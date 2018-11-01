@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp">
+
+    <TextView
+        android:id="@+id/nota_testo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#fff"
+        android:paddingBottom="6dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="4dp"
+        android:text="Invitati solo i parenti stretti.
+Non ci sono scuse per un tale comportamento."
+        android:textColor="#444"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/nota_fonti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@color/citazioneFonte"
+        android:padding="4dp"
+        android:text="3" />
+</RelativeLayout>

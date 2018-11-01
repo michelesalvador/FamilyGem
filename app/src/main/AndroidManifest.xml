@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="app.familygem">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PROFILE"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
+    <application
+        android:name=".Globale"
+        android:allowBackup="true"
+        android:icon="@mipmap/vetrina"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/vetrina_round"
+        android:theme="@style/AppTheme"
+        android:supportsRtl="false"
+        tools:replace="android:supportsRtl" >
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBxL3Y0Ta-ccbmmEGxjyKN2yEb8WF2n428"/>
+        <activity
+            android:name=".Principe"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Alberi"
+            android:label="@string/trees" />
+        <activity
+            android:name="AlberoNuovo"
+            android:label="@string/new_tree"
+            android:parentActivityName=".Alberi" />
+        <activity
+            android:name="InfoAlbero"
+            android:parentActivityName=".Alberi" />
+        <activity
+            android:name="Individuo"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".dettaglio.Famiglia"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Nome"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Archivio"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.ArchivioRef"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Nota"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Fonte"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.CitazioneFonte"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Immagine"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Evento"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Indirizzo"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Autore"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".dettaglio.Estensione"
+            android:parentActivityName=".Individuo" />
+        <activity
+            android:name=".Lavagna"
+            android:parentActivityName=".Principe"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".EditaIndividuo" />
+        <activity
+            android:name=".DiagrammaActivity"
+            android:label="Diagramma"
+            android:parentActivityName=".Principe" />
+        <activity
+            android:name=".Officina"
+            android:label="Officina"
+            android:parentActivityName=".Principe" />
+    </application>
+
+</manifest>

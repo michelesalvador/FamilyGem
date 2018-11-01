@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <!--<item
+            android:id="@+id/nav_alberi"
+            android:icon="@drawable/ic_menu_fiore"
+            android:title="@string/trees" />-->
+        <item
+            android:id="@+id/nav_diagramma"
+            android:icon="@drawable/menu_diagramma"
+            android:title="@string/diagram" />
+        <item
+            android:id="@+id/nav_persone"
+            android:icon="@drawable/menu_persone"
+            android:title="@string/Persons" />
+        <item
+            android:id="@+id/nav_famiglie"
+            android:icon="@drawable/menu_famiglia"
+            android:title="@string/families" />
+        <item
+            android:id="@+id/nav_media"
+            android:icon="@drawable/menu_ritratto"
+            android:title="@string/media" />
+        <item
+            android:id="@+id/nav_fonti"
+            android:icon="@drawable/menu_fonte"
+            android:title="@string/sources" />
+        <item
+            android:id="@+id/nav_archivi"
+            android:icon="@drawable/ic_menu_tempio"
+            android:title="@string/repositories" />
+        <item
+            android:id="@+id/nav_note"
+            android:icon="@drawable/menu_nota"
+            android:title="@string/notes" />
+        <item
+            android:id="@+id/nav_autore"
+            android:icon="@drawable/menu_autore"
+            android:title="@string/submitters" />
+    </group>
+
+    <!--<item android:title="Altre">
+        <menu>
+            <item
+                android:id="@+id/nav_varie"
+                android:title="Varie" />
+            <item
+                android:id="@+id/nav_officina"
+                android:title="Officina" />
+
+        </menu>
+    </item>-->
+
+</menu>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/schedina"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/casella_neutro"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="4dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="4dp">
+
+    <ImageView
+        android:id="@+id/schedina_foto"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/manichino" />
+
+    <TextView
+        android:id="@+id/schedina_nome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#3f5"
+        android:bufferType="normal"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="2"
+        android:maxWidth="220dp"
+        android:text="Si.  ''Soprannominoz''  asdsgsdfg"
+        android:textColor="@android:color/black"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/schedina_foto" />
+
+    <TextView
+        android:id="@+id/schedina_dati"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1823-1932 Georgetown Alaska"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/schedina_nome" />
+</android.support.constraint.ConstraintLayout>
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/schedina"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/casella_neutro"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="4dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="4dp">
+
+    <ImageView
+        android:id="@+id/schedina_foto"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:adjustViewBounds="true"
+        android:minWidth="60dp"
+        app:srcCompat="@drawable/manichino" />
+
+    <TextView
+        android:id="@+id/schedina_nome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="2"
+        android:maxWidth="200dp"
+        android:text="Sir Dott. Nominoz ''Soprannominoz''"
+        android:textColor="@android:color/black"
+        android:textSize="17sp" />
+
+    <TextView
+        android:id="@+id/schedina_dati"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1823-1932 Georgetown Alaska"
+        android:textSize="14sp" />
+</LinearLayout>

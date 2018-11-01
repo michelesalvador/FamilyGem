@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scatolissima"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
+
+<android.support.design.widget.CoordinatorLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+	<android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+		android:theme="@style/AppTheme.AppBarOverlay" >
+
+      <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+		 	 app:popupTheme="@style/AppTheme.PopupOverlay" />
+	<!-- android:background="?attr/colorPrimary" -->
+
+	</android.support.design.widget.AppBarLayout>
+
+    <FrameLayout
+        android:id="@+id/contenitore_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+	<!-- La toolbar messa qui si sovrappone trasparente alla pagina
+	<android.support.v7.widget.Toolbar
+		android:id="@+id/toolbar"
+		android:layout_width="match_parent"
+		android:layout_height="?attr/actionBarSize"
+		android:theme="@style/AppTheme.AppBarOverlay"
+		android:background="@android:color/transparent" />-->
+
+	</android.support.design.widget.CoordinatorLayout>
+	
+    <android.support.design.widget.NavigationView
+        android:id="@+id/menu"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/menu_principe_testata"
+        app:menu="@menu/menu_principe" />
+
+</android.support.v4.widget.DrawerLayout>

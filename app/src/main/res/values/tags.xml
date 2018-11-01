@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tag_oggetto" type="id"/>
+    <item name="tag_contenitore" type="id"/>
+    <item name="tag_percorso" type="id"/>
+    <item name="tag_file_senza_anteprima" type="id"/>
+    <item name="tag_famiglia" type="id"/>
+</resources>

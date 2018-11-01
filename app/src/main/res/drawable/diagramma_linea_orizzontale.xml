@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  sostituito da una semplice View di 3px -->
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="line">
+    <stroke
+        android:color="#fff"
+        android:width="3.5px" />
+</shape>
