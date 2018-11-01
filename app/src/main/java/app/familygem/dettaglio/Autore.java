@@ -2,17 +2,13 @@ package app.familygem.dettaglio;
 
 import org.folg.gedcom.model.Submitter;
 import app.familygem.Dettaglio;
-import app.familygem.Magazzino;
 import app.familygem.Podio;
 import app.familygem.Ponte;
 import app.familygem.R;
 import app.familygem.U;
 
-import static app.familygem.Globale.gc;
-
 public class Autore extends Dettaglio {
 
-	//Submitter a = gc.getSubmitter();
 	Submitter a = (Submitter) Ponte.ricevi( "oggetto" );
 
 	@Override
@@ -37,7 +33,7 @@ public class Autore extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		// Non ha molto senso, perchè Un autore deve essere specificato
+		// Non ha molto senso, perchè un autore deve essere specificato
 		Podio.elimina( a );
 	}
 }

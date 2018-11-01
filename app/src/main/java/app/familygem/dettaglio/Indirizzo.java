@@ -2,11 +2,9 @@ package app.familygem.dettaglio;
 
 import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.EventFact;
-import org.folg.gedcom.model.PersonFamilyCommonContainer;
 import app.familygem.Dettaglio;
 import app.familygem.Ponte;
 import app.familygem.R;
-import app.familygem.U;
 
 public class Indirizzo extends Dettaglio {
 

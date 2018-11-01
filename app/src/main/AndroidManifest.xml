@@ -84,14 +84,6 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".EditaIndividuo" />
-        <activity
-            android:name=".DiagrammaActivity"
-            android:label="Diagramma"
-            android:parentActivityName=".Principe" />
-        <activity
-            android:name=".Officina"
-            android:label="Officina"
-            android:parentActivityName=".Principe" />
     </application>
 
 </manifest>

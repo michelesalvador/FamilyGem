@@ -1,19 +1,16 @@
 package app.familygem.dettaglio;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.Person;
-import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
@@ -34,13 +31,10 @@ public class Fonte extends Dettaglio {
 	public void impagina() {
 		if( f != null ) {
 			oggetto = f;
-			//setTitle( Biblioteca.titoloFonte( f ) );
 			setTitle( R.string.source );
 			vistaId.setText( f.getId() );
-			//occorrenze = String.valueOf( U.quanteCitazioni( f ) );
 			VisitaListaCitazioni citazioni = new VisitaListaCitazioni( f.getId() );
 			gc.accept( citazioni );
-			//occorrenze = String.valueOf( citazioni.lista.size() );
 			f.putExtension( "citaz", citazioni.lista.size() );	// per la Biblioteca
 			metti( getString(R.string.abbreviation), "Abbreviation" );
 			metti( getString(R.string.title), "Title", true, true );
@@ -59,7 +53,6 @@ public class Fonte extends Dettaglio {
 			mettiEstensioni( f );
 			// Mette la citazione all'archivio
 			if( f.getRepositoryRef() != null ) {
-				//U.metti( box, "Archivio", f.getRepository( gc ).getName() );
 				View vistaRef = LayoutInflater.from( getApplicationContext() ).inflate( R.layout.pezzo_citazione_fonte, box, false );
 				box.addView( vistaRef );
 				vistaRef.setBackgroundColor( getResources().getColor(R.color.archivioCitazione) );
@@ -112,19 +105,6 @@ public class Fonte extends Dettaglio {
 			}
 		}
 	}
-
-	/* SPOSTATO in Dettaglio
-	@Override
-	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		if( requestCode == 5390  ) {
-			if( resultCode == RESULT_OK ) {
-				RepositoryRef archRef = new RepositoryRef();
-				archRef.setRef( data.getStringExtra("idArchivio") );
-				f.setRepositoryRef( archRef );
-				U.salvaJson();
-			}
-		}
-	}*/
 
 	@Override
 	public void elimina() {

@@ -1,6 +1,5 @@
 package app.familygem.dettaglio;
 
-import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.GedcomTag;
 import app.familygem.Dettaglio;
 import app.familygem.Ponte;
@@ -32,7 +31,6 @@ public class Estensione extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		//((ExtensionContainer)contenitore).getExtensions().remove( e );// non si fa così
 		U.eliminaEstensione( e, contenitore, null );
 	}
 }

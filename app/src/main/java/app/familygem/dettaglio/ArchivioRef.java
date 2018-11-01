@@ -1,23 +1,16 @@
 package app.familygem.dettaglio;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-
-import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
-import org.folg.gedcom.model.SourceCitation;
-import org.folg.gedcom.model.SourceCitationContainer;
-
 import app.familygem.Dettaglio;
 import app.familygem.Ponte;
 import app.familygem.R;
 import app.familygem.U;
-
 import static app.familygem.Globale.gc;
 
 public class ArchivioRef extends Dettaglio {
@@ -43,7 +36,7 @@ public class ArchivioRef extends Dettaglio {
 						Ponte.manda( r.getRepository(gc), "oggetto" );
 						startActivity( new Intent( getApplicationContext(), Archivio.class ) );
 					}
-				} );
+				});
 			} else if( r.getRef() != null ) {  // di un archivio inesistente (magari eliminato)
 				setTitle( R.string.inexistent_repository_citation );
 				vistaId.setText( r.getRef() );
@@ -59,18 +52,6 @@ public class ArchivioRef extends Dettaglio {
 			U.mettiNote( box, r, true );
 		}
 	}
-
-	/* SPOSTATO in Dettaglio
-	// Imposta l'archivio che è stato scelto in Magazzino da menu contestuale 'Scegli archivio'
-	@Override
-	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		if( requestCode == 5390  ) {
-			if( resultCode == RESULT_OK ) {
-				r.setRef( data.getStringExtra("idArchivio") );
-				U.salvaJson();
-			}
-		}
-	}*/
 
 	@Override
 	public void elimina() {

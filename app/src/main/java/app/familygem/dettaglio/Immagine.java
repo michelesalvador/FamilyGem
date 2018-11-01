@@ -33,14 +33,7 @@ public class Immagine extends Dettaglio {
 
 	@Override
 	public void impagina() {
-		//Media m = gc.getMedia( getIntent().getStringExtra("idMedia") );
-		//Media m = Globale.media;
 		if( m != null ) {
-			/*String tit;
-			if( m.getTitle() != null ) tit = m.getTitle();
-			else if( m.getFile() != null ) tit = m.getFile();
-			else tit = "Media";
-			setTitle( tit );*/
 			if( m.getId() != null ) {
 				setTitle( R.string.media );
 				vistaId.setText( m.getId() );    // 'O1' solo per Multimedia Records
@@ -50,7 +43,6 @@ public class Immagine extends Dettaglio {
 			}
 			occorrenze = String.valueOf( Galleria.popolarita( m ) );
 			oggetto = m;
-			//if( m.getFile() != null )
 			immaginona( m );
 			metti( getString(R.string.title), "Title" );
 			metti( getString(R.string.type), "Type" );	// _type
@@ -101,42 +93,15 @@ public class Immagine extends Dettaglio {
 	}
 
 	void immaginona( final Media m ) {
-		//s.l( m.getFile() );
 		final View vistaMedia = LayoutInflater.from(box.getContext()).inflate( R.layout.immagine_immagine, box, false );
 		box.addView( vistaMedia );
-		//String percorso = U.percorsoMedia( m );
 		final ImageView vistaImg = vistaMedia.findViewById( R.id.fonte_foto );
-		/*if( percorso != null ) {
-			Bitmap immagine = BitmapFactory.decodeFile( percorso );
-			vistaImg.setImageBitmap( immagine );
-		} else
-			new U.zuppaMedia( vistaImg ).execute( m.getFile() );*/
 		U.mostraMedia( vistaImg, m );
-		//((TextView)vistaMedia.findViewById( R.id.fonte_link )).setText( percorso );
 		vistaMedia.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View vista ) {
-				/* Tentativi di rilevare se nell'immagine c'è il manichino o altro drawable
-				s.l( vistaImg.getDrawable().getConstantState() +"  =  "+  getResources().getDrawable( R.drawable.manichino ).getConstantState()
-				+"  =  "+ ContextCompat.getDrawable( getApplicationContext(), R.drawable.manichino).getConstantState() );
-				if( vistaImg.getDrawable().equals( getResources().getDrawable( R.drawable.manichino ) ) ){
-				}
-				try {
-					Field f = ImageView.class.getDeclaredField("mResource");
-					f.setAccessible(true);
-					int id = (int) f.get(vistaImg);
-					s.l( id +" = "+ R.drawable.manichino );
-				} catch( NoSuchFieldException e ) {
-					e.printStackTrace();
-				} catch( IllegalAccessException e ) {
-					e.printStackTrace();
-				}*/
-
-
 				String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
-
 				if( percorso == null  ) {	// Il file è da trovare
 					Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-					//intent.setType( "image/*" );
 					intent.setType( "*/*" );
 					startActivityForResult( intent,5173 );
 				} else if( vistaImg.getTag( R.id.tag_file_senza_anteprima ) != null ) { // Apri file con altra app
@@ -208,9 +173,8 @@ public class Immagine extends Dettaglio {
 
 
 			}
-		} );
-		//vistaMedia.setTag( R.id.tag_oggetto, "immaginona" );	// per il suo menu contestuale
-		vistaMedia.setTag( R.id.tag_oggetto, 43614 );
+		});
+		vistaMedia.setTag( R.id.tag_oggetto, 43614 );	// per il suo menu contestuale
 		registerForContextMenu( vistaMedia );
 		// Caricando l'immagine il layout cambia
 		box.addOnLayoutChangeListener( new View.OnLayoutChangeListener() {
@@ -222,42 +186,8 @@ public class Immagine extends Dettaglio {
 		});
 	}
 
-	/* SPOSTATO IN Dettaglio
-	@Override
-	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		s.l( "onActivityResult " + requestCode );
-		if( resultCode == RESULT_OK && requestCode == 5173 ) {
-			try {
-				Uri uri = data.getData();
-				s.l( "uri= " + uri );
-				String percorso = PathUtil.getPath( uri );    // in Google drive trova solo il nome del file
-				s.l( "percorso= " + percorso );
-				File fileMedia;
-				if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
-					// Apre direttamente il file
-					fileMedia = new File( percorso );
-					s.l("percorsoCartella= " + fileMedia.getParent() );
-					if( fileMedia.exists() ) {
-						Globale.preferenze.alberoAperto().cartella = fileMedia.getParent();
-						Globale.preferenze.salva();
-					}
-				} else {    // è solo il nome del file 'pippo.png'
-					// Copia il contenuto in un file temporaneo
-					InputStream input = getContentResolver().openInputStream( uri );
-					fileMedia = new File( getCacheDir(), "temp.png" );
-					FileUtils.copyInputStreamToFile( input, fileMedia );
-				}
-				m.setFile( fileMedia.getAbsolutePath() );
-				U.salvaJson();
-			} catch( IOException e ) {	//URISyntaxException | SAXParseException |FileNotFoundException |
-				Toast.makeText( Immagine.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-			}
-		}
-	}*/
-
 	@Override
 	public void elimina() {
-		//((MediaContainer)contenitore).getAllMedia(gc).remove( m );	// Non fa niente
 		if( m.getId() != null ) {	// Object media
 			gc.getMedia().remove( m );
 			gc.createIndexes();

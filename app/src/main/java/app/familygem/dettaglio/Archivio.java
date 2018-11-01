@@ -6,7 +6,6 @@ import app.familygem.Magazzino;
 import app.familygem.Ponte;
 import app.familygem.R;
 import app.familygem.U;
-import static app.familygem.Globale.gc;
 
 public class Archivio extends Dettaglio {
 
