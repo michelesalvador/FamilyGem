@@ -9,21 +9,20 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-<android.support.design.widget.CoordinatorLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+	<android.support.design.widget.CoordinatorLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" >
 
-	<android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-		android:theme="@style/AppTheme.AppBarOverlay" >
+		<android.support.design.widget.AppBarLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:theme="@style/AppTheme.AppBarOverlay" >
 
-      <android.support.v7.widget.Toolbar
+		  <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
 		 	 app:popupTheme="@style/AppTheme.PopupOverlay" />
-	<!-- android:background="?attr/colorPrimary" -->
 
 	</android.support.design.widget.AppBarLayout>
 
@@ -32,14 +31,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-	<!-- La toolbar messa qui si sovrappone trasparente alla pagina
-	<android.support.v7.widget.Toolbar
-		android:id="@+id/toolbar"
-		android:layout_width="match_parent"
-		android:layout_height="?attr/actionBarSize"
-		android:theme="@style/AppTheme.AppBarOverlay"
-		android:background="@android:color/transparent" />-->
 
 	</android.support.design.widget.CoordinatorLayout>
 	

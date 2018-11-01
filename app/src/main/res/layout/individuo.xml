@@ -2,7 +2,6 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true" >
@@ -12,7 +11,6 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:theme="@style/AppTheme.AppBarOverlay">
-        <!--android:fitsSystemWindows="true"-->
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
@@ -29,7 +27,6 @@
                 android:alpha="0.6"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax" />
-                <!--android:fitsSystemWindows="true"-->
 
             <ImageView
                 android:id="@+id/persona_foto"
@@ -76,7 +73,6 @@
             app:tabSelectedTextColor="#fff"
             app:tabTextAppearance="@style/TextAppearance.AppCompat.Medium"
             app:tabTextColor="#fcc">
-            <!-- app:tabMode="fixed"-->
 
             <android.support.design.widget.TabItem
                 android:layout_width="wrap_content"

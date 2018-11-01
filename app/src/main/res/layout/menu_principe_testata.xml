@@ -14,15 +14,6 @@
         android:alpha="0.75"
         android:scaleType="centerCrop" />
 
-    <!--<Button
-        android:id="@+id/menu_bottone"
-        style="@android:style/Widget.Button.Inset"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="12dp"
-        android:text="@string/trees" />-->
-
     <TextView
         android:id="@+id/menu_titolo"
         android:layout_width="wrap_content"

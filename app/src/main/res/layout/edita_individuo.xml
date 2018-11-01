@@ -2,7 +2,6 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 <android.support.constraint.ConstraintLayout
@@ -94,16 +93,6 @@
 
     </android.support.design.widget.TextInputLayout>
 
-    <!--<include
-        android:id="@+id/editore_data_nascita"
-        layout="@layout/editore_data"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/data_nascita_label" />-->
-
     <app.familygem.EditoreData
         android:id="@+id/editore_data_nascita"
         android:layout_width="match_parent"
@@ -141,16 +130,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/luogo_nascita_label" />
 
-    <!--<fragment
-        android:id="@+id/place_autocomplete"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/luogo_nascita_label" />-->
-
-    <LinearLayout
+     <LinearLayout
         android:orientation="vertical"
         android:id="@+id/morte"
         android:layout_width="0dp"

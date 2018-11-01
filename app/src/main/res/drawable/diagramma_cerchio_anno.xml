@@ -2,11 +2,7 @@
 <shape
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-   <solid android:color="#dfd5e9"/>
+    <solid android:color="#eae4f1"/>
     <stroke android:width="1dp" android:color="#Ffff" />
-   <!-- <gradient android:type="linear"
-       android:startColor="@color/maschio"
-       android:centerColor="#fff"
-       android:endColor="@color/femmina" />-->
-   <size android:width="28dp" android:height="28dp"/>
+    <size android:width="28dp" android:height="28dp"/>
 </shape>

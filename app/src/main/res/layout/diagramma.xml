@@ -18,34 +18,10 @@
     app:overScrollVertical="true"
     app:verticalPanEnabled="true"
     app:zoomEnabled="true">
-    <!-- app:minZoomType="zoom" -->
-
-    <!--<lab.gedcomy.esperimenti.ZoomLayout
-   xmlns:android="http://schemas.android.com/apk/res/android"
-   xmlns:app="http://schemas.android.com/apk/res-auto"
-   xmlns:tools="http://schemas.android.com/tools"
-   android:layout_width="match_parent"
-   android:layout_height="match_parent"
-   android:background="#345"
-   android:fillViewport="true" >
-
-   < .gedcomy.VistaZoom
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:scrollbars="horizontal|vertical"></lab.gedcomy.esperimenti.VistaZoom>  -->
 
     <RelativeLayout
         android:id="@+id/diagramma_scatolona"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-    <!-- android:background="#6633ff55"
-
-            <LinearLayout
-                    android:id="@+id/diagramma_scatola"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal" />-->
-
 
 </com.otaliastudios.zoom.ZoomLayout>

@@ -4,10 +4,6 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
-        <!--<item
-            android:id="@+id/nav_alberi"
-            android:icon="@drawable/ic_menu_fiore"
-            android:title="@string/trees" />-->
         <item
             android:id="@+id/nav_diagramma"
             android:icon="@drawable/menu_diagramma"
@@ -41,17 +37,4 @@
             android:icon="@drawable/menu_autore"
             android:title="@string/submitters" />
     </group>
-
-    <!--<item android:title="Altre">
-        <menu>
-            <item
-                android:id="@+id/nav_varie"
-                android:title="Varie" />
-            <item
-                android:id="@+id/nav_officina"
-                android:title="Officina" />
-
-        </menu>
-    </item>-->
-
 </menu>
