@@ -5,10 +5,10 @@ import java.util.Hashtable;
 public class Ponte {
 
 	private static Ponte instance;
-	private Hashtable<String, Object> hash;
+	private Hashtable<String,Object> hash;
 
 	private Ponte() {
-		hash = new Hashtable<String, Object>();
+		hash = new Hashtable<>();
 	}
 
 	private static Ponte getInstance() {

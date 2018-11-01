@@ -1,33 +1,20 @@
 package app.familygem;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.Toast;
-
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
-
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -38,10 +25,8 @@ import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 import java.util.ArrayList;
 import java.util.List;
-
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Famiglia;
-
 import static app.familygem.Globale.gc;
 
 public class EditaIndividuo extends AppCompatActivity {
@@ -54,14 +39,10 @@ public class EditaIndividuo extends AppCompatActivity {
 	protected void onCreate(Bundle stato) {
 		super.onCreate(stato);
 		setContentView(R.layout.edita_individuo );
-		//final String idIndi = getIntent().getStringExtra("idIndividuo");
-		//final int relazione = getIntent().getIntExtra("relazione", 0 );
-
 		Bundle bundle = getIntent().getExtras();
 		final String idIndi = bundle.getString("idIndividuo");
 		final String idFamiglia = bundle.getString("idFamiglia");
 		final int relazione = bundle.getInt("relazione", 0 );
-		//final Fragment frammentoPrecedente = (Fragment)bundle.getSerializable("frammento" );
 
 		final AppCompatAutoCompleteTextView luogoNascita = findViewById(R.id.luogo_nascita);
 		final EditText dataNascita = findViewById( R.id.data_nascita );
@@ -69,19 +50,15 @@ public class EditaIndividuo extends AppCompatActivity {
 		// Nuovo individuo in relazione di parentela
 		if( relazione > 0 ) {
 			String[] parentele = { "genitore", "fratello", "coniuge", "figlio" };   // todo elimina
-			setTitle( "Nuovo " + parentele[relazione-1] );
-			/* Individuo iniziale in un albero appena creato
-			} else if( idIndi.equals("ALBERO_NUOVO") ) {
-				setTitle( "Persona iniziale" );*/
+			//setTitle( "Nuovo " + parentele[relazione-1] );
 			p = new Person();
 		// Nuovo individuo scollegato
 		} else if ( idIndi.equals("TIZIO_NUOVO") ) {
-			setTitle( "Nuova persona" );
+			//setTitle( "Nuova persona" );
 			p = new Person();
 		// Carica i dati di un individuo esistente da modificare
 		} else {
 			p = gc.getPerson(idIndi);
-			//U.unaFoto( p, (ImageView)findViewById(R.id.foto) );
 			if( !p.getNames().isEmpty() ) {
 				String epiteto = p.getNames().get( 0 ).getDisplayValue();
 				String nome = epiteto.replaceAll( "/.*?/", "" ).trim();
@@ -120,42 +97,6 @@ public class EditaIndividuo extends AppCompatActivity {
 			}
 		}
 
-		//new TrovaLuogo( luogoNascita );
-		/*final AutocompleteFilter filtro = new AutocompleteFilter.Builder().setTypeFilter( AutocompleteFilter.TYPE_FILTER_GEOCODE ).build();
-		final Activity attivita = this;
-		luogoNascita.addTextChangedListener( new TextWatcher() {
-			@Override
-			public void beforeTextChanged( CharSequence testo, int i, int i1, int i2 ) {}
-			@Override
-			public void onTextChanged( CharSequence testo, int i, int i1, int i2 ) {
-				try {
-					Intent intento = new PlaceAutocomplete.IntentBuilder( PlaceAutocomplete.MODE_OVERLAY )
-						.setFilter( filtro )
-							.build( attivita );
-					startActivityForResult( intento, 9746 );
-				} catch ( Exception e) {
-					e.printStackTrace();
-				}
-			}
-			@Override
-			public void afterTextChanged( Editable editable ) {}
-		} );
-
-		// Autocomplete nel frammento
-		PlaceAutocompleteFragment luogoNata = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete);
-		luogoNata.setOnPlaceSelectedListener( new PlaceSelectionListener() {
-			@Override
-			public void onPlaceSelected( Place posto ) {
-				s.l( "Place: " + posto.getName() +"  "+ posto.getAttributions() );
-			}
-			@Override
-			public void onError( Status status) {
-				s.l( "An error occurred: " + status );
-			}
-		});*/
-
-		//preparaEditoreData( (EditText)findViewById( R.id.data_nascita ), (LinearLayout)findViewById( R.id.editore_data_nascita ) );
-		//preparaEditoreData( (EditText)findViewById( R.id.data_morte ), (LinearLayout)findViewById( R.id.editore_data_morte ) );
 		editoreDataNescita = findViewById(R.id.editore_data_nascita);
 		editoreDataNescita.inizia( dataNascita );
 		editoreDataMorte = findViewById( R.id.editore_data_morte );
@@ -172,7 +113,6 @@ public class EditaIndividuo extends AppCompatActivity {
 
 		// Barra
 		ActionBar barra = this.getSupportActionBar();
-		//barra.setDisplayHomeAsUpEnabled( false );	// nasconde freccia <-
 		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
 		barraAzione.findViewById( R.id.edita_annulla ).setOnClickListener( new View.OnClickListener() {
 			@Override
@@ -180,7 +120,6 @@ public class EditaIndividuo extends AppCompatActivity {
 				onBackPressed();
 			}
 		} );
-		//findViewById(R.id.bottone_salva_modifiche).setOnClickListener(new View.OnClickListener() {
 		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View v ) {
@@ -204,14 +143,6 @@ public class EditaIndividuo extends AppCompatActivity {
 					sessoScelto = "F";
 				else if (((RadioButton) findViewById(R.id.sesso3)).isChecked())
 					sessoScelto = "U";
-				/*if( sessoScelto == null ) {
-					for( EventFact fatto : p.getEventsFacts() ) {
-						if( fatto.getTag().equals("SEX") ) {
-							p.getEventsFacts().remove(fatto);
-							break;
-						}
-					}
-				} else {*/
 				if( sessoScelto != null ) {
 					boolean mancaSesso = true;
 					for( EventFact fatto : p.getEventsFacts() ) {
@@ -266,10 +197,6 @@ public class EditaIndividuo extends AppCompatActivity {
 						} else {
 							fatto.setDate( data );
 							fatto.setPlace( luogo );
-							/*if( data.isEmpty() && luogo.isEmpty() )
-								fatto.setValue( "Y" );
-							else
-								fatto.setValue( "" );*/
 							Evento.ripulisciTag( fatto );
 						}
 						trovato = true;
@@ -279,9 +206,6 @@ public class EditaIndividuo extends AppCompatActivity {
 				if( !trovato && bottonMorte.isChecked() ) {
 					EventFact morte = new EventFact();
 					morte.setTag( "DEAT" );
-					/*if( data.isEmpty() && luogo.isEmpty() )
-						morte.setValue( "Y" );
-					else {*/
 					morte.setDate( data );
 					morte.setPlace( luogo );
 					Evento.ripulisciTag( morte );
@@ -309,51 +233,8 @@ public class EditaIndividuo extends AppCompatActivity {
 				}
 				Toast.makeText( getBaseContext(), R.string.saved, Toast.LENGTH_SHORT ).show();
 				U.salvaJson();
-
-				/*if( idIndi.equals("ALBERO_NUOVO") ) {
-					Globale.individuo = p.getId();
-					startActivity( new Intent(EditaIndividuo.this, Principe.class) );
-				} else {*/
 				Globale.editato = true;
 				onBackPressed();
-				/* Tentativi di individuare l'istanza di Diagramma per eseguire il metodo .rinfresca()
-				Diagramma.rinfresca();
-				//super.megascatola;
-				Bundle diagramma = new Bundle();
-				diagramma.getBundle( "Diagramma" );
-				s.l( diagramma.getClass() );
-				diagramma.disegna();
-				Diagramma.this.disegna(  );
-				Principe.this.megascatola;
-				Fragment diagra = getSupportFragmentManager().findFragmentById( R.id.diagramma_scatolona );
-				diagra.disegna("");
-				for( Fragment frag : getSupportFragmentManager().getFragments() )
-					frag.getParentFragment().getActivity().;
-				getSupportFragmentManager().executePendingTransactions();
-				int index = getSupportFragmentManager().getBackStackEntryCount() - 1;
-				FragmentManager.BackStackEntry backEntry = getSupportFragmentManager().getBackStackEntryAt(index);
-				String tag = backEntry.getName();
-				s.l( "tag = " + tag );
-				Diagramma dia = (Diagramma)getSupportFragmentManager().findFragmentByTag(tag);
-				//Diagramma dia = (Diagramma)getSupportFragmentManager().findFragmentById( R.id.diagramma_scatolona );
-				dia.rinfresca();
-				((Diagramma)frammentoPrecedente).rinfresca();
-				try {
-					Globale.frammentoPrecedente.getClass().getMethod( "rinfresca" ).invoke( Globale.frammentoPrecedente );	// ok
-				} catch( IllegalAccessException e ) { e.printStackTrace();
-				} catch( InvocationTargetException e ) { e.printStackTrace();
-				} catch( NoSuchMethodException e ) { e.printStackTrace(); }
-
-				// Soluzione molto rozza salvando l'istanza in Globale
-				if( Globale.frammentoPrecedente != null ) {
-					if( Globale.frammentoPrecedente instanceof Diagramma ) {
-						( (Diagramma) Globale.frammentoPrecedente ).rinfresca();
-					/*} else if( Globale.frammentoPrecedente instanceof Anagrafe ) {
-						( (Anagrafe) Globale.frammentoPrecedente ).rinfresca( p.getId() ); * /
-					}
-				}*/
-
-
 			}
 		});
 		barra.setCustomView( barraAzione );
@@ -372,50 +253,6 @@ public class EditaIndividuo extends AppCompatActivity {
 			// The user canceled the operation.
 		}
 	}
-
-	/* Spostato dentro EditoreData ELIMINABILE
-	void preparaEditoreData( final EditText editaTesto, final LinearLayout scatolaData )	{
-	void preparaEditoreData( final EditoreData editoreData )	{
-		editoreData.editaTesto.setOnFocusChangeListener( new View.OnFocusChangeListener() {
-			@Override
-			public void onFocusChange( View v, boolean ciapa ) {
-				s.l( editoreData +"\n"+ editoreData.editaTesto + "\nonFocusChange " + ciapa );
-				if( ciapa ) {
-					//dataNascita.clearFocus();
-					InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE );
-					imm.hideSoftInputFromWindow( editoreData.editaTesto.getWindowToken(), 0 );
-					//new EditoreData( editaTesto, scatolaData );
-					editoreData.setVisibility( View.VISIBLE );
-				} else
-					editoreData.setVisibility( View.GONE );
-			}
-		} );
-		editoreData.editaTesto.setOnClickListener( new View.OnClickListener() {
-			boolean interruttore = true;
-			InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE );
-			@Override
-			public void onClick( View v ) {
-				if( interruttore ) {
-					imm.showSoftInput( editoreData.editaTesto, 0 );
-					interruttore = false;
-				} else {
-					imm.hideSoftInputFromWindow( editoreData.editaTesto.getWindowToken(), 0 );
-					interruttore = true;
-				}
-			}
-		} );
-	}*/
-
-	/*@Override
-	public boolean onCreateOptionsMenu( Menu menu ) {
-		menu.add(0,0,0,"Elimina");
-		return true;
-	}*/
-
-	// vede se questa persona è root dell'albero
-	//if( U.valoreTag(gc.getHeader().getExtensions(),"_ROOT").equals( "id di questa Person" ) )
-	// memorizza centro del diagramma
-	//U.aggiornaTag( gc.getHeader(), "_ROOT", "id di questa Person" );
 
 	// Aggiunge un individuo in relazione di parentela con 'perno'
 	static void aggiungiParente( String idPerno, String nuovoId, int relazione ) {

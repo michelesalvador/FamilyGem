@@ -63,7 +63,7 @@ public class IndividuoEventi extends Fragment {
 				else tst += "--------\n";*/
 			}
 			Address indirizzo = fatto.getAddress();
-			if( indirizzo != null )	tst += Archivio.indirizzo(indirizzo) + "\n";
+			if( indirizzo != null )	tst += Dettaglio.indirizzo(indirizzo) + "\n";
 			if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
 			if( fatto.getCause() != null )	tst += fatto.getCause() + "\n";
 			if( tst.endsWith("\n") )	tst = tst.substring( 0, tst.length()-1 );	// Rimuove l'ultimo acapo

@@ -15,7 +15,6 @@ import java.util.Map;
 
 public class VisitaListaCitazioni extends Visitor {
 
-	//public List<SourceCitation> lista = new ArrayList<>();
 	public Map<SourceCitation,Object> lista = new LinkedHashMap<>();
 	String id;
 
@@ -25,7 +24,6 @@ public class VisitaListaCitazioni extends Visitor {
 
 	@Override
 	public boolean visit( Person p ){
-		//lista.addAll( p.getSourceCitations() );
 		for( SourceCitation c : p.getSourceCitations() )
 			if( c.getRef() != null )
 				if( c.getRef().equals(id) )

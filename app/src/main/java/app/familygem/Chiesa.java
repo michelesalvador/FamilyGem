@@ -75,10 +75,6 @@ public class Chiesa extends Fragment {
 		Family f = gc.getFamily( idFamiglia );
 		// Prima rimuove i ref alla famiglia negli indi membri
 		for( Person marito : f.getHusbands(gc) ) {
-					/* for produce ConcurrentModificationException casomai ci sono vari ref alla stessa famiglia
-					for( SpouseFamilyRef sfr : marito.getSpouseFamilyRefs() )
-						if( sfr.getRef().equals(f.getId()) )
-							marito.getSpouseFamilyRefs().remove( sfr );*/
 			Iterator<SpouseFamilyRef> refi = marito.getSpouseFamilyRefs().iterator();
 			while( refi.hasNext() ) {
 				SpouseFamilyRef sfr = refi.next();

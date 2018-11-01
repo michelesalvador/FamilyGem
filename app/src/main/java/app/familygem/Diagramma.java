@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
@@ -43,27 +42,12 @@ public class Diagramma extends Fragment {
 	ZoomLayout scatolaZoom;
 	RelativeLayout scatolona;
 	LinearLayout scatola;
-	//Person centro;
 	private int gente;
-	//public Diagramma() {}
 
     @Override
     public void onCreate( Bundle stato ) {
         super.onCreate( stato );
-		//Globale.frammentoPrecedente = this;
     }
-
-    /* onResume servirebbe a Rinfrescare il diagramma
-    	Si attiva ad ogni:
-    	 - avvio del programma
-    	 - riaccensione dello schermo
-    	 - ruotando lo schermo
-    	 - ritornando a questo fragment con backpressed
-	@Override
-	public void onResume() {
-		super.onResume();
-		disegna( Globale.individuo );
-	} */
 
     @Override
     public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,19 +56,10 @@ public class Diagramma extends Fragment {
         final View vista = inflater.inflate( R.layout.diagramma, container, false );
 
 		scatolona = vista.findViewById( R.id.diagramma_scatolona );
-		//scatola.setBackgroundColor( 0x3366ff99 );
 	    scatolaZoom = vista.findViewById( R.id.diagramma_zoom );
 
 		if( gc != null )
 			disegna();
-
-		/*LinearLayout figli = vista.findViewById( R.id.figli );
-		for(int i=0; i<3; i++) {
-			View scheda4 = inflater.inflate( R.layout.diagramma_pezzo, figli, false );
-			figli.addView( scheda4 );
-		}*/
-		//View scheda4 = DiagrammaFragment.nuovo( scatola, linea );
-		//scheda4.setRotation(45);
 
 		return vista;
     }
@@ -102,18 +77,11 @@ public class Diagramma extends Fragment {
 		}
 	}
 
-	/* Sostituito da onRestart recreate()
-	public void rinfresca() {
-		scatolona.removeAllViews();
-		disegna();
-	}*/
-
     // Riempie le file di generazioni
 	void disegna() {
 		scatola = new LinearLayout( scatolona.getContext() );
 		scatola.setOrientation(LinearLayout.VERTICAL);
 		scatola.setGravity( Gravity.CENTER_HORIZONTAL );
-		//scatola.setBackgroundColor( 0x33ff6699 );
 		LinearLayout.LayoutParams linearParam = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT );
 		scatola.setClipChildren( false );
@@ -126,7 +94,6 @@ public class Diagramma extends Fragment {
 			generaz.setGravity( Gravity.CENTER );
 			generaz.setId( g );
 			generaz.setClipChildren( false );
-			//generaz.setBackgroundColor( 0x339933ff + 0x6666*g );	// ok, equivale a impostarlo nel xml
 			linearParam.width = LinearLayout.LayoutParams.MATCH_PARENT;
 			//linearParam.topMargin = 40; linearParam.bottomMargin = 40; // ok ma per trovare il confine è meglio il padding
 			generaz.setPadding( 40,30,40,30 );
@@ -153,7 +120,6 @@ public class Diagramma extends Fragment {
 			if( !famiglia.getHusbands(gc).isEmpty() ) {
 				padre = famiglia.getHusbands(gc).get(0);
 				spazio(1, zii(padre,null, true) );
-				//nodoNonni =
 				nodoNonniPaterni = nonni( padre );
 				zii( padre, nodoNonniPaterni, false );
 				altriMatrimoni( padre, famiglia, null );	// todo: in nodoGenitori dovrebbe esserci il nodo del padre, che però viene creato dopo..
@@ -169,7 +135,7 @@ public class Diagramma extends Fragment {
 			}
 			// Genitori
 			if( padre != null && madre != null )
-				nodoGenitori = schedaDoppia( 2, famiglia, padre, madre, nodoNonniPaterni, nodoNonniMaterni, 0, false, 0 );
+				nodoGenitori = schedaDoppia( 2, famiglia, nodoNonniPaterni, nodoNonniMaterni, 0, false, 0 );
 			else if( padre != null )
 				nodoGenitori = schedaSingola( 2, padre, nodoNonniPaterni, false, false, 0 );
 			else if( madre != null )
@@ -206,8 +172,6 @@ public class Diagramma extends Fragment {
 					Rect margini = new Rect();
 					nodoCentrale.getDrawingRect( margini );
 					scatola.offsetDescendantRectToMyCoords( nodoCentrale, margini );
-					//s.l( margini.exactCenterX() +"  "+ margini.exactCenterY() );
-					//scatolaZoom.realZoomTo( 1, false );
 					scatolaZoom.panTo( -margini.exactCenterX() + scatolaZoom.getWidth() / scatolaZoom.getRealZoom() / 2,
 							-margini.exactCenterY() + scatolaZoom.getHeight() / scatolaZoom.getRealZoom() / 2, true );
 				}
@@ -236,7 +200,6 @@ public class Diagramma extends Fragment {
 		Space spaz = new Space( getContext() );
 		LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, peso );
-		//param.weight = 1;
 		LinearLayout gen = scatola.findViewById( generazione );
 		gen.addView( spaz, param );
 	}
@@ -247,9 +210,9 @@ public class Diagramma extends Fragment {
 		if( !egli.getSpouseFamilies(gc).isEmpty() ) {
 			Family fam = egli.getSpouseFamilies(gc).get(0);
 			if( U.sesso(egli)==1 && !fam.getWives(gc).isEmpty() )	// Maschio ammogliato
-				nodo = schedaDoppia( generazione, fam, egli, fam.getWives(gc).get(0), nodoSopra, null, 2, conDiscendenti, 0 );
+				nodo = schedaDoppia( generazione, fam, nodoSopra, null, 2, conDiscendenti, 0 );
 			else if( U.sesso(egli)==2 && !fam.getHusbands(gc).isEmpty() )	// Femmina ammogliata
-				nodo = schedaDoppia( generazione, fam, fam.getHusbands(gc).get(0), egli, null, nodoSopra, 1, conDiscendenti, 0 );
+				nodo = schedaDoppia( generazione, fam, null, nodoSopra, 1, conDiscendenti, 0 );
 			else
 				nodo = schedaSingola( generazione, egli, nodoSopra, false, conDiscendenti, 0 );	// senza sesso (o senza coniuge?)
 		} else
@@ -273,10 +236,6 @@ public class Diagramma extends Fragment {
 				paramContenuto.topMargin = 65;
 				contenuto.setLayoutParams( paramContenuto );
 				LinearLayout scatolaDiscendenti = new LinearLayout( getContext() );
-				//scatolaDiscendenti.setOrientation( LinearLayout.HORIZONTAL ); è di default
-				//scatolaDiscendenti.setLayoutParams( new LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
-				//scatolaDiscendenti.setPadding( 0, 30, 0, 0 );
-				//scatolaDiscendenti.setBackgroundColor( 0x99ff3333 );
 				for( final Discendente disc : discendi ) {
 					View vistaDiscend = getLayoutInflater().inflate( R.layout.diagramma_discendente, this, false );
 					scatolaDiscendenti.addView( vistaDiscend );
@@ -338,8 +297,8 @@ public class Diagramma extends Fragment {
 	// conAntenati: 0 nessuno, 1 lui, 2 lei, 3 entrambi
 	// spaziatura: 0 coppia normale, 1 primo matrimonio lui, 2 ultimo matrimonio lei, 3 altri matrimoni lui, 4 altri matrimoni lei
 	// configura: 0 coppia normale, 1 altri matrimoni lui, 2 altri matrimoni lei
-	private View schedaDoppia( int generazione, final Family famiglia, Person lui0, Person lei0, View nodoSopraLui, // todo se tutto va bene elimina lui0 e lei0
-	                               View nodoSopraLei, int conAntenati, boolean conDiscendenti, int configura ) {
+	private View schedaDoppia( int generazione, final Family famiglia, View nodoSopraLui, View nodoSopraLei,
+	                           int conAntenati, boolean conDiscendenti, int configura ) {
 		boolean conAntenatiLui = false;
 		boolean conAntenatiLei = false;
 		if( conAntenati == 1 || conAntenati == 3 )
@@ -351,7 +310,6 @@ public class Diagramma extends Fragment {
 		scatolaCoppia.setLayoutParams( new LinearLayout.LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
 		scatolaCoppia.setGravity( Gravity.CENTER_VERTICAL );
 		scatolaCoppia.setClipChildren( false );
-		//scatolaCoppia.setBackgroundColor( 0x44ff9933 );
 		Person lui = null, lei = null;
 		if( !famiglia.getHusbands(gc).isEmpty() )
 			lui = famiglia.getHusbands(gc).get(0);
@@ -362,7 +320,6 @@ public class Diagramma extends Fragment {
 		tratto.setLayoutParams( new LinearLayout.LayoutParams( 45, 10 ) );
 		tratto.setLayerType( View.LAYER_TYPE_SOFTWARE, null );  // necessario per far comparire il diagramma_tratteggio
 		tratto.setImageResource( R.drawable.diagramma_tratteggio );
-		//tratto.setBackgroundColor( 0x44ff9933 );
 		if( configura == 1 )
 			scatolaCoppia.addView( tratto );
 		else if( lui != null ) {
@@ -371,16 +328,12 @@ public class Diagramma extends Fragment {
 			rete.add( new Corda( nodoSopraLui, gen, schedinaLui ) );
 		}
 		// Legame di matrimonio con eventuale anno
-		/*final Family fam;
-		if( lui != null ) fam = lui.getSpouseFamilies(gc).get(0);
-		else fam = lei.getSpouseFamilies(gc).get(0);*/
 		String dataMatrimonio = null;
 		for( EventFact ef : famiglia.getEventsFacts() ) {
 			if( ef.getTag().equals("MARR") )
 				dataMatrimonio = ef.getDate();
 		}
 		FrameLayout legame = new FrameLayout( getContext() );
-		//legame.setLayoutParams( new LinearLayout.LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
 		if( dataMatrimonio == null ) {
 			View linea = new View( getContext() );
 			LinearLayout.LayoutParams paramLinea = new LinearLayout.LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT );
@@ -423,25 +376,22 @@ public class Diagramma extends Fragment {
 			gen.addView( new ConDiscendenti( scatolaCoppia, lui, legame ), param );
 		} else
 			gen.addView( scatolaCoppia, param );
-		//return scatolaCoppia;
 		return legame;
 	}
 
 	// La schedina base del diagramma
-	private class Schedina extends LinearLayout {	// implements OnClickListener
+	private class Schedina extends LinearLayout {
 		String id;
     	Schedina( int generazione, final Person egli, boolean conAntenati ) {   //, boolean conDiscendenti
 			super( Globale.contesto );	// necessario per estendere View
 			id = egli.getId(); // per il menu contestuale
 		    setLayoutParams( new LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
 			setOrientation( LinearLayout.VERTICAL );
-			//setBackgroundColor( 0x6666ff33 );
 		    View vista = getLayoutInflater().inflate( R.layout.diagramma_pezzo, this, false );
 		    ImageView sfondo = vista.findViewById( R.id.schedina_sfondo );
 			if( conAntenati ) {
 				Map<String,Integer> avi = antenati(egli);
 				View avetti = getLayoutInflater().inflate(R.layout.diagramma_avi, this, false );
-				//View connettore = avetti.findViewById( R.id.avi_connettore );
 				TextView testoAvi = avetti.findViewById(R.id.num_avi);
 				TextView testoAve = avetti.findViewById(R.id.num_ave);
 				if( avi.get("avo") == null ) {
@@ -462,27 +412,16 @@ public class Diagramma extends Fragment {
 					addView( avetti );
 					// per allineare i due coniugi di cui questo con corona di avi in testa
 					LayoutParams lp = new LayoutParams(	LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-					//lp.setMargins( 0, 0, 0, 30 );
 					lp.bottomMargin = 28;
 					setLayoutParams( lp ); // ok, gli avi sopra verrebbero clippati, ma possono fuoriuscire con setClipChildren(false)
-					//setPadding( 0, 0, 0, 55 );
 				}
 				if( generazione > 1 ) { // i nonni non vengono alphizzati anche se hanno gli avi
 					avetti.setAlpha( 0.7f );
 					sfondo.setAlpha( 0.7f );
 				}
 			}
-			// Foto sopra alla schedina
-			/*if( !egli.getAllMedia(gc).isEmpty() ) {
-				ImageView vistaFoto = new ImageView( getContext() );
-				vistaFoto.setLayoutParams( new LinearLayout.LayoutParams( LinearLayout.LayoutParams.MATCH_PARENT, 100) );
-				addView(vistaFoto);
-				//U.mostraMedia( vistaFoto, egli.getAllMedia(gc).get(0) );
-				U.unaFoto( egli, vistaFoto );
-			}*/
 
 			if( egli.getId().equals( Globale.individuo ) ) {
-				//vista.setBackgroundColor( 0xffffbb33 );	//getContext().getColor( R.color.colorAccent );
 				sfondo.setBackgroundResource( R.drawable.casella_evidente );
 			} else if( U.sesso(egli) == 1 )
 				sfondo.setBackgroundResource( R.drawable.casella_maschio );
@@ -506,10 +445,7 @@ public class Diagramma extends Fragment {
 			setOnClickListener( new OnClickListener() {
 				@Override
 				public void onClick( View vista ) {
-					//System.out.println( "OnClickListener: "+ ((TextView)v.findViewById(R.id.schedina_nome)).getText() +" "+ ((Schedina)v).egli.getId() );
-					//Schedina questa = (Schedina)vista;
 					if( egli.getId().equals(Globale.individuo) ) {
-						//startActivity( new Intent( getActivity(), Individuo.class ));
 						Intent intento = new Intent( getContext(), Individuo.class );
 						intento.putExtra( "idIndividuo", egli.getId() );
 						startActivity( intento );
@@ -520,26 +456,9 @@ public class Diagramma extends Fragment {
 					}
 				}
 			});
-			//setTag( egli.getId() );
 		    if( egli.getId().equals( Globale.individuo ) && !conAntenati )
 			    rete.add( new Corda( this, null, null ) );  // sfrutto rete per veicolare il centro del diagramma
 		}
-
-		/*@Override 	// non funziona
-		public void onClick(View v) {
-			System.out.println( "onClick NOME: "+ ((TextView)v.findViewById(R.id.schedina_nome)).getText());
-		}*/
-		/*@Override	// ok ma esclude il context menu
-		public boolean onTouchEvent( final MotionEvent event ) {
-			if( event.getAction() == MotionEvent.ACTION_UP ){
-				System.out.println( "onTouchEvent NOME: "+ ((TextView)this.findViewById(R.id.schedina_nome)).getText());
-				for( int g=1; g<6; g++ )
-					((LinearLayout)scatola.findViewById( g )).removeAllViews();
-				disegna( egli.getId() );
-				//return performClick();
-			}
-			return true;
-		}*/
 	}
 
 	// Un blocco ripetitivo per inserire i nonni
@@ -548,8 +467,8 @@ public class Diagramma extends Fragment {
 		if( !genitore.getParentFamilies(gc).isEmpty() ) {
 			Family fam = genitore.getParentFamilies(gc).get(0);
 			// Nonni
-			if( !fam.getHusbands(gc).isEmpty() && !fam.getWives(gc).isEmpty() )	// ci sono entrambi i nonni
-				nodoNonni = schedaDoppia( 1, fam, fam.getHusbands(gc).get(0), fam.getWives(gc).get(0), null, null, 3, false, 0 );
+			if( !fam.getHusbandRefs().isEmpty() && !fam.getWifeRefs().isEmpty() )	// ci sono entrambi i nonni
+				nodoNonni = schedaDoppia( 1, fam, null, null, 3, false, 0 );
 			else if( !fam.getHusbands(gc).isEmpty() )
 				nodoNonni = schedaSingola( 1, fam.getHusbands(gc).get(0), null, true, false, 0 );
 			else if( !fam.getWives(gc).isEmpty() )
@@ -558,29 +477,7 @@ public class Diagramma extends Fragment {
 		return nodoNonni;
 	}
 
-	// Un blocco ripetitivo per inserire zii e cugini
-	/*@Deprecated
-	private int ziiCugini( Person genitore, View nodoNonni, boolean contaZii ) {
-		if( genitore != null )
-		if( !genitore.getParentFamilies(gc).isEmpty() ) {
-			Family fam = genitore.getParentFamilies(gc).get(0);
-			// Zii
-			List<Person> zii = fam.getChildren(gc);
-			if( contaZii ) return zii.size();   // serve per posizionare i nonni
-			zii.remove(genitore);
-			for( Person zio : zii ) {
-				View nodoZii = inserisci( 2, zio, nodoNonni, false );
-				if( !zio.getSpouseFamilies(gc).isEmpty() ) {
-					fam = zio.getSpouseFamilies(gc).get(0);
-					for( Person cugino : fam.getChildren(gc) )
-						inserisci( 3, cugino, nodoZii, true );
-				}
-			}
-		}
-		return 0;
-	}*/
-
-	// Il nuovo trend è di non mettere i cugini, solo gli zii
+	// Gli zii (senza cugini)
 	private int zii( Person genitore, View nodoNonni, boolean contaZii ) {
 		if( genitore != null )
 			if( !genitore.getParentFamilies(gc).isEmpty() ) {
@@ -600,55 +497,32 @@ public class Diagramma extends Fragment {
 		List<Family> altreFamiglie = genitore.getSpouseFamilies(gc);
 		altreFamiglie.remove( famiglia );
 		for( Family altraFamiglia : altreFamiglie ) {
-			//if( U.sesso(genitore) == 1 )	// si potrebbe anche mostrare gli altri coniugi
-			//altraFamiglia.getWives(gc).get(0);
 			for( Person fratellastro : altraFamiglia.getChildren(gc) )
 				inserisci( 3, fratellastro, nodoGenitore, true );
 		}
 	}
 
-	/*void ioFigliNipotiX( Person io, View nodoGenitori ) {
-		List<Family> matrimoni = io.getSpouseFamilies(gc);
-		if ( matrimoni.isEmpty() ) // centro non si è sposato e non ha figli
-			schedaSingola( 3, io, nodoGenitori, false, false );
-		else
-			for( int i = 0; i < matrimoni.size(); i++ ) {
-				View nodoCentro = inserisci( 3, io, nodoGenitori, false );
-				//View nodoCentro = schedaDoppia( 3, null, famig.getWives( gc ).get( 0 ), null, null, 2, false, 1 + distanza );
-				for( Person figlio : matrimoni.get(i).getChildren(gc) ) {
-					View nodoFiglio = inserisci( 4, figlio, nodoCentro, false );
-					if( !figlio.getSpouseFamilies(gc).isEmpty() ) {
-						Family fam = figlio.getSpouseFamilies( gc ).get( 0 );
-						for( Person nipote : fam.getChildren( gc ) )
-							inserisci( 5, nipote, nodoFiglio, true );
-					}
-				}
-			}
-	}*/
-
 	// Il centro con i suoi matrimoni + figli e nipoti
 	void ioFigliNipoti( Person io, View nodoGenitori ) {
 		List<Family> matrimoni = io.getSpouseFamilies(gc);
-		View nodoCentro;
 		if( matrimoni.isEmpty() ) { // centro non si è sposato e non ha figli
-			nodoCentro = schedaSingola( 3, io, nodoGenitori, false, false, 0 );
-			//rete.add( new Corda( nodoCentro, null, null ) );  // sfrutto rete per veicolare il centro del diagramma
+			schedaSingola( 3, io, nodoGenitori, false, false, 0 );
 		} else {
+			View nodoCentro;
 			int configura = 0; // indica come mostrare la coppia (se ci sono matrimoni precedenti)
 			for( int i = 0; i < matrimoni.size(); i++ ) { // i molteplici matrimoni del centro
 				Family famig = matrimoni.get(i);
 				if( U.sesso(io) == 1 && !famig.getWives(gc).isEmpty() ) { // maschio con moglie/i
 					if( i > 0) configura = 1; // dal secondo matrimonio in poi
-					nodoCentro = schedaDoppia( 3, famig, io, famig.getWives( gc ).get( 0 ), nodoGenitori, null, 2, false, configura );
+					nodoCentro = schedaDoppia( 3, famig, nodoGenitori, null, 2, false, configura );
 				} else if( U.sesso(io) == 2 && !famig.getHusbands(gc).isEmpty() ) { // femmina con marito/i
 					if( i+1 == matrimoni.size() ) configura = 0; // ultimo matrimonio
 					else configura = 2; // matrimoni precedenti
-					nodoCentro = schedaDoppia( 3, famig, famig.getHusbands( gc ).get( 0 ), io, null, nodoGenitori, 1, false, configura );
+					nodoCentro = schedaDoppia( 3, famig, null, nodoGenitori, 1, false, configura );
 				} else { // centro neutro o senza coniuge
 					if( i > 0) configura = 1;
 					nodoCentro = schedaSingola( 3, io, nodoGenitori, false, false, configura);
 				}
-				//rete.add( new Corda( nodoCentro, null, null ) );  // il centro del diagramma
 				for( Person figlio : famig.getChildren(gc) ) {
 					View nodoFiglio = inserisci( 4, figlio, nodoCentro, false );
 					if( !figlio.getSpouseFamilies(gc).isEmpty() ) {
@@ -740,22 +614,6 @@ public class Diagramma extends Fragment {
 				}
 	}
 
-	/*void disegnaLinea( View vistaStart, View vistaEnd ) {
-		if( vistaStart != null && vistaEnd != null ) {
-			// Coordinate assolute start
-			Rect marginiStart = new Rect();
-			vistaStart.getDrawingRect(marginiStart);
-			scatolona.offsetDescendantRectToMyCoords(vistaStart, marginiStart);
-			// e end
-			Rect marginiEnd = new Rect();
-			vistaEnd.getDrawingRect(marginiEnd);
-			scatolona.offsetDescendantRectToMyCoords(vistaEnd, marginiEnd);
-			View linea = new Linea((int) marginiStart.exactCenterX(), marginiStart.bottom,
-					(int) marginiEnd.exactCenterX(), marginiEnd.top);
-			RelativeLayout.LayoutParams paramLinea = new RelativeLayout.LayoutParams(9000, 3000);
-			scatolona.addView(linea, paramLinea);
-		}
-	}*/
 	void disegnaLinea( View vistaInizio, View vistaMezzo, View vistaFine ) {
 		s.l( "disegnaLinea: ");
 		if( vistaInizio != null ) s.l( "vistaInizio  "+ vistaInizio.getClass() + "\t" + vistaInizio.getScrollX()+ " " + vistaInizio.getScrollY()+ " " + vistaInizio.getWidth()+ " " + vistaInizio.getHeight() );
@@ -806,24 +664,10 @@ public class Diagramma extends Fragment {
 			paint.setColor( Color.WHITE );
 			paint.setStrokeWidth(3);    // misura in pixel
 			path.moveTo( xInizio, yInizio );
-			/*float rapporto = Math.abs( (float)(yFine-yInizio) / (float)(xFine-xInizio) );	// altezza / base
-			//System.out.println( (yFine-yInizio) +" / "+ (xFine-xInizio) +" = "+ rapporto );
-			if( rapporto > 1 ) {    // linee strette
-				rapporto *= 30;
-				path.cubicTo(xInizio, yFine - rapporto, xFine, yInizio + rapporto, xFine, yFine);
-			} else {    // linee larghe
-				int mezzAlto = (yFine - yInizio) / 2;
-				path.lineTo(xInizio, yInizio+mezzAlto);
-				int direzione = ( xInizio < xFine )? 1 : -1;
-				path.lineTo(xFine-mezzAlto*direzione, yInizio+mezzAlto);
-				//path.lineTo(xFine, yFine);
-				path.cubicTo( xFine-mezzAlto*direzione, yInizio+mezzAlto, xFine, yInizio+mezzAlto, xFine, yFine);
-			}*/
 			path.lineTo( xInizio, yMezzo );
 			path.lineTo( xFine, yMezzo );
 			path.lineTo( xFine, yFine );
 			canvas.drawPath( path, paint );
-			//s.l( "onDraw = " + xInizio +"-"+ yInizio +"  "+ yMezzo +"  "+ xFine +"-"+ yFine );
 		}
 	}
 
@@ -834,7 +678,6 @@ public class Diagramma extends Fragment {
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
 		vistaScelta = vista;
 		idPersona = ((Schedina)vista).id;
-		//idPersona = (String)vista.getTag();
 		Person pers = gc.getPerson( idPersona );
 		if( !idPersona.equals(Globale.individuo) )
 			menu.add(0, 0, 0, R.string.card );
@@ -843,7 +686,6 @@ public class Diagramma extends Fragment {
 		if( !pers.getSpouseFamilies(gc).isEmpty() )
 			menu.add(0, 2, 0, R.string.family_as_spouse );
 		menu.add(0, 3, 0, R.string.new_relative);
-		//if( gc.getPeople().size() > 1 )
 		if( U.ciSonoIndividuiCollegabili(gc.getPerson(idPersona)) )
 			menu.add(0, 4, 0, R.string.link_person);
 		menu.add(0, 5, 0, R.string.modify);
@@ -853,14 +695,9 @@ public class Diagramma extends Fragment {
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		//AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();	// purtroppo qui è null
-		//System.out.println( info.id +"  "+ info.position );
-		//String idPersona = lungoCliccata.egli.getId();
 		CharSequence[] parenti = { getText(R.string.parent), getText(R.string.sibling), getText(R.string.spouse), getText(R.string.child) };
 		int id = item.getItemId();
 		if( id == 0 ) {    // Apri scheda individuo
-			//Globale.individuo = idPersona;
-			//startActivity( new Intent( getActivity(), Individuo.class ));
 			Intent intento = new Intent( getContext(), Individuo.class );
 			intento.putExtra( "idIndividuo", idPersona );
 			startActivity( intento );
@@ -874,7 +711,6 @@ public class Diagramma extends Fragment {
 			startActivity( intento );
 		} else if( id == 3 ) {	// Aggiungi parente
 			AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() );
-			//builder.setTitle("Pick a color");
 			builder.setItems( parenti, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick( DialogInterface dialog, int quale ) {
@@ -882,7 +718,6 @@ public class Diagramma extends Fragment {
 					intento.putExtra( "idIndividuo", idPersona );
 					intento.putExtra( "relazione", quale + 1 );
 					startActivity( intento );
-					/*U.editaIndividuo( getContext(), idPersona, quale+1, getTargetFragment() );*/
 				}
 			});
 			builder.show();
@@ -906,7 +741,6 @@ public class Diagramma extends Fragment {
 			Anagrafe.scollega( idPersona );
 			getActivity().recreate();
 			Snackbar.make( getView(), R.string.person_unlinked, Snackbar.LENGTH_LONG ).show();
-					//.setAction(R.string.undo, new ascoltatoreAnnulla() ).show();
 			U.salvaJson();
 		} else if( id == 7 ) {	// Elimina
 			Anagrafe.elimina( idPersona, getContext(), vistaScelta );
@@ -914,19 +748,6 @@ public class Diagramma extends Fragment {
 			return false;
 		return true;
 	}
-
-	/* Annulla nello snackbar
-	public class ascoltatoreAnnulla implements View.OnClickListener {
-		@Override
-		public void onClick( View v ) {}
-	}*/
-
-	/*class dopoEliminaDiagramma implements Anagrafe.dopoEliminazione {
-		public void esegui( String id ) {
-			//System.out.println( "dopoEliminaDiagramma " + id );
-			rinfresca();
-		}
-	}*/
 
 	// Aggiunge il parente che è stata scelto in Anagrafe
 	@Override

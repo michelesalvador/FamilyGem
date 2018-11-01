@@ -1,4 +1,4 @@
-// Classe per gestire le preferenze salvate in
+// Classe per gestire le preferenze salvate in preferenze.json
 package app.familygem;
 
 import com.google.gson.Gson;
@@ -9,7 +9,6 @@ import java.util.List;
 
 public class Armadio {
 
-	//Cassetto[] alberi;
 	List<Cassetto> alberi;
 	int idAprendo;
 
@@ -17,13 +16,6 @@ public class Armadio {
 		this.alberi = alberi;
 		this.idAprendo = idAprendo;
 	}
-
-	/*String getCartella() {
-		return alberoAperto().cartella;
-	}
-	List<String> getPreferiti {
-		return alberoAperto().preferiti;
-	}*/
 
 	int max() {
 		int num = 0;
@@ -92,25 +84,24 @@ public class Armadio {
 	}
 
 
+	public static class Cassetto {
+		int id;
+		String nome;
+		String cartella;
+		int individui;
+		int generazioni;
+		String radice;
+		List<String> preferiti;
 
-public static class Cassetto {
-	int id;
-	String nome;
-	public String cartella;
-	int individui;
-	int generazioni;
-	String radice;
-	List<String> preferiti;
+		Cassetto( int id, String nome, String cartella, int individui, int generazioni, String radice, List<String> preferiti) {
+			this.id = id;
+			this.nome = nome;
+			this.cartella = cartella;
+			this.individui = individui;
+			this.generazioni = generazioni;
+			this.radice = radice;
+			this.preferiti = preferiti;
+		}
 
-	Cassetto( int id, String nome, String cartella, int individui, int generazioni, String radice, List<String> preferiti) {
-		this.id = id;
-		this.nome = nome;
-		this.cartella = cartella;
-		this.individui = individui;
-		this.generazioni = generazioni;
-		this.radice = radice;
-		this.preferiti = preferiti;
 	}
-
-}
 }

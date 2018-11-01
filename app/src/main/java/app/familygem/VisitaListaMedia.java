@@ -19,7 +19,6 @@ import static app.familygem.Globale.gc;
 
 public class VisitaListaMedia extends Visitor {
 
-	//public List<Media> listaMedia = new ArrayList<>();
 	public Map<Media,Object> listaMedia = new LinkedHashMap<>();
 	boolean tutti;	// Elencare tutti i media (anche i locali) o solo gli oggetti media collegabili
 

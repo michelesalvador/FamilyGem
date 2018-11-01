@@ -28,7 +28,7 @@ public class EditoreData extends LinearLayout {
 
 	Data data1;
 	Data data2;
-	String frase;	// data frase
+	String frase; // data frase
 	int tipo;
 	EditText editaTesto;
 	String[] giorniRuota = { "-","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15",
@@ -83,12 +83,9 @@ public class EditoreData extends LinearLayout {
 				if( abilitaSpinner ) {
 					tipo = posizione;
 					if( tipo == 10 ) {
-						//if( frase == null )
 						frase = editaTesto.getText().toString();
 						findViewById( R.id.editadata_prima ).setVisibility( View.GONE );
 					} else {
-						//if( data1.format.toPattern().equals("") && data2.format.toPattern().equals("") && frase != null )
-						//s.l( "data1 = " + data1 );
 						if( data1 == null || data1.date == null )
 							data1 = scanna( "" );
 						findViewById( R.id.editadata_prima ).setVisibility( View.VISIBLE );
@@ -99,9 +96,6 @@ public class EditoreData extends LinearLayout {
 						findViewById( R.id.editadata_seconda ).setVisibility( View.VISIBLE );
 					} else
 						findViewById(R.id.editadata_seconda).setVisibility( View.GONE );
-					/*s.l( tipo + "\n\tdata1.date = " + (data1==null?"null":data1.date) );
-					s.l( "data2.date = " + (data2==null?"null":data2.date) );
-					s.l( "frase = " + frase );*/
 					veroImputTesto = false;
 					genera( false );
 				}
@@ -125,7 +119,6 @@ public class EditoreData extends LinearLayout {
 		editaTesto.setOnFocusChangeListener( new View.OnFocusChangeListener() {
 			@Override
 			public void onFocusChange( View v, boolean ciapa ) {
-				//s.l( "onFocusChange " + ciapa );
 				if( ciapa ) {
 					imm.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 );
 					impostaTutto();
@@ -150,7 +143,6 @@ public class EditoreData extends LinearLayout {
 			public void onTextChanged( CharSequence charSequence, int i, int i1, int i2 ) {}
 			@Override
 			public void afterTextChanged( Editable editable ) {
-				//s.l( "veroImputTesto " + veroImputTesto );
 				if( veroImputTesto ) {
 					impostaTutto();
 				}
@@ -236,7 +228,6 @@ public class EditoreData extends LinearLayout {
 						data2 = scanna( dataGc.substring( dataGc.indexOf("TO")+3 ) );
 				} else if( t == 10 ) { // Data frase
 					data1 = scanna( "" );
-					//s.l( tipo +" "+ data1.format.toPattern()  );
 					if( dataGc.endsWith(")") )
 						frase = dataGc.substring( 1, dataGc.indexOf(")") );
 					else
@@ -302,7 +293,6 @@ public class EditoreData extends LinearLayout {
 					return data;
 				} else
 					data.date = data.format.parse( dataGc );
-				//s.l( "'"+ forma + "' ok" );
 				break;
 			} catch( ParseException e ) {
 				//s.l( "'"+ forma + "' non ha funzionato. " + e.getLocalizedMessage() );
@@ -315,7 +305,6 @@ public class EditoreData extends LinearLayout {
 
 	// Gira le ruote di un carro in base a una data
 	void impostaCarro( Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
-		//final Calendar calenda = new GregorianCalendar( data.date.getYear()+1900, data.date.getMonth(), data.date.getDate() );
 		calenda.clear();
 		calenda.set( data.date.getYear()+1900, data.date.getMonth(), data.date.getDate() );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
@@ -331,7 +320,6 @@ public class EditoreData extends LinearLayout {
 			ruotaSecolo.setValue( 0 );
 		else
 			ruotaSecolo.setValue( (data.date.getYear()+1900)/100 );
-		//s.l( data.date.getYear() +"  "+ (data.date.getYear()+1900)%100  );
 		if( data.format.toPattern().equals(G_M) || data.format.toPattern().equals("") )
 			ruotaAnno.setValue( 100 );
 		else
@@ -345,14 +333,11 @@ public class EditoreData extends LinearLayout {
 		int secolo = ruotaSecolo.getValue();
 		int anno = ruotaAnno.getValue();
 		// Imposta i giorni del mese in ruotaGiorno
-		//s.l( ruotaGiorno.getValue() +" "+ mese +" "+ (secolo*100+anno) );
 		calenda.set( secolo*100+anno, mese-1, 1 );
-		//s.l( calenda.getTime().toLocaleString() + "  >  "+ calenda.getActualMaximum(Calendar.DAY_OF_MONTH)  );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
 		data.date.setDate( giorno == 0 ? 1 : giorno );  // così non attribuisce strani valori a caso al giorno 0
 		data.date.setMonth( mese - 1 );
 		data.date.setYear( secolo*100 + anno - 1900 );
-		//s.l( data.date.getDate() +" "+ (data.date.getMonth()+1) +" "+ (data.date.getYear()+1900) );
 		if( giorno != 0 && mese != 0 && anno != 100 )
 			data.format.applyPattern( G_M_A );
 		else if( giorno != 0 && mese != 0 )

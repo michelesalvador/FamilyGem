@@ -1,6 +1,5 @@
 package app.familygem;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,20 +14,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
-import org.folg.gedcom.model.ParentFamilyRef;
-import org.folg.gedcom.model.Person;
-import org.folg.gedcom.model.SpouseFamilyRef;
-
-import java.util.Iterator;
 import java.util.List;
-
 import app.familygem.dettaglio.Nota;
-
 import static app.familygem.Globale.gc;
 
 public class Quaderno extends Fragment {
@@ -116,18 +106,6 @@ public class Quaderno extends Fragment {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			case 0:
-				/*Note nuova = new Note();
-				int val, max = 0;
-				for( Note n : gc.getNotes() ) {
-					val = Anagrafe.idNumerico( n.getId() );
-					if( val > max )	max = val;
-				}
-				nuova.setId( "N" + (max + 1) );
-				nuova.setValue( "" );
-				gc.addNote( nuova );
-				Ponte.manda( nuova, "oggetto" );
-				Ponte.manda( gc, "contenitore" );
-				startActivity( new Intent( getContext(), Nota.class ) );*/
 				nuovaNota( getContext(), null );
 				return true;
 			default:

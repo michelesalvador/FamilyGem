@@ -53,8 +53,6 @@ public class Magazzino extends Fragment {
 					case 2:	// Ordine alfabeto
 						return r1.getName().compareToIgnoreCase(r2.getName());
 					case 3:	// Ordina per numero di fonti
-						//return (int)r2.getExtension("fonti") - (int)r1.getExtension("fonti");
-							// ClassCastException: com.google.gson.JsonPrimitive cannot be cast to java.lang.Integer
 						return U.castaJsonInt(r2.getExtension("fonti")) - U.castaJsonInt(r1.getExtension("fonti"));
 					default:
 						return 0;
@@ -64,7 +62,6 @@ public class Magazzino extends Fragment {
 		for( final Repository rep : listArchivi ) {
 			View vistaPezzo = inflater.inflate( R.layout.magazzino_pezzo, scatola, false );
 			scatola.addView( vistaPezzo );
-			//vistaPezzo.id = rep.getId();
 			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( rep.getName() );
 			((TextView)vistaPezzo.findViewById( R.id.magazzino_archivi )).setText( String.valueOf(rep.getExtension("fonti")) );
 			vistaPezzo.setOnClickListener( new View.OnClickListener() {
@@ -75,10 +72,6 @@ public class Magazzino extends Fragment {
 						getActivity().setResult( Activity.RESULT_OK, intento );
 						getActivity().finish();
 					} else {
-						/*Intent intento = new Intent( getContext(), Archivio.class);
-						intento.putExtra( "oggetto", "Repository" );
-						intento.putExtra( "id", rep.getId() );
-						startActivity( intento );*/
 						Ponte.manda( rep, "oggetto" );
 						startActivity( new Intent( getContext(), Archivio.class ) );
 					}
@@ -140,7 +133,6 @@ public class Magazzino extends Fragment {
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
-		//System.out.println( item.getItemId() );
 		switch( item.getItemId() ) {
 			case 1:
 				Globale.ordineMagazzino = 1;
@@ -170,7 +162,6 @@ public class Magazzino extends Fragment {
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		//s.l( "idArchivio = " + idArchivio );
 		switch( item.getItemId() ) {
 			case 0:
 				elimina( (Repository) vistaArchio.getTag() );

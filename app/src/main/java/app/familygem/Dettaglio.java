@@ -4,17 +4,13 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.text.InputType;
-import android.util.AttributeSet;
-import android.util.Xml;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,11 +19,8 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.apache.commons.io.FileUtils;
@@ -48,8 +41,6 @@ import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.model.Submitter;
-import org.xmlpull.v1.XmlPullParser;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,7 +67,6 @@ public class Dettaglio extends AppCompatActivity {
 	public TextView vistaId;
 	public String occorrenze = "";
 	public Object contenitore = Ponte.ricevi("contenitore");	// in particolare per poter eliminare l'oggetto
-	//public Map<String,Object> uova = new LinkedHashMap<>();	// Mappa dei pezzi editabili
 	List<Uovo> ovi = new ArrayList<>();	// Lista dei pezzi editabili
 	TreeMap<String,String> eventiVari; // Eventi per il FAB di Famiglia
 	public Person unRappresentanteDellaFamiglia; // una Person della Famiglia per nascondere nel FAB 'Collega persona'
@@ -108,11 +98,7 @@ public class Dettaglio extends AppCompatActivity {
 				Menu menu = popup.getMenu();
 				String[] conIndirizzo = { "Www", "Email", "Phone", "Fax" }; // questi oggetti compaiono nel FAB di Evento se esiste un Indirizzo
 				int u = 0;
-				//for( int u = 0; u < uova.size(); u++ ) {	// pare non si cicla così in un Map
-				//for( Map.Entry<String,Object> uovo : uova.entrySet() ) {
 				for( Uovo uovo : ovi ) {
-					//s.l( uovo.titolo +" "+ uovo.oggetto +"  "+  box.findViewWithTag(uovo.oggetto) );
-					//if( box.findViewWithTag(uovo.getValue()) == null )	// funziona solo con tag messi da setTag()
 					boolean giaMesso = false;
 					boolean indirizzoPresente = false;
 					for( int i = 0; i < box.getChildCount(); i++ ) {
@@ -185,18 +171,13 @@ public class Dettaglio extends AppCompatActivity {
 						// FAB + mette un nuovo uovo e lo rende subito editabile
 						int id = item.getItemId();
 						if( id < 100 ) {
-							//String titolo = ( new ArrayList<>( uova.keySet() ) ).get( id );
-							//String met = (String)( new ArrayList<>( uova.values() ) ).get( id );
-							//edita( metti( tit, met, true ) );
-							//Object coso = ( new ArrayList<>( uova.values() ) ).get( id );
 							Object coso = ovi.get( id ).oggetto;
 							if( coso instanceof Address ) {    // coso è un new Address()
 								if( oggetto instanceof EventFact )
 									((EventFact)oggetto).setAddress( (Address)coso );
 								else if( oggetto instanceof Submitter )
 									((Submitter)oggetto).setAddress( (Address)coso );
-							} /*else if( coso instanceof EventFact )
-								((EventFact)oggetto).setCause( (EventFact)coso );*/
+							}
 							View pezzo = creaPezzo( ovi.get(id).titolo, "", coso, ovi.get(id).multiLinea );
 							if( coso instanceof String )
 								edita( pezzo );
@@ -262,20 +243,9 @@ public class Dettaglio extends AppCompatActivity {
 						}
 						return true;
 					}
-				} );
+				});
 			}
-		} );
-
-		/* Serviva durante la lavorazione
-		findViewById( R.id.botttone_aggiorna ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				//s.l( "ho cliccato il bottone. oggetto = " + oggetto );
-				ovi.clear();
-				box.removeAllViews();
-				impagina();
-			}
-		} );*/
+		});
 	}
 
 	// Imposta ciò che è stato scelto nelle liste
@@ -301,17 +271,14 @@ public class Dettaglio extends AppCompatActivity {
 			} else if( requestCode == 5173 ) { // Importa un file scelto col file manager da Immagine
 				try {
 					Uri uri = data.getData();
-					//s.l( "uri= " + uri );
 					String percorso = U.uriPercorsoFile( uri );
-					//s.l( "percorso= " + percorso );
 					File fileMedia;
 					if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
 						// Apre direttamente il file
 						fileMedia = new File( percorso );
-						//s.l("percorsoCartella= " + fileMedia.getParent() );
 						if( fileMedia.exists() ) {
-							// todo questo è sciocco perché probabilmente l'utente non vuole modificare i percorsi di tutti gli altri file...
-							// todo, solo se "non li trova"
+							// TODO questo è sciocco perché probabilmente l'utente non vuole modificare i percorsi di tutti gli altri file...
+							// TODO, solo se "non li trova"
 							Globale.preferenze.alberoAperto().cartella = fileMedia.getParent();
 							Globale.preferenze.salva();
 						}
@@ -320,7 +287,6 @@ public class Dettaglio extends AppCompatActivity {
 						// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
 						InputStream input = getContentResolver().openInputStream( uri );
 						String percorsoMemoria = getExternalFilesDir(null) + "/" + Globale.preferenze.idAprendo;
-						//s.l( "percorsoMemoria= " + percorsoMemoria );
 						File dirMemoria = new File( percorsoMemoria );
 						if( !dirMemoria.exists() )
 							dirMemoria.mkdir();
@@ -330,7 +296,7 @@ public class Dettaglio extends AppCompatActivity {
 
 					}
 					((Media)oggetto).setFile( fileMedia.getAbsolutePath() );
-				} catch( IOException e ) {	//URISyntaxException | SAXParseException |FileNotFoundException |
+				} catch( IOException e ) {
 					Toast.makeText( Dettaglio.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 					return;
 				}
@@ -361,91 +327,6 @@ public class Dettaglio extends AppCompatActivity {
 	}
 
 	public void impagina() {}
-
-	/*public void deponi() {
-		for( Map.Entry<String,Object> uovo : uova.entrySet() ) {
-			Object coso = uovo.getValue();
-			if( coso instanceof String )
-				metti( uovo.getKey(), (String)coso );
-			else if( coso instanceof Address )
-				metti( uovo.getKey(), (Address)coso );
-			else if( coso instanceof EventFact )
-				metti( uovo.getKey(), (EventFact)coso );
-		//	metti( uovo.getKey(), uovo.getValue(), false );
-		}
-	}*/
-
-	/*@Deprecated
-	public View metti( String titolo, Object coso ) {
-		return metti( titolo, coso, false );
-	}
-
-	// Se true mette anche con il tag null
-	// 'coso' può essere un metodo 'Telephone', un Address, un EventFact oppure un int
-	@Deprecated
-	public View metti( String titolo, final Object coso, boolean pezzoNuovo ) {	//
-		View vistaPezzo = LayoutInflater.from(box.getContext()).inflate( R.layout.pezzo_fatto, box, false );
-		String testo = null;
-		if( pezzoNuovo ) {    // Pezzo nuovo
-			testo = "";
-			vistaPezzo.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View vista ) {
-					// ???????????
-				}
-			} );
-		} else if( coso instanceof String ) {	// Metodo
-			try {
-				testo = (String) oggetto.getClass().getMethod( "get" + coso ).invoke( oggetto );
-			} catch( IllegalAccessException|InvocationTargetException|NoSuchMethodException|SecurityException e ) {
-				testo = "ERRORE: " + e.getMessage();
-			}
-			vistaPezzo.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View vista ) {
-					//openContextMenu( vista );
-					edita( vista );
-				}
-			} );
-		} else if( coso instanceof Address ) {	// Indirizzo
-			testo = indirizzo( (Address) coso );
-			vistaPezzo.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View vista ) {
-					Ponte.manda( coso, "oggetto" );
-					Ponte.manda( oggetto, "contenitore" );
-					startActivity( new Intent( Dettaglio.this, Indirizzo.class ) );
-				}
-			} );
-		} else if( coso instanceof EventFact ) {	// Evento
-			testo = ( (EventFact) coso ).getValue();
-			vistaPezzo.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View vista ) {
-					Ponte.manda( coso, "oggetto" );
-					Ponte.manda( oggetto, "contenitore" );
-					startActivity( new Intent( Dettaglio.this, Evento.class ) );
-				}
-			} );
-		}
-		if( testo == null ) return null;
-		box.addView( vistaPezzo );
-		((TextView)vistaPezzo.findViewById( R.id.fatto_titolo )).setText( titolo );
-		//TextView vistaTesto = vistaPezzo.findViewById( R.id.fatto_testo );
-		//if( testo.isEmpty() ) vistaTesto.setVisibility( View.GONE );
-		((TextView)vistaPezzo.findViewById( R.id.fatto_testo )).setText( ".............testo" );
-		((TextView)vistaPezzo.findViewById( R.id.fatto_edita )).setText( testo );
-		registerForContextMenu( vistaPezzo );
-		vistaPezzo.setTag( R.id.tag_oggetto, coso ); // Serve a vari processi per riconoscere il pezzo
-		return vistaPezzo;
-	}*/
-
-	/*public void mettiParticolare ( String titolo, Object coso ) {
-		if( coso instanceof Address )
-			creaPezzo( titolo, indirizzo((Address)coso), coso );
-		else if( coso.equals( 140151220 ) )
-			new Uovo( titolo, new Address(), false );
-		if( coso instanceof EventFact )
-			creaPezzo( titolo, indirizzo((Address)coso), coso );
-		else if( coso.equals( 373470 ) )
-			new Uovo( titolo, new EventFact(), false );
-	}*/
 
 	class Uovo {
 		String titolo;
@@ -518,14 +399,12 @@ public class Dettaglio extends AppCompatActivity {
 			};
 			// Se si tratta di una data
 			if( coso.equals("Date") ) {
-				//s.l( vistaEditabile.getText() );
 				editoreData = vistaPezzo.findViewById( R.id.fatto_data );
 				editoreData.inizia( vistaEditabile );
 			}
 		} else if( coso instanceof Address ) {	// Indirizzo
 			clicco = new View.OnClickListener() {
 				public void onClick( View vista ) {
-					//s.l(  coso);
 					Ponte.manda( coso, "oggetto" );
 					Ponte.manda( oggetto, "contenitore" );
 					startActivity( new Intent( Dettaglio.this, Indirizzo.class ) );
@@ -608,11 +487,8 @@ public class Dettaglio extends AppCompatActivity {
 		// Termina l'eventuale editazione di un altro pezzo
 		for( int i=0; i < box.getChildCount(); i++ ) {
 			View altroPezzo = box.getChildAt(i);
-			//Object ogg = altroPezzo.getTag(R.id.tag_oggetto);
-			//s.l( ">>>>>>> " + ogg );
 			EditText vistaEdita = altroPezzo.findViewById( R.id.fatto_edita );
 			if( vistaEdita != null ) {
-				//s.l( ogg + "=====> " + vistaEdita.isShown() );
 				if( vistaEdita.isShown() ) {
 					TextView vistaTesto = altroPezzo.findViewById( R.id.fatto_testo );
 					if( !vistaEdita.getText().equals(vistaTesto.getText()) ) // se c'è stata editazione
@@ -634,25 +510,14 @@ public class Dettaglio extends AppCompatActivity {
 			ViewGroup parent = (ViewGroup) vistaPezzo;  // todo: si potrebbe usare direttamente vistaPezzo se fosse un ViewGroup o LinearLayout anzicé View
 			int index = parent.indexOfChild( vistaEdita );
 			parent.removeView( vistaEdita );
-			//vistaEdita = getLayoutInflater().inflate(optionId, box, false);
 			vistaEdita = new TrovaLuogo( vistaEdita.getContext(), null );
 			vistaEdita.setId( R.id.fatto_edita );
 			vistaEdita.setText( vistaTesto.getText() );
 			vistaEdita.setInputType( InputType.TYPE_TEXT_FLAG_CAP_WORDS );
 			parent.addView( vistaEdita, index );
 		}
-
-		// Se non si tratta di una data
+		// Se non si tratta di una data mostra la tastiera
 		if( !vistaPezzo.getTag(R.id.tag_oggetto).equals("Date") ) {
-			/*if( editoreData == null ) {
-				editoreData = vistaPezzo.findViewById( R.id.fatto_data );
-				editoreData.inizia(vistaEdita);
-			} *//*else
-				editoreData.setVisibility( View.VISIBLE );*//*
-		} else {*/
-			//editoreData = null; // annulla eventuale editoreData creato in precedenza
-
-			//setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE );
 			InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE );
 			imm.toggleSoftInput( InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY );
 		}
@@ -661,8 +526,6 @@ public class Dettaglio extends AppCompatActivity {
 
 		// ActionBar personalizzata
 		barra.setDisplayHomeAsUpEnabled( false );	// nasconde freccia <-
-		//barra.setDisplayShowHomeEnabled(false);
-		//barra.setDisplayShowTitleEnabled(false);
 		qualeMenu = 0;
 		invalidateOptionsMenu();
 		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(box.getContext()), false);
@@ -687,7 +550,6 @@ public class Dettaglio extends AppCompatActivity {
 	void salva( View vistaPezzo, ActionBar barra, FloatingActionButton fab ) {
 		if( editoreData != null && editoreData.tipo==10 ) editoreData.genera( true ); // In sostanza solo per aggiungere le parentesi alla data frase
 		String testo = vistaEdita.getText().toString();
-		s.l( "salva ---> " + testo );
 		try {
 			oggetto.getClass().getMethod( "set" + vistaPezzo.getTag(R.id.tag_oggetto), String.class )
 					.invoke( oggetto, testo );
@@ -696,7 +558,6 @@ public class Dettaglio extends AppCompatActivity {
 			Toast.makeText( box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			return;	// in caso di errore rimane in modalità editore
 		}
-		//vistaEdita.setVisibility( View.GONE );
 		((TextView)vistaPezzo.findViewById( R.id.fatto_testo )).setText( testo );
 		ripristina( vistaPezzo, barra, fab );
 		U.salvaJson();
@@ -752,16 +613,13 @@ public class Dettaglio extends AppCompatActivity {
 
 	// Menu contestuale
 	View vistaPezzo;	// testo editabile, note, citazioni, media...
-	//String metodoPezzo;	// sostituito da oggettoPezzo
 	Object oggettoPezzo;
-	//Object contenitorePezzo;	// sostituito da oggetto
 	Person pers; // siccome usato molto ne facciamo un oggettoPezzo a sè stante
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {	// info è null
 		if( qualeMenu != 0 ) {	// Se siamo in modalità edita mostra i menu editore
 			vistaPezzo = vista;
 			oggettoPezzo = vista.getTag( R.id.tag_oggetto );
-			//contenitorePezzo = vista.getTag( R.id.tag_contenitore );
 			if( oggettoPezzo instanceof Person ) {
 				pers = (Person) oggettoPezzo;
 				Family fam = (Family) oggetto;
@@ -775,7 +633,6 @@ public class Dettaglio extends AppCompatActivity {
 						menu.add(0, 13, 0, R.string.family_as_spouse );
 				if( fam.getChildren(gc).indexOf(pers) > 0 )
 					menu.add( 0, 14, 0, R.string.move_up );
-				//s.l( fam.getChildren(gc).indexOf( pers ) );
 				if( fam.getChildren(gc).indexOf(pers) < fam.getChildren(gc).size()-1 && fam.getChildren(gc).indexOf(pers) >= 0 )
 					// così esclude i genitori il cui indice è -1
 					menu.add( 0, 15, 0, R.string.move_down );

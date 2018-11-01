@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Media;
@@ -27,8 +26,6 @@ import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
-
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -47,16 +44,10 @@ public class Individuo extends AppCompatActivity {
 	TabLayout tabLayout;
 	String[] pochiEventiTag = { "BIRT", "BAPM", "RESI", "OCCU", "DEAT", "BURI" };
 	TreeMap<String,String> altriEventi;
-	//boolean ricreaIndividuoAndAttivitaPrecedente;
 
 	@Override
     protected void onCreate( Bundle stato ) {
 		super.onCreate( stato );
-		/*String idIndividuo = null;
-		if( stato != null ) {
-			s.l( "STATO NON è null " );
-			idIndividuo = stato.getString( "idIndividuo" );
-		}*/
 		String id = getIntent().getStringExtra( "idIndividuo" );
 			// todo : investigabile: risulta null eliminando un evento nella famiglia..
 			// todo : intent esiste, ma come "svuotato" della stringa "idIndividuo"
@@ -64,7 +55,6 @@ public class Individuo extends AppCompatActivity {
 		if( id == null ) return;
 		uno = gc.getPerson( id );
 		Globale.individuo = id;	// non so bene perché ma potrebbe essere utile
-		//s.l( "uno trovato  " + uno );
         setContentView(R.layout.individuo);
 		((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
 		Toolbar barra = findViewById(R.id.toolbar);
@@ -73,14 +63,11 @@ public class Individuo extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Assegna alla vista pagina un adapter che gestisce le tre schede
-        //new FragmentPagerAdapter();   // non è possibile perché FragmentPagerAdapter è abstract
         ViewPager vistaPagina = findViewById( R.id.schede_persona );
         vistaPagina.setAdapter( new ImpaginatoreSezioni() );
 
 		// arricchisce il tablayout
 		tabLayout = findViewById(R.id.tabs);
-		//vistaPagina.addOnPageChangeListener( new TabLayout.TabLayoutOnPageChangeListener(tabLayout) ); inutile???
-        //tabLayout.addOnTabSelectedListener( new TabLayout.ViewPagerOnTabSelectedListener(vistaPagina) ); inutile!!!????
         tabLayout.setupWithViewPager(vistaPagina);	// altrimenti il testo nei TabItem scompare (?!)
         tabLayout.getTabAt(0).setText(R.string.media);
         tabLayout.getTabAt(1).setText(R.string.events);
@@ -95,7 +82,6 @@ public class Individuo extends AppCompatActivity {
 		                                float scostamento, // 1->0 a destra, 0->1 a sinistra
 		                                int positionOffsetPixels ) {
 		    	if( scostamento > 0 )
-				    //s.l( posizione +"\t"+ scostamento +"\t"+ positionOffsetPixels );
 				    fab.hide();
 			    else
 				    fab.show();
@@ -106,33 +92,12 @@ public class Individuo extends AppCompatActivity {
 		    public void onPageScrollStateChanged( int state ) {}
 	    });
 
-
-        // Immagine
-		/*if( !uno.getAllMedia(gc).isEmpty() ) {
-			//File imgFile = new File("/storage/external_SD/famiglia/Albina Bello.jpg" );
-			String percorso = U.percorsoMedia(uno.getAllMedia(gc).get(0));
-			if( percorso != null ) {
-				File imgFile = new File( percorso );
-				//s.l( "imgFile: " + imgFile );
-				if (imgFile.exists()) {
-					Bitmap faccia = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-					ImageView foto = findViewById(R.id.persona_foto);
-					foto.setImageBitmap(faccia);
-					ImageView sfondo = findViewById(R.id.persona_sfondo);
-					faccia = Bitmap.createScaledBitmap(faccia, 30, 30, true);
-					sfondo.setImageBitmap(faccia);
-				}
-			}
-		}*/
 		U.unaFoto( uno, (ImageView)findViewById(R.id.persona_foto) );
 		U.unaFoto( uno, (ImageView)findViewById(R.id.persona_sfondo) );
 
 		fab.setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View vista ) {
-				//menuOpzioni = 1;
-				//invalidateOptionsMenu();
-				//openOptionsMenu();
 				PopupMenu popup = new PopupMenu( Individuo.this, vista );
 				Menu menu = popup.getMenu();
 				switch( tabLayout.getSelectedTabPosition() ){
@@ -256,23 +221,6 @@ public class Individuo extends AppCompatActivity {
 								break;
 							}
 							case 23: // Crea nota condivisa
-								/* ELIMINABILE
-								Note notaNova = new Note();
-								int val, max = 0;
-								for( Note n : gc.getNotes() ) {
-									val = Anagrafe.idNumerico( n.getId() );
-									if( val > max )	max = val;
-								}
-								String id = "N" + (max+1);
-								notaNova.setId( id );
-								notaNova.setValue( "" );
-								gc.addNote( notaNova );
-								NoteRef refNota = new NoteRef();
-								refNota.setRef( id );
-								uno.addNoteRef( refNota );
-								Ponte.manda( notaNova, "oggetto" );
-								Ponte.manda( uno, "contenitore" );
-								startActivity( new Intent( Individuo.this, Nota.class ) );*/
 								Quaderno.nuovaNota( Individuo.this, uno );
 								break;
 							case 24:    // Collega nota condivisa
@@ -289,26 +237,12 @@ public class Individuo extends AppCompatActivity {
 								startActivity( new Intent( Individuo.this, CitazioneFonte.class ) );
 								break;
 							case 26:    // Nuova fonte
-								/*Source fonte = Biblioteca.nuovaFonte();
-								SourceCitation citaFonte = new SourceCitation();
-								citaFonte.setRef( fonte.getId() );
-								uno.addSourceCitation( citaFonte );
-								Ponte.manda( fonte, "oggetto" );
-								//Ponte.manda( gc, "contenitore" );
-								startActivity( new Intent( getApplicationContext(), Fonte.class ) );*/
  								Biblioteca.nuovaFonte( Individuo.this, uno );
 								break;
 							case 27:    // Collega fonte
 								Intent intent = new Intent( Individuo.this, Principe.class );
 								intent.putExtra( "bibliotecaScegliFonte", true );
 								startActivityForResult( intent,50473 );
-								/*Fragment biblioFrammento = new Biblioteca();
-								FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-								ft.replace( R.id.contenitore_fragment, biblioFrammento );
-								ft.commit();
-								biblioFrammento.setTargetFragment( biblioFrammento, 321 );*/
-								//getTargetFragment()
-								//getTargetRequestCode()
 								break;
 							// Scheda Familiari
 							case 30:
@@ -339,7 +273,6 @@ public class Individuo extends AppCompatActivity {
 								String tagChiave = null;
 								if( item.getItemId() >= 50 ) {
 									tagChiave = altriEventi.keySet().toArray( new String[altriEventi.size()] )[item.getItemId() - 50];
-									//s.l(  item.getItemId() +"  "+  tagChiave );
 								} else if( item.getItemId() >= 40  )
 									tagChiave = pochiEventiTag[item.getItemId()-40];
 								if( tagChiave != null ) {
@@ -362,8 +295,6 @@ public class Individuo extends AppCompatActivity {
 											nuovoEvento.setDate("");
 									}
 									uno.addEventFact( nuovoEvento );
-									//((IndividuoEventi) getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" ))
-									//	.piazzaEvento( (LinearLayout)findViewById(R.id.contenuto_scheda), nuovoEvento.getDisplayType(), "", nuovoEvento.getSourceCitations(), null, nuovoEvento );
 									Ponte.manda( nuovoEvento, "oggetto" );
 									Ponte.manda( uno, "contenitore" );
 									startActivity( new Intent( Individuo.this, Evento.class ) );
@@ -400,64 +331,18 @@ public class Individuo extends AppCompatActivity {
 				Globale.editato = true; // per rinfrescare
 			}
 			U.salvaJson();
-			//recreate();
 			Globale.editato = true;
 		}
-		//else if( resultCode == AppCompatActivity.RESULT_CANCELED ) {
 	}
 
 	// Chiamato dopo onBackPressed() ricarica la pagina per aggiornare i contenuti
 	@Override
 	public void onRestart() {
 		super.onRestart();
-		//s.l( "onRestart di Individuo " + Globale.editato );
 		if( Globale.editato ) {
-			//Globale.editato = false;
-			/*Intent intento = new Intent( Individuo.this, Individuo.class);
-			intento.putExtra( "idIndividuo", uno.getId() );
-			intento.putExtra( "scheda", tabLayout.getSelectedTabPosition() );	// apre la scheda famiglia
-			startActivity( intento );*/
 			recreate();
 		}
 	}
-
-	// Tentativi di recuperare l'individuo dopo backpressed.. e poi era STATIC!!!
-	// Recupera l'individuo ritornando alla pagina, in particolare con back pressed
-	/*@Override
-	protected void onResume() {
-		s.l( "ONRESUME :  " + id +"   "+ uno.getId() );
-		super.onResume();
-		if( id == null ) {
-			id = getIntent().getStringExtra( "idIndividuo" );
-			s.l( "id trovato :  " + id );
-			if( id != null ) {
-				uno = gc.getPerson( id );
-				Globale.individuo = id;
-				s.l( " >>>>>  " + uno.getId() );
-			}
-		}
-	}
-	@Override
-	public void onSaveInstanceState( Bundle stato ) {
-		super.onSaveInstanceState( stato );
-		s.l( "sto salvando lo stato " + uno.getId() );
-		stato.putString( "idIndividuo", uno.getId() );
-	}
-	@Override
-	public void onRestoreInstanceState( Bundle stato ) {
-		super.onRestoreInstanceState(stato);
-		// Restore UI state from the savedInstanceState.
-		// This bundle has also been passed to onCreate.
-		String idIndi = stato.getString("idIndividuo");
-		s.l( "onRestoreInstanceState :  " + idIndi );
-	}
-	@Override
-	public void onPause() {
-		super.onPause();
-		SharedPreferences sp = getSharedPreferences("X", Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = sp.edit();
-		editor.putString("lastActivity", HomeActivity.class.getCanonicalName());
-	}*/
 
     class ImpaginatoreSezioni extends FragmentPagerAdapter {
 
@@ -487,10 +372,8 @@ public class Individuo extends AppCompatActivity {
 
 
 	// Menu Opzioni
-	//int menuOpzioni = 0;
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		//if( menuOpzioni == 0 ) {
 		menu.add( 0, 0, 0, R.string.diagram );
 		if( !uno.getParentFamilies( gc ).isEmpty() )
 			menu.add( 0, 1, 0, R.string.family_as_child );
@@ -498,14 +381,10 @@ public class Individuo extends AppCompatActivity {
 			menu.add( 0, 2, 0, R.string.family_as_spouse );
 		menu.add( 0, 3, 0, R.string.modify );
 		menu.add( 0, 4, 0, R.string.delete );
-		//}
 		return true;
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		switch ( item.getItemId() ) {
 			case 0:	// Diagramma
 				Globale.individuo = uno.getId();	// in caso di back stack
@@ -530,19 +409,8 @@ public class Individuo extends AppCompatActivity {
 				Anagrafe.elimina( uno.getId(), this, null );
 				return true;
 			default:
-				//menuOpzioni = 0;
-				//invalidateOptionsMenu();
-				//return false;
 				onBackPressed();
 		}
-		//invalidateOptionsMenu();
 		return false;
 	}
-	/*class dopoEliminaIndividuo implements Anagrafe.dopoEliminazione {
-		public void esegui( String id ) {
-			//s.l( "dopoEliminaIndividuo " + id );
-			//onBackPressed();
-			startActivity( new Intent( getApplicationContext(), Principe.class ) );
-		}
-	}*/
 }

@@ -12,9 +12,7 @@ import android.widget.LinearLayout;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
 import java.util.List;
-
 import app.familygem.dettaglio.Famiglia;
-
 import static app.familygem.Globale.gc;
 
 public class IndividuoFamiliari extends Fragment {
@@ -23,12 +21,6 @@ public class IndividuoFamiliari extends Fragment {
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
-		//View vistaFamiglia = inflater.inflate(R.layout.individuo_famiglia_pezzo, container, false);
-		//vistaFamiglia = new ScrollView( getContext() );
-		//vistaFamiglia.setPadding( 4, 4, 4, 4 );
-		//vistaFamiglia.setLayoutManager( new LinearLayoutManager(getContext()) );
-		//vistaFamiglia.setAdapter( new adattatoreTessera() );*/
-		//vistaFamiglia.setOrientation( LinearLayout.VERTICAL );
 		vistaFamiglia = inflater.inflate(R.layout.individuo_scheda, container, false);
 		Person uno = gc.getPerson( Globale.individuo );
 		// Famiglie di origine: genitori e fratelli
@@ -154,12 +146,4 @@ public class IndividuoFamiliari extends Fragment {
 		}
 		return true;
 	}
-	/*class dopoEliminaFamiliare implements Anagrafe.dopoEliminazione {
-		public void esegui( String id ) {
-			*//*Intent intento = new Intent( getContext(), Individuo.class );
-			intento.putExtra( "scheda", 2 );
-			startActivity( intento );*//*
-			vistaScheda.setVisibility( View.GONE );
-		}
-	}*/
 }

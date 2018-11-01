@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Submitter;
 import java.util.List;
@@ -41,7 +40,6 @@ public class Podio extends Fragment {
 		for( final Submitter autor : listAutori ) {
 			View vistaPezzo = inflater.inflate( R.layout.magazzino_pezzo, scatola, false );
 			scatola.addView( vistaPezzo );
-			//vistaPezzo.id = rep.getId();
 			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( autor.getName() );
 			vistaPezzo.findViewById( R.id.magazzino_archivi ).setVisibility( View.GONE );
 			vistaPezzo.setOnClickListener( new View.OnClickListener() {
@@ -52,10 +50,6 @@ public class Podio extends Fragment {
 						getActivity().setResult( Activity.RESULT_OK, intento );
 						getActivity().finish();
 					} else {
-						/*Intent intento = new Intent( getContext(), Archivio.class);
-						intento.putExtra( "oggetto", "Repository" );
-						intento.putExtra( "id", rep.getId() );
-						startActivity( intento );*/
 						Ponte.manda( autor, "oggetto" );
 						startActivity( new Intent( getContext(), Autore.class ) );
 					}
@@ -122,7 +116,6 @@ public class Podio extends Fragment {
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		//s.l( "idArchivio = " + idArchivio );
 		switch( item.getItemId() ) {
 			case 0:
 				gc.getHeader().setSubmitterRef( ((Submitter)vistaAutore.getTag()).getId() );

@@ -36,7 +36,6 @@ import static app.familygem.Globale.gc;
 
 public class Biblioteca extends Fragment {
 
-	//public Biblioteca() {}
     List<Source> listaFonti;
 
     @Override
@@ -51,14 +50,8 @@ public class Biblioteca extends Fragment {
 		setHasOptionsMenu(true);
 		if( Globale.ordineBiblioteca == 3 ) {
 			for( Source fonte : listaFonti ) {
-				//U.aggiornaTag(fonte, "_CITAZIONI", String.valueOf(r++));	// istantaneo
-				/*if( U.valoreTag(fonte.getExtensions(),"_CITAZIONI") == null )
-					U.aggiornaTag( fonte, "_CITAZIONI", String.valueOf(quanteCitazioni(fonte)) );*/	// 1 minuto
 				if( fonte.getExtension("citaz") == null )
-					fonte.putExtension( "citaz", quanteCitazioni(fonte) );	// 1 minuto uguale
-				/*VisitaContaCitazioni contaCitaz = new VisitaContaCitazioni( fonte.getId() );	// 4 minuti e 20 secondi
-				gc.accept( contaCitaz );
-				fonte.putExtension( "citaz", contaCitaz.quante );*/
+					fonte.putExtension( "citaz", quanteCitazioni(fonte) );	// 1 minuto
 			}
 		}
 		Collections.sort( listaFonti, new Comparator<Source>() {
@@ -70,21 +63,11 @@ public class Biblioteca extends Fragment {
 					case 2:	// Ordine alfabeto
 						return titoloFonte(f1).compareToIgnoreCase( titoloFonte(f2) );
 					case 3:	// Ordina per numero di citazioni
-						//return quanteCitazioni(f2) - quanteCitazioni(f1);	// questo rallenta parecchio
-						/*return Integer.parseInt( U.valoreTag(f2.getExtensions(),"_CITAZIONI") ) -
-								Integer.parseInt( U.valoreTag(f1.getExtensions(),"_CITAZIONI") );
-						if( f1.getExtension("citaz") instanceof Integer )
-							return (int)f2.getExtension("citaz") - (int)f1.getExtension("citaz");	// ok solo quando "citaz" sono messi freschi, altrimenti ClassCastException
-						else return ((JsonPrimitive)f2.getExtension("citaz")).getAsInt() - ((JsonPrimitive)f1.getExtension("citaz")).getAsInt();
-								// se ci sono "citaz" messi freschi ClassCastException: java.lang.Integer cannot be cast to com.google.gson.JsonPrimitive*/
 						return U.castaJsonInt(f2.getExtension("citaz")) - U.castaJsonInt(f1.getExtension("citaz"));
 				}
 				return 0;
 			}
 		});
-		/*RecyclerView vistaFonti = new RecyclerView( getContext() );
-		vistaFonti.setLayoutManager( new LinearLayoutManager(getContext()) );
-		vistaFonti.setVerticalScrollBarEnabled(true);*/	//	Purtroppo pare non sia facile abilitare la barra verticale
         View vista = inflater.inflate(R.layout.ricicla_vista, container, false);
 		RecyclerView vistaFonti = vista.findViewById( R.id.riciclatore );
 		vistaFonti.setAdapter( new BibliotecAdapter() );
@@ -98,22 +81,12 @@ public class Biblioteca extends Fragment {
 			if( Globale.ordineBiblioteca != 1 )
 				gestore.vistaId.setVisibility( View.GONE );
 			gestore.vistaTitolo.setText( titoloFonte(listaFonti.get(i)) );
-			//gestore.vistaVolte.setText( String.valueOf(U.quanteCitazioni(listaFonti.get(i),gc)) );	// rallentone
-			//gestore.vistaVolte.setText( U.valoreTag(listaFonti.get(i).getExtensions(),"_CITAZIONI") );	// velocissimo
 			Object volte = listaFonti.get(i).getExtension("citaz");
-			//s.l( "citaz int volte " + volte );
 			// Conta delle citazioni con il mio metodo
 			if( volte == null ) {
 				volte = quanteCitazioni( listaFonti.get(i) );
 				listaFonti.get(i).putExtension("citaz", volte );
 			}
-			// Conta le citazioni con il visitor, purtroppo molto più lento
-			/*if( volte == null ) {
-				VisitaContaCitazioni contaCitaz = new VisitaContaCitazioni( listaFonti.get(i).getId() );
-				gc.accept( contaCitaz );
-				volte = contaCitaz.quante;
-				listaFonti.get(i).putExtension("citaz", volte );
-			}*/
 			gestore.vistaVolte.setText( String.valueOf(volte) );
 		}
         @Override
@@ -141,11 +114,6 @@ public class Biblioteca extends Fragment {
 			vista.setOnClickListener( new View.OnClickListener() {
 				@Override
 				public void onClick( View v ) {
-					//s.l( vistaId.getText() +": "+ vistaTitolo.getText() );
-					//Intent intento = new Intent( getContext(), Archivio.class);
-					//intento.putExtra( "oggetto", "Source" );
-					//intento.putExtra( "id", vistaId.getText().toString() );
-					//startActivity( intento );
 					// Restituisce l'id di una fonte a Individuo e Dettaglio
 					if( getActivity().getIntent().getBooleanExtra("bibliotecaScegliFonte",false) ) {
 						Intent intent = new Intent();
@@ -249,7 +217,6 @@ public class Biblioteca extends Fragment {
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
-		//System.out.println( item.getItemId() );
 		switch( item.getItemId() ) {
 			case 1:
 				Globale.ordineBiblioteca = 1;
@@ -261,8 +228,6 @@ public class Biblioteca extends Fragment {
 				Globale.ordineBiblioteca = 3;
 				break;
 			case 4:
-				/*Ponte.manda( nuovaFonte(), "oggetto" );
-				startActivity( new Intent( getActivity(), Fonte.class ));*/
 				nuovaFonte( getContext(), null );
 				return true;
 			default:

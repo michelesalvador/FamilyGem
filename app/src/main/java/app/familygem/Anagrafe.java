@@ -17,24 +17,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-//import android.widget.SearchView;
-import android.widget.TextView;
-
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import app.familygem.dettaglio.Famiglia;
-
-import static android.support.v4.view.MenuItemCompat.setActionView;
-import static app.familygem.Globale.contesto;
 import static app.familygem.Globale.gc;
 
 public class Anagrafe extends Fragment {
@@ -45,7 +36,6 @@ public class Anagrafe extends Fragment {
 	@Override
 	public void onCreate( Bundle stato ) {
 		super.onCreate( stato );
-		//Globale.frammentoPrecedente = this;
 	}
 
 	@Override
@@ -61,7 +51,6 @@ public class Anagrafe extends Fragment {
 				public int compare(Person p1, Person p2) {
 					switch( Globale.ordineAnagrafe ) {
 						case 1:    // ordina per ID Gedcom
-							//return Integer.parseInt(p1.getId().substring(1)) - Integer.parseInt(p2.getId().substring(1));
 							if( gliIdsonoNumerici )
 								return idNumerico(p1.getId()) - idNumerico(p2.getId());
 							else
@@ -86,36 +75,7 @@ public class Anagrafe extends Fragment {
 	}
 
 	void elencaIndividui( String ricerca ) {
-
 		for( final Person tizio : listaIndividui ) {
-
-			/* Layout creato qui
-			//View vistaIndi = inflater.inflate( R.layout.anagrafe_pezzo, scatola, false);
-			View vistaIndi = LayoutInflater.from(scatola.getContext()).inflate( R.layout.anagrafe_pezzo, scatola, false);
-			TextView vistaId = vistaIndi.findViewById( R.id.anagrafe_id );
-			//vistaId.setText( "" + listaIndividui.indexOf( tizio ) );
-			if( Globale.ordineAnagrafe == 1 ) vistaId.setText( tizio.getId() );
-			else if( Globale.ordineAnagrafe == 4 ) vistaId.setText( String.valueOf(tizio.getExtension("famili")) );
-			else vistaId.setVisibility( View.GONE );
-			String nome = U.epiteto(tizio);
-			if(ricerca!=null) if( !nome.toUpperCase().contains( ricerca.toUpperCase() ) ) continue;
-			((TextView)vistaIndi.findViewById( R.id.anagrafe_nome )).setText( nome );
-			TextView vistaTitolo = vistaIndi.findViewById(R.id.anagrafe_titolo);
-			String titolo = U.titolo( tizio );
-			//if(ricerca!=null) if(!titolo.isEmpty()) if( !titolo.contains( ricerca ) ) continue;
-			if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
-			else vistaTitolo.setText( titolo );
-			U.dettagli( tizio, (TextView)vistaIndi.findViewById( R.id.anagrafe_dettagli ) );
-			U.unaFoto( tizio, (ImageView)vistaIndi.findViewById(R.id.anagrafe_foto) );
-			if( !U.morto(tizio) )
-				vistaIndi.findViewById( R.id.anagrafe_lutto ).setVisibility( View.GONE );
-			if( U.sesso(tizio) == 1 )
-				vistaIndi.findViewById(R.id.anagrafe_casella).setBackgroundResource( R.drawable.casella_maschio );
-			if( U.sesso(tizio) == 2 )
-				vistaIndi.findViewById(R.id.anagrafe_casella).setBackgroundResource( R.drawable.casella_femmina );
-			vistaIndi.setTag( tizio.getId() );
-			scatola.addView( vistaIndi );*/
-
 			if( ricerca == null || cercabile(tizio).contains(ricerca) ) {
 				String ruolo = null;
 				if( Globale.ordineAnagrafe == 1 ) ruolo = tizio.getId();
@@ -159,14 +119,11 @@ public class Anagrafe extends Fragment {
 		esterno:
 		for( Person p : gc.getPeople() ) {
 			for( char c : p.getId().toCharArray() ) {
-				//if( p.getId() == is only [a-z,A-Z] cioè NON HA NUMERI )
 				if (Character.isDigit(c))
 					continue esterno;
 			}
-			//s.l("Nell'id '"+ p.getId() +"' ho trovato solo lettere." );
 			return false;
 		}
-		//s.l("solo numeri");
 		return true;
 	}
 
@@ -175,16 +132,13 @@ public class Anagrafe extends Fragment {
 		//return Integer.parseInt( id.replaceAll("\\D+","") );	// sintetico ma lento
 		int num = 0;
 		int x = 1;
-		//boolean ok = false;
 		for( int i = id.length()-1; i >= 0; --i ){
 			int c = id.charAt( i );
 			if( c > 47 && c < 58 ){
 				num += (c-48) * x;
 				x *= 10;
-				//ok = true;
 			}
 		}
-		//if( !ok ) return -1;
 		return num;
 	}
 
@@ -332,15 +286,6 @@ public class Anagrafe extends Fragment {
 			}
 
 		});
-		/* Bug noto, non funziona
-		vistaCerca.setOnCloseListener( new SearchView.OnCloseListener() {
-			@Override
-			public boolean onClose() {
-				scatola.removeAllViews();
-				elencaIndividui( null );
-				return true;
-			}
-		});*/
 		ricerca.setOnActionExpandListener( new MenuItem.OnActionExpandListener() {
 			@Override
 			public boolean onMenuItemActionExpand( MenuItem i ) {
@@ -356,7 +301,6 @@ public class Anagrafe extends Fragment {
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
-		//System.out.println( item.getItemId() );
 		switch( item.getItemId() ) {
 			case 0:
 				return true;
@@ -426,7 +370,7 @@ public class Anagrafe extends Fragment {
 	static void scollega( String idScollegando ){
 		Person egli = gc.getPerson( idScollegando );
 		for( Family f : egli.getParentFamilies(gc) )	// scollega i suoi ref nelle famiglie
-			//f.getChildren(gc).remove( egli );	// non fa niente
+
 			f.getChildRefs().remove( f.getChildren(gc).indexOf(egli) );
 		for( Family f : egli.getSpouseFamilies(gc) ) {
 			if( f.getHusbands(gc).indexOf(egli) >= 0 )
@@ -441,7 +385,6 @@ public class Anagrafe extends Fragment {
 	// Metodo per eliminare una persona dal gedcom	TODO: ERRORE GRAVISSIMO ELIMINANDO TORNANDO INDIETRO...
 	public static void elimina( final String idEliminando, final Context contesto, final View vista ) {
 		AlertDialog.Builder alert = new AlertDialog.Builder( contesto );
-		//alert.setTitle("Conferma");
 		alert.setMessage( contesto.getText(R.string.really_delete) + " " + U.epiteto( gc.getPerson(idEliminando) ) + "?");
 		alert.setPositiveButton( R.string.delete, new DialogInterface.OnClickListener() {
 			public void onClick( DialogInterface dialog, int id ) {
@@ -456,10 +399,8 @@ public class Anagrafe extends Fragment {
 					contesto.startActivity( new Intent( contesto, Principe.class ) );
 				else {
 					vista.setVisibility( View.GONE );
-					//dopo.esegui( idEliminando );
 					Snackbar.make( vista, R.string.person_deleted, Snackbar.LENGTH_SHORT ).show();
 				}
-				//s.l( "eliminato " + idEliminando );
 			}
 		}).setNeutralButton( R.string.cancel, null )
 				.create().show();

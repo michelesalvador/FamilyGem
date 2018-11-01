@@ -3,7 +3,6 @@ package app.familygem;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -63,11 +62,8 @@ public class InfoAlbero extends AppCompatActivity {
 		((TextView)findViewById(R.id.info_statistiche)).setText( i );
 
 		if( gc != null ) {
-			//LinkedHashMap<String,String> t = new LinkedHashMap<>();
-			//listaInfo = new ArrayList<>();
 			Header h = gc.getHeader();
 			if( h == null) {
-				//poni( "Problema","Non trovo l'intestazione di questo albero." );
 				Button bottoneCrea = scatola.findViewById( R.id.info_crea_testata );
 				bottoneCrea.setVisibility( View.VISIBLE );
 				bottoneCrea.setOnClickListener( new View.OnClickListener() {
@@ -77,11 +73,10 @@ public class InfoAlbero extends AppCompatActivity {
 						U.salvaJson( gc, idAlbero );
 						recreate();
 					}
-				} );
+				});
 			} else {
 				scatola.findViewById( R.id.info_testata ).setVisibility( View.VISIBLE );
-				//spazio();
-				if( h.getFile() != null ) // && !h.getFile().equals(file.getAbsolutePath())
+				if( h.getFile() != null )
 					poni( getText(R.string.file),  h.getFile() );
 				if( h.getCharacterSet() != null ) {
 					poni( getText(R.string.characrter_set), h.getCharacterSet().getValue() );
@@ -99,7 +94,6 @@ public class InfoAlbero extends AppCompatActivity {
 						poni( getText(R.string.corporation), h.getGenerator().getGeneratorCorporation().getValue() );
 						if( h.getGenerator().getGeneratorCorporation().getAddress() != null )
 							poni( getText(R.string.address), h.getGenerator().getGeneratorCorporation().getAddress().getDisplayValue() ); // non è male
-						//if( h.getGenerator().getGeneratorCorporation().getPhone() != null )
 						poni( getText(R.string.telephone), h.getGenerator().getGeneratorCorporation().getPhone() );
 						poni( getText(R.string.fax), h.getGenerator().getGeneratorCorporation().getFax() );
 					}
@@ -113,7 +107,6 @@ public class InfoAlbero extends AppCompatActivity {
 				spazio();
 				if( h.getSubmitter(gc) != null )
 					poni( getText(R.string.submitter), h.getSubmitter(gc).getName() );	// todo: renderlo cliccabile?
-				//	+ "\nIndirizzo: " + gc.getSubmitter().getAddress();
 				if( gc.getSubmission() != null )
 					poni( getText(R.string.submission), gc.getSubmission().getDescription() );	// todo: cliccabile
 				spazio();
@@ -121,14 +114,12 @@ public class InfoAlbero extends AppCompatActivity {
 					poni( getText(R.string.gedcom), h.getGedcomVersion().getVersion() );
 					poni( getText(R.string.form), h.getGedcomVersion().getForm() );
 				}
-				//if( h.getDestination() != null )
 				poni( getText(R.string.destination), h.getDestination() );
 				spazio();
 				if( h.getDateTime() != null ) {
 					poni( getText(R.string.date), h.getDateTime().getValue() );
 					poni( getText(R.string.time), h.getDateTime().getTime() );
 				}
-				//+ "\nRadice: " + U.essenza(gc.getPerson(U.valoreTag(h.getExtensions(), "_ROOT")));
 				spazio();
 				for( Estensione est : U.trovaEstensioni(h) ) {	// ogni estensione nella sua riga
 					poni( est.nome, est.testo );
@@ -197,13 +188,10 @@ public class InfoAlbero extends AppCompatActivity {
 			genMin = gen;
 		// aggiunge l'estensione per indicare che è passato da questa Persona
 		p.putExtension( "gen", gen );
-		//s.l( "["+ p.getExtension("gen") +"] "+ gen +" "+ U.essenza(p) );
 		// se è un capostipite va a contare le generazioni di discendenti
 		if( p.getParentFamilies(gc).isEmpty() )
 			discendiGenerazioni( p, gc, gen );
 		for( Family f : p.getParentFamilies(gc) ) {
-			/*if( !f.getHusbands(gc).isEmpty() || !f.getWives(gc).isEmpty() )	// se c'è almeno un genitore
-				gen--;*/
 			// intercetta eventuali fratelli del capostipite
 			if( f.getHusbands(gc).isEmpty() && f.getWives(gc).isEmpty() ) {
 				for( Person frate : f.getChildren(gc) )
@@ -224,7 +212,6 @@ public class InfoAlbero extends AppCompatActivity {
 		if( gen > genMax )
 			genMax = gen;
 		p.putExtension( "gen", gen );
-		//s.l( "\t{"+ p.getExtension("gen") +"} "+ gen +" "+ U.essenza(p) );
 		for( Family fam : p.getSpouseFamilies(gc) ) {
 			// individua anche la famiglia dei coniugi
 			for( Person moglie : fam.getWives(gc) )
@@ -233,7 +220,6 @@ public class InfoAlbero extends AppCompatActivity {
 			for( Person marito : fam.getHusbands(gc) )
 				if( marito.getExtension("gen") == null )
 					risaliGenerazioni( marito, gc, gen );
-
 			for( Person figlio : fam.getChildren(gc) )
 				discendiGenerazioni( figlio, gc, gen+1 );
 		}

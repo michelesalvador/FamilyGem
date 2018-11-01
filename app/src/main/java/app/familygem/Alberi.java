@@ -51,18 +51,10 @@ public class Alberi extends AppCompatActivity {
         setContentView( R.layout.alberi );
         lista = findViewById( R.id.lista_alberi );
 
-        //String[] nomiFile = getActivity().getFilesDir().list();
         if( Globale.preferenze.alberi != null ) {
 
             // Lista degli alberi genealogici
             alberelli = new ArrayList<>();
-            /*for( Cassetto alb : Globale.preferenze.alberi) {
-                Map<String,String> datum = new HashMap<>(3);
-				datum.put( "id", String.valueOf( alb.id ) );
-                datum.put( "titolo", alb.nome );
-                datum.put( "dati", alb.individui + " individui - "+ alb.generazioni + " generazioni" );
-                alberelli.add(datum);
-            }*/
 			aggiornaLista();
 
             // Dà i dati in pasto all'adattatore
@@ -70,17 +62,13 @@ public class Alberi extends AppCompatActivity {
                     android.R.layout.simple_list_item_2,
                     new String[]{ "titolo", "dati" },
                     new int[]{ android.R.id.text1, android.R.id.text2 });
-            // Assign adapter to ListView
             lista.setAdapter(adapter);
 
             // Click su un albero della lista
             lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick( AdapterView<?> parent, View view, int position, long id ) {
-					//String nome = ((HashMap) lista.getItemAtPosition(position)).get("titolo").toString();
-					//apriJson( nome );
 					int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
-					//s.l ( id_num );
 					if( !apriJson( id_num ) )
 						return;
 	                startActivity( new Intent( Alberi.this, Principe.class ) );
@@ -156,28 +144,9 @@ public class Alberi extends AppCompatActivity {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			case 0:
-				/*try { // solo per leggere?
-					ZipFile zipFile = new ZipFile(Environment.getExternalStorageDirectory() + "/Documents/Gedcomy_backup.zip");
-				} catch( IOException e ) {
-					Toast.makeText( getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-					return false;
-				}*/
-
-				/* Soluzione per API 26
-				Map<String, String> env = new HashMap<>();
-				env.put("create", "true");
-				URI uri = URI.create( "jar:file:" + Environment.getExternalStorageDirectory() + "/Documents/Gedcomy_backup.zip" );
-				try {
-					FileSystem zipfs = FileSystems.newFileSystem(uri, env);
-					Path externalTxtFile = Paths.get("/codeSamples/zipfs/SomeTextFile.txt");
-					Path pathInZipfile = zipfs.getPath("/SomeTextFile.txt");
-					// copy a file into the zip file
-					Files.copy(externalTxtFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
-				} catch( IOException e ) { e.printStackTrace(); }*/
-
 				//getContext().getExternalFilesDir(null) + "/backup.zip";	// pubblica ma non permanente, la crea se non esiste
-				//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/Gedcomy_backup.zip";
-					// /storage/emulated/0/Documents/Gedcomy_backup.zip  richiede API 19,  non la crea se inesistente
+				//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/Family Gem backup.zip";
+					// /storage/emulated/0/Documents/Family Gem backup.zip  richiede API 19,  non la crea se inesistente
 				File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
 					// /storage/emulated/0/Documents
 				if( !cartellaDocumenti.exists() )
@@ -216,14 +185,8 @@ public class Alberi extends AppCompatActivity {
 		return true;
 	}
 
-	//AdapterView.AdapterContextMenuInfo info = null;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-		//AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		//int listPosition = info.position;      // Get Index of long-clicked item
-		//super.onCreateContextMenu(menu, v, menuInfo);
-		//menu.setHeaderTitle("Choose Action");   // Context-menu title
-		//lista = (ListView) v;
 		menu.add(0, 0, 0, R.string.tree_info );
 		menu.add(0, 1, 0, R.string.rename);
 		menu.add(0, 2, 0, R.string.find_errors);
@@ -246,10 +209,6 @@ public class Alberi extends AppCompatActivity {
 			Intent intent = new Intent( Alberi.this, InfoAlbero.class);
 			intent.putExtra( "idAlbero", idAlbero );
 			startActivity(intent);
-		/*} else if( id == 1 ) {	// Statistiche
-			Intent intent = new Intent( getActivity(), Statistiche.class);
-			intent.putExtra( "idAlbero", idAlbero );
-			startActivity(intent);*/
 		} else if( id == 1 ) {	// Rinomina albero
 			View vistaMessaggio = LayoutInflater.from( this ).inflate(R.layout.albero_nomina, lista, false );
 			AlertDialog.Builder builder = new AlertDialog.Builder( this );
@@ -258,14 +217,10 @@ public class Alberi extends AppCompatActivity {
 			nuovoNome.setText( albero.get("titolo").toString() );
 			builder.setPositiveButton( R.string.rename, new DialogInterface.OnClickListener() {
 				public void onClick( DialogInterface dialog, int id ) {
-					/*File filePrima = new File( getActivity().getFilesDir() +"/"+ albero.get("titolo") + ".json" );
-					File fileDopo = new File(getActivity().getFilesDir() +"/" + nuovoNome.getText() + ".json" );
-					filePrima.renameTo( fileDopo );*/
-					//s.l( albero.get("titolo") +" > "+ nuovoNome.getText() );
 					Globale.preferenze.rinomina( idAlbero, nuovoNome.getText().toString() );
 					aggiornaLista();
 				}
-			})	//.create().show();
+			})
 				.setNeutralButton( R.string.cancel, null );
 			AlertDialog dialog = builder.create();
 			dialog.show();
@@ -292,9 +247,7 @@ public class Alberi extends AppCompatActivity {
 			builder.setPositiveButton( R.string.delete, new DialogInterface.OnClickListener() {
 				public void onClick( DialogInterface dialog, int id ) {
 					File file = new File( getFilesDir(), idAlbero + ".json");
-					//boolean fatto =
 					file.delete();
-					//s.l( fatto +" eliminato "+ file );
 					Globale.preferenze.elimina( idAlbero );
 					aggiornaLista();
 				}
@@ -320,14 +273,12 @@ public class Alberi extends AppCompatActivity {
 					if( correggi ) {
 						p.getParentFamilyRefs().remove( pfr );
 						break;
-					} else //txt += "Family " + pfr.getRef() + " doesn't exist (" + p.getId() + ")\n";
-						errori++;
+					} else errori++;
 				} else {
 					num = 0;
 					for( ChildRef cr : fam.getChildRefs() )
 						if( cr.getRef().equals( p.getId() ) ) {
 							num++;
-							//indice = fam.getChildRefs().indexOf( cr );
 							if( num > 1 && correggi ) {
 								fam.getChildRefs().remove( cr );
 								break;
@@ -337,10 +288,7 @@ public class Alberi extends AppCompatActivity {
 						if( correggi && num == 0 ) {
 							p.getParentFamilyRefs().remove( pfr );
 							break;
-							// ChildRef new ChildRef().setRef( p.getId() );
-							// fam.getChildRefs().add(  )
-						} else //txt += "There are " + num + " refs to child " + p.getId() + " in " + fam.getId() +"\n";
-							errori++;
+						} else errori++;
 					}
 				}
 			}
@@ -350,8 +298,7 @@ public class Alberi extends AppCompatActivity {
 					if( correggi ) {
 						p.getSpouseFamilyRefs().remove( sfr );
 						break;
-					} else //txt += "Family " + sfr.getRef() + " doesn't exist (" + p.getId() + ")\n";
-						errori++;
+					} else errori++;
 				} else {
 					num = 0;
 					for( SpouseRef sr : fam.getHusbandRefs() )
@@ -374,8 +321,7 @@ public class Alberi extends AppCompatActivity {
 						if( num == 0 && correggi ) {
 							p.getSpouseFamilyRefs().remove( sfr );
 							break;
-						} else //txt += "There are " + num + " refs to spouse " + p.getId() + " in " + fam.getId() + "\n";
-							errori++;
+						} else errori++;
 					}
 				}
 			}
@@ -388,8 +334,7 @@ public class Alberi extends AppCompatActivity {
 					if( correggi ) {
 						f.getHusbandRefs().remove( sr );
 						break;
-					} else //txt += "Husband " + sr.getRef() + " doesn't exist (" + f.getId() + ")\n";
-						errori++;
+					} else errori++;
 				} else {
 					num = 0;
 					for( SpouseFamilyRef sfr : marito.getSpouseFamilyRefs() )
@@ -404,8 +349,7 @@ public class Alberi extends AppCompatActivity {
 						if( num == 0 && correggi ) {
 							f.getHusbandRefs().remove( sr );
 							break;
-						} else //txt += "There are " + num + " refs to " + f.getId() + " in " + marito.getId() + "\n";
-							errori++;
+						} else errori++;
 					}
 
 				}
@@ -416,8 +360,7 @@ public class Alberi extends AppCompatActivity {
 					if( correggi ) {
 						f.getWifeRefs().remove( sr );
 						break;
-					} else //txt += "Wife " + sr.getRef() + " doesn't exist (" + f.getId() + ")\n";
-						errori++;
+					} else errori++;
 				} else {
 					num = 0;
 					for( SpouseFamilyRef sfr : moglie.getSpouseFamilyRefs() )
@@ -432,8 +375,7 @@ public class Alberi extends AppCompatActivity {
 						if( num == 0 && correggi ) {
 							f.getWifeRefs().remove( sr );
 							break;
-						} else //txt += "There are " + num + " refs to " + f.getId() + " in " + moglie.getId() + "\n";
-							errori++;
+						} else errori++;
 					}
 				}
 			}
@@ -443,8 +385,7 @@ public class Alberi extends AppCompatActivity {
 					if( correggi ) {
 						f.getChildRefs().remove( cr );
 						break;
-					} else //txt += "Child " + cr.getRef() + " doesn't exist (" + f.getId() + ")\n";
-						errori++;
+					} else errori++;
 				} else {
 					num = 0;
 					for( ParentFamilyRef pfr : figlio.getParentFamilyRefs() )
@@ -459,29 +400,19 @@ public class Alberi extends AppCompatActivity {
 						if( num == 0 && correggi ) {
 							f.getChildRefs().remove( cr );
 							break;
-						} else //txt += "There are " + num + " refs to " + f.getId() + " in " + figlio.getId() + "\n";
-							errori++;
+						} else errori++;
 					}
 				}
 			}
 		}
 		if( !correggi ) {
 			AlertDialog.Builder dialog = new AlertDialog.Builder( this );
-			//dialog.setMessage( txt.isEmpty() ? getText(R.string.all_ok) : txt );
 			dialog.setMessage( errori==0 ? getText(R.string.all_ok) : getString(R.string.errors_found,errori) );
-			//if( !txt.isEmpty() ) {
 			if( errori > 0 ) {
 				dialog.setPositiveButton( R.string.correct, new DialogInterface.OnClickListener() {
 					public void onClick( DialogInterface dialogo, int i ) {
 						dialogo.cancel();
 						Gedcom gcCorretto = trovaErrori( idAlbero, true );
-						/*try {
-							FileUtils.writeStringToFile(
-									new File( getContext().getFilesDir(), idAlbero + ".json" ),
-									new JsonParser().toJson( gcCorretto ) );
-						} catch( IOException e ) {
-							Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-						}*/
 						U.salvaJson( gcCorretto, idAlbero );
 						trovaErrori( idAlbero, false );	// riapre per ammirere il risultato
 					}

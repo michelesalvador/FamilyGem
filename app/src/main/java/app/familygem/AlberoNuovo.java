@@ -53,7 +53,6 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 public class AlberoNuovo extends AppCompatActivity {
 
 	boolean permessoContatti;
-	boolean permessoScrittura;
 
     @Override
     protected void onCreate( Bundle stato ) {
@@ -85,7 +84,6 @@ public class AlberoNuovo extends AppCompatActivity {
 			            int num = Globale.preferenze.max() + 1;
 			            File fileJson = new File( getFilesDir(), num + ".json" );
 			            Globale.gc = new Gedcom();
-			            s.l( "CHIAMA creaTestata " + permessoContatti );
 						Globale.gc.setHeader( creaTestata( fileJson.getName(), permessoContatti ) ); //.getAbsolutePath()
 			            Globale.gc.createIndexes();
 			            JsonParser jp = new JsonParser();
@@ -95,20 +93,11 @@ public class AlberoNuovo extends AppCompatActivity {
 				            Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 				            e.printStackTrace();
 			            }
-			            //s.l( num +" = "+ jp.toJson(gc) );
-
 			            Globale.preferenze.aggiungi( new Armadio.Cassetto(
 					            num, nuovoNome.getText().toString(), null, 0, 0, null, null ));
 			            Globale.preferenze.idAprendo = num;
 			            Globale.preferenze.salva();
 			            Principe.arredaTestataMenu();
-
-			           // Snackbar.make( vista, "Creato un nuovo albero ", Snackbar.LENGTH_SHORT).show();	// <---- Non compare...
-
-			            /*//U.editaIndividuo( AlberoNuovo.this, "ALBERO_NUOVO", 0, null );
-		                Intent intento =  new Intent( AlberoNuovo.this, EditaIndividuo.class );
-		                intento.putExtra( "idIndividuo", "ALBERO_NUOVO" );
-		                startActivity( intento );*/
 			            startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
 		            }
 	            }).setNeutralButton( R.string.cancel, null );
@@ -125,7 +114,6 @@ public class AlberoNuovo extends AppCompatActivity {
 				    ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 5641 );
 			    else if( perm == PackageManager.PERMISSION_GRANTED )
 				    scaricaEsempio();
-		    	//Toast.makeText( getBaseContext(), "Permesso di scrittura non concesso.", Toast.LENGTH_LONG ).show();*/
 		    }
 	    });
 
@@ -163,7 +151,7 @@ public class AlberoNuovo extends AppCompatActivity {
     void scaricaEsempio() {
 	    // Scarica il file zip nella cartella Download
 	    String url = "https://drive.google.com/uc?export=download&id=19AR8RvROkxPwfdk1hCjNlyhnKGNfEin7";
-	    //String url = "https://www.familygem.app/trees/the_simpsons.zip"; lento e fallimentare
+	    //String url = "https://www.familygem.app/trees/the_simpsons.zip"; // singhiozzante e fallimentare
 	    final String percorsoZip = getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS) + "/the_Simpsons.zip";
 	    DownloadManager gestoreScarico = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 	    DownloadManager.Request richiesta = new DownloadManager.Request( Uri.parse( url ) )
@@ -180,10 +168,8 @@ public class AlberoNuovo extends AppCompatActivity {
 			    File zipScaricato = new File( percorsoZip );
 			    if( zipScaricato.exists() ){
 				    // Decomprime il file zip nella memoria esterna e cartella col numero dell'albero
-				    //s.l( "SCARIATOOOOOOOOOOOOO  " + percorsoZip );
 				    int numAlbero = Globale.preferenze.max() + 1;
 				    String percorsoImmagini = getExternalFilesDir(null) + "/" + numAlbero;
-				    //s.l( "percorsoImmagini = " + percorsoImmagini );
 				    File dirImmagini = new File( percorsoImmagini );
 				    if( !dirImmagini.exists() )
 					    dirImmagini.mkdir();
@@ -208,7 +194,6 @@ public class AlberoNuovo extends AppCompatActivity {
 					    zipScaricato.delete();
 				    } catch( Exception e ) {
 					    Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-					    //e.printStackTrace();
 				    }
 				    // Crea la voce nelle preferenze e apre l'albero
 				    Globale.preferenze.aggiungi( new Armadio.Cassetto( numAlbero, "The Simpsons", percorsoImmagini, 29, 10, "I1",null ) );
@@ -224,7 +209,7 @@ public class AlberoNuovo extends AppCompatActivity {
     }
 
     // Importa un file Gedcom scelto col file manager
-	// Todo: aspetta un attimo, non sarebbe meglio usare Gedcom2Json ?
+	// ToDo: aspetta un attimo, non sarebbe meglio usare Gedcom2Json ?
     @Override
     protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
         if( resultCode == RESULT_OK && requestCode == 630 ){
@@ -240,13 +225,9 @@ public class AlberoNuovo extends AppCompatActivity {
 				if( percorso.lastIndexOf('/') > 0 ) {	// se è un percorso completo del file gedcom
 					// Apre direttamente il file ged
 					fileGedcom = new File( percorso );
-					/* Percorso della cartella da cui ha caricato il gedcom*/
+					// Percorso della cartella da cui ha caricato il gedcom
 					percorsoCartella = fileGedcom.getParent();
-					//Globale.salvatore.putString( "cartella_principale", percorsoCartella ).commit();
-					//Globale.preferenze.alberoAperto().cartella = percorsoCartella;
-					//System.out.println("percorsoCartella: " + percorsoCartella);
 					nomeAlbero = fileGedcom.getName();
-							//uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1);
 				}
 				else {	// è solo il nome del file 'famiglia.ged'
 					// Copia il contenuto del Gedcom in un file temporaneo
@@ -268,8 +249,6 @@ public class AlberoNuovo extends AppCompatActivity {
 				// Salva il file Json
 				if( nomeAlbero.lastIndexOf('.') > 0 )
 					nomeAlbero = nomeAlbero.substring(0, nomeAlbero.lastIndexOf('.'));
-				//System.out.println( getFilesDir() +"  "+ nomeAlbero );
-				//PrintWriter pw = new PrintWriter(getFilesDir() + "/" + nomeAlbero + ".json");
 				PrintWriter pw = new PrintWriter( getFilesDir() + "/" + nuovoNum + ".json" );
 				JsonParser jp = new JsonParser();
 				pw.print( jp.toJson(gc) );
@@ -291,12 +270,10 @@ public class AlberoNuovo extends AppCompatActivity {
 	    if( resultCode == RESULT_OK && requestCode == 219 ){
         	//s.l( "data.getDataString() = " + data.getDataString() );
 			try {
-			    //ZipInputStream zis = new ZipInputStream( new FileInputStream( data.getDataString() ));
 				ZipInputStream zis = new ZipInputStream( getContentResolver().openInputStream( data.getData() ) );
-			    ZipEntry zipEntry; // = zis.getNextEntry();
+			    ZipEntry zipEntry;
 				int len;
 				byte[] buffer = new byte[1024];
-			   // while( zipEntry != null){
 				while( (zipEntry = zis.getNextEntry()) != null ) {
 				    File newFile = new File( getFilesDir(), zipEntry.getName() );
 				    FileOutputStream fos = new FileOutputStream(newFile);
@@ -304,7 +281,6 @@ public class AlberoNuovo extends AppCompatActivity {
 					    fos.write(buffer, 0, len);
 				    }
 				    fos.close();
-				   // zipEntry = zis.getNextEntry();
 			    }
 			    zis.closeEntry();
 			    zis.close();
@@ -317,7 +293,6 @@ public class AlberoNuovo extends AppCompatActivity {
     }
 
 	// Crea l'intestazione standard per questa app
-	;
 	static Header creaTestata( String nomeFile, boolean permessoContatti ) {
 		Header testa = new Header();
 		Generator app = new Generator();
@@ -350,16 +325,6 @@ public class AlberoNuovo extends AppCompatActivity {
 		testa.setLanguage( loc.getDisplayLanguage( Locale.ENGLISH ) );    // ok prende la lingua di sistema in inglese, non nella lingua locale
 		return testa;
 	}
-
-	/*// Controllo permessi accordati
-	static boolean permessi( AppCompatActivity attivita ) {
-		if( ContextCompat.checkSelfPermission(attivita,Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED ) {
-			ActivityCompat.requestPermissions( attivita, new String[]{Manifest.permission.READ_CONTACTS}, 6047 );
-
-			return false;
-		}
-		return true;
-	}*/
 
 	// Freccia indietro nella toolbar come quella hardware
 	@Override

@@ -16,8 +16,6 @@ public class VistaTesto extends AppCompatTextView {
 	@Override
 	protected void onMeasure( int widthSpec, int heightSpec ) {
 		int widthMode = MeasureSpec.getMode(widthSpec);
-
-		// if wrap_content
 		if (widthMode == MeasureSpec.AT_MOST) {
 			Layout layout = getLayout();
 			if (layout != null) {

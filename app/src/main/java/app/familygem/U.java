@@ -106,7 +106,6 @@ public class U {
 	public static String nomeCognome( Name n ) {
 		String completo = "";
 		String grezzo = n.getValue().trim();
-		//s.l( grezzo +  "  indexOf('/') = " + grezzo.indexOf('/') + "  lastindexOf'/' = "+ grezzo.lastIndexOf('/') + "  length() = " + grezzo.length() );
 		if( grezzo.indexOf('/') > -1 ) // Se c'è un cognome tra '/'
 			completo = grezzo.substring( 0, grezzo.indexOf('/') ).trim();
 		if (n.getNickname() != null)
@@ -189,7 +188,6 @@ public class U {
 						misura = " giorni";
 					}
 				}
-				//anni += "\n" + nascita.toString() +" "+ fine.toString();
 				if( eta >= 0 )
 					anni += "  (" + eta + misura + ")";
 				else
@@ -252,7 +250,6 @@ public class U {
 			if( giorno < 1 || giorno > 31)
 				giorno = 1;
 		}
-		//System.out.printf( "%s %s %s\n", giorno, mese, anno);
 		LocalDate data = null;
 		try {
 			data = new LocalDate( anno, mese, giorno ); // ad esempio '29 febbraio 1635' dà errore
@@ -261,38 +258,6 @@ public class U {
 		}
 		return data;
 	}
-
-	/* ELIMINABILE
-	static String tuttiTag;
-	@Deprecated
-	public static String trovaEstensioni( Map<String,Object> mappaEstensioni ) {
-		tuttiTag = "";
-		for( Map.Entry<String,Object> estensione : mappaEstensioni.entrySet() ) {
-			if( estensione.getKey().equals("folg.more_tags") ) {
-				@SuppressWarnings("unchecked")
-				List<GedcomTag> listaTag = (ArrayList<GedcomTag>) estensione.getValue();
-				for (GedcomTag tag : listaTag) {
-					scriviTag(tag);
-				}
-			}
-		}
-		if( tuttiTag.endsWith( "\n" ) )
-			tuttiTag = tuttiTag.substring( 0, tuttiTag.length()-1 );
-		return tuttiTag;
-	}
-	// Costruisce un testo con tutti i tag
-	@Deprecated
-	static void scriviTag( GedcomTag pacco ) {
-		tuttiTag += pacco.getTag() +": ";
-		if( pacco.getValue() != null )
-			tuttiTag += pacco.getValue() +"\n";
-		else if( pacco.getId() != null )
-			tuttiTag += pacco.getId() +"\n";
-		else if( pacco.getRef() != null )
-			tuttiTag += pacco.getRef() +"\n";
-		for( GedcomTag unPezzo : pacco.getChildren() )
-			scriviTag( unPezzo );
-	}*/
 
 	// Restituisce la lista di estensioni
 	@SuppressWarnings("unchecked")
@@ -357,14 +322,13 @@ public class U {
 		return null;
 	}
 
-	// Aggiorna il REF di un tag nelle estensioni di un oggetto:  tag:"_ROOT"  ref:"I123"
+	/* Aggiorna il REF di un tag nelle estensioni di un oggetto:  tag:"_ROOT"  ref:"I123"
 	@SuppressWarnings("unchecked")
 	static void aggiornaTag( Object obj, String nomeTag, String ref ) {
 		String chiave = "gedcomy_tags";
 		List<GedcomTag> listaTag = new ArrayList<>();
 		boolean aggiungi = true;
 		Map<String,Object> mappaEstensioni = ((ExtensionContainer) obj).getExtensions();	// ok
-		//s.l( "Map<String,Object> <"+ mappaEstensioni +">" );
 		if( !mappaEstensioni.isEmpty() ) {
 			chiave = (String) mappaEstensioni.keySet().toArray()[0];	// chiave = 'folg.more_tags'
 			listaTag = (ArrayList<GedcomTag>) mappaEstensioni.get( chiave );
@@ -383,38 +347,8 @@ public class U {
 			listaTag.add( tag );
 		}
 		((ExtensionContainer) obj).putExtension( chiave, listaTag );
-	}
-
-	/* Deprecabile in favore di object.getAllNotes(gc)
-	@SuppressWarnings("unchecked")
-	static List<Note> trovaNote( Object cosa, Gedcom gc ) {
-		List<Note> listaNote = new ArrayList<>();
-		try { listaNote = (List<Note>) cosa.getClass().getMethod("getNotes").invoke(cosa);
-		} catch (IllegalAccessException|IllegalArgumentException|InvocationTargetException|NoSuchMethodException|SecurityException e)
-		{ e.printStackTrace(); }
-		for( Note nota : listaNote ) {
-			//s.l( nota.getValue() );
-			trovaCitazFonti( nota );
-		}
-		return listaNote;
 	}*/
 
-	/* Deprecato in favore di object.getSourceCitations();
-	@SuppressWarnings("unchecked")
-	static List<SourceCitation> trovaCitazFonti( Object cosa ) {
-		List<SourceCitation> listaFonti = null;
-		try {
-			listaFonti = (List<SourceCitation>) cosa.getClass().getMethod("getSourceCitations").invoke(cosa);
-		} catch (NoSuchMethodException|SecurityException|IllegalAccessException|IllegalArgumentException|InvocationTargetException e) 
-			{ e.printStackTrace(); }
-		/*for( SourceCitation citazione : listaFonti ) {
-			if( citazione.getSource(gc) != null )
-				s.l( "\t"+ citazione.getSource(gc).getTitle() );
-			else
-				s.l( "\t"+ citazione.getValue() );	// per SOUR note
-		}* /
-		return listaFonti;
-	}*/
 
 	// Riceve un Uri e cerca di restituire il percorso del file
 	public static String uriPercorsoFile( Uri uri ) {
@@ -451,7 +385,6 @@ public class U {
 							if( luogo.getAbsolutePath().indexOf("/Android") > 0 ) {
 								String dir = luogo.getAbsolutePath().substring(0, luogo.getAbsolutePath().indexOf("/Android"));
 								File trovando = new File(dir, split[1]);
-								//s.l( trovando );
 								// potrebbe capitare che in due schede SD c'è lo stesso percorso e nome file
 								// l'utente sceglie il secondo e gli arriva il primo.
 								if( trovando.exists() )
@@ -485,72 +418,32 @@ public class U {
 		String[] projection = { cosaCercare };
 		Cursor cursore = Globale.contesto.getContentResolver().query( uri, projection, null, null, null);
 		if( cursore != null && cursore.moveToFirst() ) {
-			//int indice = cursore.getColumnIndexOrThrow( cosaCercare );
 			String nomeFile = cursore.getString( 0 );
 			cursore.close();
-			s.l("cursore = " + nomeFile );
 			return nomeFile;
 		}
 		return null;
 	}
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
-	public static String percorsoMedia( Media m ) {
+	static String percorsoMedia( Media m ) {
 		if( m.getFile() != null ) {
 			String nome = m.getFile().replace("\\", "/");
 			// Percorso FILE (quello nel gedcom)
 			if( new File(nome).isFile() )
 				return nome;
-			String cartella =
-					//Globale.preferenze.get( "main_dir", "/storage/external_SD/famiglia") + File.separator;
-					//Globale.preferenze.getString( "cartella_principale", null ) + File.separator;
-					Globale.preferenze.alberoAperto().cartella + '/';
+			String cartella = Globale.preferenze.alberoAperto().cartella + '/';
 			// Cartella del .ged + percorso FILE
 			String percorsoRicostruito = cartella + nome;
-			//s.l( "percorsoRicostruito: " + percorsoRicostruito );
 			if( new File(percorsoRicostruito).isFile() )
 				return percorsoRicostruito;
 			// File nella stessa cartella del gedcom
 			String percorsoFile = cartella + new File(nome).getName();
-			//s.l( "percorsoFile: " + percorsoFile );
 			if( new File(percorsoFile).isFile() )
 				return percorsoFile;
 		}
 		return null;
 	}
-
-	/* Carica asincronicamente una immagine da internet
-	static class caricaMedia extends AsyncTask<String, ImageView, Bitmap>{
-		ImageView vistaImmagine;
-		caricaMedia(ImageView vistaImmagine) {
-			this.vistaImmagine = vistaImmagine;
-		}
-		@Override
-		protected Bitmap doInBackground(String... params) {
-			Bitmap bitmap = null;
-			try {
-				URL url = new URL( params[0] );
-				InputStream inputStream = url.openConnection().getInputStream();
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				options.inJustDecodeBounds = true;
-				BitmapFactory.decodeStream( inputStream, null, options );
-				if( options.outHeight*options.outWidth > 90*90 )
-					options.inSampleSize = options.outHeight / 90;
-				inputStream = url.openConnection().getInputStream();
-				options.inJustDecodeBounds = false;
-				bitmap = BitmapFactory.decodeStream( inputStream, null, options );
-			} catch( IOException e ) {
-				e.printStackTrace();
-			}
-			return bitmap;
-		}
-		@Override
-		protected void onPostExecute(Bitmap bitmap){
-			if( bitmap != null ) {
-				vistaImmagine.setImageBitmap(bitmap);
-			}
-		}
-	}*/
 
 	// Scarica asincronicamente l'immagine da internet
 	static class zuppaMedia extends AsyncTask<String, ImageView, Bitmap> {
@@ -569,35 +462,13 @@ public class U {
 				BitmapFactory.Options opzioni = new BitmapFactory.Options();
 				opzioni.inJustDecodeBounds = true;	// prende solo le info dell'immagine senza scaricarla
 				BitmapFactory.decodeStream( inputStream, null, opzioni );
-				//s.l( params[0] +"\n"+ "OPZIONI = "+ opzioni.outMimeType +"  "+ opzioni.outWidth );
 				// Se non lo trova cerca l'immagine principale in una pagina internet
 				if( opzioni.outWidth == -1 ) {
 					Connection connessione = Jsoup.connect(params[0]);
 					//if (connessione.equals(bitmap)) {    // TODO: verifica che un address sia associato all'hostname
-					Document doc;
-					//try {
-						doc = connessione.get();
-					/*} catch( MalformedURLException | UnknownHostException | SocketTimeoutException e ) {
-						System.err.println("MalformedURLException | UnknownHostException | SocketTimeoutException");
-						e.printStackTrace(); // I'd rather (re)throw it though.
-						vistaImmagine.setRotation( 90 );
-						return null;
-					}*/
+					Document doc = connessione.get();
 					List<Element> lista = doc.select("img");
 					if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
-						//vistaImmagine.setImageResource( 0 );
-						//vistaImmagine.setBackgroundResource( R.drawable.icona_mondo );
-						/* ELIMINABILE
-						LayoutInflater inflater = (LayoutInflater)vistaImmagine.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-						View inflated = inflater.inflate( R.layout.media_mondo, null );
-						RelativeLayout frameLayout = inflated.findViewById( R.id.icona) ;
-						((TextView)frameLayout.findViewById( R.id.icona_testo )).setText( url.getProtocol() );
-						frameLayout.setDrawingCacheEnabled(true);
-						frameLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-								View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-						frameLayout.layout(0, 0, frameLayout.getMeasuredWidth(), frameLayout.getMeasuredHeight() );
-						frameLayout.buildDrawingCache(true );
-						return frameLayout.getDrawingCache();*/
 						vistaImmagine.setTag( R.id.tag_file_senza_anteprima, true );	// Usato da Immagine.java
 						return generaIcona( vistaImmagine, R.layout.media_mondo, url.getProtocol() );	// ritorna una bitmap
 					}
@@ -608,7 +479,6 @@ public class U {
 					Element imgGrande = null;
 					Element imgAltLungo = null;
 					for( Element img : lista ) {
-						//s.l( img.attr("alt") +"  "+ img.attr("width") + "x" + img.attr("height") );
 						int larga, alta;
 						if (img.attr("width").isEmpty()) larga = 0;
 						else larga = Integer.parseInt(img.attr("width"));
@@ -626,20 +496,15 @@ public class U {
 							imgAltLungo = img;
 							maxLunghezzaAlt = img.attr( "alt" ).length();
 						}
-						//s.l( img.attr("alt") +"  "+ larga + "x" + alta );
 					}
 					String percorso = null;
 					if( imgGrandeConAlt != null ) {
-						//s.l( "imgGrandeConAlt = " + imgGrandeConAlt.attr( "alt" ) + "  " + imgGrandeConAlt.attr( "width" ) + "x" + imgGrandeConAlt.attr( "height" ) );
 						percorso = imgGrandeConAlt.absUrl( "src" );  //absolute URL on src
 					} else if( imgGrande != null ) {
-						//s.l( "imgGrande = "+imgGrande.attr("alt") +"  "+ imgGrande.attr("width") + "x" + imgGrande.attr("height") );
 						percorso = imgGrande.absUrl( "src" );
 					} else if( imgAltLungo != null ) {
-						//s.l( "imgAltLungo = "+imgAltLungo.attr("alt") +"  "+ imgAltLungo.attr("width") + "x" + imgAltLungo.attr("height") );
 						percorso = imgAltLungo.absUrl( "src" );
 					}
-					//s.l( "absoluteUrl " + percorso );
 					url = new URL(percorso);
 					inputStream = url.openConnection().getInputStream();
 					BitmapFactory.decodeStream(inputStream, null, opzioni);
@@ -650,19 +515,13 @@ public class U {
 				inputStream = url.openConnection().getInputStream();
 				opzioni.inJustDecodeBounds = false;	// Scarica l'immagine
 				bitmap = BitmapFactory.decodeStream( inputStream, null, opzioni );
-			} catch( IOException | IllegalArgumentException e ) {
-				/*s.l( ">>>>>>>>>>>>>>>>>>>>>>>>>> IOException | IllegalArgumentException : " );
-				if( url != null) s.l( ">>>>>>>>>>>>>>>>>> " + url.toString() );
-				e.printStackTrace();*/
+			} catch( Exception e ) {
 				return null;
 			}
 			return bitmap;
 		}
 		@Override
 		protected void onPostExecute( Bitmap bitmap ) {
-			//((TextView)findViewById (R.id.myTextView)).setText (result);
-			//s.l( "RISULTAtO = " + bitmap.getByteCount() );
-			//((ImageView)findViewById(R.id.immagine)).setImageBitmap( bitmap );
 			if( bitmap != null ) {
 				vistaImmagine.setImageBitmap(bitmap);
 				vistaImmagine.setTag( R.id.tag_percorso, url.toString() );	// lo usa Immagine.java
@@ -690,33 +549,17 @@ public class U {
 					int largaOriginale = opzioni.outWidth;
 					if( largaOriginale > vista.getWidth() && vista.getWidth() > 0 )
 						opzioni.inSampleSize = largaOriginale / vista.getWidth();
-					//if( opzioni.outHeight > vista.getWidth() )
-						//opzioni.inSampleSize = opzioni.outHeight / vista.getWidth();
 					opzioni.inJustDecodeBounds = false;	// carica immagine
 					Bitmap bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Riesce a ricavare un'immagine
 					//bitmap = ThumbnailUtils.extractThumbnail( bitmap, 30, 60, ThumbnailUtils.OPTIONS_RECYCLE_INPUT );
 						// Fico ma ritaglia l'immagine per farla stare nelle dimensioni date. La quarta opzione non l'ho capita
 					if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
 						|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
-						//vista.setImageResource( R.drawable.anna_salvador );	// ok
-						/*vista.setMaxWidth( vista.getHeight() );	// inefficace
-						vista.setImageResource( 0 );	// ok nasconde il manichino
-						vista.setBackgroundResource( R.drawable.icona_file );*/	// ok
-						/* Tentativo di mettere un layout nell'imageView
-						//RelativeLayout relativeLayout = new RelativeLayout( Globale.contesto );
-						RelativeLayout relativeLayout = (RelativeLayout)vista.getParent();
-						LayoutInflater inflater = (LayoutInflater)Globale.contesto.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-						View iconaLayout = inflater.inflate(R.layout.media_icona, relativeLayout, true );
-						Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-						Canvas canvas = new Canvas(bitmap);
-						relativeLayout.draw(canvas);
-						vista.setImageBitmap( bitmap );*/
 						// Magari è un video
 						bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
 						if( bitmap == null ) {
 							String formato = med.getFormat();
 							if( formato == null )
-								//formato = med.getFile().substring( med.getFile().lastIndexOf( '.' )+1, med.getFile().length() );
 								formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
 							bitmap = generaIcona( vista, R.layout.media_file, formato );
 						}
@@ -724,14 +567,6 @@ public class U {
 					}
 					vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
 					vista.setImageBitmap( bitmap );
-					/*s.l( "-----------------------\n"
-						+ percorso
-						+ "\nopzioni.outMimeType = " + opzioni.outMimeType
-						+ "\nbitmap.getWidth() = " + bitmap.getWidth()
-						+ "\nbitmap.getHeight() = " + bitmap.getHeight()
-						+ "\nopzioni.outWidth = "+ largaOriginale
-						+ "\nvista.getWidth() = " + vista.getWidth()
-						+ "\nopzioni.inSampleSize = " + opzioni.inSampleSize );*/
 				} else if( med.getFile() != null )	// Cerca il file in internet
 					new U.zuppaMedia( vista ).execute( med.getFile() );
 				return true;
@@ -772,22 +607,6 @@ public class U {
 			}
 		if( !trovatoQualcosa )
 			img.setVisibility( View.GONE );
-		//img.setImageIcon(R.drawable.defunto);
-	}
-
-	 @Deprecated // ?
-	static void editaIndividuo( Context contesto, String id, int relazione ) {
-		//Globale.individuo = id;
-		Intent intento = new Intent( contesto, EditaIndividuo.class );
-		intento.putExtra( "idIndividuo", id );
-		intento.putExtra( "relazione", relazione );
-		//intento.putExtra( "frammento", (Serializable)frammento );
-		//Globale.frammentoPrecedente = frammento;
-		/*Bundle bundle = new Bundle();
-		bundle.putString( "idIndividuo", id );
-		bundle.putInt( "relazione", relazione );
-		bundle.putSerializable( "frammento", (Serializable)frammento );*/
-		contesto.startActivity( intento );
 	}
 
 	// aggiunge a un Layout una generica voce titolo-testo
@@ -798,7 +617,6 @@ public class U {
 		((TextView)vistaPezzo.findViewById( R.id.fatto_titolo )).setText( tit );
 		TextView vistaTesto = vistaPezzo.findViewById( R.id.fatto_testo );
 		if( cosa == null ) vistaTesto.setVisibility( View.GONE );
-		//else if( cosa.isEmpty() ) vistaTesto.setVisibility( View.GONE );
 		else {
 			vistaTesto.setText( cosa );
 			((TextView)vistaPezzo.findViewById( R.id.fatto_edita )).setText( cosa );
@@ -806,26 +624,7 @@ public class U {
 		((Activity)scatola.getContext()).registerForContextMenu( vistaPezzo );
 	}
 
-	/*Sostituito da mettiIndividuo
-	static void arredaIndi( View scheda, Person persona, String ruolo, String anni, String luoghi ) {
-		TextView vistaRuolo = scheda.findViewById( R.id.indi_ruolo );
-		if( ruolo.isEmpty() ) vistaRuolo.setVisibility( View.GONE );
-		else vistaRuolo.setText( ruolo );
-		TextView vistaNome = scheda.findViewById( R.id.indi_nome );
-		String nome = epiteto(persona);
-		if( nome.isEmpty() ) vistaNome.setVisibility( View.GONE );
-		else vistaNome.setText( nome );
-		TextView vistaAnni = scheda.findViewById( R.id.indi_dettagli );
-		if( anni.isEmpty() ) vistaAnni.setVisibility( View.GONE );
-		else vistaAnni.setText( anni );
-		TextView vistaLuoghi = scheda.findViewById( R.id.indi_dettagli );
-		if( luoghi.isEmpty() ) vistaLuoghi.setVisibility( View.GONE );
-		else vistaLuoghi.setText( luoghi );
-		U.unaFoto( persona, (ImageView)scheda.findViewById(R.id.indi_foto) );
-		if( !U.morto(persona) )
-			scheda.findViewById( R.id.indi_lutto ).setVisibility( View.GONE );
-	}*/
-
+	// Compone il testo coi dettagli di un individuo
 	static void dettagli( Person tizio, TextView vistaDettagli ) {
 		String anni = U.dueAnni( tizio, true );
 		String luoghi = Anagrafe.dueLuoghi( tizio );
@@ -863,29 +662,8 @@ public class U {
 		if( U.sesso(persona) == 2 )
 			vistaIndi.findViewById(R.id.indi_carta).setBackgroundResource( R.drawable.casella_femmina );
 		vistaIndi.setTag( persona.getId() );
-		//registerForContextMenu(vistaIndi);    // non qui, famolo fuori
 		return vistaIndi;
 	}
-
-	/*@Deprecated
-	public static void mettiNota( final LinearLayout scatola, final Note nota, boolean dettagliato ) {
-		View vistaNota = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_nota, scatola, false);
-		scatola.addView( vistaNota );
-		((TextView)vistaNota.findViewById( R.id.nota_testo )).setText( nota.getValue() );
-		int quanteCitaFonti = nota.getSourceCitations().size();
-		TextView vistaCitaFonti = vistaNota.findViewById( R.id.nota_fonti );
-		if( quanteCitaFonti > 0 && dettagliato ) vistaCitaFonti.setText( String.valueOf(quanteCitaFonti) );
-		else vistaCitaFonti.setVisibility( View.GONE );
-		if( dettagliato )
-			vistaNota.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View v ) {
-					//Globale.nota = nota;
-					//apriDettaglio( scatola.getContext(), Nota.class, nota );
-					Ponte.manda( nota );
-					scatola.getContext().startActivity( new Intent( scatola.getContext(), Nota.class) );
-				}
-			} );
-	}*/
 
 	// Tutte le note di un oggetto
 	public static void mettiNote( final LinearLayout scatola, final Object contenitore, boolean dettagli ) {
@@ -900,7 +678,6 @@ public class U {
 			if( dettagli ) {
 				vistaNota.setTag( R.id.tag_oggetto, nota );
 				vistaNota.setTag( R.id.tag_contenitore, contenitore );	// inutile. da tenere per un'eventuale Quaderno delle note
-				//if( scatola.getContext().getClass().getName().equals( "lab.gedcomy.Individuo" ) ) {
 				if( scatola.getContext() instanceof Individuo ) { // Fragment individuoEventi
 					((AppCompatActivity)scatola.getContext()).getSupportFragmentManager()
 							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )	// non garantito in futuro
@@ -940,17 +717,13 @@ public class U {
 		} else	// nota LOCALE
 			((NoteContainer)contenitore).getNotes().remove( nota );
 		vista.setVisibility( View.GONE );
-		//vista.getParent().removeView( vista ); non così
 	}
 
 
 	// Elenca tutti i media di un oggetto contenitore
 	public static void mettiMedia( LinearLayout scatola, Object contenitore, boolean dettagli ) {
-		//View vista;
 		for( Media media : ((MediaContainer)contenitore).getAllMedia( Globale.gc ) )
 			Galleria.poniMedia( scatola, contenitore, media, dettagli );
-			//if( dettagli )
-			//	((AppCompatActivity)scatola.getContext()).registerForContextMenu( vista );
 	}
 
 	// Di un oggetto inserisce le citazioni alle fonti
@@ -976,12 +749,9 @@ public class U {
 			else vistaTesto.setText( t.substring( 0, t.length() - 1 ) );
 			// Tutto il resto
 			LinearLayout scatolaAltro = vistaCita.findViewById( R.id.citazione_note );
-			//for( Note nota : citaz.getAllNotes(gc) )
 			mettiNote( scatolaAltro, citaz, false );
-			//for( Media med : citaz.getAllMedia( Globale.gc ) ) Galleria.poniMedia( scatolaAltro, med );
 			mettiMedia( scatolaAltro, citaz, false );
 			vistaCita.setTag( R.id.tag_oggetto, citaz );
-			//vistaCita.setTag( R.id.tag_contenitore, contenitore ); inutile
 			if( scatola.getContext() instanceof Individuo ) { // Fragment individuoEventi
 				( (AppCompatActivity) scatola.getContext() ).getSupportFragmentManager()
 						.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )
@@ -991,11 +761,6 @@ public class U {
 
 			vistaCita.setOnClickListener( new View.OnClickListener() {
 				public void onClick( View v ) {
-					//Globale.citazioneFonte = citaz;
-				/*Intent intento = new Intent( scatola.getContext(), CitazioneFonte.class );
-				intento.putExtra("o", new Gson().toJson( citaz ) );
-				scatola.getContext().startActivity( intento );*/
-					//apriDettaglio( scatola.getContext(), CitazioneFonte.class, citaz );
 					Ponte.manda( citaz, "oggetto" );
 					Ponte.manda( contenitore, "contenitore" );
 					scatola.getContext().startActivity( new Intent( scatola.getContext(), CitazioneFonte.class ) );
@@ -1004,29 +769,16 @@ public class U {
 		}
 	}
 
-	/*@Deprecated
-	static void apriDettaglio( Context contesto, Class classe, Object oggetto ) {
-		Intent intento = new Intent( contesto, classe );
-		intento.putExtra("o", new Gson().toJson( oggetto ) );
-		contesto.startActivity( intento );
-	}*/
-
 	// usato da dettaglio.CitazioneFonte e dettaglio.Immagine
 	public static void linkaFonte( final LinearLayout scatola, final Source fonte ) {
 		View vistaFonte = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_fonte, scatola, false );
 		scatola.addView( vistaFonte );
 		((TextView)vistaFonte.findViewById( R.id.fonte_titolo )).setText( Biblioteca.titoloFonte(fonte) );
 		vistaFonte.setTag( R.id.tag_oggetto, fonte );
-		//vistaFonte.setTag( R.id.tag_contenitore, contenitore );
 		((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFonte );
 		vistaFonte.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View v ) {
-				//Intent intento = new Intent( scatola.getContext(), Archivio.class);
-				//intento.putExtra( "oggetto", "Source" );
-				//intento.putExtra( "id", f.getId() );
-				//scatola.getContext().startActivity( intento );
 				Ponte.manda( fonte, "oggetto" );
-				//Ponte.manda( Globale.gc, "contenitore" );
 				scatola.getContext().startActivity( new Intent( scatola.getContext(), Fonte.class) );
 			}
 		} );
@@ -1037,7 +789,7 @@ public class U {
 		scatola.addView( vistaPersona );
 		U.unaFoto( p, (ImageView)vistaPersona.findViewById(R.id.collega_foto) );
 		((TextView)vistaPersona.findViewById( R.id.collega_nome )).setText( U.epiteto(p) );
-		String dati = U.dueAnni(p,false);	// +"   "+ Anagrafe.dueLuoghi(p)
+		String dati = U.dueAnni(p,false);
 		TextView vistaDettagli = vistaPersona.findViewById( R.id.collega_dati );
 		if( dati.isEmpty() ) vistaDettagli.setVisibility( View.GONE );
 		else vistaDettagli.setText( dati );
@@ -1049,8 +801,6 @@ public class U {
 			vistaPersona.findViewById(R.id.collega_carta).setBackgroundResource( R.drawable.casella_femmina );
 		vistaPersona.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View v ) {
-				//Globale.individuo = p.getId();
-				//scatola.getContext().startActivity( new Intent( scatola.getContext(), Individuo.class) );
 				Intent intento = new Intent( scatola.getContext(), Individuo.class );
 				intento.putExtra( "idIndividuo", p.getId() );
 				intento.putExtra( "scheda", scheda );
@@ -1068,7 +818,6 @@ public class U {
 			String dataOra = cambi.getDateTime().getValue() + " - " + cambi.getDateTime().getTime();
 			if( dataOra.isEmpty() ) vistaTesto.setVisibility( View.GONE );
 			else vistaTesto.setText( dataOra );
-			//mettiEstensioni( scatola, cambi );
 			LinearLayout scatolaNote = vistaPezzo.findViewById( R.id.fatto_note );
 			for( Estensione altroTag : trovaEstensioni( cambi ) )
 				metti( scatolaNote, altroTag.nome, altroTag.testo );
@@ -1108,8 +857,6 @@ public class U {
 	static boolean ciSonoIndividuiCollegabili( Person piolo ) {
 		int numTotali = Globale.gc.getPeople().size();
 		int numFamili = Anagrafe.quantiFamiliari( piolo );
-		//s.l( "num Totali " + numTotali +"  num Famili " + numFamili + "   "+ (numTotali > numFamili+1)  );
 		return numTotali > numFamili+1;
 	}
-
 }
