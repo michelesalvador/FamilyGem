@@ -4,26 +4,23 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-
 import com.otaliastudios.zoom.ZoomLayout;
 
-public class DiagrammaActivity extends AppCompatActivity {
+public class Diagramma extends AppCompatActivity {
 
 	RelativeLayout scatolona;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.diagramma_activity);
+		setContentView(R.layout.diagramma );
 
 		scatolona = findViewById( R.id.diagramma_scatolona );
 

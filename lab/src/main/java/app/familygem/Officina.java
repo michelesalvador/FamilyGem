@@ -44,7 +44,7 @@ public class Officina extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.casa);
+		setContentView(R.layout.officina);
 
 		findViewById(R.id.bottone_vario).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
@@ -126,6 +126,11 @@ public class Officina extends AppCompatActivity {
 			}
 		});
 
+		findViewById(R.id.immagine).setOnClickListener( new View.OnClickListener() {
+			public void onClick(View v) {
+				startActivity( new Intent( Officina.this, Diagramma.class ) );
+			}
+		});
 	}
 
 	public class AiutoDatabaseImmagini extends SQLiteOpenHelper {
