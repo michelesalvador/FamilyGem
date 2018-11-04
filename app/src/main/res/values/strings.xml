@@ -32,6 +32,7 @@
     <string name="generations">generations</string>
     <string name="no_useful_data">Can\'t get useful data.</string>
     <string name="make_backup">Make backup</string>
+    <string name="about">About</string>
     <string name="tree_info">Info</string>
     <string name="rename">Rename</string>
     <string name="find_errors">Find errors</string>
@@ -228,10 +229,8 @@
     <string name="to">To</string>
     <string name="from_to">From… to</string>
     <string name="date_phrase">Phrase</string>
-
-    <!--   <string name=""></string>
-   <string name=""></string>
-      Altro -->
+    <!-- Altro -->
+    <string name="version_name">Version %s</string>
     <string name="done">Done</string>
     <string name="make_default">Make default</string>
     <string name="citations">Citations</string>

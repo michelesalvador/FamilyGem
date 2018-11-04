@@ -120,7 +120,6 @@ public class IndividuoFamiliari extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id == 300 ) {    // Diagramma
-			s.l( idIndividuo );
 			Globale.individuo = idIndividuo;
 			startActivity( new Intent( getContext(), Principe.class ) );
 		} else if( id == 301 ) {	// Famiglia come figlio

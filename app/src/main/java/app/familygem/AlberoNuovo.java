@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -25,18 +24,15 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.CharacterSet;
 import org.folg.gedcom.model.Gedcom;
@@ -46,9 +42,6 @@ import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.parser.JsonParser;
 import org.folg.gedcom.parser.ModelParser;
-
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
-import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class AlberoNuovo extends AppCompatActivity {
 
@@ -147,13 +140,20 @@ public class AlberoNuovo extends AppCompatActivity {
 		}
 	}
 
-	// Scarica da internet un file di esempio
+	// Scarica da internet un file zip nella cartella Download e lo decomprime
     void scaricaEsempio() {
-	    // Scarica il file zip nella cartella Download
+	    DownloadManager gestoreScarico = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+	    // Evita download multipli
+	    Cursor curso = gestoreScarico.query( new DownloadManager.Query().setFilterByStatus(DownloadManager.STATUS_RUNNING) );
+	    if( curso.moveToFirst() ) {
+		    curso.close();
+		    findViewById(R.id.bottone_scarica_esempio).setEnabled(false);
+		    return;
+	    }
 	    String url = "https://drive.google.com/uc?export=download&id=19AR8RvROkxPwfdk1hCjNlyhnKGNfEin7";
 	    //String url = "https://www.familygem.app/trees/the_simpsons.zip"; // singhiozzante e fallimentare
-	    final String percorsoZip = getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS) + "/the_Simpsons.zip";
-	    DownloadManager gestoreScarico = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+	    final String percorsoZip = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+			    + "/the_Simpsons.zip";
 	    DownloadManager.Request richiesta = new DownloadManager.Request( Uri.parse( url ) )
 			    .setTitle("The Simpsons Family Tree")
 			    .setDescription("Downloading")
@@ -161,7 +161,6 @@ public class AlberoNuovo extends AppCompatActivity {
 			    .setVisibleInDownloadsUi(false)
 			    .setDestinationUri( Uri.parse( "file://" + percorsoZip ) );
 	    gestoreScarico.enqueue( richiesta );
-	    s.l( url );
 	    BroadcastReceiver alCompletamento = new BroadcastReceiver() {
 		    @Override
 		    public void onReceive( Context contesto, Intent intento ) {
@@ -237,7 +236,7 @@ public class AlberoNuovo extends AppCompatActivity {
 					if( percorso == null ) nomeAlbero = getString( R.string.tree ) + " " + nuovoNum;
 					else nomeAlbero = percorso;
 				}
-				s.l( "fileGedcom = " + fileGedcom );
+				//s.l( "fileGedcom = " + fileGedcom );
 				// Crea l'oggetto Gedcom
 				ModelParser mp = new ModelParser();
 				Gedcom gc = mp.parseGedcom( fileGedcom );
@@ -328,15 +327,17 @@ public class AlberoNuovo extends AppCompatActivity {
 
 	// Freccia indietro nella toolbar come quella hardware
 	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
+	public boolean onOptionsItemSelected( MenuItem i ) {
 		onBackPressed();
 		return true;
 	}
 
-	// Costringe ad andare indietro ad Alberi, in particolare al primo avvio, altrimenti tornerebbe a Principe
+	// Al primo avvio tornando indietro mette l'app in background
 	@Override
 	public void onBackPressed() {
-		Intent intento = NavUtils.getParentActivityIntent( AlberoNuovo.this );
-		startActivity( intento );
+		if( Globale.preferenze.idAprendo == 0 )
+			moveTaskToBack( true );
+		else
+			super.onBackPressed();
 	}
 }

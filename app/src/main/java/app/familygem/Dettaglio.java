@@ -319,9 +319,7 @@ public class Dettaglio extends AppCompatActivity {
 	@Override
 	public void onRestart() {
 		super.onRestart();
-		s.l( "onRestart di Dettaglio " + Globale.editato );
 		if( Globale.editato ) { // rinfresca il dettaglio
-			//Globale.editato = false;
 			recreate();
 		}
 	}
@@ -505,19 +503,20 @@ public class Dettaglio extends AppCompatActivity {
 		vistaEdita.setVisibility( View.VISIBLE );
 		fab.hide();
 
-		// Se è un luogo sostituisce vistaEdita con TrovaLuogo
-		if( vistaPezzo.getTag(R.id.tag_oggetto).equals("Place") && !(vistaEdita instanceof TrovaLuogo) ) {
-			ViewGroup parent = (ViewGroup) vistaPezzo;  // todo: si potrebbe usare direttamente vistaPezzo se fosse un ViewGroup o LinearLayout anzicé View
-			int index = parent.indexOfChild( vistaEdita );
-			parent.removeView( vistaEdita );
-			vistaEdita = new TrovaLuogo( vistaEdita.getContext(), null );
-			vistaEdita.setId( R.id.fatto_edita );
-			vistaEdita.setText( vistaTesto.getText() );
-			vistaEdita.setInputType( InputType.TYPE_TEXT_FLAG_CAP_WORDS );
-			parent.addView( vistaEdita, index );
-		}
 		// Se non si tratta di una data mostra la tastiera
+		s.l( "Dettaglio edita()");
 		if( !vistaPezzo.getTag(R.id.tag_oggetto).equals("Date") ) {
+			// Se è un luogo sostituisce vistaEdita con TrovaLuogo
+			if( vistaPezzo.getTag(R.id.tag_oggetto).equals("Place") && !(vistaEdita instanceof TrovaLuogo) ) {
+				ViewGroup parent = (ViewGroup) vistaPezzo;  // todo: si potrebbe usare direttamente vistaPezzo se fosse un ViewGroup o LinearLayout anzicé View
+				int index = parent.indexOfChild( vistaEdita );
+				parent.removeView( vistaEdita );
+				vistaEdita = new TrovaLuogo( vistaEdita.getContext(), null );
+				vistaEdita.setId( R.id.fatto_edita );
+				vistaEdita.setText( vistaTesto.getText() );
+				vistaEdita.setInputType( InputType.TYPE_TEXT_FLAG_CAP_WORDS );
+				parent.addView( vistaEdita, index );
+			}
 			InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE );
 			imm.toggleSoftInput( InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY );
 		}

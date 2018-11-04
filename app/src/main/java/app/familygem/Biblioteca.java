@@ -245,7 +245,6 @@ public class Biblioteca extends Fragment {
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		s.l( item.getActionView() );
 		if( item.getItemId() == 0 ) {	// Elimina
 			// todo e le citazioni alla fonte non vanno eliminate?
 			gc.getSources().remove( gc.getSource(((TextView)vistaScelta.findViewById(R.id.biblioteca_id)).getText().toString()) );

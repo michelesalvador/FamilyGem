@@ -99,7 +99,7 @@ public class Alberi extends AppCompatActivity {
 		lista.invalidateViews();
 	}
 
-	// Apertura di un Json per editare tutto in Gedcomy
+	// Apertura di un Json per editare tutto in Family Gem
     static boolean apriJson( int id ) {
 		try {
 			File file = new File( Globale.contesto.getFilesDir(), id + ".json");
@@ -138,6 +138,7 @@ public class Alberi extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu( Menu menu ) {
 		menu.add(0,0,0, R.string.make_backup );
+		menu.add(0,1,0, R.string.about );
 		return true;
 	}
 	@Override
@@ -180,7 +181,12 @@ public class Alberi extends AppCompatActivity {
 					e.printStackTrace();
 					Toast.makeText( getBaseContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 				}
-
+				break;
+			case 1:
+				startActivity( new Intent( Alberi.this, Lapide.class) );
+				break;
+			default:
+				onBackPressed();
 		}
 		return true;
 	}

@@ -31,7 +31,12 @@
         </activity>
         <activity
             android:name=".Alberi"
-            android:label="@string/trees" />
+            android:label="@string/trees"
+            android:parentActivityName=".Principe" />
+        <activity
+            android:name=".Lapide"
+            android:label="@string/about"
+            android:parentActivityName=".Alberi" />
         <activity
             android:name="AlberoNuovo"
             android:label="@string/new_tree"

@@ -1,13 +1,13 @@
 package app.familygem;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
-
 import java.lang.reflect.Field;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
@@ -38,12 +37,13 @@ public class EditoreData extends LinearLayout {
 	String[] anniRuota = { "","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",
 			"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",
 			"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","-"	};
-	String[] paterni = { "d MMM yyy", "MMM yyy", "M yyy", "d MMM", "yyy" };
+	String[] paterni = { "d MMM yyy", "d M yyy", "MMM yyy", "M yyy", "d MMM", "yyy" };
 	String G_M_A = paterni[0];
-	String M_A = paterni[1];
-	String m_A = paterni[2];
-	String G_M = paterni[3];
-	String A = paterni[4];
+	String G_m_A = paterni[1];
+	String M_A = paterni[2];
+	String m_A = paterni[3];
+	String G_M = paterni[4];
+	String A = paterni[5];
 	String[] mesiGedcom = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 	String[] prefissi = { "", "ABT", "CAL", "EST", "AFT", "BEF", "BET",	"FROM", "TO", "FROM", "(" };
 	Calendar calenda = GregorianCalendar.getInstance();
@@ -60,6 +60,7 @@ public class EditoreData extends LinearLayout {
 	}
 
 	// Azioni da fare una sola volta all'inizio
+	@SuppressLint("ClickableViewAccessibility")
 	void inizia( final EditText editaTesto ) {    //, final LinearLayout vistaEditaData, String dataGc
 
 		addView( inflate( getContext(), R.layout.editore_data, null ), this.getLayoutParams() );
@@ -115,34 +116,66 @@ public class EditoreData extends LinearLayout {
 				(NumberPicker)findViewById( R.id.seconda_secolo ),
 				(NumberPicker)findViewById( R.id.seconda_anno ) );
 
+		// Al primo focus mostra sè stesso (EditoreData) nascondendo la tastiera
 		final InputMethodManager imm = (InputMethodManager) getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
 		editaTesto.setOnFocusChangeListener( new View.OnFocusChangeListener() {
 			@Override
 			public void onFocusChange( View v, boolean ciapa ) {
+				//s.l( "editaTesto onFocusChange " + ciapa );
 				if( ciapa ) {
-					imm.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 );
+					if( tipo == 10 )
+						genera( false ); // solo per togliere le parentesi alla frase
+					else {
+						imm.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
+						/*Window finestra = ((Activity)getContext()).getWindow(); non aiuta la scomparsa della tastiera
+						finestra.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );*/
+						editaTesto.setInputType( InputType.TYPE_NULL ); // disabilita input testo con tastiera
+							// necessario in versioni recenti di android in cui la tastiera ricompare
+					}
 					impostaTutto();
 					setVisibility( View.VISIBLE );
-					if( tipo == 10 ) genera( false ); // solo per togliere le parentesi alla frase
 				} else
 					setVisibility( View.GONE );
 			}
 		} );
-		// Non so perché ma altrimenti in EditaIndividuo la tastiera non compare cliccando
+
+		// Al secondo tocco fa comparire la tastiera
+		editaTesto.setOnTouchListener( new OnTouchListener() {
+			@Override
+			public boolean onTouch( View vista, MotionEvent event ) {
+				//s.l("onTouch " + event.getAction() );
+				if( event.getAction() == MotionEvent.ACTION_DOWN ) {
+					editaTesto.setInputType( InputType.TYPE_CLASS_TEXT ); // riabilita l'input
+				} else if( event.getAction() == MotionEvent.ACTION_UP ) {
+					imm.showSoftInput( editaTesto, 0 ); // fa ricomparire la tastiera
+					veroImputTesto = true;
+					//vista.performClick(); non ne vedo l'utilità
+				}
+				return false;
+			}
+		} );
+		/* Abbandonato in favore di OnTouchListener
 		editaTesto.setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View v ) {
+				s.l( "editaTesto onClick");
 				imm.showSoftInput( editaTesto, 0 );
+				editaTesto.setInputType( InputType.TYPE_CLASS_TEXT ); // riabilita l'input ma il cursore non compare o non blinka
+				//editaTesto.requestFocus(); // non cambia niente
+				//editaTesto.setRawInputType( InputType.TYPE_CLASS_TEXT ); idem
+				editaTesto.setCursorVisible( true ); // forse aiuta a far comparire il cursore, anche se non blinka
 			}
-		});
+		});*/
 		// Imposta l'editore data in base a quanto scritto
 		editaTesto.addTextChangedListener( new TextWatcher() {
 			@Override
-			public void beforeTextChanged( CharSequence charSequence, int i, int i1, int i2 ) {}
+			public void beforeTextChanged( CharSequence testo, int i, int i1, int i2 ) {}
 			@Override
-			public void onTextChanged( CharSequence charSequence, int i, int i1, int i2 ) {}
+			public void onTextChanged( CharSequence testo, int i, int i1, int i2 ) {}
 			@Override
-			public void afterTextChanged( Editable editable ) {
+			public void afterTextChanged( Editable testo ) {
+				// non so perché ma in android 5 alla prima editazione viene chiamato 2 volte, che comunque non è un problema
+				//s.l( "veroImputTesto " + veroImputTesto +"  " + testo );
 				if( veroImputTesto ) {
 					impostaTutto();
 				}
@@ -283,6 +316,7 @@ public class EditoreData extends LinearLayout {
 	Data scanna( String dataGc ) {
 		DateFormatSymbols simboliFormato = new DateFormatSymbols();
 		simboliFormato.setShortMonths( mesiGedcom );
+		dataGc = dataGc.replaceAll("[/\\\\_\\-|.,;:?'\"#^&*°+=~()\\[\\]{}]", " ");
 		Data data = new Data();
 		for( String forma : paterni ) {
 			data.format = new SimpleDateFormat( forma, simboliFormato );
@@ -298,6 +332,8 @@ public class EditoreData extends LinearLayout {
 				//s.l( "'"+ forma + "' non ha funzionato. " + e.getLocalizedMessage() );
 			}
 		}
+		if( data.format.toPattern().equals(G_m_A) )
+			data.format.applyPattern( G_M_A );
 		if( data.format.toPattern().equals(m_A) )
 			data.format.applyPattern( M_A );
 		return data;

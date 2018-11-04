@@ -213,7 +213,7 @@ public class U {
 			int pos = data.indexOf("AND") - 1;
 			String annoPrima = data.substring( data.lastIndexOf(" ",pos-1)+1, pos );	// prende l'anno che sta prima di 'AND'
 			if( !annoPrima.equals(anno) && anno.length()>3 ) {
-				s.l( annoPrima +"  " + anno );
+				//s.l( annoPrima +"  " + anno );
 				if( annoPrima.substring(0,2).equals(anno.substring(0,2)) )		// se sono dello stesso secolo
 					anno = anno.substring( anno.length()-2, anno.length() );	// prende solo gli anni
 				anno = annoPrima.concat("~").concat(anno);
@@ -246,7 +246,8 @@ public class U {
 		}
 		int giorno = 1;
 		if( dataGc.length() > 8 ) {
-			giorno = Anagrafe.idNumerico( dataGc.substring( 0, dataGc.indexOf( ' ' ) ) );    // estrae i soli numeri
+			if( dataGc.indexOf(' ') > 0 )
+				giorno = Anagrafe.idNumerico( dataGc.substring( 0, dataGc.indexOf(' ') ) );    // estrae i soli numeri
 			if( giorno < 1 || giorno > 31)
 				giorno = 1;
 		}

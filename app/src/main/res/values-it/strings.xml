@@ -32,6 +32,7 @@
     <string name="generations">generazioni</string>
     <string name="no_useful_data">Non riesco a ricavare dati utilizzabili.</string>
     <string name="make_backup">Fai il backup</string>
+    <string name="about">Informazioni</string>
     <string name="tree_info">Informazioni</string>
     <string name="rename">Rinomina</string>
     <string name="find_errors">Trova errori</string>
@@ -229,6 +230,7 @@
     <string name="from_to">Da… a</string>
     <string name="date_phrase">Frase</string>
     <!-- Altro -->
+    <string name="version_name">Versione %s</string>
     <string name="done">Fatto</string>
     <string name="make_default">Rendi principale</string>
     <string name="citations">Citazioni</string>

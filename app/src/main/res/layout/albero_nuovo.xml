@@ -1,53 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:fillViewport="true" >
 
-    <Button
-        android:id="@+id/bottone_albero_vuoto"
-        style="@android:style/Widget.Holo.Light.Button"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="@string/empty_tree"
-        app:layout_constraintBottom_toTopOf="@+id/bottone_scarica_esempio"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp">
 
-    <Button
-        android:id="@+id/bottone_scarica_esempio"
-        style="@android:style/Widget.Holo.Light.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="@string/download_example"
-        app:layout_constraintBottom_toTopOf="@+id/bottone_importa_gedcom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <Button
+            android:id="@+id/bottone_albero_vuoto"
+            style="@android:style/Widget.Holo.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/empty_tree" />
 
-    <Button
-        android:id="@+id/bottone_importa_gedcom"
-        style="@android:style/Widget.Holo.Light.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/import_gedcom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/bottone_scarica_esempio"
+            style="@android:style/Widget.Holo.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/download_example" />
 
-    <Button
-        android:id="@+id/bottone_recupera_backup"
-        style="@android:style/Widget.Holo.Light.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/import_backup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bottone_importa_gedcom" />
+        <Button
+            android:id="@+id/bottone_importa_gedcom"
+            style="@android:style/Widget.Holo.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/import_gedcom" />
 
-</android.support.constraint.ConstraintLayout>
+        <Button
+            android:id="@+id/bottone_recupera_backup"
+            style="@android:style/Widget.Holo.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/import_backup" />
+
+    </LinearLayout>
+</ScrollView>

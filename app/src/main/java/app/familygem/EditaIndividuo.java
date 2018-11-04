@@ -241,6 +241,7 @@ public class EditaIndividuo extends AppCompatActivity {
 		barra.setDisplayShowCustomEnabled( true );
 	}
 
+	/* INUTILE?
 	@Override
 	protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		if (requestCode == 9746 && resultCode == RESULT_OK) {
@@ -252,7 +253,7 @@ public class EditaIndividuo extends AppCompatActivity {
 		} else if (resultCode == RESULT_CANCELED) {
 			// The user canceled the operation.
 		}
-	}
+	}*/
 
 	// Aggiunge un individuo in relazione di parentela con 'perno'
 	static void aggiungiParente( String idPerno, String nuovoId, int relazione ) {

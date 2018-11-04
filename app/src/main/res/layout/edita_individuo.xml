@@ -88,8 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/birth_date"
-            android:inputType="textCapCharacters"
-            android:textIsSelectable="true" />
+            android:inputType="textCapCharacters" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -154,8 +153,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/death_date"
-                android:inputType="textCapCharacters"
-                android:textIsSelectable="true" />
+                android:inputType="textCapCharacters" />
         </android.support.design.widget.TextInputLayout>
 
         <app.familygem.EditoreData
