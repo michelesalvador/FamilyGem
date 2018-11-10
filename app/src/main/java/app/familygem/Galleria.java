@@ -2,7 +2,6 @@
 
 package app.familygem;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -28,10 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import app.familygem.dettaglio.Immagine;
+import static android.app.Activity.RESULT_OK;
 import static app.familygem.Globale.gc;
 
 public class Galleria extends Fragment {
-	
+
 	@Override
 	public void onCreate( Bundle stato ) {
 		super.onCreate( stato );
@@ -42,11 +42,13 @@ public class Galleria extends Fragment {
 		setHasOptionsMenu(true);
 		View vista = inflater.inflate( R.layout.magazzino, container, false);
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
-		VisitaListaMedia visitaMedia = new VisitaListaMedia( !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
-		gc.accept( visitaMedia );
-		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size() + " " + getString(R.string.media).toLowerCase() );
-		for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() )
-			poniMedia( scatola, dato.getValue(), dato.getKey(), true );
+		if( gc != null ) {
+			VisitaListaMedia visitaMedia = new VisitaListaMedia( !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
+			gc.accept( visitaMedia );
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size() + " " + getString(R.string.media).toLowerCase() );
+			for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() )
+				poniMedia( scatola, dato.getValue(), dato.getKey(), true );
+		}
 		return vista;
 	}
 
@@ -111,7 +113,7 @@ public class Galleria extends Fragment {
 						if( attiva.getIntent().getBooleanExtra( "galleriaScegliMedia", false ) ) {
 							Intent intent = new Intent();
 							intent.putExtra( "idMedia", med.getId() );
-							attiva.setResult( AppCompatActivity.RESULT_OK, intent );
+							attiva.setResult( RESULT_OK, intent );
 							attiva.finish();
 						// Galleria in modalità normale Apre Immagine
 						} else {
@@ -153,7 +155,7 @@ public class Galleria extends Fragment {
 		return quante;
 	}
 
-	public static void nuovoMedia( Context contesto, Object contenitore ){
+	public static Media nuovoMedia( Object contenitore ){
 		Media media = new Media();
 		int val, max = 0;
 		for( Media med : gc.getMedia() ) {
@@ -161,7 +163,7 @@ public class Galleria extends Fragment {
 			if( val > max )	max = val;
 		}
 		media.setId( "M" + (max+1) );
-		media.setFile( "" );
+		//media.setFile( "" );
 		gc.addMedia( media );
 		if( contenitore != null ) {
 			MediaRef rifMed = new MediaRef();
@@ -169,9 +171,7 @@ public class Galleria extends Fragment {
 			((MediaContainer)contenitore).addMediaRef( rifMed );
 			Ponte.manda( contenitore, "contenitore" );
 		}
-		Ponte.manda( media, "oggetto" );
-		contesto.startActivity( new Intent( contesto, Immagine.class ) );
-		// todo? Dettaglio.edita( text File );
+		return media;
 	}
 
 	public static void scollegaMedia( Media media, Object contenitore, View vista ) {
@@ -212,12 +212,28 @@ public class Galleria extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch( item.getItemId() ) {
 			case 0:
-				Galleria.nuovoMedia( getContext(), null);
+				/*Ponte.manda( nuovoMedia(null), "oggetto" );
+				startActivity( new Intent( getContext(), Immagine.class ) );*/
+				Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+				intent.setType( "*/*" );
+				startActivityForResult( intent,9173 );
 				break;
 			default:
 				return false;
 		}
 		return true;
+	}
+	// Il file pescato dal file manager diventa media condiviso
+	@Override
+	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
+		if( resultCode == RESULT_OK ) {
+			if( requestCode == 9173 ) {
+				Media media = nuovoMedia( null );
+				if( !Dettaglio.settaMedia( getContext(), data, media ) ) return;
+			}
+			U.salvaJson();
+			Globale.editato = true;
+		}
 	}
 
 	// Menu contestuale
@@ -235,6 +251,7 @@ public class Galleria extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {
 			eliminaMedia( med, contenit, vistaFoto );
+			U.salvaJson();
 			return true;
 		}
 		return false;

@@ -21,6 +21,10 @@
             android:icon="@drawable/menu_ritratto"
             android:title="@string/media" />
         <item
+            android:id="@+id/nav_note"
+            android:icon="@drawable/menu_nota"
+            android:title="@string/notes" />
+        <item
             android:id="@+id/nav_fonti"
             android:icon="@drawable/menu_fonte"
             android:title="@string/sources" />
@@ -28,10 +32,6 @@
             android:id="@+id/nav_archivi"
             android:icon="@drawable/ic_menu_tempio"
             android:title="@string/repositories" />
-        <item
-            android:id="@+id/nav_note"
-            android:icon="@drawable/menu_nota"
-            android:title="@string/notes" />
         <item
             android:id="@+id/nav_autore"
             android:icon="@drawable/menu_autore"

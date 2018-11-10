@@ -33,7 +33,6 @@ import java.util.TreeMap;
 import app.familygem.dettaglio.CitazioneFonte;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Famiglia;
-import app.familygem.dettaglio.Immagine;
 import app.familygem.dettaglio.Nome;
 import app.familygem.dettaglio.Nota;
 import static app.familygem.Globale.gc;
@@ -102,9 +101,9 @@ public class Individuo extends AppCompatActivity {
 				Menu menu = popup.getMenu();
 				switch( tabLayout.getSelectedTabPosition() ){
 					case 0: // Individuo Media
-						menu.add( 0, 10, 0, R.string.new_local_media );
-						menu.add( 0, 11, 0, R.string.new_media );
-						menu.add( 0, 12, 0, R.string.link_media );
+						menu.add( 0, 10, 0, R.string.new_media );
+						menu.add( 0, 11, 0, R.string.new_shared_media );
+						menu.add( 0, 12, 0, R.string.link_shared_media );
 						break;
 					case 1: // Individuo Eventi
 						menu.add( 0, 20, 0, R.string.name );
@@ -166,17 +165,15 @@ public class Individuo extends AppCompatActivity {
 							case 0:
 								break;
 							// Media
-							case 10:    // Crea media locale
-								Media media = new Media();
-								media.setFile( "" );
-								uno.addMedia( media );
-								Ponte.manda( media, "oggetto" );
-								Ponte.manda( uno, "contenitore" );
-								startActivity( new Intent( Individuo.this, Immagine.class ) );
-								// todo? edita all'arrivo
+							case 10:    // Cerca media locale
+								Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+								intent.setType( "*/*" );
+								startActivityForResult( intent,2173 );
 								break;
-							case 11: {    // Crea oggetto media
-								Galleria.nuovoMedia( Individuo.this, uno );
+							case 11: {    // Cerca oggetto media
+								Intent inten = new Intent( Intent.ACTION_GET_CONTENT );
+								inten.setType( "*/*" );
+								startActivityForResult( inten,52173 );
 								break;
 							}
 							case 12:    // Collega media in Galleria
@@ -240,9 +237,9 @@ public class Individuo extends AppCompatActivity {
  								Biblioteca.nuovaFonte( Individuo.this, uno );
 								break;
 							case 27:    // Collega fonte
-								Intent intent = new Intent( Individuo.this, Principe.class );
-								intent.putExtra( "bibliotecaScegliFonte", true );
-								startActivityForResult( intent,50473 );
+								Intent intento = new Intent( Individuo.this, Principe.class );
+								intento.putExtra( "bibliotecaScegliFonte", true );
+								startActivityForResult( intento,50473 );
 								break;
 							// Scheda Familiari
 							case 30:
@@ -310,9 +307,18 @@ public class Individuo extends AppCompatActivity {
     }
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-    	//s.l( "onActivityResult di Individuo " + requestCode );
 		if( resultCode == RESULT_OK ) {
-			if( requestCode == 43614 ) { // Media
+			if( requestCode == 2173 ) { // File pescato dal file manager diventa media locale
+				Media media = new Media();
+				uno.addMedia( media );
+				/*Ponte.manda( media, "oggetto" );
+				Ponte.manda( uno, "contenitore" );
+				startActivity( new Intent( Individuo.this, Immagine.class ) );*/
+				if( !Dettaglio.settaMedia( this, data, media ) ) return;
+			} else if( requestCode == 52173 ) { // File pescato dal file manager diventa media condiviso
+				Media media = Galleria.nuovoMedia( uno );
+				if( !Dettaglio.settaMedia( this, data, media ) ) return;
+			} else if( requestCode == 43614 ) { // Media da Galleria
 				MediaRef rifMedia = new MediaRef();
 				rifMedia.setRef( data.getStringExtra("idMedia") );
 				uno.addMediaRef( rifMedia );

@@ -11,11 +11,8 @@ public class Armadio {
 
 	List<Cassetto> alberi;
 	int idAprendo;
-
-	public Armadio( List<Cassetto> alberi, int idAprendo ) {
-		this.alberi = alberi;
-		this.idAprendo = idAprendo;
-	}
+	boolean esperto;
+	boolean salvaVolontario;
 
 	int max() {
 		int num = 0;

@@ -17,7 +17,6 @@ import app.familygem.Dettaglio;
 import app.familygem.Individuo;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.s;
 import static app.familygem.Globale.gc;
 
 public class Famiglia extends Dettaglio {

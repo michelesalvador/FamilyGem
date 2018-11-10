@@ -70,10 +70,12 @@ public class Diagramma extends Fragment {
 		View origine;
 		View mezzo;
 		View fine;
-		Corda( View origine, View mezzo, View fine ) {
+		boolean arco;
+		Corda( View origine, View mezzo, View fine, boolean arco ) {
 			this.origine = origine;
 			this.mezzo = mezzo;
 			this.fine = fine;
+			this.arco = arco;
 		}
 	}
 
@@ -117,7 +119,7 @@ public class Diagramma extends Fragment {
 			// Ramo paterno
 			Person padre = null;
 			View nodoNonniPaterni = null;
-			if( !famiglia.getHusbands(gc).isEmpty() ) {
+			if( !famiglia.getHusbandRefs().isEmpty() ) {
 				padre = famiglia.getHusbands(gc).get(0);
 				spazio(1, zii(padre,null, true) );
 				nodoNonniPaterni = nonni( padre );
@@ -128,7 +130,7 @@ public class Diagramma extends Fragment {
 			Person madre = null;
 			View nodoNonniMaterni = null;
 			View nodoGenitori = null;
-			if( !famiglia.getWives(gc).isEmpty() ) {
+			if( !famiglia.getWifeRefs().isEmpty() ) {
 				madre = famiglia.getWives(gc).get(0);
 				spazio(1, (zii(padre,null,true) + zii(madre,null,true))/2 );
 				nodoNonniMaterni = nonni( madre );
@@ -140,16 +142,49 @@ public class Diagramma extends Fragment {
 				nodoGenitori = schedaSingola( 2, padre, nodoNonniPaterni, false, false, 0 );
 			else if( madre != null )
 				nodoGenitori = schedaSingola( 2, madre, nodoNonniMaterni, false, false, 0 );
+			// Completa arcobaleni degli zii paterni
+			View legame = null;
+			if( nodoGenitori != null ) {
+				View paiolo = nodoGenitori.findViewWithTag( "padrePaiolo" );
+				for( Corda corda : rete ) {
+					if( corda.arco && corda.origine == null ) {
+						corda.origine = paiolo!=null ? paiolo : nodoGenitori;
+						s.l( "corda  " + corda.origine );
+					}
+				}
+				// Prepara il nodo a cui si attaccano centro e i suoi fratelli
+				legame = nodoGenitori.findViewWithTag( "legame" );
+			}
 			// Fratelli (tra cui centro), figli e nipoti
-			for( Person fratello : famiglia.getChildren(gc) )
-				if( fratello.equals(centro) )
-					ioFigliNipoti( fratello, nodoGenitori );  // i figli di centro mostrereanno anche i propri figli
+			View nodoIo = null;
+			View nodoFratello = null;
+			for( Person fratello : famiglia.getChildren(gc) ) {
+				if( fratello == centro )
+					nodoIo = ioFigliNipoti( fratello, legame!=null?legame:nodoGenitori );  // i figli di centro mostrereanno anche i propri figli
 				else
-					fratelloNipoti( fratello, nodoGenitori ); // i figli dei fratelli no
+					nodoFratello = fratelloNipoti( fratello, legame!=null?legame:nodoGenitori ); // i figli dei fratelli no
+				// Le linee ad arco per fratelli senza genitori
+				if( nodoGenitori == null ) {
+					int generaz = 3;
+					rete.add( new Corda( nodoIo, scatola.findViewById( generaz ), nodoFratello, true ) );
+				}
+			}
+			// Mette il paiolo di origine agli arcobaleni sprovvisti (livello fratelli)
+			for( Corda corda : rete ) {
+				if( corda.arco && corda.origine==null )
+					corda.origine = nodoIo;
+			}
 			// Completa ramo materno
 			if( madre != null ) {
-				altriMatrimoni( madre, famiglia, nodoGenitori );	// todo: nodoGenitori così è sbagliato, deve essere il nodo solo della madre
+				View paioloMadre = nodoGenitori.findViewWithTag( "madrePaiolo" );
+				altriMatrimoni( madre, famiglia, paioloMadre!=null ? paioloMadre : nodoGenitori );	// todo: il nodo della madre viene giusto nel diagramma?
 				zii( madre, nodoNonniMaterni, false );
+				for( Corda corda : rete ) {
+					if( corda.arco && corda.origine == null ) {
+						corda.origine = paioloMadre!=null ? paioloMadre : nodoGenitori;
+						s.l( "corda  " + corda.origine );
+					}
+				}
 			}
 			spazio(1, zii(madre,null,true));
 		} else	// individuo senza genitori
@@ -165,7 +200,7 @@ public class Diagramma extends Fragment {
 						if( nodoCentrale == null )  // così se eventualmente il centro compare più volte, prende il primo
 							nodoCentrale = corda.origine;
 					} else
-						disegnaLinea( corda.origine, corda.mezzo, corda.fine );
+						disegnaLinea( corda.origine, corda.mezzo, corda.fine, corda.arco );
 				}
 				scatolaZoom.setMinZoom( 1, ZoomApi.TYPE_ZOOM ); // occorrerebbe solo la prima volta
 				if( nodoCentrale != null ) {
@@ -195,9 +230,13 @@ public class Diagramma extends Fragment {
 		} );
 	}
 
+	// Aggiunge uno spazio per distanziare i nonni
 	void spazio( int generazione, int peso ) {
 		if( peso == 0 ) peso = 1;
 		Space spaz = new Space( getContext() );
+		//LinearLayout spaz = new LinearLayout( getContext() );
+		//spaz.setPadding( 10,10,10,10 );
+		//spaz.setBackgroundResource( R.drawable.nota_sfondo );
 		LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, peso );
 		LinearLayout gen = scatola.findViewById( generazione );
@@ -244,7 +283,7 @@ public class Diagramma extends Fragment {
 						vistaDiscend.setBackgroundResource( R.drawable.casella_maschio );
 					else if( disc.sesso == 2 )
 						vistaDiscend.setBackgroundResource( R.drawable.casella_femmina );
-					rete.add( new Corda( nodoSopra, null, vistaDiscend ) );
+					rete.add( new Corda( nodoSopra, null, vistaDiscend, false ) );
 					vistaDiscend.setOnClickListener( new OnClickListener() {
 						@Override
 						public void onClick( View view ) {
@@ -277,7 +316,7 @@ public class Diagramma extends Fragment {
 		LinearLayout gen = scatola.findViewById( generazione );
 		if( configura == 0 ) {
 			scatolaSingola = new Schedina( generazione, egli, conAntenati );
-			rete.add( new Corda( nodoSopra, gen, scatolaSingola ) );
+			rete.add( new Corda( nodoSopra, gen, scatolaSingola, false ) );
 		} else {
 			scatolaSingola = new LinearLayout( getContext() );
 			scatolaSingola.addView( tratteggia() );
@@ -295,7 +334,6 @@ public class Diagramma extends Fragment {
 	// Inserisce la scheda di una coppia nel diagramma
 	// Oppure la scheda di uno dei matrimoni del centro
 	// conAntenati: 0 nessuno, 1 lui, 2 lei, 3 entrambi
-	// spaziatura: 0 coppia normale, 1 primo matrimonio lui, 2 ultimo matrimonio lei, 3 altri matrimoni lui, 4 altri matrimoni lei
 	// configura: 0 coppia normale, 1 altri matrimoni lui, 2 altri matrimoni lei
 	private View schedaDoppia( int generazione, final Family famiglia, View nodoSopraLui, View nodoSopraLei,
 	                           int conAntenati, boolean conDiscendenti, int configura ) {
@@ -325,7 +363,11 @@ public class Diagramma extends Fragment {
 		else if( lui != null ) {
 			LinearLayout schedinaLui = new Schedina( generazione, lui, conAntenatiLui );
 			scatolaCoppia.addView( schedinaLui );
-			rete.add( new Corda( nodoSopraLui, gen, schedinaLui ) );
+			rete.add( new Corda( nodoSopraLui, gen, schedinaLui, false ) );
+			if( conAntenatiLei ) // Marchia la schedina per gli archi che collegano fratelli
+				schedinaLui.setTag("paiolo");
+			else if( conAntenati == 0 ) // Marchia la schedina per gli archi che collegano zii
+				schedinaLui.setTag("padrePaiolo");
 		}
 		// Legame di matrimonio con eventuale anno
 		String dataMatrimonio = null;
@@ -356,6 +398,7 @@ public class Diagramma extends Fragment {
 				startActivity( intento );
 			}
 		} );
+		legame.setTag("legame");
 		scatolaCoppia.addView( legame );
 		// Lei
 		if( configura == 2 )
@@ -363,7 +406,11 @@ public class Diagramma extends Fragment {
 		else if( lei != null ) {
 			LinearLayout schedinaLei = new Schedina( generazione, lei, conAntenatiLei );
 			scatolaCoppia.addView( schedinaLei );
-			rete.add( new Corda( nodoSopraLei, gen, schedinaLei ) );
+			rete.add( new Corda( nodoSopraLei, gen, schedinaLei, false ) );
+			if( conAntenatiLui )
+				schedinaLei.setTag("paiolo");
+			else if( conAntenati == 0 )
+				schedinaLei.setTag("madrePaiolo");
 		}
 		LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT );
@@ -376,7 +423,7 @@ public class Diagramma extends Fragment {
 			gen.addView( new ConDiscendenti( scatolaCoppia, lui, legame ), param );
 		} else
 			gen.addView( scatolaCoppia, param );
-		return legame;
+		return scatolaCoppia;
 	}
 
 	// La schedina base del diagramma
@@ -457,7 +504,7 @@ public class Diagramma extends Fragment {
 				}
 			});
 		    if( egli.getId().equals( Globale.individuo ) && !conAntenati )
-			    rete.add( new Corda( this, null, null ) );  // sfrutto rete per veicolare il centro del diagramma
+			    rete.add( new Corda( this, null, null, false ) );  // sfrutto rete per veicolare il centro del diagramma
 		}
 	}
 
@@ -469,12 +516,15 @@ public class Diagramma extends Fragment {
 			// Nonni
 			if( !fam.getHusbandRefs().isEmpty() && !fam.getWifeRefs().isEmpty() )	// ci sono entrambi i nonni
 				nodoNonni = schedaDoppia( 1, fam, null, null, 3, false, 0 );
-			else if( !fam.getHusbands(gc).isEmpty() )
+			else if( !fam.getHusbandRefs().isEmpty() )
 				nodoNonni = schedaSingola( 1, fam.getHusbands(gc).get(0), null, true, false, 0 );
-			else if( !fam.getWives(gc).isEmpty() )
+			else if( !fam.getWifeRefs().isEmpty() )
 				nodoNonni = schedaSingola( 1, fam.getWives(gc).get(0), null, true, false, 0 );
 		}
-		return nodoNonni;
+		View legame = null;
+		if( nodoNonni != null )
+			legame = nodoNonni.findViewWithTag( "legame" );
+		return legame != null ? legame : nodoNonni;
 	}
 
 	// Gli zii (senza cugini)
@@ -486,11 +536,28 @@ public class Diagramma extends Fragment {
 				List<Person> zii = fam.getChildren(gc);
 				if( contaZii ) return zii.size();   // serve per posizionare i nonni
 				zii.remove(genitore);
-				for( Person zio : zii )
-					inserisci( 2, zio, nodoNonni, true );
+				for( Person zio : zii ) {
+					View nodoZio = inserisci( 2, zio, nodoNonni, true );
+					View paiolo = nodoZio.findViewWithTag( "paiolo" );
+					if( nodoNonni == null ) {
+						int generaz = 2;
+						rete.add( new Corda( null, scatola.findViewById(generaz), paiolo!=null?paiolo:nodoZio, true ) );
+					}
+				}
 			}
 		return 0;
 	}
+
+	/* Nodo sopra a fratrelli senza genitori
+	View genitoriAssenti( int generazione ) {
+		LinearLayout nodo = new LinearLayout( getContext() );
+		//nodo.setPadding( 10,20,10,20 );
+		//nodo.setBackgroundResource( R.drawable.casella_neutro );
+		LinearLayout gen = scatola.findViewById( generazione );
+		gen.addView( nodo );
+		//rete.add( new Corda( nodoSopraLui, gen, schedinaLui ) );
+		return nodo;
+	}*/
 
 	// Fratellastri nati dai matrimoni precedenti o seguenti dei genitori
 	private void altriMatrimoni( Person genitore, Family famiglia, View nodoGenitore ) {
@@ -503,12 +570,12 @@ public class Diagramma extends Fragment {
 	}
 
 	// Il centro con i suoi matrimoni + figli e nipoti
-	void ioFigliNipoti( Person io, View nodoGenitori ) {
+	View ioFigliNipoti( Person io, View nodoGenitori ) {
 		List<Family> matrimoni = io.getSpouseFamilies(gc);
+		View nodoCentro = null;
 		if( matrimoni.isEmpty() ) { // centro non si è sposato e non ha figli
-			schedaSingola( 3, io, nodoGenitori, false, false, 0 );
+			nodoCentro = schedaSingola( 3, io, nodoGenitori, false, false, 0 );
 		} else {
-			View nodoCentro;
 			int configura = 0; // indica come mostrare la coppia (se ci sono matrimoni precedenti)
 			for( int i = 0; i < matrimoni.size(); i++ ) { // i molteplici matrimoni del centro
 				Family famig = matrimoni.get(i);
@@ -523,26 +590,33 @@ public class Diagramma extends Fragment {
 					if( i > 0) configura = 1;
 					nodoCentro = schedaSingola( 3, io, nodoGenitori, false, false, configura);
 				}
+				View legame = nodoCentro.findViewWithTag("legame");
 				for( Person figlio : famig.getChildren(gc) ) {
-					View nodoFiglio = inserisci( 4, figlio, nodoCentro, false );
+					View nodoFiglio = inserisci( 4, figlio, legame!=null?legame:nodoCentro, false );
 					if( !figlio.getSpouseFamilies(gc).isEmpty() ) {
 						Family fam = figlio.getSpouseFamilies( gc ).get( 0 );
+						View legame2 = nodoFiglio.findViewWithTag("legame");
 						for( Person nipote : fam.getChildren( gc ) )
-							inserisci( 5, nipote, nodoFiglio, true );
+							inserisci( 5, nipote, legame2!=null?legame2:nodoFiglio, true );
 					}
 				}
 			}
 		}
+		View paiolo = nodoCentro.findViewWithTag("paiolo");
+		return paiolo != null ? paiolo : nodoCentro;
 	}
 
 	// I fratelli del centro con i rispettivi figli
-	void fratelloNipoti( Person fratello, View nodoGenitori ) {
+	View fratelloNipoti( Person fratello, View nodoGenitori ) {
 		View nodoFratello = inserisci( 3, fratello, nodoGenitori, false );
 		if( !fratello.getSpouseFamilies(gc).isEmpty() ) {
 			Family famig = fratello.getSpouseFamilies(gc).get(0);
+			View legame = nodoFratello.findViewWithTag("legame");
 			for( Person nipote : famig.getChildren(gc) )
-				inserisci(4, nipote, nodoFratello, true );
+				inserisci(4, nipote, legame!=null?legame:nodoFratello, true );
 		}
+		View paiolo = nodoFratello.findViewWithTag("paiolo");
+		return paiolo != null ? paiolo : nodoFratello;
 	}
 
 	// di una Person scrive e restituisce una coppietta di avi con il numero di antenati
@@ -614,7 +688,7 @@ public class Diagramma extends Fragment {
 				}
 	}
 
-	void disegnaLinea( View vistaInizio, View vistaMezzo, View vistaFine ) {
+	void disegnaLinea( View vistaInizio, View vistaMezzo, View vistaFine, boolean arco ) {
 		s.l( "disegnaLinea: ");
 		if( vistaInizio != null ) s.l( "vistaInizio  "+ vistaInizio.getClass() + "\t" + vistaInizio.getScrollX()+ " " + vistaInizio.getScrollY()+ " " + vistaInizio.getWidth()+ " " + vistaInizio.getHeight() );
 		if( vistaMezzo != null ) s.l( "vistaMezzo  "+ vistaMezzo.getClass() + "\t" + vistaMezzo.getScrollX()+ " " + vistaMezzo.getScrollY()+ " " + vistaMezzo.getWidth()+ " " + vistaMezzo.getHeight() );
@@ -639,7 +713,8 @@ public class Diagramma extends Fragment {
 			} else
 				mezzoY = (int) ( marginiInizio.bottom + ( marginiFine.top - marginiInizio.bottom ) / 1.3 );
 			s.l( (int) marginiInizio.exactCenterX()+"-"+marginiInizio.bottom +"  "+ mezzoY +"  "+ (int) marginiFine.exactCenterX()+"-"+marginiFine.top );
-			View linea = new Linea( (int) marginiInizio.exactCenterX(), marginiInizio.bottom,
+			View linea = new Linea( (int) marginiInizio.exactCenterX(),
+					arco ? marginiInizio.top : marginiInizio.bottom,
 					mezzoY, (int) marginiFine.exactCenterX(), marginiFine.top );
 			RelativeLayout.LayoutParams paramLinea = new RelativeLayout.LayoutParams( scatolona.getWidth(), scatolona.getHeight() );
 			scatolona.addView( linea, paramLinea );

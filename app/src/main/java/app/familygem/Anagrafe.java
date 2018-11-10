@@ -42,35 +42,37 @@ public class Anagrafe extends Fragment {
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
 		View vista = inflater.inflate( R.layout.anagrafe, container, false );
 		scatola = vista.findViewById( R.id.anagrafe_scatola );
-		setHasOptionsMenu(true);
-		listaIndividui = gc.getPeople();
-		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " " + getText(R.string.persons) );
-		if( Globale.ordineAnagrafe > 0 ) {  // 0 ovvero senza ordinamento
-			final boolean gliIdsonoNumerici = verificaIdNumerici();
-			Collections.sort(listaIndividui, new Comparator<Person>() {
-				public int compare(Person p1, Person p2) {
-					switch( Globale.ordineAnagrafe ) {
-						case 1:    // ordina per ID Gedcom
-							if( gliIdsonoNumerici )
-								return idNumerico(p1.getId()) - idNumerico(p2.getId());
-							else
-								return p1.getId().compareToIgnoreCase(p2.getId());
-						case 2:    // ordina per cognome
-							if (p1.getNames().size() == 0)    // i nomi null vanno in fondo
-								return (p2.getNames().size() == 0) ? 0 : 1;
-							if (p2.getNames().size() == 0)
-								return -1;
-							return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
-						case 3:    // ordina per anno
-							return annoBase(p1) - annoBase(p2);
-						case 4:	// Ordina per numero di familiari
-							return quantiFamiliari(p2) - quantiFamiliari(p1);
+		if( gc != null ) {
+			setHasOptionsMenu(true);
+			listaIndividui = gc.getPeople();
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " " + getText(R.string.persons) );
+			if( Globale.ordineAnagrafe > 0 ) {  // 0 ovvero senza ordinamento
+				final boolean gliIdsonoNumerici = verificaIdNumerici();
+				Collections.sort(listaIndividui, new Comparator<Person>() {
+					public int compare(Person p1, Person p2) {
+						switch( Globale.ordineAnagrafe ) {
+							case 1:    // ordina per ID Gedcom
+								if( gliIdsonoNumerici )
+									return idNumerico(p1.getId()) - idNumerico(p2.getId());
+								else
+									return p1.getId().compareToIgnoreCase(p2.getId());
+							case 2:    // ordina per cognome
+								if (p1.getNames().size() == 0)    // i nomi null vanno in fondo
+									return (p2.getNames().size() == 0) ? 0 : 1;
+								if (p2.getNames().size() == 0)
+									return -1;
+								return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
+							case 3:    // ordina per anno
+								return annoBase(p1) - annoBase(p2);
+							case 4:	// Ordina per numero di familiari
+								return quantiFamiliari(p2) - quantiFamiliari(p1);
+						}
+						return 0;
 					}
-					return 0;
-				}
-			});
+				});
+			}
+			elencaIndividui( null );
 		}
-		elencaIndividui( null );
 		return vista;
 	}
 
@@ -81,22 +83,36 @@ public class Anagrafe extends Fragment {
 				if( Globale.ordineAnagrafe == 1 ) ruolo = tizio.getId();
 				else if( Globale.ordineAnagrafe == 4 ) ruolo = String.valueOf(tizio.getExtension("famili"));
 				View vistaIndi = U.mettiIndividuo( scatola, tizio, ruolo );
-				vistaIndi.setOnClickListener( new View.OnClickListener() {
-					public void onClick( View vista ) {
-						// Anagrafe per scegliere il parente e restituire l'id a Diagramma
-						if( getActivity().getIntent().getBooleanExtra( "anagrafeScegliParente", false ) ) {
+				// Anagrafe per scegliere il parente e restituire l'id a Diagramma
+				if( getActivity().getIntent().getBooleanExtra( "anagrafeScegliParente", false ) ) {
+					vistaIndi.setOnClickListener( new View.OnClickListener() {
+						public void onClick( View v ) {
 							Intent intent = new Intent();
 							intent.putExtra( "idParente", tizio.getId() );
 							intent.putExtra( "relazione", getActivity().getIntent().getIntExtra( "relazione", 0 ) );
 							getActivity().setResult( AppCompatActivity.RESULT_OK, intent );
 							getActivity().finish();
-						} else {
+						}
+					});
+				} else { // Normale collegamento alla scheda individuo
+					vistaIndi.setOnClickListener( new View.OnClickListener() {
+						public void onClick( View v ) {
 							Intent intento = new Intent( getContext(), Individuo.class );
 							intento.putExtra( "idIndividuo", tizio.getId() );
 							startActivity( intento );
 						}
-					}
-				});
+					});
+					// Click sulla foto apre la scheda media
+					// todo.. però così si perde il menu contestuale sulla foto...
+					vistaIndi.findViewById( R.id.indi_foto ).setOnClickListener( new View.OnClickListener() {
+						public void onClick( View v ) {
+							Intent intento = new Intent( getContext(), Individuo.class );
+							intento.putExtra( "idIndividuo", tizio.getId() );
+							intento.putExtra( "scheda", 0 );
+							startActivity( intento );
+						}
+					});
+				}
 				registerForContextMenu( vistaIndi );
 			}
 		}

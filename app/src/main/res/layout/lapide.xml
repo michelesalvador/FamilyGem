@@ -46,7 +46,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/lapide_link1"
+        android:id="@+id/lapide_link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/lapide_versione"
@@ -54,20 +54,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:padding="4dp"
-        android:text="https://www.familygem.app"
+        android:text="www.familygem.app"
         android:textColor="@color/primarioScuro"
         android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/lapide_link2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/lapide_link1"
-        android:layout_alignParentTop="false"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:padding="4dp"
-        android:text="https://github.com/michelesalvador/FamilyGem"
-        android:textColor="@color/primarioScuro"
-        android:textSize="16sp" />
 </RelativeLayout>

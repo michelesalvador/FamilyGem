@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+
+    <TextView
+        android:id="@+id/opzioni_esperto_testo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/opzioni_esperto"
+        android:layout_toLeftOf="@+id/opzioni_esperto"
+        android:text="Mostra tutte le funzioni"
+        android:textColor="#000"
+        android:textSize="16sp" />
+
+    <Switch
+        android:id="@+id/opzioni_esperto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/opzioni_salva_testo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/opzioni_salva"
+        android:layout_toLeftOf="@+id/opzioni_salva"
+        android:text="Decido io quando salvare, e che cavolo, sono il padrone"
+        android:textColor="#000"
+        android:textSize="16sp" />
+
+    <Switch
+        android:id="@+id/opzioni_salva"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/opzioni_esperto_testo"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="50dp" />
+
+</RelativeLayout>

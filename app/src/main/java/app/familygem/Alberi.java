@@ -138,7 +138,8 @@ public class Alberi extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu( Menu menu ) {
 		menu.add(0,0,0, R.string.make_backup );
-		menu.add(0,1,0, R.string.about );
+		menu.add(0,1,0, R.string.options );
+		menu.add(0,2,0, R.string.about );
 		return true;
 	}
 	@Override
@@ -183,6 +184,9 @@ public class Alberi extends AppCompatActivity {
 				}
 				break;
 			case 1:
+				startActivity( new Intent( Alberi.this, Opzioni.class) );
+				break;
+			case 2:
 				startActivity( new Intent( Alberi.this, Lapide.class) );
 				break;
 			default:
@@ -192,21 +196,28 @@ public class Alberi extends AppCompatActivity {
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-		menu.add(0, 0, 0, R.string.tree_info );
-		menu.add(0, 1, 0, R.string.rename);
-		menu.add(0, 2, 0, R.string.find_errors);
-		menu.add(0, 3, 0, R.string.export_gedcom);
-		menu.add(0, 4, 0, R.string.delete);
+	public void onCreateContextMenu( ContextMenu menu, View v, ContextMenu.ContextMenuInfo info ) {
+		int posiz = ((AdapterView.AdapterContextMenuInfo)info).position;
+		final HashMap albero = (HashMap) lista.getItemAtPosition( posiz );
+		final int idAlbero = Integer.parseInt( (String)albero.get("id") );
+		if( idAlbero == Globale.preferenze.idAprendo && Globale.preferenze.salvaVolontario )
+			menu.add(0, 0, 0, R.string.save );  // todo: magari spostare 'Salva' in un posto più comodo
+		menu.add(0, 1, 0, R.string.tree_info );
+		menu.add(0, 2, 0, R.string.rename );
+		menu.add(0, 3, 0, R.string.find_errors );
+		menu.add(0, 4, 0, R.string.export_gedcom );
+		menu.add(0, 5, 0, R.string.delete );
 	}
 	@Override
-	public boolean onContextItemSelected(final MenuItem item ) {
+	public boolean onContextItemSelected( final MenuItem item ) {
 		final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 		final HashMap albero = (HashMap) lista.getItemAtPosition( info.position );
 		final int idAlbero = Integer.parseInt( (String)albero.get("id") );
 		//s.l( info.id +"  "+ info.position +"  "+ lista.getCount()	+"\n"+ idAlbero +"  "+ albero.get("titolo") );
 		int id = item.getItemId();
-		if( id == 0 ) {	// Info Gedcom
+		if( id == 0 ) {	// Salva
+			U.salvaJson( Globale.gc, idAlbero );
+		} else if( id == 1 ) {	// Info Gedcom
 			File file = new File( getFilesDir(), idAlbero + ".json" );
 			if( !file.exists() ) {
 				Toast.makeText( getBaseContext(), getString(R.string.cant_find_file) + "\n" + file.getAbsolutePath(), Toast.LENGTH_LONG ).show();
@@ -215,7 +226,7 @@ public class Alberi extends AppCompatActivity {
 			Intent intent = new Intent( Alberi.this, InfoAlbero.class);
 			intent.putExtra( "idAlbero", idAlbero );
 			startActivity(intent);
-		} else if( id == 1 ) {	// Rinomina albero
+		} else if( id == 2 ) {	// Rinomina albero
 			View vistaMessaggio = LayoutInflater.from( this ).inflate(R.layout.albero_nomina, lista, false );
 			AlertDialog.Builder builder = new AlertDialog.Builder( this );
 			builder.setView( vistaMessaggio ).setTitle( R.string.tree_name );
@@ -231,9 +242,9 @@ public class Alberi extends AppCompatActivity {
 			AlertDialog dialog = builder.create();
 			dialog.show();
 			dialog.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE );
-		} else if( id == 2 ) {	// Correggi errori
+		} else if( id == 3 ) {	// Correggi errori
 			trovaErrori( idAlbero, false );
-		} else if( id == 3 ) { // Esporta Gedcom
+		} else if( id == 4 ) { // Esporta Gedcom
 			try {
 				GedcomWriter scrittore = new GedcomWriter();
 				Gedcom gc = leggiJson( idAlbero );
@@ -247,13 +258,21 @@ public class Alberi extends AppCompatActivity {
 			} catch( IOException e ) {
 				Toast.makeText( getBaseContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			}
-		} else if( id == 4 ) {	// Elimina albero
+		} else if( id == 5 ) {	// Elimina albero
 			AlertDialog.Builder builder = new AlertDialog.Builder( this );
 			builder.setMessage( R.string.really_delete_tree );
 			builder.setPositiveButton( R.string.delete, new DialogInterface.OnClickListener() {
 				public void onClick( DialogInterface dialog, int id ) {
 					File file = new File( getFilesDir(), idAlbero + ".json");
 					file.delete();
+					File cartella = new File( getExternalFilesDir(null), String.valueOf(idAlbero) );
+					//cartella.delete(); non elimina la cartella se ci sono file dentro
+					//FileUtils.deleteDirectory( cartella ); necessita java 7
+					eliminaFileCartelle( cartella );
+					if( Globale.preferenze.idAprendo == idAlbero ) {
+						Globale.gc = null;
+						Globale.editato = true;
+					}
 					Globale.preferenze.elimina( idAlbero );
 					aggiornaLista();
 				}
@@ -265,11 +284,37 @@ public class Alberi extends AppCompatActivity {
 		return true;
 	}
 
+	void eliminaFileCartelle( File fileOrDirectory ) {
+		if( fileOrDirectory.isDirectory() )
+			for( File child : fileOrDirectory.listFiles() )
+				eliminaFileCartelle( child );
+		fileOrDirectory.delete();
+	}
+
 	Gedcom trovaErrori( final int idAlbero, final boolean correggi ) {
 		Gedcom gc = leggiJson( idAlbero );
-		String txt = "";
 		int errori = 0;
 		int num;
+		// Cerca famiglie vuote o con un solo membro per eliminarle
+		for( Family f : gc.getFamilies() ) {
+			num = 0;
+			for( SpouseRef sr : f.getHusbandRefs() ) {
+				num++;
+			}
+			for( SpouseRef sr : f.getWifeRefs() ) {
+				num++;
+			}
+			for( ChildRef cr : f.getChildRefs() ) {
+				num++;
+			}
+			if( num < 2 ) {
+				if( correggi ) {
+					gc.getFamilies().remove( f ); // così facendo lasci i ref negli individui orfani della famiglia a cui si riferiscono...
+					// ma c'è il resto del correttore che li risolve
+					break;
+				} else errori++;
+			}
+		}
 		// Riferimenti da una persona alla famiglia dei genitori e dei figli
 		for( Person p : gc.getPeople() ) {
 			for( ParentFamilyRef pfr : p.getParentFamilyRefs() ) {
@@ -422,7 +467,7 @@ public class Alberi extends AppCompatActivity {
 						U.salvaJson( gcCorretto, idAlbero );
 						trovaErrori( idAlbero, false );	// riapre per ammirere il risultato
 					}
-				} );
+				});
 			}
 			dialog.setNeutralButton( R.string.cancel, new DialogInterface.OnClickListener() {
 				public void onClick( DialogInterface dialogo, int i ) {

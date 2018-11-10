@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -554,6 +556,29 @@ public class U {
 					Bitmap bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Riesce a ricavare un'immagine
 					//bitmap = ThumbnailUtils.extractThumbnail( bitmap, 30, 60, ThumbnailUtils.OPTIONS_RECYCLE_INPUT );
 						// Fico ma ritaglia l'immagine per farla stare nelle dimensioni date. La quarta opzione non l'ho capita
+					try { // Rotazione Exif
+						ExifInterface exif = new ExifInterface( percorso );
+						int girata = exif.getAttributeInt( ExifInterface.TAG_ORIENTATION, 1 );
+						int gradi = 0;
+						switch( girata ) {
+							//case ExifInterface.ORIENTATION_NORMAL:
+							case ExifInterface.ORIENTATION_ROTATE_90:
+								gradi = 90;
+								break;
+							case ExifInterface.ORIENTATION_ROTATE_180:
+								gradi = 180;
+								break;
+							case ExifInterface.ORIENTATION_ROTATE_270:
+								gradi = 270;
+						}
+						if( gradi > 0 ) {
+							Matrix matrix = new Matrix();
+							matrix.postRotate( gradi );
+							bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true );
+						}
+					} catch( Exception e ) {
+						Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+					}
 					if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
 						|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
 						// Magari è un video
@@ -835,7 +860,8 @@ public class U {
 
 
 	public static void salvaJson() {
-		salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+		if( !Globale.preferenze.salvaVolontario )
+			salvaJson( Globale.gc, Globale.preferenze.idAprendo );
 	}
 
 	static void salvaJson( Gedcom gc, int idAlbero ) {

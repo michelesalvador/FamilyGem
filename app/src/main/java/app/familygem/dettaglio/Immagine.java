@@ -35,10 +35,10 @@ public class Immagine extends Dettaglio {
 	public void impagina() {
 		if( m != null ) {
 			if( m.getId() != null ) {
-				setTitle( R.string.media );
+				setTitle( R.string.shared_media );
 				vistaId.setText( m.getId() );    // 'O1' solo per Multimedia Records
 			} else {
-				setTitle( R.string.local_media );
+				setTitle( R.string.media );
 				vistaId.setText( "OBJE" );
 			}
 			occorrenze = String.valueOf( Galleria.popolarita( m ) );

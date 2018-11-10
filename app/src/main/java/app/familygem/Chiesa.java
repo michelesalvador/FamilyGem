@@ -33,11 +33,13 @@ public class Chiesa extends Fragment {
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
 		View vista = inflater.inflate( R.layout.magazzino, container, false );
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
-		List<Family> listaFamiglie = gc.getFamilies();
-		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaFamiglie.size() + " " + getString(R.string.families).toLowerCase() );
-		for( final Family fam : listaFamiglie )
-			mettiFamiglia( scatola, fam );
-		setHasOptionsMenu(true);
+		if( gc != null ) {
+			List<Family> listaFamiglie = gc.getFamilies();
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaFamiglie.size() + " " + getString( R.string.families ).toLowerCase() );
+			for( final Family fam : listaFamiglie )
+				mettiFamiglia( scatola, fam );
+			setHasOptionsMenu( true );
+		}
 		return vista;
 	}
 

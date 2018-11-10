@@ -1,5 +1,6 @@
 package app.familygem;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,10 +17,14 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import com.google.gson.Gson;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+import com.yalantis.ucrop.UCrop;
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.parser.ModelParser;
@@ -126,6 +131,35 @@ public class Officina extends AppCompatActivity {
 			}
 		});
 
+		findViewById(R.id.bottone_apri_croppa).setOnClickListener( new View.OnClickListener() {
+			public void onClick(View v) {
+				// il classico cercatore di file di Family Gem
+				/*Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+				intent.setType( "image/*" );
+				startActivityForResult( intent,14463 );*/
+
+				// Apre direttamente Android Image Cropper con le opzioni per importare un'immagine
+				// Molto interessante ma vorrei implementarlo io
+				/*CropImage.activity()
+						//.quiciVannoleOpzioni()
+						.start(Officina.this );*/
+
+				// Cerca di sfruttare la bellissima lista di fonti di immagini fornita da Android Image Cropper
+				// funziona TRANNE la foto scattata con la fotocamera restituisce 'Intent data' = null
+				//startActivityForResult( CropImage.getPickImageChooserIntent( Officina.this,"Choose the source", false, true ), 14463 );
+				CropImage.startPickImageActivity( Officina.this );
+				/*if (CropImage.isExplicitCameraPermissionRequired(Officina.this )) {
+					// request permissions and handle the result in onRequestPermissionsResult()
+					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.CAMERA},
+							CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE );
+				} else {
+					CropImage.startPickImageActivity( Officina.this );
+				}
+
+				startActivity( new Intent( Officina.this, CropImageActivity.class ) );*/
+			}
+		});
+
 		findViewById(R.id.immagine).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
 				startActivity( new Intent( Officina.this, Diagramma.class ) );
@@ -154,6 +188,7 @@ public class Officina extends AppCompatActivity {
 	@Override
 	protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		//??? super.onActivityResult(requestCode, resultCode, data);    Inutile
+		s.l( "requestCode ============= " + requestCode +"  resultCode ===== " + resultCode + "   " + data );
 		// Importa un file Gedcom
 		if( resultCode == RESULT_OK && requestCode == 123 ) {
 			try {
@@ -291,6 +326,65 @@ public class Officina extends AppCompatActivity {
 				}
 			} catch( Exception e ) {
 				e.printStackTrace();
+			}
+		}
+
+		/* Riceve un'immagine e la ritaglia con uCrop. ok funziona
+		if( resultCode == RESULT_OK && requestCode == 14463 ) {
+			File destino = new File( getFilesDir(), "prova.jpg" );
+			Uri uriDestinazione = Uri.fromFile( destino );
+			UCrop.Options opzioni = new UCrop.Options();
+			//opzioni.setHideBottomControls( true );
+			opzioni.setShowCropGrid( false );
+			opzioni.setFreeStyleCropEnabled( true );
+			opzioni.setAllowedGestures( UCropActivity.ALL,UCropActivity.ALL,UCropActivity.ALL ); // non ho capito bene...
+			opzioni.setToolbarColor( getResources().getColor(R.color.primario) );
+			opzioni.setStatusBarColor( getResources().getColor(R.color.primarioScuro) );
+			opzioni.setCompressionQuality( 90 );
+			UCrop.of( data.getData(), uriDestinazione )
+					//.withAspectRatio(1, 1 )
+					.withOptions( opzioni )
+					.withMaxResultSize( 200, 200 ) // max Width, max Height Todo: larghezza e altezza dello schermo?
+					.start( this );
+		}*/
+		// Riprende l'immagine ritagliata da uCrop
+		if( resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP ) {
+			Uri resultUri = UCrop.getOutput( data );
+			s.l( resultUri );	// file:///data/data/app.familylab/files/prova.jpg
+			try {
+				Bitmap bitmap = MediaStore.Images.Media.getBitmap( this.getContentResolver(), resultUri );
+				((ImageView)findViewById(R.id.immagine)).setImageBitmap( bitmap );
+			} catch( IOException e ) {
+				e.printStackTrace();
+			}
+		} else if( resultCode == UCrop.RESULT_ERROR ) {
+			final Throwable cropError = UCrop.getError(data);
+			s.l( cropError );
+		}
+
+		// Riceve un'immagine e la ritaglia con Android Image Cropper
+		if( resultCode == RESULT_OK && requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE ) { //14463
+			if( data != null ) {
+				CropImage.activity( data.getData() )
+						//.setActivityMenuIconColor(Color.GREEN)
+						//.setAutoZoomEnabled( true )
+						.setGuidelines( CropImageView.Guidelines.OFF )
+						.setBorderCornerThickness( 0 )
+						//.setAllowRotation(true)
+						//.setActivityTitle( "" )
+						.setCropMenuCropButtonTitle( "Fatto" )
+						.start( this );
+			} else
+				s.l( "data è null" );
+		}
+		// Ottiene l'immagine ritagliata da Android Image Cropper
+		if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
+			CropImage.ActivityResult result = CropImage.getActivityResult(data);
+			if( resultCode == RESULT_OK ) {
+				Uri resultUri = result.getUri();
+				((ImageView)findViewById(R.id.immagine)).setImageURI( resultUri ); // come ho fatto a ignorarlo fin'ora?????
+			} else if( resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+				s.l( result.getError() );
 			}
 		}
 	}

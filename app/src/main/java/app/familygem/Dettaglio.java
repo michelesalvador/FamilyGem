@@ -269,37 +269,7 @@ public class Dettaglio extends AppCompatActivity {
 				archRef.setRef( data.getStringExtra("idArchivio") );
 				((Source)oggetto).setRepositoryRef( archRef );
 			} else if( requestCode == 5173 ) { // Importa un file scelto col file manager da Immagine
-				try {
-					Uri uri = data.getData();
-					String percorso = U.uriPercorsoFile( uri );
-					File fileMedia;
-					if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
-						// Apre direttamente il file
-						fileMedia = new File( percorso );
-						if( fileMedia.exists() ) {
-							// TODO questo è sciocco perché probabilmente l'utente non vuole modificare i percorsi di tutti gli altri file...
-							// TODO, solo se "non li trova"
-							Globale.preferenze.alberoAperto().cartella = fileMedia.getParent();
-							Globale.preferenze.salva();
-						}
-					} else {    // è solo il nome del file 'pippo.png'
-						// Copia il file (che può essere di qualsiasi tipo) nella memoria esterna della app
-						// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
-						InputStream input = getContentResolver().openInputStream( uri );
-						String percorsoMemoria = getExternalFilesDir(null) + "/" + Globale.preferenze.idAprendo;
-						File dirMemoria = new File( percorsoMemoria );
-						if( !dirMemoria.exists() )
-							dirMemoria.mkdir();
-						// Todo: controllare che non esista già il nome del file in percorsoCartella, quindi rinominarlo con +(1)
-						fileMedia = new File( percorsoMemoria, percorso );
-						FileUtils.copyInputStreamToFile( input, fileMedia );
-
-					}
-					((Media)oggetto).setFile( fileMedia.getAbsolutePath() );
-				} catch( IOException e ) {
-					Toast.makeText( Dettaglio.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-					return;
-				}
+				if( !settaMedia( this, data, (Media)oggetto ) ) return;
 			}
 			//  da menu contestuale 'Scegli...'
 			if( requestCode == 5390  ) { // Imposta l'archivio che è stato scelto in Magazzino da ArchivioRef
@@ -313,6 +283,42 @@ public class Dettaglio extends AppCompatActivity {
 			if( contenitore != null )
 				Ponte.manda( contenitore, "contenitore" );
 		}
+	}
+
+	// Imposta in un Media il file scelto da file manager
+	static boolean settaMedia( Context contesto, Intent data, Media media ) {
+		try {
+			Uri uri = data.getData();
+			String percorso = U.uriPercorsoFile( uri );
+			File fileMedia;
+			if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
+				// Apre direttamente il file
+				fileMedia = new File( percorso );
+				if( fileMedia.exists() ) {
+					// TODO questo è sciocco perché probabilmente l'utente non vuole modificare i percorsi di tutti gli altri file...
+					// TODO, solo se "non li trova"
+					Globale.preferenze.alberoAperto().cartella = fileMedia.getParent();
+					Globale.preferenze.salva();
+				}
+			} else {    // è solo il nome del file 'pippo.png'
+				// Copia il file (che può essere di qualsiasi tipo) nella memoria esterna della app
+				// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
+				InputStream input = contesto.getContentResolver().openInputStream( uri );
+				String percorsoMemoria = contesto.getExternalFilesDir(null) + "/" + Globale.preferenze.idAprendo;
+				File dirMemoria = new File( percorsoMemoria );
+				if( !dirMemoria.exists() )
+					dirMemoria.mkdir();
+				// Todo: controllare che non esista già il nome del file in percorsoCartella, quindi rinominarlo con +(1)
+				fileMedia = new File( percorsoMemoria, percorso );
+				FileUtils.copyInputStreamToFile( input, fileMedia );
+
+			}
+			media.setFile( fileMedia.getAbsolutePath() );
+		} catch( Exception e ) {
+			Toast.makeText( contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+			return false;
+		}
+		return true;
 	}
 
 	// Aggiorna i contenuti quando si torna indietro con backPressed()
@@ -733,6 +739,7 @@ public class Dettaglio extends AppCompatActivity {
 			case 17:	// Scollega
 				Famiglia.scollega( pers.getId(), (Family)oggetto );
 				box.removeView( vistaPezzo );
+				Globale.editato = true;
 				break;
 			case 18:
 				Anagrafe.elimina( pers.getId(), this, vistaPezzo );

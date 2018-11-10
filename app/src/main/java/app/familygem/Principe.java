@@ -10,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -60,14 +61,21 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			}
         }
 
-		NavigationView menu = scatolissima.findViewById(R.id.menu);
-		menu.getHeaderView(0).findViewById( R.id.menu_testa ).setOnClickListener( new View.OnClickListener() {
+		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_testa ).setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View v ) {
 				scatolissima.closeDrawer(GravityCompat.START);
 				startActivity( new Intent( Principe.this, Alberi.class ) );
 			}
 		} );
+
+		// Nasconde le voci del menu più ostiche
+		if( !Globale.preferenze.esperto ) {
+			Menu menu = menuPrincipe.getMenu();
+			menu.findItem(R.id.nav_fonti).setVisible(false);
+			menu.findItem( R.id.nav_archivi ).setVisible(false);
+			menu.findItem( R.id.nav_autore ).setVisible(false);
+		}
     }
 
 	// Aggiorna i contenuti quando si torna indietro con backPressed()

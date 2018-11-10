@@ -46,6 +46,7 @@ import org.folg.gedcom.parser.ModelParser;
 public class AlberoNuovo extends AppCompatActivity {
 
 	boolean permessoContatti;
+	boolean proponiMostrareFunzioniAvanzate;
 
     @Override
     protected void onCreate( Bundle stato ) {
@@ -255,11 +256,30 @@ public class AlberoNuovo extends AppCompatActivity {
 				// Salva le impostazioni in Armadio
 				Globale.preferenze.aggiungi( new Armadio.Cassetto( nuovoNum, nomeAlbero, percorsoCartella,
 						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc), U.trovaRadice(gc), null ) );
-				// e apre il json
+		        // Se necessario propone di mostrare le funzioni avanzate TODO il dialogo va pensato meglio quando farlo comparire
+		        if( !gc.getSources().isEmpty() && !Globale.preferenze.esperto ) {
+			        /*AlertDialog.Builder dialog = new AlertDialog.Builder( this );
+			        dialog.setMessage( "L'albero che hai importato sembra piuttosto complesso.\nPer gestirlo vuoi mostrare le funzioni avanzate di Family Ged?" );
+			        dialog.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
+				        public void onClick( DialogInterface dialogo, int i ) {
+					        dialogo.cancel();
+					        Globale.preferenze.esperto = true;
+					        Globale.preferenze.salva();
+				        }
+			        });
+			        dialog.setNegativeButton( android.R.string.no, new DialogInterface.OnClickListener() {
+				        public void onClick( DialogInterface dialogo, int i ) {
+					        dialogo.cancel();
+				        }
+			        }).show();*/
+			        Globale.preferenze.esperto = true;
+			        Globale.preferenze.salva();
+		        }
+				// Apre il json
 				Alberi.apriJson( nuovoNum );
             } catch( Exception e ) {	//IOException | SAXParseException | URISyntaxException |FileNotFoundException |
                 Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             // torna al diagramma
 			startActivity( new Intent( this, Principe.class ) );

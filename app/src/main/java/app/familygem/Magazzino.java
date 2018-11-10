@@ -36,51 +36,52 @@ public class Magazzino extends Fragment {
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
-		List<Repository> listArchivi = gc.getRepositories();
-		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listArchivi.size() + " " + getString(R.string.repositories).toLowerCase() );
-		setHasOptionsMenu(true);
-		View vista = inflater.inflate( R.layout.magazzino, container, false);
+    	View vista = inflater.inflate( R.layout.magazzino, container, false);
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
-		for( Repository rep : listArchivi ) {
-			if( rep.getExtension("fonti") == null )
-				rep.putExtension( "fonti", quanteFonti(rep,gc) );
-		}
-		Collections.sort( listArchivi, new Comparator<Repository>() {
-			public int compare( Repository r1, Repository r2 ) {
-				switch( Globale.ordineMagazzino ) {
-					case 1:	// Ordina per id
-						return Integer.parseInt(r1.getId().substring(1)) - Integer.parseInt(r2.getId().substring(1));
-					case 2:	// Ordine alfabeto
-						return r1.getName().compareToIgnoreCase(r2.getName());
-					case 3:	// Ordina per numero di fonti
-						return U.castaJsonInt(r2.getExtension("fonti")) - U.castaJsonInt(r1.getExtension("fonti"));
-					default:
-						return 0;
-				}
+		if( gc != null ) {
+			setHasOptionsMenu(true);
+			List<Repository> listArchivi = gc.getRepositories();
+			((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listArchivi.size() + " " + getString(R.string.repositories).toLowerCase() );
+			for( Repository rep : listArchivi ) {
+				if( rep.getExtension("fonti") == null )
+					rep.putExtension( "fonti", quanteFonti(rep,gc) );
 			}
-		});
-		for( final Repository rep : listArchivi ) {
-			View vistaPezzo = inflater.inflate( R.layout.magazzino_pezzo, scatola, false );
-			scatola.addView( vistaPezzo );
-			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( rep.getName() );
-			((TextView)vistaPezzo.findViewById( R.id.magazzino_archivi )).setText( String.valueOf(rep.getExtension("fonti")) );
-			vistaPezzo.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View vista ) {
-					if( getActivity().getIntent().getBooleanExtra("magazzinoScegliArchivio",false) ) {
-						Intent intento = new Intent();
-						intento.putExtra("idArchivio", rep.getId() );
-						getActivity().setResult( Activity.RESULT_OK, intento );
-						getActivity().finish();
-					} else {
-						Ponte.manda( rep, "oggetto" );
-						startActivity( new Intent( getContext(), Archivio.class ) );
+			Collections.sort( listArchivi, new Comparator<Repository>() {
+				public int compare( Repository r1, Repository r2 ) {
+					switch( Globale.ordineMagazzino ) {
+						case 1:	// Ordina per id
+							return Integer.parseInt(r1.getId().substring(1)) - Integer.parseInt(r2.getId().substring(1));
+						case 2:	// Ordine alfabeto
+							return r1.getName().compareToIgnoreCase(r2.getName());
+						case 3:	// Ordina per numero di fonti
+							return U.castaJsonInt(r2.getExtension("fonti")) - U.castaJsonInt(r1.getExtension("fonti"));
+						default:
+							return 0;
 					}
 				}
 			});
-			registerForContextMenu( vistaPezzo );
-			vistaPezzo.setTag( rep );
+			for( final Repository rep : listArchivi ) {
+				View vistaPezzo = inflater.inflate( R.layout.magazzino_pezzo, scatola, false );
+				scatola.addView( vistaPezzo );
+				((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( rep.getName() );
+				((TextView)vistaPezzo.findViewById( R.id.magazzino_archivi )).setText( String.valueOf(rep.getExtension("fonti")) );
+				vistaPezzo.setOnClickListener( new View.OnClickListener() {
+					public void onClick( View vista ) {
+						if( getActivity().getIntent().getBooleanExtra("magazzinoScegliArchivio",false) ) {
+							Intent intento = new Intent();
+							intento.putExtra("idArchivio", rep.getId() );
+							getActivity().setResult( Activity.RESULT_OK, intento );
+							getActivity().finish();
+						} else {
+							Ponte.manda( rep, "oggetto" );
+							startActivity( new Intent( getContext(), Archivio.class ) );
+						}
+					}
+				});
+				registerForContextMenu( vistaPezzo );
+				vistaPezzo.setTag( rep );
+			}
 		}
-
 		return vista;
 	}
 

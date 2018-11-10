@@ -18,20 +18,12 @@ public class Lapide extends AppCompatActivity {
 		TextView versione = findViewById( R.id.lapide_versione );
 		versione.setText( getString(R.string.version_name,BuildConfig.VERSION_NAME) );
 
-		TextView collega1 = findViewById( R.id.lapide_link1 );
-		TextView collega2 = findViewById( R.id.lapide_link2 );
-		collega1.setPaintFlags( collega1.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG );
-		collega2.setPaintFlags( collega2.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG );
-		collega1.setOnClickListener( new View.OnClickListener() {
+		TextView collega = findViewById( R.id.lapide_link );
+		collega.setPaintFlags( collega.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG );
+		collega.setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View v ) {
 				startActivity( new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.familygem.app")) );
-			}
-		});
-		collega2.setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				startActivity( new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/michelesalvador/FamilyGem")) );
 			}
 		});
 	}

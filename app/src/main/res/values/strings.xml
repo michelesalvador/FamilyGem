@@ -32,7 +32,9 @@
     <string name="generations">generations</string>
     <string name="no_useful_data">Can\'t get useful data.</string>
     <string name="make_backup">Make backup</string>
+    <string name="options">Options</string>
     <string name="about">About</string>
+    <string name="save">Save</string>
     <string name="tree_info">Info</string>
     <string name="rename">Rename</string>
     <string name="find_errors">Find errors</string>
@@ -42,6 +44,9 @@
     <string name="all_ok">Everything ok</string>
     <string name="errors_found">%d errors found.</string>
     <string name="correct">Correct</string>
+    <!-- Opzioni -->
+    <string name="show_advanced_functions">Show advanced functions</string>
+    <string name="choose_to_save">Let me choose when to save</string>
     <!-- InfoAlbero -->
     <string name="header">Header</string>
     <string name="create_header">Create header</string>
@@ -92,9 +97,9 @@
     <!-- Individuo -->
     <string name="events">Events</string>
     <string name="relatives">Relatives</string>
-    <string name="new_local_media">New local media</string>
     <string name="new_media">New media</string>
-    <string name="link_media">Link media</string>
+    <string name="new_shared_media">New shared media</string>
+    <string name="link_shared_media">Link shared media</string>
     <string name="name">Name</string>
     <string name="sex">Sesso</string>
     <string name="event">Event</string>
@@ -176,7 +181,7 @@
     <string name="repository_note">Repository-note</string>
     <string name="repository">Repository</string>
     <!-- Immagine -->
-    <string name="local_media">Local media</string>
+    <string name="shared_media">Shared media</string>
     <string name="format">Format</string>
     <string name="primary">Primary</string>
     <string name="scrapbook">Scrapbook</string>
