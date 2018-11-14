@@ -18,6 +18,7 @@ import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
 import java.util.List;
+import java.util.Map;
 import app.familygem.dettaglio.Nota;
 import static app.familygem.Globale.gc;
 
@@ -30,22 +31,55 @@ public class Quaderno extends Fragment {
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
+		boolean scegliNota = getActivity().getIntent().getBooleanExtra("quadernoScegliNota",false );
 		View vista = inflater.inflate( R.layout.magazzino, container, false );
-		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
-		List<Note> listaNote = gc.getNotes();
-		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaNote.size() + " " + getString(R.string.shared_notes) );
-		for( Note not : listaNote )
-			registerForContextMenu( mettiNota( scatola, not ) );
-		setHasOptionsMenu(true);
+		if( gc != null ) {
+			LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
+			// Note condivise
+			List<Note> listaNoteCondivise = gc.getNotes();
+			if( !listaNoteCondivise.isEmpty() ) {
+				if( !scegliNota ) {
+					View tit = inflater.inflate( R.layout.titoletto, scatola, true );
+					String txt = listaNoteCondivise.size() +" "+ getText(R.string.shared_notes);
+					((TextView)tit.findViewById(R.id.titolo_testo)).setText( txt );
+				}
+				for( Note not : listaNoteCondivise )
+					registerForContextMenu( mettiNota(scatola,not,gc) );
+			}
+			// Note inlinea
+			VisitaListaNote visitaNote = new VisitaListaNote(null);
+			if( !scegliNota ) {
+				gc.accept( visitaNote );
+				if( !visitaNote.listaNote.isEmpty() ) {
+					View tit = inflater.inflate( R.layout.titoletto, scatola, false );
+					String txt = visitaNote.listaNote.size() +" "+ getText(R.string.simple_notes);
+					((TextView)tit.findViewById(R.id.titolo_testo)).setText( txt );
+					//((TextView)tit.findViewById(R.id.titolo_numero)).setText( String.valueOf(visitaNote.listaNote.size()) );
+					scatola.addView( tit );
+					for( Map.Entry<Note,Object> dato : visitaNote.listaNote.entrySet() )
+						registerForContextMenu( mettiNota(scatola,dato.getKey(),dato.getValue()) );
+				}
+			}
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
+					(listaNoteCondivise.size()+visitaNote.listaNote.size()) + " " + getString(R.string.notes).toLowerCase() );
+			setHasOptionsMenu(true);
+		}
 		return vista;
 	}
 
-	View mettiNota( final LinearLayout scatola, final Note nota ) {
+	View mettiNota( final LinearLayout scatola, final Note nota, final Object contenitore ) {
 		View vistaNota = LayoutInflater.from(scatola.getContext()).inflate( R.layout.quaderno_pezzo, scatola, false );
 		scatola.addView( vistaNota );
 		String testo = nota.getValue();
 		((TextView)vistaNota.findViewById( R.id.nota_testo )).setText( testo );
-		((TextView)vistaNota.findViewById( R.id.nota_citazioni )).setText( "321" ); // TODO
+		TextView vistaCita = vistaNota.findViewById( R.id.nota_citazioni );
+		if( nota.getId() == null )
+			vistaCita.setVisibility( View.GONE );
+		else {
+			VisitaListaNote contaUso = new VisitaListaNote( nota.getId() );
+			gc.accept( contaUso );
+			vistaCita.setText( String.valueOf(contaUso.num) );
+		}
 		vistaNota.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View vista ) {
 				// Restituisce l'id di una nota a Individuo e Dettaglio
@@ -56,7 +90,7 @@ public class Quaderno extends Fragment {
 					getActivity().finish();
 				} else {
 					Ponte.manda( nota, "oggetto" );
-					Ponte.manda( gc, "contenitore" );
+					Ponte.manda( contenitore, "contenitore" );
 					scatola.getContext().startActivity( new Intent( scatola.getContext(), Nota.class ) );
 				}
 			}

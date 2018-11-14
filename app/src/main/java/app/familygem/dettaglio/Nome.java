@@ -18,13 +18,23 @@ public class Nome extends Dettaglio {
 			oggetto = n;
 			setTitle( R.string.name );
 			vistaId.setText( "NAME" );
-			metti( getString(R.string.value), "Value" );
+			if( Globale.preferenze.esperto )
+				metti( getString(R.string.value), "Value" );
+			else {
+				String epiteto = n.getValue();
+				String nome = epiteto.replaceAll( "/.*?/", "" ).trim();
+				creaPezzo( getString(R.string.name), nome, 4043, false );
+				String cognome = "";
+				if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
+					cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
+				creaPezzo( getString(R.string.surname), cognome, 6064, false );
+			}
 			metti( getString(R.string.type), "Type", false, false );  // _type non Gedcom standard
 			metti( getString(R.string.prefix), "Prefix" );
-			metti( getString(R.string.given), "Given" );
+			metti( getString(R.string.given), "Given", Globale.preferenze.esperto, false );
 			metti( getString(R.string.nickname), "Nickname" );
 			metti( getString(R.string.surname_prefix), "SurnamePrefix" );
-			metti( getString(R.string.surname), "Surname" );
+			metti( getString(R.string.surname), "Surname", Globale.preferenze.esperto, false );
 			metti( getString(R.string.suffix), "Suffix" );
 			metti( getString(R.string.married_name), "MarriedName", false, false ); // _marrnm
 			metti( getString(R.string.aka), "Aka", false, false );    // _aka

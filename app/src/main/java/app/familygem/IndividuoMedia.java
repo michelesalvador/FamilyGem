@@ -23,7 +23,7 @@ public class IndividuoMedia extends Fragment {
 		View vistaMedia = inflater.inflate(R.layout.individuo_scheda, container, false);
 		final LinearLayout scatola = vistaMedia.findViewById( R.id.contenuto_scheda );
 		uno = gc.getPerson( Globale.individuo );
-		VisitaListaMedia visitaMedia = new VisitaListaMedia(true);
+		VisitaListaMedia visitaMedia = new VisitaListaMedia( gc, true );
 		uno.accept( visitaMedia );
 		for( Map.Entry<Media,Object> m :visitaMedia.listaMedia.entrySet() )
 			Galleria.poniMedia( scatola, m.getValue(), m.getKey(), true );

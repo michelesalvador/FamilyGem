@@ -5,14 +5,17 @@ import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class Armadio {
 
 	List<Cassetto> alberi;
 	int idAprendo;
-	boolean esperto;
-	boolean salvaVolontario;
+	boolean autoSalva;
+	boolean caricaAlbero;
+	public boolean esperto;
 
 	int max() {
 		int num = 0;
@@ -84,16 +87,22 @@ public class Armadio {
 	public static class Cassetto {
 		int id;
 		String nome;
+		@Deprecated
 		String cartella;
+		LinkedHashSet<String> cartelle;
 		int individui;
 		int generazioni;
+		int media;
 		String radice;
 		List<String> preferiti;
 
-		Cassetto( int id, String nome, String cartella, int individui, int generazioni, String radice, List<String> preferiti) {
+		Cassetto( int id, String nome, String cartella, int individui, int generazioni, String radice, List<String> preferiti ) {
 			this.id = id;
 			this.nome = nome;
-			this.cartella = cartella;
+			//this.cartella = cartella;
+			cartelle = new LinkedHashSet<>();
+			if( cartella != null )
+				cartelle.add( cartella );
 			this.individui = individui;
 			this.generazioni = generazioni;
 			this.radice = radice;

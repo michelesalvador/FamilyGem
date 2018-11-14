@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -109,14 +110,14 @@ public class U {
 		String completo = "";
 		String grezzo = n.getValue().trim();
 		if( grezzo.indexOf('/') > -1 ) // Se c'è un cognome tra '/'
-			completo = grezzo.substring( 0, grezzo.indexOf('/') ).trim();
+			completo = grezzo.substring( 0, grezzo.indexOf('/') ).trim(); // nome
 		if (n.getNickname() != null)
 			completo += " \"" + n.getNickname() + "\"";
-		if( grezzo.indexOf('/') > -1 ) {
-			completo += " " + grezzo.substring( grezzo.indexOf('/') + 1, grezzo.lastIndexOf('/') ).trim();
+		if( grezzo.indexOf('/') < grezzo.lastIndexOf('/') ) {
+			completo += " " + grezzo.substring( grezzo.indexOf('/') + 1, grezzo.lastIndexOf('/') ).trim(); // cognome
 		}
 		if( grezzo.length() - 1 > grezzo.lastIndexOf('/') )
-			completo += " " + grezzo.substring( grezzo.lastIndexOf('/') + 1 ).trim();
+			completo += " " + grezzo.substring( grezzo.lastIndexOf('/') + 1 ).trim(); // dopo il cognome
 		if( n.getPrefix() != null )
 			completo = n.getPrefix().trim() + " " + completo;
 		if( n.getSuffix() != null )
@@ -403,7 +404,7 @@ public class U {
 					final String id = DocumentsContract.getDocumentId(uri);	// un numero tipo '2326'
 					uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id) );
 					cosaCercare = MediaStore.Files.FileColumns.DATA;
-					s.l( "uri ricostruito = " + uri );
+					//s.l( "uri ricostruito = " + uri );
 				/*case "com.google.android.apps.docs.storage":	// Google drive 1
 					// com.google.android.apps.docs.storage.legacy
 				}*/
@@ -435,15 +436,23 @@ public class U {
 			// Percorso FILE (quello nel gedcom)
 			if( new File(nome).isFile() )
 				return nome;
-			String cartella = Globale.preferenze.alberoAperto().cartella + '/';
-			// Cartella del .ged + percorso FILE
-			String percorsoRicostruito = cartella + nome;
-			if( new File(percorsoRicostruito).isFile() )
-				return percorsoRicostruito;
-			// File nella stessa cartella del gedcom
-			String percorsoFile = cartella + new File(nome).getName();
-			if( new File(percorsoFile).isFile() )
-				return percorsoFile;
+
+			if( Globale.preferenze.alberoAperto().cartelle == null ) { // todo questo traghettatore poi se ne può andare
+				Globale.preferenze.alberoAperto().cartelle = new LinkedHashSet<>();
+				Globale.preferenze.alberoAperto().cartelle.add( Globale.preferenze.alberoAperto().cartella );
+				Globale.preferenze.salva();
+			}
+
+			for( String dir : Globale.preferenze.alberoAperto().cartelle ) {
+				// Cartella media + percorso FILE
+				String percorsoRicostruito = dir + '/' + nome;
+				if( new File(percorsoRicostruito).isFile() )
+					return percorsoRicostruito;
+				// Cartella media + nome del FILE
+				String percorsoFile = dir + '/' + new File(nome).getName();
+				if( new File(percorsoFile).isFile() )
+					return percorsoFile;
+			}
 		}
 		return null;
 	}
@@ -722,7 +731,7 @@ public class U {
 	}
 
 	public static void scollegaNota( Note nota, Object contenitore, View vista ) {
-		s.l("Scollego " + nota + " da " + contenitore );
+		//s.l("Scollego " + nota + " da " + contenitore );
 		List<NoteRef> lista = ((NoteContainer)contenitore).getNoteRefs();
 		for( NoteRef ref : lista )
 			if( ref.getNote(Globale.gc).equals( nota ) ) {
@@ -733,11 +742,11 @@ public class U {
 		vista.setVisibility( View.GONE );
 	}
 
-	// todo unifica con Quaderno.elimina()
+	// Todo unifica con Quaderno.elimina()
 	public static void eliminaNota( Note nota, Object contenitore, View vista ) {
-		s.l( "Elimina Media " + "  " + nota + " da " + contenitore );
+		//s.l( "Elimina Media " + "  " + nota + " da " + contenitore );
 		if( nota.getId() != null ) {	// nota OBJECT
-			s.l( "OBJECT " );
+			//s.l( "OBJECT " );
 			Globale.gc.getNotes().remove( nota );	// ok
 			Globale.gc.createIndexes();	// necessario per farlo scomparire anche dall'oggetto contenitore
 		} else	// nota LOCALE
@@ -858,9 +867,8 @@ public class U {
 		return false;
 	}
 
-
 	public static void salvaJson() {
-		if( !Globale.preferenze.salvaVolontario )
+		if( Globale.preferenze.autoSalva )
 			salvaJson( Globale.gc, Globale.preferenze.idAprendo );
 	}
 

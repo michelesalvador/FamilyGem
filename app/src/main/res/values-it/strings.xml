@@ -45,8 +45,9 @@
     <string name="errors_found">Ci sono %d errori.</string>
     <string name="correct">Correggi</string>
     <!-- Opzioni -->
+    <string name="auto_save">Salvataggio automatico</string>
+    <string name="load_tree_startup">Carica l\'albero all\'avvio</string>
     <string name="show_advanced_functions">Mostra le funzioni avanzate</string>
-    <string name="choose_to_save">Lasciami decidere quando salvare</string>
     <!-- InfoAlbero -->
     <string name="header">Intestazione</string>
     <string name="create_header">Crea l\'intestazione</string>
@@ -200,6 +201,9 @@
     <string name="children">figli</string>
     <string name="family">Famiglia</string>
     <string name="marriage">Matrimonio</string>
+    <!-- Note -->
+    <string name="shared_notes">note condivise</string>
+    <string name="simple_notes">note semplici</string>
     <!-- EditaIndividuo -->
     <string name="male">Maschio</string>
     <string name="female">Femmina</string>
@@ -240,6 +244,5 @@
     <string name="make_default">Rendi principale</string>
     <string name="citations">Citazioni</string>
     <string name="sources_number">Numero di fonti</string>
-    <string name="shared_notes">note condivise</string>
     <string name="extension">Altro</string>
 </resources>

@@ -43,7 +43,7 @@ public class Galleria extends Fragment {
 		View vista = inflater.inflate( R.layout.magazzino, container, false);
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
 		if( gc != null ) {
-			VisitaListaMedia visitaMedia = new VisitaListaMedia( !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
+			VisitaListaMedia visitaMedia = new VisitaListaMedia( gc, !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
 			gc.accept( visitaMedia );
 			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size() + " " + getString(R.string.media).toLowerCase() );
 			for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() )
@@ -163,7 +163,7 @@ public class Galleria extends Fragment {
 			if( val > max )	max = val;
 		}
 		media.setId( "M" + (max+1) );
-		//media.setFile( "" );
+		media.setFileTag("FILE"); // Necessario per poi esportare il Gedcom
 		gc.addMedia( media );
 		if( contenitore != null ) {
 			MediaRef rifMed = new MediaRef();
@@ -177,7 +177,7 @@ public class Galleria extends Fragment {
 	public static void scollegaMedia( Media media, Object contenitore, View vista ) {
 		List<MediaRef> lista = ((MediaContainer)contenitore).getMediaRefs();
 		for( MediaRef ref : lista ) {
-			s.l( ref.getRef() +"    "+ ref.getMedia( Globale.gc ));
+			//s.l( ref.getRef() +"    "+ ref.getMedia( Globale.gc ));
 			if( ref.getMedia( Globale.gc ) == null ) {	// Eventuale ref a un media inesistente
 				lista.remove( ref );	// rimuove il ref e ricomincia
 				scollegaMedia( media, contenitore, vista );
@@ -193,15 +193,21 @@ public class Galleria extends Fragment {
 		vista.setVisibility( View.GONE );
 	}
 
+	// Elimina un media condiviso o locale e rimuove i riferimenti nei contenitori
 	public static void eliminaMedia( Media media, Object contenitore, View vista ) {
-		// Solo per il particolare modo in cui sono collezionati i media in Galleria
-		// qui vengono eliminati i media di Gedcom (che non extende MediaContainer)
 		if( media.getId() != null ) {	// media OBJECT
 			gc.getMedia().remove( media );	// ok
-			gc.createIndexes();	// necessario per farlo scomparire anche dall'oggetto contenitore
-		} else	// media LOCALI
-			((MediaContainer)contenitore).getMedia().remove( media );
-		vista.setVisibility( View.GONE );
+			// Elimina i riferimenti in tutti i contenitori
+			VisitaEliminaMedia eliminaMedia = new VisitaEliminaMedia( media );
+			gc.accept( eliminaMedia );
+		} else {	// media LOCALE
+			List<Media> lista = ((MediaContainer)contenitore).getMedia();
+			lista.remove( media );
+			if( lista.isEmpty() )
+				((MediaContainer)contenitore).setMedia( null );
+		}
+		if( vista != null )
+			vista.setVisibility( View.GONE );
 	}
 
 	@Override

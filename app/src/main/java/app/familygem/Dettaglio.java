@@ -31,6 +31,9 @@ import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.GedcomTag;
 import org.folg.gedcom.model.Media;
+import org.folg.gedcom.model.MediaContainer;
+import org.folg.gedcom.model.MediaRef;
+import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
@@ -42,7 +45,6 @@ import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.model.Submitter;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -116,16 +118,16 @@ public class Dettaglio extends AppCompatActivity {
 				}
 				if( oggetto instanceof Family ) {
 					SubMenu subNuovi = menu.addSubMenu( 0, 100, 0, R.string.new_relative );
-					subNuovi.add( 0, 110, 0, R.string.spouse );	// todo? nascondere Coniuge se ci sono già nella famiglia?
+					subNuovi.add( 0, 120, 0, R.string.spouse );	// todo? nascondere Coniuge se ci sono già nella famiglia?
 						// todo? o magari mettere avviso "Questa famiglia ha già i genitori... Vuoi forse creare un altro matrimonio per uno dei genitori?"
-					subNuovi.add( 0, 111, 0, R.string.child );
+					subNuovi.add( 0, 121, 0, R.string.child );
 					if( U.ciSonoIndividuiCollegabili( unRappresentanteDellaFamiglia ) ) {
 						SubMenu subCollega = menu.addSubMenu( 0, 100, 0, R.string.link_person );
-						subCollega.add( 0, 112, 0, R.string.spouse );
-						subCollega.add( 0, 113, 0, R.string.child );
+						subCollega.add( 0, 122, 0, R.string.spouse );
+						subCollega.add( 0, 123, 0, R.string.child );
 					}
 					SubMenu subEvento = menu.addSubMenu( 0, 100, 0, R.string.event );
-					subEvento.add( 0, 114, 0, R.string.marriage );
+					subEvento.add( 0, 124, 0, R.string.marriage );
 					// Crea la lista degli altri eventi che si possono inserire
 					Set<String> eventiIndividuo = EventFact.PERSONAL_EVENT_FACT_TAGS;
 					for( String tag : EventFact.FAMILY_EVENT_FACT_TAGS )
@@ -157,13 +159,18 @@ public class Dettaglio extends AppCompatActivity {
 					subNota.add( 0, 104, 0, R.string.new_shared_note );
 					subNota.add( 0, 105, 0, R.string.link_shared_note );
 				}
+				if( oggetto instanceof MediaContainer ) {
+					SubMenu subMedia = menu.addSubMenu( 0, 100, 0, R.string.media );
+					subMedia.add( 0, 106, 0, R.string.new_media );
+					subMedia.add( 0, 107, 0, R.string.new_shared_media );
+					subMedia.add( 0, 108, 0, R.string.link_shared_media );
+				}
 				if( oggetto instanceof SourceCitationContainer || oggetto instanceof Note ) {
 					SubMenu subFonte = menu.addSubMenu( 0, 100, 0, R.string.source );
-					subFonte.add( 0, 106, 0, R.string.new_source_note );
-					subFonte.add( 0, 107, 0, R.string.new_source );
-					subFonte.add( 0, 108, 0, R.string.link_source );
+					subFonte.add( 0, 109, 0, R.string.new_source_note );
+					subFonte.add( 0, 110, 0, R.string.new_source );
+					subFonte.add( 0, 111, 0, R.string.link_source );
 				}
-				// TODO: Submenu Media
 				popup.show();
 				popup.setOnMenuItemClickListener( new PopupMenu.OnMenuItemClickListener() {
 					@Override
@@ -177,6 +184,18 @@ public class Dettaglio extends AppCompatActivity {
 									((EventFact)oggetto).setAddress( (Address)coso );
 								else if( oggetto instanceof Submitter )
 									((Submitter)oggetto).setAddress( (Address)coso );
+							}
+							// Tag necessari per poi esportare in Gedcom
+							if( oggetto instanceof Repository ) {
+								if( coso.equals("Www") )
+									((Repository)oggetto).setWwwTag("WWW");
+								if( coso.equals("Email") )
+									((Repository)oggetto).setEmailTag("EMAIL");
+							} else if( oggetto instanceof Submitter ) {
+								if( coso.equals("Www") )
+									((Submitter)oggetto).setWwwTag("WWW");
+								if( coso.equals("Email") )
+									((Submitter)oggetto).setEmailTag("EMAIL");
 							}
 							View pezzo = creaPezzo( ovi.get(id).titolo, "", coso, ovi.get(id).multiLinea );
 							if( coso instanceof String )
@@ -201,7 +220,19 @@ public class Dettaglio extends AppCompatActivity {
 							Intent intento = new Intent( Dettaglio.this, Principe.class );
 							intento.putExtra( "quadernoScegliNota", true );
 							startActivityForResult( intento,7074 );
-						} else if( id == 106 ) { // Nuova fonte-nota
+						} else if( id == 106 ) { // Cerca media locale
+							Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+							intent.setType( "*/*" );
+							startActivityForResult( intent,4173 );
+						} else if( id == 107 ) { // Cerca media condiviso
+							Intent inten = new Intent( Intent.ACTION_GET_CONTENT );
+							inten.setType( "*/*" );
+							startActivityForResult( inten,54173 );
+						} else if( id == 108 ) { // Collega media condiviso
+							Intent inten = new Intent( Dettaglio.this, Principe.class );
+							inten.putExtra( "galleriaScegliMedia", true );
+							startActivityForResult( inten,43616 );
+						} else if( id == 109 ) { // Nuova fonte-nota
 							SourceCitation citaz = new SourceCitation();
 							citaz.setValue( "" );
 							if( oggetto instanceof Note ) ((Note)oggetto).addSourceCitation( citaz );
@@ -209,24 +240,24 @@ public class Dettaglio extends AppCompatActivity {
 							Ponte.manda( citaz, "oggetto" );
 							Ponte.manda( oggetto, "contenitore" );
 							startActivity( new Intent( Dettaglio.this, CitazioneFonte.class ) );
-						} else if( id == 107 ) {  // Nuova fonte
+						} else if( id == 110 ) {  // Nuova fonte
 							Biblioteca.nuovaFonte( Dettaglio.this, oggetto );
-						} else if( id == 108 ) { // Collega fonte
+						} else if( id == 111 ) { // Collega fonte
   							Intent intent = new Intent( Dettaglio.this, Principe.class );
 							intent.putExtra( "bibliotecaScegliFonte", true );
 							startActivityForResult( intent, 5065 );
-						} else if( id == 110 || id == 111 ) { // Nuovo familiare
+						} else if( id == 120 || id == 121 ) { // Nuovo familiare
 							Intent intento = new Intent( Dettaglio.this, EditaIndividuo.class );
 							intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
 							intento.putExtra( "idFamiglia", ((Family)oggetto).getId() );
 							intento.putExtra( "relazione", id - 109);
 							startActivity( intento );
-						} else if( id == 112 || id == 113 ) { // Nuovo familiare
+						} else if( id == 122 || id == 123 ) { // Nuovo familiare
 							Intent intento = new Intent( Dettaglio.this, Principe.class );
 							intento.putExtra( "anagrafeScegliParente", true );
 							intento.putExtra( "relazione", id - 111 );
 							startActivityForResult( intento,34417 );
-						} else if( id == 114 ) { // Metti matrimonio
+						} else if( id == 124 ) { // Metti matrimonio
 							EventFact nuovoEvento = new EventFact();
 							nuovoEvento.setTag( "MARR" );
 							nuovoEvento.setDate( "" );
@@ -263,7 +294,19 @@ public class Dettaglio extends AppCompatActivity {
 			} else if( requestCode == 7074 ) {  // Nota condivisa
 				NoteRef rifNota = new NoteRef();
 				rifNota.setRef( data.getStringExtra( "idNota" ) );
-				( (NoteContainer) oggetto ).addNoteRef( rifNota );
+				((NoteContainer)oggetto).addNoteRef( rifNota );
+			} else if( requestCode == 4173 ) { // File preso dal file manager diventa media locale
+				Media media = new Media();
+				media.setFileTag("FILE");
+				((MediaContainer)oggetto).addMedia( media );
+				if( !settaMedia( this, data, media ) ) return;
+			} else if( requestCode == 54173 ) { // File preso dal file manager diventa media condiviso
+				Media media = Galleria.nuovoMedia( oggetto );
+				if( !settaMedia( this, data, media ) ) return;
+			} else if( requestCode == 43616 ) { // Media da Galleria
+				MediaRef rifMedia = new MediaRef();
+				rifMedia.setRef( data.getStringExtra("idMedia") );
+				((MediaContainer)oggetto).addMediaRef( rifMedia );
 			} else if( requestCode == 4562  ) { // Archivio scelto in Magazzino da Fonte
 				RepositoryRef archRef = new RepositoryRef();
 				archRef.setRef( data.getStringExtra("idArchivio") );
@@ -294,12 +337,6 @@ public class Dettaglio extends AppCompatActivity {
 			if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
 				// Apre direttamente il file
 				fileMedia = new File( percorso );
-				if( fileMedia.exists() ) {
-					// TODO questo è sciocco perché probabilmente l'utente non vuole modificare i percorsi di tutti gli altri file...
-					// TODO, solo se "non li trova"
-					Globale.preferenze.alberoAperto().cartella = fileMedia.getParent();
-					Globale.preferenze.salva();
-				}
 			} else {    // è solo il nome del file 'pippo.png'
 				// Copia il file (che può essere di qualsiasi tipo) nella memoria esterna della app
 				// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
@@ -311,8 +348,10 @@ public class Dettaglio extends AppCompatActivity {
 				// Todo: controllare che non esista già il nome del file in percorsoCartella, quindi rinominarlo con +(1)
 				fileMedia = new File( percorsoMemoria, percorso );
 				FileUtils.copyInputStreamToFile( input, fileMedia );
-
 			}
+			// Aggiunge il percorso della cartella nel Cassetto in preferenze
+			Globale.preferenze.alberoAperto().cartelle.add( fileMedia.getParent() );
+			Globale.preferenze.salva();
 			media.setFile( fileMedia.getAbsolutePath() );
 		} catch( Exception e ) {
 			Toast.makeText( contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
@@ -356,9 +395,10 @@ public class Dettaglio extends AppCompatActivity {
 		String testo;
 		try {
 			testo = (String) oggetto.getClass().getMethod( "get" + metodo ).invoke( oggetto );
-		} catch( IllegalAccessException|InvocationTargetException|NoSuchMethodException|SecurityException e ) {
+		} catch( Exception e ) {
 			testo = "ERROR: " + e.getMessage();
 		}
+		// Tranne che per gli eventi con 'Y', todo forse per gli esperti lasciare la 'Y'?
 		if( !( oggetto instanceof EventFact && metodo.equals("Value") && testo!=null && testo.equals("Y") ) )
 			creaPezzo( titolo, testo, metodo, multiLinea );
 	}
@@ -395,7 +435,13 @@ public class Dettaglio extends AppCompatActivity {
 			vistaEditabile.setVerticalScrollBarEnabled( true );
 		}
 		View.OnClickListener clicco = null;
-		if( coso instanceof String ) {	// Metodo
+		if( coso instanceof Integer ) {	// Nome e cognome in modalità inesperto
+			clicco = new View.OnClickListener() {
+				public void onClick( View vista ) {
+					edita( vista );
+				}
+			};
+		} else if( coso instanceof String ) {	// Metodo
 			clicco = new View.OnClickListener() {
 				public void onClick( View vista ) {
 					edita( vista );
@@ -495,7 +541,7 @@ public class Dettaglio extends AppCompatActivity {
 			if( vistaEdita != null ) {
 				if( vistaEdita.isShown() ) {
 					TextView vistaTesto = altroPezzo.findViewById( R.id.fatto_testo );
-					if( !vistaEdita.getText().equals(vistaTesto.getText()) ) // se c'è stata editazione
+					if( !vistaEdita.getText().toString().equals(vistaTesto.getText().toString()) ) // se c'è stata editazione
 						salva( altroPezzo, barra, fab );
 					else
 						ripristina( altroPezzo, barra, fab );
@@ -510,7 +556,6 @@ public class Dettaglio extends AppCompatActivity {
 		fab.hide();
 
 		// Se non si tratta di una data mostra la tastiera
-		s.l( "Dettaglio edita()");
 		if( !vistaPezzo.getTag(R.id.tag_oggetto).equals("Date") ) {
 			// Se è un luogo sostituisce vistaEdita con TrovaLuogo
 			if( vistaPezzo.getTag(R.id.tag_oggetto).equals("Place") && !(vistaEdita instanceof TrovaLuogo) ) {
@@ -555,8 +600,13 @@ public class Dettaglio extends AppCompatActivity {
 	void salva( View vistaPezzo, ActionBar barra, FloatingActionButton fab ) {
 		if( editoreData != null && editoreData.tipo==10 ) editoreData.genera( true ); // In sostanza solo per aggiungere le parentesi alla data frase
 		String testo = vistaEdita.getText().toString();
-		try {
-			oggetto.getClass().getMethod( "set" + vistaPezzo.getTag(R.id.tag_oggetto), String.class )
+		Object oggettoPezzo = vistaPezzo.getTag(R.id.tag_oggetto);
+		if( oggettoPezzo instanceof Integer ) { // Salva nome e cognome per inesperti
+			String nome = ((EditText)box.getChildAt(0).findViewById(R.id.fatto_edita)).getText().toString();
+			String cognome = ((EditText)box.getChildAt(1).findViewById(R.id.fatto_edita)).getText().toString();
+			((Name)oggetto).setValue( nome + " /" + cognome + "/" );
+		} else try { // Tutti gli altri normali metodi
+			oggetto.getClass().getMethod( "set" + oggettoPezzo, String.class )
 					.invoke( oggetto, testo );
 		} catch( Exception e ) { // NoSuchMethodException|IllegalAccessException|InvocationTargetException|SecurityException
 			e.printStackTrace();
@@ -608,7 +658,6 @@ public class Dettaglio extends AppCompatActivity {
 
 	@Override
 	public void onBackPressed() {
-		s.l( "onBackPressed" );
 		if( oggetto instanceof EventFact )
 			Evento.ripulisciTag( (EventFact)oggetto );
 		super.onBackPressed();
@@ -666,9 +715,11 @@ public class Dettaglio extends AppCompatActivity {
 				menu.add( 0, 80, 0, R.string.delete );
 			else if( oggettoPezzo instanceof Repository )
 				menu.add( 0, 90, 0, R.string.choose_repository );
-			else if( oggettoPezzo instanceof Integer ) {	// Immaginona
-				if( oggettoPezzo.equals( 43614 ) )
+			else if( oggettoPezzo instanceof Integer ) {
+				if( oggettoPezzo.equals( 43614 ) )	// Immaginona
 					menu.add( 0, 100, 0, R.string.choose_file );
+				else if( oggettoPezzo.equals(4043) || oggettoPezzo.equals(6064) ) // Nome e cognome per inesperti
+					menu.add( 0, 0, 0, R.string.copy );
 			} else if( oggettoPezzo instanceof String ) {
 				//metodoPezzo = (String) vista.getTag();
 				menu.add( 0, 0, 0, R.string.copy );

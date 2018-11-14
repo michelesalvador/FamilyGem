@@ -1,10 +1,15 @@
 package app.familygem;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
@@ -23,6 +28,8 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
+import org.folg.gedcom.model.Media;
+import org.folg.gedcom.model.MediaRef;
 import org.folg.gedcom.model.ParentFamilyRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
@@ -65,13 +72,19 @@ public class Alberi extends AppCompatActivity {
             lista.setAdapter(adapter);
 
             // Click su un albero della lista
-            lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            lista.setOnItemClickListener( new AdapterView.OnItemClickListener() {
                 @Override
-                public void onItemClick( AdapterView<?> parent, View view, int position, long id ) {
-					int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
-					if( !apriJson( id_num ) )
-						return;
-	                startActivity( new Intent( Alberi.this, Principe.class ) );
+                public void onItemClick( AdapterView<?> parent, View v, final int position, long id ) {
+                	findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
+	                new Thread( new Runnable() {
+		                @Override
+		                public void run() {
+			                int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
+			                if( !apriJson( id_num, true ) ) // TODo: non funziona il Toast in caso di Exception (ad es. x file inesistente)
+				                return;
+			                startActivity( new Intent( Alberi.this, Principe.class ) );
+		                }
+	                }).start();
                 }
             });
 
@@ -87,32 +100,79 @@ public class Alberi extends AppCompatActivity {
         });
     }
 
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		if( Globale.editato ) {
+			recreate();
+			Globale.editato = false;
+		} else
+			findViewById( R.id.alberi_circolo ).setVisibility( View.GONE );
+	}
+
 	void aggiornaLista() {
 		alberelli.clear();
 		for( Armadio.Cassetto alb : Globale.preferenze.alberi) {
 			Map<String,String> dato = new HashMap<>(3);
 			dato.put( "id", String.valueOf( alb.id ) );
 			dato.put( "titolo", alb.nome );
-			dato.put( "dati", alb.individui + " "+ getText(R.string.persons) + " - "+ alb.generazioni + " " + getText(R.string.generations) );
+			// Se Gedcom già aperto aggiorna i dati
+			if( Globale.gc != null && Globale.preferenze.idAprendo == alb.id && alb.individui < 100 )
+				InfoAlbero.aggiornaDati( Globale.gc, alb );
+			String dati = alb.individui + " "+ getText(R.string.persons);
+			if( alb.generazioni > 0 )
+				dati += " - " + alb.generazioni + " " + getText(R.string.generations);
+			if( alb.media > 0 )
+				dati += " - " + alb.media + " " + getString(R.string.media).toLowerCase();
+			//s.l( alb.generazioni + " = " + alb.nome );
+			dato.put( "dati", dati );
 			alberelli.add( dato );
 		}
 		lista.invalidateViews();
 	}
 
+	/* Simile a InfoAlbero.quanteGenerazioni() ma molto più essenziale
+	// Abbandonato perché troppo impreciso
+	public static int quanteGenerazioniSemplice( Gedcom gc, String idRadice ) {
+		if( gc == null || gc.getPeople().isEmpty() )
+			return 0;
+		Person capostipite = trovaCapostipite( gc, gc.getPerson(idRadice) );
+		s.l( "> " + U.epiteto( capostipite ) );
+		max = 0;
+		discendiGenerazioni( gc, capostipite, 1 );
+		return max;
+	}
+	private static Person trovaCapostipite( Gedcom gc, Person p ) {
+		if( !p.getParentFamilies(gc).isEmpty() ) {
+			if( !p.getParentFamilies(gc).get(0).getHusbands(gc).isEmpty() )
+				return trovaCapostipite( gc, p.getParentFamilies(gc).get(0).getHusbands(gc).get(0) );
+		}
+		return p;
+	}
+	static int max;
+	static void discendiGenerazioni( Gedcom gc, Person p, int gen ) {
+		if( gen > max )
+			max = gen;
+		for( Family fam : p.getSpouseFamilies(gc) ) {
+			for( Person figlio : fam.getChildren(gc) )
+				discendiGenerazioni( gc, figlio, gen++ );
+		}
+	}*/
+
 	// Apertura di un Json per editare tutto in Family Gem
-    static boolean apriJson( int id ) {
+    static boolean apriJson( int id, boolean salvaPreferenze ) {
 		try {
 			File file = new File( Globale.contesto.getFilesDir(), id + ".json");
 			String contenuto = FileUtils.readFileToString( file );
 			JsonParser jp = new JsonParser();
 			Globale.gc = jp.fromJson( contenuto );
-			Globale.preferenze.idAprendo = id;
-			Globale.preferenze.salva();
 			Globale.individuo = Globale.preferenze.alberoAperto().radice;
-			Principe.arredaTestataMenu();
+			if( salvaPreferenze ) {
+				Globale.preferenze.idAprendo = id;
+				Globale.preferenze.salva();
+			}
 		} catch( Exception e ) {
 			Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -135,6 +195,45 @@ public class Alberi extends AppCompatActivity {
 		return gc;
 	}
 
+	void faiBackup() {
+		//getContext().getExternalFilesDir(null) + "/backup.zip";	// pubblica ma non permanente, la crea se non esiste
+		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/Family Gem backup.zip";
+		// /storage/emulated/0/Documents/Family Gem backup.zip  richiede API 19,  non la crea se inesistente
+		File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
+		// /storage/emulated/0/Documents
+		if( !cartellaDocumenti.exists() )
+			cartellaDocumenti.mkdir();	// crea solo la cartella Documenti, non tutto il percorso
+		File fileZip = new File( cartellaDocumenti.getAbsolutePath(),"Family Gem backup.zip" );
+		//s.l( fileZip.getAbsolutePath() );
+		List<File> files = (List<File>) FileUtils.listFiles( getFilesDir(), TrueFileFilter.INSTANCE, null );
+		// terzo parametro se TrueFileFilter.INSTANCE lista anche le subdirectory
+		byte[] buffer = new byte[128];	// Crea un buffer for reading the files
+		try {
+			ZipOutputStream zos = new ZipOutputStream( new FileOutputStream(fileZip) );
+			for( File currentFile :  files ) {
+				//s.l( currentFile.getAbsolutePath() );
+				if (!currentFile.isDirectory()) {
+					FileInputStream fis = new FileInputStream( currentFile );
+					zos.putNextEntry( new ZipEntry( currentFile.getName() ) );	// add ZIP entry to output stream
+					int read;
+					while( (read = fis.read(buffer)) != -1 ) {
+						zos.write(buffer, 0, read);
+					}
+					// complete the entry
+					zos.closeEntry();
+					fis.close();
+				}
+			}
+			zos.close();
+			MediaScannerConnection.scanFile(this, new String[]{fileZip.getAbsolutePath()},null,null);
+			// necessario per far comparire il file in Windows
+			Toast.makeText( getBaseContext(), fileZip.getAbsolutePath(), Toast.LENGTH_LONG ).show();
+		} catch ( IOException e) {
+			e.printStackTrace();
+			Toast.makeText( getBaseContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+		}
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu( Menu menu ) {
 		menu.add(0,0,0, R.string.make_backup );
@@ -145,43 +244,12 @@ public class Alberi extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
-			case 0:
-				//getContext().getExternalFilesDir(null) + "/backup.zip";	// pubblica ma non permanente, la crea se non esiste
-				//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/Family Gem backup.zip";
-					// /storage/emulated/0/Documents/Family Gem backup.zip  richiede API 19,  non la crea se inesistente
-				File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
-					// /storage/emulated/0/Documents
-				if( !cartellaDocumenti.exists() )
-					cartellaDocumenti.mkdir();	// crea solo la cartella Documenti, non tutto il percorso
-				File fileZip = new File( cartellaDocumenti.getAbsolutePath(),"Family Gem backup.zip" );
-				//s.l( fileZip.getAbsolutePath() );
-				List<File> files = (List<File>) FileUtils.listFiles( getFilesDir(), TrueFileFilter.INSTANCE, null );
-						// terzo parametro se TrueFileFilter.INSTANCE lista anche le subdirectory
-				byte[] buffer = new byte[128];	// Crea un buffer for reading the files
-				try {
-					ZipOutputStream zos = new ZipOutputStream( new FileOutputStream(fileZip) );
-					for( File currentFile :  files ) {
-						//s.l( currentFile.getAbsolutePath() );
-						if (!currentFile.isDirectory()) {
-							FileInputStream fis = new FileInputStream( currentFile );
-							zos.putNextEntry( new ZipEntry( currentFile.getName() ) );	// add ZIP entry to output stream
-							int read;
-							while( (read = fis.read(buffer)) != -1 ) {
-								zos.write(buffer, 0, read);
-							}
-							// complete the entry
-							zos.closeEntry();
-							fis.close();
-						}
-					}
-					zos.close();
-					MediaScannerConnection.scanFile(this, new String[]{fileZip.getAbsolutePath()},null,null);
-						// necessario per far comparire il file in Windows
-					Toast.makeText( getBaseContext(), fileZip.getAbsolutePath(), Toast.LENGTH_LONG ).show();
-				} catch ( IOException e) {
-					e.printStackTrace();
-					Toast.makeText( getBaseContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-				}
+			case 0: // Backup
+				int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				if( perm == PackageManager.PERMISSION_DENIED )
+					ActivityCompat.requestPermissions( Alberi.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 327 );
+				else if( perm == PackageManager.PERMISSION_GRANTED )
+					faiBackup();
 				break;
 			case 1:
 				startActivity( new Intent( Alberi.this, Opzioni.class) );
@@ -196,11 +264,20 @@ public class Alberi extends AppCompatActivity {
 	}
 
 	@Override
+	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
+		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
+			if( codice == 327 ) {
+				faiBackup();
+			}
+		}
+	}
+
+	@Override
 	public void onCreateContextMenu( ContextMenu menu, View v, ContextMenu.ContextMenuInfo info ) {
 		int posiz = ((AdapterView.AdapterContextMenuInfo)info).position;
 		final HashMap albero = (HashMap) lista.getItemAtPosition( posiz );
 		final int idAlbero = Integer.parseInt( (String)albero.get("id") );
-		if( idAlbero == Globale.preferenze.idAprendo && Globale.preferenze.salvaVolontario )
+		if( idAlbero == Globale.preferenze.idAprendo && !Globale.preferenze.autoSalva )
 			menu.add(0, 0, 0, R.string.save );  // todo: magari spostare 'Salva' in un posto più comodo
 		menu.add(0, 1, 0, R.string.tree_info );
 		menu.add(0, 2, 0, R.string.rename );
@@ -295,6 +372,15 @@ public class Alberi extends AppCompatActivity {
 		Gedcom gc = leggiJson( idAlbero );
 		int errori = 0;
 		int num;
+		// Ricostituisce una radice non trovata
+		Armadio.Cassetto albero = Globale.preferenze.getAlbero( idAlbero );
+		Person radica = gc.getPerson( albero.radice );
+		if( radica == null && !gc.getPeople().isEmpty() ) {
+			if( correggi ) {
+				albero.radice = U.trovaRadice( gc );
+				Globale.preferenze.salva();
+			} else errori++;
+		}
 		// Cerca famiglie vuote o con un solo membro per eliminarle
 		for( Family f : gc.getFamilies() ) {
 			num = 0;
@@ -319,7 +405,6 @@ public class Alberi extends AppCompatActivity {
 		for( Person p : gc.getPeople() ) {
 			for( ParentFamilyRef pfr : p.getParentFamilyRefs() ) {
 				Family fam = gc.getFamily( pfr.getRef() );
-				//s.l( U.epiteto( p ) +"   "+ fam.getId() );
 				if( fam == null ) {
 					if( correggi ) {
 						p.getParentFamilyRefs().remove( pfr );
@@ -373,6 +458,28 @@ public class Alberi extends AppCompatActivity {
 							p.getSpouseFamilyRefs().remove( sfr );
 							break;
 						} else errori++;
+					}
+				}
+			}
+			// Riferimenti a Media inesistenti
+			// ok ma SOLO per le persone, forse andrebbe fatto col Visitor per tutti gli altri
+			num = 0;
+			for( MediaRef mr : p.getMediaRefs() ) {
+				Media med = gc.getMedia( mr.getRef() );
+				//s.l( mr.getRef() +"  > " + med);
+				if( med == null ) {
+					if( correggi ) {
+						p.getMediaRefs().remove( mr );
+						break;
+					} else errori++;
+				} else {
+					if( mr.getRef().equals( med.getId() ) ) {
+						num++;
+						if( num > 1 )
+							if( correggi ) {
+								p.getMediaRefs().remove( mr );
+								break;
+							} else errori++;
 					}
 				}
 			}
@@ -469,11 +576,7 @@ public class Alberi extends AppCompatActivity {
 					}
 				});
 			}
-			dialog.setNeutralButton( R.string.cancel, new DialogInterface.OnClickListener() {
-				public void onClick( DialogInterface dialogo, int i ) {
-					dialogo.cancel();
-				}
-			} ).show();
+			dialog.setNeutralButton( android.R.string.cancel, null ).show();
 		}
 		return gc;
 	}

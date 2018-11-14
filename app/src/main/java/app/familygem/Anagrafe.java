@@ -407,9 +407,14 @@ public class Anagrafe extends Fragment {
 				scollega( idEliminando );
 				gc.getPeople().remove( gc.getPerson( idEliminando ) );
 				gc.createIndexes();	// necessario
-				if( Globale.individuo != null )
-					if( Globale.individuo.equals(idEliminando) )
-						Globale.individuo = U.trovaRadice(gc);	// TODO dovrebbe essere: trovaParentePiuProssimo
+				Globale.preferenze.alberoAperto().individui--;
+				String idNuovaRadice = U.trovaRadice(gc);	// Todo dovrebbe essere: trovaParentePiuProssimo
+				if( Globale.preferenze.alberoAperto().radice!=null && Globale.preferenze.alberoAperto().radice.equals(idEliminando) ) {
+					Globale.preferenze.alberoAperto().radice = idNuovaRadice;
+				}
+				Globale.preferenze.salva();
+				if( Globale.individuo != null && Globale.individuo.equals(idEliminando) )
+					Globale.individuo = idNuovaRadice;
 				U.salvaJson();
 				if( vista == null )
 					contesto.startActivity( new Intent( contesto, Principe.class ) );

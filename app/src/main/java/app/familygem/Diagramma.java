@@ -106,13 +106,16 @@ public class Diagramma extends Fragment {
 		// Trova un centro
 		Person centro = gc.getPerson( Globale.individuo );
 		if( centro == null ) {
-			centro = gc.getPerson( U.trovaRadice(gc) );
-			if( centro == null ) {
-				creaBottonePrimoIndividuo();    // se non ci sono persone mette un bel bottone per aggiungere la prima persona
-				return;
-			}
-			Globale.preferenze.alberoAperto().radice = centro.getId();  // todo ma chi è che usa poi questa 'radice'?
+			centro = gc.getPerson( Globale.preferenze.alberoAperto().radice );
+			if( centro == null )
+				centro = gc.getPerson( U.trovaRadice(gc) );
+				if( centro == null ) {
+					creaBottonePrimoIndividuo();    // se non ci sono persone mette un bel bottone per aggiungere la prima persona
+					return;
+				}
 		}
+		Globale.individuo = centro.getId(); // lo ribadisce nei due casi in cui mancava
+		s.l( U.epiteto( centro ) );
 		// Risale ai nonni
 		if( !centro.getParentFamilies(gc).isEmpty() ) {	// qui ci va eventuale scelta di QUALI genitori mostrare se centro ha più genitori
 			Family famiglia = centro.getParentFamilies(gc).get(0);
@@ -147,10 +150,8 @@ public class Diagramma extends Fragment {
 			if( nodoGenitori != null ) {
 				View paiolo = nodoGenitori.findViewWithTag( "padrePaiolo" );
 				for( Corda corda : rete ) {
-					if( corda.arco && corda.origine == null ) {
+					if( corda.arco && corda.origine == null )
 						corda.origine = paiolo!=null ? paiolo : nodoGenitori;
-						s.l( "corda  " + corda.origine );
-					}
 				}
 				// Prepara il nodo a cui si attaccano centro e i suoi fratelli
 				legame = nodoGenitori.findViewWithTag( "legame" );
@@ -180,10 +181,8 @@ public class Diagramma extends Fragment {
 				altriMatrimoni( madre, famiglia, paioloMadre!=null ? paioloMadre : nodoGenitori );	// todo: il nodo della madre viene giusto nel diagramma?
 				zii( madre, nodoNonniMaterni, false );
 				for( Corda corda : rete ) {
-					if( corda.arco && corda.origine == null ) {
+					if( corda.arco && corda.origine == null )
 						corda.origine = paioloMadre!=null ? paioloMadre : nodoGenitori;
-						s.l( "corda  " + corda.origine );
-					}
 				}
 			}
 			spazio(1, zii(madre,null,true));

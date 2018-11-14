@@ -1,7 +1,11 @@
 package app.familygem;
 
-import android.content.Intent;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
@@ -12,9 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.Toast;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -49,25 +50,47 @@ public class EditaIndividuo extends AppCompatActivity {
 		final Switch bottonMorte = findViewById( R.id.defunto );
 		// Nuovo individuo in relazione di parentela
 		if( relazione > 0 ) {
-			String[] parentele = { "genitore", "fratello", "coniuge", "figlio" };   // todo elimina
+			//String[] parentele = { "genitore", "fratello", "coniuge", "figlio" };   // todo elimina
 			//setTitle( "Nuovo " + parentele[relazione-1] );
 			p = new Person();
 		// Nuovo individuo scollegato
 		} else if ( idIndi.equals("TIZIO_NUOVO") ) {
 			//setTitle( "Nuova persona" );
 			p = new Person();
+			// Se ci sono i permessi il primo Nome e Cognome li prende dal profilo 'io' nei contatti
+			if( Globale.preferenze.alberi.size()==1 && gc.getPeople().isEmpty()
+					&& ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.READ_CONTACTS)
+					== PackageManager.PERMISSION_GRANTED ) {
+				Cursor c = Globale.contesto.getContentResolver().query( ContactsContract.Profile.CONTENT_URI,null,null,null,null );
+				if( c != null && c.moveToFirst() ) {
+					String epiteto = c.getString(c.getColumnIndex("display_name_alt"));
+					String nome = epiteto.substring( epiteto.indexOf(',')+1 ).trim();
+					String cognome = epiteto.substring( 0, epiteto.indexOf(',') );
+					((EditText)findViewById( R.id.nome )).setText( nome );
+					((EditText)findViewById( R.id.cognome )).setText( cognome );
+					// non riesco a individuare le colonne indirizzo, email , telefono....
+					for( String col : c.getColumnNames() ) s.l( col +" = "+ c.getString( c.getColumnIndex( col ) ) );
+					/*	sort_key = Michele Salvador
+						display_name = Michele Salvador
+						display_name_alt = Salvador, Michele
+						sort_key_alt = Salvador, Michele    */
+					c.close();
+				}
+			}
 		// Carica i dati di un individuo esistente da modificare
 		} else {
 			p = gc.getPerson(idIndi);
+			// Nome e cognome
 			if( !p.getNames().isEmpty() ) {
 				String epiteto = p.getNames().get( 0 ).getDisplayValue();
-				String nome = epiteto.replaceAll( "/.*?/", "" ).trim();
-				( (EditText) findViewById( R.id.nome ) ).setText( nome );
-				if( epiteto.lastIndexOf('/') > 0 ) {
+				String nome = epiteto.replaceAll( "/.*?/", "" ).trim(); // rimuove il cognome '/.../'
+				((EditText)findViewById( R.id.nome )).setText( nome );
+				if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') ) {
 					String cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
-					( (EditText) findViewById( R.id.cognome ) ).setText( cognome );
+					((EditText)findViewById( R.id.cognome )).setText( cognome );
 				}
 			}
+			// Sesso
 			switch( U.sesso(p) ) {
 				case 1:
 					((RadioButton)findViewById( R.id.sesso1 )).setChecked(true);
@@ -223,8 +246,9 @@ public class EditaIndividuo extends AppCompatActivity {
 					String nuovoId = "I" + ( max + 1 );
 					p.setId( nuovoId );
 					gc.addPerson( p );
-					//s.l( p.getId() );
-					Globale.preferenze.alberoAperto().individui += 1;
+					if( Globale.preferenze.alberoAperto().radice == null )
+						Globale.preferenze.alberoAperto().radice = nuovoId;
+					Globale.preferenze.alberoAperto().individui++;
 					Globale.preferenze.salva();
 					if( idFamiglia != null ) {
 						Famiglia.aggrega( p, gc.getFamily(idFamiglia), relazione );
@@ -240,20 +264,6 @@ public class EditaIndividuo extends AppCompatActivity {
 		barra.setCustomView( barraAzione );
 		barra.setDisplayShowCustomEnabled( true );
 	}
-
-	/* INUTILE?
-	@Override
-	protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		if (requestCode == 9746 && resultCode == RESULT_OK) {
-			Place place = PlaceAutocomplete.getPlace( this, data );
-			s.l( "Place: " + place.getName() +" > "+ place.getAttributions() );
-		} else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-			Status status = PlaceAutocomplete.getStatus(this, data);
-			s.l( status.getStatusMessage() );
-		} else if (resultCode == RESULT_CANCELED) {
-			// The user canceled the operation.
-		}
-	}*/
 
 	// Aggiunge un individuo in relazione di parentela con 'perno'
 	static void aggiungiParente( String idPerno, String nuovoId, int relazione ) {

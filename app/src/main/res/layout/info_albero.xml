@@ -19,6 +19,14 @@
             android:textColor="#000"
             android:textSize="16sp" />
 
+        <Button
+            android:id="@+id/info_aggiorna"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="♺"
+            android:textSize="24sp" />
+
         <LinearLayout
             android:id="@+id/info_testata"
             android:layout_width="match_parent"

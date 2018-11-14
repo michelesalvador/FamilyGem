@@ -45,8 +45,9 @@
     <string name="errors_found">%d errors found.</string>
     <string name="correct">Correct</string>
     <!-- Opzioni -->
+    <string name="auto_save">Auto save</string>
+    <string name="load_tree_startup">Load tree at startup</string>
     <string name="show_advanced_functions">Show advanced functions</string>
-    <string name="choose_to_save">Let me choose when to save</string>
     <!-- InfoAlbero -->
     <string name="header">Header</string>
     <string name="create_header">Create header</string>
@@ -200,6 +201,9 @@
     <string name="children">children</string>
     <string name="family">Family</string>
     <string name="marriage">Marriage</string>
+    <!-- Note -->
+    <string name="shared_notes">shared notes</string>
+    <string name="simple_notes">simple notes</string>
     <!-- EditaIndividuo -->
     <string name="male">Male</string>
     <string name="female">Female</string>
@@ -240,6 +244,5 @@
     <string name="make_default">Make default</string>
     <string name="citations">Citations</string>
     <string name="sources_number">Number of sources</string>
-    <string name="shared_notes">shared notes</string>
     <string name="extension">Extension</string>
 </resources>

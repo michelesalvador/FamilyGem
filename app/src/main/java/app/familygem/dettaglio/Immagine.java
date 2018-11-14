@@ -115,7 +115,7 @@ public class Immagine extends Dettaglio {
 					Intent intento = new Intent( Intent.ACTION_VIEW );
 					Uri uri = Uri.fromFile(file);
 					intento.setDataAndType( uri, tipo );
-					s.l( "<" + estensione + "> \"" + tipo + "\"  " + percorso );
+					//s.l( "<" + estensione + "> \"" + tipo + "\"  " + percorso );
 					//intento.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK );	inutile?
 					List<ResolveInfo> resolvers = getPackageManager().queryIntentActivities( intento, 0 );
 						// per un'estensione come .tex di cui ha trovato il tipo mime, non c'è nessuna app predefinita
@@ -188,10 +188,6 @@ public class Immagine extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		if( m.getId() != null ) {	// Object media
-			gc.getMedia().remove( m );
-			gc.createIndexes();
-		} else    // media locali
-			((MediaContainer)contenitore).getMedia().remove( m );
+		Galleria.eliminaMedia( m, contenitore, null );
 	}
 }

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="app.familygem">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PROFILE"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:name=".Globale"
@@ -15,25 +14,27 @@
         android:icon="@mipmap/vetrina"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/vetrina_round"
+        android:supportsRtl="false"
         android:theme="@style/AppTheme"
-        android:supportsRtl="true"
-        android:appComponentFactory="android.support.v4.app.CoreComponentFactory"
-        tools:replace="android:appComponentFactory" > <!-- tools:replace="android:supportsRtl" -->
+        tools:replace="android:supportsRtl">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBxL3Y0Ta-ccbmmEGxjyKN2yEb8WF2n428"/>
+            android:value="AIzaSyBxL3Y0Ta-ccbmmEGxjyKN2yEb8WF2n428" />
         <activity
-            android:name=".Principe"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".Facciata"
+            android:noHistory="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="AlberoNuovo"
+            android:name=".AlberoNuovo"
             android:label="@string/new_tree"
             android:parentActivityName=".Alberi" />
+        <activity
+            android:name=".Principe"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Alberi"
             android:label="@string/trees"
@@ -47,10 +48,10 @@
             android:label="@string/about"
             android:parentActivityName=".Alberi" />
         <activity
-            android:name="InfoAlbero"
+            android:name=".InfoAlbero"
             android:parentActivityName=".Alberi" />
         <activity
-            android:name="Individuo"
+            android:name=".Individuo"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".dettaglio.Famiglia"
@@ -92,8 +93,7 @@
             android:name=".Lavagna"
             android:parentActivityName=".Principe"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".EditaIndividuo" />
+        <activity android:name=".EditaIndividuo" />
     </application>
 
 </manifest>

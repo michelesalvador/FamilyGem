@@ -46,7 +46,6 @@ import org.folg.gedcom.parser.ModelParser;
 public class AlberoNuovo extends AppCompatActivity {
 
 	boolean permessoContatti;
-	boolean proponiMostrareFunzioniAvanzate;
 
     @Override
     protected void onCreate( Bundle stato ) {
@@ -91,7 +90,6 @@ public class AlberoNuovo extends AppCompatActivity {
 					            num, nuovoNome.getText().toString(), null, 0, 0, null, null ));
 			            Globale.preferenze.idAprendo = num;
 			            Globale.preferenze.salva();
-			            Principe.arredaTestataMenu();
 			            startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
 		            }
 	            }).setNeutralButton( R.string.cancel, null );
@@ -122,9 +120,16 @@ public class AlberoNuovo extends AppCompatActivity {
 
 	    findViewById(R.id.bottone_recupera_backup).setOnClickListener( new View.OnClickListener() {
 		    public void onClick(View v) {
-			    Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-			    intent.setType( "application/zip" );
-			    startActivityForResult( intent, 219 );
+			    AlertDialog.Builder builder = new AlertDialog.Builder( AlberoNuovo.this );
+			    builder.setMessage( "Search for 'Documents/Family Gem backup.zip'\nWarning: existing trees will be overwriten." );
+			    builder.setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
+				    public void onClick( DialogInterface dialog, int id ) {
+					    Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+					    intent.setType( "application/zip" );
+					    startActivityForResult( intent, 219 );
+				    }
+			    }).setNeutralButton( android.R.string.cancel, null )
+					    .create().show();
 		    }
 	    });
     }
@@ -196,11 +201,14 @@ public class AlberoNuovo extends AppCompatActivity {
 					    Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 				    }
 				    // Crea la voce nelle preferenze e apre l'albero
-				    Globale.preferenze.aggiungi( new Armadio.Cassetto( numAlbero, "The Simpsons", percorsoImmagini, 29, 10, "I1",null ) );
-				    Alberi.apriJson( numAlbero );
-				    startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
+				    Globale.preferenze.aggiungi( new Armadio.Cassetto( numAlbero, "The Simpsons", percorsoImmagini, 41, 11, "I1",null ) );
+				    if( Globale.preferenze.caricaAlbero ) {
+					    Alberi.apriJson( numAlbero, true );
+					    startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
+				    } else
+					    startActivity( new Intent( AlberoNuovo.this, Alberi.class ) );
 			    } else
-				    Toast.makeText( AlberoNuovo.this, "Download failed", Toast.LENGTH_LONG ).show();
+				    Toast.makeText( AlberoNuovo.this, percorsoZip + " not found", Toast.LENGTH_LONG ).show();
 			    unregisterReceiver( this );
 		    }
 	    };
@@ -254,8 +262,9 @@ public class AlberoNuovo extends AppCompatActivity {
 				pw.print( jp.toJson(gc) );
 				pw.close();
 				// Salva le impostazioni in Armadio
+		        String idRadice = U.trovaRadice(gc);
 				Globale.preferenze.aggiungi( new Armadio.Cassetto( nuovoNum, nomeAlbero, percorsoCartella,
-						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc), U.trovaRadice(gc), null ) );
+						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc,idRadice), idRadice, null ) );
 		        // Se necessario propone di mostrare le funzioni avanzate TODO il dialogo va pensato meglio quando farlo comparire
 		        if( !gc.getSources().isEmpty() && !Globale.preferenze.esperto ) {
 			        /*AlertDialog.Builder dialog = new AlertDialog.Builder( this );
@@ -275,17 +284,18 @@ public class AlberoNuovo extends AppCompatActivity {
 			        Globale.preferenze.esperto = true;
 			        Globale.preferenze.salva();
 		        }
-				// Apre il json
-				Alberi.apriJson( nuovoNum );
+		        if( Globale.preferenze.caricaAlbero ) {
+			        // Apre il nuovo albero in diagramma
+			        Alberi.apriJson( nuovoNum, true );
+			        startActivity( new Intent( this, Principe.class ) );
+		        } else
+			        startActivity( new Intent( this, Alberi.class ) );
             } catch( Exception e ) {	//IOException | SAXParseException | URISyntaxException |FileNotFoundException |
                 Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-                //e.printStackTrace();
             }
-            // torna al diagramma
-			startActivity( new Intent( this, Principe.class ) );
         }
 
-        // Importa il file ZIP di backup
+        // Importa il file ZIP di backup SOVRASCRIVENDO gli alberi esistenti
 	    if( resultCode == RESULT_OK && requestCode == 219 ){
         	//s.l( "data.getDataString() = " + data.getDataString() );
 			try {
@@ -307,7 +317,7 @@ public class AlberoNuovo extends AppCompatActivity {
 				Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			}
 			Globale.avvia( getApplicationContext() );
-			startActivity( new Intent( AlberoNuovo.this, Principe.class ));
+			startActivity( new Intent( AlberoNuovo.this, Alberi.class ));
 	    }
     }
 
@@ -333,8 +343,6 @@ public class AlberoNuovo extends AppCompatActivity {
 			Cursor c = Globale.contesto.getContentResolver().query( ContactsContract.Profile.CONTENT_URI, null, null, null, null );
 			if( c != null && c.moveToFirst() ) {    // Prende il profilo 'io' in rubrica
 				autore.setName( c.getString( c.getColumnIndex( "display_name" ) ) );
-				// non riesco a individuare le colonne indirizzo, email , telefono....
-				//for( String col : c.getColumnNames() ) s.l( col +" = "+ c.getString( c.getColumnIndex( col ) ) );
 				c.close();
 			}
 			testa.setSubmitterRef( autore.getId() );
@@ -350,14 +358,5 @@ public class AlberoNuovo extends AppCompatActivity {
 	public boolean onOptionsItemSelected( MenuItem i ) {
 		onBackPressed();
 		return true;
-	}
-
-	// Al primo avvio tornando indietro mette l'app in background
-	@Override
-	public void onBackPressed() {
-		if( Globale.preferenze.idAprendo == 0 )
-			moveTaskToBack( true );
-		else
-			super.onBackPressed();
 	}
 }

@@ -1,5 +1,5 @@
 // Mappa ordinata dei media ciascuno col suo oggetto contenitore
-// Serve per i comandi Scollega e Elimina nel menu contestuale di ciascun media
+// Il contenitore serve per i comandi Scollega e Elimina nel menu contestuale di ciascun media
 
 package app.familygem;
 
@@ -9,20 +9,20 @@ import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
-import org.folg.gedcom.model.MediaRef;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Visitor;
-import static app.familygem.Globale.gc;
 
 public class VisitaListaMedia extends Visitor {
 
-	public Map<Media,Object> listaMedia = new LinkedHashMap<>();
+	Map<Media,Object> listaMedia = new LinkedHashMap<>();
+	Gedcom gc;
 	boolean tutti;	// Elencare tutti i media (anche i locali) o solo gli oggetti media collegabili
 
-	VisitaListaMedia( boolean voglioTutti ){
+	VisitaListaMedia( Gedcom gc, boolean voglioTutti ) {
+		this.gc = gc;
 		tutti = voglioTutti;
 	}
 
@@ -44,8 +44,13 @@ public class VisitaListaMedia extends Visitor {
 		return true;
 	}
 	@Override
-	public boolean visit( Source s ) {
-		if(tutti) for( Media m : s.getAllMedia(gc) ) listaMedia.put( m, s );
+	public boolean visit( EventFact e ) {
+		if(tutti) for( Media m : e.getAllMedia(gc) ) listaMedia.put( m, e );
+		return true;
+	}
+	@Override
+	public boolean visit( Name n ) {
+		if(tutti) for( Media m : n.getAllMedia(gc) ) listaMedia.put( m, n );
 		return true;
 	}
 	@Override
@@ -54,13 +59,8 @@ public class VisitaListaMedia extends Visitor {
 		return true;
 	}
 	@Override
-	public boolean visit( EventFact e ) {
-		if(tutti) for( Media m : e.getAllMedia(gc) ) listaMedia.put( m, e );
-		return true;
-	}
-	@Override
-	public boolean visit( Name n ) {
-		if(tutti) for( Media m : n.getAllMedia(gc) ) listaMedia.put( m, n );
+	public boolean visit( Source s ) {
+		if(tutti) for( Media m : s.getAllMedia(gc) ) listaMedia.put( m, s );
 		return true;
 	}
 }

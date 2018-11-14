@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -51,11 +52,12 @@ public class Individuo extends AppCompatActivity {
 			// todo : investigabile: risulta null eliminando un evento nella famiglia..
 			// todo : intent esiste, ma come "svuotato" della stringa "idIndividuo"
 		//s.l( "OnCREATE trovato id della PERSONA " +  id + "  INTENTO : " + getIntent() );
-		if( id == null ) return;
+		if( id == null || gc == null ) return;
 		uno = gc.getPerson( id );
 		Globale.individuo = id;	// non so bene perché ma potrebbe essere utile
         setContentView(R.layout.individuo);
-		((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
+        if( Globale.preferenze.esperto )
+			((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
 		Toolbar barra = findViewById(R.id.toolbar);
 		barra.setTitle( U.epiteto(uno) );
         setSupportActionBar( barra );
@@ -310,6 +312,7 @@ public class Individuo extends AppCompatActivity {
 		if( resultCode == RESULT_OK ) {
 			if( requestCode == 2173 ) { // File pescato dal file manager diventa media locale
 				Media media = new Media();
+				media.setFileTag("FILE");
 				uno.addMedia( media );
 				/*Ponte.manda( media, "oggetto" );
 				Ponte.manda( uno, "contenitore" );
@@ -385,8 +388,10 @@ public class Individuo extends AppCompatActivity {
 			menu.add( 0, 1, 0, R.string.family_as_child );
 		if( !uno.getSpouseFamilies( gc ).isEmpty() )
 			menu.add( 0, 2, 0, R.string.family_as_spouse );
-		menu.add( 0, 3, 0, R.string.modify );
-		menu.add( 0, 4, 0, R.string.delete );
+		if( !Globale.preferenze.alberoAperto().radice.equals(uno.getId()) )
+			menu.add( 0, 3, 0, "Imposta come radice" );
+		menu.add( 0, 4, 0, R.string.modify );
+		menu.add( 0, 5, 0, R.string.delete );
 		return true;
 	}
 	@Override
@@ -406,12 +411,17 @@ public class Individuo extends AppCompatActivity {
 				intento.putExtra( "idFamiglia", uno.getSpouseFamilies(gc).get(0).getId() );
 				startActivity( intento );
 				return true;
-			case 3: // Modifica
+			case 3: // Imposta come radice
+				Globale.preferenze.alberoAperto().radice = uno.getId();
+				Globale.preferenze.salva();
+				Snackbar.make( tabLayout, U.epiteto(uno) + " è la persona principale dell'albero.", Snackbar.LENGTH_LONG ).show();
+				return true;
+			case 4: // Modifica
 				Intent intent = new Intent( this, EditaIndividuo.class );
 				intent.putExtra( "idIndividuo", uno.getId() );
 				startActivity( intent );
 				return true;
-			case 4:	// Elimina
+			case 5:	// Elimina
 				Anagrafe.elimina( uno.getId(), this, null );
 				return true;
 			default:

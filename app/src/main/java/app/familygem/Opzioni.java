@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.CompoundButton;
 import android.widget.Switch;
-import android.widget.TextView;
 
 public class Opzioni extends AppCompatActivity {
 
@@ -13,8 +12,27 @@ public class Opzioni extends AppCompatActivity {
 		super.onCreate( stato );
 		setContentView( R.layout.opzioni );
 
+		// Salvataggio automatico
+		Switch salva = findViewById( R.id.opzioni_salva );
+		salva.setChecked( Globale.preferenze.autoSalva );
+		salva.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
+			public void onCheckedChanged( CompoundButton coso, boolean attivo ) {
+				Globale.preferenze.autoSalva = attivo;
+				Globale.preferenze.salva();
+			}
+		});
+
+		// Carica albero all'avvio
+		Switch carica = findViewById( R.id.opzioni_carica );
+		carica.setChecked( Globale.preferenze.caricaAlbero );
+		carica.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
+			public void onCheckedChanged( CompoundButton coso, boolean attivo ) {
+				Globale.preferenze.caricaAlbero = attivo;
+				Globale.preferenze.salva();
+			}
+		});
+
 		// Modalità esperto
-		((TextView)findViewById( R.id.opzioni_esperto_testo )).setText( R.string.show_advanced_functions );
 		Switch esperto = findViewById( R.id.opzioni_esperto );
 		esperto.setChecked( Globale.preferenze.esperto );
 		esperto.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
@@ -24,18 +42,5 @@ public class Opzioni extends AppCompatActivity {
 				Globale.editato = true;
 			}
 		});
-
-		// Salvataggio volontario
-		((TextView)findViewById( R.id.opzioni_salva_testo )).setText( R.string.choose_to_save );
-		Switch salva = findViewById( R.id.opzioni_salva );
-		salva.setChecked( Globale.preferenze.salvaVolontario );
-		salva.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
-			public void onCheckedChanged( CompoundButton coso, boolean attivo ) {
-				Globale.preferenze.salvaVolontario = attivo;
-				Globale.preferenze.salva();
-				Globale.editato = true;
-			}
-		});
-
 	}
 }

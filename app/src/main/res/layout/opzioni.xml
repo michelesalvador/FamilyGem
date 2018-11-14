@@ -5,32 +5,12 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-
     <TextView
-        android:id="@+id/opzioni_esperto_testo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/opzioni_esperto"
-        android:layout_toLeftOf="@+id/opzioni_esperto"
-        android:text="Mostra tutte le funzioni"
-        android:textColor="#000"
-        android:textSize="16sp" />
-
-    <Switch
-        android:id="@+id/opzioni_esperto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="20dp" />
-
-    <TextView
-        android:id="@+id/opzioni_salva_testo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/opzioni_salva"
         android:layout_toLeftOf="@+id/opzioni_salva"
-        android:text="Decido io quando salvare, e che cavolo, sono il padrone"
+        android:text="@string/auto_save"
         android:textColor="#000"
         android:textSize="16sp" />
 
@@ -38,9 +18,44 @@
         android:id="@+id/opzioni_salva"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/opzioni_esperto_testo"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="50dp" />
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/opzioni_carica"
+        android:layout_toLeftOf="@+id/opzioni_carica"
+        android:text="@string/load_tree_startup"
+        android:textColor="#000"
+        android:textSize="16sp" />
+
+    <Switch
+        android:id="@+id/opzioni_carica"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/opzioni_salva"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/opzioni_esperto"
+        android:layout_toLeftOf="@+id/opzioni_esperto"
+        android:text="@string/show_advanced_functions"
+        android:textColor="#000"
+        android:textSize="16sp" />
+
+    <Switch
+        android:id="@+id/opzioni_esperto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/opzioni_carica"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp" />
 
 </RelativeLayout>

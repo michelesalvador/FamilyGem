@@ -41,7 +41,6 @@
                 android:layout_marginLeft="18dp"
                 android:layout_marginTop="60dp"
                 android:fontFamily="monospace"
-                android:text="I123"
                 android:textColor="#fff" />
 
             <android.support.v7.widget.Toolbar

@@ -41,12 +41,12 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
         NavigationView menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
 		Globale.vistaPrincipe = scatolissima;
+		if( Globale.gc == null )
+			Alberi.apriJson( Globale.preferenze.idAprendo, false );
 		arredaTestataMenu();
 
         if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
-			if( Globale.preferenze.idAprendo == 0 )	// cioè praticamente alla prima apertura
-				startActivity( new Intent(this, AlberoNuovo.class) );
-			else if( getIntent().getBooleanExtra("anagrafeScegliParente",false) )
+			if( getIntent().getBooleanExtra("anagrafeScegliParente",false) )
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Anagrafe()).commit();
 			else if( getIntent().getBooleanExtra("galleriaScegliMedia",false) )
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Galleria()).commit();
@@ -56,9 +56,8 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Quaderno()).commit();
 			else if( getIntent().getBooleanExtra("magazzinoScegliArchivio",false) )
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Magazzino()).commit();
-			else {    // la normale apertura
+			else // la normale apertura
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Diagramma()).commit();
-			}
         }
 
 		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_testa ).setOnClickListener( new View.OnClickListener() {
@@ -96,7 +95,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		immagine.setVisibility( ImageView.GONE );
 		testo.setText( "" );
 		if( Globale.gc != null ) {
-			VisitaListaMedia visitaMedia = new VisitaListaMedia(true);
+			VisitaListaMedia visitaMedia = new VisitaListaMedia( Globale.gc, true );
 			Globale.gc.accept( visitaMedia );
 			if( visitaMedia.listaMedia.size() > 0 ) {
 				List<Media> lista = new ArrayList<>( visitaMedia.listaMedia.keySet() );

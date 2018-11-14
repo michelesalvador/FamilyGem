@@ -14,6 +14,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.apache.commons.io.FileUtils;
+import org.folg.gedcom.model.Extensions;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Header;
@@ -24,6 +25,8 @@ import java.io.IOException;
 
 public class InfoAlbero extends AppCompatActivity {
 
+	Gedcom gc;
+
 	@Override
 	protected void onCreate( Bundle stato ) {
 		super.onCreate( stato );
@@ -31,35 +34,54 @@ public class InfoAlbero extends AppCompatActivity {
 		LinearLayout scatola = findViewById( R.id.info_scatola );
 
 		final int idAlbero = getIntent().getIntExtra( "idAlbero", 1 );
-		Armadio.Cassetto questoAlbero = Globale.preferenze.getAlbero( idAlbero );
+		final Armadio.Cassetto questoAlbero = Globale.preferenze.getAlbero( idAlbero );
 		setTitle( questoAlbero.nome );
 		final File file = new File( getFilesDir(), idAlbero + ".json");
 		String i = getText(R.string.file) + ": " + file.getAbsolutePath();
-		String contenuto = "";
-		try {
-			contenuto = FileUtils.readFileToString( file );
-		} catch (IOException e) {
-			Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+		if( Globale.gc != null && Globale.preferenze.idAprendo == idAlbero )
+			gc = Globale.gc;
+		else {
+			String contenuto = "";
+			try {
+				contenuto = FileUtils.readFileToString( file );
+			} catch( IOException e ) {
+				Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+			}
+			JsonParser jp = new JsonParser();
+			gc = jp.fromJson( contenuto );
 		}
-		JsonParser jp = new JsonParser();
-		final Gedcom gc = jp.fromJson( contenuto );
 		if( gc == null )
 			i += "\n\n" + getString(R.string.no_useful_data);
 		else {
-			if( idAlbero == Globale.preferenze.idAprendo ) {
-				questoAlbero.generazioni = quanteGenerazioni( gc );
-				Globale.preferenze.salva();
-			}	// todo: soluzione poco convincente.. forse meglio un bottone "AGGIORNA GENERAZIONI"
-			VisitaListaMedia visitaMedia = new VisitaListaMedia(true);
-			gc.accept( visitaMedia );
-			i += "\n" + getText(R.string.Persons) + ": "+ gc.getPeople().size()
+			if( questoAlbero.individui < 100 ) {
+				findViewById( R.id.info_aggiorna ).setVisibility( View.GONE );
+				aggiornaDati( gc, questoAlbero );
+			}
+			i += "\n" + getText(R.string.Persons) + ": "+ questoAlbero.individui
 				+ "\n" + getText(R.string.families) + ": "+ gc.getFamilies().size()
 				+ "\n" + getText(R.string.Generations) + ": "+ questoAlbero.generazioni
-				+ "\n" + getText(R.string.media) + ": "+ visitaMedia.listaMedia.size()
+				+ "\n" + getText(R.string.media) + ": "+ questoAlbero.media
 				+ "\n" + getText(R.string.sources) + ": "+ gc.getSources().size()
 				+ "\n" + getText(R.string.repositories) + ": "+ gc.getRepositories().size();
+			if( questoAlbero.radice != null ) {
+				i += "\n" + "Radice: " + U.epiteto( gc.getPerson(questoAlbero.radice) );
+			}
+			if( questoAlbero.cartelle != null && !questoAlbero.cartelle.isEmpty() ) {
+				i += "\n\n" + "Media folders:";
+				for( String dir : questoAlbero.cartelle )
+					i += "\n" + dir;
+			}
 		}
 		((TextView)findViewById(R.id.info_statistiche)).setText( i );
+
+		// Bottone "Aggiorna Dati"
+		findViewById( R.id.info_aggiorna ).setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View v ) {
+				aggiornaDati( gc, questoAlbero);
+				recreate();
+			}
+		});
 
 		if( gc != null ) {
 			Header h = gc.getHeader();
@@ -132,6 +154,16 @@ public class InfoAlbero extends AppCompatActivity {
 		}
 	}
 
+	static void aggiornaDati( Gedcom gc, Armadio.Cassetto albero ) {
+		albero.individui = gc.getPeople().size();
+		albero.generazioni = quanteGenerazioni( gc, albero.radice );
+		VisitaListaMedia visitaMedia = new VisitaListaMedia( gc, true );
+		gc.accept( visitaMedia );
+		albero.media = visitaMedia.listaMedia.size();
+		Globale.preferenze.salva();
+		Globale.editato = true; // per aggiornare Alberi quando torna indietro
+	}
+
 	boolean testoMesso;  // impedisce di mettere più di uno spazio() consecutivo
 	void poni( CharSequence titolo, String testo ) {
 		if( testo != null ) {
@@ -171,16 +203,23 @@ public class InfoAlbero extends AppCompatActivity {
 		}
 	}
 
-
-	public static int quanteGenerazioni( Gedcom gc ) {
+	public static int quanteGenerazioni( Gedcom gc, String radice ) {
 		if( gc.getPeople().isEmpty() )
 			return 0;
-		risaliGenerazioni( gc.getPerson(U.trovaRadice(gc)), gc, 0 );
+		genMin = 0;
+		genMax = 0;
+		risaliGenerazioni( gc.getPerson(radice), gc, 0 );
+		// Rimuove dalle persone l'estensione 'gen' per permettere successivi conteggi
+		for( Person p : gc.getPeople() ) {
+			p.getExtensions().remove("gen");
+			if( p.getExtensions().isEmpty() )
+				p.setExtensions( null );
+		}
 		return 1 - genMin + genMax;
 	}
 
-	static int genMin = 0;
-	static int genMax = 0;
+	static int genMin;
+	static int genMax;
 
 	// riceve una Person e trova il numero della generazione di antenati più remota
 	static void risaliGenerazioni( Person p, Gedcom gc, int gen ) {
