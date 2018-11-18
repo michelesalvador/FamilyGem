@@ -1,29 +1,21 @@
-// Classe per gestire le preferenze salvate in
+// Classe per gestire le preferenze salvate in preferenze.json
 package app.familygem;
 
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class Armadio {
 
-	//Cassetto[] alberi;
 	List<Cassetto> alberi;
 	int idAprendo;
-
-	public Armadio( List<Cassetto> alberi, int idAprendo ) {
-		this.alberi = alberi;
-		this.idAprendo = idAprendo;
-	}
-
-	/*String getCartella() {
-		return alberoAperto().cartella;
-	}
-	List<String> getPreferiti {
-		return alberoAperto().preferiti;
-	}*/
+	boolean autoSalva;
+	boolean caricaAlbero;
+	public boolean esperto;
 
 	int max() {
 		int num = 0;
@@ -92,25 +84,30 @@ public class Armadio {
 	}
 
 
+	public static class Cassetto {
+		int id;
+		String nome;
+		@Deprecated
+		String cartella;
+		LinkedHashSet<String> cartelle;
+		int individui;
+		int generazioni;
+		int media;
+		String radice;
+		List<String> preferiti;
 
-public static class Cassetto {
-	int id;
-	String nome;
-	public String cartella;
-	int individui;
-	int generazioni;
-	String radice;
-	List<String> preferiti;
+		Cassetto( int id, String nome, String cartella, int individui, int generazioni, String radice, List<String> preferiti ) {
+			this.id = id;
+			this.nome = nome;
+			//this.cartella = cartella;
+			cartelle = new LinkedHashSet<>();
+			if( cartella != null )
+				cartelle.add( cartella );
+			this.individui = individui;
+			this.generazioni = generazioni;
+			this.radice = radice;
+			this.preferiti = preferiti;
+		}
 
-	Cassetto( int id, String nome, String cartella, int individui, int generazioni, String radice, List<String> preferiti) {
-		this.id = id;
-		this.nome = nome;
-		this.cartella = cartella;
-		this.individui = individui;
-		this.generazioni = generazioni;
-		this.radice = radice;
-		this.preferiti = preferiti;
 	}
-
-}
 }

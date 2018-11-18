@@ -115,7 +115,6 @@ public class Diagramma extends Fragment {
 				}
 		}
 		Globale.individuo = centro.getId(); // lo ribadisce nei due casi in cui mancava
-		s.l( U.epiteto( centro ) );
 		// Risale ai nonni
 		if( !centro.getParentFamilies(gc).isEmpty() ) {	// qui ci va eventuale scelta di QUALI genitori mostrare se centro ha più genitori
 			Family famiglia = centro.getParentFamilies(gc).get(0);
@@ -826,7 +825,6 @@ public class Diagramma extends Fragment {
 	// Aggiunge il parente che è stata scelto in Anagrafe
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		s.l( "Diagramma onActivityResult " + requestCode );
 		if( requestCode == 1401  ) {
 			if( resultCode == AppCompatActivity.RESULT_OK ) {
 				EditaIndividuo.aggiungiParente( idPersona,

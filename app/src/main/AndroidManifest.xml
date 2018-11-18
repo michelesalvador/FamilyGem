@@ -94,6 +94,7 @@
             android:parentActivityName=".Principe"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".EditaIndividuo" />
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
     </application>
 
 </manifest>

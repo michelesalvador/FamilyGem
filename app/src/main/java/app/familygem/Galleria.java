@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import com.theartofdev.edmodo.cropper.CropImage;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
@@ -218,11 +220,7 @@ public class Galleria extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch( item.getItemId() ) {
 			case 0:
-				/*Ponte.manda( nuovoMedia(null), "oggetto" );
-				startActivity( new Intent( getContext(), Immagine.class ) );*/
-				Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-				intent.setType( "*/*" );
-				startActivityForResult( intent,9173 );
+				U.appAcquisizioneImmagine( getContext(), this, 4546 );
 				break;
 			default:
 				return false;
@@ -233,13 +231,20 @@ public class Galleria extends Fragment {
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		if( resultCode == RESULT_OK ) {
-			if( requestCode == 9173 ) {
+			if( requestCode == 4546 ) { // File preso da app fornitrice viene salvato in Media ed eventualmente ritagliato
 				Media media = nuovoMedia( null );
-				if( !Dettaglio.settaMedia( getContext(), data, media ) ) return;
+				if( U.ritagliaImmagine( getContext(), this, data, media ) ) { // se è un'immagine (quindi ritagliabile)
+					Globale.editato = false; // Non deve scattare onRestart() + recreate() perché poi il fragment di arrivo non è più lo stesso
+					U.salvaJson();
+					return;
+				}
+			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
+				U.fineRitaglioImmagine( data );
 			}
 			U.salvaJson();
 			Globale.editato = true;
-		}
+		} else
+			Toast.makeText( getContext(), "Something wrong importing data", Toast.LENGTH_LONG ).show(); // todo traduci
 	}
 
 	// Menu contestuale

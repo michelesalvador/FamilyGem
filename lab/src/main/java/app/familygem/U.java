@@ -1,13 +1,20 @@
 // Attrezzi utili per tutto il programma
 package app.familygem;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -16,29 +23,40 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.JsonPrimitive;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Gedcom;
@@ -237,6 +255,38 @@ public class U {
 	}
 
 
+	// Imposta in un Media il file scelto da file manager. Restituisce l'uri dell'immagine salvata oppure null
+	// In app questo metodo è in Dettaglio
+	static File settaMedia( Context contesto, Intent data, Media media ) {
+		File fileMedia = null;
+		try {
+			Uri uri = data.getData();
+			String percorso = U.uriPercorsoFile( uri );
+
+			if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
+				// Apre direttamente il file
+				fileMedia = new File( percorso );
+			} else {    // è solo il nome del file 'pippo.png'
+				// Copia il file (che può essere di qualsiasi tipo) nella memoria esterna della app
+				// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
+				InputStream input = contesto.getContentResolver().openInputStream( uri );
+				String percorsoMemoria = contesto.getExternalFilesDir(null) + "/" + Globale.preferenze.idAprendo;
+				File dirMemoria = new File( percorsoMemoria );
+				if( !dirMemoria.exists() )
+					dirMemoria.mkdir();
+				fileMedia = new File( percorsoMemoria, percorso );
+				FileUtils.copyInputStreamToFile( input, fileMedia );
+			}
+			// Aggiunge il percorso della cartella nel Cassetto in preferenze
+			//Globale.preferenze.alberoAperto().cartelle.add( fileMedia.getParent() );
+			//Globale.preferenze.salva();
+			media.setFile( fileMedia.getAbsolutePath() );
+		} catch( Exception e ) {
+			Toast.makeText( contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+		}
+		return fileMedia;
+	}
+
 
 	// Riceve un Uri e cerca di restituire il percorso del file
 	public static String uriPercorsoFile( Uri uri ) {
@@ -300,7 +350,6 @@ public class U {
 			nomeFile = trovaNomeFile( uri, OpenableColumns.DISPLAY_NAME );
 		return nomeFile;
 	}
-
 	// Di default restituisce solo il nome del file 'famiglia.ged'
 	// se il file è preso in downloads.documents restituisce il percorso completo
 	private static String trovaNomeFile( Uri uri, String cosaCercare ) {
@@ -315,6 +364,70 @@ public class U {
 		}
 		return null;
 	}
+
+	// fa comparire l'immagine in una vista
+	public static void mostraMedia( final ImageView vista, final Media med ) {
+		vista.getViewTreeObserver().addOnPreDrawListener( new ViewTreeObserver.OnPreDrawListener() {
+			public boolean onPreDraw() {
+				vista.getViewTreeObserver().removeOnPreDrawListener(this);	// evita il ripetersi di questo metodo
+				String percorso = percorsoMedia( med );	// Il file in locale
+				s.l( percorso );
+				if( percorso != null ) {
+					BitmapFactory.Options opzioni = new BitmapFactory.Options();
+					opzioni.inJustDecodeBounds = true;	// solo info
+					BitmapFactory.decodeFile( percorso, opzioni );
+					int largaOriginale = opzioni.outWidth;
+					if( largaOriginale > vista.getWidth() && vista.getWidth() > 0 )
+						opzioni.inSampleSize = largaOriginale / vista.getWidth();
+					opzioni.inJustDecodeBounds = false;	// carica immagine
+					Bitmap bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Riesce a ricavare un'immagine
+					//bitmap = ThumbnailUtils.extractThumbnail( bitmap, 30, 60, ThumbnailUtils.OPTIONS_RECYCLE_INPUT );
+					// Fico ma ritaglia l'immagine per farla stare nelle dimensioni date. La quarta opzione non l'ho capita
+					try { // Rotazione Exif
+						ExifInterface exif = new ExifInterface( percorso );
+						int girata = exif.getAttributeInt( ExifInterface.TAG_ORIENTATION, 1 );
+						int gradi = 0;
+						switch( girata ) {
+							//case ExifInterface.ORIENTATION_NORMAL:
+							case ExifInterface.ORIENTATION_ROTATE_90:
+								gradi = 90;
+								break;
+							case ExifInterface.ORIENTATION_ROTATE_180:
+								gradi = 180;
+								break;
+							case ExifInterface.ORIENTATION_ROTATE_270:
+								gradi = 270;
+						}
+						if( gradi > 0 ) {
+							Matrix matrix = new Matrix();
+							matrix.postRotate( gradi );
+							bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true );
+						}
+					} catch( Exception e ) {
+						Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+						e.printStackTrace();
+					}
+					/*if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
+							|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
+						// Magari è un video
+						bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
+						if( bitmap == null ) {
+							String formato = med.getFormat();
+							if( formato == null )
+								formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
+							bitmap = generaIcona( vista, R.layout.media_file, formato );
+						}
+						//vista.setTag( R.id.tag_file_senza_anteprima, true );    // così Immagine può aprire un'app cliccando l'icona
+					}*/
+					//vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
+					vista.setImageBitmap( bitmap );
+				} //else if( med.getFile() != null )	// Cerca il file in internet
+					//new U.zuppaMedia( vista ).execute( med.getFile() );
+				return true;
+			}
+		});
+	}
+
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
 	public static String percorsoMedia( Media m ) {
@@ -341,4 +454,125 @@ public class U {
 		return null;
 	}
 
+	// Propone una bella lista di app per acquisire immagini
+	public static void appAcquisizioneImmagine( final Context contesto ) {
+		// Richiesta permesso accesso file in memoria
+		int perm = ContextCompat.checkSelfPermission( contesto, Manifest.permission.WRITE_EXTERNAL_STORAGE );
+		if( perm == PackageManager.PERMISSION_DENIED ) {
+			ActivityCompat.requestPermissions( (AppCompatActivity) contesto, new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE }, 5641 );
+			return;
+		} //else if( perm == PackageManager.PERMISSION_GRANTED )...
+		// Colleziona gli intenti utili per acquisire immagini
+		List<ResolveInfo> listaRisolvi = new ArrayList<>();
+		final List<Intent> listaIntenti = new ArrayList<>();
+		// Camere
+		Intent intentoCamera = new Intent( "android.media.action.IMAGE_CAPTURE" );
+		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities( intentoCamera, 0 ) ) {
+			Intent finalIntent = new Intent( intentoCamera );
+			finalIntent.setComponent( new ComponentName( info.activityInfo.packageName, info.activityInfo.name ) );
+			listaIntenti.add( finalIntent );
+			listaRisolvi.add( info );
+		}
+		// Documenti e Gallerie
+		Intent intentoGalleria = new Intent( Intent.ACTION_GET_CONTENT );
+		intentoGalleria.setType("image/*");
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) { // da KitKat: Android 4.4, api level 19
+			String[] mimeTypes = {"image/*", "audio/*", "video/*", "application/*", "text/*"};
+			intentoGalleria.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+		}
+		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoGalleria,0) ) {
+			Intent finalIntent = new Intent( intentoGalleria );
+			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
+			listaIntenti.add( finalIntent );
+			listaRisolvi.add( info );
+		}
+		AlertDialog.Builder dialog = new AlertDialog.Builder( contesto );
+		dialog.setAdapter( faiAdattatore( contesto, listaRisolvi ),
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						Intent intent = listaIntenti.get(id);
+						((AppCompatActivity)contesto).startActivityForResult(intent,14463 );
+					}
+				}).show();
+	}
+	// Strettamente legato a quello qui sopra
+	private static ArrayAdapter<ResolveInfo> faiAdattatore( final Context contesto, final List<ResolveInfo> listaRisolvi) {
+		return new ArrayAdapter<ResolveInfo>( contesto, R.layout.pezzo_intento, R.id.intento_titolo, listaRisolvi ){
+			@Override
+			public View getView(int posizione, View vista, ViewGroup genitore ) {
+				View view = super.getView( posizione, vista, genitore );
+				ResolveInfo info = listaRisolvi.get( posizione );
+				ImageView image = view.findViewById(R.id.intento_icona);
+				image.setImageDrawable( info.loadIcon(contesto.getPackageManager()) );
+				TextView textview = view.findViewById(R.id.intento_titolo);
+				textview.setText( info.loadLabel(contesto.getPackageManager()).toString() );
+				return view;
+			}
+		};
+	}
+
+	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
+	static void ritagliaImmagine( final Context contesto, Intent data, Media media ) {
+		final File fileMedia = U.settaMedia( contesto, data, media );
+		String tipoMime = URLConnection.guessContentTypeFromName( fileMedia.getName() );
+		if( tipoMime.startsWith("image/") ) {
+			ImageView vistaImmagine = new ImageView( contesto );
+			//vistaImmagine.setImageURI( data.getData() ); // ok ma l'immagine non è ruotata Exif né ridimensionata
+			U.mostraMedia( vistaImmagine, media );
+			Globale.mediaCroppato = media; // Media in attesa di essere aggiornato col nuovo percorso file
+			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
+			costruttore.setMessage( "Vuoi ritagliare questa immagine?" )
+					.setView(vistaImmagine)
+					.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
+						public void onClick( DialogInterface dialog, int id ) {
+							File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
+							if( !dirMemoria.exists() )
+								dirMemoria.mkdir();
+							File fileDestinazione = new File( dirMemoria.getAbsolutePath(), fileMedia.getName() );
+							Intent intento = CropImage.activity( Uri.fromFile(fileMedia) )
+									.setOutputUri( Uri.fromFile(fileDestinazione) ) // cartella in memoria esterna
+									//.setActivityMenuIconColor(Color.GREEN)
+									//.setAutoZoomEnabled( true )
+									.setGuidelines( CropImageView.Guidelines.OFF )
+									.setBorderLineThickness( 1 )
+									.setBorderCornerThickness( 3 )
+									//.setAllowRotation(true)
+									//.setActivityTitle( "" )
+									.setCropMenuCropButtonTitle( "Fatto" )
+									//.start( (AppCompatActivity)contesto );
+									.getIntent( contesto );
+							if( 1 > 0 )
+								((AppCompatActivity)contesto).startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
+						}
+					}).setNegativeButton( android.R.string.no, null )	.create().show();
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, 300 );
+			vistaImmagine.setLayoutParams( params ); // l'assegnazione delle dimensioni deve venire DOPO la creazione del dialogo
+			//vistaImmagine.getLayoutParams().height = 300;
+			//vistaImmagine.requestLayout();
+		}
+	}
+
+	// Conclude la procedura di ritaglio di un'immagine
+	static void fineRitaglioImmagine( int resultCode, Intent data ) {
+		CropImage.ActivityResult risultato = CropImage.getActivityResult(data);
+		if( resultCode == Activity.RESULT_OK ) {
+			Uri uri = risultato.getUri();
+			Globale.mediaCroppato.setFile( U.uriPercorsoFile( uri ) );
+			s.l(uri +"  >  "+ Globale.mediaCroppato.getFile() );
+		} else if( resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+			s.l( "RRRRRRRRRIIIIIIIIIIIISULTAO  " + risultato.getError() );
+		}
+	}
+
+	// Risposta a tutte le richieste di permessi
+	static void risultatoPermessi( Context contesto, int codice, String[] permessi, int[] accordi ) {
+		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
+			if( codice == 5641 ) {
+				appAcquisizioneImmagine( contesto );
+			}
+		} else
+			Toast.makeText( contesto, permessi[0] + " not granted", Toast.LENGTH_SHORT ).show();
+		//for( String perm : permessi ) s.l(perm); c'è solo android.permission.WRITE_EXTERNAL_STORAGE
+	}
 }

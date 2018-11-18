@@ -1,7 +1,7 @@
 package app.familygem;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -17,16 +17,15 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
-import com.google.gson.Gson;
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 import com.yalantis.ucrop.UCrop;
+import com.yalantis.ucrop.UCropActivity;
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Gedcom;
+import org.folg.gedcom.model.Media;
 import org.folg.gedcom.parser.ModelParser;
 import org.folg.gedcom.tools.CountsCollector;
 import org.folg.gedcom.tools.GedcomAnalyzer;
@@ -57,106 +56,24 @@ public class Officina extends AppCompatActivity {
 				new beviZuppa().execute();
 				//database();
 				//mandaOggettoAttivita();
+				//prendi_file_da_FileManager();
 			}
 		});
 
-		findViewById(R.id.bottone_dati).setOnClickListener( new View.OnClickListener() {
-			@SuppressLint("NewApi")
+		findViewById(R.id.bottone_libero).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				// External storage
-				File dirEsterna = getExternalFilesDir(null);	// da API 8
-				// /storage/emulated/0/Android/data/app.familylab/files
-				// che in realtà è  /mnt/shell/emulated/0/Android/data/app.familylab/files
-				// viene cancellata con disinstallazione app
-				s.l( "ExternalFilesDir= " + dirEsterna );
-				//File nuovo = new File(dirEsterna.getAbsolutePath(), "creatoDaMe.txt"  );
-				//try { nuovo.createNewFile(); } catch ( IOException e ){ e.printStackTrace(); }
-				for( String nomeFile : dirEsterna.list() ) {
-					s.l( "File in ExternalFilesDir= " + nomeFile );
-				}
+				U.appAcquisizioneImmagine( Officina.this );
+				//takePhoto(Officina.this);
 
-				File[] luoghi = getApplicationContext().getExternalFilesDirs(null);	// richiede API 19 o superiore
-				// /storage/emulated/0/Android/data/lab.gedcomy/files
-				// /storage/external_SD/Android/data/lab.gedcomy/files
-				for( File luogo : luoghi ) {
-					//String dir = luogo.getAbsolutePath().substring(0, luogo.getAbsolutePath().indexOf("/Android"));
-					s.l("contesto.getExternalFilesDirs= " + luogo );
-				}
-
-				s.l( "Environment.getExternalStorageDirectory= " + Environment.getExternalStorageDirectory()
-						+ "  stato= " + Environment.getExternalStorageState() );
-				// /storage/emulated/0   mounted
-
-				File dirDocumenti = Environment.getExternalStoragePublicDirectory( // da API 8
-						Environment.DIRECTORY_DOCUMENTS ); // da API 19
-				s.l( "Environment.getExternalStoragePublicDirectory= " + dirDocumenti );
-				// /storage/emulated/0/Documents
-				try {
-					File nuovoFile = new File(dirDocumenti,"nuovo.txt" );
-					FileUtils.write( nuovoFile, "ciao", "ASCII" );
-					/*if( dirDocumenti.exists() )
-						s.l( " esiste ");*/
-				} catch( IOException e ) {
-					e.printStackTrace();
-				}
-
-				s.l( "Environment.getDataDirectory= " + Environment.getDataDirectory() );
-				// /data
-
-				s.l( "OpenableColumns.DISPLAY_NAME= " + OpenableColumns.DISPLAY_NAME	// _display_name
-						+"\nMediaStore.MediaColumns.DISPLAY_NAME= " + MediaStore.MediaColumns.DISPLAY_NAME	// _display_name
-						+"\nMediaStore.MediaColumns.TITLE= " + MediaStore.MediaColumns.TITLE	// title
-						+"\nMediaStore.Files.FileColumns.DATA= " + MediaStore.Files.FileColumns.DATA	// _data
-						+"\nMediaStore.Images.ImageColumns.DATA= " + MediaStore.Images.ImageColumns.DATA	// _data
-						+"\nMediaStore.Images.Media.DATA= " + MediaStore.Images.Media.DATA );	// _data
-			}
-		});
-
-		findViewById(R.id.bottone_importa).setOnClickListener( new View.OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-				//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT );
-				// io non trovo nessuna differenza tra ACTION_GET_CONTENT e ACTION_OPEN_DOCUMENT
-				// entrambi producono un simpatico uri
-				//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT_TREE );
-				// produce uri tipo content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FCamera
-				//Intent intent = new Intent( Intent.ACTION_PICK );	// fa scegliere solo tra immagini, audio, video
-				intent.setType( "*/*" );	// permette di aprire qualsiasi tipo di file
-				//intent.setType( "application/octet-stream" );	// sarebbe quello corretto per abilitare solo i file .ged
-				// ma disabilita i .ged in Download e in GoogleDrive (?!!??)
-				//intent.setType( "application/*" );	// una giusta via di mezzo:
-				// mostra solo i provider di file, ma abilita quasi tutti i file
-				//intent.addCategory( Intent.CATEGORY_OPENABLE );	// dovrebbe mostrare solo i file apribili.. ma non vedo differenza
-				startActivityForResult( intent,123 );
-			}
-		});
-
-		findViewById(R.id.bottone_apri_croppa).setOnClickListener( new View.OnClickListener() {
-			public void onClick(View v) {
-				// il classico cercatore di file di Family Gem
-				/*Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-				intent.setType( "image/*" );
-				startActivityForResult( intent,14463 );*/
-
-				// Apre direttamente Android Image Cropper con le opzioni per importare un'immagine
-				// Molto interessante ma vorrei implementarlo io
-				/*CropImage.activity()
-						//.quiciVannoleOpzioni()
-						.start(Officina.this );*/
-
-				// Cerca di sfruttare la bellissima lista di fonti di immagini fornita da Android Image Cropper
-				// funziona TRANNE la foto scattata con la fotocamera restituisce 'Intent data' = null
-				//startActivityForResult( CropImage.getPickImageChooserIntent( Officina.this,"Choose the source", false, true ), 14463 );
-				CropImage.startPickImageActivity( Officina.this );
-				/*if (CropImage.isExplicitCameraPermissionRequired(Officina.this )) {
-					// request permissions and handle the result in onRequestPermissionsResult()
-					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.CAMERA},
-							CropImage.CAMERA_CAPTURE_PERMISSIONS_REQUEST_CODE );
-				} else {
-					CropImage.startPickImageActivity( Officina.this );
-				}
-
-				startActivity( new Intent( Officina.this, CropImageActivity.class ) );*/
+				/* Condivisione di un file attraverso le app esistenti
+				Intent sendIntent = new Intent(Intent.ACTION_SEND);
+				sendIntent.setType("application/*");
+				Uri uri = Uri.fromFile(new File( "ciccio.txt" ));
+				sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+				Intent chooser = Intent.createChooser(sendIntent, "title");
+				if (sendIntent.resolveActivity(getPackageManager()) != null) {
+					startActivity(chooser);
+				} else s.l("Nessuna app per questa operazione");*/
 			}
 		});
 
@@ -165,6 +82,51 @@ public class Officina extends AppCompatActivity {
 				startActivity( new Intent( Officina.this, Diagramma.class ) );
 			}
 		});
+	}
+
+	@Override
+	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
+		U.risultatoPermessi( this, codice, permessi, accordi );
+	}
+
+	// Venendo da Windows, cercavo una semplice finestra di apertura file... ma qui siamo nel mondo degli uri
+	void prendi_file_da_FileManager() {
+		Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+		//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT );
+		// uno differenza tra i 2 è che ACTION_OPEN_DOCUMENT (da api 19) consente multeplici mimetype
+		// entrambi producono un simpatico uri, ACTION_OPEN_DOCUMENT forse solo content://
+		//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT_TREE );
+		// produce uri tipo content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FCamera
+		//Intent intent = new Intent( Intent.ACTION_PICK );	// fa scegliere in una lista con alcuni provider di immagini, audio, video
+		//Intent intent = new Intent( Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI );
+			// riduce la lista di provider solo a quelli che dispensano immagini: Galleria e Foto
+		intent.setType( "*/*" );	// permette di aprire qualsiasi tipo di file
+		//intent.setDataAndType( android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "*/*" ); // bho non cambia niente
+		//intent.setType( "application/octet-stream" );	// sarebbe quello corretto per abilitare solo i file .ged
+		// ma disabilita i .ged in Download e in GoogleDrive (?!!??)
+		//intent.setType( "application/*" );	// una giusta via di mezzo:
+		// mostra solo i provider di file, ma abilita quasi tutti i file
+		//intent.addCategory( Intent.CATEGORY_OPENABLE );	// dovrebbe mostrare solo i file apribili.. ma non vedo differenza
+		startActivityForResult( intent,123 );
+	}
+
+	// Aprire un'immagine con la libreria Android Image Cropper
+	void apri_Immagine_da_Croppare() {
+		// il classico cercatore di file di Family Gem
+		/*Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+		intent.setType( "image/*" );
+		startActivityForResult( intent,14463 );*/
+
+		// Apre direttamente Android Image Cropper con le opzioni per importare un'immagine
+		// Molto interessante ma vorrei implementarlo io
+		/*CropImage.activity()
+				//.quiciVannoleOpzioni()
+				.start(Officina.this );*/
+
+		// Cerca di sfruttare la bellissima lista di fonti di immagini fornita da Android Image Cropper
+		// funziona TRANNE la foto scattata con la fotocamera restituisce 'Intent data' = null
+		//startActivityForResult( CropImage.getPickImageChooserIntent( Officina.this,"Choose the source", false, true ), 14463 );
+		CropImage.startPickImageActivity( Officina.this );
 	}
 
 	public class AiutoDatabaseImmagini extends SQLiteOpenHelper {
@@ -188,7 +150,7 @@ public class Officina extends AppCompatActivity {
 	@Override
 	protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		//??? super.onActivityResult(requestCode, resultCode, data);    Inutile
-		s.l( "requestCode ============= " + requestCode +"  resultCode ===== " + resultCode + "   " + data );
+		s.l( "requestCode: " + requestCode +"  resultCode: " + resultCode + "   " + data );
 		// Importa un file Gedcom
 		if( resultCode == RESULT_OK && requestCode == 123 ) {
 			try {
@@ -329,8 +291,8 @@ public class Officina extends AppCompatActivity {
 			}
 		}
 
-		/* Riceve un'immagine e la ritaglia con uCrop. ok funziona
-		if( resultCode == RESULT_OK && requestCode == 14463 ) {
+		/* Riceve un'immagine e la ritaglia con uCrop. ok funziona*/
+		if( resultCode == RESULT_OK && requestCode == 1234 ) {
 			File destino = new File( getFilesDir(), "prova.jpg" );
 			Uri uriDestinazione = Uri.fromFile( destino );
 			UCrop.Options opzioni = new UCrop.Options();
@@ -346,7 +308,7 @@ public class Officina extends AppCompatActivity {
 					.withOptions( opzioni )
 					.withMaxResultSize( 200, 200 ) // max Width, max Height Todo: larghezza e altezza dello schermo?
 					.start( this );
-		}*/
+		}
 		// Riprende l'immagine ritagliata da uCrop
 		if( resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP ) {
 			Uri resultUri = UCrop.getOutput( data );
@@ -363,30 +325,70 @@ public class Officina extends AppCompatActivity {
 		}
 
 		// Riceve un'immagine e la ritaglia con Android Image Cropper
-		if( resultCode == RESULT_OK && requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE ) { //14463
+		if( resultCode == RESULT_OK && requestCode == 14463 ) { //CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE
 			if( data != null ) {
-				CropImage.activity( data.getData() )
-						//.setActivityMenuIconColor(Color.GREEN)
-						//.setAutoZoomEnabled( true )
-						.setGuidelines( CropImageView.Guidelines.OFF )
-						.setBorderCornerThickness( 0 )
-						//.setAllowRotation(true)
-						//.setActivityTitle( "" )
-						.setCropMenuCropButtonTitle( "Fatto" )
-						.start( this );
+				Media media = new Media();
+				U.ritagliaImmagine( Officina.this, data, media );
 			} else
 				s.l( "data è null" );
 		}
 		// Ottiene l'immagine ritagliata da Android Image Cropper
 		if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-			CropImage.ActivityResult result = CropImage.getActivityResult(data);
-			if( resultCode == RESULT_OK ) {
-				Uri resultUri = result.getUri();
-				((ImageView)findViewById(R.id.immagine)).setImageURI( resultUri ); // come ho fatto a ignorarlo fin'ora?????
-			} else if( resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-				s.l( result.getError() );
-			}
+			U.fineRitaglioImmagine( resultCode, data );
+			if( data != null )
+				((ImageView)findViewById(R.id.immagine)).setImageURI(  // come ho fatto a ignorarlo fin'ora?????
+						CropImage.getActivityResult(data).getUri() );
 		}
+	}
+
+	@SuppressLint("NewApi")
+	void percorsi_di_Sistema() {
+		// External storage
+		File dirEsterna = getExternalFilesDir(null);	// da API 8
+		// /storage/emulated/0/Android/data/app.familylab/files
+		// che in realtà è  /mnt/shell/emulated/0/Android/data/app.familylab/files
+		// viene cancellata con disinstallazione app
+		s.l( "ExternalFilesDir= " + dirEsterna );
+		//File nuovo = new File(dirEsterna.getAbsolutePath(), "creatoDaMe.txt"  );
+		//try { nuovo.createNewFile(); } catch ( IOException e ){ e.printStackTrace(); }
+		for( String nomeFile : dirEsterna.list() ) {
+			s.l( "File in ExternalFilesDir= " + nomeFile );
+		}
+
+		File[] luoghi = getApplicationContext().getExternalFilesDirs(null);	// richiede API 19 o superiore
+		// /storage/emulated/0/Android/data/lab.gedcomy/files
+		// /storage/external_SD/Android/data/lab.gedcomy/files
+		for( File luogo : luoghi ) {
+			//String dir = luogo.getAbsolutePath().substring(0, luogo.getAbsolutePath().indexOf("/Android"));
+			s.l("contesto.getExternalFilesDirs= " + luogo );
+		}
+
+		s.l( "Environment.getExternalStorageDirectory= " + Environment.getExternalStorageDirectory()
+				+ "  stato= " + Environment.getExternalStorageState() );
+		// /storage/emulated/0   mounted
+
+		File dirDocumenti = Environment.getExternalStoragePublicDirectory( // da API 8
+				Environment.DIRECTORY_DOCUMENTS ); // da API 19
+		s.l( "Environment.getExternalStoragePublicDirectory= " + dirDocumenti );
+		// /storage/emulated/0/Documents
+		try {
+			File nuovoFile = new File(dirDocumenti,"nuovo.txt" );
+			FileUtils.write( nuovoFile, "ciao", "ASCII" );
+					/*if( dirDocumenti.exists() )
+						s.l( " esiste ");*/
+		} catch( IOException e ) {
+			e.printStackTrace();
+		}
+
+		s.l( "Environment.getDataDirectory= " + Environment.getDataDirectory() );
+		// /data
+
+		s.l( "OpenableColumns.DISPLAY_NAME= " + OpenableColumns.DISPLAY_NAME	// _display_name
+				+"\nMediaStore.MediaColumns.DISPLAY_NAME= " + MediaStore.MediaColumns.DISPLAY_NAME	// _display_name
+				+"\nMediaStore.MediaColumns.TITLE= " + MediaStore.MediaColumns.TITLE	// title
+				+"\nMediaStore.Files.FileColumns.DATA= " + MediaStore.Files.FileColumns.DATA	// _data
+				+"\nMediaStore.Images.ImageColumns.DATA= " + MediaStore.Images.ImageColumns.DATA	// _data
+				+"\nMediaStore.Images.Media.DATA= " + MediaStore.Images.Media.DATA );	// _data
 	}
 
 	void database() {
@@ -424,39 +426,6 @@ public class Officina extends AppCompatActivity {
 		cursor.close();
 		//for( long id : indirizzi )
 		//	s.l( item.toString() );
-	}
-
-	void gestisciArmadio() {
-		try {
-			/*List<String> preferiti = new ArrayList<>();
-			preferiti.add( "I2" );
-			preferiti.add( "I23" );
-			preferiti.add( "I234" );
-			Cassetto cass1 = new Cassetto(1,"the Simpsons","/storage/emulated/0/Documents",
-					1234,123, "I1", preferiti );
-			Cassetto cass2 = new Cassetto(2,"Bartolètti f.","/storage/emulated/0/Documents",
-					555,89, "I1", preferiti );
-			Cassetto cass3 = new Cassetto(3,"Jeronço f.","/storage/emulated/0/Documents",
-					800,8, "I1", preferiti );
-			Cassetto[] alberi = { cass1, cass2, cass3 };*/
-			List<Armadio.Cassetto> alberi = new ArrayList<>();
-			Gson gson = new Gson();
-			String salvando = gson.toJson( new Armadio( alberi, 0) );
-			s.l(salvando);
-			FileUtils.writeStringToFile( new File(getFilesDir(),"preferenzeX.json"), salvando );
-
-			/*String aprendo = FileUtils.readFileToString( new File(getFilesDir(), "preferenze.json") );
-			//l(aprendo);
-			Armadio armadio = gson.fromJson( aprendo, Armadio.class);
-			s.l( armadio.alberi[0].nome +"\n"+ armadio.alberi[1].nome );
-
-			//List<Cassetto> listaFrighi = armadio.alberi;
-			for( Cassetto alb : armadio.alberi ) {
-				s.l(alb.id +" "+ alb.nome );
-			}/**/
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	// Carica un'immagine asincronicamente

@@ -1,5 +1,6 @@
 package app.familygem;
 
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -68,6 +69,7 @@ public class Diagramma extends AppCompatActivity {
 				margini.exactCenterX() +"  "+ margini.exactCenterY() +"\n"+
 				zoom.getZoom() +"  "+ zoom.getRealZoom()  );
 		zoom.panTo( -margini.exactCenterX() + zoom.getWidth()/zoom.getRealZoom()/2, -margini.exactCenterY() + zoom.getHeight()/zoom.getRealZoom()/2, true );
+		startActivity( new Intent( Diagramma.this, Officina.class ) );
 	}
 
 

@@ -11,4 +11,5 @@
     <color name="archivio">#aa9988</color>
     <color name="archivioCitazione">#ddccbb</color>
     <color name="trasparente">#0000</color>
+    <color name="colorAccent">#ff4081</color>
 </resources>

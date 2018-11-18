@@ -12,7 +12,7 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Visitor;
-import java.util.List;
+import java.util.Iterator;
 
 public class VisitaEliminaMedia extends Visitor {
 
@@ -54,11 +54,11 @@ public class VisitaEliminaMedia extends Visitor {
 	}
 
 	private void scanna( MediaContainer contenitore ) {
-		List<MediaRef> lista = contenitore.getMediaRefs();
-		for( MediaRef mr : lista )
-			if( mr.getRef().equals(media.getId()) )
-				lista.remove( mr );
-		if( lista.isEmpty() )
+		Iterator<MediaRef> refiMedia = contenitore.getMediaRefs().iterator();
+		while( refiMedia.hasNext() )
+			if( refiMedia.next().getRef().equals(media.getId()) )
+				refiMedia.remove();
+		if( contenitore.getMediaRefs().isEmpty() )
 			contenitore.setMediaRefs( null );
 	}
 }

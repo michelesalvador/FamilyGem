@@ -27,9 +27,9 @@ public class Globale extends Application {
 	public static Armadio preferenze;
 	static View vistaPrincipe;
 	//static Fragment frammentoPrecedente;
-	public static Object contenitore;	// il padre del tag da modificare
-	public static Object oggetto;	// il tag da modificare
-	//public static Name nome;
+	//public static Object contenitore;	// il padre del tag da modificare
+	//public static Object oggetto;	// il tag da modificare
+	public static Media mediaCroppato;
 	//public static Note nota;	// Note e citazioniFonti meritano
 	//public static SourceCitation citazioneFonte;
 	static boolean editato; // C'è stata un'editazione in EditaIndividuo o in Dettaglio e quindi il contenuto (ad es. di Individuo) va aggiornato

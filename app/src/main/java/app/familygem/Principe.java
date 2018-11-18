@@ -153,4 +153,9 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 
         return true;
     }
+
+	@Override
+	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
+		U.risultatoPermessi( this, codice, permessi, accordi );
+	}
 }

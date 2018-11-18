@@ -4,8 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -23,16 +21,12 @@ import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import app.familygem.dettaglio.Archivio;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Nome;
-
 import static app.familygem.Globale.gc;
 
 public class IndividuoEventi extends Fragment {
@@ -42,43 +36,30 @@ public class IndividuoEventi extends Fragment {
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View vistaEventi = inflater.inflate( R.layout.individuo_scheda, container, false);
-		LinearLayout scatola = vistaEventi.findViewById( R.id.contenuto_scheda );
-		uno = gc.getPerson( Globale.individuo );
-		for( Name nome : uno.getNames())
-			piazzaEvento( scatola, getString(R.string.name), U.nomeCognome( nome ), nome );
-		for (EventFact fatto : uno.getEventsFacts() ) {
-			/*String tit;
-			if (fatto.getType() != null)
-				tit = fatto.getType();    // Custom event/attribute
-			else
-				tit = fatto.getDisplayType();    // Standard event/attribute*/
-			String tst = "";
-			if( fatto.getValue() != null )	tst = fatto.getValue() + "\n";
-			if( fatto.getType() != null )	tst += fatto.getType() + "\n";
-			if( fatto.getDate() != null ) {
-				tst += fatto.getDate() + "\n";
-				/*LocalDate data = U.data( fatto.getDate() );
-				if( data != null )
-					tst += " > " + data +" > "+ data.toString("d MMMM Y") +"\n";
-				else tst += "--------\n";*/
+		if( gc != null ) {
+			LinearLayout scatola = vistaEventi.findViewById( R.id.contenuto_scheda );
+			uno = gc.getPerson( Globale.individuo );
+			for( Name nome : uno.getNames())
+				piazzaEvento( scatola, getString(R.string.name), U.nomeCognome( nome ), nome );
+			for (EventFact fatto : uno.getEventsFacts() ) {
+				String tst = "";
+				if( fatto.getValue() != null )	tst = fatto.getValue() + "\n";
+				if( fatto.getType() != null )	tst += fatto.getType() + "\n";
+				if( fatto.getDate() != null ) 	tst += fatto.getDate() + "\n";
+				Address indirizzo = fatto.getAddress();
+				if( indirizzo != null )	tst += Dettaglio.indirizzo(indirizzo) + "\n";
+				if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
+				if( fatto.getCause() != null )	tst += fatto.getCause() + "\n";
+				if( tst.endsWith("\n") )	tst = tst.substring( 0, tst.length()-1 );	// Rimuove l'ultimo acapo
+				piazzaEvento( scatola, fatto.getDisplayType(), tst, fatto );
 			}
-			Address indirizzo = fatto.getAddress();
-			if( indirizzo != null )	tst += Dettaglio.indirizzo(indirizzo) + "\n";
-			if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
-			if( fatto.getCause() != null )	tst += fatto.getCause() + "\n";
-			if( tst.endsWith("\n") )	tst = tst.substring( 0, tst.length()-1 );	// Rimuove l'ultimo acapo
-			piazzaEvento( scatola, fatto.getDisplayType(), tst, fatto );
+			for( Estensione est : U.trovaEstensioni( uno ) ) {
+				piazzaEvento( scatola, est.nome, est.testo, est.gedcomTag );
+			}
+			U.mettiNote( scatola, uno, true );
+			U.citaFonti( scatola, uno );
+			U.cambiamenti( scatola, uno.getChange() );
 		}
-		//if( uno.getExtension("folg.more_tags") != null )
-		//	piazzaEvento( scatola, "Altro", U.trovaEstensioni(uno.getExtensions()), null, null, null );
-		//U.mettiEstensioni( scatola, uno );
-		for( Estensione est : U.trovaEstensioni( uno ) ) {
-			piazzaEvento( scatola, est.nome, est.testo, est.gedcomTag );
-		}
-		U.mettiNote( scatola, uno, true );
-		U.citaFonti( scatola, uno );
-		U.cambiamenti( scatola, uno.getChange() );
-
 		return vistaEventi;
 	}
 
@@ -90,11 +71,6 @@ public class IndividuoEventi extends Fragment {
 		TextView vistaTesto = vistaFatto.findViewById( R.id.evento_testo );
 		if( testo.isEmpty() ) vistaTesto.setVisibility( View.GONE );
 		else vistaTesto.setText( testo );
-		/*if( note != null ) {
-			LinearLayout scatolaNote = vistaFatto.findViewById( R.id.evento_note );
-			for( Note nota : note )
-				U.mettiNota( scatolaNote, nota, false );
-		}*/
 		if( oggetto instanceof SourceCitationContainer ) {
 			List<SourceCitation> citaFonti = ((SourceCitationContainer)oggetto).getSourceCitations();
 			TextView vistaCitaFonti = vistaFatto.findViewById( R.id.evento_fonti );
@@ -111,8 +87,6 @@ public class IndividuoEventi extends Fragment {
 		if( oggetto instanceof Name ) {
 			vistaFatto.setOnClickListener( new View.OnClickListener() {
 				public void onClick( View v ) {
-					//Globale.contenitore = uno;
-					//Globale.oggetto = nome;
 					Ponte.manda( oggetto, "oggetto" );
 					// non serve mandare "contenitore"
 					startActivity( new Intent( getContext(), Nome.class ) );
@@ -137,12 +111,10 @@ public class IndividuoEventi extends Fragment {
 				vistaFatto.setOnClickListener( new View.OnClickListener() {
 					public void onClick( View vista ) {
 						AlertDialog.Builder dialogo = new AlertDialog.Builder(vista.getContext());
-						//dialogo.setTitle();
 						final CharSequence[] sessi2 = { getText(R.string.male), getText(R.string.female), getText(R.string.unknown) };
 						// todo è sconcertante che non riesco a ricavare da Map sessi un array di stringhe...
 						dialogo.setSingleChoiceItems( sessi2, sessoCapitato, new DialogInterface.OnClickListener() {
 							public void onClick( DialogInterface dialog, int item) {
-								//s.l( item + "  " + sessi.get(item).first );
 								((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
 								Globale.editato = true;
 								getActivity().recreate();
@@ -154,14 +126,8 @@ public class IndividuoEventi extends Fragment {
 				});
 			} else {
 				U.mettiMedia( scatolaAltro, oggetto, false );
-				//vistaFatto.setTag( fatto );
 				vistaFatto.setOnClickListener( new View.OnClickListener() {
 					public void onClick( View vista ) {
-						//Globale.contenitore = uno;
-						//Globale.oggetto = fatto;
-						//intento.putExtra( "fatto", (Serializable)fatto ); // EventFact cannot be cast to java.io.Serializable
-						/*intento.putExtra( "oggetto", "EventFact" );
-						startActivity( intento );*/
 						Ponte.manda( oggetto, "oggetto" );
 						Ponte.manda( uno, "contenitore" );
 						startActivity( new Intent( getContext(), Evento.class ) );

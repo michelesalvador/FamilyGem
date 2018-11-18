@@ -19,6 +19,8 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+import com.theartofdev.edmodo.cropper.CropImage;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaRef;
@@ -167,17 +169,12 @@ public class Individuo extends AppCompatActivity {
 							case 0:
 								break;
 							// Media
-							case 10:    // Cerca media locale
-								Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-								intent.setType( "*/*" );
-								startActivityForResult( intent,2173 );
+							case 10: // Cerca media locale
+								U.appAcquisizioneImmagine( Individuo.this, null, 2173 );
 								break;
-							case 11: {    // Cerca oggetto media
-								Intent inten = new Intent( Intent.ACTION_GET_CONTENT );
-								inten.setType( "*/*" );
-								startActivityForResult( inten,52173 );
+							case 11: // Cerca oggetto media
+								U.appAcquisizioneImmagine( Individuo.this, null, 2174 );
 								break;
-							}
 							case 12:    // Collega media in Galleria
 								Intent inten = new Intent( Individuo.this, Principe.class );
 								inten.putExtra( "galleriaScegliMedia", true );
@@ -309,18 +306,27 @@ public class Individuo extends AppCompatActivity {
     }
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
+		s.l("onActivityResult " + resultCode +"  "+ requestCode);
 		if( resultCode == RESULT_OK ) {
-			if( requestCode == 2173 ) { // File pescato dal file manager diventa media locale
+			if( requestCode == 2173 ) { // File fornito da un'app diventa media locale eventualmente ritagliato con Android Image Cropper
 				Media media = new Media();
 				media.setFileTag("FILE");
 				uno.addMedia( media );
-				/*Ponte.manda( media, "oggetto" );
-				Ponte.manda( uno, "contenitore" );
-				startActivity( new Intent( Individuo.this, Immagine.class ) );*/
-				if( !Dettaglio.settaMedia( this, data, media ) ) return;
-			} else if( requestCode == 52173 ) { // File pescato dal file manager diventa media condiviso
+				if( U.ritagliaImmagine( this, null, data, media ) ) { // restituisce true se è un'immagine ritagliabile
+					Globale.editato = false; // così non scatta recreate() che negli Android nuovi fa scomparire il dialogo di richiesta ritaglio
+					U.salvaJson();
+					return;
+				}
+			} else if( requestCode == 2174 ) { // File dalle app in nuovo Media condiviso, con proposta di ritagliarlo
 				Media media = Galleria.nuovoMedia( uno );
-				if( !Dettaglio.settaMedia( this, data, media ) ) return;
+				if( U.ritagliaImmagine( this, null, data, media ) ) {
+					Globale.editato = false;
+					U.salvaJson();
+					return;
+				}
+			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
+				// Ottiene l'immagine ritagliata da Android Image Cropper
+				U.fineRitaglioImmagine( data );
 			} else if( requestCode == 43614 ) { // Media da Galleria
 				MediaRef rifMedia = new MediaRef();
 				rifMedia.setRef( data.getStringExtra("idMedia") );
@@ -337,11 +343,11 @@ public class Individuo extends AppCompatActivity {
 				EditaIndividuo.aggiungiParente( uno.getId(),
 						data.getStringExtra("idParente" ),
 						data.getIntExtra("relazione", 0 ));
-				Globale.editato = true; // per rinfrescare
 			}
 			U.salvaJson();
-			Globale.editato = true;
-		}
+			Globale.editato = true;  // Prima scatta onActivityResult(), poi onRestart() che rinfresca il contenuto
+		} else
+			Toast.makeText( this, "Something wrong importing data :(", Toast.LENGTH_LONG ).show(); // todo traduci
 	}
 
 	// Chiamato dopo onBackPressed() ricarica la pagina per aggiornare i contenuti
@@ -428,5 +434,10 @@ public class Individuo extends AppCompatActivity {
 				onBackPressed();
 		}
 		return false;
+	}
+
+	@Override
+	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
+		U.risultatoPermessi( this, codice, permessi, accordi );
 	}
 }

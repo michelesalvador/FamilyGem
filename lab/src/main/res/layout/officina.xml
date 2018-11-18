@@ -6,40 +6,20 @@
     android:layout_height="match_parent" >
 
     <Button
-        android:id="@+id/bottone_apri_croppa"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Apri immagine e ritaglia"
-        app:layout_constraintBottom_toTopOf="@+id/bottone_vario"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
         android:id="@+id/bottone_vario"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:text="Vario"
+        app:layout_constraintBottom_toTopOf="@+id/bottone_libero"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/bottone_libero"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Libero"
-        app:layout_constraintBottom_toTopOf="@+id/bottone_dati"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/bottone_dati"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Dati vari"
-        app:layout_constraintBottom_toTopOf="@+id/bottone_importa"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/bottone_importa"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Apri file Gedcom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,6 +36,6 @@
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bottone_importa"
+        app:layout_constraintTop_toBottomOf="@+id/bottone_libero"
         app:srcCompat="@drawable/anna_salvador" />
 </android.support.constraint.ConstraintLayout>

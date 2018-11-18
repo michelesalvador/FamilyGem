@@ -3,6 +3,8 @@ package app.familygem.dettaglio;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
+import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.MimeTypeMap;
@@ -101,9 +103,10 @@ public class Immagine extends Dettaglio {
 			public void onClick( View vista ) {
 				String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
 				if( percorso == null  ) {	// Il file è da trovare
-					Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-					intent.setType( "*/*" );
-					startActivityForResult( intent,5173 );
+					/*Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+					intent.setType( "* /*" );
+					startActivityForResult( intent,5173 );*/
+					U.appAcquisizioneImmagine( Immagine.this, null, 5173 );
 				} else if( vistaImg.getTag( R.id.tag_file_senza_anteprima ) != null ) { // Apri file con altra app
 
 					// Non male anche se la lista di app generiche fa schifo
@@ -123,6 +126,15 @@ public class Immagine extends Dettaglio {
 						//Toast.makeText( getApplicationContext(), "Nessuna app trovata per aprire " + file.getName(), Toast.LENGTH_LONG ).show();
 						//intento.setType( "*/*" ); poi il file non giunge alla app
 						intento.setDataAndType( uri, "*/*" );	// La lista di app fa un po' cagare ma vabè
+					}
+					// Da android 7 (Nougat api 24) gli uri file:// sono banditi in favore di uri content:// perciò non riesce ad aprire i file
+					//intento.addFlags( Intent.FLAG_GRANT_READ_URI_PERMISSION ); // proposta com soluzione ma nell'emulatore non funziona
+					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) { // ok funziona nell'emulatore con Android 9
+						try {
+							StrictMode.class.getMethod("disableDeathOnFileUriExposure" ).invoke(null);
+						} catch( Exception e ) {
+							e.printStackTrace();
+						}
 					}
 					startActivity( intento );
 

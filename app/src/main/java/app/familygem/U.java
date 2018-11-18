@@ -1,10 +1,15 @@
 // Attrezzi utili per tutto il programma
 package app.familygem;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,23 +23,33 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.support.v4.util.Pair;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.JsonPrimitive;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -553,7 +568,7 @@ public class U {
 		vista.getViewTreeObserver().addOnPreDrawListener( new ViewTreeObserver.OnPreDrawListener() {
 			public boolean onPreDraw() {
 				vista.getViewTreeObserver().removeOnPreDrawListener(this);	// evita il ripetersi di questo metodo
-				String percorso = U.percorsoMedia( med );	// Il file in locale
+				String percorso = percorsoMedia( med );	// Il file in locale
 				if( percorso != null ) {
 					BitmapFactory.Options opzioni = new BitmapFactory.Options();
 					opzioni.inJustDecodeBounds = true;	// solo info
@@ -643,6 +658,153 @@ public class U {
 		if( !trovatoQualcosa )
 			img.setVisibility( View.GONE );
 	}
+
+	// Metodi per acquisizione immagini:
+
+	// Propone una bella lista di app per acquisire immagini
+	public static void appAcquisizioneImmagine( final Context contesto, final Fragment frammento, final int codice ) {
+		// Richiesta permesso accesso file in memoria
+		int perm = ContextCompat.checkSelfPermission( contesto, Manifest.permission.WRITE_EXTERNAL_STORAGE );
+		if( perm == PackageManager.PERMISSION_DENIED ) {
+			ActivityCompat.requestPermissions( (AppCompatActivity) contesto, new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE }, codice );
+			return;
+		}
+		// Colleziona gli intenti utili per acquisire immagini
+		List<ResolveInfo> listaRisolvi = new ArrayList<>();
+		final List<Intent> listaIntenti = new ArrayList<>();
+		// Camere
+		Intent intentoCamera = new Intent("android.media.action.IMAGE_CAPTURE");
+		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoCamera,0) ) {
+			Intent finalIntent = new Intent( intentoCamera );
+			finalIntent.setComponent( new ComponentName(info.activityInfo.packageName, info.activityInfo.name) );
+			listaIntenti.add(finalIntent);
+			listaRisolvi.add( info );
+		}
+		// Gallerie
+		Intent intentoGalleria = new Intent( Intent.ACTION_GET_CONTENT );
+		intentoGalleria.setType("image/*");
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) { // da KitKat: Android 4.4, api level 19
+			String[] mimeTypes = { "image/*", "audio/*", "video/*", "application/*", "text/*" };
+			intentoGalleria.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+		}
+		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoGalleria,0) ) {
+			Intent finalIntent = new Intent( intentoGalleria );
+			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
+			listaIntenti.add( finalIntent );
+			listaRisolvi.add( info );
+		}
+		AlertDialog.Builder dialog = new AlertDialog.Builder( contesto );
+		dialog.setAdapter( faiAdattatore( contesto, listaRisolvi ),
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						Intent intento = listaIntenti.get(id);
+						if( frammento != null )
+							frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
+						else
+							((AppCompatActivity)contesto).startActivityForResult( intento, codice );
+					}
+				}).show();
+	}
+	// Strettamente legato a quello qui sopra
+	private static ArrayAdapter<ResolveInfo> faiAdattatore( final Context contesto, final List<ResolveInfo> listaRisolvi) {
+		return new ArrayAdapter<ResolveInfo>( contesto, R.layout.pezzo_app, R.id.intento_titolo, listaRisolvi ){
+			@Override
+			public View getView(int posizione, View vista, ViewGroup genitore ) {
+				View view = super.getView( posizione, vista, genitore );
+				ResolveInfo info = listaRisolvi.get( posizione );
+				ImageView image = view.findViewById(R.id.intento_icona);
+				image.setImageDrawable( info.loadIcon(contesto.getPackageManager()) );
+				TextView textview = view.findViewById(R.id.intento_titolo);
+				textview.setText( info.loadLabel(contesto.getPackageManager()).toString() );
+				return view;
+			}
+		};
+	}
+
+	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
+	// ritorna true se apre il dialogo e quindi bisogna bloccare l'aggiornamento dell'attività
+	static boolean ritagliaImmagine( final Context contesto, final Fragment frammento, Intent data, Media media ) {
+		final File fileMedia = Dettaglio.settaMedia( contesto, data, media );
+		String tipoMime = URLConnection.guessContentTypeFromName( fileMedia.getName() );
+		if( tipoMime != null && tipoMime.startsWith("image/") ) {
+			ImageView vistaImmagine = new ImageView( contesto );
+			U.mostraMedia( vistaImmagine, media );
+			Globale.mediaCroppato = media; // Media in attesa di essere aggiornato col nuovo percorso file
+			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
+			costruttore.setMessage( "Vuoi ritagliare questa immagine?" )
+					.setView(vistaImmagine)
+					.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
+						public void onClick( DialogInterface dialog, int id ) {
+							File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
+							if( !dirMemoria.exists() )
+								dirMemoria.mkdir();
+							File fileDestinazione;
+							if( fileMedia.getAbsolutePath().startsWith(dirMemoria.getAbsolutePath()) )
+								fileDestinazione = fileMedia; // File già nella cartella memoria vengono sovrascritti
+							else
+								fileDestinazione = fileNomeProgressivo( dirMemoria.getAbsolutePath(), fileMedia.getName() );
+							Intent intento = CropImage.activity( Uri.fromFile(fileMedia) )
+									.setOutputUri( Uri.fromFile(fileDestinazione) ) // cartella in memoria esterna
+									.setGuidelines( CropImageView.Guidelines.OFF )
+									.setBorderLineThickness( 1 )
+									.setBorderCornerThickness( 6 )
+									.setBorderCornerOffset( -3 )
+									.setCropMenuCropButtonTitle( "Fatto" ) // todo traduci
+									.getIntent( contesto );
+									//.start( contesto, frammento );
+							if( frammento != null )
+								frammento.startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
+							else
+								((AppCompatActivity)contesto).startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
+						}
+					}).setNegativeButton( android.R.string.no, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick( DialogInterface dialog, int which ) {
+					((AppCompatActivity)contesto).recreate();
+					Globale.editato = true;
+				}
+			} )	.create().show();
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, 300 );
+			vistaImmagine.setLayoutParams( params ); // l'assegnazione delle dimensioni deve venire DOPO la creazione del dialogo
+			return true;
+		}
+		return false;
+	}
+
+	// Se in percorsoMemoria esiste già un file con quel nome lo incrementa con 1 2 3...
+	static File fileNomeProgressivo( String dir, String nome ){
+		File file = new File( dir, nome );
+		int incremento = 0;
+		while( file.exists() ) {
+			incremento++;
+			file = new File( dir, nome.substring(0,nome.lastIndexOf('.'))
+					+ " " + incremento + nome.substring(nome.lastIndexOf('.'),nome.length()));
+		}
+		return file;
+	}
+
+	// Conclude la procedura di ritaglio di un'immagine
+	static void fineRitaglioImmagine( Intent data ) {
+		CropImage.ActivityResult risultato = CropImage.getActivityResult(data);
+		Uri uri = risultato.getUri();
+		Globale.mediaCroppato.setFile( U.uriPercorsoFile( uri ) );
+	}
+
+	// Risposta a tutte le richieste di permessi per Android 6+
+	static void risultatoPermessi( Context contesto, int codice, String[] permessi, int[] accordi ) {
+		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
+			if( codice == 4546 ) { // Da Fragment Galleria
+				Fragment galleria = ((AppCompatActivity)contesto).getSupportFragmentManager().findFragmentById( R.id.contenitore_fragment );
+				appAcquisizioneImmagine( contesto, galleria, codice );
+			} else
+				appAcquisizioneImmagine( contesto, null, codice );
+		} else
+			Toast.makeText( contesto, permessi[0] + " not granted", Toast.LENGTH_SHORT ).show();
+	}
+
+
+	// Metodi di creazione di elementi di lista
 
 	// aggiunge a un Layout una generica voce titolo-testo
 	// TODO: DEPRECARLO prima o poi

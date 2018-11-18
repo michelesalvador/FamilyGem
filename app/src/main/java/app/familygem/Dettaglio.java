@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.theartofdev.edmodo.cropper.CropImage;
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.ChildRef;
@@ -221,13 +222,9 @@ public class Dettaglio extends AppCompatActivity {
 							intento.putExtra( "quadernoScegliNota", true );
 							startActivityForResult( intento,7074 );
 						} else if( id == 106 ) { // Cerca media locale
-							Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-							intent.setType( "*/*" );
-							startActivityForResult( intent,4173 );
+							U.appAcquisizioneImmagine( Dettaglio.this, null, 4173 );
 						} else if( id == 107 ) { // Cerca media condiviso
-							Intent inten = new Intent( Intent.ACTION_GET_CONTENT );
-							inten.setType( "*/*" );
-							startActivityForResult( inten,54173 );
+							U.appAcquisizioneImmagine( Dettaglio.this, null, 4174 );
 						} else if( id == 108 ) { // Collega media condiviso
 							Intent inten = new Intent( Dettaglio.this, Principe.class );
 							inten.putExtra( "galleriaScegliMedia", true );
@@ -295,14 +292,24 @@ public class Dettaglio extends AppCompatActivity {
 				NoteRef rifNota = new NoteRef();
 				rifNota.setRef( data.getStringExtra( "idNota" ) );
 				((NoteContainer)oggetto).addNoteRef( rifNota );
-			} else if( requestCode == 4173 ) { // File preso dal file manager diventa media locale
+			} else if( requestCode == 4173 ) { // File preso dal file manager o altra app diventa media locale
 				Media media = new Media();
 				media.setFileTag("FILE");
 				((MediaContainer)oggetto).addMedia( media );
-				if( !settaMedia( this, data, media ) ) return;
-			} else if( requestCode == 54173 ) { // File preso dal file manager diventa media condiviso
+				if( U.ritagliaImmagine( this, null, data, media ) ) {
+					Globale.editato = false;
+					U.salvaJson();
+					return;
+				}
+			} else if( requestCode == 4174 ) { // File preso dal file manager diventa media condiviso
 				Media media = Galleria.nuovoMedia( oggetto );
-				if( !settaMedia( this, data, media ) ) return;
+				if( U.ritagliaImmagine( this, null, data, media ) ) {
+					Globale.editato = false;
+					U.salvaJson();
+					return;
+				}
+			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
+				U.fineRitaglioImmagine( data );
 			} else if( requestCode == 43616 ) { // Media da Galleria
 				MediaRef rifMedia = new MediaRef();
 				rifMedia.setRef( data.getStringExtra("idMedia") );
@@ -311,8 +318,14 @@ public class Dettaglio extends AppCompatActivity {
 				RepositoryRef archRef = new RepositoryRef();
 				archRef.setRef( data.getStringExtra("idArchivio") );
 				((Source)oggetto).setRepositoryRef( archRef );
-			} else if( requestCode == 5173 ) { // Importa un file scelto col file manager da Immagine
-				if( !settaMedia( this, data, (Media)oggetto ) ) return;
+			} else if( requestCode == 5173 ) { // Salva in Media un file scelto con le app da Immagine
+				if( U.ritagliaImmagine( this, null, data, (Media)oggetto ) ) {
+					U.salvaJson();
+					Globale.editato = false;
+					return;
+				}
+			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
+				U.fineRitaglioImmagine( data );
 			}
 			//  da menu contestuale 'Scegli...'
 			if( requestCode == 5390  ) { // Imposta l'archivio che è stato scelto in Magazzino da ArchivioRef
@@ -328,12 +341,12 @@ public class Dettaglio extends AppCompatActivity {
 		}
 	}
 
-	// Imposta in un Media il file scelto da file manager
-	static boolean settaMedia( Context contesto, Intent data, Media media ) {
+	// Imposta in un Media il file scelto da file manager. Restituisce il File dell'immagine salvata oppure null
+	static File settaMedia( Context contesto, Intent data, Media media ) {
+		File fileMedia = null;
 		try {
 			Uri uri = data.getData();
 			String percorso = U.uriPercorsoFile( uri );
-			File fileMedia;
 			if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
 				// Apre direttamente il file
 				fileMedia = new File( percorso );
@@ -341,12 +354,10 @@ public class Dettaglio extends AppCompatActivity {
 				// Copia il file (che può essere di qualsiasi tipo) nella memoria esterna della app
 				// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
 				InputStream input = contesto.getContentResolver().openInputStream( uri );
-				String percorsoMemoria = contesto.getExternalFilesDir(null) + "/" + Globale.preferenze.idAprendo;
-				File dirMemoria = new File( percorsoMemoria );
+				File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
 				if( !dirMemoria.exists() )
 					dirMemoria.mkdir();
-				// Todo: controllare che non esista già il nome del file in percorsoCartella, quindi rinominarlo con +(1)
-				fileMedia = new File( percorsoMemoria, percorso );
+				fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
 				FileUtils.copyInputStreamToFile( input, fileMedia );
 			}
 			// Aggiunge il percorso della cartella nel Cassetto in preferenze
@@ -355,9 +366,8 @@ public class Dettaglio extends AppCompatActivity {
 			media.setFile( fileMedia.getAbsolutePath() );
 		} catch( Exception e ) {
 			Toast.makeText( contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-			return false;
 		}
-		return true;
+		return fileMedia;
 	}
 
 	// Aggiorna i contenuti quando si torna indietro con backPressed()
@@ -840,15 +850,17 @@ public class Dettaglio extends AppCompatActivity {
 				startActivityForResult( intn,5390 );
 				return true;
 			case 100:	// Immaginona scegli immagine
-				Intent in = new Intent( Intent.ACTION_GET_CONTENT );
-				//in.setType( "image/*" );
-				in.setType( "*/*" );
-				startActivityForResult( in,5173 );
+				U.appAcquisizioneImmagine( this, null, 5173 );
 				return true;
 			default:
 				return false;
 		}
 		U.salvaJson();
 		return true;
+	}
+
+	@Override
+	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
+		U.risultatoPermessi( this, codice, permessi, accordi );
 	}
 }
