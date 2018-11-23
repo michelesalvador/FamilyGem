@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.Person;
 import java.util.Map;
+import app.familygem.visita.ListaMedia;
 import static app.familygem.Globale.gc;
 
 public class IndividuoMedia extends Fragment {
@@ -21,12 +22,14 @@ public class IndividuoMedia extends Fragment {
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
 		View vistaMedia = inflater.inflate(R.layout.individuo_scheda, container, false);
-		final LinearLayout scatola = vistaMedia.findViewById( R.id.contenuto_scheda );
-		uno = gc.getPerson( Globale.individuo );
-		VisitaListaMedia visitaMedia = new VisitaListaMedia( gc, true );
-		uno.accept( visitaMedia );
-		for( Map.Entry<Media,Object> m :visitaMedia.listaMedia.entrySet() )
-			Galleria.poniMedia( scatola, m.getValue(), m.getKey(), true );
+		if( gc != null ) {
+			final LinearLayout scatola = vistaMedia.findViewById( R.id.contenuto_scheda );
+			uno = gc.getPerson( Globale.individuo );
+			ListaMedia visitaMedia = new ListaMedia( gc, true );
+			uno.accept( visitaMedia );
+			for( Map.Entry<Media,Object> m : visitaMedia.listaMedia.entrySet() )
+				Galleria.poniMedia( scatola, m.getValue(), m.getKey(), true );
+		}
 		return vistaMedia;
 	}
 

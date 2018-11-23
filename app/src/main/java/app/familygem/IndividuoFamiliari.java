@@ -22,45 +22,47 @@ public class IndividuoFamiliari extends Fragment {
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
 		vistaFamiglia = inflater.inflate(R.layout.individuo_scheda, container, false);
-		Person uno = gc.getPerson( Globale.individuo );
-		// Famiglie di origine: genitori e fratelli
-		List<Family> listaFamiglie = uno.getParentFamilies(gc);
-		for( Family famiglia : listaFamiglie  ) {
-			for( Person padre : famiglia.getHusbands(gc) )
-				creaTessera( padre, getString(R.string.father), 0, famiglia );
-			for( Person madre : famiglia.getWives(gc) )
-				creaTessera( madre, getString(R.string.mother), 0, famiglia );
-			for( Person fratello : famiglia.getChildren(gc) )	// solo i figli degli stessi due genitori, non i fratellastri
-				if( !fratello.equals(uno) )
-					creaTessera( fratello, null, 1, famiglia );
-		}
-		// Fratellastri e sorellastre
-		for( Family famiglia : uno.getParentFamilies(gc) ) {
-			for( Person padre : famiglia.getHusbands(gc) ) {
-				List<Family> famigliePadre = padre.getSpouseFamilies(gc);
-				famigliePadre.removeAll( listaFamiglie );
-				for( Family fam : famigliePadre )
-					for( Person fratellastro : fam.getChildren(gc) )
-						creaTessera( fratellastro, null, 2, fam );
+		if( gc != null ) {
+			Person uno = gc.getPerson( Globale.individuo );
+			// Famiglie di origine: genitori e fratelli
+			List<Family> listaFamiglie = uno.getParentFamilies(gc);
+			for( Family famiglia : listaFamiglie  ) {
+				for( Person padre : famiglia.getHusbands(gc) )
+					creaTessera( padre, getString(R.string.father), 0, famiglia );
+				for( Person madre : famiglia.getWives(gc) )
+					creaTessera( madre, getString(R.string.mother), 0, famiglia );
+				for( Person fratello : famiglia.getChildren(gc) )	// solo i figli degli stessi due genitori, non i fratellastri
+					if( !fratello.equals(uno) )
+						creaTessera( fratello, null, 1, famiglia );
 			}
-			for( Person madre : famiglia.getWives(gc) ) {
-				List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
-				famiglieMadre.removeAll( listaFamiglie );
-				for( Family fam : famiglieMadre )
-					for( Person fratellastro : fam.getChildren(gc) )
-						creaTessera( fratellastro, null, 2, fam );
+			// Fratellastri e sorellastre
+			for( Family famiglia : uno.getParentFamilies(gc) ) {
+				for( Person padre : famiglia.getHusbands(gc) ) {
+					List<Family> famigliePadre = padre.getSpouseFamilies(gc);
+					famigliePadre.removeAll( listaFamiglie );
+					for( Family fam : famigliePadre )
+						for( Person fratellastro : fam.getChildren(gc) )
+							creaTessera( fratellastro, null, 2, fam );
+				}
+				for( Person madre : famiglia.getWives(gc) ) {
+					List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
+					famiglieMadre.removeAll( listaFamiglie );
+					for( Family fam : famiglieMadre )
+						for( Person fratellastro : fam.getChildren(gc) )
+							creaTessera( fratellastro, null, 2, fam );
+				}
 			}
-		}
-		// Coniugi e figli
-		for( Family famiglia : uno.getSpouseFamilies(gc) ) {
-			if( U.sesso(uno) == 1 )
-				for( Person moglie : famiglia.getWives(gc) )
-					creaTessera( moglie, getString(R.string.wife), 0, famiglia );
-			else
-				for( Person marito : famiglia.getHusbands(gc) )
-					creaTessera( marito, getString(R.string.husband), 0, famiglia );
-			for( Person figlio : famiglia.getChildren(gc) ) {
-				creaTessera( figlio, null, 3, famiglia );
+			// Coniugi e figli
+			for( Family famiglia : uno.getSpouseFamilies(gc) ) {
+				if( U.sesso(uno) == 1 )
+					for( Person moglie : famiglia.getWives(gc) )
+						creaTessera( moglie, getString(R.string.wife), 0, famiglia );
+				else
+					for( Person marito : famiglia.getHusbands(gc) )
+						creaTessera( marito, getString(R.string.husband), 0, famiglia );
+				for( Person figlio : famiglia.getChildren(gc) ) {
+					creaTessera( figlio, null, 3, famiglia );
+				}
 			}
 		}
 		return vistaFamiglia;
@@ -137,6 +139,7 @@ public class IndividuoFamiliari extends Fragment {
 		} else if( id == 304 ) { // Scollega da questa famiglia
 			Famiglia.scollega( idIndividuo, (Family)vistaScheda.getTag(R.id.tag_famiglia) );
 			vistaScheda.setVisibility( View.GONE );
+			Globale.editato = true;
 			U.salvaJson();
 		} else if( id == 305 ) {	// Elimina
 			Anagrafe.elimina( idIndividuo, getContext(), vistaScheda );

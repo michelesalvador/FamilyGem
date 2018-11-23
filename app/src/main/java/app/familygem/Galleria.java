@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import app.familygem.dettaglio.Immagine;
+import app.familygem.visita.EliminaMedia;
+import app.familygem.visita.ListaMedia;
 import static android.app.Activity.RESULT_OK;
 import static app.familygem.Globale.gc;
 
@@ -45,7 +47,7 @@ public class Galleria extends Fragment {
 		View vista = inflater.inflate( R.layout.magazzino, container, false);
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
 		if( gc != null ) {
-			VisitaListaMedia visitaMedia = new VisitaListaMedia( gc, !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
+			ListaMedia visitaMedia = new ListaMedia( gc, !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
 			gc.accept( visitaMedia );
 			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size() + " " + getString(R.string.media).toLowerCase() );
 			for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() )
@@ -200,7 +202,7 @@ public class Galleria extends Fragment {
 		if( media.getId() != null ) {	// media OBJECT
 			gc.getMedia().remove( media );	// ok
 			// Elimina i riferimenti in tutti i contenitori
-			VisitaEliminaMedia eliminaMedia = new VisitaEliminaMedia( media );
+			EliminaMedia eliminaMedia = new EliminaMedia( media );
 			gc.accept( eliminaMedia );
 		} else {	// media LOCALE
 			List<Media> lista = ((MediaContainer)contenitore).getMedia();
@@ -244,7 +246,7 @@ public class Galleria extends Fragment {
 			U.salvaJson();
 			Globale.editato = true;
 		} else
-			Toast.makeText( getContext(), "Something wrong importing data", Toast.LENGTH_LONG ).show(); // todo traduci
+			Toast.makeText( getContext(), R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
 	// Menu contestuale

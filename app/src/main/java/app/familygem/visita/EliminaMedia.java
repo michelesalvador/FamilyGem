@@ -1,6 +1,6 @@
-// Elimina un media in tutti i MediaContainer
+// Elimina i riferimenti a un media in tutti i MediaContainer
 
-package app.familygem;
+package app.familygem.visita;
 
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -14,11 +14,11 @@ import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Visitor;
 import java.util.Iterator;
 
-public class VisitaEliminaMedia extends Visitor {
+public class EliminaMedia extends Visitor {
 
 	Media media;
 
-	VisitaEliminaMedia( Media media ) {
+	public EliminaMedia( Media media ) {
 		this.media = media;
 	}
 

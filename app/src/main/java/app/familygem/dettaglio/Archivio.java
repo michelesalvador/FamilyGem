@@ -17,7 +17,6 @@ public class Archivio extends Dettaglio {
 			oggetto = a;
 			setTitle( R.string.repository );
 			vistaId.setText( a.getId() );
-			//occorrenze = String.valueOf( Magazzino.quanteFonti( a, gc ) );	todo
 			metti( getString(R.string.value), "Value", false, true );	// Non molto Gedcom standard
 			metti( getString(R.string.name), "Name" );
 			metti( getString(R.string.address), a.getAddress() );

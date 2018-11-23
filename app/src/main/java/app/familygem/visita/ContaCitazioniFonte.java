@@ -2,7 +2,7 @@
 // Servirebbe per sostituire U.quanteCitazioni(Source) in Biblioteca
 // è più preciso nella conta cioè non gli sfugge nulla, ma è quattro volte più lento
 
-package app.familygem;
+package app.familygem.visita;
 
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -12,19 +12,19 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Visitor;
 
-public class VisitaContaCitazioni extends Visitor {
+public class ContaCitazioniFonte extends Visitor {
 
 	public int quante = 0;
 	String id;
 
-	VisitaContaCitazioni( String id ){
+	ContaCitazioniFonte( String id ){
 		this.id = id;
 	}
 
 	@Override
 	public boolean visit( Person p ) {
 		for( SourceCitation c : p.getSourceCitations() )
-			if( c.getRef() != null )
+			if( c.getRef() != null ) // necessario perché le note-fonti non hanno Ref alla fonte
 				if( c.getRef().equals(id) ) quante++;
 		return true;
 	}

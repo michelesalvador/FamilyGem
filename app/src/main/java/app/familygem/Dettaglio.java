@@ -4,7 +4,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -24,7 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
-import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.EventFact;
@@ -45,8 +43,6 @@ import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.model.Submitter;
-import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +64,6 @@ public class Dettaglio extends AppCompatActivity {
 	public LinearLayout box;
 	public Object oggetto;	// Name Media SourceCitation ecc.
 	public TextView vistaId;
-	public String occorrenze = "";
 	public Object contenitore = Ponte.ricevi("contenitore");	// in particolare per poter eliminare l'oggetto
 	List<Uovo> ovi = new ArrayList<>();	// Lista dei pezzi editabili
 	TreeMap<String,String> eventiVari; // Eventi per il FAB di Famiglia
@@ -81,18 +76,11 @@ public class Dettaglio extends AppCompatActivity {
 		setContentView( R.layout.dettaglio );
 		box = findViewById( R.id.dettaglio_scatola );
 		vistaId = findViewById( R.id.dettaglio_id );
-
+		if( !Globale.preferenze.esperto )
+			vistaId.setVisibility( View.GONE );
 		impagina();
-
 		if( oggetto == null)
 			onBackPressed(); // salta tutti gli altri dettagli senza oggetto
-
-		TextView vistaOccorrenze = findViewById( R.id.dettaglio_citazioni );
-		if( occorrenze.isEmpty() )
-			vistaOccorrenze.setVisibility( View.GONE );
-		else
-			vistaOccorrenze.setText( occorrenze );
-
 		findViewById( R.id.dettaglio_fab ).setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View vista ) {
@@ -243,17 +231,17 @@ public class Dettaglio extends AppCompatActivity {
   							Intent intent = new Intent( Dettaglio.this, Principe.class );
 							intent.putExtra( "bibliotecaScegliFonte", true );
 							startActivityForResult( intent, 5065 );
-						} else if( id == 120 || id == 121 ) { // Nuovo familiare
+						} else if( id == 120 || id == 121 ) { // Crea nuovo familiare
 							Intent intento = new Intent( Dettaglio.this, EditaIndividuo.class );
 							intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
 							intento.putExtra( "idFamiglia", ((Family)oggetto).getId() );
-							intento.putExtra( "relazione", id - 109);
+							intento.putExtra( "relazione", id - 119);
 							startActivity( intento );
-						} else if( id == 122 || id == 123 ) { // Nuovo familiare
+						} else if( id == 122 || id == 123 ) { // Collega persona esistente
 							Intent intento = new Intent( Dettaglio.this, Principe.class );
 							intento.putExtra( "anagrafeScegliParente", true );
-							intento.putExtra( "relazione", id - 111 );
-							startActivityForResult( intento,34417 );
+							intento.putExtra( "relazione", id - 121 );
+							startActivityForResult( intento, 34417 );
 						} else if( id == 124 ) { // Metti matrimonio
 							EventFact nuovoEvento = new EventFact();
 							nuovoEvento.setTag( "MARR" );
@@ -341,35 +329,6 @@ public class Dettaglio extends AppCompatActivity {
 		}
 	}
 
-	// Imposta in un Media il file scelto da file manager. Restituisce il File dell'immagine salvata oppure null
-	static File settaMedia( Context contesto, Intent data, Media media ) {
-		File fileMedia = null;
-		try {
-			Uri uri = data.getData();
-			String percorso = U.uriPercorsoFile( uri );
-			if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
-				// Apre direttamente il file
-				fileMedia = new File( percorso );
-			} else {    // è solo il nome del file 'pippo.png'
-				// Copia il file (che può essere di qualsiasi tipo) nella memoria esterna della app
-				// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
-				InputStream input = contesto.getContentResolver().openInputStream( uri );
-				File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
-				if( !dirMemoria.exists() )
-					dirMemoria.mkdir();
-				fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
-				FileUtils.copyInputStreamToFile( input, fileMedia );
-			}
-			// Aggiunge il percorso della cartella nel Cassetto in preferenze
-			Globale.preferenze.alberoAperto().cartelle.add( fileMedia.getParent() );
-			Globale.preferenze.salva();
-			media.setFile( fileMedia.getAbsolutePath() );
-		} catch( Exception e ) {
-			Toast.makeText( contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-		}
-		return fileMedia;
-	}
-
 	// Aggiorna i contenuti quando si torna indietro con backPressed()
 	@Override
 	public void onRestart() {
@@ -408,8 +367,9 @@ public class Dettaglio extends AppCompatActivity {
 		} catch( Exception e ) {
 			testo = "ERROR: " + e.getMessage();
 		}
-		// Tranne che per gli eventi con 'Y', todo forse per gli esperti lasciare la 'Y'?
-		if( !( oggetto instanceof EventFact && metodo.equals("Value") && testo!=null && testo.equals("Y") ) )
+		// Tranne che per i 3 fatidici eventi con 'Y', todo forse per gli esperti lasciare la 'Y'?
+		if(!( oggetto instanceof EventFact && metodo.equals("Value") && testo!=null && testo.equals("Y") && ((EventFact)oggetto).getTag()!=null &&
+				( ((EventFact)oggetto).getTag().equals("BIRT") || ((EventFact)oggetto).getTag().equals("CHR") || ((EventFact)oggetto).getTag().equals("DEAT") ) ))
 			creaPezzo( titolo, testo, metodo, multiLinea );
 	}
 

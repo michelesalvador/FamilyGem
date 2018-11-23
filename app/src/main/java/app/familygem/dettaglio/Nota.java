@@ -1,12 +1,10 @@
 package app.familygem.dettaglio;
 
 import org.folg.gedcom.model.Note;
-import org.folg.gedcom.model.NoteContainer;
 import app.familygem.Dettaglio;
 import app.familygem.Ponte;
 import app.familygem.R;
 import app.familygem.U;
-import static app.familygem.Globale.gc;
 
 public class Nota extends Dettaglio {
 
@@ -29,8 +27,6 @@ public class Nota extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		((NoteContainer)contenitore).getNotes().remove( n );	// rimuove solo se è una nota locale, non se object note
-		gc.getNotes().remove( n );	// la rimuove se è un'object note
-		gc.createIndexes();	// necessario per gli object note
+		U.eliminaNota( n, contenitore, null );
 	}
 }

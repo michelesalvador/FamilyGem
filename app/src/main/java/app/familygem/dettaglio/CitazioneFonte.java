@@ -36,7 +36,7 @@ public class CitazioneFonte extends Dettaglio {
 			//if( c.getDataTagContents() != null )
 			//	U.metti( box, "Data Tag Contents", c.getDataTagContents().toString() );    // COMBINED DATA TEXT
 			metti( getString(R.string.certainty), "Quality" );    // un numero da 0 a 3
-			metti( "Ref", "Ref", false, false );
+			//metti( "Ref", "Ref", false, false ); // l'id della fonte
 			mettiEstensioni( c );
 			U.mettiNote( box, c, true );
 			U.mettiMedia( box, c, true );

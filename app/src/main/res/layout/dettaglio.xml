@@ -16,42 +16,19 @@
              android:orientation="vertical"
              android:padding="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="12dp"
-            android:orientation="horizontal">
-
             <TextView
                 android:id="@+id/dettaglio_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="I12"
-                android:typeface="monospace" />
-
-            <TextView
-                android:id="@+id/dettaglio_citazioni"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:linksClickable="true"
-                android:text="123"
-                android:textSize="16sp" />
-        </LinearLayout>
+                android:typeface="monospace"
+                android:layout_marginBottom="12dp" />
 
             <LinearLayout
                 android:id="@+id/dettaglio_scatola"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
-
-            <Button
-                android:id="@+id/botttone_aggiorna"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="Aggiorna"
-                android:visibility="gone" />
 
         </LinearLayout>
 

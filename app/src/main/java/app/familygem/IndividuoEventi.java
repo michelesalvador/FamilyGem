@@ -43,7 +43,13 @@ public class IndividuoEventi extends Fragment {
 				piazzaEvento( scatola, getString(R.string.name), U.nomeCognome( nome ), nome );
 			for (EventFact fatto : uno.getEventsFacts() ) {
 				String tst = "";
-				if( fatto.getValue() != null )	tst = fatto.getValue() + "\n";
+				if( fatto.getValue() != null ) {
+					if( fatto.getValue().equals("Y") && fatto.getTag()!=null &&
+							( fatto.getTag().equals("BIRT") || fatto.getTag().equals("CHR") || fatto.getTag().equals("DEAT") ) )
+						tst = getString(R.string.yes);
+					else tst = fatto.getValue();
+					tst += "\n";
+				}
 				if( fatto.getType() != null )	tst += fatto.getType() + "\n";
 				if( fatto.getDate() != null ) 	tst += fatto.getDate() + "\n";
 				Address indirizzo = fatto.getAddress();
@@ -93,6 +99,7 @@ public class IndividuoEventi extends Fragment {
 				}
 			} );
 		} else if( oggetto instanceof EventFact ) {
+			// Evento Sesso
 			if( ((EventFact)oggetto).getTag()!=null && ((EventFact)oggetto).getTag().equals("SEX") ) {
 				final Map<String,String> sessi = new LinkedHashMap<>();
 				sessi.put( "M", getString(R.string.male) );
@@ -124,7 +131,7 @@ public class IndividuoEventi extends Fragment {
 						dialogo.create().show();
 					}
 				});
-			} else {
+			} else { // Tutti gli altri eventi
 				U.mettiMedia( scatolaAltro, oggetto, false );
 				vistaFatto.setOnClickListener( new View.OnClickListener() {
 					public void onClick( View vista ) {
@@ -155,9 +162,10 @@ public class IndividuoEventi extends Fragment {
 		oggettoPezzo = vista.getTag( R.id.tag_oggetto );
 		//contenitorePezzo = vista.getTag( R.id.tag_contenitore );
 		if( oggettoPezzo instanceof Name ) {
-			// Todo sposta nome su e giù
-			menu.add( 0, 200, 0, R.string.move_up );
-			menu.add( 0, 201, 0, R.string.move_down );
+			if( uno.getNames().indexOf(oggettoPezzo) > 0 )
+				menu.add( 0, 200, 0, R.string.move_up );
+			if( uno.getNames().indexOf(oggettoPezzo) < uno.getNames().size()-1 )
+				menu.add( 0, 201, 0, R.string.move_down );
 			menu.add( 0, 202, 0, R.string.delete );
 		} else if( oggettoPezzo instanceof EventFact ) {
 			if( uno.getEventsFacts().indexOf(oggettoPezzo) > 0 )
@@ -176,11 +184,21 @@ public class IndividuoEventi extends Fragment {
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
+		List<Name> nomi = uno.getNames();
 		List<EventFact> fatti = uno.getEventsFacts();
 		switch( item.getItemId() ) {
 			// Nome
-			case 200:
-			case 201: 	// TODO sposta nome
+			case 200: // Sposta su
+				nomi.add( nomi.indexOf(oggettoPezzo)-1, (Name)oggettoPezzo );
+				nomi.remove( nomi.lastIndexOf(oggettoPezzo) );
+				getActivity().recreate();
+				Globale.editato = true;
+				break;
+			case 201: // Sposta giù
+				nomi.add( nomi.indexOf(oggettoPezzo)+2, (Name)oggettoPezzo );
+				nomi.remove( nomi.indexOf(oggettoPezzo) );
+				getActivity().recreate();
+				Globale.editato = true;
 				break;
 			case 202: // Elimina
 				if( U.preserva(oggettoPezzo) ) return false;
@@ -190,7 +208,7 @@ public class IndividuoEventi extends Fragment {
 				break;
 			// Evento generico
 			case 203: // Sposta su
-				fatti.add( fatti.indexOf(oggettoPezzo)-1, (EventFact) oggettoPezzo );
+				fatti.add( fatti.indexOf(oggettoPezzo)-1, (EventFact)oggettoPezzo );
 				fatti.remove( fatti.lastIndexOf(oggettoPezzo) );
 				getActivity().recreate(); // ok ricarica tutta l'activity, anche la testata
 				/* Tentativo di ricaricare solo il fragment: non funziona
@@ -198,7 +216,7 @@ public class IndividuoEventi extends Fragment {
 				tr.replace( R.id.contenuto_scheda, new IndividuoEventi() ).commit();*/
 				break;
 			case 204: // Sposta giu
-				fatti.add( fatti.indexOf(oggettoPezzo)+2, (EventFact) oggettoPezzo );
+				fatti.add( fatti.indexOf(oggettoPezzo)+2, (EventFact)oggettoPezzo );
 				fatti.remove( fatti.indexOf(oggettoPezzo) );
 				getActivity().recreate();
 				break;

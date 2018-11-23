@@ -1,5 +1,6 @@
 package app.familygem;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -83,13 +84,14 @@ public class Anagrafe extends Fragment {
 				if( Globale.ordineAnagrafe == 1 ) ruolo = tizio.getId();
 				else if( Globale.ordineAnagrafe == 4 ) ruolo = String.valueOf(tizio.getExtension("famili"));
 				View vistaIndi = U.mettiIndividuo( scatola, tizio, ruolo );
-				// Anagrafe per scegliere il parente e restituire l'id a Diagramma
+				// Anagrafe per scegliere il parente e restituire l'id a Diagramma a Individuo o a Famiglia
 				if( getActivity().getIntent().getBooleanExtra( "anagrafeScegliParente", false ) ) {
 					vistaIndi.setOnClickListener( new View.OnClickListener() {
 						public void onClick( View v ) {
 							Intent intent = new Intent();
 							intent.putExtra( "idParente", tizio.getId() );
 							intent.putExtra( "relazione", getActivity().getIntent().getIntExtra( "relazione", 0 ) );
+							intent.putExtra( "famigliaNum", getActivity().getIntent().getIntExtra( "famigliaNum", 0 ) );
 							getActivity().setResult( AppCompatActivity.RESULT_OK, intent );
 							getActivity().finish();
 						}
@@ -415,13 +417,15 @@ public class Anagrafe extends Fragment {
 				Globale.preferenze.salva();
 				if( Globale.individuo != null && Globale.individuo.equals(idEliminando) )
 					Globale.individuo = idNuovaRadice;
-				U.salvaJson();
+				Globale.editato = true;
 				if( vista == null )
-					contesto.startActivity( new Intent( contesto, Principe.class ) );
+					//contesto.startActivity( new Intent( contesto, Principe.class ) );
+					((Activity)contesto).onBackPressed();
 				else {
 					vista.setVisibility( View.GONE );
 					Snackbar.make( vista, R.string.person_deleted, Snackbar.LENGTH_SHORT ).show();
 				}
+				U.salvaJson();
 			}
 		}).setNeutralButton( R.string.cancel, null )
 				.create().show();

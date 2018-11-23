@@ -1,12 +1,18 @@
 package app.familygem;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.view.View;
@@ -44,18 +50,35 @@ public class EditaIndividuo extends AppCompatActivity {
 		final String idIndi = bundle.getString("idIndividuo");
 		final String idFamiglia = bundle.getString("idFamiglia");
 		final int relazione = bundle.getInt("relazione", 0 );
+		final int famigliaNum = bundle.getInt("famigliaNum", 0 ); // indice della famiglia per perno che ne ha più di una
 
 		final AppCompatAutoCompleteTextView luogoNascita = findViewById(R.id.luogo_nascita);
 		final EditText dataNascita = findViewById( R.id.data_nascita );
 		final Switch bottonMorte = findViewById( R.id.defunto );
 		// Nuovo individuo in relazione di parentela
 		if( relazione > 0 ) {
-			//String[] parentele = { "genitore", "fratello", "coniuge", "figlio" };   // todo elimina
-			//setTitle( "Nuovo " + parentele[relazione-1] );
 			p = new Person();
+			Person perno = gc.getPerson( idIndi );
+			String cogno = "";
+			// Cognome del fratello
+			if( relazione == 2 ) {
+				cogno = U.cognome( perno );
+			// Cognome del padre
+			} else if( relazione == 4 ) {
+				if( U.sesso(perno) == 1 )
+					cogno = U.cognome( perno );
+				else if( idFamiglia != null ) {
+					Family fam = gc.getFamily(idFamiglia);
+					cogno = U.cognome( fam.getHusbands(gc).get(0) );
+				} else if( !perno.getSpouseFamilies(gc).isEmpty() ) {
+					Family fam = perno.getSpouseFamilies(gc).get(famigliaNum);
+					if( !fam.getHusbands(gc).isEmpty() )
+						cogno = U.cognome( fam.getHusbands(gc).get(0) );
+				}
+			}
+			((EditText)findViewById( R.id.cognome )).setText( cogno );
 		// Nuovo individuo scollegato
 		} else if ( idIndi.equals("TIZIO_NUOVO") ) {
-			//setTitle( "Nuova persona" );
 			p = new Person();
 			// Se ci sono i permessi il primo Nome e Cognome li prende dal profilo 'io' nei contatti
 			if( Globale.preferenze.alberi.size()==1 && gc.getPeople().isEmpty()
@@ -250,12 +273,14 @@ public class EditaIndividuo extends AppCompatActivity {
 						Globale.preferenze.alberoAperto().radice = nuovoId;
 					Globale.preferenze.alberoAperto().individui++;
 					Globale.preferenze.salva();
+					Globale.individuo = nuovoId; // per mostrarlo orgogliosi in Diagramma
 					if( idFamiglia != null ) {
 						Famiglia.aggrega( p, gc.getFamily(idFamiglia), relazione );
 					} else if( relazione > 0 )
-						aggiungiParente( idIndi, nuovoId, relazione );
+						aggiungiParente( idIndi, nuovoId, relazione, famigliaNum );
 				}
-				Toast.makeText( getBaseContext(), R.string.saved, Toast.LENGTH_SHORT ).show();
+				if( Globale.preferenze.autoSalva )
+					Toast.makeText( getBaseContext(), R.string.saved, Toast.LENGTH_SHORT ).show();
 				U.salvaJson();
 				Globale.editato = true;
 				onBackPressed();
@@ -265,8 +290,45 @@ public class EditaIndividuo extends AppCompatActivity {
 		barra.setDisplayShowCustomEnabled( true );
 	}
 
+	// Verifica se il perno ha molteplici matrimoni e chiede a quale attaccare un figlio
+	static boolean controllaMultiMatrimoni( final Intent intento, final Context contesto, final Fragment frammento ) {
+		String idPerno = intento.getStringExtra( "idIndividuo" );
+		List<Family> famSposi = gc.getPerson(idPerno).getSpouseFamilies(gc);
+		if( intento.getIntExtra("relazione",0) == 4 && famSposi.size() > 1 ) {
+			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
+			costruttore.setTitle( R.string.which_family_add_child );
+			List<String> famigliePerno = new ArrayList<>();
+			for( Family fam : famSposi ) {
+				String etichetta = "";
+				if( !fam.getHusbands(gc).isEmpty() )
+					etichetta = U.epiteto( fam.getHusbands(gc).get(0) );
+				if( !fam.getWives(gc).isEmpty() )
+					etichetta += " & " + U.epiteto( fam.getWives(gc).get(0) );
+				famigliePerno.add( etichetta );
+			}
+			costruttore.setItems( famigliePerno.toArray(new String[0]), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick( DialogInterface dialog, int quale ) {
+					// qui viene creato questo Extra che passerà da Anagrafe per tornare all'Activity / Fragment chiamante
+					intento.putExtra( "famigliaNum", quale );
+					//s.l( contesto.getClass() +"  "+ intento );
+					if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
+						// apre Anagrafe
+						if( frammento != null )
+							frammento.startActivityForResult( intento,1401 );
+						else
+							((Activity)contesto).startActivityForResult( intento,1401 );
+					} else // apre EditaIndividuo
+						contesto.startActivity( intento );
+				}
+			}).create().show();
+			return true;
+		}
+		return false;
+	}
+
 	// Aggiunge un individuo in relazione di parentela con 'perno'
-	static void aggiungiParente( String idPerno, String nuovoId, int relazione ) {
+	static void aggiungiParente( String idPerno, String nuovoId, int relazione, int famigliaNum ) {
 		SpouseRef refSposo = new SpouseRef();
 		ChildRef refFiglio = new ChildRef();
 		Person perno = gc.getPerson( idPerno );    // Individuo a cui ci attacchiamo
@@ -337,7 +399,7 @@ public class EditaIndividuo extends AppCompatActivity {
 				break;
 			case 3:    // Coniuge
 				SpouseRef refConiuge = new SpouseRef();
-				// Crea nuovo matrimonio per chi è già sposato
+				// Crea nuovo matrimonio se perno è già sposato
 				if( !famSposi.isEmpty() && famSposi.get(0).getHusbandRefs().size() > 0 && famSposi.get(0).getWifeRefs().size() > 0 ) {
 					refSposo.setRef( idPerno );
 					refConiuge.setRef( nuovoId );
@@ -345,22 +407,24 @@ public class EditaIndividuo extends AppCompatActivity {
 						famNuova.addHusband( refSposo );
 						famNuova.addWife( refConiuge );
 					} else {
-						famNuova.addWife( refSposo );
 						famNuova.addHusband( refConiuge );
+						famNuova.addWife( refSposo );
 					}
 					perno.addSpouseFamilyRef( refFamSposo );
-				} else { // Altrimenti mette sposo nella famiglia esistente
+				} else {
 					refSposo.setRef( nuovoId );
+					// Altrimenti mette nuovo sposo nella famiglia esistente di perno (che quindi è l'unico coniuge)
 					if( !famSposi.isEmpty() ) {
 						if( U.sesso( nuovo ) == 1 )
 							famSposi.get(0).addHusband( refSposo );
 						else
 							famSposi.get(0).addWife( refSposo );
 						refFamSposo.setRef( famSposi.get(0).getId() );
+					// Oppure crea una nuova famiglia per con nuovo e perno
 					} else {
 						refConiuge.setRef( idPerno );
-						if( U.sesso( nuovo ) == 1 ) {
-							famNuova.addHusband( refSposo );
+						if( U.sesso( nuovo ) == 1 ) { // todo questa creazione di una nuova famiglia è quasi identica a quella qui sopra.
+							famNuova.addHusband( refSposo ); // todo forse si può mettere meglio..
 							famNuova.addWife( refConiuge );
 						} else {
 							famNuova.addHusband( refConiuge );
@@ -374,8 +438,8 @@ public class EditaIndividuo extends AppCompatActivity {
 			case 4:    // Figlio
 				refFiglio.setRef( nuovoId );
 				if( !famSposi.isEmpty() ) {
-					famSposi.get( 0 ).addChild( refFiglio );
-					refFamGenitori.setRef( famSposi.get(0).getId() );
+					famSposi.get( famigliaNum ).addChild( refFiglio );
+					refFamGenitori.setRef( famSposi.get(famigliaNum).getId() );
 				} else {
 					refSposo.setRef( idPerno );
 					if( U.sesso( perno ) == 1 )

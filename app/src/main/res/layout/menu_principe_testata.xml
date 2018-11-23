@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/menu_testa"
     android:layout_width="match_parent"
@@ -41,5 +42,17 @@
         android:layout_marginBottom="16dp"
         android:layout_marginRight="15dp"
         app:srcCompat="@drawable/triangolo" />
+
+    <Button
+        android:id="@+id/menu_salva"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/menu_titolo"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="14dp"
+        android:text="@string/save"
+        android:textColor="#fff"
+        android:visibility="gone" />
 
 </RelativeLayout>

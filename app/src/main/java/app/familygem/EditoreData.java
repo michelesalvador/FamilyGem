@@ -49,6 +49,8 @@ public class EditoreData extends LinearLayout {
 	Calendar calenda = GregorianCalendar.getInstance();
 	boolean veroImputTesto; // stabilisce se l'utente sta effettivamente digitando sulla tastiera virtuale o se il testo viene cambiato in altro modo
 	boolean abilitaSpinner; // il tipo è scelto cliccando sullo spinner o scrivendo il testo
+	InputMethodManager tastiera;
+	boolean tastieraVisibile;
 
 	class Data {
 		Date date;
@@ -80,7 +82,6 @@ public class EditoreData extends LinearLayout {
 		elencoTipi.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected( AdapterView<?> pv, View v, int posizione, long id ) {
-				//s.l( "abilitaSpinner  " + abilitaSpinner );
 				if( abilitaSpinner ) {
 					tipo = posizione;
 					if( tipo == 10 ) {
@@ -117,16 +118,15 @@ public class EditoreData extends LinearLayout {
 				(NumberPicker)findViewById( R.id.seconda_anno ) );
 
 		// Al primo focus mostra sè stesso (EditoreData) nascondendo la tastiera
-		final InputMethodManager imm = (InputMethodManager) getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
+		tastiera = (InputMethodManager) getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
 		editaTesto.setOnFocusChangeListener( new View.OnFocusChangeListener() {
 			@Override
 			public void onFocusChange( View v, boolean ciapa ) {
-				//s.l( "editaTesto onFocusChange " + ciapa );
 				if( ciapa ) {
 					if( tipo == 10 )
 						genera( false ); // solo per togliere le parentesi alla frase
 					else {
-						imm.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
+						tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
 						/*Window finestra = ((Activity)getContext()).getWindow(); non aiuta la scomparsa della tastiera
 						finestra.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );*/
 						editaTesto.setInputType( InputType.TYPE_NULL ); // disabilita input testo con tastiera
@@ -143,29 +143,16 @@ public class EditoreData extends LinearLayout {
 		editaTesto.setOnTouchListener( new OnTouchListener() {
 			@Override
 			public boolean onTouch( View vista, MotionEvent event ) {
-				//s.l("onTouch " + event.getAction() );
 				if( event.getAction() == MotionEvent.ACTION_DOWN ) {
 					editaTesto.setInputType( InputType.TYPE_CLASS_TEXT ); // riabilita l'input
 				} else if( event.getAction() == MotionEvent.ACTION_UP ) {
-					imm.showSoftInput( editaTesto, 0 ); // fa ricomparire la tastiera
+					tastieraVisibile = tastiera.showSoftInput( editaTesto, 0 ); // fa ricomparire la tastiera
 					veroImputTesto = true;
 					//vista.performClick(); non ne vedo l'utilità
 				}
 				return false;
 			}
 		} );
-		/* Abbandonato in favore di OnTouchListener
-		editaTesto.setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				s.l( "editaTesto onClick");
-				imm.showSoftInput( editaTesto, 0 );
-				editaTesto.setInputType( InputType.TYPE_CLASS_TEXT ); // riabilita l'input ma il cursore non compare o non blinka
-				//editaTesto.requestFocus(); // non cambia niente
-				//editaTesto.setRawInputType( InputType.TYPE_CLASS_TEXT ); idem
-				editaTesto.setCursorVisible( true ); // forse aiuta a far comparire il cursore, anche se non blinka
-			}
-		});*/
 		// Imposta l'editore data in base a quanto scritto
 		editaTesto.addTextChangedListener( new TextWatcher() {
 			@Override
@@ -175,7 +162,6 @@ public class EditoreData extends LinearLayout {
 			@Override
 			public void afterTextChanged( Editable testo ) {
 				// non so perché ma in android 5 alla prima editazione viene chiamato 2 volte, che comunque non è un problema
-				//s.l( "veroImputTesto " + veroImputTesto +"  " + testo );
 				if( veroImputTesto ) {
 					impostaTutto();
 				}
@@ -364,6 +350,10 @@ public class EditoreData extends LinearLayout {
 
 	// Aggiorna una Data coi nuovi valori presi dalle ruote
 	void aggiorna( Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
+		if( tastieraVisibile ) {    // Nasconde eventuale tastiera visibile
+			tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 );
+				// Nasconde subito la tastiera, ma ha bisogno di un secondo tentativo per restituire false. Comunque non è un problema
+		}
 		int giorno = ruotaGiorno.getValue();
 		int mese = ruotaMese.getValue();
 		int secolo = ruotaSecolo.getValue();

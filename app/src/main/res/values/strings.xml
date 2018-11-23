@@ -2,7 +2,9 @@
     <string name="app_name">Family Gem</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
     <string name="change_date">Change date</string>
+    <string name="something_wrong">Something went wrong</string>
     <!-- Principe -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
@@ -102,6 +104,7 @@
     <string name="new_shared_media">New shared media</string>
     <string name="link_shared_media">Link shared media</string>
     <string name="name">Name</string>
+    <string name="yes">Yes</string>
     <string name="sex">Sesso</string>
     <string name="event">Event</string>
     <string name="birth">Birth</string>
@@ -214,6 +217,7 @@
     <string name="death_date">Death date</string>
     <string name="death_place">Death place</string>
     <string name="saved">Saved</string>
+    <string name="which_family_add_child">To which family you add the child?</string>
     <!-- EditoreData -->
     <string name="january">January</string>
     <string name="february">February</string>
@@ -238,9 +242,11 @@
     <string name="to">To</string>
     <string name="from_to">From… to</string>
     <string name="date_phrase">Phrase</string>
+    <!-- U -->
+    <string name="want_crop_image">Do you want to crop this image?</string>
+    <string name="not_granted">%s not granted</string>
     <!-- Altro -->
     <string name="version_name">Version %s</string>
-    <string name="done">Done</string>
     <string name="make_default">Make default</string>
     <string name="citations">Citations</string>
     <string name="sources_number">Number of sources</string>

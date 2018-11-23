@@ -20,6 +20,8 @@ import org.folg.gedcom.model.NoteRef;
 import java.util.List;
 import java.util.Map;
 import app.familygem.dettaglio.Nota;
+import app.familygem.visita.ListaNote;
+import app.familygem.visita.RiferimentiNota;
 import static app.familygem.Globale.gc;
 
 public class Quaderno extends Fragment {
@@ -44,10 +46,10 @@ public class Quaderno extends Fragment {
 					((TextView)tit.findViewById(R.id.titolo_testo)).setText( txt );
 				}
 				for( Note not : listaNoteCondivise )
-					registerForContextMenu( mettiNota(scatola,not,gc) );
+					registerForContextMenu( mettiNota(scatola,not,null) );
 			}
 			// Note inlinea
-			VisitaListaNote visitaNote = new VisitaListaNote(null);
+			ListaNote visitaNote = new ListaNote();
 			if( !scegliNota ) {
 				gc.accept( visitaNote );
 				if( !visitaNote.listaNote.isEmpty() ) {
@@ -76,7 +78,7 @@ public class Quaderno extends Fragment {
 		if( nota.getId() == null )
 			vistaCita.setVisibility( View.GONE );
 		else {
-			VisitaListaNote contaUso = new VisitaListaNote( nota.getId() );
+			RiferimentiNota contaUso = new RiferimentiNota( nota.getId(), false );
 			gc.accept( contaUso );
 			vistaCita.setText( String.valueOf(contaUso.num) );
 		}
@@ -90,12 +92,14 @@ public class Quaderno extends Fragment {
 					getActivity().finish();
 				} else {
 					Ponte.manda( nota, "oggetto" );
-					Ponte.manda( contenitore, "contenitore" );
+					if( contenitore != null ) // per le note condivise è null
+						Ponte.manda( contenitore, "contenitore" );
 					scatola.getContext().startActivity( new Intent( scatola.getContext(), Nota.class ) );
 				}
 			}
 		});
-		vistaNota.setTag( nota.getId() );	// solo per il menu contestuale Elimina
+		vistaNota.setTag( R.id.tag_oggetto, nota );	// per il menu contestuale Elimina
+		vistaNota.setTag( R.id.tag_contenitore, contenitore );
 		return vistaNota;
 	}
 
@@ -113,23 +117,11 @@ public class Quaderno extends Fragment {
 		if( contenitore != null ) {
 			NoteRef refNota = new NoteRef();
 			refNota.setRef( id );
-			( (NoteContainer) contenitore ).addNoteRef( refNota );
+			((NoteContainer)contenitore).addNoteRef( refNota );
 			Ponte.manda( contenitore, "contenitore" );
 		}
 		Ponte.manda( notaNova, "oggetto" );
 		contesto.startActivity( new Intent( contesto, Nota.class ) );
-	}
-
-	// Todo unifica con U.eliminNota()
-	// Elimina una Nota TODO rimuovendo i ref dai membri
-	static void eliminaNota( String idNota ) {
-		// Todo: Conferma con avviso: Vuoi davvero eliminare questa nota?
-		Note nota = gc.getNote( idNota );
-		// Prima rimuove i ref alla nota negli indi ...... Vector?
-
-		// Poi può rimuovere la famiglia
-		gc.getNotes().remove(nota);
-		gc.createIndexes();	// necessario???????? per aggiornare gli individui
 	}
 
 	@Override
@@ -155,9 +147,8 @@ public class Quaderno extends Fragment {
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		if( item.getItemId() == 0 ) {	// Elimina
-			eliminaNota( (String) vistaScelta.getTag() );
-			vistaScelta.setVisibility( View.GONE );
+		if( item.getItemId() == 0 ) { // Elimina
+			U.eliminaNota( (Note)vistaScelta.getTag(R.id.tag_oggetto), vistaScelta.getTag(R.id.tag_contenitore), vistaScelta );
 			U.salvaJson();
 		} else {
 			return false;

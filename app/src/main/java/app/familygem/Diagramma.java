@@ -790,6 +790,8 @@ public class Diagramma extends Fragment {
 					Intent intento = new Intent( getContext(), EditaIndividuo.class );
 					intento.putExtra( "idIndividuo", idPersona );
 					intento.putExtra( "relazione", quale + 1 );
+					if( EditaIndividuo.controllaMultiMatrimoni(intento,getContext(),null) )
+						return; // se perno è sposo in più famiglie dialogo chiede a chi aggiungere un figlio
 					startActivity( intento );
 				}
 			});
@@ -800,8 +802,11 @@ public class Diagramma extends Fragment {
 				@Override
 				public void onClick( DialogInterface dialog, int quale ) {
 					Intent intento = new Intent( getContext(), Principe.class );
+					intento.putExtra( "idIndividuo", idPersona ); // serve solo a quel pistino di controllaMultiMatrimoni()
 					intento.putExtra( "anagrafeScegliParente", true );
 					intento.putExtra( "relazione", quale + 1 );
+					if( EditaIndividuo.controllaMultiMatrimoni(intento,getContext(),Diagramma.this) )
+						return;
 					startActivityForResult( intento,1401 );
 				}
 			});
@@ -828,8 +833,9 @@ public class Diagramma extends Fragment {
 		if( requestCode == 1401  ) {
 			if( resultCode == AppCompatActivity.RESULT_OK ) {
 				EditaIndividuo.aggiungiParente( idPersona,
-						data.getStringExtra("idParente" ),
-						data.getIntExtra("relazione", 0 ));
+						data.getStringExtra( "idParente" ),
+						data.getIntExtra( "relazione", 0 ),
+						data.getIntExtra( "famigliaNum", 0 ));
 				U.salvaJson();
 				Globale.editato = true; // Così Principe.onRestart aggiorna il diagramma
 			}

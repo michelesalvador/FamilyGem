@@ -20,7 +20,7 @@ import app.familygem.Dettaglio;
 import app.familygem.Ponte;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.VisitaListaCitazioni;
+import app.familygem.visita.ListaCitazioniFonte;
 import static app.familygem.Globale.gc;
 
 public class Fonte extends Dettaglio {
@@ -33,7 +33,7 @@ public class Fonte extends Dettaglio {
 			oggetto = f;
 			setTitle( R.string.source );
 			vistaId.setText( f.getId() );
-			VisitaListaCitazioni citazioni = new VisitaListaCitazioni( f.getId() );
+			ListaCitazioniFonte citazioni = new ListaCitazioniFonte( f.getId() );
 			gc.accept( citazioni );
 			f.putExtension( "citaz", citazioni.lista.size() );	// per la Biblioteca
 			metti( getString(R.string.abbreviation), "Abbreviation" );
@@ -53,7 +53,7 @@ public class Fonte extends Dettaglio {
 			mettiEstensioni( f );
 			// Mette la citazione all'archivio
 			if( f.getRepositoryRef() != null ) {
-				View vistaRef = LayoutInflater.from( getApplicationContext() ).inflate( R.layout.pezzo_citazione_fonte, box, false );
+				View vistaRef = LayoutInflater.from(this).inflate( R.layout.pezzo_citazione_fonte, box, false );
 				box.addView( vistaRef );
 				vistaRef.setBackgroundColor( getResources().getColor(R.color.archivioCitazione) );
 				final RepositoryRef refArchivio = f.getRepositoryRef();
@@ -84,10 +84,8 @@ public class Fonte extends Dettaglio {
 			U.cambiamenti( box, f.getChange() );
 
 			if( !citazioni.lista.isEmpty() ) {
-				TextView usato = new TextView( box.getContext() );
-				usato.setText( R.string.cited_by );
-				usato.setPadding( 0,10,0,0 );
-				box.addView( usato );
+				LayoutInflater.from(this).inflate( R.layout.titoletto, box, true );
+				((TextView)findViewById(R.id.titolo_testo)).setText( R.string.cited_by );
 			}
 			// TODO ricondurre questa lista variegata solo alle Person e alle Family
 			for( Map.Entry<SourceCitation,Object> e : citazioni.lista.entrySet() ) {

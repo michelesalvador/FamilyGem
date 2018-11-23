@@ -248,6 +248,8 @@ public class Individuo extends AppCompatActivity {
 										Intent intento = new Intent( getApplicationContext(), EditaIndividuo.class );
 										intento.putExtra( "idIndividuo", uno.getId() );
 										intento.putExtra( "relazione", quale + 1 );
+										if( EditaIndividuo.controllaMultiMatrimoni(intento,Individuo.this,null) )
+											return;
 										startActivity( intento );
 									}
 								});
@@ -258,8 +260,11 @@ public class Individuo extends AppCompatActivity {
 									@Override
 									public void onClick( DialogInterface dialog, int quale ) {
 										Intent intento = new Intent( getApplication(), Principe.class );
+										intento.putExtra( "idIndividuo", uno.getId() ); // solo per controllaMultiMatrimoni()
 										intento.putExtra( "anagrafeScegliParente", true );
 										intento.putExtra( "relazione", quale + 1 );
+										if( EditaIndividuo.controllaMultiMatrimoni(intento,Individuo.this,null) )
+											return;
 										startActivityForResult( intento,1401 );
 									}
 								});
@@ -306,7 +311,6 @@ public class Individuo extends AppCompatActivity {
     }
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		s.l("onActivityResult " + resultCode +"  "+ requestCode);
 		if( resultCode == RESULT_OK ) {
 			if( requestCode == 2173 ) { // File fornito da un'app diventa media locale eventualmente ritagliato con Android Image Cropper
 				Media media = new Media();
@@ -341,13 +345,14 @@ public class Individuo extends AppCompatActivity {
 				uno.addSourceCitation( citaz );
 			} else if( requestCode == 1401  ) { // Parente
 				EditaIndividuo.aggiungiParente( uno.getId(),
-						data.getStringExtra("idParente" ),
-						data.getIntExtra("relazione", 0 ));
+						data.getStringExtra("idParente"),
+						data.getIntExtra("relazione",0),
+						data.getIntExtra("famigliaNum",0) );
 			}
 			U.salvaJson();
 			Globale.editato = true;  // Prima scatta onActivityResult(), poi onRestart() che rinfresca il contenuto
 		} else
-			Toast.makeText( this, "Something wrong importing data :(", Toast.LENGTH_LONG ).show(); // todo traduci
+			Toast.makeText( this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
 	// Chiamato dopo onBackPressed() ricarica la pagina per aggiornare i contenuti

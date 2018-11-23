@@ -14,7 +14,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.apache.commons.io.FileUtils;
-import org.folg.gedcom.model.Extensions;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Header;
@@ -22,6 +21,7 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.parser.JsonParser;
 import java.io.File;
 import java.io.IOException;
+import app.familygem.visita.ListaMedia;
 
 public class InfoAlbero extends AppCompatActivity {
 
@@ -157,7 +157,7 @@ public class InfoAlbero extends AppCompatActivity {
 	static void aggiornaDati( Gedcom gc, Armadio.Cassetto albero ) {
 		albero.individui = gc.getPeople().size();
 		albero.generazioni = quanteGenerazioni( gc, albero.radice );
-		VisitaListaMedia visitaMedia = new VisitaListaMedia( gc, true );
+		ListaMedia visitaMedia = new ListaMedia( gc, true );
 		gc.accept( visitaMedia );
 		albero.media = visitaMedia.listaMedia.size();
 		Globale.preferenze.salva();

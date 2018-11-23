@@ -13,12 +13,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import org.folg.gedcom.model.Media;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import app.familygem.visita.ListaMedia;
 
 public class Principe extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -88,14 +90,14 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 	}
 
 	// Titolo e immagine a caso del Gedcom
-	static void arredaTestataMenu() {
+	void arredaTestataMenu() {
 		NavigationView menu = Globale.vistaPrincipe.findViewById(R.id.menu);
 		ImageView immagine = menu.getHeaderView(0).findViewById( R.id.menu_immagine );
 		TextView testo = menu.getHeaderView(0).findViewById( R.id.menu_titolo );
 		immagine.setVisibility( ImageView.GONE );
 		testo.setText( "" );
 		if( Globale.gc != null ) {
-			VisitaListaMedia visitaMedia = new VisitaListaMedia( Globale.gc, true );
+			ListaMedia visitaMedia = new ListaMedia( Globale.gc, true );
 			Globale.gc.accept( visitaMedia );
 			if( visitaMedia.listaMedia.size() > 0 ) {
 				List<Media> lista = new ArrayList<>( visitaMedia.listaMedia.keySet() );
@@ -106,6 +108,17 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				immagine.setVisibility( ImageView.VISIBLE );
 			}
 			testo.setText( Globale.preferenze.alberoAperto().nome );
+		}
+		Button bottoneSalva = menu.getHeaderView(0).findViewById( R.id.menu_salva );
+		if( !Globale.preferenze.autoSalva ) {
+			bottoneSalva.setVisibility( View.VISIBLE );
+			bottoneSalva.setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View v ) {
+					U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+					scatolissima.closeDrawer(GravityCompat.START);
+				}
+			});
 		}
 	}
 

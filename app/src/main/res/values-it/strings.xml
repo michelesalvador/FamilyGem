@@ -2,7 +2,9 @@
     <string name="app_name">Family Gem</string>
     <string name="delete">Elimina</string>
     <string name="cancel">Annulla</string>
+    <string name="done">Fatto</string>
     <string name="change_date">Ultima modifica</string>
+    <string name="something_wrong">Qualcosa è andato storto</string>
     <!-- Principe -->
     <string name="drawer_open">Apri menu</string>
     <string name="drawer_close">Chiudi menu</string>
@@ -102,6 +104,7 @@
     <string name="new_shared_media">Nuovo media condiviso</string>
     <string name="link_shared_media">Collega media condiviso</string>
     <string name="name">Nome</string>
+    <string name="yes">Sì</string>
     <string name="sex">Sesso</string>
     <string name="event">Evento</string>
     <string name="birth">Nascita</string>
@@ -214,6 +217,7 @@
     <string name="death_date">Data morte</string>
     <string name="death_place">Luogo morte</string>
     <string name="saved">Salvato</string>
+    <string name="which_family_add_child">A quale famiglia vuoi aggiungere un figlio?</string>
     <!-- EditoreData -->
     <string name="january">Gennaio</string>
     <string name="february">Febbraio</string>
@@ -238,9 +242,11 @@
     <string name="to">A</string>
     <string name="from_to">Da… a</string>
     <string name="date_phrase">Frase</string>
+    <!-- U -->
+    <string name="want_crop_image">Vuoi ritagliare questa immagine?</string>
+    <string name="not_granted">%s non concesso</string>
     <!-- Altro -->
     <string name="version_name">Versione %s</string>
-    <string name="done">Fatto</string>
     <string name="make_default">Rendi principale</string>
     <string name="citations">Citazioni</string>
     <string name="sources_number">Numero di fonti</string>

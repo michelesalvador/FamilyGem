@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
@@ -47,6 +46,8 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import app.familygem.visita.ListaMedia;
+
 public class Alberi extends AppCompatActivity {
 
     ListView lista;
@@ -75,16 +76,17 @@ public class Alberi extends AppCompatActivity {
             lista.setOnItemClickListener( new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick( AdapterView<?> parent, View v, final int position, long id ) {
-                	findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
-	                new Thread( new Runnable() {
-		                @Override
-		                public void run() {
-			                int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
-			                if( !apriJson( id_num, true ) ) // TODo: non funziona il Toast in caso di Exception (ad es. x file inesistente)
-				                return;
-			                startActivity( new Intent( Alberi.this, Principe.class ) );
-		                }
-	                }).start();
+				findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
+				new Thread( new Runnable() {
+					@Override
+					public void run() {
+						int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
+						if( !( Globale.gc!=null && id_num==Globale.preferenze.idAprendo ) ) // se non è già aperto
+							if( !apriJson( id_num, true ) ) // TODo: non funziona il Toast in caso di Exception (ad es. x file inesistente)
+								return;
+						startActivity( new Intent( Alberi.this, Principe.class ) );
+					}
+				}).start();
                 }
             });
 
@@ -325,8 +327,10 @@ public class Alberi extends AppCompatActivity {
 			try {
 				GedcomWriter scrittore = new GedcomWriter();
 				Gedcom gc = leggiJson( idAlbero );
+				if( gc == null ) return false;
 				String nomeFile = Globale.preferenze.getAlbero(idAlbero).nome + ".ged";
-				gc.getHeader().setFile( nomeFile );
+				if( gc.getHeader() != null )
+					gc.getHeader().setFile( nomeFile );
 				File fileGc = new File( Environment.getExternalStorageDirectory() + "/Documents", nomeFile );
 				scrittore.write( gc, fileGc );
 				MediaScannerConnection.scanFile(this, new String[]{fileGc.getAbsolutePath()},null,null);
@@ -561,6 +565,15 @@ public class Alberi extends AppCompatActivity {
 						} else errori++;
 					}
 				}
+			}
+		}
+		// Aggiunge un tag (FILE) ai Media che non l'hanno
+		ListaMedia visitaMedia = new ListaMedia( gc, true );
+		gc.accept( visitaMedia );
+		for( Map.Entry<Media,Object> med : visitaMedia.listaMedia.entrySet() ) {
+			if( med.getKey().getFileTag() == null ) {
+				if( correggi ) med.getKey().setFileTag( "FILE" );
+				else errori++;
 			}
 		}
 		if( !correggi ) {

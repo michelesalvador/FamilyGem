@@ -19,6 +19,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -43,11 +44,13 @@ import android.widget.Toast;
 import com.google.gson.JsonPrimitive;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
-
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -55,7 +58,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.ExtensionContainer;
@@ -68,7 +70,6 @@ import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
 import org.folg.gedcom.model.Person;
-
 
 public class U {
 	
@@ -254,42 +255,9 @@ public class U {
 		((ExtensionContainer) obj).putExtension( chiave, listaTag );
 	}
 
-
-	// Imposta in un Media il file scelto da file manager. Restituisce l'uri dell'immagine salvata oppure null
-	// In app questo metodo è in Dettaglio
-	static File settaMedia( Context contesto, Intent data, Media media ) {
-		File fileMedia = null;
-		try {
-			Uri uri = data.getData();
-			String percorso = U.uriPercorsoFile( uri );
-
-			if( percorso.lastIndexOf( '/' ) > 0 ) {    // se è un percorso completo del file
-				// Apre direttamente il file
-				fileMedia = new File( percorso );
-			} else {    // è solo il nome del file 'pippo.png'
-				// Copia il file (che può essere di qualsiasi tipo) nella memoria esterna della app
-				// /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
-				InputStream input = contesto.getContentResolver().openInputStream( uri );
-				String percorsoMemoria = contesto.getExternalFilesDir(null) + "/" + Globale.preferenze.idAprendo;
-				File dirMemoria = new File( percorsoMemoria );
-				if( !dirMemoria.exists() )
-					dirMemoria.mkdir();
-				fileMedia = new File( percorsoMemoria, percorso );
-				FileUtils.copyInputStreamToFile( input, fileMedia );
-			}
-			// Aggiunge il percorso della cartella nel Cassetto in preferenze
-			//Globale.preferenze.alberoAperto().cartelle.add( fileMedia.getParent() );
-			//Globale.preferenze.salva();
-			media.setFile( fileMedia.getAbsolutePath() );
-		} catch( Exception e ) {
-			Toast.makeText( contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-		}
-		return fileMedia;
-	}
-
-
 	// Riceve un Uri e cerca di restituire il percorso del file
 	public static String uriPercorsoFile( Uri uri ) {
+		if( uri == null ) return null;
 		if( uri.getScheme().equalsIgnoreCase( "file" )) {
 			// file:///storage/emulated/0/DCIM/Camera/Simpsons.ged	  da File Manager
 			// file:///storage/emulated/0/Android/data/com.dropbox.android/files/u1114176864/scratch/Simpsons.ged
@@ -514,7 +482,7 @@ public class U {
 
 	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
 	static void ritagliaImmagine( final Context contesto, Intent data, Media media ) {
-		final File fileMedia = U.settaMedia( contesto, data, media );
+		final File fileMedia = settaMedia( contesto, data, media );
 		String tipoMime = URLConnection.guessContentTypeFromName( fileMedia.getName() );
 		if( tipoMime.startsWith("image/") ) {
 			ImageView vistaImmagine = new ImageView( contesto );
@@ -540,6 +508,8 @@ public class U {
 									//.setAllowRotation(true)
 									//.setActivityTitle( "" )
 									.setCropMenuCropButtonTitle( "Fatto" )
+									//.setCropShape( CropImageView.CropShape.OVAL )
+									//.setScaleType( CropImageView.ScaleType.CENTER_INSIDE )
 									//.start( (AppCompatActivity)contesto );
 									.getIntent( contesto );
 							if( 1 > 0 )
@@ -551,6 +521,61 @@ public class U {
 			//vistaImmagine.getLayoutParams().height = 300;
 			//vistaImmagine.requestLayout();
 		}
+	}
+
+	// Imposta in un Media il file scelto da file manager. Restituisce il File dell'immagine salvata oppure null
+	static File settaMedia( Context contesto, Intent data, Media media ) {
+		s.l( data +"\n"+ data.getData()+"\n"+data.getExtras() );
+		File fileMedia = null;
+		try {
+			Uri uri = data.getData();
+			String percorso = null;
+			if( uri != null ) percorso = U.uriPercorsoFile( uri );
+			if( percorso != null && percorso.lastIndexOf('/') > 0 ) {    // se è un percorso completo del file
+				// Apre direttamente il file
+				fileMedia = new File( percorso );
+			} else {
+				// Salva il file nella memoria esterna della app  /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
+				File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
+				if( !dirMemoria.exists() )
+					dirMemoria.mkdir();
+				// File di qualsiasi tipo
+				if( percorso != null ) {    // è solo il nome del file 'pippo.png'
+					InputStream input = contesto.getContentResolver().openInputStream( uri );
+					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
+					FileUtils.copyInputStreamToFile( input, fileMedia );
+					// In alcuni casi (android vecchi?) l'app camera non restituisce l'uri dell'immagine
+					// in questi casi volendo c'è l'anteprima della foto negli extra, ma a bassa risoluzione
+				} else if( data.getExtras() != null ) {
+					Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), "img.jpg" );
+					OutputStream os = new BufferedOutputStream(new FileOutputStream(fileMedia));
+					bitmap.compress( Bitmap.CompressFormat.JPEG, 99, os );
+					os.close();
+				}
+			}
+			// Aggiunge il percorso della cartella nel Cassetto in preferenze
+			//Globale.preferenze.alberoAperto().cartelle.add( fileMedia.getParent() );
+			//Globale.preferenze.salva();
+			media.setFile( fileMedia.getAbsolutePath() );
+		} catch( Exception e ) {
+			String msg = e.getLocalizedMessage()!=null ? e.getLocalizedMessage() : "Qualcosa l'è andà stòrt";
+			Toast.makeText( contesto, msg, Toast.LENGTH_LONG ).show();
+			e.printStackTrace();
+		}
+		return fileMedia;
+	}
+
+	// Se in percorsoMemoria esiste già un file con quel nome lo incrementa con 1 2 3...
+	static File fileNomeProgressivo( String dir, String nome ){
+		File file = new File( dir, nome );
+		int incremento = 0;
+		while( file.exists() ) {
+			incremento++;
+			file = new File( dir, nome.substring(0,nome.lastIndexOf('.'))
+					+ " " + incremento + nome.substring(nome.lastIndexOf('.'),nome.length()));
+		}
+		return file;
 	}
 
 	// Conclude la procedura di ritaglio di un'immagine

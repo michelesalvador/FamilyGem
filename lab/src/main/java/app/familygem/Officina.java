@@ -63,7 +63,6 @@ public class Officina extends AppCompatActivity {
 		findViewById(R.id.bottone_libero).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
 				U.appAcquisizioneImmagine( Officina.this );
-				//takePhoto(Officina.this);
 
 				/* Condivisione di un file attraverso le app esistenti
 				Intent sendIntent = new Intent(Intent.ACTION_SEND);

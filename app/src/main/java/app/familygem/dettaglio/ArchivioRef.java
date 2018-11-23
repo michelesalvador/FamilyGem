@@ -24,7 +24,7 @@ public class ArchivioRef extends Dettaglio {
 			if( r.getRepository(gc) != null ) {  // valido
 				setTitle( R.string.repository_citation );
 				vistaId.setText( r.getRef() );    // che è poi l'id dell'archivio
-				View cartaRepo = LayoutInflater.from( getApplicationContext() ).inflate( R.layout.pezzo_fonte, box, false );
+				View cartaRepo = LayoutInflater.from(this).inflate( R.layout.pezzo_fonte, box, false );
 				box.addView( cartaRepo );
 				((TextView) cartaRepo.findViewById( R.id.fonte_titolo ) ).setText( r.getRepository(gc).getName() );
 				((CardView) cartaRepo).setCardBackgroundColor( getResources().getColor(R.color.archivio) );

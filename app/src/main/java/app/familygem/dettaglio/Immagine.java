@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Media;
-import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.Source;
 import java.io.File;
@@ -26,7 +25,6 @@ import app.familygem.Lavagna;
 import app.familygem.Ponte;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.s;
 import static app.familygem.Globale.gc;
 
 public class Immagine extends Dettaglio {
@@ -43,7 +41,6 @@ public class Immagine extends Dettaglio {
 				setTitle( R.string.media );
 				vistaId.setText( "OBJE" );
 			}
-			occorrenze = String.valueOf( Galleria.popolarita( m ) );
 			oggetto = m;
 			immaginona( m );
 			metti( getString(R.string.title), "Title" );
@@ -80,10 +77,8 @@ public class Immagine extends Dettaglio {
 						listaFamiglie.add( f );
 			}
 			if( !listaPersone.isEmpty() || !listaFonti.isEmpty() || !listaFamiglie.isEmpty() ) {
-				TextView usato = new TextView( box.getContext() );
-				usato.setText( R.string.used_by );
-				usato.setPadding( 0,10,0,0 );
-				box.addView( usato );
+				LayoutInflater.from(this).inflate( R.layout.titoletto, box, true );
+				((TextView)findViewById(R.id.titolo_testo)).setText( R.string.used_by );
 			}
 			for( Person p : listaPersone )
 				U.linkaPersona( box, p, 0 );
@@ -95,7 +90,7 @@ public class Immagine extends Dettaglio {
 	}
 
 	void immaginona( final Media m ) {
-		final View vistaMedia = LayoutInflater.from(box.getContext()).inflate( R.layout.immagine_immagine, box, false );
+		final View vistaMedia = LayoutInflater.from(this).inflate( R.layout.immagine_immagine, box, false );
 		box.addView( vistaMedia );
 		final ImageView vistaImg = vistaMedia.findViewById( R.id.fonte_foto );
 		U.mostraMedia( vistaImg, m );

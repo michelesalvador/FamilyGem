@@ -17,6 +17,16 @@ public class Armadio {
 	boolean caricaAlbero;
 	public boolean esperto;
 
+	void traghetta() { // todo questo traghettatore poi se ne può andare
+		Cassetto alb = alberoAperto();
+		if( alb.cartelle == null ) {
+			alb.cartelle = new LinkedHashSet<>();
+			alb.cartelle.add( alb.cartella );
+			alb.cartella = null;
+			salva();
+		}
+	}
+
 	int max() {
 		int num = 0;
 		for( Cassetto c : alberi ) {
@@ -83,7 +93,6 @@ public class Armadio {
 		return null;
 	}
 
-
 	public static class Cassetto {
 		int id;
 		String nome;
@@ -108,6 +117,5 @@ public class Armadio {
 			this.radice = radice;
 			this.preferiti = preferiti;
 		}
-
 	}
 }

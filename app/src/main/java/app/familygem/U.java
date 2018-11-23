@@ -14,7 +14,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
+import android.support.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -43,16 +43,16 @@ import android.widget.Toast;
 import com.google.gson.JsonPrimitive;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
-
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -85,6 +85,7 @@ import org.jsoup.nodes.Element;
 import app.familygem.dettaglio.CitazioneFonte;
 import app.familygem.dettaglio.Fonte;
 import app.familygem.dettaglio.Nota;
+import app.familygem.visita.RiferimentiNota;
 
 public class U {
 	
@@ -138,6 +139,18 @@ public class U {
 		if( n.getSuffix() != null )
 			completo += " " + n.getSuffix().trim();
 		return completo.trim();
+	}
+
+	// Restituisce il cognome di una persona
+	public static String cognome( Person p ) {
+		String cognome = "";
+		if( !p.getNames().isEmpty() ) {
+			String grezzo = p.getNames().get(0).getValue();
+			if( grezzo.indexOf('/') < grezzo.lastIndexOf('/') ) {
+				cognome = grezzo.substring( grezzo.indexOf('/') + 1, grezzo.lastIndexOf('/') ).trim();
+			}
+		}
+		return cognome;
 	}
 
 	// Riceve una Person e restituisce il sesso: 0 senza SEX, 1 Maschio, 2 Femmina, 3 Undefinito, 4 altro
@@ -370,7 +383,8 @@ public class U {
 
 
 	// Riceve un Uri e cerca di restituire il percorso del file
-	public static String uriPercorsoFile( Uri uri ) {
+	static String uriPercorsoFile( Uri uri ) {
+		if( uri == null ) return null;
 		if( uri.getScheme().equalsIgnoreCase( "file" )) {
 			// file:///storage/emulated/0/DCIM/Camera/Simpsons.ged	  da File Manager
 			// file:///storage/emulated/0/Android/data/com.dropbox.android/files/u1114176864/scratch/Simpsons.ged
@@ -446,18 +460,12 @@ public class U {
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
 	static String percorsoMedia( Media m ) {
+		Globale.preferenze.traghetta(); // todo questo traghettatore poi se ne potrà andare
 		if( m.getFile() != null ) {
 			String nome = m.getFile().replace("\\", "/");
 			// Percorso FILE (quello nel gedcom)
 			if( new File(nome).isFile() )
 				return nome;
-
-			if( Globale.preferenze.alberoAperto().cartelle == null ) { // todo questo traghettatore poi se ne può andare
-				Globale.preferenze.alberoAperto().cartelle = new LinkedHashSet<>();
-				Globale.preferenze.alberoAperto().cartelle.add( Globale.preferenze.alberoAperto().cartella );
-				Globale.preferenze.salva();
-			}
-
 			for( String dir : Globale.preferenze.alberoAperto().cartelle ) {
 				// Cartella media + percorso FILE
 				String percorsoRicostruito = dir + '/' + nome;
@@ -725,14 +733,15 @@ public class U {
 	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
 	// ritorna true se apre il dialogo e quindi bisogna bloccare l'aggiornamento dell'attività
 	static boolean ritagliaImmagine( final Context contesto, final Fragment frammento, Intent data, Media media ) {
-		final File fileMedia = Dettaglio.settaMedia( contesto, data, media );
+		final File fileMedia = settaMedia( contesto, data, media );
+		if( fileMedia == null )	return false;
 		String tipoMime = URLConnection.guessContentTypeFromName( fileMedia.getName() );
 		if( tipoMime != null && tipoMime.startsWith("image/") ) {
 			ImageView vistaImmagine = new ImageView( contesto );
 			U.mostraMedia( vistaImmagine, media );
 			Globale.mediaCroppato = media; // Media in attesa di essere aggiornato col nuovo percorso file
 			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
-			costruttore.setMessage( "Vuoi ritagliare questa immagine?" )
+			costruttore.setMessage( R.string.want_crop_image )
 					.setView(vistaImmagine)
 					.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
 						public void onClick( DialogInterface dialog, int id ) {
@@ -750,7 +759,7 @@ public class U {
 									.setBorderLineThickness( 1 )
 									.setBorderCornerThickness( 6 )
 									.setBorderCornerOffset( -3 )
-									.setCropMenuCropButtonTitle( "Fatto" ) // todo traduci
+									.setCropMenuCropButtonTitle( contesto.getText(R.string.done) )
 									.getIntent( contesto );
 									//.start( contesto, frammento );
 							if( frammento != null )
@@ -765,15 +774,57 @@ public class U {
 					Globale.editato = true;
 				}
 			} )	.create().show();
-			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, 300 );
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, 400 );
 			vistaImmagine.setLayoutParams( params ); // l'assegnazione delle dimensioni deve venire DOPO la creazione del dialogo
 			return true;
 		}
 		return false;
 	}
 
-	// Se in percorsoMemoria esiste già un file con quel nome lo incrementa con 1 2 3...
-	static File fileNomeProgressivo( String dir, String nome ){
+	// Imposta in un Media il percorso fornito dalle app dispensatrici. Restituisce il File trovato oppure null
+	static File settaMedia( Context contesto, Intent data, Media media ) {
+		File fileMedia = null;
+		try {
+			Uri uri = data.getData();
+			String percorso = null;
+			if( uri != null ) percorso = U.uriPercorsoFile( uri );
+			if( percorso != null && percorso.lastIndexOf('/') > 0 ) {    // se è un percorso completo del file
+				// Punta direttamente il file
+				fileMedia = new File( percorso );
+			} else {
+				// Salva il file nella memoria esterna della app  /mnt/shell/emulated/0/Android/data/lab.gedcomy/files/
+				File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
+				if( !dirMemoria.exists() )
+					dirMemoria.mkdir();
+				// File di qualsiasi tipo
+				if( percorso != null ) {    // è solo il nome del file 'pippo.png'
+					InputStream input = contesto.getContentResolver().openInputStream( uri );
+					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
+					FileUtils.copyInputStreamToFile( input, fileMedia );
+				// In alcuni casi (telefoni vecchi?) immagini da camera passano come bitmap A BASSA RISOLUZIONE negli extra
+				} else if( data.getExtras() != null ) {
+					Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), "img.jpg" );
+					OutputStream os = new BufferedOutputStream(new FileOutputStream(fileMedia));
+					bitmap.compress( Bitmap.CompressFormat.JPEG, 99, os );
+					os.close();
+				}
+			}
+			if( fileMedia != null ) {
+				// Aggiunge il percorso della cartella nel Cassetto in preferenze
+				if( Globale.preferenze.alberoAperto().cartelle.add( fileMedia.getParent() ) ) // true se ha aggiunto la cartella
+					Globale.preferenze.salva();
+				media.setFile( fileMedia.getAbsolutePath() );
+			}
+		} catch( Exception e ) {
+			String msg = e.getLocalizedMessage()!=null ? e.getLocalizedMessage() : contesto.getString(R.string.something_wrong);
+			Toast.makeText( contesto, msg, Toast.LENGTH_LONG ).show();
+		}
+		return fileMedia;
+	}
+
+	// Se in quella cartella esiste già un file con quel nome lo incrementa con 1 2 3...
+	static File fileNomeProgressivo( String dir, String nome ) {
 		File file = new File( dir, nome );
 		int incremento = 0;
 		while( file.exists() ) {
@@ -799,10 +850,11 @@ public class U {
 				appAcquisizioneImmagine( contesto, galleria, codice );
 			} else
 				appAcquisizioneImmagine( contesto, null, codice );
-		} else
-			Toast.makeText( contesto, permessi[0] + " not granted", Toast.LENGTH_SHORT ).show();
+		} else {
+			String permesso = permessi[0].substring( permessi[0].lastIndexOf('.')+1 );
+			Toast.makeText( contesto, contesto.getString(R.string.not_granted,permesso), Toast.LENGTH_SHORT ).show();
+		}
 	}
-
 
 	// Metodi di creazione di elementi di lista
 
@@ -904,18 +956,25 @@ public class U {
 		vista.setVisibility( View.GONE );
 	}
 
-	// Todo unifica con Quaderno.elimina()
+	// Elimina una Nota inlinea o condivisa
 	public static void eliminaNota( Note nota, Object contenitore, View vista ) {
-		//s.l( "Elimina Media " + "  " + nota + " da " + contenitore );
 		if( nota.getId() != null ) {	// nota OBJECT
-			//s.l( "OBJECT " );
-			Globale.gc.getNotes().remove( nota );	// ok
-			Globale.gc.createIndexes();	// necessario per farlo scomparire anche dall'oggetto contenitore
-		} else	// nota LOCALE
-			((NoteContainer)contenitore).getNotes().remove( nota );
-		vista.setVisibility( View.GONE );
+			// Prima rimuove i ref alla nota con un bel Visitor
+			RiferimentiNota eliminatoreNote = new RiferimentiNota( nota.getId(), true );
+			Globale.gc.accept( eliminatoreNote );
+			Globale.gc.getNotes().remove( nota );	// ok la rimuove se è un'object note
+			//Globale.gc.createIndexes();	// pare proprio non necessario
+			if( Globale.gc.getNotes().isEmpty() )
+				Globale.gc.setNotes( null );
+		} else { // nota LOCALE
+			NoteContainer nc = (NoteContainer) contenitore;
+			nc.getNotes().remove( nota ); // rimuove solo se è una nota locale, non se object note
+			if( nc.getNotes().isEmpty() )
+				nc.setNotes( null );
+		}
+		if( vista != null )
+			vista.setVisibility( View.GONE );
 	}
-
 
 	// Elenca tutti i media di un oggetto contenitore
 	public static void mettiMedia( LinearLayout scatola, Object contenitore, boolean dettagli ) {
