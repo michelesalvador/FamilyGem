@@ -121,17 +121,17 @@ public class Diagramma extends Fragment {
 			// Ramo paterno
 			Person padre = null;
 			View nodoNonniPaterni = null;
+			View nodoGenitori = null;
 			if( !famiglia.getHusbandRefs().isEmpty() ) {
 				padre = famiglia.getHusbands(gc).get(0);
 				spazio(1, zii(padre,null, true) );
 				nodoNonniPaterni = nonni( padre );
 				zii( padre, nodoNonniPaterni, false );
-				altriMatrimoni( padre, famiglia, null );	// todo: in nodoGenitori dovrebbe esserci il nodo del padre, che però viene creato dopo..
+				altriMatrimoni( padre, famiglia, nodoGenitori );	// todo: nodoGenitori sarebbe il nodo del padre, che però viene creato dopo..
 			}
 			// Inizia ramo materno
 			Person madre = null;
 			View nodoNonniMaterni = null;
-			View nodoGenitori = null;
 			if( !famiglia.getWifeRefs().isEmpty() ) {
 				madre = famiglia.getWives(gc).get(0);
 				spazio(1, (zii(padre,null,true) + zii(madre,null,true))/2 );

@@ -48,7 +48,7 @@ public class EditaIndividuo extends AppCompatActivity {
 		setContentView(R.layout.edita_individuo );
 		Bundle bundle = getIntent().getExtras();
 		final String idIndi = bundle.getString("idIndividuo");
-		final String idFamiglia = bundle.getString("idFamiglia");
+		final String idFamiglia = bundle.getString("idFamiglia"); // c'è solo per persone aggiunte da Famiglia
 		final int relazione = bundle.getInt("relazione", 0 );
 		final int famigliaNum = bundle.getInt("famigliaNum", 0 ); // indice della famiglia per perno che ne ha più di una
 
@@ -61,20 +61,23 @@ public class EditaIndividuo extends AppCompatActivity {
 			Person perno = gc.getPerson( idIndi );
 			String cogno = "";
 			// Cognome del fratello
-			if( relazione == 2 ) {
+			if( relazione == 2 ) { // = fratello
 				cogno = U.cognome( perno );
 			// Cognome del padre
-			} else if( relazione == 4 ) {
+			} else if( relazione == 4 ) { // = figlio da Diagramma o Individuo
 				if( U.sesso(perno) == 1 )
 					cogno = U.cognome( perno );
-				else if( idFamiglia != null ) {
-					Family fam = gc.getFamily(idFamiglia);
-					cogno = U.cognome( fam.getHusbands(gc).get(0) );
-				} else if( !perno.getSpouseFamilies(gc).isEmpty() ) {
+				else if( !perno.getSpouseFamilies(gc).isEmpty() ) {
 					Family fam = perno.getSpouseFamilies(gc).get(famigliaNum);
 					if( !fam.getHusbands(gc).isEmpty() )
 						cogno = U.cognome( fam.getHusbands(gc).get(0) );
 				}
+			} else if( relazione == 6 ) { // = figlio da Famiglia
+				Family fam = gc.getFamily(idFamiglia);
+				if( !fam.getHusbands(gc).isEmpty() )
+					cogno = U.cognome( fam.getHusbands(gc).get(0) );
+				else if( !fam.getChildren(gc).isEmpty() )
+					cogno = U.cognome( fam.getChildren(gc).get(0) );
 			}
 			((EditText)findViewById( R.id.cognome )).setText( cogno );
 		// Nuovo individuo scollegato
@@ -274,9 +277,9 @@ public class EditaIndividuo extends AppCompatActivity {
 					Globale.preferenze.alberoAperto().individui++;
 					Globale.preferenze.salva();
 					Globale.individuo = nuovoId; // per mostrarlo orgogliosi in Diagramma
-					if( idFamiglia != null ) {
+					if( idFamiglia != null ) { // viene da Famiglia
 						Famiglia.aggrega( p, gc.getFamily(idFamiglia), relazione );
-					} else if( relazione > 0 )
+					} else if( relazione > 0 ) // viene da Diagramma o IndividuoFamiliari
 						aggiungiParente( idIndi, nuovoId, relazione, famigliaNum );
 				}
 				if( Globale.preferenze.autoSalva )
@@ -292,9 +295,54 @@ public class EditaIndividuo extends AppCompatActivity {
 
 	// Verifica se il perno ha molteplici matrimoni e chiede a quale attaccare un figlio
 	static boolean controllaMultiMatrimoni( final Intent intento, final Context contesto, final Fragment frammento ) {
-		String idPerno = intento.getStringExtra( "idIndividuo" );
-		List<Family> famSposi = gc.getPerson(idPerno).getSpouseFamilies(gc);
-		if( intento.getIntExtra("relazione",0) == 4 && famSposi.size() > 1 ) {
+		final String idPerno = intento.getStringExtra( "idIndividuo" );
+		final Person perno = gc.getPerson(idPerno);
+		List<Family> famSposi = perno.getSpouseFamilies(gc);
+		int relazione = intento.getIntExtra( "relazione", 0 );
+		if( relazione == 4 && famSposi.size() == 1
+				&& ( famSposi.get(0).getHusbands(gc).isEmpty() || famSposi.get(0).getWives(gc).isEmpty() )	// C'è un solo genitore
+				&& !famSposi.get(0).getChildren(gc).isEmpty() ) { //  e ci sono già dei figli
+			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
+			String msg = contesto.getString( R.string.new_child_same_parents, U.epiteto(famSposi.get(0).getChildren(gc).get(0)), U.epiteto(perno) );
+			costruttore.setMessage( msg )
+					.setNeutralButton( R.string.same_family, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick( DialogInterface dialogo, int quale ) {
+							if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
+								// apre Anagrafe
+								if( frammento != null )
+									frammento.startActivityForResult( intento,1401 );
+								else
+									((Activity)contesto).startActivityForResult( intento,1401 );
+							} else // apre EditaIndividuo
+								contesto.startActivity( intento );
+						}
+					} )
+					.setPositiveButton( R.string.new_family, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick( DialogInterface dialogo, int quale ) {
+							Family famNuova = Chiesa.nuovaFamiglia();
+							SpouseRef sr = new SpouseRef();
+							sr.setRef( idPerno );
+							if( U.sesso(perno) == 2 )
+								famNuova.addWife( sr );
+							else famNuova.addHusband( sr );
+							SpouseFamilyRef sfr = new SpouseFamilyRef();
+							sfr.setRef( famNuova.getId() );
+							perno.addSpouseFamilyRef( sfr );
+							intento.putExtra( "famigliaNum", 1 );
+							if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
+								if( frammento != null )
+									frammento.startActivityForResult( intento,1401 );
+								else
+									((Activity)contesto).startActivityForResult( intento,1401 );
+							} else
+								contesto.startActivity( intento );
+						}
+					} )
+					.create().show();
+			return true;
+		} else if( intento.getIntExtra("relazione",0) == 4 && famSposi.size() > 1 ) {
 			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
 			costruttore.setTitle( R.string.which_family_add_child );
 			List<String> famigliePerno = new ArrayList<>();
@@ -309,7 +357,7 @@ public class EditaIndividuo extends AppCompatActivity {
 			costruttore.setItems( famigliePerno.toArray(new String[0]), new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick( DialogInterface dialog, int quale ) {
-					// qui viene creato questo Extra che passerà da Anagrafe per tornare all'Activity / Fragment chiamante
+					// qui viene creato questo Extra che passerà da Anagrafe per tornare all'Activity/Fragment chiamante
 					intento.putExtra( "famigliaNum", quale );
 					//s.l( contesto.getClass() +"  "+ intento );
 					if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {

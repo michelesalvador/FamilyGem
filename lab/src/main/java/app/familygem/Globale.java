@@ -46,7 +46,8 @@ public class Globale extends Application {
 		//salvatore = preferenze.edit();
 		//preferenze = new Armadio();
 		Gson gson = new Gson();
-		String stringone = "{\"alberi\":[],\"idAprendo\":0}";	// preferenze vuote
+		String stringone = "{\"alberi\":[],\"idAprendo\":0,\"autoSalva\":true,\"caricaAlbero\":true}";	// preferenze vuote
+							// i boolean false non hanno bisogno di essere inizializzati
 		try {
 			File filePreferenze = new File( contesto.getFilesDir(), "preferenze.json");
 			if( filePreferenze.exists() )
@@ -56,7 +57,7 @@ public class Globale extends Application {
 		}
 		preferenze = gson.fromJson( stringone, Armadio.class );
 
-		// (ri)apre il Gedcom
+		/* (ri)apre il Gedcom
 		if( gc == null && preferenze.idAprendo > 0 ) {
 			try {
 				//s.l( "Globale.preferenze.idAprendo " + preferenze.idAprendo  );
@@ -69,7 +70,6 @@ public class Globale extends Application {
 			} catch( Exception e ) {
 				Toast.makeText( contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			}
-		}
-
+		}*/
 	}
 }

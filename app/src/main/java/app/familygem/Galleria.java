@@ -2,10 +2,13 @@
 
 package app.familygem;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,7 +34,6 @@ import java.util.Map;
 import app.familygem.dettaglio.Immagine;
 import app.familygem.visita.EliminaMedia;
 import app.familygem.visita.ListaMedia;
-import static android.app.Activity.RESULT_OK;
 import static app.familygem.Globale.gc;
 
 public class Galleria extends Fragment {
@@ -43,15 +45,22 @@ public class Galleria extends Fragment {
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
-		setHasOptionsMenu(true);
-		View vista = inflater.inflate( R.layout.magazzino, container, false);
-		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
+		setHasOptionsMenu( true );
+		View vista = inflater.inflate( R.layout.galleria, container, false );
+		RecyclerView griglia = vista.findViewById( R.id.galleria );
+		griglia.setHasFixedSize( true );
 		if( gc != null ) {
 			ListaMedia visitaMedia = new ListaMedia( gc, !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
 			gc.accept( visitaMedia );
 			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size() + " " + getString(R.string.media).toLowerCase() );
-			for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() )
-				poniMedia( scatola, dato.getValue(), dato.getKey(), true );
+			RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( getContext(), 2 );
+			griglia.setLayoutManager( gestoreLayout );
+			/*List<Media> listaMedia = new ArrayList<>();
+			for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() ) {
+				listaMedia.add(dato.getKey());
+			}*/
+			AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( visitaMedia.listaMedia, true );
+			griglia.setAdapter( adattatore );
 		}
 		return vista;
 	}
@@ -83,7 +92,8 @@ public class Galleria extends Fragment {
 			lista.put( med, contenitore );
 	}
 
-	// Inserisce un singolo elemento mediale di elenco
+	/* ELIMINABILE
+	Inserisce un singolo elemento mediale di elenco
 	public static void poniMedia( final LinearLayout scatola, final Object contenitore, final Media med, boolean dettagli ) {
 		View vistaMedia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.galleria_pezzo, scatola, false );
 		scatola.addView( vistaMedia );
@@ -95,8 +105,6 @@ public class Galleria extends Fragment {
 				testo = med.getTitle() + "\n";
 			if( med.getFile() != null )
 				testo += med.getFile();
-			else
-				testo += U.percorsoMedia( med );
 			( (TextView) vistaMedia.findViewById( R.id.galleria_testo ) ).setText( testo );
 			if( dettagli ) {
 				vistaMedia.setTag( R.id.tag_oggetto, med );
@@ -117,7 +125,7 @@ public class Galleria extends Fragment {
 						if( attiva.getIntent().getBooleanExtra( "galleriaScegliMedia", false ) ) {
 							Intent intent = new Intent();
 							intent.putExtra( "idMedia", med.getId() );
-							attiva.setResult( RESULT_OK, intent );
+							attiva.setResult( Activity.RESULT_OK, intent );
 							attiva.finish();
 						// Galleria in modalità normale Apre Immagine
 						} else {
@@ -129,31 +137,27 @@ public class Galleria extends Fragment {
 				} );
 			} else {    // Media inerte
 				vistaMedia.setBackground( null );
-				// todo icona più piccola? solo titolo o nome file?
 			}
 		}
-	}
+	}*/
+
 
 	// ToDo: probabilmente rimpiazzabile da un Visitor
 	public static int popolarita( Media med ) {
 		int quante = 0;
-		for( Media m : gc.getMedia() ) {	// media record in tutto il gedcom
-			if( m.equals(med) )
-				quante++;
-		}
-		for( Person p : gc.getPeople() ) {	// local media negli individui
-			for( Media m : p.getMedia() )
-				if( m.equals(med) )
+		for( Person p : gc.getPeople() ) {	// media negli individui
+			for( MediaRef mr : p.getMediaRefs() )
+				if( mr.getRef().equals(med.getId()) )
 					quante++;
 		}
-		for( Source f : gc.getSources() ) {	// local media nelle fonti
-			for( Media m : f.getMedia() )
-				if( m.equals(med) )
+		for( Source f : gc.getSources() ) {	// media nelle fonti
+			for( MediaRef mr : f.getMediaRefs() )
+				if( mr.getRef().equals(med.getId()) )
 					quante++;
 		}
-		for( Family f : gc.getFamilies() ) {	// local media nelle famiglie
-			for( Media m : f.getMedia() )
-				if( m.equals(med) )
+		for( Family f : gc.getFamilies() ) {	// media nelle famiglie
+			for( MediaRef mr : f.getMediaRefs() )
+				if( mr.getRef().equals(med.getId()) )
 					quante++;
 		}
 		return quante;
@@ -222,7 +226,7 @@ public class Galleria extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch( item.getItemId() ) {
 			case 0:
-				U.appAcquisizioneImmagine( getContext(), this, 4546 );
+				U.appAcquisizioneImmagine( getContext(), this, 4546, null );
 				break;
 			default:
 				return false;
@@ -232,7 +236,7 @@ public class Galleria extends Fragment {
 	// Il file pescato dal file manager diventa media condiviso
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		if( resultCode == RESULT_OK ) {
+		if( resultCode == Activity.RESULT_OK ) {
 			if( requestCode == 4546 ) { // File preso da app fornitrice viene salvato in Media ed eventualmente ritagliato
 				Media media = nuovoMedia( null );
 				if( U.ritagliaImmagine( getContext(), this, data, media ) ) { // se è un'immagine (quindi ritagliabile)
@@ -245,25 +249,27 @@ public class Galleria extends Fragment {
 			}
 			U.salvaJson();
 			Globale.editato = true;
-		} else
+		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
+			Globale.editato = true;
+		else
 			Toast.makeText( getContext(), R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
 	// Menu contestuale
 	View vistaFoto;
-	Media med;
-	Object contenit;
+	Media oggettoMedia;
+	Object contenitore;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
 		vistaFoto = vista;
-		med = (Media) vistaFoto.getTag( R.id.tag_oggetto );
-		contenit = vistaFoto.getTag( R.id.tag_contenitore );
+		oggettoMedia = (Media) vistaFoto.getTag( R.id.tag_oggetto );
+		contenitore = vistaFoto.getTag( R.id.tag_contenitore );
 		menu.add(0, 0, 0, R.string.delete );
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {
-			eliminaMedia( med, contenit, vistaFoto );
+			eliminaMedia( oggettoMedia, contenitore, vistaFoto );
 			U.salvaJson();
 			return true;
 		}

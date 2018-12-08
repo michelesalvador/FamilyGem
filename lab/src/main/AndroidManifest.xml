@@ -36,6 +36,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
+        <activity
+            android:name=".ListaGriglia"
+            android:label="Griglia" />
     </application>
 
 </manifest>

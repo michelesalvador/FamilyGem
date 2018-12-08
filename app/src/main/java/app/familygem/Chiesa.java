@@ -105,6 +105,18 @@ public class Chiesa extends Fragment {
 		gc.createIndexes();	// necessario per aggiornare gli individui
 	}
 
+	static Family nuovaFamiglia() {
+		Family nuova = new Family();
+		int val, max = 0;
+		for( Family fam : gc.getFamilies() ) {
+			val = Anagrafe.idNumerico( fam.getId() );
+			if( val > max )	max = val;
+		}
+		nuova.setId( "F" + (max + 1) );
+		gc.addFamily( nuova );
+		return nuova;
+	}
+
 	@Override
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
 		menu.add(0,0,0, R.string.new_f );
@@ -113,14 +125,7 @@ public class Chiesa extends Fragment {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			case 0:
-				Family nuova = new Family();
-				int val, max = 0;
-				for( Family fam : gc.getFamilies() ) {
-					val = Anagrafe.idNumerico( fam.getId() );
-					if( val > max )	max = val;
-				}
-				nuova.setId( "F" + (max + 1) );
-				gc.addFamily( nuova );
+				Family nuova = nuovaFamiglia();
 				U.salvaJson();
 				Intent intento = new Intent( getContext(), Famiglia.class );
 				intento.putExtra( "idFamiglia", nuova.getId() );

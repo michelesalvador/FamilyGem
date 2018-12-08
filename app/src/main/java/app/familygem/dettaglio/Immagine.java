@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Media;
@@ -44,10 +45,10 @@ public class Immagine extends Dettaglio {
 			oggetto = m;
 			immaginona( m );
 			metti( getString(R.string.title), "Title" );
-			metti( getString(R.string.type), "Type" );	// _type
-			metti( getString(R.string.file), "File" );	// Angelina Guadagnoli.jpg
+			metti( getString(R.string.type), "Type", false, false );	// _type
+			if(Globale.preferenze.esperto) metti( getString(R.string.file), "File" );	// Angelina Guadagnoli.jpg
 				// dovrebbe essere max 259 characters
-			metti( getString(R.string.format), "Format" );	// jpeg
+			metti( getString(R.string.format), "Format", Globale.preferenze.esperto, false );	// jpeg
 			metti( getString(R.string.primary), "Primary" );	// _prim
 			metti( getString(R.string.scrapbook), "Scrapbook", false, false );	// _scbk the multimedia object should be in the scrapbook
 			metti( getString(R.string.slideshow), "SlideShow", false, false );	//
@@ -92,18 +93,15 @@ public class Immagine extends Dettaglio {
 	void immaginona( final Media m ) {
 		final View vistaMedia = LayoutInflater.from(this).inflate( R.layout.immagine_immagine, box, false );
 		box.addView( vistaMedia );
-		final ImageView vistaImg = vistaMedia.findViewById( R.id.fonte_foto );
-		U.mostraMedia( vistaImg, m );
+		final ImageView vistaImg = vistaMedia.findViewById( R.id.immagine_foto );
+		U.dipingiMedia( m, vistaImg, (ProgressBar)vistaMedia.findViewById(R.id.immagine_circolo) );
 		vistaMedia.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View vista ) {
 				String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
-				if( percorso == null  ) {	// Il file è da trovare
-					/*Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-					intent.setType( "* /*" );
-					startActivityForResult( intent,5173 );*/
-					U.appAcquisizioneImmagine( Immagine.this, null, 5173 );
-				} else if( vistaImg.getTag( R.id.tag_file_senza_anteprima ) != null ) { // Apri file con altra app
-
+				int tipoFile = (int)vistaImg.getTag(R.id.tag_tipo_file);
+				if( tipoFile == 0 ) {	// Il file è da trovare
+					U.appAcquisizioneImmagine( Immagine.this, null, 5173, null );
+				} else if( tipoFile == 2 || tipoFile == 3 ) { // Apri file con altra app
 					// Non male anche se la lista di app generiche fa schifo
 					File file = new File( percorso );
 					MimeTypeMap mappa = MimeTypeMap.getSingleton();
@@ -174,23 +172,14 @@ public class Immagine extends Dettaglio {
 								Toast.LENGTH_LONG ).show();*/
 
 				} else {
-					Globale.media = m;    // potrebbe essere evitato, perchè arrivando in Immagine già è impostato
-					startActivity( new Intent( Immagine.this, Lavagna.class ) );
+					Intent intento = new Intent( Immagine.this, Lavagna.class );
+					intento.putExtra( "percorso", percorso );
+					startActivity( intento );
 				}
-
-
 			}
 		});
 		vistaMedia.setTag( R.id.tag_oggetto, 43614 );	// per il suo menu contestuale
 		registerForContextMenu( vistaMedia );
-		// Caricando l'immagine il layout cambia
-		box.addOnLayoutChangeListener( new View.OnLayoutChangeListener() {
-			@Override
-			public void onLayoutChange(View v, int l, int t, int r, int b, int oL, int oT, int oR, int oB) {
-				if( b != oB )
-					((TextView)vistaMedia.findViewById( R.id.fonte_link )).setText( (String)vistaImg.getTag( R.id.tag_percorso ) );
-			}
-		});
 	}
 
 	@Override

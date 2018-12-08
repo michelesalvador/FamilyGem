@@ -98,7 +98,7 @@
     <string name="really_delete">Really delete</string>
     <string name="person_deleted">Person deleted.</string>
     <!-- Individuo -->
-    <string name="events">Events</string>
+    <string name="events">Facts</string>
     <string name="relatives">Relatives</string>
     <string name="new_media">New media</string>
     <string name="new_shared_media">New shared media</string>
@@ -141,6 +141,7 @@
     <string name="choose_source">Choose source</string>
     <string name="choose_repository">Choose repository</string>
     <string name="choose_file">Choose file</string>
+    <string name="crop">Crop</string>
     <string name="copy">Copy</string>
     <!-- Nome -->
     <string name="value">Value</string>
@@ -217,6 +218,9 @@
     <string name="death_date">Death date</string>
     <string name="death_place">Death place</string>
     <string name="saved">Saved</string>
+    <string name="new_child_same_parents">Does the new child have the same parents of %s (same family), or is %s the only common parent (a new family need to be created)?</string>
+    <string name="same_family">Same family</string>
+    <string name="new_family">New family</string>
     <string name="which_family_add_child">To which family you add the child?</string>
     <!-- EditoreData -->
     <string name="january">January</string>
@@ -245,6 +249,7 @@
     <!-- U -->
     <string name="want_crop_image">Do you want to crop this image?</string>
     <string name="not_granted">%s not granted</string>
+    <string name="empty_media">Empty Media</string>
     <!-- Altro -->
     <string name="version_name">Version %s</string>
     <string name="make_default">Make default</string>

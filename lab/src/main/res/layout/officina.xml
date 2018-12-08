@@ -38,4 +38,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bottone_libero"
         app:srcCompat="@drawable/anna_salvador" />
+
+    <ProgressBar
+        android:id="@+id/circolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/immagine"
+        app:layout_constraintEnd_toEndOf="@+id/immagine"
+        app:layout_constraintStart_toStartOf="@+id/immagine"
+        app:layout_constraintTop_toTopOf="@+id/immagine" />
+
 </android.support.constraint.ConstraintLayout>

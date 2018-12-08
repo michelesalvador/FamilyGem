@@ -17,6 +17,16 @@ public class Armadio {
 	boolean caricaAlbero;
 	public boolean esperto;
 
+	void traghetta() {
+		Cassetto alb = alberoAperto();
+		if( alb.cartelle == null ) {
+			alb.cartelle = new LinkedHashSet<>();
+			alb.cartelle.add( alb.cartella );
+			alb.cartella = null;
+			salva();
+		}
+	}
+
 	int max() {
 		int num = 0;
 		for( Cassetto c : alberi ) {

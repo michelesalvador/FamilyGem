@@ -3,6 +3,8 @@ package app.familygem;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -11,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.Person;
-import java.util.Map;
 import app.familygem.visita.ListaMedia;
 import static app.familygem.Globale.gc;
 
@@ -27,8 +28,13 @@ public class IndividuoMedia extends Fragment {
 			uno = gc.getPerson( Globale.individuo );
 			ListaMedia visitaMedia = new ListaMedia( gc, true );
 			uno.accept( visitaMedia );
-			for( Map.Entry<Media,Object> m : visitaMedia.listaMedia.entrySet() )
-				Galleria.poniMedia( scatola, m.getValue(), m.getKey(), true );
+			RecyclerView griglia = new RecyclerView( scatola.getContext() );
+			griglia.setHasFixedSize( true );
+			RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( getContext(), 2 );
+			griglia.setLayoutManager( gestoreLayout );
+			AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( visitaMedia.listaMedia, true );
+			griglia.setAdapter( adattatore );
+			scatola.addView( griglia );
 		}
 		return vistaMedia;
 	}

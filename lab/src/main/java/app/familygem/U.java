@@ -38,10 +38,13 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.JsonPrimitive;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.BufferedOutputStream;
@@ -59,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Gedcom;
@@ -70,6 +74,9 @@ import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
 import org.folg.gedcom.model.Person;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 public class U {
 	
@@ -339,7 +346,6 @@ public class U {
 			public boolean onPreDraw() {
 				vista.getViewTreeObserver().removeOnPreDrawListener(this);	// evita il ripetersi di questo metodo
 				String percorso = percorsoMedia( med );	// Il file in locale
-				s.l( percorso );
 				if( percorso != null ) {
 					BitmapFactory.Options opzioni = new BitmapFactory.Options();
 					opzioni.inJustDecodeBounds = true;	// solo info
@@ -375,7 +381,7 @@ public class U {
 						Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 						e.printStackTrace();
 					}
-					/*if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
+					if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
 							|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
 						// Magari è un video
 						bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
@@ -385,41 +391,374 @@ public class U {
 								formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
 							bitmap = generaIcona( vista, R.layout.media_file, formato );
 						}
-						//vista.setTag( R.id.tag_file_senza_anteprima, true );    // così Immagine può aprire un'app cliccando l'icona
-					}*/
-					//vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
+					}
+					vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
 					vista.setImageBitmap( bitmap );
 				} //else if( med.getFile() != null )	// Cerca il file in internet
-					//new U.zuppaMedia( vista ).execute( med.getFile() );
+					//new ZuppaMedia( vista ).execute( med.getFile() );
 				return true;
 			}
 		});
 	}
 
+	// Caricatore asincrono di immagini locali, sostiusce il metodo mostraMedia()
+	static class MostraMedia extends AsyncTask<Media,Void,Bitmap> {
+		private ImageView vista;
+		boolean dettagli;
+		MostraMedia( ImageView vista, boolean dettagli ) {
+			this.vista = vista;
+			this.dettagli = dettagli;
+		}
+		@Override
+		protected Bitmap doInBackground( Media... params) {
+			// I vari getSize restituiscono 0 finché il layout non è completato
+			//s.l(vista.getWidth() +"  "+ vista.getHeight() +"  "+ vista.getMeasuredWidth() +"  "+ vista.getMeasuredHeight());
+			Media media = params[0];
+			String percorso = U.percorsoMedia( media );
+			Bitmap bitmap = null;
+			vista.setTag( R.id.tag_tipo_file, 0 );
+			if( percorso != null ) {
+				BitmapFactory.Options opzioni = new BitmapFactory.Options();
+				opzioni.inJustDecodeBounds = true;	// solo info
+				BitmapFactory.decodeFile( percorso, opzioni );
+				int largaOriginale = opzioni.outWidth;
+				if( largaOriginale > vista.getWidth() && vista.getWidth() > 0 )
+					opzioni.inSampleSize = largaOriginale / vista.getWidth();
+				else if( largaOriginale > 300 ) // 300 una larghezza media approssimativa per una ImageView
+					opzioni.inSampleSize = largaOriginale / 300;
+				opzioni.inJustDecodeBounds = false;	// carica immagine
+				bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Ricava un'immagine ridimensionata
+				//bitmap = Bitmap.createScaledBitmap( bitmap, vista.getWidth(), vista.getHeight(), false ); // mmh no
+				try { // Rotazione Exif
+					ExifInterface exif = new ExifInterface( percorso );
+					int girata = exif.getAttributeInt( ExifInterface.TAG_ORIENTATION, 1 );
+					int gradi = 0;
+					switch( girata ) {
+						//case ExifInterface.ORIENTATION_NORMAL:
+						case ExifInterface.ORIENTATION_ROTATE_90:
+							gradi = 90;
+							break;
+						case ExifInterface.ORIENTATION_ROTATE_180:
+							gradi = 180;
+							break;
+						case ExifInterface.ORIENTATION_ROTATE_270:
+							gradi = 270;
+					}
+					if( gradi > 0 ) {
+						Matrix matrix = new Matrix();
+						matrix.postRotate( gradi );
+						bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true );
+					}
+				} catch( Exception e ) {
+					Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+				}
+				vista.setTag( R.id.tag_tipo_file, 1 );
+				if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
+						|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
+					// Magari è un video
+					bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
+					vista.setTag( R.id.tag_tipo_file, 2 );
+					if( bitmap == null ) {
+						String formato = media.getFormat();
+						if( formato == null )
+							formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
+						bitmap = U.generaIcona( vista, R.layout.media_file, formato );
+						vista.setTag( R.id.tag_tipo_file, 3 );
+					}
+				}
+				vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
+			} else if( media.getFile() != null )	// Cerca il file in internet
+				new ZuppaMedia( vista, null, null ).execute( media.getFile() );
+			return bitmap;
+		}
+		@Override
+		protected void onPostExecute( Bitmap bitmap ) {
+			//super.onPostExecute(bitmap); ?
+			if( bitmap != null ) {
+				vista.setImageBitmap( bitmap );
+				// Icona di file
+				if( vista.getTag(R.id.tag_tipo_file).equals(3) ) {
+					vista.setScaleType( ImageView.ScaleType.FIT_CENTER );
+					if( dettagli ) {
+						//ViewGroup.LayoutParams parami = (RelativeLayout)vista.getLayoutParams(); cazzo non riesco a PRENDERLI
+						RelativeLayout.LayoutParams parami = new RelativeLayout.LayoutParams(
+								RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT );
+						parami.addRule( RelativeLayout.ABOVE, R.id.media_testo );
+						vista.setLayoutParams( parami );
+					}
+				}
+			}
+		}
+	}
+
+	// Mostra le immagini con il tanto declamato Picasso
+	static void dipingiMedia( final Media media, final ImageView vistaImmagine, final ProgressBar circo ) {
+		final String percorso = U.percorsoMedia(media);
+		circo.setVisibility( View.VISIBLE );
+		vistaImmagine.setTag( R.id.tag_tipo_file, 0 );
+		if( percorso != null ) {
+			Picasso.get().load( new File(percorso) )
+					/*.resize(300, 300) ok
+					.onlyScaleDown()*/
+					.fit()  // necessita di aspettare che il layout è creato
+					.centerCrop()
+					//.placeholder( R.drawable.anna_salvador )
+					//.into(vistaImmagine); ok
+					.into( vistaImmagine, new Callback() {
+						@Override
+						public void onSuccess() {
+							circo.setVisibility( View.GONE );
+							vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
+						}
+						@Override
+						public void onError( Exception e ) {
+							// Magari è un video
+							Bitmap bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
+							vistaImmagine.setTag( R.id.tag_tipo_file, 2 );
+							if( bitmap == null ) {
+								// un File locale senza anteprima
+								String formato = media.getFormat();
+								if( formato == null )
+									formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
+								bitmap = U.generaIcona( vistaImmagine, R.layout.media_file, formato );
+								vistaImmagine.setScaleType( ImageView.ScaleType.FIT_CENTER );
+								if( vistaImmagine.getParent() instanceof RelativeLayout ) {
+									RelativeLayout.LayoutParams parami = new RelativeLayout.LayoutParams(
+											RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT );
+									parami.addRule( RelativeLayout.ABOVE, R.id.media_testo );
+									vistaImmagine.setLayoutParams( parami );
+								}
+								vistaImmagine.setTag( R.id.tag_tipo_file, 3 );
+							}
+							vistaImmagine.setImageBitmap( bitmap );
+							circo.setVisibility( View.GONE );
+						}
+					});
+		} else if( media.getFile() != null ) { // magari è un'immagine in internet
+			final String percorsoFile = media.getFile();
+			Picasso.get().load(percorsoFile).fit().centerCrop()
+					.into(vistaImmagine, new Callback() {
+						@Override
+						public void onSuccess() {
+							circo.setVisibility( View.GONE );
+							vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
+							try {
+								new ImboscaImmagine(media).execute(new URL(percorsoFile));
+							} catch( Exception e ) {
+								e.printStackTrace();
+							}
+						}
+						@Override
+						public void onError( Exception e ) {
+							// Proviamo con una pagina web
+							new ZuppaMedia( vistaImmagine, circo, media ).execute( percorsoFile );
+						}
+					});
+		} else {
+			circo.setVisibility( View.GONE );
+			vistaImmagine.setImageResource( R.drawable.anna_salvador );
+			vistaImmagine.setAlpha( 0.5f );
+		}
+	}
+
+	static Bitmap generaIcona( ImageView vista, int icona, String testo ) {
+		LayoutInflater inflater = (LayoutInflater) vista.getContext().getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+		View inflated = inflater.inflate( icona, null );
+		RelativeLayout frameLayout = inflated.findViewById( R.id.icona );
+		((TextView)frameLayout.findViewById( R.id.icona_testo ) ).setText( testo );
+		frameLayout.setDrawingCacheEnabled( true );
+		frameLayout.measure( View.MeasureSpec.makeMeasureSpec( 0, View.MeasureSpec.UNSPECIFIED ),
+				View.MeasureSpec.makeMeasureSpec( 0, View.MeasureSpec.UNSPECIFIED ) );
+		frameLayout.layout( 0, 0, frameLayout.getMeasuredWidth(), frameLayout.getMeasuredHeight() );
+		frameLayout.buildDrawingCache( true );
+		return frameLayout.getDrawingCache();
+	}
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
-	public static String percorsoMedia( Media m ) {
+	static String percorsoMedia( Media m ) {
+		Globale.preferenze.traghetta();
 		if( m.getFile() != null ) {
 			String nome = m.getFile().replace("\\", "/");
 			// Percorso FILE (quello nel gedcom)
 			if( new File(nome).isFile() )
 				return nome;
-			String cartella =
-					//Globale.preferenze.get( "main_dir", "/storage/external_SD/famiglia") + File.separator;
-					//Globale.preferenze.getString( "cartella_principale", null ) + File.separator;
-					Globale.preferenze.alberoAperto().cartella + '/';
-			// Cartella del .ged + percorso FILE
-			String percorsoRicostruito = cartella + nome;
-			//s.l( "percorsoRicostruito: " + percorsoRicostruito );
-			if( new File(percorsoRicostruito).isFile() )
-				return percorsoRicostruito;
-			// File nella stessa cartella del gedcom
-			String percorsoFile = cartella + new File(nome).getName();
-			//s.l( "percorsoFile: " + percorsoFile );
-			if( new File(percorsoFile).isFile() )
-				return percorsoFile;
+			for( String dir : Globale.preferenze.alberoAperto().cartelle ) {
+				// Cartella media + percorso FILE
+				String percorsoRicostruito = dir + '/' + nome;
+				if( new File(percorsoRicostruito).isFile() )
+					return percorsoRicostruito;
+				// Cartella media + nome del FILE
+				String percorsoFile = dir + '/' + new File(nome).getName();
+				if( new File(percorsoFile).isFile() )
+					return percorsoFile;
+			}
+		}
+		String percorsoCache = (String) m.getExtension("cache");
+		if( percorsoCache != null ) {
+			s.l("percorsoCache "+percorsoCache);
+			if( new File(percorsoCache).isFile() )
+				return percorsoCache;
 		}
 		return null;
+	}
+
+	// Salva in cache un'immagine trovabile in internet per poi riusarla
+	static class ImboscaImmagine extends AsyncTask<URL,Void,String> {
+		Media media;
+		ImboscaImmagine( Media media ) {
+			this.media = media;
+		}
+		protected String doInBackground( URL... url ) {
+			s.l( "imboscaImmagine " + url[0].toString() + "  " + FilenameUtils.getName(url[0].getPath())+" "+
+					url[0].getFile()+" "+FilenameUtils.getExtension(url[0].getFile()) );
+			try {
+				File cartellaCache = new File( Globale.contesto.getCacheDir().getPath() + "/" + Globale.preferenze.idAprendo );
+				if( !cartellaCache.exists() ) {
+					// todo elimina extension "cache" da tutti i Media
+					cartellaCache.mkdir();
+				}
+				String estensione = FilenameUtils.getName( url[0].getPath() );
+				if( estensione.lastIndexOf('.') > -1 )
+					estensione = estensione.substring( estensione.lastIndexOf('.')+1 );
+				String ext;
+				switch( estensione ) {
+					case "png":
+						ext = "png";
+						break;
+					case "gif":
+						ext = "gif";
+						break;
+					case "bmp":
+						ext = "bmp";
+						break;
+					case "jpg":
+					case "jpeg":
+					default:
+						ext = "jpg";
+				}
+				File cache = fileNomeProgressivo( cartellaCache.getPath(), "img." + ext );
+				s.l("FILE " + cache.getPath() );
+				FileUtils.copyURLToFile( url[0], cache );
+				return cache.getPath();
+				/*try {
+					FileOutputStream fos = new FileOutputStream(vistaImmagine.getContext().getCacheDir() + "/" + url.getFile() );
+
+					bitmap.compress( Bitmap.CompressFormat.JPEG, 90, fos );
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}*/
+			} catch( Exception e ) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		protected void onPostExecute( String percorso) {
+			if( percorso != null )
+				media.putExtension( "cache", percorso );
+		}
+	}
+
+	// Carica l'immagine più grande da una pagina internet
+	static class ZuppaMedia extends AsyncTask<String, Integer, Bitmap> {
+		ImageView vistaImmagine;
+		ProgressBar circo;
+		Media media;
+		URL url;
+		ZuppaMedia( ImageView vistaImmagine, ProgressBar circo, Media media ) {
+			this.vistaImmagine = vistaImmagine;
+			this.circo = circo;
+			this.media = media;
+		}
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			Bitmap bitmap = null;
+			int i = 0;
+			publishProgress( i );
+			try {
+				//Document doc = Jsoup.connect("http://www.antenati.san.beniculturali.it/v/Archivio+di+Stato+di+Firenze/Stato+civile+della+restaurazione/Borgo+San+Lorenzo/Morti/1842/1366/005186556_00447.jpg").get();
+				//Document doc = Jsoup.connect("https://www.google.com").get();
+				Document doc = Jsoup.connect( params[0] ).get();
+				//Element immagine = doc.select("img").first();	// ok
+				List<Element> lista = doc.select("img");
+				if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
+					vistaImmagine.setTag( R.id.tag_tipo_file, 3 );
+					return null;	// dovrebbe ritornare una bitmap
+				}
+				int maxDimensioniConAlt = 1;
+				int maxDimensioni = 1;
+				int maxLunghezzaAlt = 0;
+				int maxLunghezzaSrc = 0;
+				Element imgGrandeConAlt = null;
+				Element imgGrande = null;
+				Element imgAltLungo = null;
+				Element imgSrcLungo = null;
+				for( Element img : lista ) {
+					s.p( img.attr("src") + " \"" + img.attr("alt") +"\" "+ img.attr("width") + "x" + img.attr("height") );
+					int larga, alta;
+					if( img.attr("width").isEmpty() ) larga = 1;
+					else larga = Integer.parseInt(img.attr("width"));
+					if( img.attr("height").isEmpty() ) alta = 1;
+					else alta = Integer.parseInt(img.attr("height"));
+					s.l( " -> " + larga + "x" + alta );
+					// Se in <img> mancano gli attributi "width" e "height", 'larga' e 'alta' rimangono a 1
+					if( larga * alta > maxDimensioniConAlt  &&  !img.attr("alt").isEmpty() ) { // la più grande con alt
+						imgGrandeConAlt = img;
+						maxDimensioniConAlt = larga * alta;
+					}
+					if( larga * alta > maxDimensioni ) { // la più grande anche senza alt
+						imgGrande = img;
+						maxDimensioni = larga * alta;
+					}
+					if( img.attr("alt").length() > maxLunghezzaAlt ) { // quella con l'alt più lungo (ah ah!)
+						imgAltLungo = img;
+						maxLunghezzaAlt = img.attr( "alt" ).length();
+					}
+					if( img.attr("src").length() > maxLunghezzaSrc ) { // quella col src più lungo
+						imgSrcLungo = img;
+						maxLunghezzaSrc = img.attr("src").length();
+					}
+				}
+				String percorso = null;
+				if( imgGrandeConAlt != null ) {
+					s.l( "imgGrandeConAlt = " + imgGrandeConAlt.attr( "alt" ) + "  " + imgGrandeConAlt.attr( "width" ) + "x" + imgGrandeConAlt.attr( "height" ) );
+					percorso = imgGrandeConAlt.absUrl( "src" );  //absolute URL on src
+				} else if( imgGrande != null ) {
+					s.l( "imgGrande = " + imgGrande.attr("width") + "x" + imgGrande.attr("height") );
+					percorso = imgGrande.absUrl( "src" );
+				} else if( imgAltLungo != null ) {
+					s.l( "imgAltLungo = "+imgAltLungo.attr("alt") +"  "+ imgAltLungo.attr("width") + "x" + imgAltLungo.attr("height") );
+					percorso = imgAltLungo.absUrl( "src" );
+				} else if( imgSrcLungo != null ) {
+					s.l( "imgSrcLungo = "+imgSrcLungo.attr("src") +"  "+ imgSrcLungo.attr("width") + "x" + imgSrcLungo.attr("height") );
+					percorso = imgSrcLungo.absUrl( "src" );
+				}
+				//String srcValue = imageElement.attr("src");  // exact content value of the attribute.
+				s.l( "percorso " + percorso );
+				url = new URL( percorso );
+				InputStream inputStream = url.openConnection().getInputStream();
+				bitmap = BitmapFactory.decodeStream(inputStream);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			publishProgress( i );
+			return bitmap;
+		}
+		@Override
+		protected void onProgressUpdate(Integer... valori) { // Non dà molta soddisfazione
+			//s.l( valori[0] );
+		}
+		@Override
+		protected void onPostExecute( Bitmap bitmap ) {
+			//s.l( "RISULTAtO = " + bitmap.getByteCount() );
+			if( bitmap != null ) {
+				vistaImmagine.setImageBitmap( bitmap );
+				vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
+				new ImboscaImmagine( media ).execute( url );
+			} else
+				vistaImmagine.setImageResource( R.drawable.anna_salvador );
+			circo.setVisibility( View.GONE );
+		}
 	}
 
 	// Propone una bella lista di app per acquisire immagini
@@ -573,7 +912,7 @@ public class U {
 		while( file.exists() ) {
 			incremento++;
 			file = new File( dir, nome.substring(0,nome.lastIndexOf('.'))
-					+ " " + incremento + nome.substring(nome.lastIndexOf('.'),nome.length()));
+					+ incremento + nome.substring(nome.lastIndexOf('.'),nome.length()));
 		}
 		return file;
 	}

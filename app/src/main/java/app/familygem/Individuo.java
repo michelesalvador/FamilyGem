@@ -147,10 +147,12 @@ public class Individuo extends AppCompatActivity {
 						subNota.add( 0, 22, 0, R.string.new_note );
 						subNota.add( 0, 23, 0, R.string.new_shared_note );
 						subNota.add( 0, 24, 0, R.string.link_shared_note );
-						SubMenu subFonte = menu.addSubMenu( 0, 0, 0, R.string.source );
-						subFonte.add( 0, 25, 0, R.string.new_source_note );
-						subFonte.add( 0, 26, 0, R.string.new_source );
-						subFonte.add( 0, 27, 0, R.string.link_source );
+						if( Globale.preferenze.esperto ) {
+							SubMenu subFonte = menu.addSubMenu( 0, 0, 0, R.string.source );
+							subFonte.add( 0, 25, 0, R.string.new_source_note );
+							subFonte.add( 0, 26, 0, R.string.new_source );
+							subFonte.add( 0, 27, 0, R.string.link_source );
+						}
 						break;
 					case 2: // Individuo Familiari
 						menu.add( 0, 30, 0, R.string.new_relative );
@@ -170,10 +172,10 @@ public class Individuo extends AppCompatActivity {
 								break;
 							// Media
 							case 10: // Cerca media locale
-								U.appAcquisizioneImmagine( Individuo.this, null, 2173 );
+								U.appAcquisizioneImmagine( Individuo.this, null, 2173, uno );
 								break;
 							case 11: // Cerca oggetto media
-								U.appAcquisizioneImmagine( Individuo.this, null, 2174 );
+								U.appAcquisizioneImmagine( Individuo.this, null, 2174, uno );
 								break;
 							case 12:    // Collega media in Galleria
 								Intent inten = new Intent( Individuo.this, Principe.class );
@@ -351,7 +353,9 @@ public class Individuo extends AppCompatActivity {
 			}
 			U.salvaJson();
 			Globale.editato = true;  // Prima scatta onActivityResult(), poi onRestart() che rinfresca il contenuto
-		} else
+		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
+			Globale.editato = true;
+		else
 			Toast.makeText( this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
@@ -443,6 +447,6 @@ public class Individuo extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		U.risultatoPermessi( this, codice, permessi, accordi );
+		U.risultatoPermessi( this, codice, permessi, accordi, uno );
 	}
 }

@@ -20,6 +20,8 @@ import android.provider.OpenableColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
@@ -46,14 +48,15 @@ import java.util.Map;
 public class Officina extends AppCompatActivity {
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void onCreate( Bundle stato ) {
+		super.onCreate( stato );
 		setContentView(R.layout.officina);
+		//s.l( Globale.preferenze+"  "+ Globale.preferenze.idAprendo+"  "+ Globale.preferenze.alberoAperto() );
 
 		findViewById(R.id.bottone_vario).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
 				//new LoadImageFromURL().execute("http://www.cafleurebon.com/wp-content/uploads/2017/03/fica-mana-symbol-182x300.jpg");
-				new beviZuppa().execute();
+				new U.ZuppaMedia( (ImageView)findViewById(R.id.immagine), (ProgressBar)findViewById(R.id.circolo), null ).execute("https://www.google.com");
 				//database();
 				//mandaOggettoAttivita();
 				//prendi_file_da_FileManager();
@@ -78,7 +81,7 @@ public class Officina extends AppCompatActivity {
 
 		findViewById(R.id.immagine).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				startActivity( new Intent( Officina.this, Diagramma.class ) );
+				startActivity( new Intent( Officina.this, ListaGriglia.class ) );
 			}
 		});
 	}
@@ -443,73 +446,6 @@ public class Officina extends AppCompatActivity {
 		}
 		@Override
 		protected void onPostExecute(Bitmap bitmap){
-			((ImageView)findViewById(R.id.immagine)).setImageBitmap( bitmap );
-		}
-	}
-
-	// Carica l'immagine più grande da una pagina internet
-	class beviZuppa extends AsyncTask<Void, Void, Bitmap> {
-		@Override
-		protected Bitmap doInBackground(Void... params) {
-			Bitmap bitmap = null;
-			try {
-				//Document doc = Jsoup.connect("http://www.antenati.san.beniculturali.it/v/Archivio+di+Stato+di+Firenze/Stato+civile+della+restaurazione/Borgo+San+Lorenzo/Morti/1842/1366/005186556_00447.jpg").get();
-				Document doc = Jsoup.connect("http://www.geditcom.com").get();
-				//Element immagine = doc.select("img").first();	// ok
-				List<Element> lista = doc.select("img");
-				int maxDimensioniConAlt = 0;
-				int maxDimensioni = 0;
-				int maxLunghezzaAlt = 0;
-				Element imgGrandeConAlt = null;
-				Element imgGrande = null;
-				Element imgAltLungo = null;
-				for( Element img : lista ) {
-					s.p( "\"" + img.attr("alt") +"\" "+ img.attr("width") + "x" + img.attr("height") );
-					int larga, alta;
-					if( img.attr("width").isEmpty() ) larga = 0;
-					else larga = Integer.parseInt(img.attr("width"));
-					if( img.attr("height").isEmpty() ) alta = 0;
-					else alta = Integer.parseInt(img.attr("height"));
-					s.l( " -> " + larga + "x" + alta );
-					// Se in <img> mancano gli attributi "width" e "height", 'larga' e 'alta' rimangono a zero
-					if( larga * alta > maxDimensioniConAlt  &&  !img.attr("alt").isEmpty() ) {    // la più grande con alt
-						imgGrandeConAlt = img;
-						maxDimensioniConAlt = larga * alta;
-					}
-					if( larga * alta > maxDimensioni ) {    // la più grande anche senza alt
-						imgGrande = img;
-						maxDimensioni = larga * alta;
-					}
-					if( img.attr("alt").length() > maxLunghezzaAlt )  {	// quella con l'alt più lungo (ah ah!)
-						imgAltLungo = img;
-						maxLunghezzaAlt = img.attr( "alt" ).length();
-					}
-				}
-				String percorso = null;
-				if( imgGrandeConAlt != null ) {
-					s.l( "imgGrandeConAlt = " + imgGrandeConAlt.attr( "alt" ) + "  " + imgGrandeConAlt.attr( "width" ) + "x" + imgGrandeConAlt.attr( "height" ) );
-					percorso = imgGrandeConAlt.absUrl( "src" );  //absolute URL on src
-				} else if( imgGrande != null ) {
-					s.l( "imgGrande = "+imgGrande.attr("alt") +"  "+ imgGrande.attr("width") + "x" + imgGrande.attr("height") );
-					percorso = imgGrande.absUrl( "src" );
-				} else if( imgAltLungo != null ) {
-					s.l( "imgAltLungo = "+imgAltLungo.attr("alt") +"  "+ imgAltLungo.attr("width") + "x" + imgAltLungo.attr("height") );
-					percorso = imgAltLungo.absUrl( "src" );
-				}
-				//String srcValue = imageElement.attr("src");  // exact content value of the attribute.
-				s.l( "absoluteUrl " + percorso );
-				URL url = new URL( percorso );
-				InputStream inputStream = url.openConnection().getInputStream();
-				bitmap = BitmapFactory.decodeStream(inputStream);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return bitmap;
-		}
-		@Override
-		protected void onPostExecute( Bitmap bitmap ) {
-			//((TextView)findViewById (R.id.myTextView)).setText (result);
-			//s.l( "RISULTAtO = " + bitmap.getByteCount() );
 			((ImageView)findViewById(R.id.immagine)).setImageBitmap( bitmap );
 		}
 	}

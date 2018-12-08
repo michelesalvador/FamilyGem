@@ -84,7 +84,7 @@ public class Famiglia extends Dettaglio {
 	// Collega una persona ad una famiglia come genitore o figlio
 	public static void aggrega( Person tizio, Family fam, int ruolo ) {
 		switch( ruolo ) {
-			case 1:	// Genitore
+			case 5:	// Genitore
 				// il ref dell'indi nella famiglia
 				SpouseRef sr = new SpouseRef();
 				sr.setRef( tizio.getId() );
@@ -102,7 +102,7 @@ public class Famiglia extends Dettaglio {
 				listaSfr.add( sfr );	// ok
 				tizio.setSpouseFamilyRefs( listaSfr );
 				break;
-			case 2:	// Figlio
+			case 6:	// Figlio
 				ChildRef cr = new ChildRef();
 				cr.setRef( tizio.getId() );
 				fam.addChild( cr );

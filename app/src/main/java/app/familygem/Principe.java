@@ -103,8 +103,8 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				List<Media> lista = new ArrayList<>( visitaMedia.listaMedia.keySet() );
 				Random caso = new Random();
 				int num = caso.nextInt( lista.size() );
-				U.mostraMedia( immagine, lista.get(num) );
-				//if( immagine.getTag(R.id.tag_file_senza_anteprima) == null ) essendo asincrono arriva in ritardo
+				U.dipingiMedia( lista.get(num), immagine, null );
+				//if( immagine.getTag(R.id.tag_tipo_file).equals(1) || 2 ) // no essendo asincrono arriva in ritardo
 				immagine.setVisibility( ImageView.VISIBLE );
 			}
 			testo.setText( Globale.preferenze.alberoAperto().nome );
@@ -169,6 +169,6 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		U.risultatoPermessi( this, codice, permessi, accordi );
+		U.risultatoPermessi( this, codice, permessi, accordi, null );
 	}
 }

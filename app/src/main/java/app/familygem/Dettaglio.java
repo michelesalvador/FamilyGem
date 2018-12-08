@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +44,7 @@ import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.model.Submitter;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,7 +156,7 @@ public class Dettaglio extends AppCompatActivity {
 					subMedia.add( 0, 107, 0, R.string.new_shared_media );
 					subMedia.add( 0, 108, 0, R.string.link_shared_media );
 				}
-				if( oggetto instanceof SourceCitationContainer || oggetto instanceof Note ) {
+				if( ( oggetto instanceof SourceCitationContainer || oggetto instanceof Note ) && Globale.preferenze.esperto ) {
 					SubMenu subFonte = menu.addSubMenu( 0, 100, 0, R.string.source );
 					subFonte.add( 0, 109, 0, R.string.new_source_note );
 					subFonte.add( 0, 110, 0, R.string.new_source );
@@ -210,9 +212,9 @@ public class Dettaglio extends AppCompatActivity {
 							intento.putExtra( "quadernoScegliNota", true );
 							startActivityForResult( intento,7074 );
 						} else if( id == 106 ) { // Cerca media locale
-							U.appAcquisizioneImmagine( Dettaglio.this, null, 4173 );
+							U.appAcquisizioneImmagine( Dettaglio.this, null, 4173, (MediaContainer)oggetto );
 						} else if( id == 107 ) { // Cerca media condiviso
-							U.appAcquisizioneImmagine( Dettaglio.this, null, 4174 );
+							U.appAcquisizioneImmagine( Dettaglio.this, null, 4174, (MediaContainer)oggetto );
 						} else if( id == 108 ) { // Collega media condiviso
 							Intent inten = new Intent( Dettaglio.this, Principe.class );
 							inten.putExtra( "galleriaScegliMedia", true );
@@ -235,12 +237,12 @@ public class Dettaglio extends AppCompatActivity {
 							Intent intento = new Intent( Dettaglio.this, EditaIndividuo.class );
 							intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
 							intento.putExtra( "idFamiglia", ((Family)oggetto).getId() );
-							intento.putExtra( "relazione", id - 119);
+							intento.putExtra( "relazione", id - 115 );
 							startActivity( intento );
 						} else if( id == 122 || id == 123 ) { // Collega persona esistente
 							Intent intento = new Intent( Dettaglio.this, Principe.class );
 							intento.putExtra( "anagrafeScegliParente", true );
-							intento.putExtra( "relazione", id - 121 );
+							intento.putExtra( "relazione", id - 117 );
 							startActivityForResult( intento, 34417 );
 						} else if( id == 124 ) { // Metti matrimonio
 							EventFact nuovoEvento = new EventFact();
@@ -296,8 +298,6 @@ public class Dettaglio extends AppCompatActivity {
 					U.salvaJson();
 					return;
 				}
-			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-				U.fineRitaglioImmagine( data );
 			} else if( requestCode == 43616 ) { // Media da Galleria
 				MediaRef rifMedia = new MediaRef();
 				rifMedia.setRef( data.getStringExtra("idMedia") );
@@ -326,7 +326,10 @@ public class Dettaglio extends AppCompatActivity {
 			Ponte.manda( oggetto, "oggetto" ); // li spedisce per riprenderli subito dopo nel onRestart()
 			if( contenitore != null )
 				Ponte.manda( contenitore, "contenitore" );
-		}
+		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE )
+			Globale.editato = true;
+		else
+			Toast.makeText( this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
 	// Aggiorna i contenuti quando si torna indietro con backPressed()
@@ -686,9 +689,12 @@ public class Dettaglio extends AppCompatActivity {
 			else if( oggettoPezzo instanceof Repository )
 				menu.add( 0, 90, 0, R.string.choose_repository );
 			else if( oggettoPezzo instanceof Integer ) {
-				if( oggettoPezzo.equals( 43614 ) )	// Immaginona
-					menu.add( 0, 100, 0, R.string.choose_file );
-				else if( oggettoPezzo.equals(4043) || oggettoPezzo.equals(6064) ) // Nome e cognome per inesperti
+				if( oggettoPezzo.equals( 43614 ) ) { // Immaginona
+					// è un'immagine ritagliabile
+					if( vistaPezzo.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
+						menu.add( 0, 100, 0, R.string.crop );
+					menu.add( 0, 101, 0, R.string.choose_file );
+				} else if( oggettoPezzo.equals(4043) || oggettoPezzo.equals(6064) ) // Nome e cognome per inesperti
 					menu.add( 0, 0, 0, R.string.copy );
 			} else if( oggettoPezzo instanceof String ) {
 				//metodoPezzo = (String) vista.getTag();
@@ -809,8 +815,15 @@ public class Dettaglio extends AppCompatActivity {
 				intn.putExtra( "magazzinoScegliArchivio", true );
 				startActivityForResult( intn,5390 );
 				return true;
-			case 100:	// Immaginona scegli immagine
-				U.appAcquisizioneImmagine( this, null, 5173 );
+			case 100: // Immaginona ritaglia
+				ImageView vistaImg = vistaPezzo.findViewById( R.id.immagine_foto );
+				String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
+				File fileMedia = new File ( percorso );
+				Globale.mediaCroppato = (Media)oggetto;
+				U.tagliaImmagine( this, fileMedia, null );
+				return true;
+			case 101: // scegli immagine
+				U.appAcquisizioneImmagine( this, null, 5173, null );
 				return true;
 			default:
 				return false;
@@ -821,6 +834,6 @@ public class Dettaglio extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		U.risultatoPermessi( this, codice, permessi, accordi );
+		U.risultatoPermessi( this, codice, permessi, accordi, oggetto );
 	}
 }

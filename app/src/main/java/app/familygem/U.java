@@ -28,6 +28,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,10 +39,13 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.JsonPrimitive;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.BufferedOutputStream;
@@ -53,10 +58,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.folg.gedcom.model.Change;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -84,7 +91,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import app.familygem.dettaglio.CitazioneFonte;
 import app.familygem.dettaglio.Fonte;
+import app.familygem.dettaglio.Immagine;
 import app.familygem.dettaglio.Nota;
+import app.familygem.visita.ListaMedia;
 import app.familygem.visita.RiferimentiNota;
 
 public class U {
@@ -458,120 +467,30 @@ public class U {
 		return null;
 	}
 
-	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
-	static String percorsoMedia( Media m ) {
-		Globale.preferenze.traghetta(); // todo questo traghettatore poi se ne potrà andare
-		if( m.getFile() != null ) {
-			String nome = m.getFile().replace("\\", "/");
-			// Percorso FILE (quello nel gedcom)
-			if( new File(nome).isFile() )
-				return nome;
-			for( String dir : Globale.preferenze.alberoAperto().cartelle ) {
-				// Cartella media + percorso FILE
-				String percorsoRicostruito = dir + '/' + nome;
-				if( new File(percorsoRicostruito).isFile() )
-					return percorsoRicostruito;
-				// Cartella media + nome del FILE
-				String percorsoFile = dir + '/' + new File(nome).getName();
-				if( new File(percorsoFile).isFile() )
-					return percorsoFile;
+	// Metodi per mostrare immagini:
+
+	// Riceve una Person e sceglie il Media principale da cui ricavare l'immagine
+	static void unaFoto( Person p, ImageView img ) {
+		boolean trovatoQualcosa = false;
+		for( Media med : p.getAllMedia(Globale.gc) ) {	// Cerca un media contrassegnato Primario Y
+			if( med.getPrimary() != null && med.getPrimary().equals("Y") ) {
+				dipingiMedia( med, img, null );
+				trovatoQualcosa = true;
+				break;
 			}
 		}
-		return null;
+		if( !trovatoQualcosa )	// In alternativa restituisce il primo che trova
+			for( Media med : p.getAllMedia(Globale.gc) ) {
+				dipingiMedia( med, img, null );
+				trovatoQualcosa = true;
+				break;
+			}
+		if( !trovatoQualcosa )
+			img.setVisibility( View.GONE );
 	}
 
-	// Scarica asincronicamente l'immagine da internet
-	static class zuppaMedia extends AsyncTask<String, ImageView, Bitmap> {
-		ImageView vistaImmagine;
-		URL url;
-		zuppaMedia(ImageView vistaImmagine) {
-			this.vistaImmagine = vistaImmagine;
-		}
-		@Override
-		protected Bitmap doInBackground(String... params) {
-			Bitmap bitmap;
-			try {
-				// Prima prova con l'url diretto a un'immagine
-				url = new URL( params[0] );
-				InputStream inputStream = url.openConnection().getInputStream();
-				BitmapFactory.Options opzioni = new BitmapFactory.Options();
-				opzioni.inJustDecodeBounds = true;	// prende solo le info dell'immagine senza scaricarla
-				BitmapFactory.decodeStream( inputStream, null, opzioni );
-				// Se non lo trova cerca l'immagine principale in una pagina internet
-				if( opzioni.outWidth == -1 ) {
-					Connection connessione = Jsoup.connect(params[0]);
-					//if (connessione.equals(bitmap)) {    // TODO: verifica che un address sia associato all'hostname
-					Document doc = connessione.get();
-					List<Element> lista = doc.select("img");
-					if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
-						vistaImmagine.setTag( R.id.tag_file_senza_anteprima, true );	// Usato da Immagine.java
-						return generaIcona( vistaImmagine, R.layout.media_mondo, url.getProtocol() );	// ritorna una bitmap
-					}
-					int maxDimensioniConAlt = 0;
-					int maxDimensioni = 0;
-					int maxLunghezzaAlt = 0;
-					Element imgGrandeConAlt = null;
-					Element imgGrande = null;
-					Element imgAltLungo = null;
-					for( Element img : lista ) {
-						int larga, alta;
-						if (img.attr("width").isEmpty()) larga = 0;
-						else larga = Integer.parseInt(img.attr("width"));
-						if (img.attr("height").isEmpty()) alta = 0;
-						else alta = Integer.parseInt(img.attr("height"));
-						if( larga * alta > maxDimensioniConAlt  &&  !img.attr("alt").isEmpty() ) {    // la più grande con alt
-							imgGrandeConAlt = img;
-							maxDimensioniConAlt = larga * alta;
-						}
-						if( larga * alta > maxDimensioni ) {    // la più grande anche senza alt
-							imgGrande = img;
-							maxDimensioni = larga * alta;
-						}
-						if( img.attr("alt").length() > maxLunghezzaAlt )  {	// quella con l'alt più lungo (ah ah!)
-							imgAltLungo = img;
-							maxLunghezzaAlt = img.attr( "alt" ).length();
-						}
-					}
-					String percorso = null;
-					if( imgGrandeConAlt != null ) {
-						percorso = imgGrandeConAlt.absUrl( "src" );  //absolute URL on src
-					} else if( imgGrande != null ) {
-						percorso = imgGrande.absUrl( "src" );
-					} else if( imgAltLungo != null ) {
-						percorso = imgAltLungo.absUrl( "src" );
-					}
-					url = new URL(percorso);
-					inputStream = url.openConnection().getInputStream();
-					BitmapFactory.decodeStream(inputStream, null, opzioni);
-				}
-				// Infine cerca di caricare l'immagine vera e propria ridimensionandola
-				if( opzioni.outWidth > vistaImmagine.getWidth() )
-					opzioni.inSampleSize = opzioni.outWidth / (vistaImmagine.getWidth()+1);
-				inputStream = url.openConnection().getInputStream();
-				opzioni.inJustDecodeBounds = false;	// Scarica l'immagine
-				bitmap = BitmapFactory.decodeStream( inputStream, null, opzioni );
-			} catch( Exception e ) {
-				return null;
-			}
-			return bitmap;
-		}
-		@Override
-		protected void onPostExecute( Bitmap bitmap ) {
-			if( bitmap != null ) {
-				vistaImmagine.setImageBitmap(bitmap);
-				vistaImmagine.setTag( R.id.tag_percorso, url.toString() );	// lo usa Immagine.java
-				try { // Abbozzo per salvare l'immagine scaricata da internet in una cache per poi riusarla
-					FileOutputStream fos = new FileOutputStream(Globale.contesto.getCacheDir() + "/img.jpg");
-					bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
-					fos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	// fa comparire l'immagine in una vista
+	/* ELIMINABILE
+	fa comparire l'immagine in una vista immagine
 	public static void mostraMedia( final ImageView vista, final Media med ) {
 		vista.getViewTreeObserver().addOnPreDrawListener( new ViewTreeObserver.OnPreDrawListener() {
 			public boolean onPreDraw() {
@@ -587,7 +506,7 @@ public class U {
 					opzioni.inJustDecodeBounds = false;	// carica immagine
 					Bitmap bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Riesce a ricavare un'immagine
 					//bitmap = ThumbnailUtils.extractThumbnail( bitmap, 30, 60, ThumbnailUtils.OPTIONS_RECYCLE_INPUT );
-						// Fico ma ritaglia l'immagine per farla stare nelle dimensioni date. La quarta opzione non l'ho capita
+					// Fico ma ritaglia l'immagine per farla stare nelle dimensioni date. La quarta opzione non l'ho capita
 					try { // Rotazione Exif
 						ExifInterface exif = new ExifInterface( percorso );
 						int girata = exif.getAttributeInt( ExifInterface.TAG_ORIENTATION, 1 );
@@ -612,7 +531,7 @@ public class U {
 						Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 					}
 					if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
-						|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
+							|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
 						// Magari è un video
 						bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
 						if( bitmap == null ) {
@@ -621,15 +540,201 @@ public class U {
 								formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
 							bitmap = generaIcona( vista, R.layout.media_file, formato );
 						}
-						vista.setTag( R.id.tag_file_senza_anteprima, true );    // così Immagine può aprire un'app cliccando l'icona
 					}
 					vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
 					vista.setImageBitmap( bitmap );
 				} else if( med.getFile() != null )	// Cerca il file in internet
-					new U.zuppaMedia( vista ).execute( med.getFile() );
+					new U.ZuppaMedia( vista, null, med ).execute( med.getFile() );
 				return true;
 			}
 		});
+	}*/
+
+	/* Abbastanza buono ma Picasso sembra meglio
+	Caricatore asincrono di immagini locali, sostiusce il metodo mostraMedia()
+	static class MostraMedia extends AsyncTask<Media,Void,Bitmap> {
+		private ImageView vista;
+		boolean galleria;
+		MostraMedia( ImageView vista, boolean galleria ) {
+			this.vista = vista;
+			this.galleria = galleria;
+		}
+		@Override
+		protected Bitmap doInBackground( Media... params) {
+			Media media = params[0];
+			String percorso = U.percorsoMedia( media );
+			Bitmap bitmap = null;
+			if( percorso != null ) {
+				BitmapFactory.Options opzioni = new BitmapFactory.Options();
+				opzioni.inJustDecodeBounds = true;	// solo info
+				BitmapFactory.decodeFile( percorso, opzioni );
+				int largaOriginale = opzioni.outWidth;
+				if( largaOriginale > vista.getWidth() && vista.getWidth() > 0 )
+					opzioni.inSampleSize = largaOriginale / vista.getWidth();
+				else if( largaOriginale > 300 ) // 300 una larghezza media approssimativa per una ImageView
+					opzioni.inSampleSize = largaOriginale / 300;
+				opzioni.inJustDecodeBounds = false;	// carica immagine
+				bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Ricava un'immagine ridimensionata
+				try { // Rotazione Exif
+					ExifInterface exif = new ExifInterface( percorso );
+					int girata = exif.getAttributeInt( ExifInterface.TAG_ORIENTATION, 1 );
+					int gradi = 0;
+					switch( girata ) {
+						case ExifInterface.ORIENTATION_ROTATE_90:
+							gradi = 90;
+							break;
+						case ExifInterface.ORIENTATION_ROTATE_180:
+							gradi = 180;
+							break;
+						case ExifInterface.ORIENTATION_ROTATE_270:
+							gradi = 270;
+					}
+					if( gradi > 0 ) {
+						Matrix matrix = new Matrix();
+						matrix.postRotate( gradi );
+						bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true );
+					}
+				} catch( Exception e ) {
+					Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+				}
+				if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
+						|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
+					// Magari è un video
+					bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
+					if( bitmap == null ) {
+						String formato = media.getFormat();
+						if( formato == null )
+							formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
+						bitmap = U.generaIcona( vista, R.layout.media_file, formato );
+					}
+				}
+				vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
+			} else if( media.getFile() != null )	// Cerca il file in internet
+				new ZuppaMedia( vista, (ProgressBar)vista.findViewById(R.id.media_circolo), media ).execute( media.getFile() );
+			// TODO ok ma un file in attesa di essere scaricato da internet blocca tutti gli altri anche locali
+			return bitmap;
+		}
+		@Override
+		protected void onPostExecute( Bitmap bitmap ) {
+			if( bitmap != null ) {
+				vista.setImageBitmap( bitmap );
+				// Icona di file senza anteprima
+				if( vista.getTag(R.id.tag_tipo_file).equals(3) ) {
+					vista.setScaleType( ImageView.ScaleType.FIT_CENTER );
+					if( galleria ) {
+						RelativeLayout.LayoutParams parami = new RelativeLayout.LayoutParams(
+								RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT );
+						parami.addRule( RelativeLayout.ABOVE, R.id.media_testo );
+						vista.setLayoutParams( parami );
+					}
+				}
+			}
+		}
+	}*/
+
+	// Mostra le immagini con il tanto declamato Picasso
+	public static void dipingiMedia( final Media media, final ImageView vistaImmagine, final ProgressBar circo ) {
+		final String percorso = U.percorsoMedia(media);
+		if( circo!=null ) circo.setVisibility( View.VISIBLE );
+		vistaImmagine.setTag( R.id.tag_tipo_file, 0 );
+		if( percorso != null ) {
+			Picasso.get().load( new File(percorso) )
+					.placeholder( R.drawable.manichino )
+					.fit() //.centerCrop()
+					.centerInside()
+					.into( vistaImmagine, new Callback() {
+						@Override
+						public void onSuccess() {
+							if( circo!=null ) circo.setVisibility( View.GONE );
+							vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
+							vistaImmagine.setTag( R.id.tag_percorso, percorso );
+						}
+						@Override
+						public void onError( Exception e ) {
+							// Magari è un video
+							Bitmap bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
+							vistaImmagine.setTag( R.id.tag_tipo_file, 2 );
+							if( bitmap == null ) {
+								// un File locale senza anteprima
+								String formato = media.getFormat();
+								if( formato == null )
+									formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
+								bitmap = U.generaIcona( vistaImmagine, R.layout.media_file, formato );
+								vistaImmagine.setScaleType( ImageView.ScaleType.FIT_CENTER );
+								if( vistaImmagine.getParent() instanceof RelativeLayout && // brutto ma efficace
+									((RelativeLayout)vistaImmagine.getParent()).findViewById(R.id.media_testo) != null ) {
+									RelativeLayout.LayoutParams parami = new RelativeLayout.LayoutParams(
+											RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT );
+									parami.addRule( RelativeLayout.ABOVE, R.id.media_testo );
+									vistaImmagine.setLayoutParams( parami );
+								}
+								vistaImmagine.setTag( R.id.tag_tipo_file, 3 );
+							}
+							vistaImmagine.setImageBitmap( bitmap );
+							vistaImmagine.setTag( R.id.tag_percorso, percorso );
+							if( circo!=null ) circo.setVisibility( View.GONE );
+						}
+					});
+		} else if( media.getFile() != null ) { // magari è un'immagine in internet
+			final String percorsoFile = media.getFile();
+			Picasso.get().load(percorsoFile).fit()
+					//.centerCrop()
+					.placeholder( R.drawable.manichino ).centerInside()
+					.into(vistaImmagine, new Callback() {
+						@Override
+						public void onSuccess() {
+							if( circo!=null ) circo.setVisibility( View.GONE );
+							vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
+							try {
+								new ImboscaImmagine(media).execute(new URL(percorsoFile));
+							} catch( Exception e ) {
+								e.printStackTrace();
+							}
+						}
+						@Override
+						public void onError( Exception e ) {
+							// Proviamo con una pagina web
+							new ZuppaMedia( vistaImmagine, circo, media ).execute( percorsoFile );
+						}
+					});
+		} else {
+			if( circo!=null ) circo.setVisibility( View.GONE );
+			vistaImmagine.setImageResource( R.drawable.manichino );
+			vistaImmagine.setAlpha( 0.5f );
+		}
+	}
+
+	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
+	static String percorsoMedia( Media m ) {
+		Globale.preferenze.traghetta(); // todo questo traghettatore poi se ne potrà andare
+		if( m.getFile() != null ) {
+			String nome = m.getFile().replace("\\", "/");
+			// Percorso FILE (quello nel gedcom)
+			if( new File(nome).isFile() )
+				return nome;
+			for( String dir : Globale.preferenze.alberoAperto().cartelle ) {
+				// Cartella media + percorso FILE
+				String percorsoRicostruito = dir + '/' + nome;
+				if( new File(percorsoRicostruito).isFile() )
+					return percorsoRicostruito;
+				// Cartella media + nome del FILE
+				String percorsoFile = dir + '/' + new File(nome).getName();
+				if( new File(percorsoFile).isFile() )
+					return percorsoFile;
+			}
+			Object stringa = m.getExtension("cache");
+			// A volte è String a volte JsonPrimitive, non ho capito bene perché
+			if( stringa != null ) {
+				String percorsoCache;
+				if( stringa instanceof String )
+					percorsoCache = (String) stringa;
+				else
+					percorsoCache = ((JsonPrimitive)stringa).getAsString();
+				if( new File(percorsoCache).isFile() )
+					return percorsoCache;
+			}
+		}
+		return null;
 	}
 
 	static Bitmap generaIcona( ImageView vista, int icona, String testo ) {
@@ -645,32 +750,162 @@ public class U {
 		return frameLayout.getDrawingCache();
 	}
 
-	// Riceve una Person e sceglie la foto principale
-	static void unaFoto( Person p, ImageView img ) {
-		boolean trovatoQualcosa = false;
-		for( Media med : p.getAllMedia(Globale.gc) ) {	// Cerca un media contrassegnato Primario Y
-			if( med.getPrimary() != null ) {
-				if( med.getPrimary().equals( "Y" ) ) {
-					mostraMedia( img, med );
-					trovatoQualcosa = true;
-					break;
-				}
-			}
+	// Salva in cache un'immagine trovabile in internet per poi riusarla
+	static class ImboscaImmagine extends AsyncTask<URL,Void,String> {
+		Media media;
+		ImboscaImmagine( Media media ) {
+			this.media = media;
 		}
-		if( !trovatoQualcosa )	// In alternativa restituisce il primo che trova
-			for( Media med : p.getAllMedia(Globale.gc) ) {
-				mostraMedia( img, med );
-				trovatoQualcosa = true;
-				break;
+		protected String doInBackground( URL... url ) {
+			try {
+				File cartellaCache = new File( Globale.contesto.getCacheDir().getPath() + "/" + Globale.preferenze.idAprendo );
+				if( !cartellaCache.exists() ) {
+					// Elimina extension "cache" da tutti i Media
+					ListaMedia visitaMedia = new ListaMedia( Globale.gc, true );
+					Globale.gc.accept( visitaMedia );
+					for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() )
+						if( dato.getKey().getExtension("cache") != null )
+							dato.getKey().putExtension( "cache", null );
+					cartellaCache.mkdir();
+				}
+				String estensione = FilenameUtils.getName( url[0].getPath() );
+				if( estensione.lastIndexOf('.') > -1 )
+					estensione = estensione.substring( estensione.lastIndexOf('.')+1 );
+				String ext;
+				switch( estensione ) {
+					case "png":
+						ext = "png";
+						break;
+					case "gif":
+						ext = "gif";
+						break;
+					case "bmp":
+						ext = "bmp";
+						break;
+					case "jpg":
+					case "jpeg":
+					default:
+						ext = "jpg";
+				}
+				File cache = fileNomeProgressivo( cartellaCache.getPath(), "img." + ext );
+				FileUtils.copyURLToFile( url[0], cache );
+				return cache.getPath();
+			} catch( Exception e ) {
+				e.printStackTrace();
 			}
-		if( !trovatoQualcosa )
-			img.setVisibility( View.GONE );
+			return null;
+		}
+		protected void onPostExecute( String percorso) {
+			if( percorso != null )
+				media.putExtension( "cache", percorso );
+		}
+	}
+
+	// Scarica asincronicamente l'immagine da internet
+	static class ZuppaMedia extends AsyncTask<String, Integer, Bitmap> {
+		ImageView vistaImmagine;
+		ProgressBar circo;
+		Media media;
+		URL url;
+		ZuppaMedia( ImageView vistaImmagine, ProgressBar circo, Media media ) {
+			this.vistaImmagine = vistaImmagine;
+			this.circo = circo;
+			this.media = media;
+		}
+		@Override
+		protected Bitmap doInBackground(String... parametri) {
+			Bitmap bitmap;
+			try {
+				// Prima prova con l'url diretto a un'immagine
+				// Todo Eliminare? l'url diretto all'immagine è gestito da Picasso
+				url = new URL( parametri[0] );
+				InputStream inputStream = url.openConnection().getInputStream();
+				BitmapFactory.Options opzioni = new BitmapFactory.Options();
+				opzioni.inJustDecodeBounds = true;	// prende solo le info dell'immagine senza scaricarla
+				BitmapFactory.decodeStream( inputStream, null, opzioni );
+				// Se non lo trova cerca l'immagine principale in una pagina internet
+				if( opzioni.outWidth == -1 ) {
+					Connection connessione = Jsoup.connect(parametri[0]);
+					//if (connessione.equals(bitmap)) {    // TODO: verifica che un address sia associato all'hostname
+					Document doc = connessione.get();
+					List<Element> lista = doc.select("img");
+					if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
+						vistaImmagine.setTag( R.id.tag_tipo_file, 3 );
+						return generaIcona( vistaImmagine, R.layout.media_mondo, url.getProtocol() );	// ritorna una bitmap
+					}
+					int maxDimensioniConAlt = 1;
+					int maxDimensioni = 1;
+					int maxLunghezzaAlt = 0;
+					int maxLunghezzaSrc = 0;
+					Element imgGrandeConAlt = null;
+					Element imgGrande = null;
+					Element imgAltLungo = null;
+					Element imgSrcLungo = null;
+					for( Element img : lista ) {
+						int larga, alta;
+						if (img.attr("width").isEmpty()) larga = 1;
+						else larga = Integer.parseInt(img.attr("width"));
+						if (img.attr("height").isEmpty()) alta = 1;
+						else alta = Integer.parseInt(img.attr("height"));
+						if( larga * alta > maxDimensioniConAlt  &&  !img.attr("alt").isEmpty() ) {    // la più grande con alt
+							imgGrandeConAlt = img;
+							maxDimensioniConAlt = larga * alta;
+						}
+						if( larga * alta > maxDimensioni ) {    // la più grande anche senza alt
+							imgGrande = img;
+							maxDimensioni = larga * alta;
+						}
+						if( img.attr("alt").length() > maxLunghezzaAlt ) { // quella con l'alt più lungo
+							imgAltLungo = img;
+							maxLunghezzaAlt = img.attr( "alt" ).length();
+						}
+						if( img.attr("src").length() > maxLunghezzaSrc ) { // quella col src più lungo
+							imgSrcLungo = img;
+							maxLunghezzaSrc = img.attr("src").length();
+						}
+					}
+					String percorso = null;
+					if( imgGrandeConAlt != null )
+						percorso = imgGrandeConAlt.absUrl( "src" );  //absolute URL on src
+					else if( imgGrande != null )
+						percorso = imgGrande.absUrl( "src" );
+					else if( imgAltLungo != null )
+						percorso = imgAltLungo.absUrl( "src" );
+					else if( imgSrcLungo != null )
+						percorso = imgSrcLungo.absUrl( "src" );
+					url = new URL(percorso);
+					inputStream = url.openConnection().getInputStream();
+					BitmapFactory.decodeStream(inputStream, null, opzioni);
+				}
+				// Infine cerca di caricare l'immagine vera e propria ridimensionandola
+				if( opzioni.outWidth > vistaImmagine.getWidth() )
+					opzioni.inSampleSize = opzioni.outWidth / (vistaImmagine.getWidth()+1);
+				inputStream = url.openConnection().getInputStream();
+				opzioni.inJustDecodeBounds = false;	// Scarica l'immagine
+				bitmap = BitmapFactory.decodeStream( inputStream, null, opzioni );
+			} catch( Exception e ) {
+				return null;
+			}
+			return bitmap;
+		}
+		@Override
+		protected void onPostExecute( Bitmap bitmap ) {
+			if( bitmap != null ) {
+				vistaImmagine.setImageBitmap( bitmap );
+				vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
+				vistaImmagine.setTag( R.id.tag_percorso, url.toString() );	// usato da Immagine
+				new ImboscaImmagine(media).execute( url );
+			} else
+				vistaImmagine.setImageResource( R.drawable.manichino );
+			if( circo != null ) // può arrivare molto in ritardo quando la pagina non esiste più
+				circo.setVisibility( View.GONE );
+		}
 	}
 
 	// Metodi per acquisizione immagini:
 
 	// Propone una bella lista di app per acquisire immagini
-	public static void appAcquisizioneImmagine( final Context contesto, final Fragment frammento, final int codice ) {
+	public static void appAcquisizioneImmagine( final Context contesto, final Fragment frammento, final int codice, final MediaContainer contenitore ) {
 		// Richiesta permesso accesso file in memoria
 		int perm = ContextCompat.checkSelfPermission( contesto, Manifest.permission.WRITE_EXTERNAL_STORAGE );
 		if( perm == PackageManager.PERMISSION_DENIED ) {
@@ -698,7 +933,16 @@ public class U {
 		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoGalleria,0) ) {
 			Intent finalIntent = new Intent( intentoGalleria );
 			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
+			s.l( info.activityInfo.packageName +"   "+ info.activityInfo.name);
 			listaIntenti.add( finalIntent );
+			listaRisolvi.add( info );
+		}
+		// Media vuoto
+		if( Globale.preferenze.esperto && codice != 5173 ) { // tranne che per la scelta di file in Immagine
+			Intent intento = new Intent( contesto, Immagine.class );
+			ResolveInfo info = contesto.getPackageManager().resolveActivity( intento, 0 );
+			intento.setComponent(new ComponentName(info.activityInfo.packageName,info.activityInfo.name));
+			listaIntenti.add( intento );
 			listaRisolvi.add( info );
 		}
 		AlertDialog.Builder dialog = new AlertDialog.Builder( contesto );
@@ -707,7 +951,19 @@ public class U {
 					@Override
 					public void onClick(DialogInterface dialog, int id) {
 						Intent intento = listaIntenti.get(id);
-						if( frammento != null )
+						if( intento.getComponent().getPackageName().equals("app.familygem") ) {
+							Media med;
+							if( codice==4173 || codice==2173 ) { // Media inline
+								med = new Media();
+								med.setFileTag( "FILE" );
+								contenitore.addMedia( med );
+								Ponte.manda( contenitore, "contenitore" );
+							} else // Media condiviso
+								med = Galleria.nuovoMedia( contenitore );
+							med.setFile( "" );
+							Ponte.manda( med, "oggetto" );
+							contesto.startActivity( intento );
+						} else if( frammento != null )
 							frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
 						else
 							((AppCompatActivity)contesto).startActivityForResult( intento, codice );
@@ -716,15 +972,20 @@ public class U {
 	}
 	// Strettamente legato a quello qui sopra
 	private static ArrayAdapter<ResolveInfo> faiAdattatore( final Context contesto, final List<ResolveInfo> listaRisolvi) {
-		return new ArrayAdapter<ResolveInfo>( contesto, R.layout.pezzo_app, R.id.intento_titolo, listaRisolvi ){
+		return new ArrayAdapter<ResolveInfo>( contesto, R.layout.pezzo_app, R.id.intento_titolo, listaRisolvi ) {
 			@Override
-			public View getView(int posizione, View vista, ViewGroup genitore ) {
+			public View getView( int posizione, View vista, ViewGroup genitore ) {
 				View view = super.getView( posizione, vista, genitore );
 				ResolveInfo info = listaRisolvi.get( posizione );
 				ImageView image = view.findViewById(R.id.intento_icona);
-				image.setImageDrawable( info.loadIcon(contesto.getPackageManager()) );
 				TextView textview = view.findViewById(R.id.intento_titolo);
-				textview.setText( info.loadLabel(contesto.getPackageManager()).toString() );
+				if( info.activityInfo.packageName.equals("app.familygem") ) {
+					image.setImageResource( R.drawable.manichino );
+					textview.setText( R.string.empty_media );
+				} else {
+					image.setImageDrawable( info.loadIcon(contesto.getPackageManager()) );
+					textview.setText( info.loadLabel(contesto.getPackageManager()).toString() );
+				}
 				return view;
 			}
 		};
@@ -732,40 +993,21 @@ public class U {
 
 	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
 	// ritorna true se apre il dialogo e quindi bisogna bloccare l'aggiornamento dell'attività
+	// Todo: rinomina tipo stoccaImmagine
 	static boolean ritagliaImmagine( final Context contesto, final Fragment frammento, Intent data, Media media ) {
 		final File fileMedia = settaMedia( contesto, data, media );
 		if( fileMedia == null )	return false;
 		String tipoMime = URLConnection.guessContentTypeFromName( fileMedia.getName() );
 		if( tipoMime != null && tipoMime.startsWith("image/") ) {
 			ImageView vistaImmagine = new ImageView( contesto );
-			U.mostraMedia( vistaImmagine, media );
+			U.dipingiMedia( media, vistaImmagine, null );
 			Globale.mediaCroppato = media; // Media in attesa di essere aggiornato col nuovo percorso file
 			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
 			costruttore.setMessage( R.string.want_crop_image )
 					.setView(vistaImmagine)
 					.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
 						public void onClick( DialogInterface dialog, int id ) {
-							File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
-							if( !dirMemoria.exists() )
-								dirMemoria.mkdir();
-							File fileDestinazione;
-							if( fileMedia.getAbsolutePath().startsWith(dirMemoria.getAbsolutePath()) )
-								fileDestinazione = fileMedia; // File già nella cartella memoria vengono sovrascritti
-							else
-								fileDestinazione = fileNomeProgressivo( dirMemoria.getAbsolutePath(), fileMedia.getName() );
-							Intent intento = CropImage.activity( Uri.fromFile(fileMedia) )
-									.setOutputUri( Uri.fromFile(fileDestinazione) ) // cartella in memoria esterna
-									.setGuidelines( CropImageView.Guidelines.OFF )
-									.setBorderLineThickness( 1 )
-									.setBorderCornerThickness( 6 )
-									.setBorderCornerOffset( -3 )
-									.setCropMenuCropButtonTitle( contesto.getText(R.string.done) )
-									.getIntent( contesto );
-									//.start( contesto, frammento );
-							if( frammento != null )
-								frammento.startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
-							else
-								((AppCompatActivity)contesto).startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
+							tagliaImmagine( contesto, fileMedia, frammento );
 						}
 					}).setNegativeButton( android.R.string.no, new DialogInterface.OnClickListener() {
 				@Override
@@ -779,6 +1021,29 @@ public class U {
 			return true;
 		}
 		return false;
+	}
+
+	static void tagliaImmagine( Context contesto, File fileMedia, Fragment frammento ) {
+		File dirMemoria = new File( contesto.getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
+		if( !dirMemoria.exists() )
+			dirMemoria.mkdir();
+		File fileDestinazione;
+		if( fileMedia.getAbsolutePath().startsWith(dirMemoria.getAbsolutePath()) )
+			fileDestinazione = fileMedia; // File già nella cartella memoria vengono sovrascritti
+		else
+			fileDestinazione = fileNomeProgressivo( dirMemoria.getAbsolutePath(), fileMedia.getName() );
+		Intent intento = CropImage.activity( Uri.fromFile(fileMedia) )
+				.setOutputUri( Uri.fromFile(fileDestinazione) ) // cartella in memoria esterna
+				.setGuidelines( CropImageView.Guidelines.OFF )
+				.setBorderLineThickness( 1 )
+				.setBorderCornerThickness( 6 )
+				.setBorderCornerOffset( -3 )
+				.setCropMenuCropButtonTitle( contesto.getText(R.string.done) )
+				.getIntent( contesto );
+		if( frammento != null )
+			frammento.startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
+		else
+			((AppCompatActivity)contesto).startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
 	}
 
 	// Imposta in un Media il percorso fornito dalle app dispensatrici. Restituisce il File trovato oppure null
@@ -801,9 +1066,10 @@ public class U {
 					InputStream input = contesto.getContentResolver().openInputStream( uri );
 					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
 					FileUtils.copyInputStreamToFile( input, fileMedia );
-				// In alcuni casi (telefoni vecchi?) immagini da camera passano come bitmap A BASSA RISOLUZIONE negli extra
+				// In alcuni casi (telefoni vecchi?) immagini da camera passano solo come bitmap A BASSA RISOLUZIONE negli extra
 				} else if( data.getExtras() != null ) {
 					Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+					// TODo usa la bitmap solo come anteprima: "La foto è stata scattata, ma non è stato possibile importarla."
 					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), "img.jpg" );
 					OutputStream os = new BufferedOutputStream(new FileOutputStream(fileMedia));
 					bitmap.compress( Bitmap.CompressFormat.JPEG, 99, os );
@@ -830,7 +1096,7 @@ public class U {
 		while( file.exists() ) {
 			incremento++;
 			file = new File( dir, nome.substring(0,nome.lastIndexOf('.'))
-					+ " " + incremento + nome.substring(nome.lastIndexOf('.'),nome.length()));
+					+ incremento + nome.substring(nome.lastIndexOf('.'),nome.length()));
 		}
 		return file;
 	}
@@ -843,13 +1109,13 @@ public class U {
 	}
 
 	// Risposta a tutte le richieste di permessi per Android 6+
-	static void risultatoPermessi( Context contesto, int codice, String[] permessi, int[] accordi ) {
+	static void risultatoPermessi( Context contesto, int codice, String[] permessi, int[] accordi, Object oggetto ) {
 		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
 			if( codice == 4546 ) { // Da Fragment Galleria
 				Fragment galleria = ((AppCompatActivity)contesto).getSupportFragmentManager().findFragmentById( R.id.contenitore_fragment );
-				appAcquisizioneImmagine( contesto, galleria, codice );
+				appAcquisizioneImmagine( contesto, galleria, codice, null );
 			} else
-				appAcquisizioneImmagine( contesto, null, codice );
+				appAcquisizioneImmagine( contesto, null, codice, (MediaContainer)oggetto );
 		} else {
 			String permesso = permessi[0].substring( permessi[0].lastIndexOf('.')+1 );
 			Toast.makeText( contesto, contesto.getString(R.string.not_granted,permesso), Toast.LENGTH_SHORT ).show();
@@ -978,8 +1244,16 @@ public class U {
 
 	// Elenca tutti i media di un oggetto contenitore
 	public static void mettiMedia( LinearLayout scatola, Object contenitore, boolean dettagli ) {
-		for( Media media : ((MediaContainer)contenitore).getAllMedia( Globale.gc ) )
-			Galleria.poniMedia( scatola, contenitore, media, dettagli );
+		RecyclerView griglia = new RecyclerView( scatola.getContext() );
+		griglia.setHasFixedSize( true );
+		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( scatola.getContext(), dettagli?2:3 );
+		griglia.setLayoutManager( gestoreLayout );
+		Map<Media,Object> listaMedia = new LinkedHashMap<>();
+		for( Media med : ((MediaContainer)contenitore).getAllMedia(Globale.gc) )
+			listaMedia.put( med, contenitore );
+		AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( listaMedia, dettagli );
+		griglia.setAdapter( adattatore );
+		scatola.addView( griglia );
 	}
 
 	// Di un oggetto inserisce le citazioni alle fonti
@@ -1106,7 +1380,7 @@ public class U {
 
 	static int castaJsonInt( Object ignoto ) {
 		if( ignoto instanceof Integer ) return (int) ignoto;
-		else return ((JsonPrimitive)ignoto).getAsInt() ;
+		else return ((JsonPrimitive)ignoto).getAsInt();
 	}
 
 	// Valuta se ci sono individui collegabili a un individuo

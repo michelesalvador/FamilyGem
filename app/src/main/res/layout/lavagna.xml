@@ -8,7 +8,7 @@
     android:background="#000"
     app:hasClickableChildren="false"
     app:horizontalPanEnabled="true"
-    app:maxZoom="4"
+    app:maxZoom="5"
     app:maxZoomType="zoom"
     app:minZoom="1"
     app:minZoomType="zoom"

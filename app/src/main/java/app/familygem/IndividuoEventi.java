@@ -91,6 +91,7 @@ public class IndividuoEventi extends Fragment {
 		vistaFatto.setTag( R.id.tag_oggetto, oggetto );
 		registerForContextMenu( vistaFatto );
 		if( oggetto instanceof Name ) {
+			U.mettiMedia( scatolaAltro, oggetto, false );
 			vistaFatto.setOnClickListener( new View.OnClickListener() {
 				public void onClick( View v ) {
 					Ponte.manda( oggetto, "oggetto" );
