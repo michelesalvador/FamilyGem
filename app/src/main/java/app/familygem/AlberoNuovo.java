@@ -13,10 +13,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.ContactsContract;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -203,8 +203,8 @@ public class AlberoNuovo extends AppCompatActivity {
 				    // Crea la voce nelle preferenze e apre l'albero
 				    Globale.preferenze.aggiungi( new Armadio.Cassetto( numAlbero, "The Simpsons", percorsoImmagini, 41, 11, "I1",null ) );
 				    if( Globale.preferenze.caricaAlbero ) {
-					    Alberi.apriJson( numAlbero, true );
-					    startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
+					    if( Alberi.apriJson( numAlbero, true ) )
+					        startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
 				    } else
 					    startActivity( new Intent( AlberoNuovo.this, Alberi.class ) );
 			    } else
@@ -286,8 +286,8 @@ public class AlberoNuovo extends AppCompatActivity {
 		        }
 		        if( Globale.preferenze.caricaAlbero ) {
 			        // Apre il nuovo albero in diagramma
-			        Alberi.apriJson( nuovoNum, true );
-			        startActivity( new Intent( this, Principe.class ) );
+			        if( Alberi.apriJson( nuovoNum, true ) )
+			            startActivity( new Intent( this, Principe.class ) );
 		        } else
 			        startActivity( new Intent( this, Alberi.class ) );
             } catch( Exception e ) {	//IOException | SAXParseException | URISyntaxException |FileNotFoundException |

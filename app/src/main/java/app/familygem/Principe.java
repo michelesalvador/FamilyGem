@@ -2,14 +2,14 @@ package app.familygem;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,8 +43,10 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
         NavigationView menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
 		Globale.vistaPrincipe = scatolissima;
-		if( Globale.gc == null )
-			Alberi.apriJson( Globale.preferenze.idAprendo, false );
+		if( Globale.gc == null ) {
+			if( !Alberi.apriJson( Globale.preferenze.idAprendo, false ) )
+				return;
+		}
 		arredaTestataMenu();
 
         if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
@@ -145,7 +147,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			fragment = new Magazzino();
         } else if (id == R.id.nav_media) {
         	// ToDo: Se clicco  IndividuoMedia > FAB > CollegaMedia....  "galleriaScegliMedia" viene passato all'intent dell'activity con valore 'true'
-	        // todo: porò rimane true anche quando poi torno in Galleria cliccando nel drawer, con conseguenti errori:
+	        // todo: però rimane true anche quando poi torno in Galleria cliccando nel drawer, con conseguenti errori:
 	        // vengono visualizzati solo gli oggetti media
 	        // cliccandone uno esso viene aggiunto ai media dell'ultima persona vista !
             fragment = new Galleria();

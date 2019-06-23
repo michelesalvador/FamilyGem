@@ -7,10 +7,10 @@ import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -76,20 +76,24 @@ public class Alberi extends AppCompatActivity {
             lista.setOnItemClickListener( new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick( AdapterView<?> parent, View v, final int position, long id ) {
-				findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
-				new Thread( new Runnable() {
-					@Override
-					public void run() {
-						int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
-						if( !( Globale.gc!=null && id_num==Globale.preferenze.idAprendo ) ) // se non è già aperto
-							if( !apriJson( id_num, true ) ) // TODo: non funziona il Toast in caso di Exception (ad es. x file inesistente)
-								return;
-						startActivity( new Intent( Alberi.this, Principe.class ) );
-					}
-				}).start();
+				    int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
+	                if( !( Globale.gc!=null && id_num==Globale.preferenze.idAprendo ) ) // se non è già aperto
+		                if( !apriJson( id_num, true ) )
+		                	return;
+	                startActivity( new Intent( Alberi.this, Principe.class ) );
+	                /*findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
+	            	new Thread( new Runnable() {
+						@Override
+						public void run() {
+							int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
+							if( !( Globale.gc!=null && id_num==Globale.preferenze.idAprendo ) ) // se non è già aperto
+								if( apriJson( id_num, true ) ) // TODo: in caso di Exception (ad es. x file inesistente) il Toast crasha
+									return;
+							startActivity( new Intent( Alberi.this, Principe.class ) );
+						}
+					}).start();*/
                 }
             });
-
             registerForContextMenu(lista);
         }
 
@@ -168,11 +172,11 @@ public class Alberi extends AppCompatActivity {
 			String contenuto = FileUtils.readFileToString( file );
 			JsonParser jp = new JsonParser();
 			Globale.gc = jp.fromJson( contenuto );
-			Globale.individuo = Globale.preferenze.alberoAperto().radice;
 			if( salvaPreferenze ) {
 				Globale.preferenze.idAprendo = id;
 				Globale.preferenze.salva();
 			}
+			Globale.individuo = Globale.preferenze.alberoAperto().radice;
 		} catch( Exception e ) {
 			Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			return false;

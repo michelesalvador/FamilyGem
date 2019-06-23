@@ -1,7 +1,7 @@
 package app.familygem.dettaglio;
 
 import android.content.Intent;
-import android.support.v7.widget.CardView;
+import androidx.cardview.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;

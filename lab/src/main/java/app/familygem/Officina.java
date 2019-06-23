@@ -1,7 +1,6 @@
 package app.familygem;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +16,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -31,9 +30,6 @@ import org.folg.gedcom.model.Media;
 import org.folg.gedcom.parser.ModelParser;
 import org.folg.gedcom.tools.CountsCollector;
 import org.folg.gedcom.tools.GedcomAnalyzer;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.xml.sax.SAXParseException;
 import java.io.File;
 import java.io.FileDescriptor;

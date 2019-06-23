@@ -1,5 +1,5 @@
 # Family Gem
-### _The family tree_ 🌳 _in your pocket_ 📱
+### 🌳 _The family tree in your pocket_ 📱
 
 _Family Gem_ is an app for Android designed to manage family trees.<br>
 Project started on beginning of 2018.
@@ -15,4 +15,8 @@ With _Family Gem_ you can:
 
 _Family Gem_ is completely free and open source.
 
-~~More~~ Less informations on www.familygem.app.
+The APK file is stored on [Uptodown](https://family-gem.en.uptodown.com).
+
+Michele Salvador email: michelesalvador@iol.it
+
+Official website: www.familygem.app

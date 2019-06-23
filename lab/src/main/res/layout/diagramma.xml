@@ -140,7 +140,7 @@
                 android:layout_marginTop="32dp"
                 android:orientation="horizontal">
 
-                <android.support.constraint.ConstraintLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="#5f3e">
@@ -214,7 +214,7 @@
                             android:padding="6dp"
                             android:text="Moglie Genitorozzo\n1234-2345\nLisbona" />
                     </RelativeLayout>
-                </android.support.constraint.ConstraintLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
 
                 <RelativeLayout
@@ -337,7 +337,7 @@
 
                 </LinearLayout>
 
-                <android.support.constraint.ConstraintLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/scheda2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -368,7 +368,7 @@
                         tools:layout_editor_absoluteX="6dp" />
 
 
-                </android.support.constraint.ConstraintLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <RelativeLayout
                     android:id="@+id/scheda3"

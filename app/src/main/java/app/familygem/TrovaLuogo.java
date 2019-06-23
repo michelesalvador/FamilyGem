@@ -9,7 +9,7 @@ import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
 import android.util.AttributeSet;
 import android.widget.ArrayAdapter;
-import android.support.v7.widget.AppCompatAutoCompleteTextView;
+import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 import android.widget.Filter;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompleteFilter;

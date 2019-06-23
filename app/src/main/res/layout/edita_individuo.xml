@@ -4,13 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusableInTouchMode="true"
     android:padding="16dp">
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/nome_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -18,15 +18,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/nome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/name"
             android:inputType="textCapWords|textPersonName" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/cognome_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -34,13 +34,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nome_label">
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/cognome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/surname"
             android:inputType="textCapWords|textPersonName" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <RadioGroup
         android:id="@+id/radioGroup"
@@ -74,7 +74,7 @@
             android:text="@string/unknown" />
     </RadioGroup>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/data_nascita_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -83,14 +83,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radioGroup">
 
-        <android.support.design.widget.TextInputEditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/data_nascita"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/birth_date"
             android:inputType="textCapCharacters" />
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <app.familygem.EditoreData
         android:id="@+id/editore_data_nascita"
@@ -101,7 +101,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/data_nascita_label" />
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/luogo_nascita_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
             android:imeOptions="actionNext"
             android:inputType="textCapWords|textPostalAddress"
             android:nextFocusForward="@id/data_morte" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Switch
         android:id="@+id/defunto"
@@ -140,7 +140,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/defunto">
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/data_morte_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -148,13 +148,13 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <android.support.design.widget.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/data_morte"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/death_date"
                 android:inputType="textCapCharacters" />
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <app.familygem.EditoreData
             android:id="@+id/editore_data_morte"
@@ -165,7 +165,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/data_morte_label" />
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -178,9 +178,9 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/death_place"
                 android:inputType="textCapWords" />
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
