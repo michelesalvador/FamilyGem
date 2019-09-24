@@ -1,67 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/info_scatola"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="12dp">
+	<LinearLayout
+		android:id="@+id/info_scatola"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:padding="12dp">
 
-        <TextView
-            android:id="@+id/info_statistiche"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Statistiche su questo albero"
-            android:textColor="#000"
-            android:textSize="16sp" />
+		<TextView
+			android:id="@+id/info_statistiche"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Statistiche su questo albero"
+			android:textColor="#000"
+			android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/info_aggiorna"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="♺"
-            android:textSize="24sp" />
+		<Button
+			android:id="@+id/info_aggiorna"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="right"
+			android:text="♺"
+			android:textSize="24sp"
+			android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/info_testata"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical"
-            android:visibility="gone">
+		<LinearLayout
+			android:id="@+id/info_testata"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_marginTop="20dp"
+			android:orientation="vertical"
+			android:visibility="gone">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#c8960f47"
-                android:paddingBottom="3dp"
-                android:paddingLeft="8dp"
-                android:paddingTop="3dp"
-                android:text="@string/header"
-                android:textColor="#fff"
-                android:textSize="16sp" />
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="#c8960f47"
+				android:paddingBottom="3dp"
+				android:paddingLeft="8dp"
+				android:paddingTop="3dp"
+				android:text="@string/header"
+				android:textColor="#fff"
+				android:textSize="16sp" />
 
-            <TableLayout
-                android:id="@+id/info_tabella"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#22960f47"
-                android:padding="5dp"
-                android:shrinkColumns="1" />
-        </LinearLayout>
+			<TableLayout
+				android:id="@+id/info_tabella"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="#22960f47"
+				android:padding="5dp"
+				android:shrinkColumns="1" />
+		</LinearLayout>
 
-        <Button
-            android:id="@+id/info_crea_testata"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
-            android:text="@string/create_header"
-            android:visibility="gone" />
-    </LinearLayout>
+		<Button
+			android:id="@+id/info_crea_testata"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="30dp"
+			android:text="@string/create_header"
+			android:visibility="gone" />
+	</LinearLayout>
 </ScrollView>

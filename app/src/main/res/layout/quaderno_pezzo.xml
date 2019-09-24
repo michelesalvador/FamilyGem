@@ -1,38 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
-    android:paddingLeft="10dp"
-    android:paddingRight="8dp"
-    android:paddingTop="8dp">
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="?android:attr/selectableItemBackground"
+	android:paddingLeft="10dp"
+	android:paddingRight="8dp"
+	android:paddingTop="8dp">
 
-    <TextView
-        android:id="@+id/nota_testo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/nota_citazioni"
-        android:ellipsize="end"
-        android:maxLines="4"
-        android:text="Un bel dì giovanni pascoli andò a pascolare e nel mezzo del bosco si perse.
+	<TextView
+		android:id="@+id/nota_testo"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_toLeftOf="@+id/nota_citazioni"
+		android:ellipsize="end"
+		android:maxLines="4"
+		android:text="Un bel dì giovanni pascoli andò a pascolare e nel mezzo del bosco si perse.
 Fine della storia ma se vi è piaciuta possiamo continuare:
 Ne vale la pena, C'era una volta una bosco con dentro giovanni pascoli, un giovinetto dall'aspetto giocondo.
 Che cacchio faceva nel bosco?"
-        android:textColor="#000"
-        android:textSize="16sp" />
+		android:textColor="#000"
+		android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/nota_citazioni"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="4dp"
-        android:text="12" />
+	<TextView
+		android:id="@+id/nota_citazioni"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:layout_marginLeft="4dp"
+		android:text="12"
+		android:background="@drawable/cerchietto"
+		android:paddingLeft="5dp"
+		android:paddingTop="2dp"
+		android:paddingRight="5dp"
+		android:paddingBottom="2dp"
+		android:textColor="#fff" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@+id/nota_testo"
-        android:layout_marginTop="8dp"
-        android:background="?android:attr/listDivider" />
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:layout_below="@+id/nota_testo"
+		android:layout_marginTop="8dp"
+		android:background="?android:attr/listDivider" />
 </RelativeLayout>

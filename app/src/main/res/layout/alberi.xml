@@ -1,35 +1,37 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
 
-    <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:orientation="vertical" >
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical">
 
-         <ListView
-              android:id="@+id/lista_alberi"
-              android:layout_height="wrap_content"
-              android:layout_width="match_parent">
-         </ListView>
+		<ListView
+			android:id="@+id/lista_alberi"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingBottom="80dp"
+			android:clipToPadding="false"
+			android:scrollbarStyle="outsideOverlay" />
 
-    </LinearLayout>
+	</LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/alberi_circolo"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:visibility="gone" />
+	<ProgressBar
+		android:id="@+id/alberi_circolo"
+		android:layout_width="70dp"
+		android:layout_height="70dp"
+		android:layout_gravity="center_vertical|center_horizontal"
+		android:visibility="gone" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        app:srcCompat="@drawable/piu" />
+	<com.google.android.material.floatingactionbutton.FloatingActionButton
+		android:id="@+id/fab"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom|end"
+		android:layout_margin="16dp"
+		app:srcCompat="@drawable/piu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

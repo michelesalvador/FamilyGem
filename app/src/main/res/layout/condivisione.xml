@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<LinearLayout
+			android:id="@+id/condividi_scatola"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:focusableInTouchMode="true"
+			android:orientation="vertical"
+			android:padding="16dp">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/title"
+				android:textSize="18sp"
+				android:textStyle="bold" />
+
+			<EditText
+				android:id="@+id/condividi_titolo"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="30dp"
+				android:inputType="textCapSentences"
+				android:singleLine="true"
+				android:textSize="20sp" />
+
+			<LinearLayout
+				android:id="@+id/condividi_radice"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="30dp"
+				android:orientation="vertical"
+				android:visibility="gone">
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/shared_tree_root"
+					android:textSize="18sp"
+					android:textStyle="bold" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/ideally_recipient"
+					android:textColor="#000" />
+
+			</LinearLayout>
+
+			<TextView
+				android:id="@+id/condividi_tit_autore"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/tree_submitter"
+				android:textSize="18sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/usually_your_name"
+				android:textColor="#000" />
+
+			<EditText
+				android:id="@+id/condividi_autore"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="30dp"
+				android:singleLine="true"
+				android:inputType="textCapWords"
+				android:textSize="20sp" />
+
+			<Button
+				android:id="@+id/bottone_condividi"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_horizontal"
+				android:text="@string/share_tree" />
+
+		</LinearLayout>
+	</ScrollView>
+
+	<ProgressBar
+		android:id="@+id/condividi_circolo"
+		android:layout_width="70dp"
+		android:layout_height="70dp"
+		android:layout_centerInParent="true"
+		android:visibility="invisible" />
+
+</RelativeLayout>

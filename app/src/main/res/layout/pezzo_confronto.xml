@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	app:cardCornerRadius="3dp"
+	app:cardElevation="5dp"
+	app:cardUseCompatPadding="true"
+	app:contentPadding="8dp">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical">
+
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<ImageView
+				android:id="@+id/confronto_foto"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:visibility="gone"
+				app:srcCompat="@drawable/manichino" />
+
+			<TextView
+				android:id="@+id/confronto_titolo"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_toLeftOf="@id/confronto_foto"
+				android:text="Famiglia"
+				android:textSize="22sp" />
+
+			<TextView
+				android:id="@+id/confronto_testo"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_below="@id/confronto_titolo"
+				android:layout_toLeftOf="@id/confronto_foto"
+				android:ellipsize="end"
+				android:maxLines="6"
+				android:singleLine="false"
+				android:text="+3 famiglie\n+7 persone\n+15 media\n+2 fonti\n-1 nota"
+				android:textSize="18sp" />
+
+		</RelativeLayout>
+
+		<include
+			android:id="@+id/confronto_data"
+			layout="@layout/pezzo_data_cambiamenti"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content" />
+	</LinearLayout>
+
+
+</androidx.cardview.widget.CardView>

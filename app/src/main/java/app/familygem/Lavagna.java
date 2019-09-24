@@ -10,8 +10,8 @@ import java.io.File;
 public class Lavagna extends AppCompatActivity {
 
 	@Override
-	protected void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	protected void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView( R.layout.lavagna );
 		// Mostra il file a piena risoluzione

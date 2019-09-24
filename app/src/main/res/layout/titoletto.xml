@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
-    android:layout_marginBottom="6dp"
-    android:background="@color/primarioChiaro"
-    android:paddingLeft="12dp"
-    android:paddingTop="2dp"
-    android:paddingRight="12dp"
-    android:paddingBottom="4dp">
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="12dp"
+	android:layout_marginBottom="6dp"
+	android:background="@color/primarioChiaro"
+	android:paddingLeft="12dp"
+	android:paddingTop="2dp"
+	android:paddingRight="12dp"
+	android:paddingBottom="4dp">
 
-    <TextView
-        android:id="@+id/titolo_testo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Titoletto lunghetto"
-        android:textColor="#fee"
-        android:textSize="18sp" />
+	<TextView
+		android:id="@+id/titolo_testo"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Titoletto lunghetto"
+		android:textColor="#fee"
+		android:textSize="18sp" />
 
 </RelativeLayout>

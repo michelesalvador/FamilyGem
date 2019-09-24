@@ -17,8 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import org.folg.gedcom.model.Media;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import app.familygem.visita.ListaMedia;
 
@@ -27,29 +25,29 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 	DrawerLayout scatolissima;
 
 	@Override
-    protected void onCreate( Bundle savedInstanceState ) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.principe);
+	protected void onCreate( Bundle savedInstanceState ) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.principe);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
 
 		scatolissima = findViewById(R.id.scatolissima);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, scatolissima, toolbar, R.string.drawer_open, R.string.drawer_close );
+		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+				this, scatolissima, toolbar, R.string.drawer_open, R.string.drawer_close );
 		scatolissima.addDrawerListener(toggle);
-        toggle.syncState();
+		toggle.syncState();
 
-        NavigationView menuPrincipe = findViewById(R.id.menu);
+		NavigationView menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
 		Globale.vistaPrincipe = scatolissima;
 		if( Globale.gc == null ) {
-			if( !Alberi.apriJson( Globale.preferenze.idAprendo, false ) )
+			if( !Alberi.apriGedcom( Globale.preferenze.idAprendo, false ) )
 				return;
 		}
 		arredaTestataMenu();
 
-        if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
+		if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
 			if( getIntent().getBooleanExtra("anagrafeScegliParente",false) )
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Anagrafe()).commit();
 			else if( getIntent().getBooleanExtra("galleriaScegliMedia",false) )
@@ -62,7 +60,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Magazzino()).commit();
 			else // la normale apertura
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Diagramma()).commit();
-        }
+		}
 
 		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_testa ).setOnClickListener( new View.OnClickListener() {
 			@Override
@@ -79,7 +77,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			menu.findItem( R.id.nav_archivi ).setVisible(false);
 			menu.findItem( R.id.nav_autore ).setVisible(false);
 		}
-    }
+	}
 
 	// Aggiorna i contenuti quando si torna indietro con backPressed()
 	@Override
@@ -93,81 +91,83 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 
 	// Titolo e immagine a caso del Gedcom
 	void arredaTestataMenu() {
-		NavigationView menu = Globale.vistaPrincipe.findViewById(R.id.menu);
+		NavigationView menu = scatolissima.findViewById(R.id.menu);
 		ImageView immagine = menu.getHeaderView(0).findViewById( R.id.menu_immagine );
 		TextView testo = menu.getHeaderView(0).findViewById( R.id.menu_titolo );
 		immagine.setVisibility( ImageView.GONE );
 		testo.setText( "" );
 		if( Globale.gc != null ) {
-			ListaMedia visitaMedia = new ListaMedia( Globale.gc, true );
-			Globale.gc.accept( visitaMedia );
-			if( visitaMedia.listaMedia.size() > 0 ) {
-				List<Media> lista = new ArrayList<>( visitaMedia.listaMedia.keySet() );
-				Random caso = new Random();
-				int num = caso.nextInt( lista.size() );
-				U.dipingiMedia( lista.get(num), immagine, null );
-				//if( immagine.getTag(R.id.tag_tipo_file).equals(1) || 2 ) // no essendo asincrono arriva in ritardo
-				immagine.setVisibility( ImageView.VISIBLE );
+			ListaMedia cercaMedia = new ListaMedia( Globale.gc, 3 );
+			Globale.gc.accept( cercaMedia );
+			if( cercaMedia.lista.size() > 0 ) {
+				int caso = new Random().nextInt( cercaMedia.lista.size() );
+				for( Media med : cercaMedia.lista )
+					if( --caso < 0 ) { // arriva a -1
+						U.dipingiMedia( med, immagine, null );
+						immagine.setVisibility( ImageView.VISIBLE );
+						break;
+					}
 			}
 			testo.setText( Globale.preferenze.alberoAperto().nome );
 		}
 		Button bottoneSalva = menu.getHeaderView(0).findViewById( R.id.menu_salva );
-		if( !Globale.preferenze.autoSalva ) {
+		bottoneSalva.setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View vista ) {
+				vista.setVisibility( View.GONE );
+				U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+				scatolissima.closeDrawer(GravityCompat.START);
+				Globale.daSalvare = false;
+			}
+		});
+		if( Globale.daSalvare )
 			bottoneSalva.setVisibility( View.VISIBLE );
-			bottoneSalva.setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View v ) {
-					U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
-					scatolissima.closeDrawer(GravityCompat.START);
-				}
-			});
+	}
+
+	@Override
+	public void onBackPressed() {
+		if( scatolissima.isDrawerOpen(GravityCompat.START) ) {
+			scatolissima.closeDrawer(GravityCompat.START);
+		} else {
+			super.onBackPressed();
 		}
 	}
 
-    @Override
-    public void onBackPressed() {
-        if( scatolissima.isDrawerOpen(GravityCompat.START) ) {
-	        scatolissima.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        Fragment fragment = null;
-        if (id == R.id.nav_diagramma) {
-            fragment = new Diagramma();
-        } else if (id == R.id.nav_persone) {
-            fragment = new Anagrafe();
-        } else if (id == R.id.nav_fonti) {
-            fragment = new Biblioteca();
+	@Override
+	public boolean onNavigationItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		Fragment fragment = null;
+		if (id == R.id.nav_diagramma) {
+			fragment = new Diagramma();
+		} else if (id == R.id.nav_persone) {
+			fragment = new Anagrafe();
+		} else if (id == R.id.nav_fonti) {
+			fragment = new Biblioteca();
 		} else if (id == R.id.nav_archivi) {
 			fragment = new Magazzino();
-        } else if (id == R.id.nav_media) {
-        	// ToDo: Se clicco  IndividuoMedia > FAB > CollegaMedia....  "galleriaScegliMedia" viene passato all'intent dell'activity con valore 'true'
-	        // todo: però rimane true anche quando poi torno in Galleria cliccando nel drawer, con conseguenti errori:
-	        // vengono visualizzati solo gli oggetti media
-	        // cliccandone uno esso viene aggiunto ai media dell'ultima persona vista !
-            fragment = new Galleria();
+		} else if (id == R.id.nav_media) {
+			// ToDo: Se clicco  IndividuoMedia > FAB > CollegaMedia....  "galleriaScegliMedia" viene passato all'intent dell'activity con valore 'true'
+			// todo: però rimane true anche quando poi torno in Galleria cliccando nel drawer, con conseguenti errori:
+			// vengono visualizzati solo gli oggetti media
+			// cliccandone uno esso viene aggiunto ai media dell'ultima persona vista !
+			fragment = new Galleria();
 		} else if (id == R.id.nav_famiglie) {
 			fragment = new Chiesa();
-        } else if (id == R.id.nav_note) {
-	        fragment = new Quaderno();
-        } else if (id == R.id.nav_autore) {
-	        fragment = new Podio();
-        }
-        if( fragment != null ) {
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.replace( R.id.contenitore_fragment, fragment );
-            ft.addToBackStack(null);
-            ft.commit();
-        }
-	    scatolissima.closeDrawer(GravityCompat.START);
+		} else if (id == R.id.nav_note) {
+			fragment = new Quaderno();
+		} else if (id == R.id.nav_autore) {
+			fragment = new Podio();
+		}
+		if( fragment != null ) {
+			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+			ft.replace( R.id.contenitore_fragment, fragment );
+			ft.addToBackStack(null);
+			ft.commit();
+		}
+		scatolissima.closeDrawer(GravityCompat.START);
 
-        return true;
-    }
+		return true;
+	}
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {

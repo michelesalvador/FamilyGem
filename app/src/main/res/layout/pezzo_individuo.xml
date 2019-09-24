@@ -1,74 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/indi_carta"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="3dp"
-    android:layout_marginTop="3dp"
-    android:background="@drawable/casella_neutro">
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/indi_carta"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginBottom="3dp"
+	android:layout_marginTop="3dp"
+	android:background="@drawable/casella_neutro">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:clipToPadding="false"
-        android:padding="8dp">
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="?android:attr/selectableItemBackground"
+		android:clipToPadding="false"
+		android:padding="8dp">
 
-        <TextView
-            android:id="@+id/indi_ruolo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Moglie"
-            android:textAllCaps="true"
-            android:textSize="15sp" />
+		<TextView
+			android:id="@+id/indi_ruolo"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Moglie"
+			android:textAllCaps="true"
+			android:textSize="15sp" />
 
-        <TextView
-            android:id="@+id/indi_nome"
-            style="@android:style/Widget.TextView.SpinnerItem"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/indi_ruolo"
-            android:layout_toLeftOf="@+id/indi_foto"
-            android:text='Nome "Sopradetto" Cognonome Lungotto' />
+		<TextView
+			android:id="@+id/indi_nome"
+			style="@android:style/Widget.TextView.SpinnerItem"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/indi_ruolo"
+			android:layout_toLeftOf="@+id/indi_foto"
+			android:text='Nome "Sopradetto" Cognonome Lungotto' />
 
 
-        <TextView
-            android:id="@+id/indi_titolo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/indi_nome"
-            android:text="Re di Danimarca"
-            android:textColor="#000"
-            android:textStyle="italic" />
+		<TextView
+			android:id="@+id/indi_titolo"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/indi_nome"
+			android:text="Re di Danimarca"
+			android:textColor="#000"
+			android:textStyle="italic" />
 
-        <TextView
-            android:id="@+id/indi_dettagli"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/indi_titolo"
-            android:layout_toLeftOf="@+id/indi_foto"
-            android:text="1824 - 1913 (43)
+		<TextView
+			android:id="@+id/indi_dettagli"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@+id/indi_titolo"
+			android:layout_toLeftOf="@+id/indi_foto"
+			android:text="1824 - 1913 (43)
 Bello Lago di Ginevra - Castello Roganzuolo" />
 
-        <ImageView
-            android:id="@+id/indi_foto"
-            android:layout_width="65dp"
-            android:layout_height="80dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="8dp"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/manichino" />
+		<ImageView
+			android:id="@+id/indi_foto"
+			android:layout_width="65dp"
+			android:layout_height="80dp"
+			android:layout_alignParentRight="true"
+			android:layout_marginLeft="8dp"
+			android:scaleType="centerCrop"
+			app:srcCompat="@drawable/manichino" />
 
-        <ImageView
-            android:id="@+id/indi_lutto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="-8dp"
-            android:layout_marginTop="-8dp"
-            app:srcCompat="@drawable/defunto" />
+		<ImageView
+			android:id="@+id/indi_lutto"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_marginRight="-8dp"
+			android:layout_marginTop="-8dp"
+			app:srcCompat="@drawable/defunto" />
 
-    </RelativeLayout>
+	</RelativeLayout>
 </FrameLayout>

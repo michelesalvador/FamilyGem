@@ -18,21 +18,21 @@ import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
 import java.util.List;
-import java.util.Map;
 import app.familygem.dettaglio.Nota;
 import app.familygem.visita.ListaNote;
 import app.familygem.visita.RiferimentiNota;
+import app.familygem.visita.TrovaPila;
 import static app.familygem.Globale.gc;
 
 public class Quaderno extends Fragment {
 	
 	@Override
-	public void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	public void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 	}
 
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
+	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
 		boolean scegliNota = getActivity().getIntent().getBooleanExtra("quadernoScegliNota",false );
 		View vista = inflater.inflate( R.layout.magazzino, container, false );
 		if( gc != null ) {
@@ -46,7 +46,7 @@ public class Quaderno extends Fragment {
 					((TextView)tit.findViewById(R.id.titolo_testo)).setText( txt );
 				}
 				for( Note not : listaNoteCondivise )
-					registerForContextMenu( mettiNota(scatola,not,null) );
+					registerForContextMenu( mettiNota(scatola,not) );
 			}
 			// Note inlinea
 			ListaNote visitaNote = new ListaNote();
@@ -58,8 +58,8 @@ public class Quaderno extends Fragment {
 					((TextView)tit.findViewById(R.id.titolo_testo)).setText( txt );
 					//((TextView)tit.findViewById(R.id.titolo_numero)).setText( String.valueOf(visitaNote.listaNote.size()) );
 					scatola.addView( tit );
-					for( Map.Entry<Note,Object> dato : visitaNote.listaNote.entrySet() )
-						registerForContextMenu( mettiNota(scatola,dato.getKey(),dato.getValue()) );
+					for( Object nota : visitaNote.listaNote )
+						registerForContextMenu( mettiNota(scatola,(Note)nota) );
 				}
 			}
 			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
@@ -69,7 +69,7 @@ public class Quaderno extends Fragment {
 		return vista;
 	}
 
-	View mettiNota( final LinearLayout scatola, final Note nota, final Object contenitore ) {
+	View mettiNota( final LinearLayout scatola, final Note nota ) {
 		View vistaNota = LayoutInflater.from(scatola.getContext()).inflate( R.layout.quaderno_pezzo, scatola, false );
 		scatola.addView( vistaNota );
 		String testo = nota.getValue();
@@ -78,9 +78,8 @@ public class Quaderno extends Fragment {
 		if( nota.getId() == null )
 			vistaCita.setVisibility( View.GONE );
 		else {
-			RiferimentiNota contaUso = new RiferimentiNota( nota.getId(), false );
-			gc.accept( contaUso );
-			vistaCita.setText( String.valueOf(contaUso.num) );
+			RiferimentiNota contaUso = new RiferimentiNota( gc, nota.getId(), false );
+			vistaCita.setText( String.valueOf(contaUso.tot) );
 		}
 		vistaNota.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View vista ) {
@@ -90,27 +89,26 @@ public class Quaderno extends Fragment {
 					intento.putExtra( "idNota", nota.getId() );
 					getActivity().setResult( AppCompatActivity.RESULT_OK, intento );
 					getActivity().finish();
-				} else {
-					Ponte.manda( nota, "oggetto" );
-					if( contenitore != null ) // per le note condivise è null
-						Ponte.manda( contenitore, "contenitore" );
-					scatola.getContext().startActivity( new Intent( scatola.getContext(), Nota.class ) );
+				} else { // Apre il dettaglio della nota
+					Intent intento = new Intent( scatola.getContext(), Nota.class );
+					if( nota.getId() != null ) { // Nota condivisa
+						Memoria.setPrimo( nota );
+					} else { // Nota semplice
+						new TrovaPila( gc, nota );
+						intento.putExtra( "daQuaderno", true );
+					}
+					scatola.getContext().startActivity( intento );
 				}
 			}
 		});
-		vistaNota.setTag( R.id.tag_oggetto, nota );	// per il menu contestuale Elimina
-		vistaNota.setTag( R.id.tag_contenitore, contenitore );
+		vistaNota.setTag( nota );	// per il menu contestuale Elimina
 		return vistaNota;
 	}
 
+	// Crea una nuova nota condivisa, attaccata a un contenitore oppure slegata
 	static void nuovaNota( Context contesto, Object contenitore ){
 		Note notaNova = new Note();
-		int val, max = 0;
-		for( Note n : gc.getNotes() ) {
-			val = Anagrafe.idNumerico( n.getId() );
-			if( val > max )	max = val;
-		}
-		String id = "N" + (max+1);
+		String id = U.nuovoId( gc, Note.class );
 		notaNova.setId( id );
 		notaNova.setValue( "" );
 		gc.addNote( notaNova );
@@ -118,9 +116,8 @@ public class Quaderno extends Fragment {
 			NoteRef refNota = new NoteRef();
 			refNota.setRef( id );
 			((NoteContainer)contenitore).addNoteRef( refNota );
-			Ponte.manda( contenitore, "contenitore" );
 		}
-		Ponte.manda( notaNova, "oggetto" );
+		Memoria.setPrimo( notaNova );
 		contesto.startActivity( new Intent( contesto, Nota.class ) );
 	}
 
@@ -148,8 +145,8 @@ public class Quaderno extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) { // Elimina
-			U.eliminaNota( (Note)vistaScelta.getTag(R.id.tag_oggetto), vistaScelta.getTag(R.id.tag_contenitore), vistaScelta );
-			U.salvaJson();
+			Object[] capi = U.eliminaNota( (Note)vistaScelta.getTag(), vistaScelta );
+			U.salvaJson( false, capi );
 		} else {
 			return false;
 		}

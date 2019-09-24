@@ -8,8 +8,8 @@ import android.widget.Switch;
 public class Opzioni extends AppCompatActivity {
 
 	@Override
-	protected void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	protected void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 		setContentView( R.layout.opzioni );
 
 		// Salvataggio automatico

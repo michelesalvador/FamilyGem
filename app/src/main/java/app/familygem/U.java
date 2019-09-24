@@ -1,4 +1,5 @@
 // Attrezzi utili per tutto il programma
+
 package app.familygem;
 
 import android.Manifest;
@@ -21,6 +22,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
@@ -28,6 +30,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +43,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.material.navigation.NavigationView;
 import com.google.gson.JsonPrimitive;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -55,13 +59,22 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.folg.gedcom.model.Change;
+import org.folg.gedcom.model.DateTime;
+import org.folg.gedcom.model.Family;
+import org.folg.gedcom.model.Header;
+import org.folg.gedcom.model.Repository;
+import org.folg.gedcom.model.Submitter;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.folg.gedcom.model.EventFact;
@@ -81,22 +94,25 @@ import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.parser.JsonParser;
 import org.joda.time.Months;
 import org.joda.time.Years;
-import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import app.familygem.dettaglio.ArchivioRef;
+import app.familygem.dettaglio.Cambiamenti;
 import app.familygem.dettaglio.CitazioneFonte;
+import app.familygem.dettaglio.Famiglia;
 import app.familygem.dettaglio.Fonte;
 import app.familygem.dettaglio.Immagine;
 import app.familygem.dettaglio.Nota;
 import app.familygem.visita.ListaMedia;
 import app.familygem.visita.RiferimentiNota;
+import app.familygem.visita.TrovaPila;
 
 public class U {
 	
 	// restituisce l'id della Person iniziale di un Gedcom
-	public static String trovaRadice( Gedcom gc ) {
+	static String trovaRadice( Gedcom gc ) {
 		if( gc.getHeader() != null)
 			if( valoreTag( gc.getHeader().getExtensions(), "_ROOT" ) != null )
 				return valoreTag( gc.getHeader().getExtensions(), "_ROOT" );
@@ -107,7 +123,7 @@ public class U {
 	
 	// riceve una Person e restituisce stringa con nome e cognome principale
 	static String epiteto( Person p ) {
-		if( !p.getNames().isEmpty() )
+		if( p != null && !p.getNames().isEmpty() )
 			return nomeCognome( p.getNames().get(0) );
 		return "";
 	}
@@ -182,119 +198,120 @@ public class U {
 	static boolean morto( Person p ) {
 		for( EventFact fatto : p.getEventsFacts() ) {
 			if( fatto.getTag().equals( "DEAT" ) || fatto.getTag().equals( "BURI" ) )
-				//s.l( p.getNames().get(0).getDisplayValue() +" > "+ fatto.getDisplayType() +": '"+ fatto.getValue() +"'" );
-				//if( fatto.getValue().equals("Y") )
 				return true;
 		}
 		return false;
 	}
 
-	// riceve una Person e restituisce una stringa con gli anni di nascita e morte 
+	// Riceve una Person e restituisce una stringa con gli anni di nascita e morte e l'età eventualmente
 	static String dueAnni( Person p, boolean conEta ) {
 		String anni = "";
-		LocalDate nascita = null,
-				fine = null;
+		String annoFine = "";
+		Datatore inizio = null, fine = null;
 		for( EventFact unFatto : p.getEventsFacts() ) {
 			if( unFatto.getTag() != null && unFatto.getTag().equals("BIRT") && unFatto.getDate() != null ) {
-				anni = soloAnno( unFatto.getDate() );
-				nascita = data( unFatto.getDate() );
+				inizio = new Datatore( unFatto.getDate() );
+				anni = inizio.scriviAnno();
 				break;
 			}
 		}
 		for( EventFact unFatto : p.getEventsFacts() ) {
 			if( unFatto.getTag() != null && unFatto.getTag().equals("DEAT") && unFatto.getDate() != null ) {
-				if( !anni.isEmpty() )
+				fine = new Datatore( unFatto.getDate() );
+				annoFine = fine.scriviAnno();
+				if( !anni.isEmpty() && !annoFine.isEmpty() )
 					anni += " – ";
-				anni += soloAnno( unFatto.getDate() );
-				fine = data( unFatto.getDate() );
+				anni += annoFine;
 				break;
 			}
 		}
-		if( conEta && nascita != null ) {
-			if( fine == null && nascita.isBefore(LocalDate.now()) && Years.yearsBetween(nascita,LocalDate.now()).getYears() < 100 ) {
-				fine = LocalDate.now();
+		// Aggiunge l'età tra parentesi
+		if( conEta && inizio != null && inizio.tipo <= 3 && !inizio.data1.format.toPattern().equals(Datatore.G_M) ) {
+			LocalDate dataInizio = new LocalDate( inizio.data1.date ); // converte in joda time
+			// Se è ancora vivo la fine è adesso
+			if( fine == null && dataInizio.isBefore(LocalDate.now()) && Years.yearsBetween(dataInizio,LocalDate.now()).getYears() < 120 && !U.morto(p) ) {
+				fine = new Datatore( String.format(Locale.ENGLISH,"%te %<Tb %<tY",new Date()) ); // un po' assurdo dover qui passare per Datatore...
+				annoFine = fine.scriviAnno();
 			}
-			if( fine != null ) {
+			if( fine != null && fine.tipo <= 3 && !annoFine.equals("") ) { // date plausibili
+				LocalDate dataFine = new LocalDate( fine.data1.date );
 				String misura = "";
-				int eta = Years.yearsBetween( nascita, fine ).getYears();
+				int eta = Years.yearsBetween( dataInizio, dataFine ).getYears();
 				if( eta < 2 ) {
-					eta = Months.monthsBetween( nascita, fine ).getMonths();
-					misura = " mesi";
+					eta = Months.monthsBetween( dataInizio, dataFine ).getMonths(); // todo e se nella data non c'è il mese / giorno?
+					misura = " " + Globale.contesto.getText( R.string.months );
 					if( eta < 2 ) {
-						eta = Days.daysBetween( nascita, fine ).getDays();
-						misura = " giorni";
+						eta = Days.daysBetween( dataInizio, dataFine ).getDays();
+						misura = " " + Globale.contesto.getText( R.string.days );;
 					}
 				}
 				if( eta >= 0 )
 					anni += "  (" + eta + misura + ")";
-				else
-					anni += "  (?)";
 			}
-
 		}
 		return anni;
 	}
 
-	// riceve una data in stile gedcom e restituisce l'annno semplificato alla mia maniera
-	static String soloAnno( String data ) {
-		String anno = data.substring( data.lastIndexOf(" ")+1 );	// prende l'anno che sta in fondo alla data
-		if( anno.contains("/") )	// gli anni tipo '1711/12' vengono semplificati in '1712'
-			anno = anno.substring(0,2).concat( anno.substring(anno.length()-2,anno.length()) );
-		if( data.startsWith("ABT") || data.startsWith("EST") || data.startsWith("CAL") )
-			anno = anno.concat("?");
-		if( data.startsWith("BEF") )
-			anno = "←".concat(anno);
-		if( data.startsWith("AFT") )
-			anno = anno.concat("→");
-		if( data.startsWith("BET") ) {
-			int pos = data.indexOf("AND") - 1;
-			String annoPrima = data.substring( data.lastIndexOf(" ",pos-1)+1, pos );	// prende l'anno che sta prima di 'AND'
-			if( !annoPrima.equals(anno) && anno.length()>3 ) {
-				//s.l( annoPrima +"  " + anno );
-				if( annoPrima.substring(0,2).equals(anno.substring(0,2)) )		// se sono dello stesso secolo
-					anno = anno.substring( anno.length()-2, anno.length() );	// prende solo gli anni
-				anno = annoPrima.concat("~").concat(anno);
+	// Estrae i soli numeri da una stringa che può contenere anche lettere
+	static int soloNumeri( String id ) {
+		//return Integer.parseInt( id.replaceAll("\\D+","") );	// sintetico ma lento
+		int num = 0;
+		int x = 1;
+		for( int i = id.length()-1; i >= 0; --i ){
+			int c = id.charAt( i );
+			if( c > 47 && c < 58 ){
+				num += (c-48) * x;
+				x *= 10;
 			}
 		}
-		return anno;
+		return num;
 	}
 
-	// Riceve una data stringa Gedcom e restituisce una singola LocalDate joda oppure null
-	static LocalDate data( String dataGc ) {
-		if( dataGc.contains("BEF") || dataGc.contains("AFT") || dataGc.contains("BET")
-				|| dataGc.contains("FROM") || dataGc.contains("TO") )	// date incalcolabili
-			return null;
-		if( dataGc.contains("ABT") || dataGc.contains("EST") || dataGc.contains("CAL") || dataGc.contains("INT") )  // rimuove i tre porcellini
-			dataGc = dataGc.substring( dataGc.indexOf(' ')+1, dataGc.length() );
-		if( dataGc.contains("(") && dataGc.contains(")") )
-			dataGc = dataGc.replaceAll("\\(.*?\\)", "").trim();
-		if( dataGc.isEmpty() ) return null;
-		String annoStr = dataGc.substring( dataGc.lastIndexOf(" ") + 1 );
-		if( annoStr.contains("/") )	// gli anni tipo '1711/12' o '1711/1712' vengono semplificati in '1712'
-			annoStr = annoStr.substring(0,2).concat( annoStr.substring(annoStr.length()-2,annoStr.length()) ); // TODO: E l'anno 1799/00 diventa 1700
-		int anno = Anagrafe.idNumerico( annoStr );
-		if( anno == 0 ) return null;
-		int mese = 1;
-		if( dataGc.length() > 4 && dataGc.indexOf(' ') > 0 ) {
-			try {
-				String meseStr = dataGc.substring( dataGc.lastIndexOf( ' ' ) - 3, dataGc.lastIndexOf( ' ' ) );
-				mese = DateTimeFormat.forPattern( "MMM" ).withLocale( Locale.ENGLISH ).parseDateTime( meseStr ).getMonthOfYear();
-			} catch( Exception e ) { return null; }
+	// Genera il nuovo id seguente a quelli già esistenti
+	static int max;
+	public static String nuovoId( Gedcom gc, Class classe ) {
+		max = 0;
+		String pre = "";
+		if( classe == Note.class ) {
+			pre = "N";
+			for( Note n : gc.getNotes() )
+				calcolaMax( n );
+		} else if( classe == Submitter.class ) {
+			pre = "U";
+			for( Submitter a : gc.getSubmitters() )
+				calcolaMax( a );
+		} else if( classe == Repository.class ) {
+			pre = "R";
+			for( Repository r : gc.getRepositories() )
+				calcolaMax( r );
+		} else if( classe == Media.class ) {
+			pre = "M";
+			for( Media m : gc.getMedia() )
+				calcolaMax( m );
+		} else if( classe == Source.class ) {
+			pre = "S";
+			for( Source f : gc.getSources() )
+				calcolaMax( f );
+		} else if( classe == Person.class ) {
+			pre = "I";
+			for( Person p : gc.getPeople() )
+				calcolaMax( p );
+		} else if( classe == Family.class ) {
+			pre = "F";
+			for( Family f : gc.getFamilies() )
+				calcolaMax( f );
 		}
-		int giorno = 1;
-		if( dataGc.length() > 8 ) {
-			if( dataGc.indexOf(' ') > 0 )
-				giorno = Anagrafe.idNumerico( dataGc.substring( 0, dataGc.indexOf(' ') ) );    // estrae i soli numeri
-			if( giorno < 1 || giorno > 31)
-				giorno = 1;
-		}
-		LocalDate data = null;
+		return pre + (max+1);
+	}
+
+	private static void calcolaMax( Object oggetto ) {
 		try {
-			data = new LocalDate( anno, mese, giorno ); // ad esempio '29 febbraio 1635' dà errore
+			String idStringa = (String) oggetto.getClass().getMethod("getId").invoke( oggetto );
+			int num = soloNumeri( idStringa );
+			if( num > max )	max = num;
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
-		return data;
 	}
 
 	// Restituisce la lista di estensioni
@@ -303,7 +320,7 @@ public class U {
 		if( contenitore.getExtension( "folg.more_tags" ) != null ) {
 			List<Estensione> lista = new ArrayList<>();
 			for( GedcomTag est : (List<GedcomTag>)contenitore.getExtension("folg.more_tags") ) {
-				String testo = scavaEstensione(est);
+				String testo = scavaEstensione(est,0);
 				if( testo.endsWith("\n") )
 					testo = testo.substring( 0, testo.length()-1 );
 				lista.add( new Estensione( est.getTag(), testo, est ) );
@@ -314,9 +331,10 @@ public class U {
 	}
 
 	// Costruisce un testo con il contenuto ricorsivo dell'estensione
-	public static String scavaEstensione( GedcomTag pacco ) {
+	public static String scavaEstensione( GedcomTag pacco, int grado ) {
 		String testo = "";
-		//testo += pacco.getTag() +": ";
+		if( grado > 0 )
+			testo += pacco.getTag() +" ";
 		if( pacco.getValue() != null )
 			testo += pacco.getValue() +"\n";
 		else if( pacco.getId() != null )
@@ -324,17 +342,25 @@ public class U {
 		else if( pacco.getRef() != null )
 			testo += pacco.getRef() +"\n";
 		for( GedcomTag unPezzo : pacco.getChildren() )
-			testo += scavaEstensione( unPezzo );
+			testo += scavaEstensione( unPezzo, ++grado );
 		return testo;
 	}
 
 	public static void eliminaEstensione( GedcomTag estensione, Object contenitore, View vista ) {
 		if( contenitore instanceof ExtensionContainer ) { // IndividuoEventi
+			ExtensionContainer exc = (ExtensionContainer) contenitore;
 			@SuppressWarnings("unchecked")
-			List<GedcomTag> lista = (List<GedcomTag>) ((ExtensionContainer)contenitore).getExtension( "folg.more_tags" );
+			List<GedcomTag> lista = (List<GedcomTag>) exc.getExtension( "folg.more_tags" );
 			lista.remove( estensione );
+			if( lista.isEmpty() )
+				exc.getExtensions().remove( "folg.more_tags" );
+			if( exc.getExtensions().isEmpty() )
+				exc.setExtensions( null );
 		} else if( contenitore instanceof GedcomTag ) { // Dettaglio
-			((GedcomTag)contenitore).getChildren().remove( estensione );
+			GedcomTag gt = (GedcomTag) contenitore;
+			gt.getChildren().remove( estensione );
+			if( gt.getChildren().isEmpty() )
+				gt.setChildren( null );
 		}
 		if( vista != null )
 			vista.setVisibility( View.GONE );
@@ -359,34 +385,6 @@ public class U {
 		}
 		return null;
 	}
-
-	/* Aggiorna il REF di un tag nelle estensioni di un oggetto:  tag:"_ROOT"  ref:"I123"
-	@SuppressWarnings("unchecked")
-	static void aggiornaTag( Object obj, String nomeTag, String ref ) {
-		String chiave = "gedcomy_tags";
-		List<GedcomTag> listaTag = new ArrayList<>();
-		boolean aggiungi = true;
-		Map<String,Object> mappaEstensioni = ((ExtensionContainer) obj).getExtensions();	// ok
-		if( !mappaEstensioni.isEmpty() ) {
-			chiave = (String) mappaEstensioni.keySet().toArray()[0];	// chiave = 'folg.more_tags'
-			listaTag = (ArrayList<GedcomTag>) mappaEstensioni.get( chiave );
-			// Aggiorna tag esistente
-			for( GedcomTag gct : listaTag ) {
-				if( gct.getTag().equals(nomeTag) ) {
-					gct.setRef( ref );
-					aggiungi = false;
-				}
-			}
-		}
-		// Aggiunge nuovo tag
-		if( aggiungi ) {
-			GedcomTag tag = new GedcomTag( null, nomeTag, null );
-			tag.setValue( ref );
-			listaTag.add( tag );
-		}
-		((ExtensionContainer) obj).putExtension( chiave, listaTag );
-	}*/
-
 
 	// Riceve un Uri e cerca di restituire il percorso del file
 	static String uriPercorsoFile( Uri uri ) {
@@ -435,7 +433,7 @@ public class U {
 				case "com.android.providers.downloads.documents":	// file dalla cartella Download
 					/* Gli arriva un uri tipo	content://com.android.providers.downloads.documents/document/2326
 					   e lo ricostruisce tipo	content://downloads/public_downloads/2326
-					   così il cursor può interpretarlo anziché restituire null    */
+					   così il cursor può interpretarlo anziché restituire null	*/
 					final String id = DocumentsContract.getDocumentId(uri);	// un numero tipo '2326'
 					uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id) );
 					cosaCercare = MediaStore.Files.FileColumns.DATA;
@@ -467,171 +465,39 @@ public class U {
 	// Metodi per mostrare immagini:
 
 	// Riceve una Person e sceglie il Media principale da cui ricavare l'immagine
-	static void unaFoto( Person p, ImageView img ) {
+	static void unaFoto( Gedcom gc, Person p, ImageView img ) {
+		ListaMedia visita = new ListaMedia( gc, 0 );
+		p.accept( visita );
 		boolean trovatoQualcosa = false;
-		for( Media med : p.getAllMedia(Globale.gc) ) {	// Cerca un media contrassegnato Primario Y
+		for( Media med : visita.lista ) {	// Cerca un media contrassegnato Primario Y
 			if( med.getPrimary() != null && med.getPrimary().equals("Y") ) {
 				dipingiMedia( med, img, null );
 				trovatoQualcosa = true;
 				break;
 			}
 		}
-		if( !trovatoQualcosa )	// In alternativa restituisce il primo che trova
-			for( Media med : p.getAllMedia(Globale.gc) ) {
+		if( !trovatoQualcosa ) {	// In alternativa restituisce il primo che trova
+			for( Media med : visita.lista ) {
 				dipingiMedia( med, img, null );
 				trovatoQualcosa = true;
 				break;
 			}
+		}
 		if( !trovatoQualcosa )
 			img.setVisibility( View.GONE );
 	}
 
-	/* ELIMINABILE
-	fa comparire l'immagine in una vista immagine
-	public static void mostraMedia( final ImageView vista, final Media med ) {
-		vista.getViewTreeObserver().addOnPreDrawListener( new ViewTreeObserver.OnPreDrawListener() {
-			public boolean onPreDraw() {
-				vista.getViewTreeObserver().removeOnPreDrawListener(this);	// evita il ripetersi di questo metodo
-				String percorso = percorsoMedia( med );	// Il file in locale
-				if( percorso != null ) {
-					BitmapFactory.Options opzioni = new BitmapFactory.Options();
-					opzioni.inJustDecodeBounds = true;	// solo info
-					BitmapFactory.decodeFile( percorso, opzioni );
-					int largaOriginale = opzioni.outWidth;
-					if( largaOriginale > vista.getWidth() && vista.getWidth() > 0 )
-						opzioni.inSampleSize = largaOriginale / vista.getWidth();
-					opzioni.inJustDecodeBounds = false;	// carica immagine
-					Bitmap bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Riesce a ricavare un'immagine
-					//bitmap = ThumbnailUtils.extractThumbnail( bitmap, 30, 60, ThumbnailUtils.OPTIONS_RECYCLE_INPUT );
-					// Fico ma ritaglia l'immagine per farla stare nelle dimensioni date. La quarta opzione non l'ho capita
-					try { // Rotazione Exif
-						ExifInterface exif = new ExifInterface( percorso );
-						int girata = exif.getAttributeInt( ExifInterface.TAG_ORIENTATION, 1 );
-						int gradi = 0;
-						switch( girata ) {
-							//case ExifInterface.ORIENTATION_NORMAL:
-							case ExifInterface.ORIENTATION_ROTATE_90:
-								gradi = 90;
-								break;
-							case ExifInterface.ORIENTATION_ROTATE_180:
-								gradi = 180;
-								break;
-							case ExifInterface.ORIENTATION_ROTATE_270:
-								gradi = 270;
-						}
-						if( gradi > 0 ) {
-							Matrix matrix = new Matrix();
-							matrix.postRotate( gradi );
-							bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true );
-						}
-					} catch( Exception e ) {
-						Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-					}
-					if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
-							|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
-						// Magari è un video
-						bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
-						if( bitmap == null ) {
-							String formato = med.getFormat();
-							if( formato == null )
-								formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
-							bitmap = generaIcona( vista, R.layout.media_file, formato );
-						}
-					}
-					vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
-					vista.setImageBitmap( bitmap );
-				} else if( med.getFile() != null )	// Cerca il file in internet
-					new U.ZuppaMedia( vista, null, med ).execute( med.getFile() );
-				return true;
-			}
-		});
-	}*/
-
-	/* Abbastanza buono ma Picasso sembra meglio
-	Caricatore asincrono di immagini locali, sostiusce il metodo mostraMedia()
-	static class MostraMedia extends AsyncTask<Media,Void,Bitmap> {
-		private ImageView vista;
-		boolean galleria;
-		MostraMedia( ImageView vista, boolean galleria ) {
-			this.vista = vista;
-			this.galleria = galleria;
-		}
-		@Override
-		protected Bitmap doInBackground( Media... params) {
-			Media media = params[0];
-			String percorso = U.percorsoMedia( media );
-			Bitmap bitmap = null;
-			if( percorso != null ) {
-				BitmapFactory.Options opzioni = new BitmapFactory.Options();
-				opzioni.inJustDecodeBounds = true;	// solo info
-				BitmapFactory.decodeFile( percorso, opzioni );
-				int largaOriginale = opzioni.outWidth;
-				if( largaOriginale > vista.getWidth() && vista.getWidth() > 0 )
-					opzioni.inSampleSize = largaOriginale / vista.getWidth();
-				else if( largaOriginale > 300 ) // 300 una larghezza media approssimativa per una ImageView
-					opzioni.inSampleSize = largaOriginale / 300;
-				opzioni.inJustDecodeBounds = false;	// carica immagine
-				bitmap = BitmapFactory.decodeFile( percorso, opzioni );	// Ricava un'immagine ridimensionata
-				try { // Rotazione Exif
-					ExifInterface exif = new ExifInterface( percorso );
-					int girata = exif.getAttributeInt( ExifInterface.TAG_ORIENTATION, 1 );
-					int gradi = 0;
-					switch( girata ) {
-						case ExifInterface.ORIENTATION_ROTATE_90:
-							gradi = 90;
-							break;
-						case ExifInterface.ORIENTATION_ROTATE_180:
-							gradi = 180;
-							break;
-						case ExifInterface.ORIENTATION_ROTATE_270:
-							gradi = 270;
-					}
-					if( gradi > 0 ) {
-						Matrix matrix = new Matrix();
-						matrix.postRotate( gradi );
-						bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true );
-					}
-				} catch( Exception e ) {
-					Toast.makeText( vista.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-				}
-				if( bitmap == null 	// Il file esiste in locale ma senza un'immagine
-						|| ( bitmap.getWidth()<10 && bitmap.getHeight()>200 ) ) {	// Giusto per gli strambi mpg e mov
-					// Magari è un video
-					bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
-					if( bitmap == null ) {
-						String formato = media.getFormat();
-						if( formato == null )
-							formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
-						bitmap = U.generaIcona( vista, R.layout.media_file, formato );
-					}
-				}
-				vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
-			} else if( media.getFile() != null )	// Cerca il file in internet
-				new ZuppaMedia( vista, (ProgressBar)vista.findViewById(R.id.media_circolo), media ).execute( media.getFile() );
-			// TODO ok ma un file in attesa di essere scaricato da internet blocca tutti gli altri anche locali
-			return bitmap;
-		}
-		@Override
-		protected void onPostExecute( Bitmap bitmap ) {
-			if( bitmap != null ) {
-				vista.setImageBitmap( bitmap );
-				// Icona di file senza anteprima
-				if( vista.getTag(R.id.tag_tipo_file).equals(3) ) {
-					vista.setScaleType( ImageView.ScaleType.FIT_CENTER );
-					if( galleria ) {
-						RelativeLayout.LayoutParams parami = new RelativeLayout.LayoutParams(
-								RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT );
-						parami.addRule( RelativeLayout.ABOVE, R.id.media_testo );
-						vista.setLayoutParams( parami );
-					}
-				}
-			}
-		}
-	}*/
-
 	// Mostra le immagini con il tanto declamato Picasso
 	public static void dipingiMedia( final Media media, final ImageView vistaImmagine, final ProgressBar circo ) {
-		final String percorso = U.percorsoMedia(media);
+		int idAlbero;
+		// Confrontatore ha bisogno dell'id dell'albero nuovo per cercare nella sua cartella
+		View probabile = null;
+		if( vistaImmagine.getParent() != null && vistaImmagine.getParent().getParent() != null )
+			probabile = (View) vistaImmagine.getParent().getParent().getParent();
+		if( probabile != null && probabile.getId() == R.id.confronto_nuovo )
+			idAlbero = Globale.idAlbero2;
+		else idAlbero = Globale.preferenze.idAprendo;
+		final String percorso = percorsoMedia( idAlbero, media );
 		if( circo!=null ) circo.setVisibility( View.VISIBLE );
 		vistaImmagine.setTag( R.id.tag_tipo_file, 0 );
 		if( percorso != null ) {
@@ -672,7 +538,7 @@ public class U {
 							if( circo!=null ) circo.setVisibility( View.GONE );
 						}
 					});
-		} else if( media.getFile() != null ) { // magari è un'immagine in internet
+		} else if( media.getFile() != null && !media.getFile().isEmpty() ) { // magari è un'immagine in internet
 			final String percorsoFile = media.getFile();
 			Picasso.get().load(percorsoFile).fit()
 					//.centerCrop()
@@ -684,9 +550,7 @@ public class U {
 							vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
 							try {
 								new ImboscaImmagine(media).execute(new URL(percorsoFile));
-							} catch( Exception e ) {
-								e.printStackTrace();
-							}
+							} catch( Exception e ) {}
 						}
 						@Override
 						public void onError( Exception e ) {
@@ -702,14 +566,14 @@ public class U {
 	}
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
-	static String percorsoMedia( Media m ) {
+	public static String percorsoMedia( int idAlbero, Media m ) {
 		Globale.preferenze.traghetta(); // todo questo traghettatore poi se ne potrà andare
 		if( m.getFile() != null ) {
 			String nome = m.getFile().replace("\\", "/");
 			// Percorso FILE (quello nel gedcom)
 			if( new File(nome).isFile() )
 				return nome;
-			for( String dir : Globale.preferenze.alberoAperto().cartelle ) {
+			for( String dir : Globale.preferenze.getAlbero( idAlbero ).cartelle ) {
 				// Cartella media + percorso FILE
 				String percorsoRicostruito = dir + '/' + nome;
 				if( new File(percorsoRicostruito).isFile() )
@@ -758,15 +622,15 @@ public class U {
 				File cartellaCache = new File( Globale.contesto.getCacheDir().getPath() + "/" + Globale.preferenze.idAprendo );
 				if( !cartellaCache.exists() ) {
 					// Elimina extension "cache" da tutti i Media
-					ListaMedia visitaMedia = new ListaMedia( Globale.gc, true );
+					ListaMedia visitaMedia = new ListaMedia( Globale.gc, 0 );
 					Globale.gc.accept( visitaMedia );
-					for( Map.Entry<Media,Object> dato : visitaMedia.listaMedia.entrySet() )
-						if( dato.getKey().getExtension("cache") != null )
-							dato.getKey().putExtension( "cache", null );
+					for( Media media : visitaMedia.lista )
+						if( media.getExtension("cache") != null )
+							media.putExtension( "cache", null );
 					cartellaCache.mkdir();
 				}
 				String estensione = FilenameUtils.getName( url[0].getPath() );
-				if( estensione.lastIndexOf('.') > -1 )
+				if( estensione.lastIndexOf('.') > 0 )
 					estensione = estensione.substring( estensione.lastIndexOf('.')+1 );
 				String ext;
 				switch( estensione ) {
@@ -823,7 +687,7 @@ public class U {
 				// Se non lo trova cerca l'immagine principale in una pagina internet
 				if( opzioni.outWidth == -1 ) {
 					Connection connessione = Jsoup.connect(parametri[0]);
-					//if (connessione.equals(bitmap)) {    // TODO: verifica che un address sia associato all'hostname
+					//if (connessione.equals(bitmap)) {	// TODO: verifica che un address sia associato all'hostname
 					Document doc = connessione.get();
 					List<Element> lista = doc.select("img");
 					if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
@@ -844,11 +708,11 @@ public class U {
 						else larga = Integer.parseInt(img.attr("width"));
 						if (img.attr("height").isEmpty()) alta = 1;
 						else alta = Integer.parseInt(img.attr("height"));
-						if( larga * alta > maxDimensioniConAlt  &&  !img.attr("alt").isEmpty() ) {    // la più grande con alt
+						if( larga * alta > maxDimensioniConAlt  &&  !img.attr("alt").isEmpty() ) {	// la più grande con alt
 							imgGrandeConAlt = img;
 							maxDimensioniConAlt = larga * alta;
 						}
-						if( larga * alta > maxDimensioni ) {    // la più grande anche senza alt
+						if( larga * alta > maxDimensioni ) {	// la più grande anche senza alt
 							imgGrande = img;
 							maxDimensioni = larga * alta;
 						}
@@ -930,7 +794,6 @@ public class U {
 		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoGalleria,0) ) {
 			Intent finalIntent = new Intent( intentoGalleria );
 			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
-			s.l( info.activityInfo.packageName +"   "+ info.activityInfo.name);
 			listaIntenti.add( finalIntent );
 			listaRisolvi.add( info );
 		}
@@ -949,17 +812,18 @@ public class U {
 					public void onClick(DialogInterface dialog, int id) {
 						Intent intento = listaIntenti.get(id);
 						if( intento.getComponent().getPackageName().equals("app.familygem") ) {
+							// Crea un Media vuoto
 							Media med;
 							if( codice==4173 || codice==2173 ) { // Media inline
 								med = new Media();
 								med.setFileTag( "FILE" );
 								contenitore.addMedia( med );
-								Ponte.manda( contenitore, "contenitore" );
 							} else // Media condiviso
 								med = Galleria.nuovoMedia( contenitore );
 							med.setFile( "" );
-							Ponte.manda( med, "oggetto" );
+							Memoria.setPrimo( med );
 							contesto.startActivity( intento );
+							U.salvaJson( true, Memoria.oggettoCapo() );
 						} else if( frammento != null )
 							frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
 						else
@@ -990,7 +854,7 @@ public class U {
 
 	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
 	// ritorna true se apre il dialogo e quindi bisogna bloccare l'aggiornamento dell'attività
-	// Todo: rinomina tipo stoccaImmagine
+	// Todo: rinomina tipo vuoiRitagliare()
 	static boolean ritagliaImmagine( final Context contesto, final Fragment frammento, Intent data, Media media ) {
 		final File fileMedia = settaMedia( contesto, data, media );
 		if( fileMedia == null )	return false;
@@ -998,21 +862,30 @@ public class U {
 		if( tipoMime != null && tipoMime.startsWith("image/") ) {
 			ImageView vistaImmagine = new ImageView( contesto );
 			U.dipingiMedia( media, vistaImmagine, null );
-			Globale.mediaCroppato = media; // Media in attesa di essere aggiornato col nuovo percorso file
-			AlertDialog.Builder costruttore = new AlertDialog.Builder( contesto );
-			costruttore.setMessage( R.string.want_crop_image )
+			Globale.mediaCroppato = media; // Media parcheggiato in attesa di essere aggiornato col nuovo percorso file
+			Globale.editato = false; // per non innescare il recreate() che negli Android nuovi non fa comparire l'AlertDialog
+			new AlertDialog.Builder( contesto )
 					.setView(vistaImmagine)
-					.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
+					.setMessage( R.string.want_crop_image )
+					.setPositiveButton( R.string.yes, new DialogInterface.OnClickListener() {
+						@Override
 						public void onClick( DialogInterface dialog, int id ) {
 							tagliaImmagine( contesto, fileMedia, frammento );
 						}
-					}).setNegativeButton( android.R.string.no, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick( DialogInterface dialog, int which ) {
-					((AppCompatActivity)contesto).recreate();
-					Globale.editato = true;
-				}
-			} )	.create().show();
+					}).setNeutralButton( R.string.no, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick( DialogInterface dialog, int which ) {
+							// todo: anziché recreate() -> if( contesto instanceof Individuo) aggiorna() fragment 0
+							((AppCompatActivity)contesto).recreate();
+							Globale.editato = true; // per rinfrescare le pagine precedenti
+						}
+					}).setOnCancelListener(	new DialogInterface.OnCancelListener() {
+						@Override // click fuori dal dialogo
+						public void onCancel( DialogInterface dialog ) {
+							((AppCompatActivity)contesto).recreate();
+							Globale.editato = true;
+						}
+					}).show();
 			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, 400 );
 			vistaImmagine.setLayoutParams( params ); // l'assegnazione delle dimensioni deve venire DOPO la creazione del dialogo
 			return true;
@@ -1050,7 +923,7 @@ public class U {
 			Uri uri = data.getData();
 			String percorso = null;
 			if( uri != null ) percorso = U.uriPercorsoFile( uri );
-			if( percorso != null && percorso.lastIndexOf('/') > 0 ) {    // se è un percorso completo del file
+			if( percorso != null && percorso.lastIndexOf('/') > 0 ) {	// se è un percorso completo del file
 				// Punta direttamente il file
 				fileMedia = new File( percorso );
 			} else {
@@ -1059,7 +932,7 @@ public class U {
 				if( !dirMemoria.exists() )
 					dirMemoria.mkdir();
 				// File di qualsiasi tipo
-				if( percorso != null ) {    // è solo il nome del file 'pippo.png'
+				if( percorso != null ) {	// è solo il nome del file 'pippo.png'
 					InputStream input = contesto.getContentResolver().openInputStream( uri );
 					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
 					FileUtils.copyInputStreamToFile( input, fileMedia );
@@ -1093,7 +966,7 @@ public class U {
 		while( file.exists() ) {
 			incremento++;
 			file = new File( dir, nome.substring(0,nome.lastIndexOf('.'))
-					+ incremento + nome.substring(nome.lastIndexOf('.'),nome.length()));
+					+ incremento + nome.substring(nome.lastIndexOf('.')) );
 		}
 		return file;
 	}
@@ -1102,7 +975,9 @@ public class U {
 	static void fineRitaglioImmagine( Intent data ) {
 		CropImage.ActivityResult risultato = CropImage.getActivityResult(data);
 		Uri uri = risultato.getUri();
-		Globale.mediaCroppato.setFile( U.uriPercorsoFile( uri ) );
+		String percorso = U.uriPercorsoFile( uri );
+		Picasso.get().invalidate( new File(percorso) ); // cancella dalla cache l'eventuale immagine prima del ritaglio che ha lo stesso percorso
+		Globale.mediaCroppato.setFile( percorso );
 	}
 
 	// Risposta a tutte le richieste di permessi per Android 6+
@@ -1122,33 +997,36 @@ public class U {
 	// Metodi di creazione di elementi di lista
 
 	// aggiunge a un Layout una generica voce titolo-testo
-	// TODO: DEPRECARLO prima o poi
-	public static void metti( LinearLayout scatola, String tit, String cosa ) {
+	// Usato seriamente solo da dettaglio.Cambiamenti
+	public static void metti( LinearLayout scatola, String tit, String testo ) {
 		View vistaPezzo = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_fatto, scatola, false );
 		scatola.addView( vistaPezzo );
 		((TextView)vistaPezzo.findViewById( R.id.fatto_titolo )).setText( tit );
 		TextView vistaTesto = vistaPezzo.findViewById( R.id.fatto_testo );
-		if( cosa == null ) vistaTesto.setVisibility( View.GONE );
+		if( testo == null ) vistaTesto.setVisibility( View.GONE );
 		else {
-			vistaTesto.setText( cosa );
-			((TextView)vistaPezzo.findViewById( R.id.fatto_edita )).setText( cosa );
+			vistaTesto.setText( testo );
+			//((TextView)vistaPezzo.findViewById( R.id.fatto_edita )).setText( testo );
 		}
-		((Activity)scatola.getContext()).registerForContextMenu( vistaPezzo );
+		//((Activity)scatola.getContext()).registerForContextMenu( vistaPezzo );
 	}
 
-	// Compone il testo coi dettagli di un individuo
-	static void dettagli( Person tizio, TextView vistaDettagli ) {
+	// Compone il testo coi dettagli di un individuo e lo mette nella vista testo
+	// inoltre restituisce lo stesso testo per Confrontatore
+	static String dettagli( Person tizio, TextView vistaDettagli ) {
 		String anni = U.dueAnni( tizio, true );
 		String luoghi = Anagrafe.dueLuoghi( tizio );
-		if( anni.isEmpty() && luoghi.isEmpty() ) {
+		if( anni.isEmpty() && luoghi.isEmpty() && vistaDettagli != null ) {
 			vistaDettagli.setVisibility( View.GONE );
 		} else {
 			if( ( anni.length() > 10 || luoghi.length() > 20 ) && ( !anni.isEmpty() && !luoghi.isEmpty() ) )
 				anni += "\n" + luoghi;
 			else
 				anni += "   " + luoghi;
-			vistaDettagli.setText( anni.trim() );
+			if( vistaDettagli != null )
+				vistaDettagli.setText( anni.trim() );
 		}
+		return anni.trim();
 	}
 
 	public static View mettiIndividuo( LinearLayout scatola, Person persona, String ruolo ) {
@@ -1166,7 +1044,7 @@ public class U {
 		if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
 		else vistaTitolo.setText( titolo );
 		dettagli( persona, (TextView) vistaIndi.findViewById( R.id.indi_dettagli ) );
-		unaFoto( persona, (ImageView)vistaIndi.findViewById(R.id.indi_foto) );
+		unaFoto( Globale.gc, persona, (ImageView)vistaIndi.findViewById(R.id.indi_foto) );
 		if( !U.morto(persona) )
 			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( View.GONE );
 		if( U.sesso(persona) == 1 )
@@ -1178,32 +1056,43 @@ public class U {
 	}
 
 	// Tutte le note di un oggetto
-	public static void mettiNote( final LinearLayout scatola, final Object contenitore, boolean dettagli ) {
+	public static void mettiNote( LinearLayout scatola, Object contenitore, boolean dettagli ) {
 		for( final Note nota : ((NoteContainer)contenitore).getAllNotes( Globale.gc ) ) {
-			View vistaNota = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_nota, scatola, false);
-			scatola.addView( vistaNota );
-			((TextView)vistaNota.findViewById( R.id.nota_testo )).setText( nota.getValue() );
-			int quanteCitaFonti = nota.getSourceCitations().size();
-			TextView vistaCitaFonti = vistaNota.findViewById( R.id.nota_fonti );
-			if( quanteCitaFonti > 0 && dettagli ) vistaCitaFonti.setText( String.valueOf(quanteCitaFonti) );
-			else vistaCitaFonti.setVisibility( View.GONE );
-			if( dettagli ) {
-				vistaNota.setTag( R.id.tag_oggetto, nota );
-				vistaNota.setTag( R.id.tag_contenitore, contenitore );	// inutile. da tenere per un'eventuale Quaderno delle note
-				if( scatola.getContext() instanceof Individuo ) { // Fragment individuoEventi
-					((AppCompatActivity)scatola.getContext()).getSupportFragmentManager()
-							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )	// non garantito in futuro
-							.registerForContextMenu( vistaNota );
-				} else	// ok nelle AppCompatActivity
-					((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaNota );
-				vistaNota.setOnClickListener( new View.OnClickListener() {
-					public void onClick( View v ) {
-						Ponte.manda( nota, "oggetto" );
-						Ponte.manda( contenitore, "contenitore" );
-						scatola.getContext().startActivity( new Intent( scatola.getContext(), Nota.class ) );
-					}
-				} );
-			}
+			mettiNota( scatola, nota, dettagli );
+		}
+	}
+
+	// Aggiunge una singola nota a un layout, con i dettagli o no
+	public static void mettiNota( final LinearLayout scatola, final Note nota, boolean dettagli ) {
+		final Context contesto = scatola.getContext();
+		View vistaNota = LayoutInflater.from(contesto).inflate( R.layout.pezzo_nota, scatola, false);
+		scatola.addView( vistaNota );
+		TextView testoNota = vistaNota.findViewById( R.id.nota_testo );
+		testoNota.setText( nota.getValue() );
+		int quanteCitaFonti = nota.getSourceCitations().size();
+		TextView vistaCitaFonti = vistaNota.findViewById( R.id.nota_fonti );
+		if( quanteCitaFonti > 0 && dettagli ) vistaCitaFonti.setText( String.valueOf(quanteCitaFonti) );
+		else vistaCitaFonti.setVisibility( View.GONE );
+		if( dettagli ) {
+			vistaNota.setTag( R.id.tag_oggetto, nota );
+			if( contesto instanceof Individuo ) { // Fragment individuoEventi
+				((AppCompatActivity)contesto).getSupportFragmentManager()
+						.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )	// non garantito in futuro
+						.registerForContextMenu( vistaNota );
+			} else	// ok nelle AppCompatActivity
+				((AppCompatActivity)contesto).registerForContextMenu( vistaNota );
+			vistaNota.setOnClickListener( new View.OnClickListener() {
+				public void onClick( View v ) {
+					if( nota.getId() != null )
+						Memoria.setPrimo( nota );
+					else
+						Memoria.aggiungi( nota );
+					contesto.startActivity( new Intent( contesto, Nota.class ) );
+				}
+			} );
+		} else {
+			testoNota.setMaxLines( 3 );
+			testoNota.setEllipsize( TextUtils.TruncateAt.END );
 		}
 	}
 
@@ -1220,28 +1109,36 @@ public class U {
 	}
 
 	// Elimina una Nota inlinea o condivisa
-	public static void eliminaNota( Note nota, Object contenitore, View vista ) {
+	// Restituisce un array dei capostipiti modificati
+	public static Object[] eliminaNota( Note nota, View vista ) {
+		Set<Object> capi;
 		if( nota.getId() != null ) {	// nota OBJECT
 			// Prima rimuove i ref alla nota con un bel Visitor
-			RiferimentiNota eliminatoreNote = new RiferimentiNota( nota.getId(), true );
+			RiferimentiNota eliminatoreNote = new RiferimentiNota( Globale.gc, nota.getId(), true );
 			Globale.gc.accept( eliminatoreNote );
 			Globale.gc.getNotes().remove( nota );	// ok la rimuove se è un'object note
-			//Globale.gc.createIndexes();	// pare proprio non necessario
+			capi = eliminatoreNote.capostipiti;
 			if( Globale.gc.getNotes().isEmpty() )
 				Globale.gc.setNotes( null );
 		} else { // nota LOCALE
-			NoteContainer nc = (NoteContainer) contenitore;
+			new TrovaPila( Globale.gc, nota );
+			NoteContainer nc = (NoteContainer) Memoria.oggettoContenitore();
 			nc.getNotes().remove( nota ); // rimuove solo se è una nota locale, non se object note
 			if( nc.getNotes().isEmpty() )
 				nc.setNotes( null );
+			capi = new HashSet<>();
+			capi.add( Memoria.oggettoCapo() );
+			Memoria.arretra();
 		}
+		Memoria.annullaIstanze( nota );
 		if( vista != null )
 			vista.setVisibility( View.GONE );
+		return capi.toArray();
 	}
 
 	// Elenca tutti i media di un oggetto contenitore
 	public static void mettiMedia( LinearLayout scatola, Object contenitore, boolean dettagli ) {
-		RecyclerView griglia = new RecyclerView( scatola.getContext() );
+		RecyclerView griglia = new AdattatoreGalleriaMedia.RiciclaVista( scatola.getContext(), dettagli );
 		griglia.setHasFixedSize( true );
 		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( scatola.getContext(), dettagli?2:3 );
 		griglia.setLayoutManager( gestoreLayout );
@@ -1262,7 +1159,7 @@ public class U {
 		for( final SourceCitation citaz : listaCitaFonti ) {
 			View vistaCita = LayoutInflater.from( scatola.getContext() ).inflate( R.layout.pezzo_citazione_fonte, scatola, false );
 			scatola.addView( vistaCita );
-			if( citaz.getSource(Globale.gc) != null )    // source CITATION
+			if( citaz.getSource(Globale.gc) != null )	// source CITATION
 				( (TextView) vistaCita.findViewById( R.id.fonte_titolo ) ).setText( Biblioteca.titoloFonte( citaz.getSource( Globale.gc ) ) );
 			else // source NOTE, oppure Citazione di fonte che è stata eliminata
 				vistaCita.findViewById( R.id.citazione_fonte ).setVisibility( View.GONE );
@@ -1270,7 +1167,7 @@ public class U {
 			if( citaz.getValue() != null ) t += citaz.getValue() + "\n";
 			if( citaz.getPage() != null ) t += citaz.getPage() + "\n";
 			if( citaz.getDate() != null ) t += citaz.getDate() + "\n";
-			if( citaz.getText() != null ) t += citaz.getText() + "\n";    // vale sia per sourceNote che per sourceCitation
+			if( citaz.getText() != null ) t += citaz.getText() + "\n";	// vale sia per sourceNote che per sourceCitation
 			TextView vistaTesto = vistaCita.findViewById( R.id.citazione_testo );
 			if( t.isEmpty() ) vistaTesto.setVisibility( View.GONE );
 			else vistaTesto.setText( t.substring( 0, t.length() - 1 ) );
@@ -1280,7 +1177,7 @@ public class U {
 			mettiMedia( scatolaAltro, citaz, false );
 			vistaCita.setTag( R.id.tag_oggetto, citaz );
 			if( scatola.getContext() instanceof Individuo ) { // Fragment individuoEventi
-				( (AppCompatActivity) scatola.getContext() ).getSupportFragmentManager()
+				((AppCompatActivity)scatola.getContext()).getSupportFragmentManager()
 						.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )
 						.registerForContextMenu( vistaCita );
 			} else	// AppCompatActivity
@@ -1288,9 +1185,9 @@ public class U {
 
 			vistaCita.setOnClickListener( new View.OnClickListener() {
 				public void onClick( View v ) {
-					Ponte.manda( citaz, "oggetto" );
-					Ponte.manda( contenitore, "contenitore" );
-					scatola.getContext().startActivity( new Intent( scatola.getContext(), CitazioneFonte.class ) );
+					Intent intento = new Intent( scatola.getContext(), CitazioneFonte.class );
+					Memoria.aggiungi( citaz );
+					scatola.getContext().startActivity( intento );
 				}
 			} );
 		}
@@ -1305,16 +1202,17 @@ public class U {
 		((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFonte );
 		vistaFonte.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View v ) {
-				Ponte.manda( fonte, "oggetto" );
+				Memoria.setPrimo( fonte );
 				scatola.getContext().startActivity( new Intent( scatola.getContext(), Fonte.class) );
 			}
 		} );
 	}
 
-	public static void linkaPersona( final LinearLayout scatola, final Person p, final int scheda ) {
+	// La view ritornata è usata da Condivisione
+	public static View linkaPersona( final LinearLayout scatola, final Person p, final int scheda ) {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_individuo_piccolo, scatola, false );
 		scatola.addView( vistaPersona );
-		U.unaFoto( p, (ImageView)vistaPersona.findViewById(R.id.collega_foto) );
+		U.unaFoto( Globale.gc, p, (ImageView)vistaPersona.findViewById(R.id.collega_foto) );
 		((TextView)vistaPersona.findViewById( R.id.collega_nome )).setText( U.epiteto(p) );
 		String dati = U.dueAnni(p,false);
 		TextView vistaDettagli = vistaPersona.findViewById( R.id.collega_dati );
@@ -1334,23 +1232,80 @@ public class U {
 				scatola.getContext().startActivity( intento );
 			}
 		} );
+		return vistaPersona;
 	}
 
-	public static void cambiamenti( final LinearLayout scatola, Change cambi ) {
-		if( cambi != null ) {
-			View vistaPezzo = LayoutInflater.from( scatola.getContext() ).inflate( R.layout.pezzo_fatto, scatola, false );
-			scatola.addView( vistaPezzo );
-			( (TextView) vistaPezzo.findViewById( R.id.fatto_titolo ) ).setText( R.string.change_date );
-			TextView vistaTesto = vistaPezzo.findViewById( R.id.fatto_testo );
+	// Usato da dispensa
+	static void linkaMedia( final LinearLayout scatola, final Media media ) {
+		View vistaMedia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_media, scatola, false );
+		scatola.addView( vistaMedia );
+		AdattatoreGalleriaMedia.arredaMedia( media, (TextView)vistaMedia.findViewById(R.id.media_testo), (TextView)vistaMedia.findViewById(R.id.media_num) );
+		LinearLayout.LayoutParams parami = (LinearLayout.LayoutParams)vistaMedia.getLayoutParams();
+		parami.height = 120;
+		U.dipingiMedia( media, (ImageView)vistaMedia.findViewById(R.id.media_img), (ProgressBar)vistaMedia.findViewById(R.id.media_circolo) );
+		vistaMedia.setOnClickListener( new View.OnClickListener() {
+			public void onClick( View v ) {
+				Memoria.setPrimo( media );
+				scatola.getContext().startActivity( new Intent( scatola.getContext(), Immagine.class) );
+			}
+		} );
+	}
+
+	// Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipite
+	public static void mettiDispensa( LinearLayout scatola, Object cosa, int tit ) {
+		View vista = LayoutInflater.from(scatola.getContext()).inflate( R.layout.dispensa, scatola, false );
+		TextView vistaTit = vista.findViewById( R.id.dispensa_titolo );
+		vistaTit.setText( tit );
+		vistaTit.setBackground( AppCompatResources.getDrawable(scatola.getContext(),R.drawable.sghembo) ); // per android 4
+		scatola.addView( vista );
+		LinearLayout dispensa = vista.findViewById( R.id.dispensa_scatola );
+		if( cosa instanceof Object[] ) {
+			for( Object o : (Object[])cosa )
+				mettiQualsiasi( dispensa, o );
+		} else
+			mettiQualsiasi( dispensa, cosa );
+
+	}
+
+	// Riconosce il tipo di record e aggiunge il link appropriato alla scatola
+	static void mettiQualsiasi( LinearLayout scatola, Object record ) {
+		if( record instanceof Person )
+			linkaPersona( scatola, (Person)record, 1 );
+		else if( record instanceof Source )
+			linkaFonte( scatola, (Source)record );
+		else if( record instanceof Family )
+			Chiesa.mettiFamiglia( scatola, (Family)record );
+		else if( record instanceof Repository )
+			ArchivioRef.mettiArchivio( scatola, (Repository)record );
+		else if( record instanceof Note )
+			mettiNota( scatola, (Note)record, true );
+		else if( record instanceof Media )
+			linkaMedia( scatola, (Media)record );
+	}
+
+	// Aggiunge al layout il pezzo con la data e tempo di Cambiamento
+	public static View cambiamenti( final LinearLayout scatola, final Change cambi ) {
+		View vistaCambio = null;
+		if( cambi != null && Globale.preferenze.esperto ) {
+			vistaCambio = LayoutInflater.from( scatola.getContext() ).inflate( R.layout.pezzo_data_cambiamenti, scatola, false );
+			scatola.addView( vistaCambio );
+			TextView vistaTesto = vistaCambio.findViewById( R.id.cambi_testo );
 			String dataOra = cambi.getDateTime().getValue() + " - " + cambi.getDateTime().getTime();
 			if( dataOra.isEmpty() ) vistaTesto.setVisibility( View.GONE );
 			else vistaTesto.setText( dataOra );
-			LinearLayout scatolaNote = vistaPezzo.findViewById( R.id.fatto_note );
+			LinearLayout scatolaNote = vistaCambio.findViewById( R.id.cambi_note );
 			for( Estensione altroTag : trovaEstensioni( cambi ) )
 				metti( scatolaNote, altroTag.nome, altroTag.testo );
 			// Grazie al mio contributo la data cambiamento può avere delle note
-			U.mettiNote( scatolaNote, cambi, true );
+			mettiNote( scatolaNote, cambi, false );
+			vistaCambio.setOnClickListener( new View.OnClickListener() {
+				public void onClick( View v ) {
+					Memoria.aggiungi( cambi );
+					scatola.getContext().startActivity( new Intent( scatola.getContext(), Cambiamenti.class ) );
+				}
+			} );
 		}
+		return vistaCambio;
 	}
 
 	// Chiede conferma di eliminare un elemento
@@ -1359,9 +1314,50 @@ public class U {
 		return false;
 	}
 
-	public static void salvaJson() {
+	// Aggiorna la data di cambiamento del/dei record
+	public static void aggiornaDate( Object ... oggetti ) {
+		for( Object aggiornando : oggetti ) {
+			try { // se aggiornando non ha il metodo get/setChange, si passa oltre silenziosamente
+				Change chan = (Change)aggiornando.getClass().getMethod( "getChange" ).invoke( aggiornando );
+				if( chan == null ) // il record non ha ancora un CHAN
+					chan = new Change();
+				DateTime dataTempo = new DateTime();
+				Date now = new Date();
+				dataTempo.setValue( String.format(Locale.ENGLISH,"%te %<Tb %<tY",now) );
+				dataTempo.setTime( String.format(Locale.ENGLISH,"%tT",now) );
+				chan.setDateTime(dataTempo);
+				aggiornando.getClass().getMethod( "setChange", Change.class ).invoke( aggiornando, chan );
+				// Estensione con l'id della zona, una stringa tipo 'America/Sao_Paulo'
+				chan.putExtension( "zona", TimeZone.getDefault().getID() );
+				//s.l( "DATA CAMBIO "+aggiornando.hashCode()+" "+ aggiornando.getClass().getSimpleName() +"\t"+ dataTempo.getValue() +" - "+dataTempo.getTime() );
+			} catch( Exception e ) {}
+		}
+		// in header ci sono ben due campi data ma nessuno è la data dell'ultima modifica dell'albero
+	}
+
+	// Eventualmente salva il Json
+	public static void salvaJson( boolean rinfresca, Object ... oggetti ) {
+		aggiornaDate( oggetti );
+		if( rinfresca )
+			Globale.editato = true;
+
+		// al primo salvataggio marchia gli autori
+		if( Globale.preferenze.alberoAperto().grado == 9 ) {
+			for( Submitter autore : Globale.gc.getSubmitters() )
+				autore.putExtension( "passato", true );
+			Globale.preferenze.alberoAperto().grado = 10;
+			Globale.preferenze.salva();
+		}
+
 		if( Globale.preferenze.autoSalva )
 			salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+		else { // mostra il tasto Salva
+			Globale.daSalvare = true;
+			if( Globale.vistaPrincipe != null ) {
+				NavigationView menu = Globale.vistaPrincipe.findViewById(R.id.menu);
+				menu.getHeaderView(0).findViewById( R.id.menu_salva ).setVisibility( View.VISIBLE );
+			}
+		}
 	}
 
 	static void salvaJson( Gedcom gc, int idAlbero ) {
@@ -1380,10 +1376,129 @@ public class U {
 		else return ((JsonPrimitive)ignoto).getAsInt();
 	}
 
-	// Valuta se ci sono individui collegabili a un individuo
+	static String castaJsonString( Object ignoto ) {
+		if( ignoto instanceof String ) return (String) ignoto;
+		else return ((JsonPrimitive)ignoto).getAsString();
+	}
+
+	// Valuta se ci sono individui collegabili rispetto a un individuo.
+	// Usato per decidere se far comparire il menu 'Collega persona esistente'
 	static boolean ciSonoIndividuiCollegabili( Person piolo ) {
 		int numTotali = Globale.gc.getPeople().size();
+		if( numTotali > 0 && ( Globale.preferenze.esperto // gli esperti possono sempre
+				|| piolo == null ) ) // in una famiglia vuota unRappresentanteDellaFamiglia è null
+			return true;
 		int numFamili = Anagrafe.quantiFamiliari( piolo );
 		return numTotali > numFamili+1;
+	}
+
+	// Chiede se referenziare un autore nell'header
+	static void autorePrincipale( Context contesto, final String idAutore ) {
+		final Header[] testa = { Globale.gc.getHeader() };
+		if( testa[0] == null || testa[0].getSubmitterRef() == null ) {
+			new AlertDialog.Builder( contesto ).setMessage( R.string.make_main_submitter )
+					.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick( DialogInterface dialog, int id ) {
+							if( testa[0] == null ) {
+								testa[0] = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo+".json" );
+								Globale.gc.setHeader(testa[0]);
+							}
+							testa[0].setSubmitterRef( idAutore );
+							U.salvaJson( true );
+						}
+					} ).setNegativeButton( R.string.no, null ).show();
+		}
+	}
+
+	// Restituisce il primo autore non passato
+	static Submitter autoreFresco( Gedcom gc ) {
+		for( Submitter autore : gc.getSubmitters() ) {
+			if( autore.getExtension( "passato" ) == null )
+				return autore;
+		}
+		return null;
+	}
+
+	// Verifica se un autore ha partecipato alle condivisioni, per non farlo eliminare
+	static boolean autoreHaCondiviso( Submitter autore ) {
+		List<Armadio.Invio> condivisioni = Globale.preferenze.alberoAperto().condivisioni;
+		boolean inviatore = false;
+		if( condivisioni != null )
+			for( Armadio.Invio invio : condivisioni )
+				if( autore.getId().equals( invio.submitter ) )
+					inviatore = true;
+		return inviatore;
+	}
+
+	// Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
+	// restituisce true per bloccare Diagramma
+	public static boolean qualiGenitoriMostrare( final Context contesto, final Person perno, final Class attivita ) {
+		if( perno.getParentFamilies(Globale.gc).size() > 1 ) {
+			List<String> famigliePerno = new ArrayList<>();
+			for( Family fam : perno.getParentFamilies( Globale.gc ) ) {
+				String etichetta = "";
+				if( !fam.getHusbands(Globale.gc).isEmpty() )
+					etichetta = U.epiteto( fam.getHusbands(Globale.gc).get(0) );
+				if( !fam.getWives(Globale.gc).isEmpty() )
+					etichetta += " & " + U.epiteto( fam.getWives(Globale.gc).get(0) );
+				famigliePerno.add( etichetta );
+			}
+			new AlertDialog.Builder( contesto ).setTitle( R.string.which_parents )
+					.setItems( famigliePerno.toArray(new String[0]), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick( DialogInterface dialog, int quale ) {
+							Intent intento = new Intent( contesto, attivita );
+							if( attivita.equals( Principe.class ) ) {
+								Globale.individuo = perno.getId();
+								intento.putExtra( "genitoriNum", quale );
+							} else if( attivita.equals( Famiglia.class ) )
+								Memoria.setPrimo( perno.getParentFamilies(Globale.gc).get(quale) );
+							contesto.startActivity( intento );
+						}
+					}).show();
+			return true;
+		} else if( attivita.equals( Famiglia.class ) ) {
+			Memoria.setPrimo( perno.getParentFamilies(Globale.gc).get(0) );
+			contesto.startActivity( new Intent( contesto, attivita ) );
+		}
+		return false;
+	}
+
+	public static void qualiConiugiMostrare( final Context contesto, final Person perno ) {
+		if( perno.getSpouseFamilies(Globale.gc).size() > 1 ) {
+			List<String> famigliePerno = new ArrayList<>();
+			for( Family fam : perno.getSpouseFamilies( Globale.gc ) ) {
+				String etichetta = "";
+				if( !fam.getHusbands(Globale.gc).isEmpty() )
+					etichetta = U.epiteto( fam.getHusbands(Globale.gc).get(0) );
+				if( !fam.getWives(Globale.gc).isEmpty() )
+					etichetta += " & " + U.epiteto( fam.getWives(Globale.gc).get(0) );
+				famigliePerno.add( etichetta );
+			}
+			new AlertDialog.Builder( contesto ).setTitle( R.string.which_spouses )
+					.setItems( famigliePerno.toArray(new String[0]), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick( DialogInterface dialog, int quale ) {
+							Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( quale ) );
+							contesto.startActivity( new Intent( contesto, Famiglia.class ) );
+						}
+					}).show();
+		} else {
+			Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( 0 ) );
+			contesto.startActivity( new Intent( contesto, Famiglia.class ) );
+		}
+	}
+
+	// Mostra un messaggio Toast anche da un thread collaterale
+	static void tosta( final Activity contesto, final int messaggio ) {
+		tosta( contesto, contesto.getString( messaggio ) );
+	}
+	static void tosta( final Activity contesto, final String messaggio ) {
+		contesto.runOnUiThread( new Runnable() {
+			public void run() {
+				Toast.makeText( contesto, messaggio, Toast.LENGTH_LONG ).show();
+			}
+		} );
 	}
 }

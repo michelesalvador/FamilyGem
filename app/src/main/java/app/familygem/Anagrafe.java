@@ -25,7 +25,9 @@ import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import app.familygem.dettaglio.Famiglia;
 import static app.familygem.Globale.gc;
 
@@ -35,35 +37,30 @@ public class Anagrafe extends Fragment {
 	List<Person> listaIndividui;
 	
 	@Override
-	public void onCreate( Bundle stato ) {
-		super.onCreate( stato );
-	}
-
-	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
+	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
 		View vista = inflater.inflate( R.layout.anagrafe, container, false );
 		scatola = vista.findViewById( R.id.anagrafe_scatola );
 		if( gc != null ) {
 			setHasOptionsMenu(true);
 			listaIndividui = gc.getPeople();
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " " + getText(R.string.persons) );
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " " + getString(R.string.persons).toLowerCase() );
 			if( Globale.ordineAnagrafe > 0 ) {  // 0 ovvero senza ordinamento
 				final boolean gliIdsonoNumerici = verificaIdNumerici();
 				Collections.sort(listaIndividui, new Comparator<Person>() {
 					public int compare(Person p1, Person p2) {
 						switch( Globale.ordineAnagrafe ) {
-							case 1:    // ordina per ID Gedcom
+							case 1: // ordina per ID Gedcom
 								if( gliIdsonoNumerici )
-									return idNumerico(p1.getId()) - idNumerico(p2.getId());
+									return U.soloNumeri(p1.getId()) - U.soloNumeri(p2.getId());
 								else
 									return p1.getId().compareToIgnoreCase(p2.getId());
-							case 2:    // ordina per cognome
-								if (p1.getNames().size() == 0)    // i nomi null vanno in fondo
+							case 2: // ordina per cognome
+								if (p1.getNames().size() == 0) // i nomi null vanno in fondo
 									return (p2.getNames().size() == 0) ? 0 : 1;
 								if (p2.getNames().size() == 0)
 									return -1;
 								return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
-							case 3:    // ordina per anno
+							case 3: // ordina per anno
 								return annoBase(p1) - annoBase(p2);
 							case 4:	// Ordina per numero di familiari
 								return quantiFamiliari(p2) - quantiFamiliari(p1);
@@ -145,21 +142,6 @@ public class Anagrafe extends Fragment {
 		return true;
 	}
 
-	// Estrae i soli numeri da un id che può contenere anche lettere
-	static int idNumerico( String id ) {
-		//return Integer.parseInt( id.replaceAll("\\D+","") );	// sintetico ma lento
-		int num = 0;
-		int x = 1;
-		for( int i = id.length()-1; i >= 0; --i ){
-			int c = id.charAt( i );
-			if( c > 47 && c < 58 ){
-				num += (c-48) * x;
-				x *= 10;
-			}
-		}
-		return num;
-	}
-
 	// Restituisce una stringa con cognome e nome attaccati: 'dalla ValleFrancesco Maria '
 	private String cognomeNome(Person tizio) {
 		String tutto = tizio.getNames().get(0).getValue();
@@ -176,16 +158,8 @@ public class Anagrafe extends Fragment {
 	private int annoBase( Person p ) {
 		int anno = 9999;
 		for( EventFact unFatto : p.getEventsFacts() ) {
-			if( unFatto.getDate() != null ) {
-				String data = unFatto.getDate();
-				data = data.substring( data.lastIndexOf(" ")+1 );	// prende l'anno che sta in fondo alla data
-				if( data.contains("/") )	// gli anni tipo '1711/12' vengono semplificati in '1712'
-					data = data.substring(0,2).concat( data.substring(data.length()-2,data.length()) );
-				if( data.matches("[0-9]+") ) {
-					anno = Integer.parseInt(data);
-					break;
-				}
-			}
+			if( unFatto.getDate() != null )
+				anno = new Datatore( unFatto.getDate() ).soloAnno();
 		}
 		return anno;
 	}
@@ -351,9 +325,9 @@ public class Anagrafe extends Fragment {
 		idIndi = (String) vista.getTag();
 		menu.add(0, 0, 0, R.string.diagram );
 		if( !gc.getPerson(idIndi).getParentFamilies(gc).isEmpty() )
-			menu.add(0, 1, 0, R.string.family_as_child );
+			menu.add(0, 1, 0, gc.getPerson(idIndi).getSpouseFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_child );
 		if( !gc.getPerson(idIndi).getSpouseFamilies(gc).isEmpty() )
-			menu.add(0, 2, 0, R.string.family_as_spouse );
+			menu.add(0, 2, 0, gc.getPerson(idIndi).getParentFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_spouse );
 		menu.add(0, 3, 0, R.string.modify );
 		menu.add(0, 4, 0, R.string.delete );
 	}
@@ -365,13 +339,9 @@ public class Anagrafe extends Fragment {
 			getFragmentManager().beginTransaction().replace( R.id.contenitore_fragment, new Diagramma() )
 					.addToBackStack(null).commit();
 		} else if( id == 1) {	// Famiglia come figlio
-			Intent intento = new Intent( getContext(), Famiglia.class );
-			intento.putExtra( "idFamiglia", gc.getPerson(idIndi).getParentFamilies(gc).get(0).getId() );
-			startActivity( intento );
+			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), Famiglia.class );
 		} else if( id == 2 ) {	// Famiglia come coniuge
-			Intent intento = new Intent( getContext(), Famiglia.class );
-			intento.putExtra( "idFamiglia", gc.getPerson(idIndi).getSpouseFamilies(gc).get(0).getId() );
-			startActivity( intento );
+			U.qualiConiugiMostrare( getContext(), gc.getPerson(idIndi) );
 		} else if( id == 3 ) {	// Modifica
 			Intent intento = new Intent( getContext(), EditaIndividuo.class );
 			intento.putExtra( "idIndividuo", idIndi );
@@ -385,28 +355,36 @@ public class Anagrafe extends Fragment {
 	}
 
 	// Cancella tutti i ref nelle famiglie della tal persona
-	static void scollega( String idScollegando ){
+	// Restituisce l'elenco delle famiglie affette
+	static Family[] scollega( String idScollegando ) {
 		Person egli = gc.getPerson( idScollegando );
-		for( Family f : egli.getParentFamilies(gc) )	// scollega i suoi ref nelle famiglie
-
+		Set<Family> famiglie = new HashSet<>();
+		for( Family f : egli.getParentFamilies(gc) ) {	// scollega i suoi ref nelle famiglie
 			f.getChildRefs().remove( f.getChildren(gc).indexOf(egli) );
+			famiglie.add( f );
+		}
 		for( Family f : egli.getSpouseFamilies(gc) ) {
-			if( f.getHusbands(gc).indexOf(egli) >= 0 )
+			if( f.getHusbands(gc).indexOf(egli) >= 0 ) {
 				f.getHusbandRefs().remove( f.getHusbands(gc).indexOf(egli) );
-			if( f.getWives(gc).indexOf(egli) >= 0 )
+				famiglie.add( f );
+			}
+			if( f.getWives(gc).indexOf(egli) >= 0 ) {
 				f.getWifeRefs().remove( f.getWives(gc).indexOf(egli) );
+				famiglie.add( f );
+			}
 		}
 		egli.setParentFamilyRefs( null );	// nell'indi scollega i ref delle famiglie a cui appartiene
 		egli.setSpouseFamilyRefs( null );
+		return famiglie.toArray( new Family[0] );
 	}
 
-	// Metodo per eliminare una persona dal gedcom	TODO: ERRORE GRAVISSIMO ELIMINANDO TORNANDO INDIETRO...
+	// Chiede conferma per eliminare una persona dal gedcom
 	public static void elimina( final String idEliminando, final Context contesto, final View vista ) {
 		AlertDialog.Builder alert = new AlertDialog.Builder( contesto );
-		alert.setMessage( contesto.getText(R.string.really_delete) + " " + U.epiteto( gc.getPerson(idEliminando) ) + "?");
+		alert.setMessage( contesto.getString(R.string.really_delete,U.epiteto(gc.getPerson(idEliminando))) );
 		alert.setPositiveButton( R.string.delete, new DialogInterface.OnClickListener() {
 			public void onClick( DialogInterface dialog, int id ) {
-				scollega( idEliminando );
+				Family[] famiglie = scollega( idEliminando );
 				gc.getPeople().remove( gc.getPerson( idEliminando ) );
 				gc.createIndexes();	// necessario
 				Globale.preferenze.alberoAperto().individui--;
@@ -417,7 +395,6 @@ public class Anagrafe extends Fragment {
 				Globale.preferenze.salva();
 				if( Globale.individuo != null && Globale.individuo.equals(idEliminando) )
 					Globale.individuo = idNuovaRadice;
-				Globale.editato = true;
 				if( vista == null )
 					//contesto.startActivity( new Intent( contesto, Principe.class ) );
 					((Activity)contesto).onBackPressed();
@@ -425,9 +402,8 @@ public class Anagrafe extends Fragment {
 					vista.setVisibility( View.GONE );
 					Snackbar.make( vista, R.string.person_deleted, Snackbar.LENGTH_SHORT ).show();
 				}
-				U.salvaJson();
+				U.salvaJson( true, (Object[])famiglie );
 			}
-		}).setNeutralButton( R.string.cancel, null )
-				.create().show();
+		}).setNeutralButton( R.string.cancel, null ).show();
 	}
 }

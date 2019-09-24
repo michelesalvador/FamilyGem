@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="20dp">
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginRight="8dp"
+		android:layout_toLeftOf="@id/cambi_testo"
+		android:text="@string/change_date" />
+
+	<TextView
+		android:id="@+id/cambi_testo"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:text="27 JUL 2019 - 12:13:14" />
+
+	<LinearLayout
+		android:id="@+id/cambi_note"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/cambi_testo"
+		android:orientation="vertical" />
+
+</RelativeLayout>

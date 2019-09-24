@@ -32,21 +32,22 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import app.familygem.dettaglio.Fonte;
+import app.familygem.visita.ListaCitazioniFonte;
 import static app.familygem.Globale.gc;
 
 public class Biblioteca extends Fragment {
 
-    List<Source> listaFonti;
+	List<Source> listaFonti;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+	}
 
-    @Override
-    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
+	@Override
+	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
 		listaFonti = gc.getSources();
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listaFonti.size() + " " + getString(R.string.sources).toLowerCase() );
+		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listaFonti.size() + " " + getString(R.string.sources).toLowerCase() );
 		setHasOptionsMenu(true);
 		if( Globale.ordineBiblioteca == 3 ) {
 			for( Source fonte : listaFonti ) {
@@ -68,13 +69,13 @@ public class Biblioteca extends Fragment {
 				return 0;
 			}
 		});
-        View vista = inflater.inflate(R.layout.ricicla_vista, container, false);
+		View vista = inflater.inflate(R.layout.ricicla_vista, container, false);
 		RecyclerView vistaFonti = vista.findViewById( R.id.riciclatore );
 		vistaFonti.setAdapter( new BibliotecAdapter() );
-        return vista;
-    }
+		return vista;
+	}
 
-    public class BibliotecAdapter extends RecyclerView.Adapter<GestoreBiblioteca> {
+	public class BibliotecAdapter extends RecyclerView.Adapter<GestoreBiblioteca> {
 		@Override
 		public void onBindViewHolder( final GestoreBiblioteca gestore, int i ) {
 			gestore.vistaId.setText( listaFonti.get(i).getId() );
@@ -89,25 +90,25 @@ public class Biblioteca extends Fragment {
 			}
 			gestore.vistaVolte.setText( String.valueOf(volte) );
 		}
-        @Override
-        public GestoreBiblioteca onCreateViewHolder( ViewGroup parent, int tipo ) {
-            View vistaFonte = LayoutInflater.from( parent.getContext() )
+		@Override
+		public GestoreBiblioteca onCreateViewHolder( ViewGroup parent, int tipo ) {
+			View vistaFonte = LayoutInflater.from( parent.getContext() )
 					.inflate(R.layout.biblioteca_pezzo, parent, false);
-	        registerForContextMenu( vistaFonte );
-            return new GestoreBiblioteca( vistaFonte );
-        }
+			registerForContextMenu( vistaFonte );
+			return new GestoreBiblioteca( vistaFonte );
+		}
 		@Override
 		public int getItemCount() {
 			return listaFonti.size();
 		}
-    }
+	}
 
-    class GestoreBiblioteca extends RecyclerView.ViewHolder {
-        TextView vistaId;
-        TextView vistaTitolo;
+	class GestoreBiblioteca extends RecyclerView.ViewHolder {
+		TextView vistaId;
+		TextView vistaTitolo;
 		TextView vistaVolte;
-        GestoreBiblioteca( View vista ) {
-        	super( vista );
+		GestoreBiblioteca( View vista ) {
+			super( vista );
 			vistaId = vista.findViewById( R.id.biblioteca_id );
 			vistaTitolo = vista.findViewById( R.id.biblioteca_titolo );
 			vistaVolte = vista.findViewById( R.id.biblioteca_volte );
@@ -121,13 +122,14 @@ public class Biblioteca extends Fragment {
 						getActivity().setResult( Activity.RESULT_OK, intent );
 						getActivity().finish();
 					} else {
-						Ponte.manda( gc.getSource( vistaId.getText().toString() ), "oggetto" );
+						Source fonte = gc.getSource( vistaId.getText().toString() );
+						Memoria.setPrimo( fonte );
 						startActivity( new Intent( getContext(), Fonte.class ) );
 					}
 				}
 			});
-        }
-    }
+		}
+	}
 
 	// Restituisce il titolo della fonte
 	static String titoloFonte( Source fon ) {
@@ -187,12 +189,7 @@ public class Biblioteca extends Fragment {
 
 	public static void nuovaFonte( Context contesto, Object contenitore ){
 		Source fonte = new Source();
-		int val, max = 0;
-		for( Source fon : gc.getSources() ) {
-			val = Anagrafe.idNumerico( fon.getId() );
-			if( val > max )	max = val;
-		}
-		fonte.setId(  "S" + (max+1) );
+		fonte.setId( U.nuovoId( gc, Source.class ) );
 		fonte.setTitle( "" );
 		gc.addSource( fonte );
 		if( contenitore != null ) {
@@ -200,10 +197,46 @@ public class Biblioteca extends Fragment {
 			citaFonte.setRef( fonte.getId() );
 			if( contenitore instanceof Note ) ((Note)contenitore).addSourceCitation( citaFonte );
 			else ((SourceCitationContainer)contenitore).addSourceCitation( citaFonte );
-			//Ponte.manda( contenitore, "contenitore" );
 		}
-		Ponte.manda( fonte, "oggetto" );
+		Memoria.setPrimo( fonte );
 		contesto.startActivity( new Intent( contesto, Fonte.class ) );
+	}
+
+	// Elimina la fonte, i Ref in tutte le SourceCitation che puntano ad essa, e le SourceCitation vuote
+	// Restituisce un array dei capostipiti modificati
+	// Todo le citazioni alla Source eliminata diventano Fonte-nota a cui bisognerebbe poter riattaccare una Source
+	public static Object[] eliminaFonte( Source fon ) {
+		ListaCitazioniFonte citazioni = new ListaCitazioniFonte( gc, fon.getId() );
+		for( ListaCitazioniFonte.Tripletta cita : citazioni.lista ) {
+			SourceCitation sc = cita.citazione;
+			sc.setRef( null );
+			// Se la SourceCitation non contiene altro si può eliminare
+			boolean eliminabile = true;
+			if( sc.getPage()!=null || sc.getDate()!=null || sc.getText()!=null || sc.getQuality()!=null
+					|| !sc.getAllNotes(gc).isEmpty() || !sc.getAllMedia(gc).isEmpty() || !sc.getExtensions().isEmpty() )
+				eliminabile = false;
+			if( eliminabile ) {
+				Object contenitore = cita.contenitore;
+				List<SourceCitation> lista;
+				if( contenitore instanceof Note )
+					lista = ((Note)contenitore).getSourceCitations();
+				else
+					lista = ((SourceCitationContainer)contenitore).getSourceCitations();
+				lista.remove( sc );
+				if( lista.isEmpty() ) {
+					if( contenitore instanceof Note )
+						((Note)contenitore).setSourceCitations( null );
+					else
+						((SourceCitationContainer)contenitore).setSourceCitations( null );
+				}
+			}
+		}
+		gc.getSources().remove( fon );
+		if( gc.getSources().isEmpty() )
+			gc.setSources( null );
+		gc.createIndexes();	// necessario
+		Memoria.annullaIstanze( fon );
+		return citazioni.getCapi();
 	}
 
 	// menu opzioni nella toolbar
@@ -246,11 +279,9 @@ public class Biblioteca extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {	// Elimina
-			// todo e le citazioni alla fonte non vanno eliminate?
-			gc.getSources().remove( gc.getSource(((TextView)vistaScelta.findViewById(R.id.biblioteca_id)).getText().toString()) );
-			gc.createIndexes();
 			vistaScelta.setVisibility( View.GONE );
-			U.salvaJson();
+			Object[] oggetti = eliminaFonte( gc.getSource(((TextView)vistaScelta.findViewById(R.id.biblioteca_id)).getText().toString()) );
+			U.salvaJson( false, oggetti );
 		} else {
 			return false;
 		}

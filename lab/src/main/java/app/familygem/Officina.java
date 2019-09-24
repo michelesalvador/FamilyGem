@@ -1,6 +1,7 @@
 package app.familygem;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -18,9 +19,8 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
@@ -31,31 +31,69 @@ import org.folg.gedcom.parser.ModelParser;
 import org.folg.gedcom.tools.CountsCollector;
 import org.folg.gedcom.tools.GedcomAnalyzer;
 import org.xml.sax.SAXParseException;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class Officina extends AppCompatActivity {
 
 	@Override
-	protected void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	protected void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 		setContentView(R.layout.officina);
 		//s.l( Globale.preferenze+"  "+ Globale.preferenze.idAprendo+"  "+ Globale.preferenze.alberoAperto() );
 
+		Intent intento = getIntent();
+		String action = intento.getAction();
+		Uri data = intento.getData();
+		s.l( action );
+		if( data != null )
+			s.l( data.getQuery() );
+
 		findViewById(R.id.bottone_vario).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
+				//percorsi_di_Sistema();
 				//new LoadImageFromURL().execute("http://www.cafleurebon.com/wp-content/uploads/2017/03/fica-mana-symbol-182x300.jpg");
-				new U.ZuppaMedia( (ImageView)findViewById(R.id.immagine), (ProgressBar)findViewById(R.id.circolo), null ).execute("https://www.google.com");
+				//new U.ZuppaMedia( (ImageView)findViewById(R.id.immagine), (ProgressBar)findViewById(R.id.circolo), null ).execute("https://www.google.com");
 				//database();
 				//mandaOggettoAttivita();
 				//prendi_file_da_FileManager();
+				/*if( BuildConfig.utenteAruba != null )
+					new InvioFTP().execute( getCacheDir() + "/Notepad3_4.18.512.992_Setup.zip" );*/
+				//new PostaDatiCondivisione().execute( BuildConfig.passwordAruba, "Tìtolo Albèro pròtto", "nòòme Mìtto Gròsso", "Bèllo Ciìao" );
+				//creaZipConCartella();
+				//listaAttivita( Officina.this );
+				apriFileConApp( getExternalFilesDir(null)+"/Document.pdf" ); //Environment.getExternalStorageDirectory()+"/Documents/nuovo.txt"
 			}
 		});
 
@@ -77,9 +115,146 @@ public class Officina extends AppCompatActivity {
 
 		findViewById(R.id.immagine).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				startActivity( new Intent( Officina.this, ListaGriglia.class ) );
+				startActivity( new Intent( Officina.this, Diagramma.class ) );
 			}
 		});
+	}
+
+	static void listaAttivita( Context contesto ) {
+		ActivityManager am = (ActivityManager)contesto.getSystemService(ACTIVITY_SERVICE);
+		List<ActivityManager.RunningTaskInfo> runningTaskInfoList = am.getRunningTasks(10);
+		//Iterator<ActivityManager.RunningTaskInfo> itr = runningTaskInfoList.iterator();
+		for ( ActivityManager.RunningTaskInfo info : runningTaskInfoList ) {
+			s.l( info.id +" "+ info.description +"\n"+ info.numActivities +" "+ info.topActivity.getClassName() );
+		}
+		am.getRunningAppProcesses();
+	}
+
+	public static void unzip(File source, String out) throws IOException {
+		try {
+			ZipInputStream zis = new ZipInputStream(new FileInputStream(source));
+			ZipEntry entry = zis.getNextEntry();
+			while (entry != null) {
+				File file = new File( out, entry.getName());
+				if (entry.isDirectory()) {
+					file.mkdirs();
+				} else {
+					File parent = file.getParentFile();
+					if (!parent.exists()) {
+						parent.mkdirs();
+					}
+					BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+					byte[] buffer = new byte[1024];
+					int location;
+					while ((location = zis.read(buffer)) != -1) {
+						bos.write(buffer, 0, location);
+					}
+				}
+				entry = zis.getNextEntry();
+			}
+		} catch( Exception e ){
+			e.printStackTrace();
+		}
+	}
+
+	// Crea un file zip con sottocartella
+	void creaZipConCartella() {
+			try {
+				FileOutputStream f = new FileOutputStream(getCacheDir() + "/cartellato.zip" );
+				ZipOutputStream zip = new ZipOutputStream( new BufferedOutputStream(f) );
+				zip.putNextEntry( new ZipEntry("xml/") );
+				zip.putNextEntry( new ZipEntry("xml/xml") );
+				zip.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+	}
+
+	// si connette a una pagina php e gli posta dei dati (da inserire in un databse)
+	static class PostaDatiCondivisione extends AsyncTask<String,Void,String> {
+		@Override
+		protected String doInBackground(String... stringhe) {
+			String risposta = null;
+			if( stringhe[0] != null )
+				try {
+					URL url = new URL("https://www.familygem.app/inserisci.php");
+					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+					conn.setRequestMethod("POST");
+					/*conn.setDoInput(true);
+					conn.setDoOutput(true);
+					conn.setReadTimeout(10000);
+					conn.setConnectTimeout(15000);
+					conn.setChunkedStreamingMode(0);*/
+					OutputStream out = new BufferedOutputStream( conn.getOutputStream() );
+					BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+					String dati = "password=" + URLEncoder.encode( stringhe[0], "UTF-8") +
+							//"&idData=" + stringhe[1] +
+							"&titoloAlbero=" + URLEncoder.encode( stringhe[1], "UTF-8") +
+							"&nomeMittente=" + URLEncoder.encode(stringhe[2], "UTF-8") +
+							"&nomeDestinatario=" + URLEncoder.encode(stringhe[3], "UTF-8");
+					s.l( dati );
+					writer.write( dati );
+					writer.flush();
+					writer.close();
+					out.close();
+
+					// Risposta
+					BufferedReader in = new BufferedReader( new InputStreamReader(conn.getInputStream()) );
+					/*String inputLine;
+					StringBuffer risposta = new StringBuffer();
+					while ((inputLine = in.readLine()) != null) { risposta.append(inputLine); }
+					in.close();*/
+					risposta = in.readLine();
+					in.close();
+					conn.disconnect();
+				} catch( Exception e ) {
+					e.printStackTrace();
+				}
+			return risposta;
+		}
+
+		@Override
+		protected void onPostExecute(String risposta) {
+			if( risposta.startsWith("20") )
+				s.l("OK " + risposta);
+			else
+				s.l( "KO " + risposta );
+		}
+	}
+
+	static class InvioFTP extends AsyncTask<String, Void, FTPClient> {
+		protected FTPClient doInBackground(String... percorsi) {
+			FTPClient ftpClient = new FTPClient();
+			try {
+				ftpClient.connect( "89.46.104.211", 21 );
+				ftpClient.enterLocalPassiveMode();
+				ftpClient.login( BuildConfig.utenteAruba, BuildConfig.passwordAruba );
+				ftpClient.changeWorkingDirectory("/www.familygem.app/condivisi");
+				s.l( "dir " + ftpClient.printWorkingDirectory() );
+				/*for( FTPFile dir : ftpClient.listDirectories() ) {
+					s.l ( ">>>>> " + dir.getName());
+				}*/
+				ftpClient.setFileType( FTP.BINARY_FILE_TYPE ); // FTP.ASCII_FILE_TYPE
+				BufferedInputStream buffIn;
+				buffIn = new BufferedInputStream( new FileInputStream( percorsi[0] ) );
+				//ftpClient.getModificationTime(  );
+				String dataId = new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance().getTime());
+				ftpClient.storeFile( dataId +".zip", buffIn );
+				buffIn.close();
+				ftpClient.logout();
+				ftpClient.disconnect();
+			} catch( Exception e ) {
+				e.printStackTrace();
+				//Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+					// Can't create handler inside thread that has not called Looper.prepare()
+			}
+			return ftpClient;
+		}
+		protected void onPostExecute(FTPClient result) {
+			s.l("FTP connection complete");
+			//ftpClient = result;
+			//Where ftpClient is a instance variable in the main activity
+		}
 	}
 
 	@Override
@@ -444,5 +619,49 @@ public class Officina extends AppCompatActivity {
 		protected void onPostExecute(Bitmap bitmap){
 			((ImageView)findViewById(R.id.immagine)).setImageBitmap( bitmap );
 		}
+	}
+
+	void apriFileConApp( String percorso ) {
+
+		// Un modo per avere la lista delle app con cui aprire un file
+		/* Non funziona negli android moderni: https://stackoverflow.com/questions/38200282
+		try {
+			File file = new File( percorso );
+			Intent intento = new Intent(Intent.ACTION_VIEW);
+			String tipo = URLConnection.guessContentTypeFromStream( new FileInputStream(file) );
+			if( tipo == null)
+				tipo = URLConnection.guessContentTypeFromName( file.getName() );
+			intento.setDataAndType( Uri.fromFile(file), tipo );
+			s.l( "<" + file.getName() + "> \"" + tipo + "\"  " + percorso );
+			startActivity( intento );
+		} catch( IOException e ) {
+			e.printStackTrace();
+		}*/
+
+		// Lista completa delle app installate
+		File file = new File( percorso );
+		MimeTypeMap mappa = MimeTypeMap.getSingleton();
+		String estensione = MimeTypeMap.getFileExtensionFromUrl( file.getName() );
+		String tipo = mappa.getMimeTypeFromExtension( estensione.toLowerCase() );
+		Intent mainIntent = new Intent( Intent.ACTION_MAIN );	// non trovo altro uso che questi due messi Così
+		mainIntent.addCategory( Intent.CATEGORY_LAUNCHER );
+		//mainIntent.setDataAndType( Uri.fromFile(file), tipo );	// no l'INTENTO diventa NON GESTIBILE
+		s.l( file.getAbsolutePath() +" "+estensione);
+		startActivity( mainIntent );
+
+		/* Tentativo di avviare il chooser che però non parte
+		File file = new File( percorso );
+		MimeTypeMap mappa = MimeTypeMap.getSingleton();
+		String estensione = MimeTypeMap.getFileExtensionFromUrl( file.getName() );
+		String tipo = mappa.getMimeTypeFromExtension( estensione.toLowerCase() );
+		Intent intento = new Intent( Intent.ACTION_VIEW );
+		intento.setDataAndType( Uri.fromFile(file), tipo );
+		intento.addFlags( Intent.FLAG_GRANT_READ_URI_PERMISSION );
+		Intent chooser = Intent.createChooser( intento, "Open with" );
+		if( intento.resolveActivity( getPackageManager() ) != null)
+			startActivity(chooser);
+		else
+			Toast.makeText( getApplicationContext(), "Nessuna app trovata per aprire.",
+					Toast.LENGTH_LONG ).show();*/
 	}
 }

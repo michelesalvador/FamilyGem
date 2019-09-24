@@ -12,15 +12,11 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
-import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Person;
-import org.folg.gedcom.parser.JsonParser;
 import java.io.File;
-import java.io.IOException;
 import app.familygem.visita.ListaMedia;
 
 public class InfoAlbero extends AppCompatActivity {
@@ -28,8 +24,8 @@ public class InfoAlbero extends AppCompatActivity {
 	Gedcom gc;
 
 	@Override
-	protected void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	protected void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 		setContentView(R.layout.info_albero );
 		LinearLayout scatola = findViewById( R.id.info_scatola );
 
@@ -37,51 +33,53 @@ public class InfoAlbero extends AppCompatActivity {
 		final Armadio.Cassetto questoAlbero = Globale.preferenze.getAlbero( idAlbero );
 		setTitle( questoAlbero.nome );
 		final File file = new File( getFilesDir(), idAlbero + ".json");
-		String i = getText(R.string.file) + ": " + file.getAbsolutePath();
-		if( Globale.gc != null && Globale.preferenze.idAprendo == idAlbero )
-			gc = Globale.gc;
-		else {
-			String contenuto = "";
-			try {
-				contenuto = FileUtils.readFileToString( file );
-			} catch( IOException e ) {
-				Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-			}
-			JsonParser jp = new JsonParser();
-			gc = jp.fromJson( contenuto );
-		}
-		if( gc == null )
-			i += "\n\n" + getString(R.string.no_useful_data);
-		else {
-			if( questoAlbero.individui < 100 ) {
-				findViewById( R.id.info_aggiorna ).setVisibility( View.GONE );
-				aggiornaDati( gc, questoAlbero );
-			}
-			i += "\n" + getText(R.string.Persons) + ": "+ questoAlbero.individui
-				+ "\n" + getText(R.string.families) + ": "+ gc.getFamilies().size()
-				+ "\n" + getText(R.string.Generations) + ": "+ questoAlbero.generazioni
-				+ "\n" + getText(R.string.media) + ": "+ questoAlbero.media
-				+ "\n" + getText(R.string.sources) + ": "+ gc.getSources().size()
-				+ "\n" + getText(R.string.repositories) + ": "+ gc.getRepositories().size();
-			if( questoAlbero.radice != null ) {
-				i += "\n" + "Radice: " + U.epiteto( gc.getPerson(questoAlbero.radice) );
-			}
-			if( questoAlbero.cartelle != null && !questoAlbero.cartelle.isEmpty() ) {
-				i += "\n\n" + "Media folders:";
-				for( String dir : questoAlbero.cartelle )
-					i += "\n" + dir;
+		String i;
+		if( !file.exists() ) {
+			i = getText(R.string.item_exists_but_file) + "\n" + file.getAbsolutePath();
+		} else  {
+			i = getText(R.string.file) + ": " + file.getAbsolutePath();
+			gc = Alberi.apriGedcomTemporaneo( idAlbero, false );
+			if( gc == null )
+				i += "\n\n" + getString(R.string.no_useful_data);
+			else {
+				// Aggiornamento dei dati automatico o su richiesta
+				if( questoAlbero.individui < 100 ) {
+					aggiornaDati( gc, questoAlbero );
+				} else {
+					Button bottoneAggiorna = findViewById( R.id.info_aggiorna );
+					bottoneAggiorna.setVisibility( View.VISIBLE );
+					bottoneAggiorna.setOnClickListener( new View.OnClickListener() {
+						@Override
+						public void onClick( View v ) {
+							aggiornaDati( gc, questoAlbero);
+							recreate();
+						}
+					});
+				}
+				i += "\n\n" + getText(R.string.persons) + ": "+ questoAlbero.individui
+					+ "\n" + getText(R.string.families) + ": "+ gc.getFamilies().size()
+					+ "\n" + getText(R.string.generations) + ": "+ questoAlbero.generazioni
+					+ "\n" + getText(R.string.media) + ": "+ questoAlbero.media
+					+ "\n" + getText(R.string.sources) + ": "+ gc.getSources().size()
+					+ "\n" + getText(R.string.repositories) + ": "+ gc.getRepositories().size();
+				if( questoAlbero.radice != null ) {
+					i += "\n" + getText(R.string.root) + ": " + U.epiteto( gc.getPerson(questoAlbero.radice) );
+				}
+				if( questoAlbero.cartelle != null && !questoAlbero.cartelle.isEmpty() ) {
+					i += "\n\n" + getText(R.string.media_folders) + ":";
+					for( String dir : questoAlbero.cartelle )
+						i += "\n" + dir;
+				}
+				if( questoAlbero.condivisioni != null && !questoAlbero.condivisioni.isEmpty() ) {
+					i += "\n\n" + getText(R.string.shares) + ":";
+					for( Armadio.Invio invio : questoAlbero.condivisioni ) {
+						i += "\n" + dataIdVersoData(invio.data); // todo data leggibile
+						if( gc.getSubmitter(invio.submitter) != null ) i += " - " + gc.getSubmitter( invio.submitter ).getName();
+					}
+				}
 			}
 		}
 		((TextView)findViewById(R.id.info_statistiche)).setText( i );
-
-		// Bottone "Aggiorna Dati"
-		findViewById( R.id.info_aggiorna ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				aggiornaDati( gc, questoAlbero);
-				recreate();
-			}
-		});
 
 		if( gc != null ) {
 			Header h = gc.getHeader();
@@ -91,7 +89,7 @@ public class InfoAlbero extends AppCompatActivity {
 				bottoneCrea.setOnClickListener( new View.OnClickListener() {
 					@Override
 					public void onClick( View view ) {
-						gc.setHeader( AlberoNuovo.creaTestata( file.getName(), false ) );
+						gc.setHeader( AlberoNuovo.creaTestata( file.getName() ) );
 						U.salvaJson( gc, idAlbero );
 						recreate();
 					}
@@ -121,14 +119,18 @@ public class InfoAlbero extends AppCompatActivity {
 					}
 					spazio();
 					if( h.getGenerator().getGeneratorData() != null ) {
-						poni( getText(R.string.data), h.getGenerator().getGeneratorData().getValue() );
-						poni( getText(R.string.copyright), h.getGenerator().getGeneratorData().getCopyright() );
+						poni( getText(R.string.source), h.getGenerator().getGeneratorData().getValue() );
 						poni( getText(R.string.date), h.getGenerator().getGeneratorData().getDate() );
+						poni( getText(R.string.copyright), h.getGenerator().getGeneratorData().getCopyright() );
 					}
 				}
 				spazio();
-				if( h.getSubmitter(gc) != null )
-					poni( getText(R.string.submitter), h.getSubmitter(gc).getName() );	// todo: renderlo cliccabile?
+				if( h.getSubmitter(gc) != null ) {
+					String nome = h.getSubmitter( gc ).getName();
+					if( nome == null || nome.isEmpty() )
+						nome = getString( android.R.string.unknownName );
+					poni( getText( R.string.submitter ), nome );	// todo: renderlo cliccabile?
+				}
 				if( gc.getSubmission() != null )
 					poni( getText(R.string.submission), gc.getSubmission().getDescription() );	// todo: cliccabile
 				spazio();
@@ -151,15 +153,24 @@ public class InfoAlbero extends AppCompatActivity {
 
 				U.mettiNote( scatola, h, true );
 			}
+			// Estensioni del Gedcom, ovvero tag non standard di livello 0 zero
+			for( Estensione est : U.trovaEstensioni(gc) ) {
+				U.metti( scatola, est.nome, est.testo );
+			}
 		}
+	}
+
+	String dataIdVersoData( String id ) {
+		return id.substring(0,4) +"-"+ id.substring(4,6) +"-"+ id.substring(6,8) +" "+
+				id.substring(8,10) +":"+ id.substring(10,12) +":"+ id.substring(12);
 	}
 
 	static void aggiornaDati( Gedcom gc, Armadio.Cassetto albero ) {
 		albero.individui = gc.getPeople().size();
-		albero.generazioni = quanteGenerazioni( gc, albero.radice );
-		ListaMedia visitaMedia = new ListaMedia( gc, true );
+		albero.generazioni = quanteGenerazioni( gc, albero.radice!=null?albero.radice:U.trovaRadice(gc) );
+		ListaMedia visitaMedia = new ListaMedia( gc, 0 );
 		gc.accept( visitaMedia );
-		albero.media = visitaMedia.listaMedia.size();
+		albero.media = visitaMedia.lista.size();
 		Globale.preferenze.salva();
 		Globale.editato = true; // per aggiornare Alberi quando torna indietro
 	}

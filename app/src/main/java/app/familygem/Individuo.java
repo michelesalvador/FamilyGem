@@ -3,6 +3,7 @@ package app.familygem;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -48,57 +49,111 @@ public class Individuo extends AppCompatActivity {
 	TreeMap<String,String> altriEventi;
 
 	@Override
-    protected void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	protected void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 		String id = getIntent().getStringExtra( "idIndividuo" );
-			// todo : investigabile: risulta null eliminando un evento nella famiglia..
-			// todo : intent esiste, ma come "svuotato" della stringa "idIndividuo"
-		//s.l( "OnCREATE trovato id della PERSONA " +  id + "  INTENTO : " + getIntent() );
-		if( id == null || gc == null ) return;
+		if( gc == null ) {
+			Alberi.apriGedcom( Globale.preferenze.idAprendo, false );
+		}
 		uno = gc.getPerson( id );
-		Globale.individuo = id;	// non so bene perché ma potrebbe essere utile
-        setContentView(R.layout.individuo);
-        if( Globale.preferenze.esperto )
-			((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
-		Toolbar barra = findViewById(R.id.toolbar);
-		barra.setTitle( U.epiteto(uno) );
-        setSupportActionBar( barra );
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		//Globale.individuo = id;	// passava l'id alle schede fragment
+		if( Memoria.getOggetto() != uno ) // per evitare di ricreare pile già iniziate
+			Memoria.setPrimo( uno, "INDI" );
+		setContentView(R.layout.individuo);
 
-        // Assegna alla vista pagina un adapter che gestisce le tre schede
-        ViewPager vistaPagina = findViewById( R.id.schede_persona );
-        vistaPagina.setAdapter( new ImpaginatoreSezioni() );
+		// Barra
+		Toolbar barra = findViewById(R.id.toolbar);
+		setSupportActionBar( barra );
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true); // fa comparire la freccia indietro e il menu
+
+		// Assegna alla vista pagina un adapter che gestisce le tre schede
+		ViewPager vistaPagina = findViewById( R.id.schede_persona );
+		ImpaginatoreSezioni impaginatoreSezioni = new ImpaginatoreSezioni();
+		vistaPagina.setAdapter( impaginatoreSezioni );
 
 		// arricchisce il tablayout
 		tabLayout = findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(vistaPagina);	// altrimenti il testo nei TabItem scompare (?!)
-        tabLayout.getTabAt(0).setText(R.string.media);
-        tabLayout.getTabAt(1).setText(R.string.events);
-        tabLayout.getTabAt(2).setText(R.string.relatives);
+		tabLayout.setupWithViewPager(vistaPagina);	// altrimenti il testo nei TabItem scompare (?!)
+		tabLayout.getTabAt(0).setText(R.string.media);
+		tabLayout.getTabAt(1).setText(R.string.events);
+		tabLayout.getTabAt(2).setText(R.string.relatives);
 		tabLayout.getTabAt( getIntent().getIntExtra( "scheda", 1 ) ).select();
 
-		// In sostanza per animare il FAB
-	    final FloatingActionButton fab = findViewById( R.id.persona_fab );
-	    vistaPagina.addOnPageChangeListener( new ViewPager.OnPageChangeListener() {
-		    @Override
-		    public void onPageScrolled( int posizione,  // 0 tra la prima e la seconda, 1 tra la seconda e la terza...
-		                                float scostamento, // 1->0 a destra, 0->1 a sinistra
-		                                int positionOffsetPixels ) {
-		    	if( scostamento > 0 )
-				    fab.hide();
-			    else
-				    fab.show();
-		    }
-		    @Override
-		    public void onPageSelected( int position ) {}
-		    @Override
-		    public void onPageScrollStateChanged( int state ) {}
-	    });
+		// per animare il FAB
+		final FloatingActionButton fab = findViewById( R.id.persona_fab );
+		vistaPagina.addOnPageChangeListener( new ViewPager.OnPageChangeListener() {
+			@Override
+			public void onPageScrolled( int posizione,  // 0 tra la prima e la seconda, 1 tra la seconda e la terza...
+										float scostamento, // 1->0 a destra, 0->1 a sinistra
+										int positionOffsetPixels ) {
+				if( scostamento > 0 )
+					fab.hide();
+				else
+					fab.show();
+			}
+			@Override
+			public void onPageSelected( int position ) {}
+			@Override
+			public void onPageScrollStateChanged( int state ) {}
+		});
+	}
 
-		U.unaFoto( uno, (ImageView)findViewById(R.id.persona_foto) );
-		U.unaFoto( uno, (ImageView)findViewById(R.id.persona_sfondo) );
+	class ImpaginatoreSezioni extends FragmentPagerAdapter {
 
-		fab.setOnClickListener( new View.OnClickListener() {
+		ImpaginatoreSezioni() {
+			super( getSupportFragmentManager() );
+		}
+
+		@Override	// in realtà non seleziona ma CREA le tre schede
+		public Fragment getItem( int position ) {
+			Fragment scheda = new Fragment();
+			if( position == 0 )
+				scheda = new IndividuoMedia();
+			else if( position == 1 )
+				scheda = new IndividuoEventi();
+			else if( position == 2 )
+				scheda = new IndividuoFamiliari();
+			return scheda;
+		}
+
+		@Override   // necessario
+		public int getCount() {
+			return 3;
+		}
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		if( uno == null || Globale.editato )
+			uno = gc.getPerson( getIntent().getStringExtra( "idIndividuo" ) );
+
+		if( uno == null ) { // ritornando indietro nella Scheda di un individuo che è stato eliminato
+			onBackPressed();
+			return;
+		}
+
+		// Tutto ciò che nella pagina può cambiare
+		if( Globale.preferenze.esperto )
+			((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
+ 		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
+		barraCollasso.setTitle( U.epiteto(uno) ); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
+		//s.l( "barraCollasso "+barraCollasso+" '"+U.epiteto( uno )+"'");
+		U.unaFoto( Globale.gc, uno, (ImageView)findViewById(R.id.persona_foto) );
+		U.unaFoto( Globale.gc, uno, (ImageView)findViewById(R.id.persona_sfondo) );
+		if( Globale.editato ) {
+			// Ricostruisce le tre schede ritornando alla pagina
+			for( int i=0; i<3; i++ ) {
+				Fragment scheda = getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":"+i );
+				//s.l(i+" "+scheda);
+				if( scheda != null ) // alla prima creazione dell'activity sono null
+					getSupportFragmentManager().beginTransaction().detach( scheda ).attach( scheda ).commit();
+				// ToDo tornando indietro dopo una editazione non aggiorna la scheda 0 coi media...
+			}
+		}
+
+		// Menu FAB
+		findViewById( R.id.persona_fab ).setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View vista ) {
 				PopupMenu popup = new PopupMenu( Individuo.this, vista );
@@ -164,7 +219,7 @@ public class Individuo extends AppCompatActivity {
 					@Override
 					public boolean onMenuItemClick( MenuItem item ) {
 						CharSequence[] familiari = { getText(R.string.parent), getText(R.string.sibling), getText(R.string.spouse), getText(R.string.child) };
-															// DUBBIO : "Padre" , "Madre" ?    "Marito"  "Moglie" ?
+															// DUBBIO : "Padre" , "Madre" ?	"Marito"  "Moglie" ?
 						AlertDialog.Builder builder = new AlertDialog.Builder( Individuo.this );
 						switch( item.getItemId() ) {
 							// Scheda Eventi
@@ -177,43 +232,40 @@ public class Individuo extends AppCompatActivity {
 							case 11: // Cerca oggetto media
 								U.appAcquisizioneImmagine( Individuo.this, null, 2174, uno );
 								break;
-							case 12:    // Collega media in Galleria
+							case 12:	// Collega media in Galleria
 								Intent inten = new Intent( Individuo.this, Principe.class );
 								inten.putExtra( "galleriaScegliMedia", true );
 								startActivityForResult( inten,43614 );
 								break;
 							case 20: // Crea nome
-								Name nom = new Name();
-								nom.setValue( "" );
-								uno.addName( nom );
-								Ponte.manda( nom, "oggetto" );
-								Ponte.manda( uno, "contenitore" );
+								Name nome = new Name();
+								nome.setValue( "//" );
+								uno.addName( nome );
+								Memoria.aggiungi( nome );
 								startActivity( new Intent( Individuo.this, Nome.class ) );
 								break;
 							case 21: // Crea sesso
-								AlertDialog.Builder costruttore = new AlertDialog.Builder( tabLayout.getContext() );
 								String[] sessoNomi = { getString(R.string.male), getString(R.string.female), getString(R.string.unknown) };
-								costruttore.setSingleChoiceItems( sessoNomi, -1, new DialogInterface.OnClickListener() {
-									public void onClick( DialogInterface dialo, int i ) {
-										EventFact genere = new EventFact();
-										genere.setTag( "SEX" );
-										String[] sessoValori = { "M", "F", "U" };
-										genere.setValue( sessoValori[i] );
-										uno.addEventFact( genere );
-										dialo.dismiss();
-										Globale.editato = true;
-										recreate();
-										U.salvaJson();
-									}
-								});
-								costruttore.create().show();
+								new AlertDialog.Builder( tabLayout.getContext() )
+										.setSingleChoiceItems( sessoNomi, -1, new DialogInterface.OnClickListener() {
+											public void onClick( DialogInterface dialo, int i ) {
+												EventFact genere = new EventFact();
+												genere.setTag( "SEX" );
+												String[] sessoValori = { "M", "F", "U" };
+												genere.setValue( sessoValori[i] );
+												uno.addEventFact( genere );
+												dialo.dismiss();
+												IndividuoEventi tabEventi = (IndividuoEventi) getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" );
+												tabEventi.aggiorna( 1 );
+												U.salvaJson( true, uno );
+											}
+										}).show();
 								break;
 							case 22: { // Crea nota
-								Note not = new Note();
-								not.setValue( "" );
-								uno.addNote( not );
-								Ponte.manda( not, "oggetto" );
-								Ponte.manda( uno, "contenitore" );
+								Note nota = new Note();
+								nota.setValue( "" );
+								uno.addNote( nota );
+								Memoria.aggiungi( nota );
 								startActivity( new Intent( Individuo.this, Nota.class ) );
 								// todo? Dettaglio.edita( View vistaValore );
 								break;
@@ -221,23 +273,22 @@ public class Individuo extends AppCompatActivity {
 							case 23: // Crea nota condivisa
 								Quaderno.nuovaNota( Individuo.this, uno );
 								break;
-							case 24:    // Collega nota condivisa
+							case 24:	// Collega nota condivisa
 								Intent inte = new Intent( Individuo.this, Principe.class );
 								inte.putExtra( "quadernoScegliNota", true );
 								startActivityForResult( inte,4074 );
 								break;
-							case 25:    // Nuova fonte-nota
+							case 25:	// Nuova fonte-nota
 								SourceCitation citaz = new SourceCitation();
 								citaz.setValue( "" );
 								uno.addSourceCitation( citaz );
-								Ponte.manda( citaz, "oggetto" );
-								Ponte.manda( uno, "contenitore" );
+								Memoria.aggiungi( citaz );
 								startActivity( new Intent( Individuo.this, CitazioneFonte.class ) );
 								break;
-							case 26:    // Nuova fonte
+							case 26:	// Nuova fonte
  								Biblioteca.nuovaFonte( Individuo.this, uno );
 								break;
-							case 27:    // Collega fonte
+							case 27:	// Collega fonte
 								Intent intento = new Intent( Individuo.this, Principe.class );
 								intento.putExtra( "bibliotecaScegliFonte", true );
 								startActivityForResult( intento,50473 );
@@ -298,8 +349,7 @@ public class Individuo extends AppCompatActivity {
 											nuovoEvento.setDate("");
 									}
 									uno.addEventFact( nuovoEvento );
-									Ponte.manda( nuovoEvento, "oggetto" );
-									Ponte.manda( uno, "contenitore" );
+									Memoria.aggiungi( nuovoEvento );
 									startActivity( new Intent( Individuo.this, Evento.class ) );
 									return true;
 								}
@@ -310,29 +360,33 @@ public class Individuo extends AppCompatActivity {
 				} );
 			}
 		} );
-    }
+	}
+
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
+		super.onActivityResult( requestCode, resultCode, data );
 		if( resultCode == RESULT_OK ) {
 			if( requestCode == 2173 ) { // File fornito da un'app diventa media locale eventualmente ritagliato con Android Image Cropper
 				Media media = new Media();
 				media.setFileTag("FILE");
 				uno.addMedia( media );
 				if( U.ritagliaImmagine( this, null, data, media ) ) { // restituisce true se è un'immagine ritagliabile
-					Globale.editato = false; // così non scatta recreate() che negli Android nuovi fa scomparire il dialogo di richiesta ritaglio
-					U.salvaJson();
+					U.salvaJson( false, uno );
+						// false così non scatta recreate() che negli Android nuovi fa scomparire il dialogo di richiesta ritaglio
 					return;
 				}
 			} else if( requestCode == 2174 ) { // File dalle app in nuovo Media condiviso, con proposta di ritagliarlo
 				Media media = Galleria.nuovoMedia( uno );
 				if( U.ritagliaImmagine( this, null, data, media ) ) {
-					Globale.editato = false;
-					U.salvaJson();
+					U.salvaJson( false, media, uno );
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
 				// Ottiene l'immagine ritagliata da Android Image Cropper
 				U.fineRitaglioImmagine( data );
+				U.salvaJson(true); // la data di cambio per i Media condivisi viene già salvata nel passaggio precedente
+						// todo passargli Globale.mediaCroppato ?
+				return;
 			} else if( requestCode == 43614 ) { // Media da Galleria
 				MediaRef rifMedia = new MediaRef();
 				rifMedia.setRef( data.getStringExtra("idMedia") );
@@ -346,65 +400,36 @@ public class Individuo extends AppCompatActivity {
 				citaz.setRef( data.getStringExtra("idFonte") );
 				uno.addSourceCitation( citaz );
 			} else if( requestCode == 1401  ) { // Parente
-				EditaIndividuo.aggiungiParente( uno.getId(),
+				Object[] modificati = EditaIndividuo.aggiungiParente( uno.getId(),
 						data.getStringExtra("idParente"),
 						data.getIntExtra("relazione",0),
 						data.getIntExtra("famigliaNum",0) );
+				U.salvaJson( true, modificati );
+				return;
 			}
-			U.salvaJson();
-			Globale.editato = true;  // Prima scatta onActivityResult(), poi onRestart() che rinfresca il contenuto
+			U.salvaJson( true, uno );
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
 			Globale.editato = true;
 		else
 			Toast.makeText( this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
-	// Chiamato dopo onBackPressed() ricarica la pagina per aggiornare i contenuti
 	@Override
-	public void onRestart() {
-		super.onRestart();
-		if( Globale.editato ) {
-			recreate();
-		}
+	public void onBackPressed() {
+		Memoria.arretra();
+		super.onBackPressed();
 	}
-
-    class ImpaginatoreSezioni extends FragmentPagerAdapter {
-
-        ImpaginatoreSezioni() {
-            super( getSupportFragmentManager() );
-        }
-
-        @Override	// in realtà CREA le schede
-        public Fragment getItem( int position ) {
-            // seleziona una delle tre schede
-            Fragment scheda = new Fragment();
-            if( position == 0 )
-                scheda = new IndividuoMedia();
-            else if( position == 1 )
-				scheda = new IndividuoEventi();
-			else if( position == 2 )
-                scheda = new IndividuoFamiliari();
-            return scheda;
-        }
-
-        @Override   // necessario
-        public int getCount() {
-            return 3;
-        }
-    }
-
-
 
 	// Menu Opzioni
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add( 0, 0, 0, R.string.diagram );
 		if( !uno.getParentFamilies( gc ).isEmpty() )
-			menu.add( 0, 1, 0, R.string.family_as_child );
+			menu.add( 0, 1, 0, uno.getSpouseFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_child );
 		if( !uno.getSpouseFamilies( gc ).isEmpty() )
-			menu.add( 0, 2, 0, R.string.family_as_spouse );
-		if( !Globale.preferenze.alberoAperto().radice.equals(uno.getId()) )
-			menu.add( 0, 3, 0, "Imposta come radice" );
+			menu.add( 0, 2, 0, uno.getParentFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_spouse );
+		if( Globale.preferenze.alberoAperto().radice == null || !Globale.preferenze.alberoAperto().radice.equals(uno.getId()) )
+			menu.add( 0, 3, 0, R.string.make_root );
 		menu.add( 0, 4, 0, R.string.modify );
 		menu.add( 0, 5, 0, R.string.delete );
 		return true;
@@ -413,23 +438,19 @@ public class Individuo extends AppCompatActivity {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch ( item.getItemId() ) {
 			case 0:	// Diagramma
-				Globale.individuo = uno.getId();	// in caso di back stack
+				Globale.individuo = uno.getId();
 				startActivity( new Intent( getApplicationContext(), Principe.class ) );
 				return true;
 			case 1:	// Famiglia come figlio
-				Intent intento = new Intent( this, Famiglia.class );
-				intento.putExtra( "idFamiglia", uno.getParentFamilies(gc).get(0).getId() );
-				startActivity( intento );
+				U.qualiGenitoriMostrare( this, uno, Famiglia.class );
 				return true;
 			case 2:	// Famiglia come coniuge
-				intento = new Intent( this, Famiglia.class );
-				intento.putExtra( "idFamiglia", uno.getSpouseFamilies(gc).get(0).getId() );
-				startActivity( intento );
+				U.qualiConiugiMostrare( this, uno );
 				return true;
 			case 3: // Imposta come radice
 				Globale.preferenze.alberoAperto().radice = uno.getId();
 				Globale.preferenze.salva();
-				Snackbar.make( tabLayout, U.epiteto(uno) + " è la persona principale dell'albero.", Snackbar.LENGTH_LONG ).show();
+				Snackbar.make( tabLayout, getString( R.string.this_is_root, U.epiteto(uno) ), Snackbar.LENGTH_LONG ).show();
 				return true;
 			case 4: // Modifica
 				Intent intent = new Intent( this, EditaIndividuo.class );

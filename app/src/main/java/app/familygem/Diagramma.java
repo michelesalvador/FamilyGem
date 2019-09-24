@@ -28,9 +28,7 @@ import android.widget.TextView;
 import com.otaliastudios.zoom.ZoomApi;
 import com.otaliastudios.zoom.ZoomLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
@@ -44,25 +42,25 @@ public class Diagramma extends Fragment {
 	LinearLayout scatola;
 	private int gente;
 
-    @Override
-    public void onCreate( Bundle stato ) {
-        super.onCreate( stato );
-    }
+	@Override
+	public void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
+	}
 
-    @Override
-    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	@Override
+	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( Globale.preferenze.alberoAperto().nome );
-        final View vista = inflater.inflate( R.layout.diagramma, container, false );
+		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( Globale.preferenze.alberoAperto().nome );
+		final View vista = inflater.inflate( R.layout.diagramma, container, false );
 
 		scatolona = vista.findViewById( R.id.diagramma_scatolona );
-	    scatolaZoom = vista.findViewById( R.id.diagramma_zoom );
+		scatolaZoom = vista.findViewById( R.id.diagramma_zoom );
 
 		if( gc != null )
 			disegna();
 
 		return vista;
-    }
+	}
 
 	// Il libro mastro in cui inserire le coppie di View da collegare con linee
 	List<Corda> rete;
@@ -79,7 +77,7 @@ public class Diagramma extends Fragment {
 		}
 	}
 
-    // Riempie le file di generazioni
+	// Riempie le file di generazioni
 	void disegna() {
 		scatola = new LinearLayout( scatolona.getContext() );
 		scatola.setOrientation(LinearLayout.VERTICAL);
@@ -110,14 +108,15 @@ public class Diagramma extends Fragment {
 			if( centro == null )
 				centro = gc.getPerson( U.trovaRadice(gc) );
 				if( centro == null ) {
-					creaBottonePrimoIndividuo();    // se non ci sono persone mette un bel bottone per aggiungere la prima persona
+					creaBottonePrimoIndividuo();	// se non ci sono persone mette un bel bottone per aggiungere la prima persona
 					return;
 				}
 		}
 		Globale.individuo = centro.getId(); // lo ribadisce nei due casi in cui mancava
 		// Risale ai nonni
-		if( !centro.getParentFamilies(gc).isEmpty() ) {	// qui ci va eventuale scelta di QUALI genitori mostrare se centro ha più genitori
-			Family famiglia = centro.getParentFamilies(gc).get(0);
+		if( !centro.getParentFamilies(gc).isEmpty() ) {
+			Family famiglia = centro.getParentFamilies(gc).get( getActivity().getIntent().getIntExtra("genitoriNum", 0) );
+			getActivity().getIntent().putExtra( "genitoriNum", 0 ); // lo resetta per gli altri che hanno una sola parent family
 			// Ramo paterno
 			Person padre = null;
 			View nodoNonniPaterni = null;
@@ -191,7 +190,6 @@ public class Diagramma extends Fragment {
 		// Aggiunge le linee e centra il diagramma
 		scatolaZoom.postDelayed( new Runnable() {
 			public void run() {
-				s.l( "rete.size " + rete.size() );
 				View nodoCentrale = null;  // per centrare il diagramma
 				for( Corda corda : rete ) {
 					if( corda.mezzo == null && corda.fine == null ) { // trucchetto per sfruttare rete come veicolo della View centrale
@@ -232,9 +230,6 @@ public class Diagramma extends Fragment {
 	void spazio( int generazione, int peso ) {
 		if( peso == 0 ) peso = 1;
 		Space spaz = new Space( getContext() );
-		//LinearLayout spaz = new LinearLayout( getContext() );
-		//spaz.setPadding( 10,10,10,10 );
-		//spaz.setBackgroundResource( R.drawable.nota_sfondo );
 		LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, peso );
 		LinearLayout gen = scatola.findViewById( generazione );
@@ -265,7 +260,6 @@ public class Diagramma extends Fragment {
 			setOrientation( LinearLayout.VERTICAL );
 			setGravity( Gravity.CENTER_HORIZONTAL );
 			setClipChildren( false );
-			//setBackgroundColor( 0x666633ff );
 			addView( contenuto );
 			List<Discendente> discendi = discendenti(egli);
 			if( discendi.size() > 0 ) {
@@ -285,8 +279,10 @@ public class Diagramma extends Fragment {
 					vistaDiscend.setOnClickListener( new OnClickListener() {
 						@Override
 						public void onClick( View view ) {
+							if( U.qualiGenitoriMostrare( Diagramma.this.getContext(), disc.egli, Principe.class ) )
+								return;
 							scatolona.removeAllViews();
-							Globale.individuo = disc.id;
+							Globale.individuo = disc.egli.getId();
 							disegna();
 						}
 					} );
@@ -334,7 +330,7 @@ public class Diagramma extends Fragment {
 	// conAntenati: 0 nessuno, 1 lui, 2 lei, 3 entrambi
 	// configura: 0 coppia normale, 1 altri matrimoni lui, 2 altri matrimoni lei
 	private View schedaDoppia( int generazione, final Family famiglia, View nodoSopraLui, View nodoSopraLei,
-	                           int conAntenati, boolean conDiscendenti, int configura ) {
+							   int conAntenati, boolean conDiscendenti, int configura ) {
 		boolean conAntenatiLui = false;
 		boolean conAntenatiLei = false;
 		if( conAntenati == 1 || conAntenati == 3 )
@@ -385,15 +381,14 @@ public class Diagramma extends Fragment {
 			TextView anno = new TextView( getContext() );
 			anno.setBackgroundResource( R.drawable.diagramma_cerchio_anno );
 			anno.setPadding(4,4,4,4);
-			anno.setText( U.soloAnno(dataMatrimonio) );
+			anno.setText( new Datatore(dataMatrimonio).scriviAnno() );
 			legame.addView( anno );
 		}
 		legame.setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View view ) {
-				Intent intento = new Intent( getContext(), Famiglia.class );
-				intento.putExtra( "idFamiglia", famiglia.getId() );
-				startActivity( intento );
+				Memoria.setPrimo( famiglia );
+				startActivity( new Intent( getContext(), Famiglia.class ) );
 			}
 		} );
 		legame.setTag("legame");
@@ -427,33 +422,54 @@ public class Diagramma extends Fragment {
 	// La schedina base del diagramma
 	private class Schedina extends LinearLayout {
 		String id;
-    	Schedina( int generazione, final Person egli, boolean conAntenati ) {   //, boolean conDiscendenti
+		Schedina( int generazione, final Person egli, boolean conAntenati ) {   //, boolean conDiscendenti
 			super( Globale.contesto );	// necessario per estendere View
 			id = egli.getId(); // per il menu contestuale
-		    setLayoutParams( new LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
+			setLayoutParams( new LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
 			setOrientation( LinearLayout.VERTICAL );
-		    View vista = getLayoutInflater().inflate( R.layout.diagramma_pezzo, this, false );
-		    ImageView sfondo = vista.findViewById( R.id.schedina_sfondo );
+			setGravity( Gravity.CENTER_HORIZONTAL );
+			View vista = getLayoutInflater().inflate( R.layout.diagramma_pezzo, this, false );
+			ImageView sfondo = vista.findViewById( R.id.schedina_sfondo );
 			if( conAntenati ) {
-				Map<String,Integer> avi = antenati(egli);
-				View avetti = getLayoutInflater().inflate(R.layout.diagramma_avi, this, false );
-				TextView testoAvi = avetti.findViewById(R.id.num_avi);
-				TextView testoAve = avetti.findViewById(R.id.num_ave);
-				if( avi.get("avo") == null ) {
+				final Antenato[] avi = antenati( egli );
+				View avetti = getLayoutInflater().inflate( R.layout.diagramma_avi, this, false );
+				TextView testoAvi = avetti.findViewById( R.id.num_avi );
+				TextView testoAve = avetti.findViewById( R.id.num_ave );
+				if( avi[0] == null ) {
 					testoAvi.setVisibility( View.GONE );
 					RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) testoAve.getLayoutParams();
 					param.addRule( RelativeLayout.RIGHT_OF, 0 );
-					param.addRule( RelativeLayout.CENTER_HORIZONTAL );
-				} else
-					testoAvi.setText( String.valueOf(avi.get("avo")) );
-				if( avi.get("ava") == null ) {
+				} else {
+					testoAvi.setText( String.valueOf( avi[0].ascendenza ) );
+					testoAvi.setOnClickListener( new OnClickListener() {
+						@Override
+						public void onClick( View v ) {
+							if( U.qualiGenitoriMostrare( Diagramma.this.getContext(), avi[0].egli, Principe.class ) )
+								return;
+							scatolona.removeAllViews();
+							Globale.individuo = avi[0].egli.getId();
+							disegna();
+						}
+					} );
+				}
+				if( avi[1] == null ) {
 					testoAve.setVisibility( View.GONE );
-					RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) testoAvi.getLayoutParams();
-					param.addRule( RelativeLayout.LEFT_OF, 0 );
-					param.addRule( RelativeLayout.CENTER_HORIZONTAL );
-				} else
-					testoAve.setText( String.valueOf(avi.get("ava")) );
-				if( avi.get("avo")!=null || avi.get("ava")!=null ) {
+					RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) avetti.findViewById( R.id.avi_connettore ).getLayoutParams();
+					param.addRule( RelativeLayout.RIGHT_OF, 0 );
+				} else {
+					testoAve.setText( String.valueOf( avi[1].ascendenza ) );
+					testoAve.setOnClickListener( new OnClickListener() {
+						@Override
+						public void onClick( View v ) {
+							if( U.qualiGenitoriMostrare( Diagramma.this.getContext(), avi[1].egli, Principe.class ) )
+								return;
+							scatolona.removeAllViews();
+							Globale.individuo = avi[1].egli.getId();
+							disegna();
+						}
+					} );
+				}
+				if( avi[0]!=null || avi[1]!=null ) {
 					addView( avetti );
 					// per allineare i due coniugi di cui questo con corona di avi in testa
 					LayoutParams lp = new LayoutParams(	LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
@@ -472,19 +488,21 @@ public class Diagramma extends Fragment {
 				sfondo.setBackgroundResource( R.drawable.casella_maschio );
 			else if( U.sesso(egli) == 2 )
 				sfondo.setBackgroundResource( R.drawable.casella_femmina );
-			U.unaFoto( egli, (ImageView) vista.findViewById( R.id.schedina_foto ) );
-		    TextView vistaNome = vista.findViewById(R.id.schedina_nome);
+			U.unaFoto( Globale.gc, egli, (ImageView) vista.findViewById( R.id.schedina_foto ) );
+			TextView vistaNome = vista.findViewById(R.id.schedina_nome);
 			String nome = U.epiteto(egli);
 			if( nome.isEmpty() && vista.findViewById(R.id.schedina_foto).getVisibility()==VISIBLE ) vistaNome.setVisibility( GONE );
 			else vistaNome.setText( nome );
-		    TextView vistaTitolo = vista.findViewById(R.id.schedina_titolo);
-		    String titolo = U.titolo( egli );
-		    if( titolo.isEmpty() ) vistaTitolo.setVisibility( GONE );
-		    else vistaTitolo.setText( titolo );
+			TextView vistaTitolo = vista.findViewById(R.id.schedina_titolo);
+			String titolo = U.titolo( egli );
+			if( titolo.isEmpty() ) vistaTitolo.setVisibility( GONE );
+			else vistaTitolo.setText( titolo );
 			TextView vistaDati = vista.findViewById(R.id.schedina_dati);
 			String dati = U.dueAnni( egli, true );
-		    if( dati.isEmpty() ) vistaDati.setVisibility(GONE);
+			if( dati.isEmpty() ) vistaDati.setVisibility(GONE);
 			else vistaDati.setText( dati );
+			if( !U.morto(egli) )
+				vista.findViewById(R.id.schedina_lutto).setVisibility(GONE);
 			addView( vista );
 			registerForContextMenu(this);
 			setOnClickListener( new OnClickListener() {
@@ -495,14 +513,16 @@ public class Diagramma extends Fragment {
 						intento.putExtra( "idIndividuo", egli.getId() );
 						startActivity( intento );
 					} else {
+						if( U.qualiGenitoriMostrare( Diagramma.this.getContext(), egli, Principe.class ) )
+							return;
 						scatolona.removeAllViews();
 						Globale.individuo = egli.getId();
 						disegna();
 					}
 				}
 			});
-		    if( egli.getId().equals( Globale.individuo ) && !conAntenati )
-			    rete.add( new Corda( this, null, null, false ) );  // sfrutto rete per veicolare il centro del diagramma
+			if( egli.getId().equals( Globale.individuo ) && !conAntenati )
+				rete.add( new Corda( this, null, null, false ) );  // sfrutto rete per veicolare il centro del diagramma
 		}
 	}
 
@@ -545,17 +565,6 @@ public class Diagramma extends Fragment {
 			}
 		return 0;
 	}
-
-	/* Nodo sopra a fratrelli senza genitori
-	View genitoriAssenti( int generazione ) {
-		LinearLayout nodo = new LinearLayout( getContext() );
-		//nodo.setPadding( 10,20,10,20 );
-		//nodo.setBackgroundResource( R.drawable.casella_neutro );
-		LinearLayout gen = scatola.findViewById( generazione );
-		gen.addView( nodo );
-		//rete.add( new Corda( nodoSopraLui, gen, schedinaLui ) );
-		return nodo;
-	}*/
 
 	// Fratellastri nati dai matrimoni precedenti o seguenti dei genitori
 	private void altriMatrimoni( Person genitore, Family famiglia, View nodoGenitore ) {
@@ -617,23 +626,32 @@ public class Diagramma extends Fragment {
 		return paiolo != null ? paiolo : nodoFratello;
 	}
 
-	// di una Person scrive e restituisce una coppietta di avi con il numero di antenati
-	private Map<String,Integer> antenati( Person capo ) {
-		Map<String,Integer> avi = new HashMap<>();
+	// classe per memorizzare i dati delle caselline antenati
+	class Antenato {
+		Person egli;
+		int ascendenza;
+		public Antenato( Person egli, int ascendenza ) {
+			this.egli = egli;
+			this.ascendenza = ascendenza;
+		}
+	}
+
+	// di una Person scrive e restituisce una coppietta di classi Antenato
+	private Antenato[] antenati( Person capo ) {
+		Antenato[] avi = new Antenato[2];
 		if( !capo.getParentFamilies(gc).isEmpty() ) {
 			Family fam = capo.getParentFamilies(gc).get(0);
 			if( !fam.getHusbands(gc).isEmpty() ) {
 				gente = 1;
 				contaAntenati( fam.getHusbands(gc).get(0) );
-				avi.put( "avo", gente);
+				avi[0] = new Antenato( fam.getHusbands(gc).get(0), gente);
 			}
 			if( !fam.getWives(gc).isEmpty() ) {
 				gente = 1;
 				contaAntenati( fam.getWives(gc).get(0) );
-				avi.put( "ava", gente);
+				avi[1] = new Antenato( fam.getWives(gc).get(0), gente);
 			}
 		}
-		//if( !avi.isEmpty() ) sl( "   " + avi );
 		return avi;
 	}
 
@@ -654,11 +672,11 @@ public class Diagramma extends Fragment {
 
 	// classe per memorizzare i dati delle caselline discendenti
 	class Discendente {
-		String id;
+		Person egli;
 		int sesso;
 		int prole;
-		public Discendente( String id, int sesso, int prole ) {
-			this.id = id;
+		public Discendente( Person egli, int sesso, int prole ) {
+			this.egli = egli;
 			this.sesso = sesso;
 			this.prole = prole;
 		}
@@ -671,7 +689,7 @@ public class Diagramma extends Fragment {
 			for( Person nipote : famiglia.getChildren(gc) ) {
 				gente = 1;
 				contaDiscendenti( nipote );
-				sfilza.add( new Discendente( nipote.getId(), U.sesso(nipote), gente ) );
+				sfilza.add( new Discendente( nipote, U.sesso(nipote), gente ) );
 			}
 		return sfilza;
 	}
@@ -686,11 +704,12 @@ public class Diagramma extends Fragment {
 				}
 	}
 
+	//boolean alterna;
 	void disegnaLinea( View vistaInizio, View vistaMezzo, View vistaFine, boolean arco ) {
-		s.l( "disegnaLinea: ");
+		/*s.l( "disegnaLinea: ");
 		if( vistaInizio != null ) s.l( "vistaInizio  "+ vistaInizio.getClass() + "\t" + vistaInizio.getScrollX()+ " " + vistaInizio.getScrollY()+ " " + vistaInizio.getWidth()+ " " + vistaInizio.getHeight() );
 		if( vistaMezzo != null ) s.l( "vistaMezzo  "+ vistaMezzo.getClass() + "\t" + vistaMezzo.getScrollX()+ " " + vistaMezzo.getScrollY()+ " " + vistaMezzo.getWidth()+ " " + vistaMezzo.getHeight() );
-		if( vistaFine != null ) s.l( "vistaFine  "+ vistaFine.getClass() + "\t" + vistaFine.getScrollX()+ " " + vistaFine.getScrollY()+ " " + vistaFine.getWidth()+ " " + vistaFine.getHeight() );
+		if( vistaFine != null ) s.l( "vistaFine  "+ vistaFine.getClass() + "\t" + vistaFine.getScrollX()+ " " + vistaFine.getScrollY()+ " " + vistaFine.getWidth()+ " " + vistaFine.getHeight() );*/
 		if( vistaInizio != null && vistaFine != null ) {
 			// Coordinate assolute start
 			Rect marginiInizio = new Rect();
@@ -708,9 +727,11 @@ public class Diagramma extends Fragment {
 				vistaMezzo.getDrawingRect( marginiMezzo );
 				scatolona.offsetDescendantRectToMyCoords( vistaMezzo, marginiMezzo );
 				mezzoY = marginiMezzo.top;
+				//mezzoY += alterna ? 10 : -10; // TODO
+				//alterna = !alterna;
 			} else
 				mezzoY = (int) ( marginiInizio.bottom + ( marginiFine.top - marginiInizio.bottom ) / 1.3 );
-			s.l( (int) marginiInizio.exactCenterX()+"-"+marginiInizio.bottom +"  "+ mezzoY +"  "+ (int) marginiFine.exactCenterX()+"-"+marginiFine.top );
+			//s.l( (int) marginiInizio.exactCenterX()+"-"+marginiInizio.bottom +"  "+ mezzoY +"  "+ (int) marginiFine.exactCenterX()+"-"+marginiFine.top );
 			View linea = new Linea( (int) marginiInizio.exactCenterX(),
 					arco ? marginiInizio.top : marginiInizio.bottom,
 					mezzoY, (int) marginiFine.exactCenterX(), marginiFine.top );
@@ -735,7 +756,7 @@ public class Diagramma extends Fragment {
 		protected void onDraw(Canvas canvas) {
 			paint.setStyle( Paint.Style.STROKE );
 			paint.setColor( Color.WHITE );
-			paint.setStrokeWidth(3);    // misura in pixel
+			paint.setStrokeWidth(3);	// misura in pixel
 			path.moveTo( xInizio, yInizio );
 			path.lineTo( xInizio, yMezzo );
 			path.lineTo( xFine, yMezzo );
@@ -747,17 +768,18 @@ public class Diagramma extends Fragment {
 	// Menu contestuale
 	String idPersona;
 	View vistaScelta;
+	Person pers;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
 		vistaScelta = vista;
 		idPersona = ((Schedina)vista).id;
-		Person pers = gc.getPerson( idPersona );
+		pers = gc.getPerson( idPersona );
 		if( !idPersona.equals(Globale.individuo) )
 			menu.add(0, 0, 0, R.string.card );
 		if( !pers.getParentFamilies(gc).isEmpty() )
-			menu.add(0, 1, 0, R.string.family_as_child );
+			menu.add(0, 1, 0, pers.getSpouseFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_child );
 		if( !pers.getSpouseFamilies(gc).isEmpty() )
-			menu.add(0, 2, 0, R.string.family_as_spouse );
+			menu.add(0, 2, 0, pers.getParentFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_spouse );
 		menu.add(0, 3, 0, R.string.new_relative);
 		if( U.ciSonoIndividuiCollegabili(gc.getPerson(idPersona)) )
 			menu.add(0, 4, 0, R.string.link_person);
@@ -770,21 +792,16 @@ public class Diagramma extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		CharSequence[] parenti = { getText(R.string.parent), getText(R.string.sibling), getText(R.string.spouse), getText(R.string.child) };
 		int id = item.getItemId();
-		if( id == 0 ) {    // Apri scheda individuo
+		if( id == 0 ) {	// Apri scheda individuo
 			Intent intento = new Intent( getContext(), Individuo.class );
 			intento.putExtra( "idIndividuo", idPersona );
 			startActivity( intento );
 		} else if( id == 1) {	// Famiglia come figlio
-			Intent intento = new Intent( getContext(), Famiglia.class );
-			intento.putExtra( "idFamiglia", gc.getPerson(idPersona).getParentFamilies(gc).get(0).getId() );
-			startActivity( intento );
+			U.qualiGenitoriMostrare( getContext(), pers, Famiglia.class );
 		} else if( id == 2 ) {	// Famiglia come coniuge
-			Intent intento = new Intent( getContext(), Famiglia.class );
-			intento.putExtra( "idFamiglia", gc.getPerson(idPersona).getSpouseFamilies(gc).get(0).getId() );
-			startActivity( intento );
+			U.qualiConiugiMostrare( getContext(), pers );
 		} else if( id == 3 ) {	// Aggiungi parente
-			AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() );
-			builder.setItems( parenti, new DialogInterface.OnClickListener() {
+			new AlertDialog.Builder( getActivity() ).setItems( parenti, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick( DialogInterface dialog, int quale ) {
 					Intent intento = new Intent( getContext(), EditaIndividuo.class );
@@ -794,11 +811,9 @@ public class Diagramma extends Fragment {
 						return; // se perno è sposo in più famiglie dialogo chiede a chi aggiungere un figlio
 					startActivity( intento );
 				}
-			});
-			builder.show();
+			}).show();
 		} else if( id == 4 ) {	// Collega persona
-			AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() );
-			builder.setItems( parenti, new DialogInterface.OnClickListener() {
+			new AlertDialog.Builder( getActivity() ).setItems( parenti, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick( DialogInterface dialog, int quale ) {
 					Intent intento = new Intent( getContext(), Principe.class );
@@ -809,19 +824,20 @@ public class Diagramma extends Fragment {
 						return;
 					startActivityForResult( intento,1401 );
 				}
-			});
-			builder.show();
+			}).show();
 		} else if( id == 5 ) {	// Modifica
 			Intent intento = new Intent( getContext(), EditaIndividuo.class );
 			intento.putExtra( "idIndividuo", idPersona );
 			startActivity( intento );
 		} else if( id == 6 ) {	// Scollega
-			Anagrafe.scollega( idPersona );
+			Family[] famiglie = Anagrafe.scollega( idPersona );
 			getActivity().recreate();
 			Snackbar.make( getView(), R.string.person_unlinked, Snackbar.LENGTH_LONG ).show();
-			U.salvaJson();
+			U.aggiornaDate( pers );
+			U.salvaJson( false, (Object[])famiglie );
 		} else if( id == 7 ) {	// Elimina
 			Anagrafe.elimina( idPersona, getContext(), vistaScelta );
+			//getActivity().recreate(); todo
 		} else
 			return false;
 		return true;
@@ -832,12 +848,11 @@ public class Diagramma extends Fragment {
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		if( requestCode == 1401  ) {
 			if( resultCode == AppCompatActivity.RESULT_OK ) {
-				EditaIndividuo.aggiungiParente( idPersona,
+				Object[] modificati = EditaIndividuo.aggiungiParente( idPersona,
 						data.getStringExtra( "idParente" ),
 						data.getIntExtra( "relazione", 0 ),
 						data.getIntExtra( "famigliaNum", 0 ));
-				U.salvaJson();
-				Globale.editato = true; // Così Principe.onRestart aggiorna il diagramma
+				U.salvaJson( true, modificati );
 			}
 		}
 	}

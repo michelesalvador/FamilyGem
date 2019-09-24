@@ -1,66 +1,107 @@
-// Mappa ordinata dei media ciascuno col suo oggetto contenitore
-// Il contenitore serve per i comandi Scollega e Elimina nel menu contestuale di ciascun media
+// Set ordinato dei media
+// Quasi sempre può sostituire ListaMediaContenitore
 
 package app.familygem.visita;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
+import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Visitor;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import app.familygem.Globale;
+import app.familygem.U;
 
 public class ListaMedia extends Visitor {
 
-	public Map<Media,Object> listaMedia = new LinkedHashMap<>();
-	Gedcom gc;
-	boolean tutti;	// Elencare tutti i media (anche i locali) o solo gli oggetti media condivisi
+	public Set<Media> lista = new LinkedHashSet<>();
+	private Gedcom gc;
+	/*	0 tutti i media
+		1 solo gli oggetti media condivisi (per tutto il Gedcom)
+		2 solo i locali (non serve gc)
+		3 condivisi e locali ma solo immagini e video anteprimabili	(per il menu principale) */
+	private int cosaVuoi;
 
-	public ListaMedia( Gedcom gc, boolean voglioTutti ) {
+	public ListaMedia( Gedcom gc, int cosaVuoi ) {
 		this.gc = gc;
-		tutti = voglioTutti;
+		this.cosaVuoi = cosaVuoi;
+	}
+
+	private boolean visita( Object oggetto ) {
+		if( oggetto instanceof MediaContainer ) {
+			MediaContainer contenitore = (MediaContainer) oggetto;
+			if( cosaVuoi == 0 )
+				lista.addAll( contenitore.getAllMedia(gc) ); // aggiunge media condivisi e locali
+			else if( cosaVuoi == 2 )
+				lista.addAll( contenitore.getMedia() ); // solo i media locali
+			else if( cosaVuoi == 3 )
+				for( Media med : contenitore.getAllMedia(gc) )
+					filtra( med );
+		}
+		return true;
+	}
+
+	// Aggiunge solo quelli presunti bellini con anteprima
+	private void filtra( Media media ) {
+		String file = U.percorsoMedia( Globale.preferenze.idAprendo, media);
+		if( file != null && file.lastIndexOf('.') > 0 ) {
+			String estensione = file.substring( file.lastIndexOf('.')+1 );
+			switch( estensione ) {
+				case "jpg":
+				case "jpeg":
+				case "png":
+				case "gif":
+				case "bmp":
+				case "webp": // ok
+				case "heic": // ok todo l'immagine può risultare ruotata di 90° o 180°
+				case "heif": // sinonimo di .heic
+				case "mp4":
+				case "3gp": // ok
+				case "webm": // ok
+				case "mkv": // ok
+					lista.add( media );
+			}
+		}
+
 	}
 
 	@Override
 	public boolean visit( Gedcom gc ) {
-		for( Media m : gc.getMedia() ) listaMedia.put( m, gc );	// rastrella gli oggetti media
+		if( cosaVuoi < 2 )
+			lista.addAll( gc.getMedia() ); // rastrella tutti gli oggetti media condivisi del Gedcom
+		else if( cosaVuoi == 3 )
+			for( Media med : gc.getMedia() )
+				filtra(med);
 		return true;
 	}
 	@Override
 	public boolean visit( Person p ) {
-		//if(tutti) for( MediaRef r : p.getMediaRefs() ) listaMedia.put( r.getMedia(gc), p );	// elenca i ref a vuoto => media null
-		if(tutti) for( Media m : p.getAllMedia(gc) ) listaMedia.put( m, p );	// Oggetti media e media locali di tutti gli individui
-													// put non aggiunge duplicati alle chiavi già esistenti
-		return true;
+		return visita( p );
 	}
 	@Override
 	public boolean visit( Family f ) {
-		if(tutti) for( Media m : f.getAllMedia(gc) ) listaMedia.put( m, f );
-		return true;
+		return visita( f );
 	}
 	@Override
 	public boolean visit( EventFact e ) {
-		if(tutti) for( Media m : e.getAllMedia(gc) ) listaMedia.put( m, e );
-		return true;
+		return visita( e );
 	}
 	@Override
 	public boolean visit( Name n ) {
-		if(tutti) for( Media m : n.getAllMedia(gc) ) listaMedia.put( m, n );
-		return true;
+		return visita( n );
 	}
 	@Override
 	public boolean visit( SourceCitation c ) {
-		if(tutti) for( Media m : c.getAllMedia(gc) ) listaMedia.put( m, c );
-		return true;
+		return visita( c );
 	}
 	@Override
 	public boolean visit( Source s ) {
-		if(tutti) for( Media m : s.getAllMedia(gc) ) listaMedia.put( m, s );
-		return true;
+		return visita( s );
 	}
 }

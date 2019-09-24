@@ -1,61 +1,65 @@
-// Genera una lista delle citazioni di una fonte con il contenitore della citazione
-// Usato da Fonte
+// Partendo dall'id di una fonte genera una lista di triplette: capostipite / contenitore / citazioni della fonte
+// Usato da Biblioteca, da Fonte e da Conferma
 
 package app.familygem.visita;
 
-import org.folg.gedcom.model.EventFact;
-import org.folg.gedcom.model.Family;
-import org.folg.gedcom.model.Name;
+import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Note;
-import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
-import org.folg.gedcom.model.Visitor;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
-public class ListaCitazioniFonte extends Visitor {
+public class ListaCitazioniFonte extends VisitorTotale {
 
-	public Map<SourceCitation,Object> lista = new LinkedHashMap<>();
-	private String id;
+	public List<Tripletta> lista = new ArrayList<>();
+	private String id; // id della fonte
+	private Object capo;
 
-	public ListaCitazioniFonte( String id ){
+	public ListaCitazioniFonte( Gedcom gc, String id ) {
 		this.id = id;
+		gc.accept( this );
 	}
 
-	private void elenca( SourceCitationContainer contenitore ) {
-		for( SourceCitation citaz : contenitore.getSourceCitations() )
+	@Override
+	boolean visita( Object oggetto, boolean capostipite ) {
+		if( capostipite )
+			capo = oggetto;
+		if( oggetto instanceof SourceCitationContainer ) {
+			analizza( oggetto, ((SourceCitationContainer)oggetto).getSourceCitations() );
+		} // Note non estende SourceCitationContainer, ma implementa i suoi propri metodi
+		else if( oggetto instanceof Note ) {
+			analizza( oggetto, ((Note)oggetto).getSourceCitations() );
+		}
+		return true;
+	}
+
+	private void analizza( Object contenitore, List<SourceCitation> citazioni ) {
+		for( SourceCitation citaz : citazioni )
 			// Le fonti-note non hanno Ref ad una fonte
-			if( citaz.getRef() != null && citaz.getRef().equals(id) )
-				lista.put( citaz, contenitore );
+			if( citaz.getRef() != null && citaz.getRef().equals(id) ) {
+				Tripletta tris = new Tripletta();
+				tris.capostipite = capo;
+				tris.contenitore = contenitore;
+				tris.citazione = citaz;
+				lista.add( tris );
+			}
 	}
 
-	@Override
-	public boolean visit( Person citatore ){
-		elenca(citatore);
-		return true;
+	public Object[] getCapi() {
+		Set<Object> capi = new LinkedHashSet<>(); // unifica i duplicati
+		for( Tripletta tri : lista ) {
+			capi.add( tri.capostipite );
+		}
+		return capi.toArray();
 	}
-	@Override
-	public boolean visit( Family citatore ) {
-		elenca(citatore);
-		return true;
-	}
-	@Override
-	public boolean visit( Name citatore ) {
-		elenca(citatore);
-		return true;
-	}
-	@Override
-	public boolean visit( EventFact citatore ) {
-		elenca(citatore);
-		return true;
-	}
-	// Note non estende SourceCitationContainer, ma implementa i suoi propri metodi
-	@Override
-	public boolean visit( Note citatore ) {
-		for( SourceCitation citaz : citatore.getSourceCitations() )
-			if( citaz.getRef() != null && citaz.getRef().equals(id) )
-				lista.put( citaz, citatore );
-		return true;
+
+	// Classe per stoccare insieme i tre elementi capostipite - contenitore - citazione
+	public class Tripletta {
+		public Object capostipite;
+		public Object contenitore; // Sarebbe un SourceCitationContainer ma Note fa eccezione
+		public SourceCitation citazione;
 	}
 }

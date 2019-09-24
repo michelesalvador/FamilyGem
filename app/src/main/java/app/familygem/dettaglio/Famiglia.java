@@ -25,22 +25,19 @@ public class Famiglia extends Dettaglio {
 
 	@Override
 	public void impagina() {
-		String idFamiglia = getIntent().getStringExtra("idFamiglia");
-		f = gc.getFamily( idFamiglia );
-		oggetto = f;
 		setTitle( R.string.family );
-		vistaId.setText( f.getId() );
-
+		f = (Family) casta( Family.class );
+		mettiBava( "FAM", f.getId() );
 		for( Person marito : f.getHusbands(gc) )
-			membro( marito, getString(R.string.husband) );	// todo se ci sono figli "Padre" "Madre" ??
+			membro( marito, !f.getChildRefs().isEmpty() ? R.string.father : R.string.husband );
 		for( Person moglie : f.getWives(gc) )
-			membro( moglie, getString(R.string.wife) );
+			membro( moglie, !f.getChildRefs().isEmpty() ? R.string.mother : R.string.wife );
 		for( EventFact ef : f.getEventsFacts() ) {
 			if( ef.getTag().equals("MARR") )
 				metti( getString(R.string.marriage), ef );
 		}
 		for( Person figlio : f.getChildren(gc) )
-			membro( figlio, ( U.sesso(figlio)==2 )? getString(R.string.daughter) : getString(R.string.son) );
+			membro( figlio, ( U.sesso(figlio)==2 )? R.string.daughter : R.string.son );
 		for( EventFact ef : f.getEventsFacts() ) {
 			if( !ef.getTag().equals( "MARR" ) )
 				metti( ef.getDisplayType(), ef );
@@ -52,29 +49,29 @@ public class Famiglia extends Dettaglio {
 		U.cambiamenti( box, f.getChange() );
 	}
 
-	void membro( final Person p, String ruolo ) {
-		View vistaPersona = U.mettiIndividuo( box, p, ruolo );
+	void membro( final Person p, final int ruolo ) {
+		View vistaPersona = U.mettiIndividuo( box, p, getString(ruolo) );
 		vistaPersona.setTag( R.id.tag_oggetto, p ); // per il menu contestuale in Dettaglio
 		registerForContextMenu( vistaPersona );
 		vistaPersona.setOnClickListener( new View.OnClickListener() {
 			public void onClick( View v ) {
-				if( !p.getParentFamilies(gc).isEmpty() )
-					if( !p.getParentFamilies(gc).get(0).equals( f ) ) {
-						Intent intento = new Intent( Famiglia.this, Famiglia.class );
-						intento.putExtra( "idFamiglia", p.getParentFamilies(gc).get(0).getId() );
-						startActivity( intento );
-						return;
-					}
-				if( !p.getSpouseFamilies(gc).isEmpty() )
-					if( !p.getSpouseFamilies(gc).get(0).equals( f ) ) {
-						Intent intento = new Intent( Famiglia.this, Famiglia.class );
-						intento.putExtra( "idFamiglia", p.getSpouseFamilies(gc).get(0).getId() );
-						startActivity( intento );
-						return;
-					}
-				Intent intento = new Intent( Famiglia.this, Individuo.class );
-				intento.putExtra( "idIndividuo", p.getId() );
-				startActivity( intento );
+				// un genitore con una o più famiglie in cui è figlio
+				if( (ruolo==R.string.husband || ruolo==R.string.wife) && !p.getParentFamilies(gc).isEmpty() ) {
+					U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
+				} // un figlio con una o più famiglie in cui è coniuge
+				else if( (ruolo==R.string.son || ruolo==R.string.daughter) && !p.getSpouseFamilies(gc).isEmpty() ) {
+					U.qualiConiugiMostrare( Famiglia.this, p );
+				} // un figlio non sposato che ha più famiglie genitoriali
+				else if( p.getParentFamilies(gc).size() > 1 ) {
+					U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
+				} // un coniuge senza genitori ma con più famiglie coniugali
+				else if( p.getSpouseFamilies(gc).size() > 1 ) {
+					U.qualiConiugiMostrare( Famiglia.this, p );
+				} else {
+					Intent intento = new Intent( Famiglia.this, Individuo.class );
+					intento.putExtra( "idIndividuo", p.getId() );
+					startActivity( intento );
+				}
 			}
 		} );
 		if( unRappresentanteDellaFamiglia == null )
@@ -98,7 +95,6 @@ public class Famiglia extends Dettaglio {
 				//List<SpouseFamilyRef> listaSfr = tizio.getSpouseFamilyRefs();	// Non va bene:
 				// quando la lista è inesistente, anzichè restituire una ArrayList restituisce una Collections$EmptyList che è IMMUTABILE cioè non ammette add()
 				List<SpouseFamilyRef> listaSfr = new ArrayList<>( tizio.getSpouseFamilyRefs() );	// ok
-				//s.l( listaSfr + " "+ listaSfr.size() +" "+ listaSfr.isEmpty() +" "+ listaSfr.getClass() );
 				listaSfr.add( sfr );	// ok
 				tizio.setSpouseFamilyRefs( listaSfr );
 				break;
@@ -118,7 +114,7 @@ public class Famiglia extends Dettaglio {
 	// Elimina famiglia
 	@Override
 	public void elimina() {
-		Chiesa.elimina( f.getId() );
+		U.aggiornaDate( (Object[]) Chiesa.elimina(f.getId()) );
 	}
 
 	// Rimuove i ref reciproci individuo-famiglia

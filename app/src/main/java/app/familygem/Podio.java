@@ -2,7 +2,6 @@
 
 package app.familygem;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,10 +24,10 @@ import static app.familygem.Globale.gc;
 
 public class Podio extends Fragment {
 
-    @Override
-    public void onCreate( Bundle stato ) {
-        super.onCreate( stato );
-    }
+	@Override
+	public void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
+	}
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
@@ -40,19 +39,22 @@ public class Podio extends Fragment {
 		for( final Submitter autor : listAutori ) {
 			View vistaPezzo = inflater.inflate( R.layout.magazzino_pezzo, scatola, false );
 			scatola.addView( vistaPezzo );
-			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( autor.getName() );
+			String nome = autor.getName();
+			if( nome == null || nome.isEmpty() )
+				nome = getString( android.R.string.unknownName );
+			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( nome );
 			vistaPezzo.findViewById( R.id.magazzino_archivi ).setVisibility( View.GONE );
 			vistaPezzo.setOnClickListener( new View.OnClickListener() {
 				public void onClick( View vista ) {
+					/* non usato
 					if( getActivity().getIntent().getBooleanExtra("podioScegliAutore",false) ) {
 						Intent intento = new Intent();
 						intento.putExtra("idAutore", autor.getId() );
 						getActivity().setResult( Activity.RESULT_OK, intento );
 						getActivity().finish();
-					} else {
-						Ponte.manda( autor, "oggetto" );
-						startActivity( new Intent( getContext(), Autore.class ) );
-					}
+					} else{*/
+					Memoria.setPrimo( autor );
+					startActivity( new Intent( getContext(), Autore.class ) );
 				}
 			});
 			registerForContextMenu( vistaPezzo );
@@ -61,32 +63,31 @@ public class Podio extends Fragment {
 		return vista;
 	}
 
+	// Elimina un autore
+	// Todo mi sa che andrebbe cercato eventuale SubmitterRef in tutti i record
+	public static void eliminaAutore( Submitter aut ) {
+		Header testa = gc.getHeader();
+		if( testa != null && testa.getSubmitterRef() != null
+				&& testa.getSubmitterRef().equals(aut.getId()) ) {
+			testa.setSubmitterRef( null );
+		}
+		gc.getSubmitters().remove( aut );
+		if( gc.getSubmitters().isEmpty() )
+			gc.setSubmitters( null );
+	}
+
 	// Crea un Autore nuovo, se riceve un contesto lo apre in modalità editore
 	public static Submitter nuovoAutore( Context contesto ) {
 		Submitter subm = new Submitter();
-		int val, max = 0;
-		for( Submitter a : gc.getSubmitters() ) {
-			val = Anagrafe.idNumerico( a.getId() );
-			if( val > max )	max = val;
-		}
-		subm.setId(  "U" + (max+1) );
+		subm.setId( U.nuovoId(gc,Submitter.class) );
 		subm.setName( "" );
+		U.aggiornaDate( subm );
 		gc.addSubmitter( subm );
 		if( contesto != null ) {
-			Ponte.manda( subm, "oggetto" );
+			Memoria.setPrimo( subm );
 			contesto.startActivity( new Intent( contesto, Autore.class ) );
 		}
 		return subm;
-	}
-
-	public static void elimina( Submitter aut ) {
-		gc.getSubmitters().remove( aut );
-		Header testa = gc.getHeader();
-		if( testa != null )
-			if( testa.getSubmitterRef() != null )
-				if( testa.getSubmitterRef().equals(aut.getId()) )
-					testa.setSubmitterRef( null );
-		gc.createIndexes();	// serve?
 	}
 
 	// menu opzioni nella toolbar
@@ -99,6 +100,7 @@ public class Podio extends Fragment {
 		switch( item.getItemId() ) {
 			case 0:
 				nuovoAutore( getContext() );
+				U.salvaJson( true );
 				return true;
 			default:
 				return false;
@@ -110,22 +112,30 @@ public class Podio extends Fragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
 		vistaAutore = vista;
-		if( gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals( vista.getTag() ) )
+		if( gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals( vista.getTag() ) )
 			menu.add( 0, 0, 0, R.string.make_default );
-		menu.add( 0, 1, 0, R.string.delete );
+		if( !U.autoreHaCondiviso((Submitter)vista.getTag()) ) // può essere eliminato solo se non ha mai condiviso
+			menu.add( 0, 1, 0, R.string.delete );
+		// todo spiegare perché non può essere eliminato?
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
+		Submitter subm = (Submitter) vistaAutore.getTag();
 		switch( item.getItemId() ) {
 			case 0:
-				gc.getHeader().setSubmitterRef( ((Submitter)vistaAutore.getTag()).getId() );
-				U.salvaJson();
+				Header testa = gc.getHeader();
+				if( testa == null ) {
+					testa = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo + ".json" );
+					gc.setHeader( testa );
+				}
+				testa.setSubmitterRef( subm.getId() );
+				U.salvaJson( false, subm );
 				return true;
 			case 1:
 				// Todo conferma elimina
-				elimina( (Submitter) vistaAutore.getTag() );
+				eliminaAutore( subm );
 				vistaAutore.setVisibility( View.GONE );
-				U.salvaJson();
+				U.salvaJson(false);
 				return true;
 		}
 		return false;

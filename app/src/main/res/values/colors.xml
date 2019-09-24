@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primario">#960f3e</color>
-    <color name="primarioScuro">#720426</color>
-    <color name="primarioChiaro">#be4265</color>
-    <color name="evidenzia">#e99725</color>
-    <color name="maschio">#44aaff</color>
-    <color name="femmina">#ff66dd</color>
-    <color name="fonte">#ffcc66</color>
-    <color name="citazioneFonte">#ffeeaa</color>
-    <color name="archivio">#aa9988</color>
-    <color name="archivioCitazione">#ddccbb</color>
-    <color name="trasparente">#0000</color>
+	<color name="primario">#960f3e</color>
+	<color name="primarioScuro">#720426</color>
+	<color name="primarioChiaro">#be4265</color>
+	<color name="evidenzia">#e99725</color>
+	<color name="maschio">#44aaff</color>
+	<color name="femmina">#ff66dd</color>
+	<color name="fonte">#ffcc66</color>
+	<color name="citazioneFonte">#ffeeaa</color>
+	<color name="archivio">#aa9988</color>
+	<color name="archivioCitazione">#ddccbb</color>
+	<color name="trasparente">#0000</color>
 </resources>

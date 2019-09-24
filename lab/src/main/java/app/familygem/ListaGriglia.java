@@ -27,8 +27,8 @@ import java.util.Map;
 public class ListaGriglia extends AppCompatActivity {
 
 	@Override
-	public void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	public void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 		setContentView( R.layout.galleria );
 		RecyclerView griglia = findViewById( R.id.galleria );
 		//griglia.setNestedScrollingEnabled( false ); pareva dovesse supplire al caricamento asincrono

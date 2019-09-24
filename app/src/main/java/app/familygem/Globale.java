@@ -12,16 +12,18 @@ import java.io.IOException;
 
 public class Globale extends Application {
 	public static Gedcom gc;
-	static int ordineAnagrafe = 0;
-	public static String individuo;	// "I1";
-	static int ordineBiblioteca = 0;
-	static int ordineMagazzino;
-	public static Media media;
 	public static Context contesto;
 	public static Armadio preferenze;
+	public static String individuo;	// "I1";
 	static View vistaPrincipe;
-	static boolean editato; // C'è stata un'editazione in EditaIndividuo o in Dettaglio e quindi il contenuto delle attività precedenti va aggiornato
-	public static Media mediaCroppato;
+	static int ordineAnagrafe = 0;
+	static int ordineBiblioteca = 0;
+	static int ordineMagazzino;
+	public static boolean editato; // C'è stata un'editazione in EditaIndividuo o in Dettaglio e quindi il contenuto delle attività precedenti va aggiornato
+	static boolean daSalvare; // Il contenuto del Gedcom è stato modificato e deve essere salvato
+	public static Media mediaCroppato; // parcheggio temporaneo del media in fase di croppaggio
+	static Gedcom gc2; // per il confronto degli aggiornamenti
+	static int idAlbero2; // id dell'albero2 con gli aggiornamenti
 
 	// Viene chiamato all'avvio dell'applicazione, e anche quando viene riavviata
 	public void onCreate() {
@@ -37,7 +39,7 @@ public class Globale extends Application {
 		try {
 			File filePreferenze = new File( contesto.getFilesDir(), "preferenze.json");
 			if( filePreferenze.exists() )
-				stringone = FileUtils.readFileToString( filePreferenze );
+				stringone = FileUtils.readFileToString( filePreferenze, "UTF-8" );
 		} catch( IOException e ) {
 			e.printStackTrace();
 		}

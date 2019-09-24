@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground" >
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="?android:attr/selectableItemBackground" >
 
-    <TextView
-        android:id="@+id/evento_titolo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Titolozzo"
-        android:textStyle="bold" />
+	<TextView
+		android:id="@+id/evento_titolo"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:text="Titolozzo"
+		android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/evento_testo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/evento_titolo"
-        android:text="Appuntato
+	<TextView
+		android:id="@+id/evento_testo"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/evento_titolo"
+		android:text="Appuntato
 DAL 13 NOV 1234
 Piazza delle Barche 11
 Mestre, Venezia
 A causa di un grave malore"
-        android:textColor="#000"
-        android:textSize="18sp" />
+		android:textColor="#000"
+		android:textSize="18sp" />
 
-    <LinearLayout
-        android:id="@+id/evento_altro"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/evento_testo"
-        android:orientation="vertical" />
+	<LinearLayout
+		android:id="@+id/evento_altro"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/evento_testo"
+		android:orientation="vertical" />
 
-    <TextView
-        android:id="@+id/evento_fonti"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="8dp"
-        android:background="@color/citazioneFonte"
-        android:padding="4dp"
-        android:text="3"
-        android:visibility="gone" />
+	<TextView
+		android:id="@+id/evento_fonti"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+		android:layout_marginBottom="8dp"
+		android:background="@color/citazioneFonte"
+		android:padding="4dp"
+		android:text="3"
+		android:visibility="gone" />
 
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@+id/evento_altro"
-        android:layout_marginTop="8dp"
-        android:background="@color/primario" />
+	<View
+		android:id="@+id/divider"
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:layout_below="@+id/evento_altro"
+		android:layout_marginTop="8dp"
+		android:background="@color/primario" />
 </RelativeLayout>

@@ -11,8 +11,8 @@ import android.widget.TextView;
 public class Lapide extends AppCompatActivity {
 
 	@Override
-	protected void onCreate( Bundle stato ) {
-		super.onCreate( stato );
+	protected void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
 		setContentView( R.layout.lapide );
 
 		TextView versione = findViewById( R.id.lapide_versione );

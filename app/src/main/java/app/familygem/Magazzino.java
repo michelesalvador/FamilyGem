@@ -23,20 +23,17 @@ import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import app.familygem.dettaglio.Archivio;
 import static app.familygem.Globale.gc;
 
 public class Magazzino extends Fragment {
 
-    @Override
-    public void onCreate( Bundle stato ) {
-        super.onCreate( stato );
-    }
-
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
-    	View vista = inflater.inflate( R.layout.magazzino, container, false);
+	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
+		View vista = inflater.inflate( R.layout.magazzino, container, false);
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
 		if( gc != null ) {
 			setHasOptionsMenu(true);
@@ -73,7 +70,7 @@ public class Magazzino extends Fragment {
 							getActivity().setResult( Activity.RESULT_OK, intento );
 							getActivity().finish();
 						} else {
-							Ponte.manda( rep, "oggetto" );
+							Memoria.setPrimo( rep );
 							startActivity( new Intent( getContext(), Archivio.class ) );
 						}
 					}
@@ -89,9 +86,8 @@ public class Magazzino extends Fragment {
 	static int quanteFonti( Repository rep, Gedcom gc ) {
 		int quante = 0;
 		for( Source fon : gc.getSources() ) {
-			if( fon.getRepository(gc) != null )
-				if( fon.getRepository(gc).equals(rep) )
-					quante++;
+			if( fon.getRepositoryRef() != null && fon.getRepositoryRef().getRef().equals(rep.getId()) )
+				quante++;
 		}
 		return quante;
 	}
@@ -99,28 +95,32 @@ public class Magazzino extends Fragment {
 	// Crea un archivio nuovo, se riceve una fonte glielo collega
 	public static void nuovoArchivio( Context contesto, Source fonte ) {
 		Repository arch = new Repository();
-		int val, max = 0;
-		for( Repository a : gc.getRepositories() ) {
-			val = Anagrafe.idNumerico( a.getId() );
-			if( val > max )	max = val;
-		}
-		arch.setId(  "R" + (max+1) );
+		arch.setId( U.nuovoId( gc, Repository.class ) );
 		arch.setName( "" );
 		gc.addRepository( arch );
 		if( fonte != null ) {
 			RepositoryRef archRef = new RepositoryRef();
 			archRef.setRef( arch.getId() );
 			fonte.setRepositoryRef( archRef );
-			Ponte.manda( fonte, "contenitore" );
 		}
-		Ponte.manda( arch, "oggetto" );
+		Memoria.setPrimo( arch );
 		contesto.startActivity( new Intent( contesto, Archivio.class ) );
 	}
 
-	public static void elimina( Repository arch ) {
-		// todo eliminare ref dalle fonti in cui è citato
+	/* Elimina l'archivio e i ref dalle fonti in cui è citato l'archivio
+		Restituisce un array delle Source modificate
+	Secondo le specifiche Gedcom 5.5, la labreria FS e Family Historian una SOUR prevede un solo Ref a un REPO
+	Invece secondo Gedcom 5.5.1 può avere molteplici Ref ad archivi */
+	public static Source[] elimina( Repository arch ) {
+		Set<Source> fonti = new HashSet<>();
+		for( Source fon : gc.getSources() )
+			if( fon.getRepositoryRef() != null && fon.getRepositoryRef().getRef().equals(arch.getId()) ) {
+				fon.setRepositoryRef( null );
+				fonti.add( fon );
+			}
 		gc.getRepositories().remove( arch );
-		gc.createIndexes();	// serve?
+		Memoria.annullaIstanze( arch );
+		return fonti.toArray( new Source[0] );
 	}
 
 	// menu opzioni nella toolbar
@@ -165,9 +165,9 @@ public class Magazzino extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			case 0:
-				elimina( (Repository) vistaArchio.getTag() );
 				vistaArchio.setVisibility( View.GONE );
-				U.salvaJson();
+				Source[] fonti = elimina( (Repository)vistaArchio.getTag() );
+				U.salvaJson( false, (Object[])fonti );
 				return true;
 		}
 		return false;

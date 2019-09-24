@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.GedcomTag;
@@ -32,39 +33,42 @@ import static app.familygem.Globale.gc;
 public class IndividuoEventi extends Fragment {
 
 	Person uno;
+	View vistaCambi;
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View vistaEventi = inflater.inflate( R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
 			LinearLayout scatola = vistaEventi.findViewById( R.id.contenuto_scheda );
-			uno = gc.getPerson( Globale.individuo );
-			for( Name nome : uno.getNames())
-				piazzaEvento( scatola, getString(R.string.name), U.nomeCognome( nome ), nome );
-			for (EventFact fatto : uno.getEventsFacts() ) {
-				String tst = "";
-				if( fatto.getValue() != null ) {
-					if( fatto.getValue().equals("Y") && fatto.getTag()!=null &&
-							( fatto.getTag().equals("BIRT") || fatto.getTag().equals("CHR") || fatto.getTag().equals("DEAT") ) )
-						tst = getString(R.string.yes);
-					else tst = fatto.getValue();
-					tst += "\n";
+			uno = gc.getPerson( getActivity().getIntent().getStringExtra( "idIndividuo" ) );
+			if( uno != null ) {
+				for( Name nome : uno.getNames())
+					piazzaEvento( scatola, getString(R.string.name), U.nomeCognome( nome ), nome );
+				for (EventFact fatto : uno.getEventsFacts() ) {
+					String tst = "";
+					if( fatto.getValue() != null ) {
+						if( fatto.getValue().equals("Y") && fatto.getTag()!=null &&
+								( fatto.getTag().equals("BIRT") || fatto.getTag().equals("CHR") || fatto.getTag().equals("DEAT") ) )
+							tst = getString(R.string.yes);
+						else tst = fatto.getValue();
+						tst += "\n";
+					}
+					if( fatto.getType() != null )	tst += fatto.getType() + "\n";
+					if( fatto.getDate() != null ) 	tst += fatto.getDate() + "\n";
+					Address indirizzo = fatto.getAddress();
+					if( indirizzo != null )	tst += Dettaglio.indirizzo(indirizzo) + "\n";
+					if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
+					if( fatto.getCause() != null )	tst += fatto.getCause() + "\n";
+					if( tst.endsWith("\n") )	tst = tst.substring( 0, tst.length()-1 );	// Rimuove l'ultimo acapo
+					piazzaEvento( scatola, fatto.getDisplayType(), tst, fatto );
 				}
-				if( fatto.getType() != null )	tst += fatto.getType() + "\n";
-				if( fatto.getDate() != null ) 	tst += fatto.getDate() + "\n";
-				Address indirizzo = fatto.getAddress();
-				if( indirizzo != null )	tst += Dettaglio.indirizzo(indirizzo) + "\n";
-				if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
-				if( fatto.getCause() != null )	tst += fatto.getCause() + "\n";
-				if( tst.endsWith("\n") )	tst = tst.substring( 0, tst.length()-1 );	// Rimuove l'ultimo acapo
-				piazzaEvento( scatola, fatto.getDisplayType(), tst, fatto );
+				for( Estensione est : U.trovaEstensioni( uno ) ) {
+					piazzaEvento( scatola, est.nome, est.testo, est.gedcomTag );
+				}
+				U.mettiNote( scatola, uno, true );
+				U.citaFonti( scatola, uno );
+				vistaCambi = U.cambiamenti( scatola, uno.getChange() );
 			}
-			for( Estensione est : U.trovaEstensioni( uno ) ) {
-				piazzaEvento( scatola, est.nome, est.testo, est.gedcomTag );
-			}
-			U.mettiNote( scatola, uno, true );
-			U.citaFonti( scatola, uno );
-			U.cambiamenti( scatola, uno.getChange() );
 		}
 		return vistaEventi;
 	}
@@ -94,8 +98,7 @@ public class IndividuoEventi extends Fragment {
 			U.mettiMedia( scatolaAltro, oggetto, false );
 			vistaFatto.setOnClickListener( new View.OnClickListener() {
 				public void onClick( View v ) {
-					Ponte.manda( oggetto, "oggetto" );
-					// non serve mandare "contenitore"
+					Memoria.aggiungi( oggetto );
 					startActivity( new Intent( getContext(), Nome.class ) );
 				}
 			} );
@@ -118,26 +121,22 @@ public class IndividuoEventi extends Fragment {
 				if( sessoCapitato > 2 ) sessoCapitato = -1;
 				vistaFatto.setOnClickListener( new View.OnClickListener() {
 					public void onClick( View vista ) {
-						AlertDialog.Builder dialogo = new AlertDialog.Builder(vista.getContext());
-						final CharSequence[] sessi2 = { getText(R.string.male), getText(R.string.female), getText(R.string.unknown) };
-						// todo è sconcertante che non riesco a ricavare da Map sessi un array di stringhe...
-						dialogo.setSingleChoiceItems( sessi2, sessoCapitato, new DialogInterface.OnClickListener() {
+						new AlertDialog.Builder( vista.getContext() )
+						.setSingleChoiceItems( sessi.values().toArray(new String[0]), sessoCapitato, new DialogInterface.OnClickListener() {
 							public void onClick( DialogInterface dialog, int item) {
 								((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
-								Globale.editato = true;
-								getActivity().recreate();
 								dialog.dismiss();
+								aggiorna( 1 );
+								U.salvaJson( true, uno );
 							}
-						});
-						dialogo.create().show();
+						}).show();
 					}
 				});
 			} else { // Tutti gli altri eventi
 				U.mettiMedia( scatolaAltro, oggetto, false );
 				vistaFatto.setOnClickListener( new View.OnClickListener() {
 					public void onClick( View vista ) {
-						Ponte.manda( oggetto, "oggetto" );
-						Ponte.manda( uno, "contenitore" );
+						Memoria.aggiungi( oggetto );
 						startActivity( new Intent( getContext(), Evento.class ) );
 					}
 				});
@@ -145,8 +144,7 @@ public class IndividuoEventi extends Fragment {
 		} else if( oggetto instanceof GedcomTag ) {
 			vistaFatto.setOnClickListener( new View.OnClickListener() {
 				public void onClick( View vista ) {
-					Ponte.manda( oggetto, "oggetto" );
-					Ponte.manda( uno, "contenitore" );
+					Memoria.aggiungi( oggetto );
 					startActivity( new Intent( getContext(), app.familygem.dettaglio.Estensione.class ) );
 				}
 			} );
@@ -161,7 +159,6 @@ public class IndividuoEventi extends Fragment {
 		// menuInfo come al solito è null
 		vistaPezzo = vista;
 		oggettoPezzo = vista.getTag( R.id.tag_oggetto );
-		//contenitorePezzo = vista.getTag( R.id.tag_contenitore );
 		if( oggettoPezzo instanceof Name ) {
 			if( uno.getNames().indexOf(oggettoPezzo) > 0 )
 				menu.add( 0, 200, 0, R.string.move_up );
@@ -187,39 +184,35 @@ public class IndividuoEventi extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		List<Name> nomi = uno.getNames();
 		List<EventFact> fatti = uno.getEventsFacts();
+		int cosa = 0; // cosa aggiornare dopo la modifica
 		switch( item.getItemId() ) {
 			// Nome
 			case 200: // Sposta su
 				nomi.add( nomi.indexOf(oggettoPezzo)-1, (Name)oggettoPezzo );
 				nomi.remove( nomi.lastIndexOf(oggettoPezzo) );
-				getActivity().recreate();
-				Globale.editato = true;
+				cosa = 2;
 				break;
 			case 201: // Sposta giù
 				nomi.add( nomi.indexOf(oggettoPezzo)+2, (Name)oggettoPezzo );
 				nomi.remove( nomi.indexOf(oggettoPezzo) );
-				getActivity().recreate();
-				Globale.editato = true;
+				cosa = 2;
 				break;
 			case 202: // Elimina
 				if( U.preserva(oggettoPezzo) ) return false;
 				uno.getNames().remove( oggettoPezzo );
 				vistaPezzo.setVisibility( View.GONE );
-				Globale.editato = true;
+				cosa = 2;
 				break;
 			// Evento generico
 			case 203: // Sposta su
 				fatti.add( fatti.indexOf(oggettoPezzo)-1, (EventFact)oggettoPezzo );
 				fatti.remove( fatti.lastIndexOf(oggettoPezzo) );
-				getActivity().recreate(); // ok ricarica tutta l'activity, anche la testata
-				/* Tentativo di ricaricare solo il fragment: non funziona
-				FragmentTransaction tr = getFragmentManager().beginTransaction();
-				tr.replace( R.id.contenuto_scheda, new IndividuoEventi() ).commit();*/
+				cosa = 1;
 				break;
 			case 204: // Sposta giu
 				fatti.add( fatti.indexOf(oggettoPezzo)+2, (EventFact)oggettoPezzo );
 				fatti.remove( fatti.indexOf(oggettoPezzo) );
-				getActivity().recreate();
+				cosa = 1;
 				break;
 			case 205:
 				// todo Conferma elimina
@@ -233,8 +226,10 @@ public class IndividuoEventi extends Fragment {
 				U.scollegaNota( (Note)oggettoPezzo, uno, vistaPezzo );
 				break;
 			case 211:
-				U.eliminaNota( (Note)oggettoPezzo, uno, vistaPezzo );
-				break;
+				Object[] capi = U.eliminaNota( (Note)oggettoPezzo, vistaPezzo );
+				U.salvaJson( true, capi );
+				aggiorna( 0 );
+				return true;
 			case 220: 	// Citazione fonte
 				// todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
 				uno.getSourceCitations().remove( oggettoPezzo );
@@ -243,7 +238,24 @@ public class IndividuoEventi extends Fragment {
 			default:
 				return false;
 		}
-		U.salvaJson();
+		U.salvaJson( true, uno );
+		aggiorna( cosa );
 		return true;
+	}
+
+	// Rinfresca il contenuto del frammento Eventi
+	void aggiorna( int cheCosa ) {
+		if( cheCosa == 0 ) { // sostituisce solo la data di cambiamento
+			LinearLayout scatola = getActivity().findViewById( R.id.contenuto_scheda );
+			if( vistaCambi != null )
+				scatola.removeView( vistaCambi );
+			vistaCambi = U.cambiamenti( scatola, uno.getChange() );
+		} else { // ricarica il fragment
+			getActivity().getSupportFragmentManager().beginTransaction().detach( this ).attach( this ).commit();
+			if( cheCosa == 2 ) { // aggiorna anche il titolo dell'activity
+				CollapsingToolbarLayout barraCollasso = getActivity().findViewById( R.id.toolbar_layout );
+				barraCollasso.setTitle( U.epiteto( uno ) );
+			}
+		}
 	}
 }

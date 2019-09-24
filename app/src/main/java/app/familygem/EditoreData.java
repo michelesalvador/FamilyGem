@@ -1,111 +1,130 @@
 package app.familygem;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
-import android.widget.Spinner;
+import android.widget.TextView;
+import androidx.appcompat.widget.PopupMenu;
 import java.lang.reflect.Field;
-import java.text.DateFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
+import static app.familygem.Datatore.*;
 
 public class EditoreData extends LinearLayout {
 
-	Data data1;
-	Data data2;
-	String frase; // data frase
-	int tipo;
+	Datatore datatore;
+	Datatore.Data data1;
+	Datatore.Data data2;
 	EditText editaTesto;
 	String[] giorniRuota = { "-","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15",
 			"16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31" };
 	String[] mesiRuota = { "-", s(R.string.january), s(R.string.february), s(R.string.march), s(R.string.april), s(R.string.may), s(R.string.june),
 			s(R.string.july), s(R.string.august), s(R.string.september), s(R.string.october), s(R.string.november), s(R.string.december) };
-	String[] anniRuota = { "","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",
-			"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",
-			"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","-"	};
-	String[] paterni = { "d MMM yyy", "d M yyy", "MMM yyy", "M yyy", "d MMM", "yyy" };
-	String G_M_A = paterni[0];
-	String G_m_A = paterni[1];
-	String M_A = paterni[2];
-	String m_A = paterni[3];
-	String G_M = paterni[4];
-	String A = paterni[5];
-	String[] mesiGedcom = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
-	String[] prefissi = { "", "ABT", "CAL", "EST", "AFT", "BEF", "BET",	"FROM", "TO", "FROM", "(" };
+	String[] anniRuota = new String[101];
+	int[] tipiData = { R.string.exact, R.string.approximate, R.string.calculated, R.string.estimated,
+			R.string.after, R.string.before, R.string.between,
+			R.string.from, R.string.to, R.string.from_to, R.string.date_phrase };
 	Calendar calenda = GregorianCalendar.getInstance();
 	boolean veroImputTesto; // stabilisce se l'utente sta effettivamente digitando sulla tastiera virtuale o se il testo viene cambiato in altro modo
-	boolean abilitaSpinner; // il tipo è scelto cliccando sullo spinner o scrivendo il testo
 	InputMethodManager tastiera;
 	boolean tastieraVisibile;
-
-	class Data {
-		Date date;
-		SimpleDateFormat format;
-	}
 
 	public EditoreData( Context contesto, AttributeSet as ) {
 		super( contesto, as );
 	}
 
 	// Azioni da fare una sola volta all'inizio
-	@SuppressLint("ClickableViewAccessibility")
-	void inizia( final EditText editaTesto ) {    //, final LinearLayout vistaEditaData, String dataGc
+	//@SuppressLint("ClickableViewAccessibility")
+	void inizia( final EditText editaTesto ) {	//, final LinearLayout vistaEditaData, String dataGc
 
 		addView( inflate( getContext(), R.layout.editore_data, null ), this.getLayoutParams() );
-		veroImputTesto = false;
 		this.editaTesto = editaTesto;
 
 		for( int i = 0; i < anniRuota.length-1; i++ )
-			anniRuota[i] = i<10 ? "0"+i : ""+i ;
+			anniRuota[i] = i<10 ? "0"+i : ""+i;
+		anniRuota[100] = "-";
+
+		datatore = new Datatore( editaTesto.getText().toString() );
+		data1 = datatore.data1;
+		data2 = datatore.data2;
 
 		// Arreda l'editore data
-		Spinner elencoTipi = findViewById(R.id.editadata_tipi);
-		String[] tipiData = { s(R.string.exact), s(R.string.approximate), s(R.string.calculated), s(R.string.estimated),
-				s(R.string.after), s(R.string.before), s(R.string.between),
-				s(R.string.from), s(R.string.to), s(R.string.from_to), s(R.string.date_phrase) };
-		ArrayAdapter<String> adattatore = new ArrayAdapter<>( Globale.contesto, R.layout.elemento_spinner, tipiData );
-		elencoTipi.setAdapter( adattatore );
-		elencoTipi.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
-			@Override
-			public void onItemSelected( AdapterView<?> pv, View v, int posizione, long id ) {
-				if( abilitaSpinner ) {
-					tipo = posizione;
-					if( tipo == 10 ) {
-						frase = editaTesto.getText().toString();
-						findViewById( R.id.editadata_prima ).setVisibility( View.GONE );
-					} else {
-						if( data1 == null || data1.date == null )
-							data1 = scanna( "" );
-						findViewById( R.id.editadata_prima ).setVisibility( View.VISIBLE );
-					}
-					if( tipo == 6 || tipo == 9 ) {
-						if( data2 == null )
-							data2 = scanna( "" );
-						findViewById( R.id.editadata_seconda ).setVisibility( View.VISIBLE );
-					} else
-						findViewById(R.id.editadata_seconda).setVisibility( View.GONE );
+		if( Globale.preferenze.esperto ) {
+			final TextView elencoTipi = findViewById(R.id.editadata_tipi);
+			elencoTipi.setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View vista ) {
+					PopupMenu popup = new PopupMenu( getContext(), vista );
+					Menu menu = popup.getMenu();
+					for( int i=0; i<tipiData.length-1; i++ )
+						menu.add( 0, i, 0, tipiData[i] );
+					popup.show();
+					popup.setOnMenuItemClickListener( new PopupMenu.OnMenuItemClickListener() {
+						@Override
+						public boolean onMenuItemClick( MenuItem item ) {
+							datatore.tipo = item.getItemId();
+							// Se eventualmente invisibile
+							findViewById( R.id.editadata_prima ).setVisibility( View.VISIBLE );
+							if( data1.date == null ) // micro settaggio del carro
+								((NumberPicker)findViewById( R.id.prima_anno )).setValue( 100 );
+							if( datatore.tipo == 6 || datatore.tipo == 9 ) {
+								findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
+								if( data2.date == null )
+									((NumberPicker)findViewById( R.id.seconda_anno )).setValue( 100 );
+							} else {
+								findViewById( R.id.editadata_seconda ).setVisibility( GONE );
+							}
+							impostaCeccoDoppia( data2 );
+							elencoTipi.setText( tipiData[datatore.tipo] );
+							veroImputTesto = false;
+							genera( false );
+							return true;
+						}
+					});
+				}
+			});
+			findViewById( R.id.editadata_doppia1 ).setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View vista ) {
+					data1.doppia = ((CompoundButton)vista).isChecked();
 					veroImputTesto = false;
 					genera( false );
 				}
-				abilitaSpinner = true;
-			}
-			@Override
-			public void onNothingSelected( AdapterView<?> pv ) {}
-		});
+			});
+			findViewById( R.id.editadata_doppia2 ).setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View vista ) {
+					data2.doppia = ((CompoundButton)vista).isChecked();
+					veroImputTesto = false;
+					genera( false );
+				}
+			});
+			findViewById( R.id.editadata_circa ).setVisibility( GONE );
+		} else {
+			findViewById( R.id.editadata_circa ).setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View vista ) {
+					datatore.tipo = ((CompoundButton)vista).isChecked() ? 1 : 0;
+					veroImputTesto = false;
+					genera( false );
+				}
+			});
+			findViewById( R.id.editadata_avanzate ).setVisibility( GONE );
+		}
 
 		arredaCarro( 1, (NumberPicker)findViewById( R.id.prima_giorno ),
 				(NumberPicker)findViewById( R.id.prima_mese ),
@@ -122,8 +141,9 @@ public class EditoreData extends LinearLayout {
 		editaTesto.setOnFocusChangeListener( new View.OnFocusChangeListener() {
 			@Override
 			public void onFocusChange( View v, boolean ciapa ) {
+				//s.l("onFocusChange "+ciapa);
 				if( ciapa ) {
-					if( tipo == 10 )
+					if( datatore.tipo == 10 )
 						genera( false ); // solo per togliere le parentesi alla frase
 					else {
 						tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
@@ -132,6 +152,7 @@ public class EditoreData extends LinearLayout {
 						editaTesto.setInputType( InputType.TYPE_NULL ); // disabilita input testo con tastiera
 							// necessario in versioni recenti di android in cui la tastiera ricompare
 					}
+					datatore.data1.date = null; // un resettino
 					impostaTutto();
 					setVisibility( View.VISIBLE );
 				} else
@@ -147,7 +168,7 @@ public class EditoreData extends LinearLayout {
 					editaTesto.setInputType( InputType.TYPE_CLASS_TEXT ); // riabilita l'input
 				} else if( event.getAction() == MotionEvent.ACTION_UP ) {
 					tastieraVisibile = tastiera.showSoftInput( editaTesto, 0 ); // fa ricomparire la tastiera
-					veroImputTesto = true;
+					//veroImputTesto = true;
 					//vista.performClick(); non ne vedo l'utilità
 				}
 				return false;
@@ -161,10 +182,10 @@ public class EditoreData extends LinearLayout {
 			public void onTextChanged( CharSequence testo, int i, int i1, int i2 ) {}
 			@Override
 			public void afterTextChanged( Editable testo ) {
+				//s.l("\tafterTextChanged "+veroImputTesto);
 				// non so perché ma in android 5 alla prima editazione viene chiamato 2 volte, che comunque non è un problema
-				if( veroImputTesto ) {
+				if( veroImputTesto )
 					impostaTutto();
-				}
 				veroImputTesto = true;
 			}
 		} );
@@ -213,70 +234,28 @@ public class EditoreData extends LinearLayout {
 		});
 	}
 
-	// Toglie le famigerate linee divisorie azzurre
 	void stilizza( NumberPicker ruota ) {
+		// Toglie le famigerate linee divisorie azzurre
 		try {
 			Field campo = NumberPicker.class.getDeclaredField( "mSelectionDivider" );
 			campo.setAccessible( true );
 			campo.set( ruota, null );
-		} catch( Exception e ) {
-			e.printStackTrace();
-		}
+		} catch( Exception e ) {}
+		// Risolve il bug https://issuetracker.google.com/issues/37055335
+		ruota.setSaveFromParentEnabled(false);
 	}
 
 	// Prende la stringa data, aggiorna le Date e ci modifica tutto l'editore data
 	// Chiamato quando clicco sul campo editabile, e dopo ogni editazione del testo
 	void impostaTutto() {
-		data1 = null;
-		data2 = null;
-		frase = null;
-		String dataGc = editaTesto.getText().toString().trim();
+		datatore.analizza( editaTesto.getText().toString() );
 
-		// Riconosce i tipi con prefisso e converte la stringa in Data
-		for( int t = 1; t < prefissi.length; t++  ) {
-			if( dataGc.startsWith(prefissi[t]) ) {
-				tipo = t;
-				if( t == 6 && dataGc.contains("AND") ) { // BET... AND
-					data1 = scanna( dataGc.substring( 4, dataGc.indexOf("AND")-1 ));
-					if( dataGc.length() > dataGc.indexOf("AND")+3 )
-						data2 = scanna( dataGc.substring( dataGc.indexOf("AND")+4 ));
-				} else if( t == 7 && dataGc.contains("TO") ) { // FROM... TO
-					tipo = 9;
-					data1 = scanna( dataGc.substring( 5, dataGc.indexOf("TO")-1 ));
-					if( dataGc.length() > dataGc.indexOf("TO")+2 )
-						data2 = scanna( dataGc.substring( dataGc.indexOf("TO")+3 ) );
-				} else if( t == 10 ) { // Data frase
-					data1 = scanna( "" );
-					if( dataGc.endsWith(")") )
-						frase = dataGc.substring( 1, dataGc.indexOf(")") );
-					else
-						frase = dataGc;
-				} else if( dataGc.length() > prefissi[t].length() ) // Altri prefissi seguiti da qualcosa
-					data1 = scanna( dataGc.substring( prefissi[t].length() + 1 ) );
-				else
-					data1 = scanna( "" ); // Prefisso e basta
-				break;
-			}
-		}
-		// Rimane da provare il tipo 0
-		if( data1 == null ) {
-			data1 = scanna( dataGc );
-			tipo = 0;
-		}
+		((CheckBox)findViewById( R.id.editadata_circa )).setChecked( datatore.tipo == 1 );
 
-		// La data non è stata interpretata e non è una frase tra parentesi
-		if( data1.date == null && tipo != 10 ) {
-			//data1 = scanna( "" );
-			frase = dataGc;
-			tipo = 10;
-		}
-
-		abilitaSpinner = false;
-		((Spinner)findViewById(R.id.editadata_tipi)).setSelection( tipo );
-			// Il settaggio dello spinner non avviene istantaneamente, ma solo dopo che è finito impostaTutto
+		((TextView)findViewById( R.id.editadata_tipi )).setText( tipiData[datatore.tipo] );
 
 		// Primo carro
-		if( tipo == 10 ) // Data frase
+		if( datatore.tipo == 10 ) // Data frase
 			findViewById( R.id.editadata_prima ).setVisibility( GONE );
 		else {
 			impostaCarro( data1, (NumberPicker)findViewById( R.id.prima_giorno ),
@@ -285,10 +264,9 @@ public class EditoreData extends LinearLayout {
 					(NumberPicker)findViewById( R.id.prima_anno ) );
 			findViewById( R.id.editadata_prima ).setVisibility( VISIBLE );
 		}
+
 		// Secondo carro
-		if( tipo == 6 || tipo == 9 ) {
-			if( data2 == null || data2.date == null )
-				data2 = scanna( "" );
+		if( datatore.tipo == 6 || datatore.tipo == 9 ) {
 			impostaCarro( data2, (NumberPicker)findViewById( R.id.seconda_giorno ),
 					(NumberPicker)findViewById( R.id.seconda_mese ),
 					(NumberPicker)findViewById( R.id.seconda_secolo ),
@@ -296,61 +274,54 @@ public class EditoreData extends LinearLayout {
 			findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
 		} else
 			findViewById( R.id.editadata_seconda ).setVisibility( GONE );
-	}
 
-	// Prende una stringa e ci farcisce la mia classe Data
-	Data scanna( String dataGc ) {
-		DateFormatSymbols simboliFormato = new DateFormatSymbols();
-		simboliFormato.setShortMonths( mesiGedcom );
-		dataGc = dataGc.replaceAll("[/\\\\_\\-|.,;:?'\"#^&*°+=~()\\[\\]{}]", " ");
-		Data data = new Data();
-		for( String forma : paterni ) {
-			data.format = new SimpleDateFormat( forma, simboliFormato );
-			try {
-				if( dataGc.isEmpty() ) {
-					data.date = data.format.parse( "1 JAN 1900" );
-					data.format.applyPattern( "" );
-					return data;
-				} else
-					data.date = data.format.parse( dataGc );
-				break;
-			} catch( ParseException e ) {
-				//s.l( "'"+ forma + "' non ha funzionato. " + e.getLocalizedMessage() );
-			}
-		}
-		if( data.format.toPattern().equals(G_m_A) )
-			data.format.applyPattern( G_M_A );
-		if( data.format.toPattern().equals(m_A) )
-			data.format.applyPattern( M_A );
-		return data;
+		// I Checkbox della data doppia
+		impostaCeccoDoppia( data1 );
+		impostaCeccoDoppia( data2 );
 	}
 
 	// Gira le ruote di un carro in base a una data
-	void impostaCarro( Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
+	void impostaCarro( Datatore.Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
 		calenda.clear();
-		calenda.set( data.date.getYear()+1900, data.date.getMonth(), data.date.getDate() );
+		if( data.date != null )
+			calenda.set( data.date.getYear()+1900, data.date.getMonth(), data.date.getDate() );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
-		if( data.format.toPattern().equals(G_M_A) || data.format.toPattern().equals(G_M) )
+		if( data.date != null && (data.format.toPattern().equals(G_M_A) || data.format.toPattern().equals(G_M)) )
 			ruotaGiorno.setValue( data.date.getDate() );
 		else
 			ruotaGiorno.setValue( 0 );
-		if( data.format.toPattern().equals(A) || data.format.toPattern().equals("") )
+		if( data.date == null || data.format.toPattern().equals(A) )
 			ruotaMese.setValue( 0 );
 		else
 			ruotaMese.setValue( data.date.getMonth() + 1 );
-		if( data.format.toPattern().equals(G_M) || data.format.toPattern().equals("") )
+		if( data.date == null || data.format.toPattern().equals(G_M) )
 			ruotaSecolo.setValue( 0 );
 		else
 			ruotaSecolo.setValue( (data.date.getYear()+1900)/100 );
-		if( data.format.toPattern().equals(G_M) || data.format.toPattern().equals("") )
+		if( data.date == null || data.format.toPattern().equals(G_M) )
 			ruotaAnno.setValue( 100 );
 		else
 			ruotaAnno.setValue( (data.date.getYear()+1900)%100 );
 	}
 
+	void impostaCeccoDoppia( Datatore.Data data ) {
+		CheckBox cecco;
+		if( data.equals(data1) )
+			cecco = findViewById( R.id.editadata_doppia1 );
+		else
+			cecco = findViewById( R.id.editadata_doppia2 );
+		if( data.date == null || data.format.toPattern().equals("") || data.format.toPattern().equals(G_M) // date senza anno
+				|| (data.equals(data2) && !(datatore.tipo == 6 || datatore.tipo == 9) ) ) {
+			cecco.setVisibility( INVISIBLE );
+		} else {
+			cecco.setChecked( data.doppia );
+			cecco.setVisibility( VISIBLE );
+		}
+	}
+
 	// Aggiorna una Data coi nuovi valori presi dalle ruote
-	void aggiorna( Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
-		if( tastieraVisibile ) {    // Nasconde eventuale tastiera visibile
+	void aggiorna( Datatore.Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
+		if( tastieraVisibile ) {	// Nasconde eventuale tastiera visibile
 			tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 );
 				// Nasconde subito la tastiera, ma ha bisogno di un secondo tentativo per restituire false. Comunque non è un problema
 		}
@@ -361,7 +332,9 @@ public class EditoreData extends LinearLayout {
 		// Imposta i giorni del mese in ruotaGiorno
 		calenda.set( secolo*100+anno, mese-1, 1 );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
-		data.date.setDate( giorno == 0 ? 1 : giorno );  // così non attribuisce strani valori a caso al giorno 0
+		if( data.date == null ) data.date = new Date();
+		//data.date.setDate( giorno == 0 ? 1 : giorno );  // così non attribuisce strani valori a caso al giorno 0
+		data.date.setDate( giorno );
 		data.date.setMonth( mese - 1 );
 		data.date.setYear( secolo*100 + anno - 1900 );
 		if( giorno != 0 && mese != 0 && anno != 100 )
@@ -374,6 +347,8 @@ public class EditoreData extends LinearLayout {
 			data.format.applyPattern( A );
 		else
 			data.format.applyPattern( "" );
+		// Il ceckbox della data doppia
+		impostaCeccoDoppia( data );
 		veroImputTesto = false;
 		genera( false );
 	}
@@ -381,21 +356,38 @@ public class EditoreData extends LinearLayout {
 	// Ricostruisce la stringa con la data finale e la mette in editaTesto
 	void genera( boolean appenaPrimaDiSalvare ) {
 		String rifatta;
-		if( tipo == 0 )
-			rifatta = data1.format.format( data1.date );
-		else if( tipo == 6 )
-			rifatta = "BET " + data1.format.format( data1.date ) + " AND " + data2.format.format( data2.date );
-		else if( tipo == 9 )
-			rifatta = "FROM " + data1.format.format( data1.date ) + " TO " + data2.format.format( data2.date );
-		else if( tipo == 10 ) {
+		if( datatore.tipo == 0 )
+			rifatta = rifai( data1 );
+		else if( datatore.tipo == 6 )
+			rifatta = "BET " + rifai( data1 ) + " AND " + rifai( data2 );
+		else if( datatore.tipo == 9 )
+			rifatta = "FROM " + rifai( data1 ) + " TO " + rifai( data2 );
+		else if( datatore.tipo == 10 ) {
 			if( appenaPrimaDiSalvare )
 				rifatta = "(" + editaTesto.getText() + ")"; // mette le parentesi intorno a una data frase
 			else
-				rifatta = frase;
+				rifatta = datatore.frase;
 		} else
-			rifatta = prefissi[tipo] + " " + data1.format.format( data1.date );
+			rifatta = prefissi[datatore.tipo] + " " + rifai( data1 );
 
 		editaTesto.setText( rifatta );
+	}
+
+	// Scrive la singola data in base al formato
+	String rifai ( Datatore.Data data ) {
+		String fatta = "";
+		if( data.date != null ) {
+			// Date con l'anno doppio
+			if( data.doppia && !( data.format.toPattern().equals("") || data.format.toPattern().equals(G_M) ) ) {
+				Date unAnnoDopo = new Date();
+				unAnnoDopo.setYear( data.date.getYear() + 1 );
+				String secondoAnno = String.format( Locale.ENGLISH, "%tY", unAnnoDopo );
+				//s.l("secondoAnno "+secondoAnno);
+				fatta = data.format.format( data.date ) +"/"+ secondoAnno.substring( 2 );
+			} else // Le altre date normali
+				fatta = data.format.format( data.date );
+		}
+		return fatta;
 	}
 
 	String s( int id ) {

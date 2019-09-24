@@ -1,87 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
 
-    <Spinner
-        android:id="@+id/editadata_tipi"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="18sp" />
+	<CheckBox
+		android:id="@+id/editadata_circa"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/approximate" />
 
-    <LinearLayout
-        android:id="@+id/editadata_prima"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal">
+	<LinearLayout
+		android:id="@+id/editadata_avanzate"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
 
-        <NumberPicker
-            android:id="@+id/prima_giorno"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:theme="@style/Ruota" />
+		<TextView
+			android:id="@+id/editadata_tipi"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:textSize="18sp" />
 
-        <NumberPicker
-            android:id="@+id/prima_mese"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/Ruota" />
+		<CheckBox
+			android:id="@+id/editadata_doppia1"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/double_date" />
 
-        <NumberPicker
-            android:id="@+id/prima_secolo"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/Ruota" />
+		<CheckBox
+			android:id="@+id/editadata_doppia2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/double_date" />
+	</LinearLayout>
 
-        <NumberPicker
-            android:id="@+id/prima_anno"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/Ruota" />
+	<LinearLayout
+		android:id="@+id/editadata_prima"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:orientation="horizontal">
 
-    </LinearLayout>
+		<NumberPicker
+			android:id="@+id/prima_giorno"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:theme="@style/Ruota" />
 
-    <LinearLayout
-        android:id="@+id/editadata_seconda"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:visibility="gone">
+		<NumberPicker
+			android:id="@+id/prima_mese"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:layout_marginLeft="8dp"
+			android:theme="@style/Ruota" />
 
-        <NumberPicker
-            android:id="@+id/seconda_giorno"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:theme="@style/Ruota" />
+		<NumberPicker
+			android:id="@+id/prima_secolo"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:layout_marginLeft="8dp"
+			android:theme="@style/Ruota" />
 
-        <NumberPicker
-            android:id="@+id/seconda_mese"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/Ruota" />
+		<NumberPicker
+			android:id="@+id/prima_anno"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:layout_marginLeft="8dp"
+			android:theme="@style/Ruota" />
 
-        <NumberPicker
-            android:id="@+id/seconda_secolo"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/Ruota" />
+	</LinearLayout>
 
-        <NumberPicker
-            android:id="@+id/seconda_anno"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/Ruota" />
+	<LinearLayout
+		android:id="@+id/editadata_seconda"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:orientation="horizontal"
+		android:visibility="gone">
 
-    </LinearLayout>
+		<NumberPicker
+			android:id="@+id/seconda_giorno"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:theme="@style/Ruota" />
+
+		<NumberPicker
+			android:id="@+id/seconda_mese"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:layout_marginLeft="8dp"
+			android:theme="@style/Ruota" />
+
+		<NumberPicker
+			android:id="@+id/seconda_secolo"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:layout_marginLeft="8dp"
+			android:theme="@style/Ruota" />
+
+		<NumberPicker
+			android:id="@+id/seconda_anno"
+			android:layout_width="wrap_content"
+			android:layout_height="100dp"
+			android:layout_marginLeft="8dp"
+			android:theme="@style/Ruota" />
+
+	</LinearLayout>
 
 </LinearLayout>

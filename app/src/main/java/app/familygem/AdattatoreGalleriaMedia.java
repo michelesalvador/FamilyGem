@@ -3,18 +3,22 @@
 package app.familygem;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import org.folg.gedcom.model.Media;
+import org.folg.gedcom.model.Person;
 import java.util.Map;
 import app.familygem.dettaglio.Immagine;
+import app.familygem.visita.TrovaPila;
 
 class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMedia.gestoreVistaMedia> {
 	private Object[] listaMedia;
@@ -26,12 +30,12 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 		this.dettagli = dettagli;
 	}
 	@Override
-	public AdattatoreGalleriaMedia.gestoreVistaMedia onCreateViewHolder( ViewGroup parent, int tipo ) {
+	public gestoreVistaMedia onCreateViewHolder( ViewGroup parent, int tipo ) {
 		View vista = LayoutInflater.from(parent.getContext()).inflate( R.layout.pezzo_media, parent, false );
-		return new AdattatoreGalleriaMedia.gestoreVistaMedia( vista, dettagli );
+		return new gestoreVistaMedia( vista, dettagli );
 	}
 	@Override
-	public void onBindViewHolder( final AdattatoreGalleriaMedia.gestoreVistaMedia gestore, int posizione ) {
+	public void onBindViewHolder( final gestoreVistaMedia gestore, int posizione ) {
 		if( gestore.media == null ) {
 			gestore.setta( posizione );
 		}
@@ -69,30 +73,7 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 			media = (Media)listaMedia[posizione];
 			contenitore = listaContenitori[posizione];
 			if( dettagli ) {
-				String testo = "";
-				if( media.getTitle() != null )
-					testo = media.getTitle() + "\n";
-				if( Globale.preferenze.esperto && media.getFile() != null ) {
-					String file = media.getFile();
-					file = file.replace( '\\', '/' );
-					if( file.lastIndexOf('/') > -1 ) {
-						if( file.length() > 1 && file.endsWith("/") ) // rimuove l'ultima barra
-							file = file.substring( 0, file.length()-1 );
-						file = file.substring( file.lastIndexOf('/') + 1 );
-					}
-					testo += file;
-				}
-				if( testo.isEmpty() )
-					vistaTesto.setVisibility( View.GONE );
-				else {
-					if( testo.endsWith("\n") )
-						testo = testo.substring( 0, testo.length()-1 );
-					vistaTesto.setText( testo );
-				}
-				if( media.getId() != null ) {
-					vistaNumero.setText( String.valueOf(Galleria.popolarita(media)) );
-				} else
-					vistaNumero.setVisibility( View.GONE );
+				arredaMedia( media, vistaTesto, vistaNumero );
 				vista.setOnClickListener( this );
 				((Activity)vista.getContext()).registerForContextMenu( vista );
 				vista.setTag( R.id.tag_oggetto, media );
@@ -101,11 +82,11 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 				final AppCompatActivity attiva = (AppCompatActivity) vista.getContext();
 				if( vista.getContext() instanceof Individuo ) { // Fragment individuoMedia
 					attiva.getSupportFragmentManager()
-							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" )    // non garantito in futuro
+							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" )	// non garantito in futuro
 							.registerForContextMenu( vista );
 				} else if( vista.getContext() instanceof Principe ) // Fragment Galleria
 					attiva.getSupportFragmentManager().findFragmentById( R.id.contenitore_fragment ).registerForContextMenu( vista );
-				else    // nelle AppCompatActivity
+				else	// nelle AppCompatActivity
 					attiva.registerForContextMenu( vista );
 			} else {
 				//vistaImmagine.setMaxHeight( 110 ); // no
@@ -130,10 +111,62 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 				attiva.finish();
 			// Galleria in modalità normale apre Immagine
 			} else {
-				Ponte.manda( media, "oggetto" );
-				Ponte.manda( contenitore, "contenitore" );
-				v.getContext().startActivity( new Intent( v.getContext(), Immagine.class ) );
+				Intent intento = new Intent( v.getContext(), Immagine.class );
+				//s.l("contenitore "+contenitore.getClass() );
+				if( media.getId() != null ) { // tutti i Media record
+					Memoria.setPrimo( media );
+				} else if( (attiva instanceof Individuo && contenitore instanceof Person) // media di primo livello nell'Indi
+						|| attiva instanceof Dettaglio ) { // normale apertura nei Dettagli
+					Memoria.aggiungi( media );
+				} else { // da Galleria tutti i media semplici, o da IndividuoMedia i media sotto molteplici livelli
+					new TrovaPila( Globale.gc, media );
+					if( attiva instanceof Principe )
+						intento.putExtra( "daSolo", true ); // così poi Immagine mostra la dispensa
+				}
+				v.getContext().startActivity( intento );
 			}
+		}
+	}
+
+	static void arredaMedia( Media media, TextView vistaTesto, TextView vistaNumero ) {
+		String testo = "";
+		if( media.getTitle() != null )
+			testo = media.getTitle() + "\n";
+		if( Globale.preferenze.esperto && media.getFile() != null ) {
+			String file = media.getFile();
+			file = file.replace( '\\', '/' );
+			if( file.lastIndexOf('/') > -1 ) {
+				if( file.length() > 1 && file.endsWith("/") ) // rimuove l'ultima barra
+					file = file.substring( 0, file.length()-1 );
+				file = file.substring( file.lastIndexOf('/') + 1 );
+			}
+			testo += file;
+		}
+		if( testo.isEmpty() )
+			vistaTesto.setVisibility( View.GONE );
+		else {
+			if( testo.endsWith("\n") )
+				testo = testo.substring( 0, testo.length()-1 );
+			vistaTesto.setText( testo );
+		}
+		if( media.getId() != null ) {
+			vistaNumero.setText( String.valueOf(Galleria.popolarita(media)) );
+		} else
+			vistaNumero.setVisibility( View.GONE );
+	}
+
+	// Questa serve solo per creare una RecyclerView con le iconcine dei media che risulti trasparente ai click
+	// todo però impedisce lo scroll in Dettaglio
+	static class RiciclaVista extends RecyclerView {
+		boolean dettagli;
+		public RiciclaVista( Context context, boolean dettagli) {
+			super(context);
+			this.dettagli = dettagli;
+		}
+		@Override
+		public boolean onTouchEvent( MotionEvent e ) {
+			super.onTouchEvent( e );
+			return dettagli; // quando è false la griglia non intercetta il click
 		}
 	}
 }

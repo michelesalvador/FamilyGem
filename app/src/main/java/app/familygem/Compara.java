@@ -1,0 +1,247 @@
+// Attività di introduzione all'importazione delle novità in un albero già esistente
+
+package app.familygem;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import org.folg.gedcom.model.Change;
+import org.folg.gedcom.model.Family;
+import org.folg.gedcom.model.Gedcom;
+import org.folg.gedcom.model.Media;
+import org.folg.gedcom.model.Note;
+import org.folg.gedcom.model.Person;
+import org.folg.gedcom.model.Repository;
+import org.folg.gedcom.model.Source;
+import org.folg.gedcom.model.Submitter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
+public class Compara extends AppCompatActivity {
+
+	Date dataCondivisione;
+	SimpleDateFormat formatoDataOggetto;
+
+	@Override
+	protected void onCreate( Bundle bandolo ) {
+		super.onCreate( bandolo );
+		setContentView( R.layout.compara );
+		int idAlbero = getIntent().getIntExtra("idAlbero",1);
+		final int idAlbero2 = getIntent().getIntExtra("idAlbero2",1);
+		Globale.idAlbero2 = idAlbero2; // servirà alle immagini di Confrontatore e a Conferma
+		Globale.gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
+		Globale.gc2 = Alberi.apriGedcomTemporaneo( idAlbero2, false );
+
+		TimeZone.setDefault( TimeZone.getTimeZone("Europe/Rome") ); // riconduce tutte le date al fuso orario di Aruba
+		try {
+			SimpleDateFormat formatoDataId = new SimpleDateFormat( "yyyyMMddHHmmss", Locale.ENGLISH );
+			dataCondivisione = formatoDataId.parse( getIntent().getStringExtra("idData") );
+		} catch( ParseException e ) {
+			e.printStackTrace();
+		}
+
+		formatoDataOggetto = new SimpleDateFormat( "d MMM yyyyHH:mm:ss", Locale.ENGLISH );
+
+		// Confronta tutti i record dei due Gedcom
+		for( Note o2 : Globale.gc2.getNotes() )
+			confronta( Globale.gc.getNote(o2.getId()), o2, 1 );
+		for( Note o : Globale.gc.getNotes() )
+			riconfronta( o, Globale.gc2.getNote(o.getId()), 1 );
+
+		for( Submitter o2 : Globale.gc2.getSubmitters() )
+			confronta( Globale.gc.getSubmitter(o2.getId()), o2, 2 );
+		for( Submitter o : Globale.gc.getSubmitters() )
+			riconfronta( o, Globale.gc2.getSubmitter(o.getId()), 2 );
+
+		for( Repository o2 : Globale.gc2.getRepositories() )
+			confronta( Globale.gc.getRepository(o2.getId()), o2, 3 );
+		for( Repository o : Globale.gc.getRepositories() )
+			riconfronta( o, Globale.gc2.getRepository(o.getId()), 3 );
+
+		for( Media o2 : Globale.gc2.getMedia() )
+			confronta( Globale.gc.getMedia(o2.getId()), o2, 4 );
+		for( Media o : Globale.gc.getMedia() )
+			riconfronta( o, Globale.gc2.getMedia(o.getId()), 4 );
+
+		for( Source o2 : Globale.gc2.getSources() )
+			confronta( Globale.gc.getSource(o2.getId()), o2, 5 );
+		for( Source o : Globale.gc.getSources() )
+			riconfronta( o, Globale.gc2.getSource(o.getId()), 5 );
+
+		for( Person o2 : Globale.gc2.getPeople() )
+			confronta( Globale.gc.getPerson(o2.getId()), o2, 6 );
+		for( Person o : Globale.gc.getPeople() )
+			riconfronta( o, Globale.gc2.getPerson(o.getId()), 6 );
+
+		for( Family o2 : Globale.gc2.getFamilies() )
+			confronta( Globale.gc.getFamily(o2.getId()), o2, 7 );
+		for( Family o : Globale.gc.getFamilies() )
+			riconfronta( o, Globale.gc2.getFamily(o.getId()), 7 );
+
+		Armadio.Cassetto cassetto2 = Globale.preferenze.getAlbero( idAlbero2 );
+		if( Confronto.getLista().isEmpty() ) {
+			setTitle( R.string.tree_without_news );
+			if( cassetto2.grado != 30 ) {
+				cassetto2.grado = 30;
+				Globale.preferenze.salva();
+			}
+		} else if( cassetto2.grado != 20 ) {
+			cassetto2.grado = 20;
+			Globale.preferenze.salva();
+		}
+
+		arredaScheda( Globale.gc, idAlbero, R.id.compara_vecchio );
+		arredaScheda( Globale.gc2, idAlbero2, R.id.compara_nuovo );
+
+		((TextView)findViewById(R.id.compara_testo )).setText( getString(R.string.tree_news_imported,Confronto.getLista().size()) );
+
+		Button botton = findViewById(R.id.compara_bottone );
+		if( Confronto.getLista().size() > 0 )
+			botton.setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View v ) {
+					Confronto.next(); // 'posizione' che è 0 diventa 1
+					startActivity( new Intent( Compara.this, Confrontatore.class ) );
+				}
+			} );
+		else {
+			botton.setText( R.string.delete_imported_tree );
+			botton.setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View v ) {
+					Alberi.eliminaAlbero( Compara.this, idAlbero2 );
+					Globale.editato = true;
+					onBackPressed();
+				}
+			} );
+		}
+	}
+
+	// Vede se aggiungere i due oggetti alla lista di quelli da valutare
+	void confronta( Object o, Object o2, int tipo ) {
+		Change c = getCambi(o);
+		Change c2 = getCambi(o2);
+		int modifica = 0;
+		if( o == null && recente(c2) ) // o2 è stata aggiunto nel nuovo albero --> AGGIUNGI
+			modifica = 1;
+		else {
+			if( c == null && c2 != null )
+				modifica = 1;
+			else if( c != null && c2 != null &&
+					!(c.getDateTime().getValue().equals(c2.getDateTime().getValue()) // le due date devono essere diverse
+					&& c.getDateTime().getTime().equals(c2.getDateTime().getTime())) ) {
+				if(	recente(c) && recente(c2) ) { // entrambi modificati dopo la condivisione --> AGGIUNGI/SOSTITUISCI
+					modifica = 2;
+				} else if( recente(c2) ) // solo o2 è stato modificato --> SOSTITUISCI
+					modifica = 1;
+			}
+		}
+		if( modifica > 0 ) {
+			Confronto.Fronte fronte = Confronto.addFronte( o, o2, tipo );
+			if( modifica == 2 )
+				fronte.doppiaOpzione = true;
+		}
+	}
+
+	// Idem per i rimanenti oggetti eliminati nell'albero vecchio
+	void riconfronta( Object o, Object o2, int tipo ) {
+		if( o2 == null && !recente(getCambi(o)) )
+			Confronto.addFronte( o, null, tipo );
+	}
+
+	// Dice se un oggetto è stato modificato dopo la data di condivisione
+	boolean recente( Change cambio ) {
+		boolean ok = false;
+		if( cambio != null && cambio.getDateTime() != null ) {
+			try { // todo con time null
+				String idZona = U.castaJsonString( cambio.getExtension("zona") );
+				if( idZona == null )
+					idZona = "UTC";
+				TimeZone zona = TimeZone.getTimeZone( idZona );
+				formatoDataOggetto.setTimeZone( zona );
+				Date dataOggetto = formatoDataOggetto.parse( cambio.getDateTime().getValue() + cambio.getDateTime().getTime() );
+				ok = dataOggetto.after( dataCondivisione );
+				//long oreSfaso = TimeUnit.MILLISECONDS.toMinutes( zona.getOffset(dataOggetto.getTime()) );
+				//s.l( dataOggetto+"\t"+ ok +"\t"+ (oreSfaso>0?"+":"")+oreSfaso +"\t"+ zona.getID() );
+			} catch( ParseException e ) {
+				e.printStackTrace();
+			}
+		}
+		return ok;
+	}
+
+	Change getCambi( Object ogg ) {
+		Change cambio = null;
+		try {
+			cambio = (Change) ogg.getClass().getMethod( "getChange" ).invoke( ogg );
+		} catch( Exception e ) {}
+		return cambio;
+	}
+
+	void arredaScheda( Gedcom gc, int idAlbero, int idScheda ) {
+		CardView carta = findViewById(idScheda);
+		Armadio.Cassetto cassetto = Globale.preferenze.getAlbero( idAlbero );
+		((TextView)carta.findViewById(R.id.confronto_titolo )).setText( cassetto.nome );
+		String txt = "";
+		if( idScheda == R.id.compara_vecchio ) {
+			txt = Alberi.scriviDati( this, cassetto );
+		} else {
+			if( cassetto.grado == 30 )
+				carta.setCardBackgroundColor( 0xffdddddd );
+			else
+				carta.setCardBackgroundColor( getResources().getColor(R.color.evidenzia) );
+			Submitter autore = gc.getSubmitter( cassetto.condivisioni.get( cassetto.condivisioni.size()-1 ).submitter );
+			if( autore != null ) {
+				String nome = autore.getName();
+				if( nome == null || nome.isEmpty() )
+					nome = getString( android.R.string.unknownName );
+				txt = getString( R.string.sent_by, nome ) + "\n";
+			}
+			for( int i = 7; i > 0; i-- ) {
+				txt += scriviDifferenze( i );
+			}
+		}
+		if( txt.endsWith("\n") ) txt = txt.substring( 0, txt.length()-1 );
+		((TextView)carta.findViewById(R.id.confronto_testo )).setText( txt );
+		carta.findViewById( R.id.confronto_data ).setVisibility( View.GONE );
+	}
+
+	int[] singolari = { R.string.shared_note, R.string.submitter, R.string.repository, R.string.shared_media, R.string.source, R.string.person, R.string.family };
+	int[] plurali = { R.string.shared_notes, R.string.submitters, R.string.repositories, R.string.shared_media, R.string.sources, R.string.persons, R.string.families };
+	String scriviDifferenze( int tipo ) {
+		int modifiche = 0;
+		for( Confronto.Fronte fronte : Confronto.getLista() ) {
+			if( fronte.tipo == tipo ) {
+				modifiche++;
+			}
+		}
+		String testo = "";
+		if( modifiche > 0 ) {
+			tipo--;
+			int definizione = modifiche==1 ? singolari[tipo] : plurali[tipo];
+			testo = "\t+" + modifiche + " " + getString( definizione ).toLowerCase() + "\n";
+		}
+		return testo;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected( MenuItem i ) {
+		onBackPressed();
+		return true;
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		Confronto.prev(); // in pratica resetta il singleton Confronto
+	}
+}
