@@ -40,9 +40,7 @@ public class Globale extends Application {
 			File filePreferenze = new File( contesto.getFilesDir(), "preferenze.json");
 			if( filePreferenze.exists() )
 				stringone = FileUtils.readFileToString( filePreferenze, "UTF-8" );
-		} catch( IOException e ) {
-			e.printStackTrace();
-		}
+		} catch( IOException e ) {}
 		preferenze = gson.fromJson( stringone, Armadio.class );
 	}
 }

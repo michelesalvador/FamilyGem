@@ -431,16 +431,12 @@ public class U {
 					}
 					break;
 				case "com.android.providers.downloads.documents":	// file dalla cartella Download
-					/* Gli arriva un uri tipo	content://com.android.providers.downloads.documents/document/2326
-					   e lo ricostruisce tipo	content://downloads/public_downloads/2326
-					   così il cursor può interpretarlo anziché restituire null	*/
 					final String id = DocumentsContract.getDocumentId(uri);	// un numero tipo '2326'
-					uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id) );
+					if( id.startsWith( "raw:/" ) )
+						return id.replaceFirst("raw:", "");
 					cosaCercare = MediaStore.Files.FileColumns.DATA;
-					//s.l( "uri ricostruito = " + uri );
-				/*case "com.google.android.apps.docs.storage":	// Google drive 1
-					// com.google.android.apps.docs.storage.legacy
-				}*/
+					if( id.matches("\\d+") && Build.VERSION.SDK_INT < Build.VERSION_CODES.P )
+						uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), U.soloNumeri(id) );
 			}
 		}
 		String nomeFile = trovaNomeFile( uri, cosaCercare );
@@ -934,6 +930,7 @@ public class U {
 				// File di qualsiasi tipo
 				if( percorso != null ) {	// è solo il nome del file 'pippo.png'
 					InputStream input = contesto.getContentResolver().openInputStream( uri );
+					// Todo se il file esiste già identico non duplicarlo ma riutilizzarlo: come in Conferma.vediSeCopiareFile()
 					fileMedia = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
 					FileUtils.copyInputStreamToFile( input, fileMedia );
 				// In alcuni casi (telefoni vecchi?) immagini da camera passano solo come bitmap A BASSA RISOLUZIONE negli extra
@@ -1377,7 +1374,8 @@ public class U {
 	}
 
 	static String castaJsonString( Object ignoto ) {
-		if( ignoto instanceof String ) return (String) ignoto;
+		if( ignoto == null ) return null;
+		else if( ignoto instanceof String ) return (String) ignoto;
 		else return ((JsonPrimitive)ignoto).getAsString();
 	}
 

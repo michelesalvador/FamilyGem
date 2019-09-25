@@ -73,7 +73,7 @@ public class InfoAlbero extends AppCompatActivity {
 				if( questoAlbero.condivisioni != null && !questoAlbero.condivisioni.isEmpty() ) {
 					i += "\n\n" + getText(R.string.shares) + ":";
 					for( Armadio.Invio invio : questoAlbero.condivisioni ) {
-						i += "\n" + dataIdVersoData(invio.data); // todo data leggibile
+						i += "\n" + dataIdVersoData(invio.data);
 						if( gc.getSubmitter(invio.submitter) != null ) i += " - " + gc.getSubmitter( invio.submitter ).getName();
 					}
 				}
@@ -161,6 +161,7 @@ public class InfoAlbero extends AppCompatActivity {
 	}
 
 	String dataIdVersoData( String id ) {
+		if( id == null ) return "";
 		return id.substring(0,4) +"-"+ id.substring(4,6) +"-"+ id.substring(6,8) +" "+
 				id.substring(8,10) +":"+ id.substring(10,12) +":"+ id.substring(12);
 	}

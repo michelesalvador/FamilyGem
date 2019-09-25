@@ -263,7 +263,7 @@ public class U {
 		}
 		String cosaCercare = OpenableColumns.DISPLAY_NAME;
 		// Uri is different in versions after KITKAT (Android 4.4), we need to deal with different Uris
-		//s.l( "uri Authority = " + uri.getAuthority() );
+		s.l( "uri Authority = " + uri.getAuthority() );
 		//s.l( "isDocumentUri = " + DocumentsContract.isDocumentUri( Globale.contesto, uri) );	// false solo in G.Drive legacy
 		// content://com.google.android.apps.docs.storage.legacy/enc%3DAPsNYqUd_MITZZJxxda1wvQP2ojY7f9xQCAPJoePEFIgSa-5%0A
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT 	// 21 sul mio cellu e 19
@@ -279,7 +279,6 @@ public class U {
 					// ad esempio 'primary:DCIM/Camera/Simpsons.ged'
 					// oppure '3132-6232:famiglia/a_famigliotta_250.ged'
 					final String[] split = docId.split(":");
-
 					if( split[0].equalsIgnoreCase("primary")) {
 						return Environment.getExternalStorageDirectory() + "/" + split[1];
 						// Environment.getExternalStorageDirectory() restituisce sempre /storage/emulated/0 anche per la sd card
@@ -303,9 +302,16 @@ public class U {
 					   e lo ricostruisce tipo	content://downloads/public_downloads/2326
 					   così il cursor può interpretarlo anziché restituire null    */
 					final String id = DocumentsContract.getDocumentId(uri);	// un numero tipo '2326'
-					uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id) );
-					cosaCercare = MediaStore.Files.FileColumns.DATA;
-					s.l( "uri ricostruito = " + uri );
+					s.l( uri +" -> " + id);
+					/* A partire da android 9 l'id può essere un percorso completo tipo 'raw:/storage/emulated/0/Download/miofile.zip'
+					   oppure l'uri può avere un id non numerico: 'content://com.android.providers.downloads.documents/document/msf%3A287'
+					   nel qual caso l'uri va bene così com'è */
+					if( id.startsWith("raw:/") )
+						return id.replaceFirst("raw:", "");
+					cosaCercare = MediaStore.Files.FileColumns.DATA; // = '_data'
+					if( id.matches("\\d+") && Build.VERSION.SDK_INT < Build.VERSION_CODES.P ) // negli android prima del 9 l'id numerico va ricostruito
+						uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id) );
+					s.l( uri+"   "+cosaCercare );
 				/*case "com.google.android.apps.docs.storage":	// Google drive 1
 					// com.google.android.apps.docs.storage.legacy
 				}*/
@@ -567,7 +573,7 @@ public class U {
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
 	static String percorsoMedia( Media m ) {
-		Globale.preferenze.traghetta();
+		//Globale.preferenze.traghetta();
 		if( m.getFile() != null ) {
 			String nome = m.getFile().replace("\\", "/");
 			// Percorso FILE (quello nel gedcom)
@@ -855,7 +861,7 @@ public class U {
 
 	// Imposta in un Media il file scelto da file manager. Restituisce il File dell'immagine salvata oppure null
 	static File settaMedia( Context contesto, Intent data, Media media ) {
-		s.l( data +"\n"+ data.getData()+"\n"+data.getExtras() );
+		//s.l( "DATA: "+data +"\n"+ data.getData()+"\n"+data.getExtras() );
 		File fileMedia = null;
 		try {
 			Uri uri = data.getData();
@@ -893,6 +899,8 @@ public class U {
 			Toast.makeText( contesto, msg, Toast.LENGTH_LONG ).show();
 			e.printStackTrace();
 		}
+		if( fileMedia != null ) s.l( "Percorso: "+fileMedia.getAbsolutePath() );
+		else s.l("File è null");
 		return fileMedia;
 	}
 
