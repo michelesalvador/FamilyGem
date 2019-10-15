@@ -12,7 +12,7 @@ With _Family Gem_ you can:
 - Create a family tree from scratch, entering names, dates, places, various events, photos and sources.
 - Import an existing family tree through a Gedcom file and modify it as you want.
 - Export the family tree you created (via Gedcom again) to import in every other genealogy program.
-- Share a tree with everyone in the world, let them improve it and receive back the updates to import (new feature since version 0.7.0).
+- Share a tree with your relatives, letting them improve it and receiving back the updates. Then you can choose whether accept them or not.
 
 There are 2 modules:
 - **app** is the actual _Family Gem_ app.
@@ -20,8 +20,7 @@ There are 2 modules:
 
 _Family Gem_ is completely free and open source.
 
-🇮🇹 The code (classes, variables, comments...) is all written in italian, because I'm italian and I love to write in my native language.<br>
-I know it's not so kind, because everyone expects an english code, but it started like this as an hobby project and it will continue like this.
+The code (classes, variables, comments...) is all written in italian, because I'm italian and I love to write in my native language. I know it's not so kind, because everyone expects an english code, but I started like this as an hobby project and I will continue like this.
 
 The APK file is stored on [Uptodown](https://family-gem.en.uptodown.com).
 

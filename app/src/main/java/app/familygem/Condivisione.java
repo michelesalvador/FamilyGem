@@ -138,7 +138,7 @@ public class Condivisione extends AppCompatActivity {
 							U.salvaJson( gc, idAlbero ); // baypassando la preferenza di non salvare in atomatico
 
 						// Invia i dati
-						if( BuildConfig.utenteAruba != null )
+						if( !BuildConfig.utenteAruba.isEmpty() )
 							new PostaDatiCondivisione().execute( Condivisione.this );
 					}
 				}

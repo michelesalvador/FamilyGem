@@ -48,7 +48,7 @@ public class Facciata extends AppCompatActivity {
 						U.tosta( Facciata.this, R.string.cant_understand_uri );
 						return;
 					}
-					if( BuildConfig.utenteAruba != null ) {
+					if( !BuildConfig.utenteAruba.isEmpty() ) {
 						int perm = ContextCompat.checkSelfPermission( getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
 						if( perm == PackageManager.PERMISSION_DENIED )
 							ActivityCompat.requestPermissions( Facciata.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,dataId}, 1457 );
