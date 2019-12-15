@@ -6,19 +6,20 @@ def utenteAruba = "null"
 def passwordAruba = "null"
 
 android {
-    if( fileChiavi.exists() ) {
+    if (fileChiavi.exists()) {
         chiave = new Properties()
-        chiave.load( new FileInputStream(fileChiavi) )
-        utenteAruba = "\""+chiave['utenteAruba']+"\""
-        passwordAruba = "\""+chiave['passwordAruba']+"\""
+        chiave.load(new FileInputStream(fileChiavi))
+        utenteAruba = "\"" + chiave['utenteAruba'] + "\""
+        passwordAruba = "\"" + chiave['passwordAruba'] + "\""
     }
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "app.familylab"
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "utenteAruba", utenteAruba
         buildConfigField "String", "passwordAruba", passwordAruba
@@ -29,6 +30,11 @@ android {
             minifyEnabled false
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    buildToolsVersion = '28.0.3'
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
     }
 }
 
@@ -44,7 +50,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'commons-io:commons-io:2.6'
     implementation 'org.jsoup:jsoup:1.12.1'
     implementation 'com.otaliastudios:zoomlayout:1.3.0'

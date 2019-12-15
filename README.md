@@ -2,8 +2,11 @@
 ### Create your own family trees
 
 _Family Gem_ is an app for Android designed to manage family trees.<br>
-Project started on beginning of 2018.
-It's writen in Java within Android Studio.<br>
+It's completely free and open source.
+
+Project started on beginning of 2018.<br>
+_Family Gem_ is written in Java within Eclipse and Android Studio.<br>
+Minimun supported version is Android 4.1 Jelly Bean (API 16), maximum is Android 10 (API 29).<br>
 The intent is that data structure respects as much as possible the Gedcom standard, in the latest versions 5.5 and 5.5.1.<br>
 It's strongly based on the java [Gedcom parser](https://github.com/FamilySearch/Gedcom) by Family Search.<br>
 Author is Michele Salvador, an italian self-taught programmer and genealogy enthusiast.
@@ -16,14 +19,12 @@ With _Family Gem_ you can:
 
 There are 2 modules:
 - **app** is the actual _Family Gem_ app.
-- **lab** is the _Family Lab_ app, used only to develop new features.
-
-_Family Gem_ is completely free and open source.
+- **lab** is the _Family Lab_ app, a playground used only to develop new features.
 
 The code (classes, variables, comments...) is all written in italian, because I'm italian and I love to write in my native language. I know it's not so kind, because everyone expects an english code, but I started like this as an hobby project and I will continue like this.
 
+Official website: www.familygem.app
+
 The APK file is stored on [Uptodown](https://family-gem.en.uptodown.com).
 
-Michele Salvador email: michelesalvador@iol.it
-
-Official website: www.familygem.app
+For questions, problems, suggestions please [open an issue](https://github.com/michelesalvador/FamilyGem/issues).
