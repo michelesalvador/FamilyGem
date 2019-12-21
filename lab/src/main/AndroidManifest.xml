@@ -38,6 +38,9 @@
 			android:name=".Diagramma"
 			android:label="Diagramma" />
 		<activity
+			android:name=".Diagram"
+			android:label="Diagram" />
+		<activity
 			android:name="com.yalantis.ucrop.UCropActivity"
 			android:screenOrientation="portrait"
 			android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>

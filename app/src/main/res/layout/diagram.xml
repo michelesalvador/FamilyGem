@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.otaliastudios.zoom.ZoomLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/diagram_zoom"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@drawable/diagramma_sfondo"
+	android:scrollbars="vertical|horizontal"
+	app:hasClickableChildren="true"
+	app:minZoom="0.9"
+	app:maxZoom="2"
+	app:maxZoomType="realZoom"
+	>
+
+	<RelativeLayout
+		android:id="@+id/diagram_box"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:background="#3333ff33"
+		android:clipChildren="false"
+		android:padding="50dp"/>
+
+</com.otaliastudios.zoom.ZoomLayout>

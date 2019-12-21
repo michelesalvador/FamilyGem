@@ -59,7 +59,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			else if( getIntent().getBooleanExtra("magazzinoScegliArchivio",false) )
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Magazzino()).commit();
 			else // la normale apertura
-				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Diagramma()).commit();
+				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Diagram()).commit();
 		}
 
 		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_testa ).setOnClickListener( new View.OnClickListener() {
@@ -138,7 +138,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		int id = item.getItemId();
 		Fragment fragment = null;
 		if (id == R.id.nav_diagramma) {
-			fragment = new Diagramma();
+			fragment = new Diagram();
 		} else if (id == R.id.nav_persone) {
 			fragment = new Anagrafe();
 		} else if (id == R.id.nav_fonti) {

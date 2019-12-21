@@ -48,7 +48,7 @@ public class Diagramma extends Fragment {
 	}
 
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo) {
 
 		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( Globale.preferenze.alberoAperto().nome );
 		final View vista = inflater.inflate( R.layout.diagramma, container, false );
