@@ -9,6 +9,7 @@ import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -73,7 +74,7 @@ public class Alberi extends AppCompatActivity {
 					new int[] { R.id.albero_titolo, R.id.albero_dati }) {
 				// Individua ciascuna vista dell'elenco
 				@Override
-				public View getView ( final int posiz, View convertView, ViewGroup parent ) {
+				public View getView( final int posiz, View convertView, ViewGroup parent ) {
 					View vistaAlbero = super.getView( posiz, convertView, parent );
 					//final int idAlbero = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(posiz)).get("id") );
 					final int idAlbero = Integer.parseInt( alberelli.get(posiz).get("id") );
@@ -111,7 +112,7 @@ public class Alberi extends AppCompatActivity {
 						vistaAlbero.setOnClickListener( new View.OnClickListener() {
 							@Override
 							public void onClick( View v ) {
-								if( !( Globale.gc!=null && idAlbero==Globale.preferenze.idAprendo ) ) // se non è già aperto
+								if( !( Globale.gc != null && idAlbero == Globale.preferenze.idAprendo ) ) // se non è già aperto
 									if( !apriGedcom( idAlbero, true ) )
 										return;
 								startActivity( new Intent( Alberi.this, Principe.class ) );
@@ -161,17 +162,17 @@ public class Alberi extends AppCompatActivity {
 								@Override
 								public boolean onMenuItemClick( MenuItem item ) {
 									int id = item.getItemId();
-									if( id == -1 ) {	// Salva
+									if( id == -1 ) { // Salva
 										U.salvaJson( Globale.gc, idAlbero );
 										Globale.daSalvare = false;
-									} else if( id == 0 ) {	// Apre un albero derivato
+									} else if( id == 0 ) { // Apre un albero derivato
 										apriGedcom( idAlbero, true );
 										startActivity( new Intent( Alberi.this, Principe.class ) );
-									} else if( id == 1 ) {	// Info Gedcom
-										Intent intento = new Intent( Alberi.this, InfoAlbero.class);
+									} else if( id == 1 ) { // Info Gedcom
+										Intent intento = new Intent( Alberi.this, InfoAlbero.class );
 										intento.putExtra( "idAlbero", idAlbero );
 										startActivity(intento);
-									} else if( id == 2 ) {	// Rinomina albero
+									} else if( id == 2 ) { // Rinomina albero
 										View vistaMessaggio = LayoutInflater.from( Alberi.this ).inflate(R.layout.albero_nomina, lista, false );
 										AlertDialog.Builder builder = new AlertDialog.Builder( Alberi.this );
 										builder.setView( vistaMessaggio ).setTitle( R.string.title );
@@ -187,26 +188,26 @@ public class Alberi extends AppCompatActivity {
 										AlertDialog dialog = builder.create();
 										dialog.show();
 										dialog.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE );
-									} else if( id == 3 ) {	// Correggi errori
+									} else if( id == 3 ) { // Correggi errori
 										trovaErrori( idAlbero, false );
-									} else if( id == 4 ) {  // Condividi albero
+									} else if( id == 4 ) { // Condividi albero
 										Intent intento = new Intent( Alberi.this, Condivisione.class);
 										intento.putExtra( "idAlbero", idAlbero );
-										startActivity(intento);
+										startActivity( intento );
 									} else if( id == 5 ) { // Confronta con alberi esistenti
-										if( AlberoNuovo.confronta(Alberi.this, cassetto) ) {
+										if( AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
 											cassetto.grado = 20;
 											aggiornaLista();
 										} else
 											Toast.makeText( Alberi.this, R.string.no_results, Toast.LENGTH_LONG ).show();
-									} else if( id == 6 ) {	// Esporta Gedcom
+									} else if( id == 6 ) { // Esporta Gedcom
 										int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
 										if( perm == PackageManager.PERMISSION_DENIED )
 											ActivityCompat.requestPermissions( Alberi.this,
 													new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(idAlbero), cassetto.nome }, 6366 );
 										else if( perm == PackageManager.PERMISSION_GRANTED )
 											esportaGedcom( idAlbero, cassetto.nome );
-									} else if( id == 7 ) {	// Fai backup
+									} else if( id == 7 ) { // Fai backup
 										int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
 										if( perm == PackageManager.PERMISSION_DENIED )
 											ActivityCompat.requestPermissions( Alberi.this,
@@ -234,6 +235,18 @@ public class Alberi extends AppCompatActivity {
 			};
 			lista.setAdapter(adapter);
 		}
+
+		// Barra personalizzata
+		ActionBar barra = getSupportActionBar();
+		View barraAlberi = getLayoutInflater().inflate( R.layout.alberi_barra, null );
+		barraAlberi.findViewById( R.id.alberi_opzioni ).setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View v ) {
+				startActivity( new Intent( Alberi.this, Opzioni.class) );
+			}
+		});
+		barra.setCustomView( barraAlberi );
+		barra.setDisplayShowCustomEnabled( true );
 
 		// Fab
 		findViewById(R.id.fab).setOnClickListener( new View.OnClickListener() {
@@ -327,49 +340,61 @@ public class Alberi extends AppCompatActivity {
 		return gc;
 	}
 
-	// Todo e le immagini???
+	// Esporta un singolo file Gedcom oppure uno zip con il Gedcom + media
 	void esportaGedcom( int idAlbero, String titolo ) {
 		try {
-			GedcomWriter scrittore = new GedcomWriter();
 			Gedcom gc = leggiJson( idAlbero );
 			if( gc == null ) return;
-			String nomeFile = titolo.replaceAll( "[\\\\/:*?\"<>|]","_" ) + ".ged";
+			titolo = titolo.replaceAll( "[\\\\/:*?\"<>|]", "_" );
+			String nomeFile = titolo + ".ged";
 			Header testa = gc.getHeader();
 			if( testa == null )
-				gc.setHeader( AlberoNuovo.creaTestata(nomeFile) );
+				gc.setHeader( AlberoNuovo.creaTestata( nomeFile ) );
 			else
 				testa.setFile( nomeFile );
-			File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
-			if( !cartellaDocumenti.exists() )
-				cartellaDocumenti.mkdir();
-			File fileGc = new File( cartellaDocumenti.getAbsolutePath(), nomeFile );
+			GedcomWriter scrittore = new GedcomWriter();
+			File fileGc = new File( getCacheDir(), nomeFile );
 			scrittore.write( gc, fileGc );
-			MediaScannerConnection.scanFile(Alberi.this, new String[]{fileGc.getAbsolutePath()},null,null);
-				// necessario per rendere il file immediatamente visibile da Windows
-			Toast.makeText( getBaseContext(), fileGc.getAbsolutePath(), Toast.LENGTH_LONG ).show();
+			ListaMedia visitaMedia = new ListaMedia( gc, 0 );
+			gc.accept( visitaMedia );
+			Map<File,Integer> files = new HashMap<>();
+			for( Media med : visitaMedia.lista ) {
+				String percorsoMedia = U.percorsoMedia( idAlbero, med );
+				if( percorsoMedia != null )
+					files.put( new File( percorsoMedia ), 2 );
+			}
+			File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
+			String finalPath;
+			if( files.isEmpty() ) {
+				FileUtils.copyFileToDirectory( fileGc, cartellaDocumenti ); // Crea la cartella se non esiste
+				finalPath = cartellaDocumenti.getAbsolutePath() + "/" + fileGc.getName();
+			} else {
+				// Crea la cartella Documents se per caso non esiste
+				new File(cartellaDocumenti.getAbsolutePath()).mkdirs();
+				files.put( fileGc, 0 );
+				File fileZip = creaFileZip( this, files, cartellaDocumenti.getAbsolutePath()+"/"+ titolo + ".zip");
+				finalPath = fileZip.getAbsolutePath();
+			}
+			// Rende il file visibile da Windows
+			MediaScannerConnection.scanFile( Alberi.this, new String[]{ finalPath }, null, null );
+			Toast.makeText( this, finalPath, Toast.LENGTH_LONG ).show();
 		} catch( IOException e ) {
-			Toast.makeText( getBaseContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+			Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 		}
 	}
 
-	// Fa il backup di un singolo albero in un file zip nella cartella Documents
+	// Fa il backup di un singolo albero in un file zip nella cartella '/storage/emulated/0/Documents'
 	void faiBackup( int idAlbero ) {
-		//getContext().getExternalFilesDir(null) + "/backup.zip";	// pubblica ma non permanente, la crea se non esiste
-		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/Family Gem backup.zip";
-			// /storage/emulated/0/Documents/Family Gem backup.zip  richiede API 19,  non la crea se inesistente
 		File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
-			// /storage/emulated/0/Documents
 		if( !cartellaDocumenti.exists() )
-			cartellaDocumenti.mkdir();	// crea solo la cartella Documenti, non tutto il percorso
+			cartellaDocumenti.mkdir();    // crea solo la cartella Documents, non tutto il percorso
 
 		// Cerca di creare il file zip
-		Armadio.Cassetto cassetto = Globale.preferenze.getAlbero(idAlbero);
+		Armadio.Cassetto cassetto = Globale.preferenze.getAlbero( idAlbero );
 		String titolo = cassetto.nome;
 		File fileZip = zippaAlbero( getApplicationContext(), idAlbero, titolo, cassetto.radice, cassetto.grado,
-				cartellaDocumenti.getAbsolutePath()+"/"+titolo.replaceAll( "[\\\\/:*?\"<>|]","_" )+".zip" );
-		//s.l( fileZip.getAbsolutePath() );
-		MediaScannerConnection.scanFile(this, new String[]{fileZip.getAbsolutePath()},null,null);
-			// necessario per far comparire il file in Windows
+				cartellaDocumenti.getAbsolutePath() + "/" + titolo.replaceAll( "[\\\\/:*?\"<>|]", "_" ) + ".zip" );
+		MediaScannerConnection.scanFile( this, new String[]{ fileZip.getAbsolutePath() }, null, null );
 		Toast.makeText( getBaseContext(), fileZip.getAbsolutePath(), Toast.LENGTH_LONG ).show();
 	}
 
@@ -399,23 +424,23 @@ public class Alberi extends AppCompatActivity {
 			String percorsoMedia = U.percorsoMedia( idAlbero, med );
 			if( percorsoMedia != null )
 				files.put( new File( percorsoMedia ), 2 );
-		} // todo file da cartelle sparse vengono copiati nel zip ma il percorso nel Media rimane quello originale...
+		} // todo file da cartelle sparse vengono copiati nello zip ma il percorso nel Media rimane quello originale...
+		return creaFileZip(contesto, files, percorsoZip);
+	}
 
-		// Produce il file zip
+	// Riceve una lista di file e produce il file zip
+	static File creaFileZip(Context contesto, Map<File,Integer> files, String percorsoZip) {
 		File fileZip = new File( percorsoZip );
-		//s.l( fileZip.getAbsolutePath() );
 		byte[] buffer = new byte[128];
 		try {
 			ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( fileZip ) );
-			for( Map.Entry<File,Integer> fileTipo : files.entrySet() ) {
+			for( Map.Entry<File, Integer> fileTipo : files.entrySet() ) {
 				File file = fileTipo.getKey();
-				//s.l( "---> " + file.getAbsolutePath() );
 				FileInputStream fis = new FileInputStream( file );
-				String nomeFile = file.getName();   // settings.json
-				//if( nomeFile.endsWith( ".json" ) && !nomeFile.equals( "settings.json" ) )
-				if( fileTipo.getValue().equals(1) )
+				String nomeFile = file.getName();   // File che non vengono rinominati ('settings.json', 'Xxxx.ged')
+				if( fileTipo.getValue().equals( 1 ) )
 					nomeFile = "tree.json";
-				else if ( fileTipo.getValue().equals(2) )
+				else if( fileTipo.getValue().equals( 2 ) )
 					nomeFile = "media/" + file.getName();
 				zos.putNextEntry( new ZipEntry( nomeFile ) );
 				int read;
@@ -427,7 +452,6 @@ public class Alberi extends AppCompatActivity {
 			}
 			zos.close();
 		} catch( IOException e ) {
-			//e.printStackTrace();
 			Toast.makeText( contesto.getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 		}
 		return fileZip;
@@ -437,12 +461,6 @@ public class Alberi extends AppCompatActivity {
 		File file = new File( contesto.getFilesDir(), idAlbero + ".json");
 		file.delete();
 		File cartella = new File( contesto.getExternalFilesDir(null), String.valueOf(idAlbero) );
-		//cartella.delete(); non elimina la cartella se ci sono file dentro
-		/*try { // in Android 5.0.2 NoSuchMethodError: No virtual method toPath()Ljava/nio/file/Path...
-			FileUtils.deleteDirectory( cartella );
-		} catch( IOException e ) {
-			e.printStackTrace();
-		}*/
 		eliminaFileCartelle( cartella );
 		if( Globale.preferenze.idAprendo == idAlbero ) {
 			Globale.gc = null;
@@ -456,27 +474,6 @@ public class Alberi extends AppCompatActivity {
 			for( File child : fileOrDirectory.listFiles() )
 				eliminaFileCartelle( child );
 		fileOrDirectory.delete();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu( Menu menu ) {
-		menu.add(0,0,0, R.string.options );
-		menu.add(0,1,0, R.string.about );
-		return true;
-	}
-	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
-		switch( item.getItemId() ) {
-			case 0:
-				startActivity( new Intent( Alberi.this, Opzioni.class) );
-				break;
-			case 1:
-				startActivity( new Intent( Alberi.this, Lapide.class) );
-				break;
-			default:
-				onBackPressed();
-		}
-		return true;
 	}
 
 	@Override

@@ -1,7 +1,9 @@
 package app.familygem;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
@@ -40,6 +42,13 @@ public class Opzioni extends AppCompatActivity {
 				Globale.preferenze.esperto = attivo;
 				Globale.preferenze.salva();
 				Globale.editato = true;
+			}
+		});
+
+		findViewById( R.id.opzioni_lapide ).setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View view ) {
+				startActivity( new Intent( Opzioni.this, Lapide.class) );
 			}
 		});
 	}

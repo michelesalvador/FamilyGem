@@ -3,12 +3,14 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:fitsSystemWindows="true">
+	android:layout_height="match_parent">
 
 	<ScrollView
 		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:layout_height="match_parent"
+		android:paddingBottom="80dp"
+		android:clipToPadding="false"
+		android:scrollbarStyle="outsideOverlay">
 
 		<LinearLayout
 			 android:layout_width="match_parent"
@@ -21,25 +23,13 @@
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:orientation="horizontal"
-				android:layout_marginBottom="12dp" >
-
-				<include layout="@layout/pezzo_bava" />
-
-				<include layout="@layout/pezzo_bava" />
-				<include layout="@layout/pezzo_bava" />
-				<include layout="@layout/pezzo_bava" />
-				<include layout="@layout/pezzo_bava" />
-				<include layout="@layout/pezzo_bava" />
-				<include layout="@layout/pezzo_bava" />
-				<include layout="@layout/pezzo_bava" />
-
-			</LinearLayout>
+				android:layout_marginBottom="12dp"/>
 
 			<LinearLayout
 				android:id="@+id/dettaglio_scatola"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:orientation="vertical" />
+				android:orientation="vertical"/>
 
 		</LinearLayout>
 
@@ -51,6 +41,6 @@
 		android:layout_height="wrap_content"
 		android:layout_gravity="end|bottom"
 		android:layout_margin="@dimen/fab_margin"
-		app:srcCompat="@drawable/piu" />
+		app:srcCompat="@drawable/piu"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

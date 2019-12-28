@@ -104,9 +104,11 @@ public class AlberoNuovo extends AppCompatActivity {
 
 		findViewById(R.id.bottone_importa_gedcom).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-				intent.setType( "application/*" );
-				startActivityForResult( intent,630 );
+				int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				if( perm == PackageManager.PERMISSION_DENIED )
+					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
+				else if( perm == PackageManager.PERMISSION_GRANTED )
+					importaGedcom();
 			}
 		});
 
@@ -115,6 +117,27 @@ public class AlberoNuovo extends AppCompatActivity {
 				Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
 				intent.setType( "application/zip" );
 				startActivityForResult( intent, 219 );
+
+				// PROVVISORIO
+				/*BackupManager mBackupManager = new BackupManager(v.getContext());
+				//mBackupManager.dataChanged();
+				int successo = mBackupManager.requestRestore(
+					new RestoreObserver() {
+						@Override
+						public void restoreStarting (int numPackages) {
+							s.l("restoreStarting, numPackages:",numPackages);
+						}
+						@Override
+						public void onUpdate (int nowBeingRestored, String currentPackage) {
+							s.l("onUpdate, nowBeingRestored:",nowBeingRestored,"currentPackage:",currentPackage);
+						}
+						@Override
+						public void restoreFinished(int error) {
+							s.l("restoreFinished, error:", error);
+						}
+					}
+				);
+				s.l("successo "+successo);*/
 			}
 		});
 	}
@@ -125,6 +148,8 @@ public class AlberoNuovo extends AppCompatActivity {
 		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
 			if( codice == 5641 ) {
 				scaricaEsempio();
+			} else if( codice == 1390 ) {
+				importaGedcom();
 			}
 		}
 	}
@@ -227,6 +252,13 @@ public class AlberoNuovo extends AppCompatActivity {
 		}
 	}
 
+	// Fa scegliere un file Gedcom da importare
+	void importaGedcom() {
+		Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+		intent.setType( "application/*" );
+		startActivityForResult( intent,630 );
+	}
+
 	// Importa un file Gedcom scelto col file manager
 	// ToDo: aspetta un attimo, non sarebbe meglio usare Gedcom2Json ?
 	@Override
@@ -274,7 +306,7 @@ public class AlberoNuovo extends AppCompatActivity {
 				String idRadice = U.trovaRadice(gc);
 				Globale.preferenze.aggiungi( new Armadio.Cassetto( nuovoNum, nomeAlbero, percorsoCartella,
 						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc,idRadice), idRadice, null, 0, null ) );
-				// Se necessario propone di mostrare le funzioni avanzate TODO il dialogo va pensato meglio quando farlo comparire
+				// Se necessario propone di mostrare le funzioni avanzate ToDo il dialogo va pensato meglio quando farlo comparire
 				if( !gc.getSources().isEmpty() && !Globale.preferenze.esperto ) {
 					/*AlertDialog.Builder dialog = new AlertDialog.Builder( this );
 					dialog.setMessage( "L'albero che hai importato sembra piuttosto complesso.\nPer gestirlo vuoi mostrare le funzioni avanzate di Family Ged?" );

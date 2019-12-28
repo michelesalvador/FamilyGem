@@ -479,8 +479,7 @@ public class U {
 				break;
 			}
 		}
-		if( !trovatoQualcosa )
-			img.setVisibility( View.GONE );
+		img.setVisibility( trovatoQualcosa ? View.VISIBLE : View.GONE );
 	}
 
 	// Mostra le immagini con il tanto declamato Picasso
@@ -1020,8 +1019,10 @@ public class U {
 				anni += "\n" + luoghi;
 			else
 				anni += "   " + luoghi;
-			if( vistaDettagli != null )
+			if( vistaDettagli != null ) {
 				vistaDettagli.setText( anni.trim() );
+				vistaDettagli.setVisibility( View.VISIBLE );
+			}
 		}
 		return anni.trim();
 	}
@@ -1314,7 +1315,7 @@ public class U {
 	// Aggiorna la data di cambiamento del/dei record
 	public static void aggiornaDate( Object ... oggetti ) {
 		for( Object aggiornando : oggetti ) {
-			try { // se aggiornando non ha il metodo get/setChange, si passa oltre silenziosamente
+			try { // se aggiornando non ha il metodo get/setChange, passa oltre silenziosamente
 				Change chan = (Change)aggiornando.getClass().getMethod( "getChange" ).invoke( aggiornando );
 				if( chan == null ) // il record non ha ancora un CHAN
 					chan = new Change();

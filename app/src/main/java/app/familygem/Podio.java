@@ -9,8 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +58,13 @@ public class Podio extends Fragment {
 			registerForContextMenu( vistaPezzo );
 			vistaPezzo.setTag( autor );
 		}
+		vista.findViewById( R.id.magazzino_fab ).setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View v ) {
+				nuovoAutore( getContext() );
+				U.salvaJson( true );
+			}
+		});
 		return vista;
 	}
 
@@ -90,21 +95,14 @@ public class Podio extends Fragment {
 		return subm;
 	}
 
-	// menu opzioni nella toolbar
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater ) {
-		menu.add( 0, 0, 0, R.string.new_m );
-	}
-	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
-		switch( item.getItemId() ) {
-			case 0:
-				nuovoAutore( getContext() );
-				U.salvaJson( true );
-				return true;
-			default:
-				return false;
+	static void autorePrincipale(Submitter subm) {
+		Header testa = gc.getHeader();
+		if( testa == null ) {
+			testa = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo + ".json" );
+			gc.setHeader( testa );
 		}
+		testa.setSubmitterRef( subm.getId() );
+		U.salvaJson( false, subm );
 	}
 
 	// Menu contestuale
@@ -123,13 +121,7 @@ public class Podio extends Fragment {
 		Submitter subm = (Submitter) vistaAutore.getTag();
 		switch( item.getItemId() ) {
 			case 0:
-				Header testa = gc.getHeader();
-				if( testa == null ) {
-					testa = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo + ".json" );
-					gc.setHeader( testa );
-				}
-				testa.setSubmitterRef( subm.getId() );
-				U.salvaJson( false, subm );
+				autorePrincipale(subm);
 				return true;
 			case 1:
 				// Todo conferma elimina

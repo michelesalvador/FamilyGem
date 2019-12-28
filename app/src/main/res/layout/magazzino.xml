@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-		xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<ScrollView
 		android:layout_width="match_parent"
-		android:layout_height="match_parent">
-	<LinearLayout
-		android:id="@+id/magazzino_scatola"
-		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:paddingBottom="80dp"
+		android:clipToPadding="false"
+		android:scrollbarStyle="outsideOverlay">
+
+		<LinearLayout
+			android:id="@+id/magazzino_scatola"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"/>
+
+	</ScrollView>
+
+	<com.google.android.material.floatingactionbutton.FloatingActionButton
+		android:id="@+id/magazzino_fab"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:orientation="vertical" />
-</ScrollView>
+		android:layout_gravity="end|bottom"
+		android:layout_margin="@dimen/fab_margin"
+		app:srcCompat="@drawable/piu"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

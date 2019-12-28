@@ -6,7 +6,7 @@ It's completely free and open source.
 
 Project started on beginning of 2018.<br>
 _Family Gem_ is written in Java within Eclipse and Android Studio.<br>
-Minimun supported version is Android 4.1 Jelly Bean (API 16), maximum is Android 10 (API 29).<br>
+Minimun supported version is Android 4.4 KitKat (API 19), maximum is Android 10 (API 29).<br>
 The intent is that data structure respects as much as possible the Gedcom standard, in the latest versions 5.5 and 5.5.1.<br>
 It's strongly based on the java [Gedcom parser](https://github.com/FamilySearch/Gedcom) by Family Search.<br>
 Author is Michele Salvador, an italian self-taught programmer and genealogy enthusiast.

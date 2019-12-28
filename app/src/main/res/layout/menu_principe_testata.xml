@@ -13,7 +13,16 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:alpha="0.75"
-		android:scaleType="centerCrop" />
+		android:scaleType="centerCrop"/>
+
+	<ImageView
+		android:id="@+id/imageView"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="16dp"
+		android:layout_marginBottom="16dp"
+		android:layout_above="@+id/menu_titolo"
+		app:srcCompat="@drawable/freccia"/>
 
 	<TextView
 		android:id="@+id/menu_titolo"
@@ -25,23 +34,12 @@
 		android:layout_marginRight="16dp"
 		android:ellipsize="end"
 		android:maxLines="3"
-		android:paddingRight="24dp"
 		android:shadowColor="#000"
 		android:shadowDy="2"
 		android:shadowRadius="5"
 		android:text="Alberello cogliatell con nominetto lungotto e financo uscente dal riquadro ma solo se c'è testo in abbondanza"
 		android:textColor="#fff"
-		android:textSize="24sp" />
-
-	<ImageView
-		android:id="@+id/imageView"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:layout_alignParentRight="true"
-		android:layout_marginBottom="16dp"
-		android:layout_marginRight="15dp"
-		app:srcCompat="@drawable/triangolo" />
+		android:textSize="24sp"/>
 
 	<Button
 		android:id="@+id/menu_salva"
@@ -50,9 +48,9 @@
 		android:layout_height="wrap_content"
 		android:layout_above="@+id/menu_titolo"
 		android:layout_alignParentRight="true"
-		android:layout_marginRight="14dp"
+		android:layout_marginRight="16dp"
 		android:text="@string/save"
 		android:textColor="#fff"
-		android:visibility="gone" />
+		android:visibility="gone"/>
 
 </RelativeLayout>

@@ -50,6 +50,12 @@ public class Galleria extends Fragment {
 			griglia.setLayoutManager( gestoreLayout );
 			AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( visitaMedia.listaMedia, true );
 			griglia.setAdapter( adattatore );
+			vista.findViewById( R.id.galleria_fab ).setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View v ) {
+					U.appAcquisizioneImmagine( getContext(), Galleria.this, 4546, null );
+				}
+			});
 		}
 		return vista;
 	}
@@ -112,21 +118,6 @@ public class Galleria extends Fragment {
 		return capi.toArray( new Object[0] );
 	}
 
-	@Override
-	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
-		menu.add( 0,0,0, R.string.new_m );
-	}
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch( item.getItemId() ) {
-			case 0:
-				U.appAcquisizioneImmagine( getContext(), this, 4546, null );
-				break;
-			default:
-				return false;
-		}
-		return true;
-	}
 	// Il file pescato dal file manager diventa media condiviso
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {

@@ -139,14 +139,14 @@ public class EditaIndividuo extends AppCompatActivity {
 		});
 
 		// Barra
-		ActionBar barra = this.getSupportActionBar();
+		ActionBar barra = getSupportActionBar();
 		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
 		barraAzione.findViewById( R.id.edita_annulla ).setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View v ) {
 				onBackPressed();
 			}
-		} );
+		});
 		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( new View.OnClickListener() {
 			@Override
 			public void onClick( View v ) {

@@ -78,6 +78,12 @@ public class Magazzino extends Fragment {
 				registerForContextMenu( vistaPezzo );
 				vistaPezzo.setTag( rep );
 			}
+			vista.findViewById( R.id.magazzino_fab ).setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View v ) {
+					nuovoArchivio( getContext(), null );
+				}
+			});
 		}
 		return vista;
 	}
@@ -126,11 +132,10 @@ public class Magazzino extends Fragment {
 	// menu opzioni nella toolbar
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater ) {
-		Menu subOrdina = menu.addSubMenu(0,0,0, R.string.order_by );
-		subOrdina.add( 0,1,0, R.string.id );
-		subOrdina.add( 0,2,0, R.string.name );
-		subOrdina.add( 0,3,0, R.string.sources_number );
-		menu.add( 0, 4, 0, R.string.new_m );
+		menu.add( R.string.order_by ).setEnabled( false );
+		menu.add( 0,1,0, R.string.id );
+		menu.add( 0,2,0, R.string.name );
+		menu.add( 0,3,0, R.string.sources_number );
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
@@ -144,9 +149,6 @@ public class Magazzino extends Fragment {
 			case 3:
 				Globale.ordineMagazzino = 3;
 				break;
-			case 4:
-				nuovoArchivio( getContext(), null );
-				return true;
 			default:
 				return false;
 		}

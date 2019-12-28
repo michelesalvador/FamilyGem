@@ -16,8 +16,6 @@ public class Globale extends Application {
 	public static Armadio preferenze;
 	public static String individuo;	// "I1";
 	static View vistaPrincipe;
-	static int ordineAnagrafe = 0;
-	static int ordineBiblioteca = 0;
 	static int ordineMagazzino;
 	public static boolean editato; // C'è stata un'editazione in EditaIndividuo o in Dettaglio e quindi il contenuto delle attività precedenti va aggiornato
 	static boolean daSalvare; // Il contenuto del Gedcom è stato modificato e deve essere salvato

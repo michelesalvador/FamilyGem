@@ -10,7 +10,7 @@
 			android:title="@string/diagram" />
 		<item
 			android:id="@+id/nav_persone"
-			android:icon="@drawable/menu_persone"
+			android:icon="@drawable/menu_persona"
 			android:title="@string/persons" />
 		<item
 			android:id="@+id/nav_famiglie"

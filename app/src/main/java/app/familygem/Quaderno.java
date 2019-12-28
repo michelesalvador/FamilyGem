@@ -7,8 +7,6 @@ import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,6 +63,12 @@ public class Quaderno extends Fragment {
 			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
 					(listaNoteCondivise.size()+visitaNote.listaNote.size()) + " " + getString(R.string.notes).toLowerCase() );
 			setHasOptionsMenu(true);
+			vista.findViewById( R.id.magazzino_fab ).setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View v ) {
+					nuovaNota( getContext(), null );
+				}
+			});
 		}
 		return vista;
 	}
@@ -121,22 +125,7 @@ public class Quaderno extends Fragment {
 		contesto.startActivity( new Intent( contesto, Nota.class ) );
 	}
 
-	@Override
-	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
-		menu.add(0,0,0, R.string.new_f );
-	}
-	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
-		switch( item.getItemId() ) {
-			case 0:
-				nuovaNota( getContext(), null );
-				return true;
-			default:
-				return false;
-		}
-	}
-
-	View vistaScelta;
+	private View vistaScelta;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
 		vistaScelta = vista;

@@ -12,7 +12,6 @@ import org.folg.gedcom.model.SpouseRef;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import app.familygem.Chiesa;
 import app.familygem.Dettaglio;
 import app.familygem.Individuo;
 import app.familygem.R;
@@ -109,12 +108,6 @@ public class Famiglia extends Dettaglio {
 				listaPfr.add( pfr );
 				tizio.setParentFamilyRefs( listaPfr );
 		}
-	}
-
-	// Elimina famiglia
-	@Override
-	public void elimina() {
-		U.aggiornaDate( (Object[]) Chiesa.elimina(f.getId()) );
 	}
 
 	// Rimuove i ref reciproci individuo-famiglia

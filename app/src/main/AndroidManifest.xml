@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	package="app.familygem">
 
@@ -7,17 +8,21 @@
 	<uses-permission android:name="android.permission.INTERNET" />
 
 	<application
-		android:name=".Globale"
-		android:allowBackup="true"
-		android:icon="@mipmap/vetrina"
 		android:label="@string/app_name"
+		android:name=".Globale"
+		android:icon="@mipmap/vetrina"
 		android:roundIcon="@mipmap/vetrina_round"
-		android:supportsRtl="false"
 		android:theme="@style/AppTheme"
+		android:allowBackup="true"
+		android:backupAgent="AgenteBackup"
+		android:supportsRtl="false"
 		tools:replace="android:supportsRtl">
 		<meta-data
 			android:name="com.google.android.geo.API_KEY"
 			android:value="AIzaSyBxL3Y0Ta-ccbmmEGxjyKN2yEb8WF2n428" />
+		<meta-data
+			android:name="com.google.android.backup.api_key"
+			android:value="AEdPqrEAAAAIeqibcFchy7ZZ1uALZBVy-FPsTXQbXFRa2VO-AQ" />
 		<activity
 			android:name=".Facciata"
 			android:noHistory="true" >
@@ -43,30 +48,8 @@
 					android:host="www.familygem.app"
 					android:pathPattern="/condivisi/.*.zip" />
 			</intent-filter>
-			<!--<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.BROWSABLE" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data
-					android:scheme="https"
-					android:host="www.familygem.app"
-					android:path="/share.php" />
-				<data
-					android:scheme="https"
-					android:host="www.familygem.app"
-					android:pathPrefix="/condivisi/" />
-			</intent-filter>
-			<intent-filter>
-			   <action android:name="android.intent.action.VIEW" />
-			   <category android:name="android.intent.category.BROWSABLE" />
-			   <category android:name="android.intent.category.DEFAULT" />
-			   <data android:scheme="https" />
-				<data  android:host="www.familygem.app" />
-			< !- - <data   android:path="/share.php" />
-			<data android:pathPrefix="/condivisi/" />- - >
-			<data android:pathPattern="/condivisi/.*.zip" />
-			</intent-filter>-->
 		</activity>
+		<activity android:name=".Alberi" />
 		<activity
 			android:name=".AlberoNuovo"
 			android:label="@string/new_tree"
@@ -75,17 +58,13 @@
 			android:name=".Principe"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity
-			android:name=".Alberi"
-			android:label="@string/trees"
-			android:parentActivityName=".Principe" />
-		<activity
 			android:name=".Opzioni"
-			android:label="@string/options"
+			android:label="@string/settings"
 			android:parentActivityName=".Alberi" />
 		<activity
 			android:name=".Lapide"
 			android:label="@string/about"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".Opzioni" />
 		<activity
 			android:name=".InfoAlbero"
 			android:parentActivityName=".Alberi" />

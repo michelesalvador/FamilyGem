@@ -58,4 +58,14 @@
 		android:layout_marginLeft="10dp"
 		android:layout_marginTop="20dp" />
 
+	<TextView
+		android:id="@+id/opzioni_lapide"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/about"
+		android:textColor="#000"
+		android:textSize="16sp"
+		android:layout_marginTop="25dp"
+		android:layout_below="@+id/opzioni_esperto"/>
+
 </RelativeLayout>

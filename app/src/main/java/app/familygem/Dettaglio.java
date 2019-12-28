@@ -666,7 +666,7 @@ public class Dettaglio extends AppCompatActivity {
 		ripristina( vistaPezzo, barra, fab );
 		U.salvaJson( true, Memoria.oggettoCapo() );
 		/*if( Memoria.getPila().size() == 1 ) {
-			recreate(); // Orrendo, serve per aggiornare la data Cambiamento dei record todo punta direttamente a data Cambio
+			recreate(); // Orrendo, serve per aggiornare la data Cambiamento dei record TODO punta direttamente a data Cambio
 		}*/
 		// Se ha modificato un autore chiede di referenziarlo in header
 		if( oggetto instanceof Submitter )
@@ -692,16 +692,25 @@ public class Dettaglio extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu( Menu menu ) {
 		if( qualeMenu == 1 ) {	// Menu standard della barra
-			if( !(oggetto instanceof Submitter && U.autoreHaCondiviso((Submitter)oggetto)) ) // autore che ha condiviso non può essere eliminato
-				menu.add( 0, 1, 0, R.string.delete );
+			if( oggetto instanceof Submitter && ( gc.getHeader()==null || // Autore non principale
+					gc.getHeader().getSubmitter(gc)==null || !gc.getHeader().getSubmitter(gc).equals(oggetto) ))
+				menu.add( 0, 1, 0, R.string.make_default );
+			if( oggetto instanceof Family )
+				menu.add( 0, 2, 0, R.string.delete );
+			else if( !(oggetto instanceof Submitter && U.autoreHaCondiviso((Submitter)oggetto)) ) // autore che ha condiviso non può essere eliminato
+				menu.add( 0, 3, 0, R.string.delete );
 		}
 		return true;
 	}
 	@Override	// è evocato quando viene scelta una voce del menu E cliccando freccia indietro
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		int id = item.getItemId();
-		if( id == 1 ) {
-			// todo: conferma eliminazione di questo oggetto..
+		if( id == 1 ) { // Autore principale
+			Podio.autorePrincipale( (Submitter)oggetto );
+		} else if( id == 2 ) { // Famiglia
+			Chiesa.eliminaFamiglia( this, ((Family)oggetto).getId(), null );
+		} else if( id == 3 ) { // Tutti gli altri
+			// todo: conferma eliminazione di tutti gli oggetti..
 			elimina();
 			U.salvaJson(true); // l'aggiornamento delle date avviene negli Override di elimina()
 			onBackPressed();
@@ -794,14 +803,13 @@ public class Dettaglio extends AppCompatActivity {
 						((TextView)vistaPezzo.findViewById( R.id.fatto_testo )).getText() );
 				clipboard.setPrimaryClip(clip);
 				return true;
-			case 1:
+			case 1: // Elimina
 				try {
 					oggetto.getClass().getMethod( "set" + oggettoPezzo, String.class ).invoke( oggetto, (Object)null );
 				} catch( Exception e ) {
 					Toast.makeText( box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 					break;
 				}
-				//vistaPezzo.setVisibility( View.GONE );
 				box.removeView( vistaPezzo );
 				break;
 			case 10: // Diagramma
@@ -848,48 +856,48 @@ public class Dettaglio extends AppCompatActivity {
 				Anagrafe.elimina( pers.getId(), this, vistaPezzo );
 				trovaUnAltroRappresentanteDellaFamiglia( pers );
 				return true;
-			case 20: 	// Nota
+			case 20: // Nota
 				U.scollegaNota( (Note)oggettoPezzo, oggetto, vistaPezzo );
 				break;
 			case 21:
 				Object[] capi = U.eliminaNota( (Note)oggettoPezzo, vistaPezzo );
 				U.salvaJson( true, capi );
 				return true;
-			case 30: 	// Citazione fonte
+			case 30: // Citazione fonte
 				if( oggetto instanceof Note ) // Note non estende SourceCitationContainer
 					((Note)oggetto).getSourceCitations().remove( oggettoPezzo );
 				else
 					((SourceCitationContainer)oggetto).getSourceCitations().remove( oggettoPezzo );
 				box.removeView( vistaPezzo );
 				break;
-			case 40:	// Media
+			case 40: // Media
 				Galleria.scollegaMedia( ((Media)oggettoPezzo).getId(), (MediaContainer)oggetto, vistaPezzo );
 				break;
 			case 41:
 				Object[] capiMedia = Galleria.eliminaMedia( (Media)oggettoPezzo, vistaPezzo );
 				U.salvaJson( true, capiMedia ); // un media condiviso può dover aggiornare le date di più capi
 				return true;
-			case 50:	// Address
+			case 50: // Address
 				eliminaIndirizzo( oggetto );
 				box.removeView( vistaPezzo );
 				break;
-			case 55:	// Evento di Famiglia
+			case 55: // Evento di Famiglia
 				((Family)oggetto).getEventsFacts().remove( oggettoPezzo );
 				box.removeView( vistaPezzo );
 				break;
-			case 60:	// Estensione
+			case 60: // Estensione
 				U.eliminaEstensione( (GedcomTag)oggettoPezzo, oggetto, vistaPezzo );
 				break;
-			case 70:	// Scegli fonte in Biblioteca
+			case 70: // Scegli fonte in Biblioteca
 				Intent inte = new Intent( Dettaglio.this, Principe.class );
 				inte.putExtra( "bibliotecaScegliFonte", true );
 				startActivityForResult( inte,7047 );
 				return true;
-			case 80: 	// Citazione archivio
+			case 80: // Citazione archivio
 				((Source)oggetto).setRepositoryRef( null );
 				box.removeView( vistaPezzo );
 				break;
-			case 90:	// Scegli archivio in Magazzino
+			case 90: // Scegli archivio in Magazzino
 				Intent intn = new Intent( Dettaglio.this, Principe.class );
 				intn.putExtra( "magazzinoScegliArchivio", true );
 				startActivityForResult( intn,5390 );

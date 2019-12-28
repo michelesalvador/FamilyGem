@@ -82,7 +82,7 @@ public class Officina extends AppCompatActivity {
 
 		findViewById(R.id.bottone_vario).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				//percorsi_di_Sistema();
+				percorsi_di_Sistema();
 				//new LoadImageFromURL().execute("http://www.cafleurebon.com/wp-content/uploads/2017/03/fica-mana-symbol-182x300.jpg");
 				//new U.ZuppaMedia( (ImageView)findViewById(R.id.immagine), (ProgressBar)findViewById(R.id.circolo), null ).execute("https://www.google.com");
 				//database();
@@ -93,7 +93,7 @@ public class Officina extends AppCompatActivity {
 				//new PostaDatiCondivisione().execute( BuildConfig.passwordAruba, "Tìtolo Albèro pròtto", "nòòme Mìtto Gròsso", "Bèllo Ciìao" );
 				//creaZipConCartella();
 				//listaAttivita( Officina.this );
-				apriFileConApp( getExternalFilesDir(null)+"/Document.pdf" ); //Environment.getExternalStorageDirectory()+"/Documents/nuovo.txt"
+				//apriFileConApp( getExternalFilesDir(null)+"/Document.pdf" ); //Environment.getExternalStorageDirectory()+"/Documents/nuovo.txt"
 			}
 		});
 
