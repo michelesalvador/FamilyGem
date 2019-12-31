@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.otaliastudios.zoom.ZoomLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.otaliastudios.zoom.ZoomLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/diagram_zoom"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#6345"
     android:scrollbars="vertical|horizontal"
     app:hasClickableChildren="true"
-    app:horizontalPanEnabled="true"
+    app:minZoom="0.9"
     app:maxZoom="2"
-    app:maxZoomType="realZoom"
-    app:minZoom="1"
-    app:minZoomType="realZoom"
-    app:overPinchable="true"
-    app:overScrollHorizontal="true"
-    app:overScrollVertical="true"
-    app:verticalPanEnabled="true"
-    app:zoomEnabled="true">
+    app:maxZoomType="realZoom">
 
     <RelativeLayout
         android:id="@+id/diagram_box"
@@ -28,7 +21,7 @@
         android:padding="20dp">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="230dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="50dp"
             android:layout_marginTop="60dp"
@@ -60,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="100dp"
+                android:layout_alignParentRight="true"
                 android:background="#88FF6600"
                 android:clipChildren="false">
 
@@ -85,7 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="65dp"
+                android:layout_marginLeft="70dp"
                 android:background="@drawable/diagramma_cerchio_anno"
                 android:padding="5dp"
                 android:text="1825"

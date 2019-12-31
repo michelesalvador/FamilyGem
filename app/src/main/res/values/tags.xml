@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<item name="tag_legame" type="id"/>
 	<item name="tag_oggetto" type="id"/>
 	<item name="tag_contenitore" type="id"/>
 	<item name="tag_percorso" type="id"/>

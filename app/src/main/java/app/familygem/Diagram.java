@@ -2,12 +2,17 @@ package app.familygem;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -15,18 +20,26 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.otaliastudios.zoom.ZoomLayout;
+
+import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Person;
+
+import app.familygem.dettaglio.Famiglia;
+import graph.gedcom.AncestryNode;
 import graph.gedcom.Card;
+import graph.gedcom.CardNode;
 import graph.gedcom.Graph;
+import graph.gedcom.Line;
 import graph.gedcom.Node;
+import graph.gedcom.Util;
 
 public class Diagram extends Fragment {
 
-	private Graph diagram;
-	ZoomLayout zoomBox;
-	RelativeLayout box;
-	View fulcrumCard;
-	float zoomValue;
+	private Graph graph;
+	private ZoomLayout zoomBox;
+	private RelativeLayout box;
+	private View fulcrumCard;
+	private float zoomValue = 1;
 
 	@Override
 	public void onCreate( Bundle state ) {
@@ -40,12 +53,11 @@ public class Diagram extends Fragment {
 		final View view = inflater.inflate( R.layout.diagram, container, false );
 
 		zoomBox = view.findViewById( R.id.diagram_zoom );
-		//zoomBox.setMinZoom( 1, ZoomApi.TYPE_ZOOM );
 		box = view.findViewById( R.id.diagram_box );
 
 		// Create a diagram model
-		diagram = new Graph( Globale.gc );
-		diagram.maxAncestors(2)
+		graph = new Graph( Globale.gc );
+		graph.maxAncestors(2)
 				.showFamily( getActivity().getIntent().getIntExtra("genitoriNum", 0) )
 				.startFrom(Globale.individuo);
 		getActivity().getIntent().putExtra( "genitoriNum", 0 ); // lo resetta per gli altri che hanno una sola parent family
@@ -53,36 +65,75 @@ public class Diagram extends Fragment {
 		return view;
 	}
 
-	void drawDiagram() {
+	private void drawDiagram() {
 
-		// Place graphic cards layouts in the box taking them from the list of cards
-		for( Card card : diagram.getCards() ) {
-			DiagramCard diagramCard = new DiagramCard(getContext(), card);
-			box.addView( diagramCard );
+		// Place graphic nodes in the box taking them from the list of nodes
+		for( Node node : graph.getNodes() ) {
+			if( node instanceof CardNode )
+				box.addView( new GraphicCardNode(getContext(), (CardNode)node) );
+			if( node instanceof AncestryNode ) {
+				box.addView( new GraphicAncestry(getContext(), (AncestryNode)node) );
+			}
 		}
 
 		box.post(new Runnable() {
 			@Override
 			public void run() {
+
 				// Set dimensions of each graphic card
 				for (int i = 0; i < box.getChildCount(); i++) {
-					DiagramCard diagramCard = (DiagramCard) box.getChildAt(i);
-					//s.l( diagramCard.getLayout().getWidth() );
-					diagramCard.card.width = diagramCard.getWidth();
-					diagramCard.card.height = diagramCard.getHeight();
+					View node = box.getChildAt( i );
+					if( node instanceof GraphicCardNode) {
+						for( int c = 0; c < ((GraphicCardNode)node).getChildCount(); c++ ) {
+							View card = ((GraphicCardNode)node).getChildAt( c );
+							if( card instanceof GraphicCardContainer) {
+								GraphicCardContainer graphicCard = (GraphicCardContainer) card;
+								graphicCard.card.width = graphicCard.getWidth();
+								graphicCard.card.height = graphicCard.getHeight();
+								s.l(graphicCard.card.width);
+							}
+						}
+					} // And each Ancestry node
+					else if( node instanceof GraphicAncestry) {
+						GraphicAncestry ancestry = (GraphicAncestry) node;
+						ancestry.node.width = ancestry.getWidth();
+						ancestry.node.height = ancestry.getHeight();
+					}
 				}
 
-				// Let the diagram calculate positions of Nodes and Lines
-				diagram.arrange();
+				// Let the graph calculate positions of Nodes and Lines
+				graph.arrange();
 
-				// Final position of the cards
+				// Final position of the nodes
 				for (int i = 0; i < box.getChildCount(); i++) {
-					DiagramCard diagramCard = (DiagramCard) box.getChildAt(i);
-					RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) diagramCard.getLayoutParams();
-					params.leftMargin = diagramCard.card.x;
-					params.topMargin = diagramCard.card.y;
-					diagramCard.setLayoutParams(params);
+					View node = box.getChildAt( i );
+					if( node instanceof GraphicCardNode) {
+						GraphicCardNode graphicCardNode = (GraphicCardNode) node;
+						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) graphicCardNode.getLayoutParams();
+						params.width = graphicCardNode.node.width;
+						params.leftMargin = graphicCardNode.node.x;
+						params.topMargin = graphicCardNode.node.y;
+						graphicCardNode.setLayoutParams(params);
+						if( graphicCardNode.node.isCouple() ) {
+							//s.l( "> " + graphicCardNode.node.husband.width );
+							View legame = graphicCardNode.findViewById( R.id.tag_legame );
+							RelativeLayout.LayoutParams legameParams = (RelativeLayout.LayoutParams)legame.getLayoutParams();
+							legameParams.addRule( RelativeLayout.CENTER_VERTICAL );
+							legameParams.leftMargin = graphicCardNode.node.husband.width;
+							legame.setLayoutParams( legameParams );
+						}
+					} else if( node instanceof GraphicAncestry) {
+						GraphicAncestry ancestry = (GraphicAncestry) node;
+						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ancestry.getLayoutParams();
+						params.leftMargin = ancestry.node.x;
+						params.topMargin = ancestry.node.y;
+						ancestry.setLayoutParams(params);
+					}
 				}
+
+				// Add the lines
+				RelativeLayout.LayoutParams paramLines = new RelativeLayout.LayoutParams( box.getWidth(), box.getHeight() );
+				box.addView( new Lines(getContext()), 0, paramLines );
 
 				// Pan to diagram fulcrum
 				zoomBox.post( new Runnable() {
@@ -101,27 +152,88 @@ public class Diagram extends Fragment {
 		});
 	}
 
-	/*class DiagramNode extends RelativeLayout {
-		String id;
-		DiagramNode( Context context, Node node ) {
+	class GraphicCardNode extends RelativeLayout {
+		CardNode node;
+		GraphicCardNode( final Context context, CardNode node ) {
 			super(context);
-			id = egli.getId();
+			this.node = node;
+			setClipChildren( false );
+			//setBackgroundColor( 0x3300FF00 );
+			if( node.husband != null ) {
+				LayoutParams paramsHusband = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+				paramsHusband.addRule( CENTER_VERTICAL );
+				this.addView( new GraphicCardContainer( context, node.husband ), paramsHusband );
+			} if( node.wife != null ) {
+				LayoutParams paramsWife = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+				paramsWife.addRule( CENTER_VERTICAL );
+				paramsWife.addRule( ALIGN_PARENT_RIGHT );
+				this.addView( new GraphicCardContainer(context,node.wife), paramsWife );
+			}
+
+			// Legame di matrimonio con eventuale anno
+			if( node.isCouple() ) {
+				FrameLayout legame = new FrameLayout( getContext() );
+				if( node.marriageDate == null ) {
+					View line = new View( getContext() );
+					LayoutParams paramLine = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+					paramLine.width = Util.MARGIN;
+					paramLine.height = 4;
+					line.setBackgroundColor( 0xffffffff );
+					legame.addView( line, paramLine );
+				} else {
+					TextView year = new TextView( context );
+					year.setBackgroundResource( R.drawable.diagramma_cerchio_anno );
+					year.setPadding(4,5,4,4);
+					year.setText( new Datatore(node.marriageDate).scriviAnno() );
+					legame.addView( year );
+				}
+				legame.setOnClickListener( new View.OnClickListener() {
+					@Override
+					public void onClick( View view ) {
+						//Memoria.setPrimo( famiglia ); // TODO famiglia?
+						startActivity( new Intent( context, Famiglia.class ) );
+					}
+				});
+				legame.setId( R.id.tag_legame );
+				addView( legame );
+			}
 		}
-	}*/
+	}
 
-	public class DiagramCard extends LinearLayout {
-
+	// Container for card crowned with ancestors
+	class GraphicCardContainer extends RelativeLayout {
 		Card card;
-
-		public DiagramCard( Context context, final Card card ) {
+		GraphicCardContainer( Context context, Card card ) {
 			super(context);
 			this.card = card;
-			Person person = card.getPerson();
+			GraphicCard graphicCard = new GraphicCard(context, card);
+			graphicCard.setId( R.id.card );
+			addView( graphicCard );
+			setClipChildren( false );
+			//setBackgroundColor( 0x66ff00ff );
+			if( card.ancestryNode != null && card.ancestryNode.foreFather != null && card.ancestryNode.foreMother != null ) {
+				LayoutParams params = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+				params.addRule( RelativeLayout.ABOVE, graphicCard.getId() );
+				params.addRule( RelativeLayout.CENTER_HORIZONTAL );
+				addView( new GraphicAncestry(context, card.ancestryNode), params);
+			}
+		}
+	}
 
-			setLayoutParams( new LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT ) );
+
+	class GraphicCard extends LinearLayout {
+
+		//Card card;
+
+		public GraphicCard( Context context, final Card card ) {
+			super(context);
+			//this.card = card;
+			Person person = card.getPerson();
+			//setId( R.id. );
+			setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT ) );
 			setOrientation( LinearLayout.VERTICAL );
 			setGravity( Gravity.CENTER_HORIZONTAL );
-			View view = getLayoutInflater().inflate( R.layout.diagram_card, this, false );
+			View view = getLayoutInflater().inflate( R.layout.diagram_card, this, true );
 
 			ImageView background = view.findViewById( R.id.card_background );
 			if( person.getId().equals( Globale.individuo ) ) {
@@ -148,7 +260,7 @@ public class Diagram extends Fragment {
 			else vistaDati.setText( dati );
 			if( !U.morto(person) )
 				view.findViewById(R.id.card_mourn).setVisibility(View.GONE);
-			addView( view );
+			//addView( view );
 			registerForContextMenu(this);
 			setOnClickListener( new OnClickListener() {
 				@Override
@@ -159,16 +271,82 @@ public class Diagram extends Fragment {
 						intent.putExtra( "idIndividuo", person.getId() );
 						startActivity( intent );
 					} else {
-						if( U.qualiGenitoriMostrare(getContext(), person, Principe.class) )
-							return;
-						zoomValue = zoomBox.getRealZoom();
-						box.removeAllViews();
-						Globale.individuo = person.getId();
-						diagram.restartFrom(Globale.individuo);
-						drawDiagram();
+						clickCard(person);
 					}
 				}
 			});
+		}
+	}
+
+	private void clickCard(Person person) {
+		if( U.qualiGenitoriMostrare(getContext(), person, Principe.class) )
+			return;
+		zoomValue = zoomBox.getRealZoom();
+		box.removeAllViews();
+		Globale.individuo = person.getId();
+		graph.restartFrom(Globale.individuo);
+		drawDiagram();
+	}
+
+	class GraphicAncestry extends RelativeLayout {
+		AncestryNode node;
+		GraphicAncestry( Context context, final AncestryNode node) {
+			super(context);
+			this.node = node;
+			//setBackgroundColor( 0x440000FF );
+			View view = getLayoutInflater().inflate(R.layout.diagramma_avi,this, true);
+			TextView testoAvi = view.findViewById( R.id.num_avi );
+			TextView testoAve = view.findViewById( R.id.num_ave );
+			if( node.foreFather == null ) {
+				testoAvi.setVisibility( View.GONE );
+				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) testoAve.getLayoutParams();
+				param.addRule( RelativeLayout.RIGHT_OF, 0 );
+			} else {
+				testoAvi.setText( String.valueOf(node.foreFather.ancestry) );
+				testoAvi.setOnClickListener( new View.OnClickListener() {
+					@Override
+					public void onClick( View v ) {
+						clickCard(node.foreFather.person);
+					}
+				});
+			}
+			if( node.foreMother == null ) {
+				testoAve.setVisibility( View.GONE );
+				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) findViewById( R.id.avi_connettore ).getLayoutParams();
+				param.addRule( RelativeLayout.RIGHT_OF, 0 );
+			} else {
+				testoAve.setText( String.valueOf(node.foreMother.ancestry) );
+				testoAve.setOnClickListener( new View.OnClickListener() {
+					@Override
+					public void onClick( View v ) {
+						clickCard(node.foreMother.person);
+					}
+				} );
+			}
+			if( 0 > 1 ) {
+				setAlpha( 0.7f );
+				//sfondo.setAlpha( 0.7f );
+			}
+		}
+	}
+
+	class Lines extends View {
+		Paint paint = new Paint();
+		Path path = new Path();
+		public Lines( Context context ) {
+			super( context );
+		}
+		@Override
+		protected void onDraw( Canvas canvas) {
+			paint.setStyle( Paint.Style.STROKE );
+			paint.setColor( Color.WHITE );
+			paint.setStrokeWidth(3);
+			for(Line line : graph.getLines()) {
+				path.moveTo( line.x1, line.y1 );
+				//path.lineTo( line.x2, line.y2 );
+				path.cubicTo( line.x1, line.y2, line.x2, line.y1, line.x2, line.y2 );
+			}
+			canvas.drawPath( path, paint );
 		}
 	}
 }

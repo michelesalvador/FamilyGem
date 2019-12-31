@@ -1,14 +1,8 @@
 package app.familygem;
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import com.otaliastudios.zoom.ZoomLayout;
@@ -49,8 +43,7 @@ public class Diagram extends AppCompatActivity {
 						figli.getLeft()+schedina2.getLeft()+schedina2.getWidth()/2, figli.getTop()+schedina2.getTop() );
 				box.addView( linea2, paramLinea );
 
-				disegnaLinea( anno, genitori, findViewById(R.id.scheda0) );
-				disegnaLinea( anno, genitori, findViewById(R.id.scheda3) );*/
+				disegnaLinea( anno, genitori, findViewById(R.id.scheda0) );*/
 			}
 		});
 	}
@@ -67,61 +60,4 @@ public class Diagram extends AppCompatActivity {
 		//startActivity( new Intent( Diagramma.this, Officina.class ) );
 		Officina.listaAttivita( this );
 	}
-
-
-	void disegnaLinea( View vistaInizio, View vistaMezzo, View vistaFine ) {
-		// Coordinate assolute start
-		Rect marginiInizio = new Rect();
-		vistaInizio.getDrawingRect( marginiInizio );
-		box.offsetDescendantRectToMyCoords( vistaInizio, marginiInizio );
-		// mezzo
-		Rect marginiMezzo = new Rect();
-		vistaMezzo.getDrawingRect( marginiMezzo );
-		box.offsetDescendantRectToMyCoords( vistaMezzo, marginiMezzo );
-		// e end
-		Rect marginiFine = new Rect();
-		vistaFine.getDrawingRect( marginiFine );
-		box.offsetDescendantRectToMyCoords( vistaFine, marginiFine );
-		View linea = new Linea( (int)marginiInizio.exactCenterX(), marginiInizio.bottom,
-				marginiMezzo.bottom,
-				(int)marginiFine.exactCenterX(), marginiFine.top );
-		RelativeLayout.LayoutParams paramLinea = new RelativeLayout.LayoutParams( box.getWidth(), box.getHeight() );
-		box.addView( linea, paramLinea );
-
-	}
-
-	class Linea extends View {
-		Paint paint = new Paint();
-		Path path = new Path();
-		int xInizio, yInizio, yMezzo, xFine, yFine;
-		/*public Linea( int x1, int y1, int x2, int y2 ) {
-			super( Globale.contesto );
-			xInizio = x1;
-			yInizio = y1;
-			xFine = x2;
-			yFine = y2;
-		}*/
-		public Linea( int x1, int y1, int y2, int x3, int y3 ) {
-			super( Globale.contesto );
-			xInizio = x1;
-			yInizio = y1;
-			yMezzo = y2;
-			xFine = x3;
-			yFine = y3;
-		}
-		@Override
-		protected void onDraw( Canvas canvas ) {
-			paint.setStyle( Paint.Style.STROKE );
-			paint.setColor( Color.WHITE );
-			paint.setStrokeWidth(3);
-			path.moveTo( xInizio, yInizio );	// partenza necessario per evitare il ricciolo finale (?)
-			//path.cubicTo( xInizio, yFine, xFine, yInizio, xFine, yFine );	// linea curva
-			//int mezzAlto = (yFine - yInizio) / 2;
-			path.lineTo( xInizio, yMezzo );
-			path.lineTo( xFine, yMezzo );
-			path.lineTo( xFine, yFine );
-			canvas.drawPath( path, paint );
-		}
-	}
-
 }

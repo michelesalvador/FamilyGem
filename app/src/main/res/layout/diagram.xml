@@ -10,14 +10,13 @@
 	app:hasClickableChildren="true"
 	app:minZoom="0.9"
 	app:maxZoom="2"
-	app:maxZoomType="realZoom"
-	>
+	app:maxZoomType="realZoom">
 
 	<RelativeLayout
 		android:id="@+id/diagram_box"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:background="#3333ff33"
+		android:background="#22FFBB00"
 		android:clipChildren="false"
 		android:padding="50dp"/>
 
