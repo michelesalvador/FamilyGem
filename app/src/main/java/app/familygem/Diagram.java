@@ -31,13 +31,14 @@ import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
 import app.familygem.dettaglio.Famiglia;
 import graph.gedcom.AncestryNode;
-import graph.gedcom.Card;
+import graph.gedcom.IndiCard;
+import graph.gedcom.MiniCard;
+import graph.gedcom.ProgenyNode;
 import graph.gedcom.UnitNode;
 import graph.gedcom.Graph;
 import graph.gedcom.Line;
 import graph.gedcom.Node;
 import graph.gedcom.Util;
-
 import static app.familygem.Globale.gc;
 
 public class Diagram extends Fragment {
@@ -64,8 +65,7 @@ public class Diagram extends Fragment {
 
 		// Create a diagram model
 		graph = new Graph( Globale.gc );
-		graph.maxAncestors(2)
-				.showFamily( getActivity().getIntent().getIntExtra("genitoriNum", 0) );
+		graph.maxAncestors(2).showFamily( getActivity().getIntent().getIntExtra("genitoriNum", 0) );
 		getActivity().getIntent().putExtra( "genitoriNum", 0 ); // lo resetta per gli altri che hanno una sola parent family
 		drawDiagram();
 		return view;
@@ -77,8 +77,7 @@ public class Diagram extends Fragment {
 		if( !graph.startFrom(Globale.individuo,Globale.preferenze.alberoAperto().radice,U.trovaRadice(gc)) ) {
 			Button button = new Button(getContext());
 			button.setText( R.string.new_person );
-			box.addView( button, new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT ) );
+			box.addView( button );
 			button.setOnClickListener( new View.OnClickListener() {
 				@Override
 				public void onClick( View view ) {
@@ -93,39 +92,44 @@ public class Diagram extends Fragment {
 		// Place graphic nodes in the box taking them from the list of nodes
 		for( Node node : graph.getNodes() ) {
 			if( node instanceof UnitNode )
-				box.addView( new GraphicUnitNode(getContext(), (UnitNode)node) );
+				box.addView( new GraphicUnitNodeBox( getContext(), (UnitNode) node ) );
+					//	,RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 			if( node instanceof AncestryNode ) {
 				box.addView( new GraphicAncestry(getContext(), (AncestryNode)node, false));
 			}
 		}
 
-		box.post(new Runnable() {
+		box.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-
-				// Set dimensions of each graphic card
 				for (int i = 0; i < box.getChildCount(); i++) {
-					View graphicNode = box.getChildAt( i );
-					if( graphicNode instanceof GraphicUnitNode) {
-						for( int c = 0; c < ((GraphicUnitNode)graphicNode).getChildCount(); c++ ) {
-							View card = ((GraphicUnitNode)graphicNode).getChildAt( c );
-							if( card instanceof GraphicCardContainer) {
-								GraphicCardContainer graphicCard = (GraphicCardContainer) card;
-								graphicCard.card.width = card.getWidth();
-								graphicCard.card.height = card.getHeight();
+					View nodeView = box.getChildAt( i );
+					if( nodeView instanceof GraphicUnitNodeBox) {
+						// Get the bond width
+						GraphicUnitNode graphicUnitNode = ((GraphicUnitNodeBox)nodeView).graphicUnitNode;
+						Bond bond = graphicUnitNode.findViewById( R.id.tag_bond );
+						if( bond != null )
+							graphicUnitNode.unitNode.bondWidth = bond.getWidth();
+						// Get dimensions of each graphic card
+						for( int c = 0; c < graphicUnitNode.getChildCount(); c++ ) {
+							View cardView = graphicUnitNode.getChildAt( c );
+							if( cardView instanceof GraphicCardBox) {
+								GraphicCardBox graphicCard = (GraphicCardBox) cardView;
+								graphicCard.card.width = cardView.getWidth();
+								graphicCard.card.height = cardView.getHeight();
 							}
 						}
-					} // And each Ancestry node
-					else if( graphicNode instanceof GraphicAncestry) {
-						GraphicAncestry graphicAncestry = (GraphicAncestry) graphicNode;
-						graphicAncestry.node.width = graphicNode.getWidth();
-						graphicAncestry.node.height = graphicNode.getHeight();
-						if( graphicAncestry.node.isCouple() )
+					} // Get dimensions of each ancestry node
+					else if( nodeView instanceof GraphicAncestry) {
+						GraphicAncestry graphicAncestry = (GraphicAncestry) nodeView;
+						graphicAncestry.node.width = nodeView.getWidth();
+						graphicAncestry.node.height = nodeView.getHeight();
+						if( graphicAncestry.node.isCouple() ) {
 							graphicAncestry.node.horizontalCenter =
 									graphicAncestry.findViewById( R.id.ancestry_father ).getWidth() +
 									graphicAncestry.findViewById( R.id.ancestry_connector ).getWidth() / 2;
-						else
-							graphicAncestry.node.horizontalCenter = graphicNode.getWidth() / 2;
+						} else
+							graphicAncestry.node.horizontalCenter = nodeView.getWidth() / 2;
 					}
 				}
 
@@ -134,28 +138,35 @@ public class Diagram extends Fragment {
 
 				// Final position of the nodes
 				for (int i = 0; i < box.getChildCount(); i++) {
-					View node = box.getChildAt( i );
-					if( node instanceof GraphicUnitNode) {
-						GraphicUnitNode graphicUnitNode = (GraphicUnitNode) node;
-						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) graphicUnitNode.getLayoutParams();
-						params.width = graphicUnitNode.node.width;
-						params.leftMargin = graphicUnitNode.node.x;
-						params.topMargin = graphicUnitNode.node.y;
-						//graphicUnitNode.setLayoutParams(params);
-						if( graphicUnitNode.node.isCouple() ) {
-							Bond bond = new Bond(getContext(),graphicUnitNode.node);
-							RelativeLayout.LayoutParams bondParams = new RelativeLayout.LayoutParams(
-									RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT );
-							bondParams.addRule( bond.youths ? RelativeLayout.ALIGN_PARENT_BOTTOM : RelativeLayout.CENTER_VERTICAL );
-							bondParams.leftMargin = graphicUnitNode.node.husband.width;
-							graphicUnitNode.addView( bond, bondParams );
+					View nodeView = box.getChildAt( i );
+					if( nodeView instanceof GraphicUnitNodeBox) {
+						GraphicUnitNodeBox unitNodeBox = (GraphicUnitNodeBox) nodeView;
+						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) unitNodeBox.getLayoutParams();
+						params.leftMargin = unitNodeBox.unitNode.x;
+						params.topMargin = unitNodeBox.unitNode.y;
+						unitNodeBox.setLayoutParams( params );
+						/*GraphicUnitNode graphicUnit = unitNodeBox.graphicUnitNode;
+						LinearLayout.LayoutParams unitParams = (LinearLayout.LayoutParams) graphicUnit.getLayoutParams();
+						unitParams.width = unitNodeBox.unitNode.width;
+						//s.l(">>>>>>>>  "+unitParams.width);
+						graphicUnit.setLayoutParams( unitParams );*/
+						// Bond height
+						if( unitNodeBox.unitNode.isCouple() ) {
+							Bond bond = unitNodeBox.graphicUnitNode.findViewById( R.id.tag_bond  );
+							RelativeLayout.LayoutParams bondParams = (RelativeLayout.LayoutParams) bond.getLayoutParams();
+							if(bond.hasChildren) {
+								bondParams.height = unitNodeBox.unitNode.height / 2 + bond.getHeight() / 2;
+							}
+							//bondParams.leftMargin = unitNodeBox.unitNode.husband.width
+							//		- (unitNodeBox.unitNode.marriageDate != null ? Util.TIC : 0);
+							bond.setLayoutParams( bondParams );
 						}
-					} else if( node instanceof GraphicAncestry) {
-						GraphicAncestry ancestry = (GraphicAncestry) node;
+					} else if( nodeView instanceof GraphicAncestry) {
+						GraphicAncestry ancestry = (GraphicAncestry) nodeView;
 						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ancestry.getLayoutParams();
 						params.leftMargin = ancestry.node.x;
 						params.topMargin = ancestry.node.y;
-						//ancestry.setLayoutParams(params);
+						ancestry.setLayoutParams(params);
 					}
 				}
 
@@ -177,59 +188,90 @@ public class Diagram extends Fragment {
 					}
 				});
 			}
-		});
+		}, 2000);
 	}
 
-	class GraphicUnitNode extends RelativeLayout {
-		UnitNode node;
-		GraphicUnitNode( final Context context, UnitNode node ) {
-			super(context);
-			this.node = node;
+	// Main container of a unit node (one person or a couple) plus the little descendants below
+	class GraphicUnitNodeBox extends LinearLayout {
+		UnitNode unitNode;
+		GraphicUnitNode graphicUnitNode;
+		public GraphicUnitNodeBox( Context context, UnitNode unitNode  ) {
+			super( context );
+			this.unitNode = unitNode;
+			setLayoutParams( new RelativeLayout.LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT ) );
+			setOrientation( LinearLayout.VERTICAL );
 			setClipChildren( false );
-			//setBackgroundColor( 0x3300FF00 );
-			if( node.husband != null ) {
-				LayoutParams paramsHusband = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-				paramsHusband.addRule( CENTER_VERTICAL );
-				addView( new GraphicCardContainer( context, node.husband ), paramsHusband );
-			} if( node.wife != null ) {
-				LayoutParams paramsWife = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-				paramsWife.addRule( CENTER_VERTICAL );
-				paramsWife.addRule( ALIGN_PARENT_RIGHT );
-				addView( new GraphicCardContainer(context,node.wife), paramsWife );
+			setBackgroundColor( 0x3300FF00 );
+			graphicUnitNode = new GraphicUnitNode(context, unitNode);
+			addView(graphicUnitNode, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			ProgenyNode progeny = unitNode.getProgeny();
+			if (progeny != null) {
+				addView( new GraphicProgeny(context, progeny) );
 			}
 		}
 	}
 
-	// Container for card with ancestors on top
-	class GraphicCardContainer extends RelativeLayout {
-		Card card;
-		GraphicCardContainer( Context context, Card card ) {
+	// Node with one person or couple + marriage
+	class GraphicUnitNode extends RelativeLayout {
+		UnitNode unitNode;
+		GraphicUnitNode( final Context context, UnitNode unitNode ) {
+			super(context);
+			this.unitNode = unitNode;
+			setClipChildren( false );
+			setBackgroundColor( 0x33FF00FF );
+			if( unitNode.husband != null ) {
+				addView( new GraphicCardBox(context,unitNode.husband,true) );
+			}
+			if( unitNode.wife != null ) {
+				addView( new GraphicCardBox(context,unitNode.wife,false) );
+			}
+			if( unitNode.isCouple() ) {
+				Bond bond = new Bond(getContext(), unitNode);
+				LayoutParams bondParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				bondParams.addRule( bond.hasChildren ? ALIGN_PARENT_BOTTOM : CENTER_VERTICAL);
+				bondParams.addRule( RIGHT_OF, R.id.tag_husband );
+				if( unitNode.marriageDate != null ) {
+					bondParams.leftMargin = -Util.TIC;
+					bondParams.rightMargin = -Util.TIC;
+				}
+				addView( bond, bondParams );
+			}
+		}
+	}
+
+	// Container for one card with eventual ancestors above
+	class GraphicCardBox extends RelativeLayout {
+		IndiCard card;
+		GraphicCardBox( Context context, IndiCard card, boolean husband ) {
 			super(context);
 			this.card = card;
+			LayoutParams params = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+			params.addRule( CENTER_VERTICAL );
+			if (husband)
+				setId( R.id.tag_husband );
+			 else
+				params.addRule( RIGHT_OF, R.id.tag_bond );
+			setLayoutParams( params );
 			GraphicCard graphicCard = new GraphicCard(context, card);
 			graphicCard.setId( R.id.card );
 			addView( graphicCard );
 			setClipChildren( false );
-			//setBackgroundColor( 0x66ff00ff );
 			if( card.acquired && card.hasAncestry() ) {
-				LayoutParams params = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-				params.addRule( RelativeLayout.ABOVE, graphicCard.getId() );
-				params.addRule( RelativeLayout.CENTER_HORIZONTAL );
-				//params.bottomMargin = Util.TIC;
-				addView( new GraphicAncestry(context, (AncestryNode)card.origin, true), params);
+				LayoutParams ancestryParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+				ancestryParams.addRule( RelativeLayout.ABOVE, graphicCard.getId() );
+				ancestryParams.addRule( RelativeLayout.CENTER_HORIZONTAL );
+				addView( new GraphicAncestry(context, (AncestryNode)card.origin, true), ancestryParams);
 			}
 		}
 	}
 
-
+	// Card of a person
 	class GraphicCard extends LinearLayout {
-
-		Card card;
-
-		public GraphicCard( Context context, final Card card ) {
+		IndiCard card;
+		public GraphicCard( Context context, final IndiCard card ) {
 			super(context);
 			this.card = card;
-			Person person = card.getPerson();
+			Person person = card.person;
 			setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT ) );
 			setOrientation( LinearLayout.VERTICAL );
 			setGravity( Gravity.CENTER_HORIZONTAL );
@@ -262,19 +304,62 @@ public class Diagram extends Fragment {
 			else vistaDati.setText( dati );
 			if( !U.morto(person) )
 				view.findViewById(R.id.card_mourn).setVisibility(View.GONE);
-			//addView( view );
 			registerForContextMenu(this);
 			setOnClickListener( new OnClickListener() {
 				@Override
 				public void onClick( View v ) {
-					Person person = card.getPerson();
+					Person person = card.person;
 					if( person.getId().equals(Globale.individuo) ) {
 						Intent intent = new Intent( getContext(), Individuo.class );
 						intent.putExtra( "idIndividuo", person.getId() );
 						startActivity( intent );
 					} else {
 						clickCard(person);
+					}
 				}
+			});
+		}
+	}
+
+	// Marriage with eventual year and vertical line
+	class Bond extends FrameLayout {
+		boolean hasChildren;
+		//boolean hasYear;
+		Bond( final Context context, UnitNode unitNode) {
+			super(context);
+			if (unitNode.guardGroup != null && !unitNode.guardGroup.getYouths().isEmpty()) {
+				View verticaLine = new View( context );
+				verticaLine.setBackgroundColor( 0xffffffff );
+				LayoutParams lineParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT );
+				lineParams.width = 4;
+				lineParams.gravity = Gravity.CENTER_HORIZONTAL;
+				addView( verticaLine, lineParams );
+				hasChildren = true;
+			}
+			if( unitNode.marriageDate == null ) {
+				View horizontaLine = new View( context );
+				horizontaLine.setBackgroundColor( 0xffffffff );
+				LayoutParams paramLine = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+				paramLine.width = Util.MARGIN;
+				paramLine.height = 4;
+				addView( horizontaLine, paramLine );
+			} else {
+				TextView year = new TextView( context );
+				year.setBackgroundResource( R.drawable.diagramma_cerchio_anno );
+				year.setPadding(8,10,8,0);
+				year.setText( new Datatore(unitNode.marriageDate).scriviAnno() );
+				year.setTextSize( 13f );
+				//LayoutParams yearParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+				//yearParams.leftMargin = -15;
+				addView( year, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+				//hasYear = true;
+			}
+			setId( R.id.tag_bond );
+			setOnClickListener( new View.OnClickListener() {
+				@Override
+				public void onClick( View view ) {
+					//Memoria.setPrimo( famiglia ); // TODO famiglia?
+					startActivity( new Intent( context, Famiglia.class ) );
 				}
 			});
 		}
@@ -289,29 +374,29 @@ public class Diagram extends Fragment {
 			View view = getLayoutInflater().inflate(R.layout.diagram_ancestry,this, true);
 			TextView testoAvi = view.findViewById( R.id.ancestry_father );
 			TextView testoAve = view.findViewById( R.id.ancestry_mother );
-			if( node.foreFather == null ) {
+			if( node.miniFather == null ) {
 				testoAvi.setVisibility( View.GONE );
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) testoAve.getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				testoAvi.setText( String.valueOf(node.foreFather.ancestry) );
+				testoAvi.setText( String.valueOf(node.miniFather.ancestry) );
 				testoAvi.setOnClickListener( new View.OnClickListener() {
 					@Override
 					public void onClick( View v ) {
-						clickCard(node.foreFather.person);
+						clickCard(node.miniFather.person);
 					}
 				});
 			}
-			if( node.foreMother == null ) {
+			if( node.miniMother == null ) {
 				testoAve.setVisibility( View.GONE );
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) findViewById( R.id.ancestry_connector ).getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				testoAve.setText( String.valueOf(node.foreMother.ancestry) );
+				testoAve.setText( String.valueOf(node.miniMother.ancestry) );
 				testoAve.setOnClickListener( new View.OnClickListener() {
 					@Override
 					public void onClick( View v ) {
-						clickCard(node.foreMother.person);
+						clickCard(node.miniMother.person);
 					}
 				} );
 			}
@@ -321,6 +406,36 @@ public class Diagram extends Fragment {
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) verticalLine.getLayoutParams();
 				params.height = 50;
 				verticalLine.setLayoutParams(params);
+			}
+		}
+	}
+
+	// List of little descendants cards
+	class GraphicProgeny extends LinearLayout {
+		GraphicProgeny( final Context context, ProgenyNode progenyNode) {
+			super( context );
+			LayoutParams params = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+			params.topMargin = Util.GAP;
+			params.gravity = Gravity.CENTER_HORIZONTAL;
+			setLayoutParams( params );
+			setBackgroundColor( 0x330000FF );
+			for( final MiniCard miniChild : progenyNode.miniChildren) {
+				View graphicMiniCard = getLayoutInflater().inflate( R.layout.diagramma_discendente, this, false );
+				addView( graphicMiniCard );
+				((TextView)graphicMiniCard.findViewById( R.id.num_discendenti ) ).setText( String.valueOf( miniChild.ancestry ) );
+				int sex = U.sesso( miniChild.person );
+				int background = R.drawable.casella_neutro;
+				if( sex == 1 )
+					background = R.drawable.casella_maschio;
+				else if( sex == 2 )
+					background = R.drawable.casella_femmina;
+				graphicMiniCard.setBackgroundResource( background );
+				graphicMiniCard.setOnClickListener( new OnClickListener() {
+					@Override
+					public void onClick( View view ) {
+						clickCard( miniChild.person );
+					}
+				});
 			}
 		}
 	}
@@ -345,56 +460,12 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Marriage with eventual year and vertical line
-	class Bond extends FrameLayout {
-		boolean youths;
-		Bond( final Context context, UnitNode unitNode) {
-			super(context);
-			if (unitNode.guardGroup != null && !unitNode.guardGroup.getYouths().isEmpty()) {
-				View verticaLine = new View( context );
-				verticaLine.setBackgroundColor( 0xffffffff );
-				LayoutParams lineParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-				lineParams.width = 4;
-				lineParams.height = unitNode.height / 2;
-				lineParams.leftMargin = Util.MARGIN / 2 - 2;
-				addView( verticaLine, lineParams );
-				youths = true;
-			}
-			if( unitNode.marriageDate == null ) {
-				View horizontaLine = new View( context );
-				horizontaLine.setBackgroundColor( 0xffffffff );
-				LayoutParams paramLine = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-				paramLine.width = Util.MARGIN;
-				paramLine.height = 4;
-				addView( horizontaLine, paramLine );
-			} else {
-				TextView year = new TextView( context );
-				year.setBackgroundResource( R.drawable.diagramma_cerchio_anno );
-				year.setPadding(8,10,8,0);
-				year.setText( new Datatore(unitNode.marriageDate).scriviAnno() );
-				year.setTextSize( 12f );
-				LayoutParams yearParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-				yearParams.leftMargin = -15;
-				addView( year, yearParams );
-				s.l(">>>>>>>>  "+year.getWidth());
-			}
-			setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View view ) {
-					//Memoria.setPrimo( famiglia ); // TODO famiglia?
-					startActivity( new Intent( context, Famiglia.class ) );
-				}
-			});
-		}
-	}
-
 	private void clickCard(Person person) {
 		if( U.qualiGenitoriMostrare(getContext(), person, Principe.class) )
 			return;
 		zoomValue = zoomBox.getRealZoom();
 		box.removeAllViews();
 		Globale.individuo = person.getId();
-		//graph.restartFrom(Globale.individuo);
 		drawDiagram();
 	}
 
@@ -405,7 +476,7 @@ public class Diagram extends Fragment {
 	@Override
 	public void onCreateContextMenu( @NonNull ContextMenu menu, @NonNull View vista, ContextMenu.ContextMenuInfo info ) {
 		vistaScelta = vista;
-		idPersona = ((GraphicCard)vista).card.getPerson().getId();
+		idPersona = ((GraphicCard)vista).card.person.getId();
 		pers = gc.getPerson( idPersona );
 		if( !idPersona.equals(Globale.individuo) )
 			menu.add(0, 0, 0, R.string.card );

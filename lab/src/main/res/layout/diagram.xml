@@ -23,8 +23,8 @@
         <RelativeLayout
             android:layout_width="230dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="60dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
             android:background="#66FF6600"
             android:clipChildren="false">
 
@@ -52,8 +52,8 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:background="#88FF6600"
                 android:clipChildren="false">
 
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="60dp"
-            android:layout_marginTop="260dp"
+            android:layout_marginTop="150dp"
             android:background="#66FF6600"
             android:clipChildren="false">
 
@@ -161,6 +161,134 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="1dp"
+            android:layout_marginTop="260dp"
+            android:background="#440000FF"
+            android:clipChildren="false"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clipChildren="false">
+                <include
+                    layout="@layout/diagram_card"
+                    android:id="@+id/husband3"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content" />
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/bond3"
+                    android:layout_centerVertical="true"
+                    android:clipChildren="false">
+                    <include
+                        layout="@layout/diagramma_avi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@id/wife3"
+                        android:layout_centerHorizontal="true" />
+                    <include
+                        layout="@layout/diagram_card"
+                        android:id="@+id/wife3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="120dp" />
+                </RelativeLayout>
+
+                <FrameLayout
+                    android:id="@+id/bond3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="80dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginRight="-10dp"
+                    android:layout_marginLeft="-10dp"
+                    android:layout_toRightOf="@id/husband3">
+
+                    <View
+                        android:layout_width="4px"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:background="#ffffffff" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/diagramma_cerchio_anno"
+                        android:padding="5dp"
+                        android:text="1825"
+                        android:textSize="12sp" />
+                </FrameLayout>
+
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal">
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="300dp"
+            android:background="#440000FF"
+            android:clipChildren="false"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+                <include
+                    layout="@layout/diagram_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"/>
+                <TextView
+                    android:id="@+id/year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="-10dp"
+                    android:layout_marginRight="-10dp"
+                    android:background="@drawable/diagramma_cerchio_anno"
+                    android:layout_gravity="bottom"
+                    android:padding="5dp"
+                    android:text="1825"
+                    android:textSize="12sp" />
+                <include
+                    layout="@layout/diagram_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/diagram_progeny4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal">
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+                <include layout="@layout/diagramma_discendente" />
+            </LinearLayout>
+
+        </LinearLayout>
     </RelativeLayout>
 
 </com.otaliastudios.zoom.ZoomLayout>

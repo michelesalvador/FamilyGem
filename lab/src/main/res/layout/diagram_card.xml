@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:id="@+id/card"
+	android:minWidth="30dp">
+
+	<ImageView
+		android:id="@+id/card_background"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@drawable/casella_neutro"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:background="?android:attr/selectableItemBackground"
+		android:gravity="center_horizontal"
+		android:orientation="vertical"
+		android:paddingBottom="4dp"
+		android:paddingLeft="6dp"
+		android:paddingRight="6dp"
+		android:paddingTop="4dp">
+
+		<ImageView
+			android:id="@+id/card_photo"
+			android:layout_width="wrap_content"
+			android:layout_height="80dp"
+			android:adjustViewBounds="true"
+			app:srcCompat="@drawable/anna_salvador" />
+
+		<TextView
+			android:id="@+id/card_name"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:ellipsize="end"
+			android:gravity="center_horizontal"
+			android:maxWidth="200dp"
+			android:maxLines="2"
+			android:text="Sir Dott. Nominoz"
+			android:textColor="@android:color/black"
+			android:textSize="17sp" />
+
+		<TextView
+			android:id="@+id/card_title"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Re di Danimarca"
+			android:textColor="#000"
+			android:textStyle="italic" />
+
+		<TextView
+			android:id="@+id/card_data"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="1823-1932 (90)"
+			android:textColor="#777"
+			android:textSize="14sp" />
+
+	</LinearLayout>
+
+	<ImageView
+		android:id="@+id/card_mourn"
+		android:layout_width="16dp"
+		android:layout_height="16dp"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:srcCompat="@drawable/defunto" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
