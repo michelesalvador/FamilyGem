@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:padding="20dp">
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Ancestors"
+		android:textColor="#000"
+		android:textSize="16sp" />
+
+	<SeekBar
+		android:id="@+id/settings_ancestors"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:max="5"
+		android:layout_marginTop="15dp"
+		style="@style/Widget.AppCompat.SeekBar.Discrete"/>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Uncles"
+		android:textColor="#000"
+		android:textSize="16sp"
+		android:layout_marginTop="40dp"/>
+
+	<SeekBar
+		android:id="@+id/settings_uncles"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:max="5"
+		android:layout_marginTop="15dp"
+		style="@style/Widget.AppCompat.SeekBar.Discrete"/>
+
+	<Switch
+		android:id="@+id/settings_siblings"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Siblings"
+		android:textSize="16sp"
+		android:layout_marginTop="40dp"/>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Descendants"
+		android:textColor="#000"
+		android:textSize="16sp"
+		android:layout_marginTop="40dp"/>
+
+	<SeekBar
+		android:id="@+id/settings_descendants"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:max="5"
+		android:layout_marginTop="15dp"
+		style="@style/Widget.AppCompat.SeekBar.Discrete"/>
+
+	<TextView
+		android:id="@+id/settings_indicator"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="10dp"
+		android:background="@color/evidenzia"
+		android:paddingLeft="5dp"
+		android:paddingTop="2dp"
+		android:paddingRight="5dp"
+		android:paddingBottom="2dp"
+		android:textColor="#FFFFFFFF"
+		android:textSize="18sp"
+		android:visibility="gone" />
+
+</LinearLayout>

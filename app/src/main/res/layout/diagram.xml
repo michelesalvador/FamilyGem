@@ -16,8 +16,8 @@
 		android:id="@+id/diagram_box"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:background="#22FFBB00"
 		android:clipChildren="false"
+		android:clipToPadding="false"
 		android:padding="50dp"/>
 
 </com.otaliastudios.zoom.ZoomLayout>
