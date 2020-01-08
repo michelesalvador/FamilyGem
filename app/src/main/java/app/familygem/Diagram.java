@@ -96,17 +96,16 @@ public class Diagram extends Fragment {
 		}
 
 		// Place graphic nodes in the box taking them from the list of nodes
-		for( Node node : graph.getNodes() ) {
-			if( node instanceof UnitNode )
-				box.addView( new GraphicUnitNode( getContext(), (UnitNode) node ) );
-					//	,RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		for(Node node : graph.getNodes()) {
+			if(node instanceof UnitNode)
+				box.addView(new GraphicUnitNode(getContext(), (UnitNode) node));
 			else if( node instanceof AncestryNode )
-				box.addView( new GraphicAncestry(getContext(), (AncestryNode)node, false));
+				box.addView(new GraphicAncestry(getContext(), (AncestryNode)node, false));
 			else if( node instanceof ProgenyNode )
-				box.addView( new GraphicProgeny(getContext(), (ProgenyNode) node));
+				box.addView(new GraphicProgeny(getContext(), (ProgenyNode) node));
 		}
 
-		box.post(new Runnable() {
+		box.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				// Get the dimensions of various nodes
@@ -204,7 +203,7 @@ public class Diagram extends Fragment {
 					}
 				});
 			}
-		});
+		}, 100);
 	}
 
 	// Node with one person or couple + marriage
@@ -245,18 +244,23 @@ public class Diagram extends Fragment {
 			params.addRule( CENTER_VERTICAL );
 			if (husband)
 				setId( R.id.tag_husband );
-			 else
+			else
 				params.addRule( RIGHT_OF, R.id.tag_bond );
 			setLayoutParams( params );
-			GraphicCard graphicCard = new GraphicCard(context, card);
-			graphicCard.setId( R.id.card );
-			addView( graphicCard );
-			setClipChildren( false );
-			if( card.acquired && card.hasAncestry() ) {
-				LayoutParams ancestryParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-				ancestryParams.addRule( RelativeLayout.ABOVE, graphicCard.getId() );
-				ancestryParams.addRule( RelativeLayout.CENTER_HORIZONTAL );
-				addView( new GraphicAncestry(context, (AncestryNode)card.origin, true), ancestryParams);
+			if (card.asterisk) {
+				addView( new Asterisk( context, card ) );
+			} else {
+				GraphicCard graphicCard = new GraphicCard(context, card);
+				graphicCard.setId( R.id.card );
+				addView( graphicCard );
+				setClipChildren( false );
+				if( card.acquired && card.hasAncestry() ) {
+					LayoutParams ancestryParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+					ancestryParams.addRule( RelativeLayout.ABOVE, graphicCard.getId() );
+					ancestryParams.addRule( RelativeLayout.CENTER_HORIZONTAL );
+					addView( new GraphicAncestry(context, (AncestryNode)card.origin, true), ancestryParams);
+				}
+
 			}
 		}
 	}
@@ -317,6 +321,24 @@ public class Diagram extends Fragment {
 		}
 	}
 
+	// Replacement for person with multiple marriages
+	class Asterisk extends LinearLayout {
+		IndiCard card;
+		Asterisk( Context context, final IndiCard card ) {
+			super(context);
+			this.card = card;
+			getLayoutInflater().inflate( R.layout.diagram_asterisk, this, true );
+			setOnClickListener( new OnClickListener() {
+				@Override
+				public void onClick( View v ) {
+					Intent intent = new Intent( getContext(), Individuo.class );
+					intent.putExtra( "idIndividuo", card.person.getId() );
+					startActivity( intent );
+				}
+			});
+		}
+	}
+
 	// Marriage with eventual year and vertical line
 	class Bond extends FrameLayout {
 		Bond( final Context context, UnitNode unitNode) {
@@ -369,7 +391,7 @@ public class Diagram extends Fragment {
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) testoAve.getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				testoAvi.setText( String.valueOf(node.miniFather.ancestry) );
+				testoAvi.setText( String.valueOf(node.miniFather.amount) );
 				testoAvi.setOnClickListener( new View.OnClickListener() {
 					@Override
 					public void onClick( View v ) {
@@ -382,7 +404,7 @@ public class Diagram extends Fragment {
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) findViewById( R.id.ancestry_connector ).getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				testoAve.setText( String.valueOf(node.miniMother.ancestry) );
+				testoAve.setText( String.valueOf(node.miniMother.amount) );
 				testoAve.setOnClickListener( new View.OnClickListener() {
 					@Override
 					public void onClick( View v ) {
@@ -415,7 +437,7 @@ public class Diagram extends Fragment {
 			for( int i = 0; i < progenyNode.miniChildren.size(); i++ ) {
 				final MiniCard miniChild = progenyNode.miniChildren.get(i);
 				View graphicMiniCard = getLayoutInflater().inflate( R.layout.diagram_progeny, this, false );
-				((TextView)graphicMiniCard.findViewById( R.id.progeny_number ) ).setText( String.valueOf( miniChild.ancestry ) );
+				((TextView)graphicMiniCard.findViewById( R.id.progeny_number ) ).setText( String.valueOf( miniChild.amount ) );
 				int sex = U.sesso( miniChild.person );
 				int background = R.drawable.casella_neutro;
 				if( sex == 1 )
