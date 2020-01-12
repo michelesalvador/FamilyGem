@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<com.otaliastudios.zoom.ZoomLayout
+		android:id="@+id/diagram_zoom"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@drawable/diagramma_sfondo"
+		android:scrollbars="vertical|horizontal"
+		app:hasClickableChildren="true"
+		app:minZoom="0.9"
+		app:maxZoom="2"
+		app:maxZoomType="realZoom">
+
+		<RelativeLayout
+			android:id="@+id/diagram_box"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:clipChildren="false"
+			android:clipToPadding="false"
+			android:padding="50dp"/>
+
+	</com.otaliastudios.zoom.ZoomLayout>
+
+	<ImageButton
+		android:id="@+id/diagram_hamburger"
+		android:layout_width="?attr/actionBarSize"
+		android:layout_height="?attr/actionBarSize"
+		android:background="?attr/selectableItemBackground"
+		android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+		app:srcCompat="@drawable/hamburger" />
+
+	<ImageButton
+		android:id="@+id/diagram_options"
+		android:layout_width="?attr/actionBarSize"
+		android:layout_height="?attr/actionBarSize"
+		android:layout_gravity="end"
+		android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+		style="@style/TintaBianca" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

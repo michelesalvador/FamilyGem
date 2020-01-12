@@ -16,6 +16,7 @@ public class Armadio {
 	boolean autoSalva;
 	boolean caricaAlbero;
 	public boolean esperto;
+	CassettoDiagram diagram;
 
 	void traghetta() { // todo questo traghettatore poi se ne può andare
 		Cassetto alb = alberoAperto();
@@ -92,13 +93,12 @@ public class Armadio {
 		return null;
 	}
 
-	/*void setStato( int grado ) {
-		alberoAperto().grado = grado;
-		salva();
+	static class CassettoDiagram {
+		int ancestors;
+		int uncles;
+		int descendants;
+		boolean siblings;
 	}
-	int getGrado() {
-		return alberoAperto().grado;
-	}*/
 /*
 "grado":
 0	albero creato da zero in Italia

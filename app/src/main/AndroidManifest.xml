@@ -85,6 +85,10 @@
 			android:label="@string/confirm_news"
 			android:parentActivityName=".Compara" />
 		<activity
+			android:name=".DiagramSettings"
+			android:label="Diagram settings"
+			android:parentActivityName=".Principe" />
+		<activity
 			android:name=".Individuo"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity

@@ -115,7 +115,7 @@ public class Officina extends AppCompatActivity {
 
 		findViewById(R.id.immagine).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				startActivity( new Intent( Officina.this, Diagramma.class ) );
+				startActivity( new Intent( Officina.this, Diagram.class ) );
 			}
 		});
 	}
