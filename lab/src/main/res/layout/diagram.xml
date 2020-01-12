@@ -162,84 +162,59 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
             android:layout_marginLeft="1dp"
             android:layout_marginTop="260dp"
-            android:background="#440000FF"
-            android:clipChildren="false"
-            android:orientation="vertical">
-            <RelativeLayout
-                android:layout_width="wrap_content"
+            android:background="#440000FF">
+
+            <include
+                android:id="@+id/husband3"
+                layout="@layout/diagram_card"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:clipChildren="false">
-                <include
-                    layout="@layout/diagram_card"
-                    android:id="@+id/husband3"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content" />
-                <RelativeLayout
+                android:layout_centerVertical="true" />
+
+            <include
+                android:id="@+id/wife3"
+                layout="@layout/diagram_card"
+                android:layout_width="wrap_content"
+                android:layout_height="120dp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/bond3" />
+
+            <FrameLayout
+                android:id="@+id/bond3"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="-10dp"
+                android:layout_marginLeft="-10dp"
+                android:layout_toRightOf="@id/husband3">
+
+                <View
+                    android:layout_width="4px"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:background="#ffffffff" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@id/bond3"
-                    android:layout_centerVertical="true"
-                    android:clipChildren="false">
-                    <include
-                        layout="@layout/diagramma_avi"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_above="@id/wife3"
-                        android:layout_centerHorizontal="true" />
-                    <include
-                        layout="@layout/diagram_card"
-                        android:id="@+id/wife3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="120dp" />
-                </RelativeLayout>
-
-                <FrameLayout
-                    android:id="@+id/bond3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="80dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginRight="-10dp"
-                    android:layout_marginLeft="-10dp"
-                    android:layout_toRightOf="@id/husband3">
-
-                    <View
-                        android:layout_width="4px"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_horizontal"
-                        android:background="#ffffffff" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/diagramma_cerchio_anno"
-                        android:padding="5dp"
-                        android:text="1825"
-                        android:textSize="12sp" />
-                </FrameLayout>
-
-
-            </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center_horizontal">
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-
-            </LinearLayout>
-
-        </LinearLayout>
+                    android:background="@drawable/diagramma_cerchio_anno"
+                    android:padding="5dp"
+                    android:text="1825"
+                    android:textSize="12sp" />
+            </FrameLayout>
+        </RelativeLayout>
+        <include
+            layout="@layout/diagramma_avi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="245dp"
+            android:layout_marginLeft="200dp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"

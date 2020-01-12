@@ -60,7 +60,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="1823-1932 Georgetown Alaska"
-			android:textColor="#777"
+			android:textColor="#99000000"
 			android:textSize="14sp" />
 
 	</LinearLayout>

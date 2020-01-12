@@ -23,13 +23,14 @@ import app.familygem.visita.ListaMedia;
 public class Principe extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	DrawerLayout scatolissima;
+	Toolbar toolbar;
 
 	@Override
 	protected void onCreate( Bundle savedInstanceState ) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.principe);
 
-		Toolbar toolbar = findViewById(R.id.toolbar);
+		toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
 		scatolissima = findViewById(R.id.scatolissima);
@@ -159,6 +160,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			fragment = new Podio();
 		}
 		if( fragment != null ) {
+			toolbar.setVisibility( View.VISIBLE );
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 			ft.replace( R.id.contenitore_fragment, fragment );
 			ft.addToBackStack(null);

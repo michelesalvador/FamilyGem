@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +24,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.otaliastudios.zoom.ZoomLayout;
@@ -59,11 +59,24 @@ public class Diagram extends Fragment {
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle state) {
 
-		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( Globale.preferenze.alberoAperto().nome );
+		getActivity().findViewById(R.id.toolbar).setVisibility( View.GONE );
 		final View view = inflater.inflate( R.layout.diagram, container, false );
+		view.findViewById( R.id.diagram_hamburger ).setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View view ) {
+				DrawerLayout scatolissima = getActivity().findViewById(R.id.scatolissima);
+				scatolissima.openDrawer( GravityCompat.START );
+			}
+		});
+		view.findViewById( R.id.diagram_options ).setOnClickListener( new View.OnClickListener() {
+			@Override
+			public void onClick( View view ) {
+				startActivity( new Intent(getContext(), DiagramSettings.class) );
+			}
+		});
+
 		zoomBox = view.findViewById( R.id.diagram_zoom );
 		box = view.findViewById( R.id.diagram_box );
-		setHasOptionsMenu(true);
 
 		// Create a diagram model
 		graph = new Graph( Globale.gc );
@@ -100,7 +113,7 @@ public class Diagram extends Fragment {
 			if(node instanceof UnitNode)
 				box.addView(new GraphicUnitNode(getContext(), (UnitNode) node));
 			else if( node instanceof AncestryNode )
-				box.addView(new GraphicAncestry(getContext(), (AncestryNode)node, false));
+				box.addView(new GraphicAncestry(getContext(), (AncestryNode)node));
 			else if( node instanceof ProgenyNode )
 				box.addView(new GraphicProgeny(getContext(), (ProgenyNode) node));
 		}
@@ -120,8 +133,8 @@ public class Diagram extends Fragment {
 						// Get dimensions of each graphic card
 						for( int c = 0; c < graphicUnitNode.getChildCount(); c++ ) {
 							View cardView = graphicUnitNode.getChildAt( c );
-							if( cardView instanceof GraphicCardBox) {
-								GraphicCardBox graphicCard = (GraphicCardBox) cardView;
+							if( cardView instanceof GraphicCard ) {
+								GraphicCard graphicCard = (GraphicCard) cardView;
 								graphicCard.card.width = cardView.getWidth();
 								graphicCard.card.height = cardView.getHeight();
 							}
@@ -209,19 +222,17 @@ public class Diagram extends Fragment {
 	// Node with one person or couple + marriage
 	class GraphicUnitNode extends RelativeLayout {
 		UnitNode unitNode;
-		GraphicUnitNode( final Context context, UnitNode unitNode ) {
+		GraphicUnitNode( Context context, UnitNode unitNode ) {
 			super(context);
 			this.unitNode = unitNode;
 			setClipChildren( false );
 			//setBackgroundColor( 0x33FF00FF );
-			if( unitNode.husband != null ) {
-				addView( new GraphicCardBox(context,unitNode.husband,true) );
-			}
-			if( unitNode.wife != null ) {
-				addView( new GraphicCardBox(context,unitNode.wife,false) );
-			}
+			if( unitNode.husband != null )
+				addView( new GraphicCard(context, unitNode.husband, true) );
+			if( unitNode.wife != null )
+				addView( new GraphicCard(context, unitNode.wife, false) );
 			if( unitNode.isCouple() ) {
-				Bond bond = new Bond(getContext(), unitNode);
+				Bond bond = new Bond(context, unitNode);
 				LayoutParams bondParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 				bondParams.addRule( unitNode.hasChildren() ? ALIGN_PARENT_BOTTOM : CENTER_VERTICAL);
 				bondParams.addRule( RIGHT_OF, R.id.tag_husband );
@@ -234,90 +245,69 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Container for one card with eventual ancestors above
-	class GraphicCardBox extends RelativeLayout {
+	// Card of a person
+	class GraphicCard extends LinearLayout {
 		IndiCard card;
-		GraphicCardBox( Context context, IndiCard card, boolean husband ) {
+		public GraphicCard( Context context, final IndiCard card, boolean husband ) {
 			super(context);
 			this.card = card;
-			LayoutParams params = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-			params.addRule( CENTER_VERTICAL );
+			Person person = card.person;
+			setOrientation( LinearLayout.VERTICAL );
+			setGravity( Gravity.CENTER_HORIZONTAL );
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+			params.addRule( RelativeLayout.CENTER_VERTICAL );
 			if (husband)
 				setId( R.id.tag_husband );
 			else
-				params.addRule( RIGHT_OF, R.id.tag_bond );
+				params.addRule( RelativeLayout.RIGHT_OF, R.id.tag_bond );
 			setLayoutParams( params );
 			if (card.asterisk) {
 				addView( new Asterisk( context, card ) );
 			} else {
-				GraphicCard graphicCard = new GraphicCard(context, card);
-				graphicCard.setId( R.id.card );
-				addView( graphicCard );
-				setClipChildren( false );
-				if( card.acquired && card.hasAncestry() ) {
-					LayoutParams ancestryParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
-					ancestryParams.addRule( RelativeLayout.ABOVE, graphicCard.getId() );
-					ancestryParams.addRule( RelativeLayout.CENTER_HORIZONTAL );
-					addView( new GraphicAncestry(context, (AncestryNode)card.origin, true), ancestryParams);
-				}
+				View view = getLayoutInflater().inflate( R.layout.diagram_card, this, true );
 
-			}
-		}
-	}
+				ImageView background = view.findViewById( R.id.card_background );
+				if( person.getId().equals( Globale.individuo ) ) {
+					background.setBackgroundResource( R.drawable.casella_evidente );
+					fulcrumCard = this;
+				} else if( U.sesso(person) == 1 )
+					background.setBackgroundResource( R.drawable.casella_maschio );
+				else if( U.sesso(person) == 2 )
+					background.setBackgroundResource( R.drawable.casella_femmina );
+				if( card.acquired )
+					background.setAlpha( 0.7f );
 
-	// Card of a person
-	class GraphicCard extends LinearLayout {
-		IndiCard card;
-		public GraphicCard( Context context, final IndiCard card ) {
-			super(context);
-			this.card = card;
-			Person person = card.person;
-			setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT ) );
-			setOrientation( LinearLayout.VERTICAL );
-			setGravity( Gravity.CENTER_HORIZONTAL );
-			View view = getLayoutInflater().inflate( R.layout.diagram_card, this, true );
-
-			ImageView background = view.findViewById( R.id.card_background );
-			if( person.getId().equals( Globale.individuo ) ) {
-				background.setBackgroundResource( R.drawable.casella_evidente );
-				fulcrumCard = this;
-			} else if( U.sesso(person) == 1 )
-				background.setBackgroundResource( R.drawable.casella_maschio );
-			else if( U.sesso(person) == 2 )
-				background.setBackgroundResource( R.drawable.casella_femmina );
-			if( card.acquired )
-				background.setAlpha( 0.7f );
-
-			U.unaFoto( Globale.gc, person, (ImageView) view.findViewById( R.id.card_photo ) );
-			TextView vistaNome = view.findViewById(R.id.card_name);
-			String nome = U.epiteto(person);
-			if( nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility()==View.VISIBLE )
-				vistaNome.setVisibility( View.GONE );
-			else vistaNome.setText( nome );
-			TextView vistaTitolo = view.findViewById(R.id.card_title);
-			String titolo = U.titolo( person );
-			if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
-			else vistaTitolo.setText( titolo );
-			TextView vistaDati = view.findViewById(R.id.card_data);
-			String dati = U.dueAnni( person, true );
-			if( dati.isEmpty() ) vistaDati.setVisibility(View.GONE);
-			else vistaDati.setText( dati );
-			if( !U.morto(person) )
-				view.findViewById(R.id.card_mourn).setVisibility(View.GONE);
-			registerForContextMenu(this);
-			setOnClickListener( new OnClickListener() {
-				@Override
-				public void onClick( View v ) {
-					Person person = card.person;
-					if( person.getId().equals(Globale.individuo) ) {
-						Intent intent = new Intent( getContext(), Individuo.class );
-						intent.putExtra( "idIndividuo", person.getId() );
-						startActivity( intent );
-					} else {
-						clickCard(person);
+				U.unaFoto( Globale.gc, person, (ImageView) view.findViewById( R.id.card_photo ) );
+				TextView vistaNome = view.findViewById(R.id.card_name);
+				String nome = U.epiteto(person);
+				if( nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility()==View.VISIBLE )
+					vistaNome.setVisibility( View.GONE );
+				else vistaNome.setText( nome );
+				TextView vistaTitolo = view.findViewById(R.id.card_title);
+				String titolo = U.titolo( person );
+				if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
+				else vistaTitolo.setText( titolo );
+				TextView vistaDati = view.findViewById(R.id.card_data);
+				String dati = U.dueAnni( person, true );
+				if( dati.isEmpty() ) vistaDati.setVisibility(View.GONE);
+				else vistaDati.setText( dati );
+				if( !U.morto(person) )
+					view.findViewById(R.id.card_mourn).setVisibility(View.GONE);
+				registerForContextMenu(this);
+				setOnClickListener( new OnClickListener() {
+					@Override
+					public void onClick( View v ) {
+						Person person = card.person;
+						if( person.getId().equals(Globale.individuo) ) {
+							Intent intent = new Intent( getContext(), Individuo.class );
+							intent.putExtra( "idIndividuo", person.getId() );
+							startActivity( intent );
+						} else {
+							clickCard(person);
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 
@@ -341,7 +331,7 @@ public class Diagram extends Fragment {
 
 	// Marriage with eventual year and vertical line
 	class Bond extends FrameLayout {
-		Bond( final Context context, UnitNode unitNode) {
+		Bond( final Context context, final UnitNode unitNode) {
 			super(context);
 			if (unitNode.hasChildren()) {
 				View verticaLine = new View( context );
@@ -370,7 +360,7 @@ public class Diagram extends Fragment {
 			setOnClickListener( new View.OnClickListener() {
 				@Override
 				public void onClick( View view ) {
-					//Memoria.setPrimo( famiglia ); // TODO famiglia?
+					Memoria.setPrimo( unitNode.family );
 					startActivity( new Intent( context, Famiglia.class ) );
 				}
 			});
@@ -379,13 +369,14 @@ public class Diagram extends Fragment {
 
 	class GraphicAncestry extends RelativeLayout {
 		AncestryNode node;
-		GraphicAncestry( Context context, final AncestryNode node, boolean acquired) {
+		GraphicAncestry( Context context, final AncestryNode node) {
 			super(context);
 			this.node = node;
 			//setBackgroundColor( 0x440000FF );
 			View view = getLayoutInflater().inflate(R.layout.diagram_ancestry,this, true);
 			TextView testoAvi = view.findViewById( R.id.ancestry_father );
 			TextView testoAve = view.findViewById( R.id.ancestry_mother );
+			testoAvi.setClickable( true );
 			if( node.miniFather == null ) {
 				testoAvi.setVisibility( View.GONE );
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) testoAve.getLayoutParams();
@@ -412,12 +403,12 @@ public class Diagram extends Fragment {
 					}
 				} );
 			}
-			if( acquired ) {
+			if( node.acquired ) {
 				setAlpha( 0.7f );
 				View verticalLine = findViewById( R.id.ancestry_connector_vertical );
-				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) verticalLine.getLayoutParams();
-				params.height = 45;
-				verticalLine.setLayoutParams(params);
+				LinearLayout.LayoutParams lineParams = (LinearLayout.LayoutParams) verticalLine.getLayoutParams();
+				lineParams.height = 50;
+				verticalLine.setLayoutParams(lineParams);
 			}
 		}
 	}
@@ -474,7 +465,6 @@ public class Diagram extends Fragment {
 			paint.setStrokeWidth(3);
 			for(Line line : graph.getLines()) {
 				path.moveTo( line.x1, line.y1 );
-				//path.lineTo( line.x2, line.y2 );
 				path.cubicTo( line.x1, line.y2, line.x2, line.y1, line.x2, line.y2 );
 			}
 			canvas.drawPath( path, paint );
@@ -580,22 +570,6 @@ public class Diagram extends Fragment {
 						data.getIntExtra( "famigliaNum", 0 ));
 				U.salvaJson( true, modificati );
 			}
-		}
-	}
-
-	@Override
-	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
-		menu.add( 0,0,0, "Diagram settings" );
-	}
-
-	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
-		switch( item.getItemId() ) {
-			case 0:
-				startActivity( new Intent(getContext(), DiagramSettings.class) );
-				return true;
-			default:
-				return false;
 		}
 	}
 }
