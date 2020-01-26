@@ -65,11 +65,4 @@
 
 	</LinearLayout>
 
-	<ImageView
-		android:id="@+id/card_mourn"
-		android:layout_width="16dp"
-		android:layout_height="16dp"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:srcCompat="@drawable/defunto" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

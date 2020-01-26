@@ -27,13 +27,23 @@
 			android:id="@+id/compara_nuovo"
 			layout="@layout/pezzo_confronto" />
 
-		<Button
-			android:id="@+id/compara_bottone"
+		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:orientation="horizontal"
 			android:layout_gravity="center_horizontal"
-			android:layout_marginTop="16dp"
-			android:text="@string/view_updates" />
+			android:layout_marginTop="16dp">
+			<Button
+				android:id="@+id/compara_bottone1"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/view_updates" />
+			<Button
+				android:id="@+id/compara_bottone2"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/accept_all" />
+		</LinearLayout>
 
 	</LinearLayout>
 </ScrollView>

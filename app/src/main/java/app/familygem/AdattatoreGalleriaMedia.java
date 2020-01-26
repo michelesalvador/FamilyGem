@@ -89,15 +89,14 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 				else	// nelle AppCompatActivity
 					attiva.registerForContextMenu( vista );
 			} else {
-				//vistaImmagine.setMaxHeight( 110 ); // no
-				RecyclerView.LayoutParams parami = new RecyclerView.LayoutParams( RecyclerView.LayoutParams.WRAP_CONTENT, 170 );
-				parami.setMargins( 5, 5, 5, 5 );
+				RecyclerView.LayoutParams parami = new RecyclerView.LayoutParams( RecyclerView.LayoutParams.WRAP_CONTENT, U.dpToPx(110) );
+				int margin = U.dpToPx(5);
+				parami.setMargins( margin, margin, margin, margin );
 				vista.setLayoutParams( parami );
 				vistaTesto.setVisibility( View.GONE );
 				vistaNumero.setVisibility( View.GONE );
 			}
-			//new U.MostraMedia( vistaImmagine, true ).execute( media );
-			U.dipingiMedia( media, vistaImmagine, (ProgressBar)vista.findViewById(R.id.media_circolo) );
+			U.dipingiMedia( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
 		}
 		@Override
 		public void onClick( View v ) {

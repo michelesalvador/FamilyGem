@@ -17,12 +17,12 @@
 
 		<View
 			android:layout_width="14dp"
-			android:layout_height="4px"
+			android:layout_height="2dp"
 			android:background="#fff" />
 
 		<View
 			android:id="@+id/ancestry_connector_vertical"
-			android:layout_width="3px"
+			android:layout_width="2dp"
 			android:layout_height="11dp"
 			android:background="#fff" />
 	</LinearLayout>

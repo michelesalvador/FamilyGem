@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:id="@+id/menu_testa"
 	android:layout_width="match_parent"
 	android:layout_height="@dimen/nav_header_height"
@@ -14,15 +13,6 @@
 		android:layout_height="match_parent"
 		android:alpha="0.75"
 		android:scaleType="centerCrop"/>
-
-	<ImageView
-		android:id="@+id/imageView"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginLeft="16dp"
-		android:layout_marginBottom="16dp"
-		android:layout_above="@+id/menu_titolo"
-		app:srcCompat="@drawable/freccia"/>
 
 	<TextView
 		android:id="@+id/menu_titolo"
@@ -42,6 +32,17 @@
 		android:textSize="24sp"/>
 
 	<Button
+		android:id="@+id/menu_alberi"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_above="@+id/menu_titolo"
+		android:layout_marginLeft="16dp"
+		android:layout_marginBottom="8dp"
+		android:text="@string/trees"
+		android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+		android:theme="@style/AppTheme" />
+
+	<Button
 		android:id="@+id/menu_salva"
 		style="@style/Widget.AppCompat.Button.Colored"
 		android:layout_width="wrap_content"
@@ -49,6 +50,7 @@
 		android:layout_above="@+id/menu_titolo"
 		android:layout_alignParentRight="true"
 		android:layout_marginRight="16dp"
+		android:layout_marginBottom="8dp"
 		android:text="@string/save"
 		android:textColor="#fff"
 		android:visibility="gone"/>

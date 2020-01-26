@@ -99,6 +99,14 @@ public class Armadio {
 		int descendants;
 		boolean siblings;
 	}
+
+	void defaultDiagram() {
+		diagram = new CassettoDiagram();
+		diagram.ancestors = 2;
+		diagram.uncles = 1;
+		diagram.descendants = 2;
+		diagram.siblings = true;
+	}
 /*
 "grado":
 0	albero creato da zero in Italia

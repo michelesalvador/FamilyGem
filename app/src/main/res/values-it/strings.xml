@@ -37,6 +37,7 @@
 	<string name="downloading">Download in corso.</string>
 	<!-- Alberi -->
 	<string name="persons">Persone</string>
+	<string name="generation">Generazione</string>
 	<string name="generations">Generazioni</string>
 	<string name="no_useful_data">Non riesco a ricavare dati utilizzabili.</string>
 	<string name="make_backup">Fai il backup</string>
@@ -100,8 +101,13 @@
 	<string name="tree_without_news">Albero senza novità</string>
 	<string name="tree_news_imported">Il vecchio albero qui sopra può ricevere %d aggiornamenti dall\'albero che è stato importato:</string>
 	<string name="sent_by">Inviato da %s</string>
-	<string name="view_updates">Vedi aggiornamenti</string>
+	<string name="shared_medias">Media condivisi</string>
+	<string name="view_updates">Esamina singolarmente</string>
+	<string name="accept_all">Accetta tutti</string>
 	<string name="delete_imported_tree">Elimina l\'albero importato</string>
+	<string name="one_update_choice">Un aggiornamento richiede una scelta</string>
+	<string name="many_updates_choice">%d aggiornamenti richiedono una scelta</string>
+	<string name="updates_replace_add">Devi decidere se gli aggiornamenti debbano sostituire elementi esistenti o essere aggiunti come nuovi elementi.</string>
 	<!-- Confrontatore -->
 	<string name="import_news">Importa aggiornamento</string>
 	<string name="person">Persona</string>
@@ -113,7 +119,7 @@
 	<string name="accepted_news">Hai accettato %d aggiornamenti:\n\t%d aggiunte\n\t%d sostituzioni\n\t%d eliminazioni</string>
 	<string name="confirm">Conferma</string>
 	<string name="all_imported_delete">Tutti gli aggiornamenti sono stati importati.\nVuoi eliminare l\'albero importato?</string>
-	<!-- Diagramma -->
+	<!-- Diagram -->
 	<string name="new_person">Inserisci una persona</string>
 	<string name="card">Scheda</string>
 	<string name="family_as_child">Famiglia (come figlio)</string>
@@ -126,7 +132,14 @@
 	<string name="sibling">Fratello / sorella</string>
 	<string name="spouse">Coniuge</string>
 	<string name="child">Figlio / figlia</string>
+	<string name="long_press_menu">Tieni premuto per mostrare il menu.\nTocca per aprire la scheda.</string>
 	<string name="person_unlinked">Persona scollegata.</string>
+	<!-- Diagram settings -->
+	<string name="diagram_settings">Impostazioni diagramma</string>
+	<string name="ancestors">Antenati</string>
+	<string name="uncles">Zii</string>
+	<string name="siblings">Fratelli</string>
+	<string name="descendants">Discendenti</string>
 	<!-- Anagrafe -->
 	<string name="order_by">Ordina per</string>
 	<string name="none">Niente</string>

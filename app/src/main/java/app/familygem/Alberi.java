@@ -20,7 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -59,6 +59,9 @@ public class Alberi extends AppCompatActivity {
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.alberi );
+		// Alla prima apertura nasconde la freccia indietro
+		/*if( Globale.preferenze.idAprendo == 0 )
+			getSupportActionBar().setDisplayHomeAsUpEnabled( false );*/
 		lista = findViewById( R.id.lista_alberi );
 
 		if( Globale.preferenze.alberi != null ) {
@@ -83,152 +86,135 @@ public class Alberi extends AppCompatActivity {
 					final boolean esaurito = Globale.preferenze.getAlbero(idAlbero).grado == 30;
 					if( derivato ) {
 						vistaAlbero.setBackgroundColor( getResources().getColor( R.color.evidenzia ) );
-						vistaAlbero.setOnClickListener( new View.OnClickListener() {
-							@Override
-							public void onClick( View v ) {
-								if( !AlberoNuovo.confronta( Alberi.this, Globale.preferenze.getAlbero(idAlbero) ) ) {
-									Globale.preferenze.getAlbero(idAlbero).grado = 10; // viene retrocesso
-									Globale.preferenze.salva();
-									aggiornaLista();
-									Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
-								}
+						vistaAlbero.setOnClickListener( v -> {
+							if( !AlberoNuovo.confronta( Alberi.this, Globale.preferenze.getAlbero(idAlbero) ) ) {
+								Globale.preferenze.getAlbero(idAlbero).grado = 10; // viene retrocesso
+								Globale.preferenze.salva();
+								aggiornaLista();
+								Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 							}
 						});
 					} else if ( esaurito ) {
 						vistaAlbero.setBackgroundColor( 0xffdddddd );
-						vistaAlbero.setOnClickListener( new View.OnClickListener() {
-							@Override
-							public void onClick( View v ) {
-								if( !AlberoNuovo.confronta( Alberi.this, Globale.preferenze.getAlbero(idAlbero) ) ) {
-									Globale.preferenze.getAlbero(idAlbero).grado = 10; // viene retrocesso
-									Globale.preferenze.salva();
-									aggiornaLista();
-									Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
-								}
+						vistaAlbero.setOnClickListener( v -> {
+							if( !AlberoNuovo.confronta( Alberi.this, Globale.preferenze.getAlbero(idAlbero) ) ) {
+								Globale.preferenze.getAlbero(idAlbero).grado = 10; // viene retrocesso
+								Globale.preferenze.salva();
+								aggiornaLista();
+								Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 							}
 						});
 					} else {
 						vistaAlbero.setBackgroundColor( Color.TRANSPARENT ); // bisogna dirglielo esplicitamente altrimenti colora a caso
-						vistaAlbero.setOnClickListener( new View.OnClickListener() {
-							@Override
-							public void onClick( View v ) {
-								if( !( Globale.gc != null && idAlbero == Globale.preferenze.idAprendo ) ) // se non è già aperto
-									if( !apriGedcom( idAlbero, true ) )
-										return;
-								startActivity( new Intent( Alberi.this, Principe.class ) );
-								/*findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
-								new Thread( new Runnable() {
-									@Override
-									public void run() {
-										int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
-										if( !( Globale.gc!=null && id_num==Globale.preferenze.idAprendo ) ) // se non è già aperto
-											if( apriGedcom( id_num, true ) ) // TODo: in caso di Exception (ad es. x file inesistente) il Toast crasha
-												return;
-										startActivity( new Intent( Alberi.this, Principe.class ) );
-									}
-								}).start();*/
-							}
+						vistaAlbero.setOnClickListener( v -> {
+							if( !( Globale.gc != null && idAlbero == Globale.preferenze.idAprendo ) ) // se non è già aperto
+								if( !apriGedcom( idAlbero, true ) )
+									return;
+							startActivity( new Intent( Alberi.this, Principe.class ) );
+							/*findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
+							new Thread( new Runnable() {
+								@Override
+								public void run() {
+									int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
+									if( !( Globale.gc!=null && id_num==Globale.preferenze.idAprendo ) ) // se non è già aperto
+										if( apriGedcom( id_num, true ) ) // TODo: in caso di Exception (ad es. x file inesistente) il Toast crasha
+											return;
+									startActivity( new Intent( Alberi.this, Principe.class ) );
+								}
+							}).start();*/
 						});
 					}
-					vistaAlbero.findViewById(R.id.albero_menu).setOnClickListener( new View.OnClickListener() {
-						@Override
-						public void onClick( View vista ) {
-							boolean esiste = new File( getFilesDir(), idAlbero + ".json" ).exists();
-							final Armadio.Cassetto cassetto = Globale.preferenze.getAlbero(idAlbero);
-							PopupMenu popup = new PopupMenu( Alberi.this, vista );
-							Menu menu = popup.getMenu();
-							if( idAlbero == Globale.preferenze.idAprendo && Globale.daSalvare )
-								menu.add(0, -1, 0, R.string.save );
-							if( (Globale.preferenze.esperto && derivato) || (Globale.preferenze.esperto && esaurito) )
-								menu.add(0, 0, 0, R.string.open );
-							if( !esaurito || Globale.preferenze.esperto )
-								menu.add(0, 1, 0, R.string.tree_info );
-							if( (!derivato && !esaurito) || Globale.preferenze.esperto )
-								menu.add(0, 2, 0, R.string.rename );
-							if( !esaurito )
-								menu.add(0, 3, 0, R.string.find_errors );
-							if( esiste && !derivato && !esaurito ) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
-								menu.add(0, 4, 0, R.string.share_tree );
-							if( esiste && !derivato && !esaurito && Globale.preferenze.getAlbero(idAlbero).grado != 0 // cioè dev'essere 9 o 10
-									&& cassetto.condivisioni != null && Globale.preferenze.alberi.size() > 1 )
-								menu.add(0, 5, 0, R.string.compare );
-							if( esiste && Globale.preferenze.esperto && !esaurito )
-								menu.add(0, 6, 0, R.string.export_gedcom );
-							if( esiste && (!derivato || Globale.preferenze.esperto) && (!esaurito || Globale.preferenze.esperto) )
-								menu.add(0, 7, 0, R.string.make_backup );
-							menu.add(0, 8, 0, R.string.delete );
-							popup.show();
-							popup.setOnMenuItemClickListener( new PopupMenu.OnMenuItemClickListener() {
-								@Override
-								public boolean onMenuItemClick( MenuItem item ) {
-									int id = item.getItemId();
-									if( id == -1 ) { // Salva
-										U.salvaJson( Globale.gc, idAlbero );
-										Globale.daSalvare = false;
-									} else if( id == 0 ) { // Apre un albero derivato
-										apriGedcom( idAlbero, true );
-										startActivity( new Intent( Alberi.this, Principe.class ) );
-									} else if( id == 1 ) { // Info Gedcom
-										Intent intento = new Intent( Alberi.this, InfoAlbero.class );
-										intento.putExtra( "idAlbero", idAlbero );
-										startActivity(intento);
-									} else if( id == 2 ) { // Rinomina albero
-										View vistaMessaggio = LayoutInflater.from( Alberi.this ).inflate(R.layout.albero_nomina, lista, false );
-										AlertDialog.Builder builder = new AlertDialog.Builder( Alberi.this );
-										builder.setView( vistaMessaggio ).setTitle( R.string.title );
-										final EditText editaNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
-										//nuovoNome.setText( albero.get("titolo").toString() );
-										editaNome.setText( alberelli.get(posiz).get("titolo") );
-										builder.setPositiveButton( R.string.rename, new DialogInterface.OnClickListener() {
-											public void onClick( DialogInterface dialog, int id ) {
-												Globale.preferenze.rinomina( idAlbero, editaNome.getText().toString() );
-												aggiornaLista();
-											}
-										}).setNeutralButton( R.string.cancel, null );
-										AlertDialog dialog = builder.create();
-										dialog.show();
-										dialog.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE );
-									} else if( id == 3 ) { // Correggi errori
-										trovaErrori( idAlbero, false );
-									} else if( id == 4 ) { // Condividi albero
-										Intent intento = new Intent( Alberi.this, Condivisione.class);
-										intento.putExtra( "idAlbero", idAlbero );
-										startActivity( intento );
-									} else if( id == 5 ) { // Confronta con alberi esistenti
-										if( AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
-											cassetto.grado = 20;
+					vistaAlbero.findViewById(R.id.albero_menu).setOnClickListener( vista -> {
+						boolean esiste = new File( getFilesDir(), idAlbero + ".json" ).exists();
+						final Armadio.Cassetto cassetto = Globale.preferenze.getAlbero(idAlbero);
+						PopupMenu popup = new PopupMenu( Alberi.this, vista );
+						Menu menu = popup.getMenu();
+						if( idAlbero == Globale.preferenze.idAprendo && Globale.daSalvare )
+							menu.add(0, -1, 0, R.string.save );
+						if( (Globale.preferenze.esperto && derivato) || (Globale.preferenze.esperto && esaurito) )
+							menu.add(0, 0, 0, R.string.open );
+						if( !esaurito || Globale.preferenze.esperto )
+							menu.add(0, 1, 0, R.string.tree_info );
+						if( (!derivato && !esaurito) || Globale.preferenze.esperto )
+							menu.add(0, 2, 0, R.string.rename );
+						if( !esaurito )
+							menu.add(0, 3, 0, R.string.find_errors );
+						if( esiste && !derivato && !esaurito ) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
+							menu.add(0, 4, 0, R.string.share_tree );
+						if( esiste && !derivato && !esaurito && Globale.preferenze.getAlbero(idAlbero).grado != 0 // cioè dev'essere 9 o 10
+								&& cassetto.condivisioni != null && Globale.preferenze.alberi.size() > 1 )
+							menu.add(0, 5, 0, R.string.compare );
+						if( esiste && Globale.preferenze.esperto && !esaurito )
+							menu.add(0, 6, 0, R.string.export_gedcom );
+						if( esiste && (!derivato || Globale.preferenze.esperto) && (!esaurito || Globale.preferenze.esperto) )
+							menu.add(0, 7, 0, R.string.make_backup );
+						menu.add(0, 8, 0, R.string.delete );
+						popup.show();
+						popup.setOnMenuItemClickListener( item -> {
+							int id = item.getItemId();
+							if( id == -1 ) { // Salva
+								U.salvaJson( Globale.gc, idAlbero );
+								Globale.daSalvare = false;
+							} else if( id == 0 ) { // Apre un albero derivato
+								apriGedcom( idAlbero, true );
+								startActivity( new Intent( Alberi.this, Principe.class ) );
+							} else if( id == 1 ) { // Info Gedcom
+								Intent intento = new Intent( Alberi.this, InfoAlbero.class );
+								intento.putExtra( "idAlbero", idAlbero );
+								startActivity(intento);
+							} else if( id == 2 ) { // Rinomina albero
+								View vistaMessaggio = LayoutInflater.from( Alberi.this ).inflate(R.layout.albero_nomina, lista, false );
+								AlertDialog.Builder builder = new AlertDialog.Builder( Alberi.this );
+								builder.setView( vistaMessaggio ).setTitle( R.string.title );
+								final EditText editaNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
+								editaNome.setText( alberelli.get(posiz).get("titolo") );
+								builder.setPositiveButton( R.string.rename, ( dialog, i1 ) -> {
+									Globale.preferenze.rinomina( idAlbero, editaNome.getText().toString() );
+									aggiornaLista();
+								}).setNeutralButton( R.string.cancel, null ).create().show();
+								vistaMessaggio.post( () -> {
+									editaNome.requestFocus();
+									editaNome.setSelection(editaNome.getText().length());
+									InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+									inputMethodManager.showSoftInput(editaNome, InputMethodManager.SHOW_IMPLICIT);
+								});
+							} else if( id == 3 ) { // Correggi errori
+								trovaErrori( idAlbero, false );
+							} else if( id == 4 ) { // Condividi albero
+								Intent intento = new Intent( Alberi.this, Condivisione.class);
+								intento.putExtra( "idAlbero", idAlbero );
+								startActivity( intento );
+							} else if( id == 5 ) { // Confronta con alberi esistenti
+								if( AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
+									cassetto.grado = 20;
+									aggiornaLista();
+								} else
+									Toast.makeText( Alberi.this, R.string.no_results, Toast.LENGTH_LONG ).show();
+							} else if( id == 6 ) { // Esporta Gedcom
+								int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+								if( perm == PackageManager.PERMISSION_DENIED )
+									ActivityCompat.requestPermissions( Alberi.this,
+											new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(idAlbero), cassetto.nome }, 6366 );
+								else if( perm == PackageManager.PERMISSION_GRANTED )
+									esportaGedcom( idAlbero, cassetto.nome );
+							} else if( id == 7 ) { // Fai backup
+								int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+								if( perm == PackageManager.PERMISSION_DENIED )
+									ActivityCompat.requestPermissions( Alberi.this,
+											new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(idAlbero) }, 327 );
+								else if( perm == PackageManager.PERMISSION_GRANTED )
+									faiBackup(idAlbero);
+							} else if( id == 8 ) {	// Elimina albero
+								new AlertDialog.Builder( Alberi.this ).setMessage( R.string.really_delete_tree )
+										.setPositiveButton( R.string.delete, ( dialog, id1 ) -> {
+											eliminaAlbero( Alberi.this, idAlbero );
 											aggiornaLista();
-										} else
-											Toast.makeText( Alberi.this, R.string.no_results, Toast.LENGTH_LONG ).show();
-									} else if( id == 6 ) { // Esporta Gedcom
-										int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-										if( perm == PackageManager.PERMISSION_DENIED )
-											ActivityCompat.requestPermissions( Alberi.this,
-													new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(idAlbero), cassetto.nome }, 6366 );
-										else if( perm == PackageManager.PERMISSION_GRANTED )
-											esportaGedcom( idAlbero, cassetto.nome );
-									} else if( id == 7 ) { // Fai backup
-										int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-										if( perm == PackageManager.PERMISSION_DENIED )
-											ActivityCompat.requestPermissions( Alberi.this,
-													new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(idAlbero) }, 327 );
-										else if( perm == PackageManager.PERMISSION_GRANTED )
-											faiBackup(idAlbero);
-									} else if( id == 8 ) {	// Elimina albero
-										new AlertDialog.Builder( Alberi.this ).setMessage( R.string.really_delete_tree )
-												.setPositiveButton( R.string.delete, new DialogInterface.OnClickListener() {
-													public void onClick( DialogInterface dialog, int id ) {
-														eliminaAlbero( Alberi.this, idAlbero );
-														aggiornaLista();
-													}
-												}).setNeutralButton( R.string.cancel, null ).show();
-									} else {
-										return false;
-									}
-									return true;
-								}
-							});
-						}
+										}).setNeutralButton( R.string.cancel, null ).show();
+							} else {
+								return false;
+							}
+							return true;
+						});
 					});
 					return vistaAlbero;
 				}
@@ -239,22 +225,16 @@ public class Alberi extends AppCompatActivity {
 		// Barra personalizzata
 		ActionBar barra = getSupportActionBar();
 		View barraAlberi = getLayoutInflater().inflate( R.layout.alberi_barra, null );
-		barraAlberi.findViewById( R.id.alberi_opzioni ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				startActivity( new Intent( Alberi.this, Opzioni.class) );
-			}
-		});
+		barraAlberi.findViewById( R.id.alberi_opzioni ).setOnClickListener( v -> startActivity(
+				new Intent( Alberi.this, Opzioni.class) )
+		);
 		barra.setCustomView( barraAlberi );
 		barra.setDisplayShowCustomEnabled( true );
 
 		// Fab
-		findViewById(R.id.fab).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				startActivity( new Intent( Alberi.this, AlberoNuovo.class) );
-			}
-		});
+		findViewById(R.id.fab).setOnClickListener( v -> startActivity(
+				new Intent( Alberi.this, AlberoNuovo.class) )
+		);
 	}
 
 	@Override
@@ -285,10 +265,11 @@ public class Alberi extends AppCompatActivity {
 	}
 
 	static String scriviDati( Context contesto, Armadio.Cassetto alb ) {
-		String dati = //"["+alb.grado+"] "+
-				alb.individui + " " + contesto.getString(R.string.persons).toLowerCase();
+		String dati = alb.individui + " " +
+				contesto.getString(alb.individui == 1 ? R.string.person : R.string.persons).toLowerCase();
 		if( alb.generazioni > 0 )
-			dati += " - " + alb.generazioni + " " + contesto.getString(R.string.generations).toLowerCase();
+			dati += " - " + alb.generazioni + " " +
+					contesto.getString(alb.generazioni == 1 ? R.string.generation : R.string.generations).toLowerCase();
 		if( alb.media > 0 )
 			dati += " - " + alb.media + " " + contesto.getString(R.string.media).toLowerCase();
 		return dati;
@@ -484,6 +465,12 @@ public class Alberi extends AppCompatActivity {
 			else if( codice == 327 )
 				faiBackup( Integer.parseInt(permessi[1]) );
 		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected( MenuItem i ) {
+		onBackPressed();
+		return true;
 	}
 
 	Gedcom trovaErrori( final int idAlbero, final boolean correggi ) {

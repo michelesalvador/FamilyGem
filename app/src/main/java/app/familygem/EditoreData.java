@@ -6,7 +6,6 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -48,8 +47,7 @@ public class EditoreData extends LinearLayout {
 	}
 
 	// Azioni da fare una sola volta all'inizio
-	//@SuppressLint("ClickableViewAccessibility")
-	void inizia( final EditText editaTesto ) {	//, final LinearLayout vistaEditaData, String dataGc
+	void inizia( final EditText editaTesto ) {
 
 		addView( inflate( getContext(), R.layout.editore_data, null ), this.getLayoutParams() );
 		this.editaTesto = editaTesto;
@@ -65,115 +63,89 @@ public class EditoreData extends LinearLayout {
 		// Arreda l'editore data
 		if( Globale.preferenze.esperto ) {
 			final TextView elencoTipi = findViewById(R.id.editadata_tipi);
-			elencoTipi.setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View vista ) {
-					PopupMenu popup = new PopupMenu( getContext(), vista );
-					Menu menu = popup.getMenu();
-					for( int i=0; i<tipiData.length-1; i++ )
-						menu.add( 0, i, 0, tipiData[i] );
-					popup.show();
-					popup.setOnMenuItemClickListener( new PopupMenu.OnMenuItemClickListener() {
-						@Override
-						public boolean onMenuItemClick( MenuItem item ) {
-							datatore.tipo = item.getItemId();
-							// Se eventualmente invisibile
-							findViewById( R.id.editadata_prima ).setVisibility( View.VISIBLE );
-							if( data1.date == null ) // micro settaggio del carro
-								((NumberPicker)findViewById( R.id.prima_anno )).setValue( 100 );
-							if( datatore.tipo == 6 || datatore.tipo == 9 ) {
-								findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
-								if( data2.date == null )
-									((NumberPicker)findViewById( R.id.seconda_anno )).setValue( 100 );
-							} else {
-								findViewById( R.id.editadata_seconda ).setVisibility( GONE );
-							}
-							impostaCeccoDoppia( data2 );
-							elencoTipi.setText( tipiData[datatore.tipo] );
-							veroImputTesto = false;
-							genera( false );
-							return true;
-						}
-					});
-				}
-			});
-			findViewById( R.id.editadata_doppia1 ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View vista ) {
-					data1.doppia = ((CompoundButton)vista).isChecked();
+			elencoTipi.setOnClickListener( vista -> {
+				PopupMenu popup = new PopupMenu( getContext(), vista );
+				Menu menu = popup.getMenu();
+				for( int i=0; i<tipiData.length-1; i++ )
+					menu.add( 0, i, 0, tipiData[i] );
+				popup.show();
+				popup.setOnMenuItemClickListener( item -> {
+					datatore.tipo = item.getItemId();
+					// Se eventualmente invisibile
+					findViewById( R.id.editadata_prima ).setVisibility( View.VISIBLE );
+					if( data1.date == null ) // micro settaggio del carro
+						((NumberPicker)findViewById( R.id.prima_anno )).setValue( 100 );
+					if( datatore.tipo == 6 || datatore.tipo == 9 ) {
+						findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
+						if( data2.date == null )
+							((NumberPicker)findViewById( R.id.seconda_anno )).setValue( 100 );
+					} else {
+						findViewById( R.id.editadata_seconda ).setVisibility( GONE );
+					}
+					impostaCeccoDoppia( data2 );
+					elencoTipi.setText( tipiData[datatore.tipo] );
 					veroImputTesto = false;
 					genera( false );
-				}
+					return true;
+				});
 			});
-			findViewById( R.id.editadata_doppia2 ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View vista ) {
-					data2.doppia = ((CompoundButton)vista).isChecked();
-					veroImputTesto = false;
-					genera( false );
-				}
+			findViewById( R.id.editadata_doppia1 ).setOnClickListener( vista -> {
+				data1.doppia = ((CompoundButton)vista).isChecked();
+				veroImputTesto = false;
+				genera( false );
+			});
+			findViewById( R.id.editadata_doppia2 ).setOnClickListener( vista -> {
+				data2.doppia = ((CompoundButton)vista).isChecked();
+				veroImputTesto = false;
+				genera( false );
 			});
 			findViewById( R.id.editadata_circa ).setVisibility( GONE );
 		} else {
-			findViewById( R.id.editadata_circa ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View vista ) {
-					datatore.tipo = ((CompoundButton)vista).isChecked() ? 1 : 0;
-					veroImputTesto = false;
-					genera( false );
-				}
-			});
+			findViewById( R.id.editadata_circa ).setOnClickListener( vista -> {
+				datatore.tipo = ((CompoundButton)vista).isChecked() ? 1 : 0;
+				veroImputTesto = false;
+				genera( false );
+			} );
 			findViewById( R.id.editadata_avanzate ).setVisibility( GONE );
 		}
 
-		arredaCarro( 1, (NumberPicker)findViewById( R.id.prima_giorno ),
-				(NumberPicker)findViewById( R.id.prima_mese ),
-				(NumberPicker)findViewById( R.id.prima_secolo ),
-				(NumberPicker)findViewById( R.id.prima_anno ) );
+		arredaCarro( 1, findViewById( R.id.prima_giorno ), findViewById( R.id.prima_mese ),
+				findViewById( R.id.prima_secolo ), findViewById( R.id.prima_anno ) );
 
-		arredaCarro( 2, (NumberPicker)findViewById( R.id.seconda_giorno ),
-				(NumberPicker)findViewById( R.id.seconda_mese ),
-				(NumberPicker)findViewById( R.id.seconda_secolo ),
-				(NumberPicker)findViewById( R.id.seconda_anno ) );
+		arredaCarro( 2, findViewById( R.id.seconda_giorno ), findViewById( R.id.seconda_mese ),
+				findViewById( R.id.seconda_secolo ), findViewById( R.id.seconda_anno ) );
 
 		// Al primo focus mostra sè stesso (EditoreData) nascondendo la tastiera
 		tastiera = (InputMethodManager) getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
-		editaTesto.setOnFocusChangeListener( new View.OnFocusChangeListener() {
-			@Override
-			public void onFocusChange( View v, boolean ciapa ) {
-				//s.l("onFocusChange "+ciapa);
-				if( ciapa ) {
-					if( datatore.tipo == 10 )
-						genera( false ); // solo per togliere le parentesi alla frase
-					else {
-						tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
-						/*Window finestra = ((Activity)getContext()).getWindow(); non aiuta la scomparsa della tastiera
-						finestra.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );*/
-						editaTesto.setInputType( InputType.TYPE_NULL ); // disabilita input testo con tastiera
-							// necessario in versioni recenti di android in cui la tastiera ricompare
-					}
-					datatore.data1.date = null; // un resettino
-					impostaTutto();
-					setVisibility( View.VISIBLE );
-				} else
-					setVisibility( View.GONE );
-			}
+		editaTesto.setOnFocusChangeListener( ( v, ciapa ) -> {
+			if( ciapa ) {
+				if( datatore.tipo == 10 )
+					genera( false ); // solo per togliere le parentesi alla frase
+				else {
+					tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
+					/*Window finestra = ((Activity)getContext()).getWindow(); non aiuta la scomparsa della tastiera
+					finestra.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );*/
+					editaTesto.setInputType( InputType.TYPE_NULL ); // disabilita input testo con tastiera
+						// necessario in versioni recenti di android in cui la tastiera ricompare
+				}
+				datatore.data1.date = null; // un resettino
+				impostaTutto();
+				setVisibility( View.VISIBLE );
+			} else
+				setVisibility( View.GONE );
 		} );
 
 		// Al secondo tocco fa comparire la tastiera
-		editaTesto.setOnTouchListener( new OnTouchListener() {
-			@Override
-			public boolean onTouch( View vista, MotionEvent event ) {
-				if( event.getAction() == MotionEvent.ACTION_DOWN ) {
-					editaTesto.setInputType( InputType.TYPE_CLASS_TEXT ); // riabilita l'input
-				} else if( event.getAction() == MotionEvent.ACTION_UP ) {
-					tastieraVisibile = tastiera.showSoftInput( editaTesto, 0 ); // fa ricomparire la tastiera
-					//veroImputTesto = true;
-					//vista.performClick(); non ne vedo l'utilità
-				}
-				return false;
+		editaTesto.setOnTouchListener( (vista, event) -> {
+			if( event.getAction() == MotionEvent.ACTION_DOWN ) {
+				editaTesto.setInputType( InputType.TYPE_CLASS_TEXT ); // riabilita l'input
+			} else if( event.getAction() == MotionEvent.ACTION_UP ) {
+				tastieraVisibile = tastiera.showSoftInput( editaTesto, 0 ); // fa ricomparire la tastiera
+				//veroImputTesto = true;
+				//vista.performClick(); non ne vedo l'utilità
 			}
-		} );
+			return false;
+		});
 		// Imposta l'editore data in base a quanto scritto
 		editaTesto.addTextChangedListener( new TextWatcher() {
 			@Override
@@ -197,41 +169,29 @@ public class EditoreData extends LinearLayout {
 		ruotaGiorno.setMaxValue(31);
 		ruotaGiorno.setDisplayedValues( giorniRuota );
 		stilizza(ruotaGiorno);
-		ruotaGiorno.setOnValueChangedListener( new NumberPicker.OnValueChangeListener() {
-			@Override
-			public void onValueChange( NumberPicker picker, int vecchio, int nuovo ) {
-				aggiorna( quale==1?data1:data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno );
-			}
-		});
+		ruotaGiorno.setOnValueChangedListener( (picker, vecchio, nuovo) ->
+				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		);
 		ruotaMese.setMinValue(0);
 		ruotaMese.setMaxValue(12);
 		ruotaMese.setDisplayedValues( mesiRuota );
 		stilizza(ruotaMese);
-		ruotaMese.setOnValueChangedListener( new NumberPicker.OnValueChangeListener() {
-			@Override
-			public void onValueChange( NumberPicker picker, int vecchio, int nuovo ) {
-				aggiorna( quale==1?data1:data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno );
-			}
-		});
+		ruotaMese.setOnValueChangedListener( (picker, vecchio, nuovo) ->
+				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		);
 		ruotaSecolo.setMinValue(0);
 		ruotaSecolo.setMaxValue(20);
 		stilizza(ruotaSecolo);
-		ruotaSecolo.setOnValueChangedListener( new NumberPicker.OnValueChangeListener() {
-			@Override
-			public void onValueChange( NumberPicker picker, int vecchio, int nuovo ) {
-				aggiorna( quale==1?data1:data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno );
-			}
-		});
+		ruotaSecolo.setOnValueChangedListener( (picker, vecchio, nuovo) ->
+				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		);
 		ruotaAnno.setMinValue(0);
 		ruotaAnno.setMaxValue(100);
 		ruotaAnno.setDisplayedValues( anniRuota );
 		stilizza(ruotaAnno);
-		ruotaAnno.setOnValueChangedListener( new NumberPicker.OnValueChangeListener() {
-			@Override
-			public void onValueChange( NumberPicker picker, int vecchio, int nuovo ) {
-				aggiorna( quale==1?data1:data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno );
-			}
-		});
+		ruotaAnno.setOnValueChangedListener( ( picker, vecchio, nuovo ) ->
+				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		);
 	}
 
 	void stilizza( NumberPicker ruota ) {
@@ -258,19 +218,15 @@ public class EditoreData extends LinearLayout {
 		if( datatore.tipo == 10 ) // Data frase
 			findViewById( R.id.editadata_prima ).setVisibility( GONE );
 		else {
-			impostaCarro( data1, (NumberPicker)findViewById( R.id.prima_giorno ),
-					(NumberPicker)findViewById( R.id.prima_mese ),
-					(NumberPicker)findViewById( R.id.prima_secolo ),
-					(NumberPicker)findViewById( R.id.prima_anno ) );
+			impostaCarro( data1, findViewById( R.id.prima_giorno ), findViewById( R.id.prima_mese ),
+					findViewById( R.id.prima_secolo ), findViewById( R.id.prima_anno ) );
 			findViewById( R.id.editadata_prima ).setVisibility( VISIBLE );
 		}
 
 		// Secondo carro
 		if( datatore.tipo == 6 || datatore.tipo == 9 ) {
-			impostaCarro( data2, (NumberPicker)findViewById( R.id.seconda_giorno ),
-					(NumberPicker)findViewById( R.id.seconda_mese ),
-					(NumberPicker)findViewById( R.id.seconda_secolo ),
-					(NumberPicker)findViewById( R.id.seconda_anno ) );
+			impostaCarro( data2, findViewById( R.id.seconda_giorno ), findViewById( R.id.seconda_mese ),
+					findViewById( R.id.seconda_secolo ), findViewById( R.id.seconda_anno ) );
 			findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
 		} else
 			findViewById( R.id.editadata_seconda ).setVisibility( GONE );
@@ -329,12 +285,13 @@ public class EditoreData extends LinearLayout {
 		int mese = ruotaMese.getValue();
 		int secolo = ruotaSecolo.getValue();
 		int anno = ruotaAnno.getValue();
+		s.l("DATA",giorno, mese,secolo,anno);
 		// Imposta i giorni del mese in ruotaGiorno
 		calenda.set( secolo*100+anno, mese-1, 1 );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
 		if( data.date == null ) data.date = new Date();
-		//data.date.setDate( giorno == 0 ? 1 : giorno );  // così non attribuisce strani valori a caso al giorno 0
-		data.date.setDate( giorno );
+		//data.date.setDate( giorno );
+		data.date.setDate( giorno == 0 ? 1 : giorno );  // altrimenti la data M_A arretra di un mese
 		data.date.setMonth( mese - 1 );
 		data.date.setYear( secolo*100 + anno - 1900 );
 		if( giorno != 0 && mese != 0 && anno != 100 )

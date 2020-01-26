@@ -42,28 +42,23 @@ public class Podio extends Fragment {
 				nome = getString( android.R.string.unknownName );
 			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( nome );
 			vistaPezzo.findViewById( R.id.magazzino_archivi ).setVisibility( View.GONE );
-			vistaPezzo.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View vista ) {
-					/* non usato
-					if( getActivity().getIntent().getBooleanExtra("podioScegliAutore",false) ) {
-						Intent intento = new Intent();
-						intento.putExtra("idAutore", autor.getId() );
-						getActivity().setResult( Activity.RESULT_OK, intento );
-						getActivity().finish();
-					} else{*/
-					Memoria.setPrimo( autor );
-					startActivity( new Intent( getContext(), Autore.class ) );
-				}
+			vistaPezzo.setOnClickListener( v -> {
+				/* non usato
+				if( getActivity().getIntent().getBooleanExtra("podioScegliAutore",false) ) {
+					Intent intento = new Intent();
+					intento.putExtra("idAutore", autor.getId() );
+					getActivity().setResult( Activity.RESULT_OK, intento );
+					getActivity().finish();
+				} else{*/
+				Memoria.setPrimo( autor );
+				startActivity( new Intent( getContext(), Autore.class ) );
 			});
 			registerForContextMenu( vistaPezzo );
 			vistaPezzo.setTag( autor );
 		}
-		vista.findViewById( R.id.magazzino_fab ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				nuovoAutore( getContext() );
-				U.salvaJson( true );
-			}
+		vista.findViewById( R.id.fab ).setOnClickListener( v -> {
+			nuovoAutore( getContext() );
+			U.salvaJson( true );
 		});
 		return vista;
 	}

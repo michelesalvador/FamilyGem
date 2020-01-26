@@ -188,21 +188,22 @@
             <FrameLayout
                 android:id="@+id/bond3"
                 android:layout_width="wrap_content"
-                android:layout_height="80dp"
-                android:layout_alignParentBottom="true"
-                android:layout_marginRight="-10dp"
+                android:layout_height="150dp"
                 android:layout_marginLeft="-10dp"
+                android:layout_marginRight="-10dp"
+                android:layout_weight="1"
                 android:layout_toRightOf="@id/husband3">
 
                 <View
-                    android:layout_width="4px"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_width="2dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|bottom"
                     android:background="#ffffffff" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:background="@drawable/diagramma_cerchio_anno"
                     android:padding="5dp"
                     android:text="1825"
@@ -216,54 +217,55 @@
             android:layout_marginTop="245dp"
             android:layout_marginLeft="200dp"/>
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="300dp"
-            android:background="#440000FF"
-            android:clipChildren="false"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:background="#330000ff">
 
-            <LinearLayout
+            <include
+                android:id="@+id/lui4"
+                layout="@layout/diagram_card"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_centerVertical="true" />
+
+            <include
+                layout="@layout/diagram_card"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical">
-                <include
-                    layout="@layout/diagram_card"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"/>
+                android:layout_toRightOf="@id/bond4" />
+
+            <LinearLayout
+                android:id="@+id/bond4"
+                android:layout_width="wrap_content"
+                android:layout_height="150dp"
+                android:layout_marginLeft="-8dp"
+                android:layout_marginRight="-8dp"
+                android:layout_toRightOf="@id/lui4"
+                android:background="#45FF0000"
+                android:orientation="vertical">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" />
                 <TextView
-                    android:id="@+id/year"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="-10dp"
-                    android:layout_marginRight="-10dp"
                     android:background="@drawable/diagramma_cerchio_anno"
-                    android:layout_gravity="bottom"
                     android:padding="5dp"
                     android:text="1825"
                     android:textSize="12sp" />
-                <include
-                    layout="@layout/diagram_card"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="0.5"
+                    android:background="#ffffffff" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/diagram_progeny4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_gravity="center_horizontal">
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-                <include layout="@layout/diagramma_discendente" />
-            </LinearLayout>
-
-        </LinearLayout>
+        </RelativeLayout>
     </RelativeLayout>
 
 </com.otaliastudios.zoom.ZoomLayout>

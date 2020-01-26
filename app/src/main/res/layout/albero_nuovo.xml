@@ -8,12 +8,9 @@
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:gravity="center"
 		android:orientation="vertical"
-		android:paddingTop="12dp"
-		android:paddingBottom="16dp"
-		android:paddingLeft="30dp"
-		android:paddingRight="30dp">
+		android:gravity="center"
+		android:padding="30dp">
 
 		<Button
 			android:id="@+id/bottone_albero_vuoto"

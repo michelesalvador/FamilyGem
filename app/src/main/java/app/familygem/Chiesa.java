@@ -39,15 +39,12 @@ public class Chiesa extends Fragment {
 			for( final Family fam : listaFamiglie )
 				mettiFamiglia( scatola, fam );
 			setHasOptionsMenu( true );
-			vista.findViewById( R.id.magazzino_fab ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View vista ) {
-					Family nuovaFamiglia = nuovaFamiglia(true);
-					U.salvaJson( true, nuovaFamiglia );
-					// Se torna subito indietro in Chiesa rinfresca la lista con la famiglia vuota
-					Memoria.setPrimo( nuovaFamiglia );
-					startActivity( new Intent( getContext(), Famiglia.class ) );
-				}
+			vista.findViewById( R.id.fab ).setOnClickListener( v -> {
+				Family nuovaFamiglia = nuovaFamiglia(true);
+				U.salvaJson( true, nuovaFamiglia );
+				// Se torna subito indietro in Chiesa rinfresca la lista con la famiglia vuota
+				Memoria.setPrimo( nuovaFamiglia );
+				startActivity( new Intent( getContext(), Famiglia.class ) );
 			});
 		}
 		return vista;
@@ -77,11 +74,9 @@ public class Chiesa extends Fragment {
 					.findFragmentById( R.id.contenitore_fragment ).registerForContextMenu( vistaFamiglia );
 		else // AppCompatActivity
 			((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFamiglia );
-		vistaFamiglia.setOnClickListener( new View.OnClickListener() {
-			public void onClick( View vista ) {
-				Memoria.setPrimo( fam );
-				scatola.getContext().startActivity( new Intent( scatola.getContext(), Famiglia.class ) );
-			}
+		vistaFamiglia.setOnClickListener( v -> {
+			Memoria.setPrimo( fam );
+			scatola.getContext().startActivity( new Intent( scatola.getContext(), Famiglia.class ) );
 		});
 		vistaFamiglia.setTag( fam.getId() );	// solo per il menu contestuale Elimina qui in Chiesa
 	}

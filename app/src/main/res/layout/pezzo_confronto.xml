@@ -43,8 +43,20 @@
 				android:ellipsize="end"
 				android:maxLines="6"
 				android:singleLine="false"
-				android:text="+3 famiglie\n+7 persone\n+15 media\n+2 fonti\n-1 nota"
+				android:text="15 persone - 3 generzioni - 15 media"
 				android:textSize="18sp" />
+
+			<TextView
+				android:id="@+id/confronto_sottotesto"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_below="@id/confronto_testo"
+				android:layout_toLeftOf="@id/confronto_foto"
+				android:singleLine="false"
+				android:textSize="16sp"
+				android:layout_marginTop="5dp"
+				android:text="+3 famiglie\n+7 persone\n+15 media\n+2 fonti\n-1 nota"
+				android:visibility="gone"/>
 
 		</RelativeLayout>
 

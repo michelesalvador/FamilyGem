@@ -3,6 +3,8 @@ package app.familygem;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.app.backup.BackupManager;
+import android.app.backup.RestoreObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,7 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,95 +52,90 @@ public class AlberoNuovo extends AppCompatActivity {
 		super.onCreate( bandolo );
 		setContentView(R.layout.albero_nuovo);
 
-		// Alla prima apertura nasconde la freccia indietro
-		if( Globale.preferenze.idAprendo == 0 )
-			getSupportActionBar().setDisplayHomeAsUpEnabled( false );
-
 		// Parte con un albero vuoto
-		findViewById( R.id.bottone_albero_vuoto ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View vista ) {
-				View vistaMessaggio = LayoutInflater.from( vista.getContext() ).inflate(R.layout.albero_nomina, null);
-				AlertDialog.Builder builder = new AlertDialog.Builder( vista.getContext() );
-				builder.setView( vistaMessaggio ).setTitle( R.string.title );
-				TextView vistaTesto = vistaMessaggio.findViewById( R.id.nuovo_nome_testo );
-				vistaTesto.setText( R.string.modify_later );
-				vistaTesto.setVisibility( View.VISIBLE );
-				final EditText nuovoNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
-				builder.setPositiveButton( R.string.create, new DialogInterface.OnClickListener() {
-					public void onClick( DialogInterface dialog, int id ) {
-						int num = Globale.preferenze.max() + 1;
-						File fileJson = new File( getFilesDir(), num + ".json" );
-						Globale.gc = new Gedcom();
-						Globale.gc.setHeader( creaTestata( fileJson.getName() ) ); //.getAbsolutePath()
-						Globale.gc.createIndexes();
-						JsonParser jp = new JsonParser();
-						try {
-							FileUtils.writeStringToFile( fileJson, jp.toJson(Globale.gc), "UTF-8" );
-						} catch (IOException e) {
-							Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-							e.printStackTrace();
-						}
-						Globale.preferenze.aggiungi( new Armadio.Cassetto(
-								num, nuovoNome.getText().toString(), null, 0, 0, null, null, 0, null ));
-						Globale.preferenze.idAprendo = num;
-						Globale.preferenze.salva();
-						startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
-					}
-				}).setNeutralButton( R.string.cancel, null );
-				AlertDialog dialog = builder.create();
-				dialog.show();
-				dialog.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE );
-			}
+		findViewById( R.id.bottone_albero_vuoto ).setOnClickListener( vista -> {
+			View vistaMessaggio = LayoutInflater.from( vista.getContext() ).inflate(R.layout.albero_nomina, null);
+			AlertDialog.Builder builder = new AlertDialog.Builder( vista.getContext() );
+			builder.setView( vistaMessaggio ).setTitle( R.string.title );
+			TextView vistaTesto = vistaMessaggio.findViewById( R.id.nuovo_nome_testo );
+			vistaTesto.setText( R.string.modify_later );
+			vistaTesto.setVisibility( View.VISIBLE );
+			final EditText nuovoNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
+			builder.setPositiveButton( R.string.create, ( dialog, id ) -> {
+				int num = Globale.preferenze.max() + 1;
+				File fileJson = new File( getFilesDir(), num + ".json" );
+				Globale.gc = new Gedcom();
+				Globale.gc.setHeader( creaTestata( fileJson.getName() ) ); //.getAbsolutePath()
+				Globale.gc.createIndexes();
+				JsonParser jp = new JsonParser();
+				try {
+					FileUtils.writeStringToFile( fileJson, jp.toJson(Globale.gc), "UTF-8" );
+				} catch (IOException e) {
+					Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+					e.printStackTrace();
+				}
+				Globale.preferenze.aggiungi( new Armadio.Cassetto(
+						num, nuovoNome.getText().toString(), null, 0, 0, null, null, 0, null ));
+				Globale.preferenze.idAprendo = num;
+				Globale.preferenze.salva();
+				startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
+			}).setNeutralButton( R.string.cancel, null ).create().show();
+			vistaMessaggio.post( () -> {
+				nuovoNome.requestFocus();
+				InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.showSoftInput(nuovoNome, InputMethodManager.SHOW_IMPLICIT);
+			});
 		});
 
-		findViewById(R.id.bottone_scarica_esempio).setOnClickListener( new View.OnClickListener() {
-			public void onClick( View v ) {
-				int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-				if( perm == PackageManager.PERMISSION_DENIED )
-					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 5641 );
-				else if( perm == PackageManager.PERMISSION_GRANTED )
-					scaricaEsempio();
-			}
+		findViewById(R.id.bottone_scarica_esempio).setOnClickListener( v -> {
+			int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+			if( perm == PackageManager.PERMISSION_DENIED )
+				ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 5641 );
+			else if( perm == PackageManager.PERMISSION_GRANTED )
+				scaricaEsempio();
 		});
 
-		findViewById(R.id.bottone_importa_gedcom).setOnClickListener( new View.OnClickListener() {
-			public void onClick(View v) {
-				int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-				if( perm == PackageManager.PERMISSION_DENIED )
-					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
-				else if( perm == PackageManager.PERMISSION_GRANTED )
-					importaGedcom();
-			}
+		findViewById(R.id.bottone_importa_gedcom).setOnClickListener( v -> {
+			int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+			if( perm == PackageManager.PERMISSION_DENIED )
+				ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
+			else if( perm == PackageManager.PERMISSION_GRANTED )
+				importaGedcom();
 		});
 
-		findViewById(R.id.bottone_recupera_backup).setOnClickListener( new View.OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-				intent.setType( "application/zip" );
-				startActivityForResult( intent, 219 );
+		findViewById(R.id.bottone_recupera_backup).setOnClickListener( v -> {
+			Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+			intent.setType( "application/zip" );
+			startActivityForResult( intent, 219 );
+		});
 
-				// PROVVISORIO
-				/*BackupManager mBackupManager = new BackupManager(v.getContext());
+		findViewById(R.id.bottone_recupera_backup).setOnLongClickListener( v -> {
+			if( getFilesDir().listFiles().length == 0 ) {
+				BackupManager mBackupManager = new BackupManager(v.getContext());
 				//mBackupManager.dataChanged();
 				int successo = mBackupManager.requestRestore(
-					new RestoreObserver() {
-						@Override
-						public void restoreStarting (int numPackages) {
-							s.l("restoreStarting, numPackages:",numPackages);
+						new RestoreObserver() {
+							@Override
+							public void restoreStarting (int numPackages) {
+								s.l("restoreStarting, numPackages:",numPackages);
+							}
+							@Override
+							public void onUpdate (int nowBeingRestored, String currentPackage) {
+								s.l("onUpdate, nowBeingRestored:",nowBeingRestored,"currentPackage:",currentPackage);
+							}
+							@Override
+							public void restoreFinished(int result) {
+								s.l("restoreFinished, result:", result);
+								if( result == 0 ) {
+									Globale.avvia( v.getContext() );
+									startActivity( new Intent( AlberoNuovo.this, Alberi.class ) );
+								}
+							}
 						}
-						@Override
-						public void onUpdate (int nowBeingRestored, String currentPackage) {
-							s.l("onUpdate, nowBeingRestored:",nowBeingRestored,"currentPackage:",currentPackage);
-						}
-						@Override
-						public void restoreFinished(int error) {
-							s.l("restoreFinished, error:", error);
-						}
-					}
 				);
-				s.l("successo "+successo);*/
+				s.l("successo", successo); // Zero on success, nonzero on error
 			}
+			return true;
 		});
 	}
 
@@ -206,6 +203,8 @@ public class AlberoNuovo extends AppCompatActivity {
 			InputStream is;
 			if( percorsoZip != null )
 				is = new FileInputStream( percorsoZip );
+			// toDO da android 10 necessario rivedere il metodo di accesso a file nelle cartelle esterne
+				// temporaneamente risolto nel manifest con 'requestLegacyExternalStorage'
 			else
 				is = contesto.getContentResolver().openInputStream( uriZip );
 			ZipInputStream zis = new ZipInputStream( is );

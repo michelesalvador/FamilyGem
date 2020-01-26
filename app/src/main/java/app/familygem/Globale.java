@@ -40,13 +40,7 @@ public class Globale extends Application {
 				stringone = FileUtils.readFileToString( filePreferenze, "UTF-8" );
 		} catch( IOException e ) {}
 		preferenze = gson.fromJson( stringone, Armadio.class );
-		if( preferenze.diagram == null ) {
-			Armadio.CassettoDiagram defaultDiagram = new Armadio.CassettoDiagram();
-			defaultDiagram.ancestors = 2;
-			defaultDiagram.uncles = 1;
-			defaultDiagram.descendants = 2;
-			defaultDiagram.siblings = true;
-			preferenze.diagram = defaultDiagram;
-		}
+		if( preferenze.diagram == null )
+			preferenze.defaultDiagram();
 	}
 }

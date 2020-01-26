@@ -49,7 +49,7 @@ public class Diagram extends AppCompatActivity {
 	}
 
 	public void muovi( View vista ) {
-		ZoomLayout zoom = findViewById( R.id.diagramma_zoom );
+		ZoomLayout zoom = findViewById( R.id.diagram_zoom );
 		Rect margini = new Rect();
 		vista.getDrawingRect( margini );
 		box.offsetDescendantRectToMyCoords( vista, margini );
@@ -57,7 +57,7 @@ public class Diagram extends AppCompatActivity {
 				margini.exactCenterX() +"  "+ margini.exactCenterY() +"\n"+
 				zoom.getZoom() +"  "+ zoom.getRealZoom()  );
 		zoom.panTo( -margini.exactCenterX() + zoom.getWidth()/zoom.getRealZoom()/2, -margini.exactCenterY() + zoom.getHeight()/zoom.getRealZoom()/2, true );
-		//startActivity( new Intent( Diagramma.this, Officina.class ) );
+		//startActivity( new Intent( Diagram.this, Officina.class ) );
 		Officina.listaAttivita( this );
 	}
 }

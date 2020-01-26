@@ -26,6 +26,7 @@
 	<string name="invalid_gedcom">Gedcom no válido.</string>
 	<string name="tree">Árbol</string>
 	<string name="persons">Personas</string>
+	<string name="generation">Generación</string>
 	<string name="generations">Generaciones</string>
 	<string name="no_useful_data">No puedo obtener datos útiles.</string>
 	<string name="make_backup">Hacer una copia de seguridad</string>
@@ -264,7 +265,7 @@
 	<string name="tree_without_news">Árbol sin actualizaciones</string>
 	<string name="shared_by">Utilizado por</string>
 	<string name="usually_your_name">Normalmente tu nombre y apellido.</string>
-	<string name="view_updates">Ver actualizaciones</string>
+	<string name="view_updates">Revisar individualmente</string>
 	<string name="which_parents">¿Cuáles padres?</string>
 	<string name="which_spouses">¿Cuáles cónyuges?</string>
 	<string name="written_in">Escrita en</string>
@@ -285,4 +286,15 @@
 	<string name="all_imported_delete">Todas las actualizaciones han sido importadas.\n¿Desea eliminar el árbol importado?</string>
 	<string name="really_delete_family">¿Seguro que quiere eliminar esta familia?\nLas personas que la componen no serán eliminadas.</string>
 	<string name="year">Año</string>
+	<string name="ancestors">Antepasados</string>
+	<string name="descendants">Descendientes</string>
+	<string name="diagram_settings">Configuración del diagrama</string>
+	<string name="siblings">Hermanos</string>
+	<string name="uncles">Tíos</string>
+	<string name="accept_all">Aceptar todas</string>
+	<string name="long_press_menu">Mantener presionado para mostrar el menú. Pulsar para abrir la tarjeta.</string>
+	<string name="one_update_choice">Una actualización necesita una elección</string>
+	<string name="many_updates_choice">%d actualizaciones necesitan una elección</string>
+	<string name="updates_replace_add">Tiene que elegir si las actualizaciones deben reemplazar los elementos existentes o añadirse como nuevos elementos.</string>
+	<string name="shared_medias">Multimedia compartidos</string>
 </resources>

@@ -35,9 +35,6 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".Diagramma"
-			android:label="Diagramma" />
-		<activity
 			android:name=".Diagram"
 			android:label="Diagram" />
 		<activity

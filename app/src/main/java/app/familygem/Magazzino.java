@@ -22,7 +22,6 @@ import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,18 +42,16 @@ public class Magazzino extends Fragment {
 				if( rep.getExtension("fonti") == null )
 					rep.putExtension( "fonti", quanteFonti(rep,gc) );
 			}
-			Collections.sort( listArchivi, new Comparator<Repository>() {
-				public int compare( Repository r1, Repository r2 ) {
-					switch( Globale.ordineMagazzino ) {
-						case 1:	// Ordina per id
-							return Integer.parseInt(r1.getId().substring(1)) - Integer.parseInt(r2.getId().substring(1));
-						case 2:	// Ordine alfabeto
-							return r1.getName().compareToIgnoreCase(r2.getName());
-						case 3:	// Ordina per numero di fonti
-							return U.castaJsonInt(r2.getExtension("fonti")) - U.castaJsonInt(r1.getExtension("fonti"));
-						default:
-							return 0;
-					}
+			Collections.sort( listArchivi, ( r1, r2 ) -> {
+				switch( Globale.ordineMagazzino ) {
+					case 1:	// Ordina per id
+						return Integer.parseInt(r1.getId().substring(1)) - Integer.parseInt(r2.getId().substring(1));
+					case 2:	// Ordine alfabeto
+						return r1.getName().compareToIgnoreCase(r2.getName());
+					case 3:	// Ordina per numero di fonti
+						return U.castaJsonInt(r2.getExtension("fonti")) - U.castaJsonInt(r1.getExtension("fonti"));
+					default:
+						return 0;
 				}
 			});
 			for( final Repository rep : listArchivi ) {
@@ -62,28 +59,21 @@ public class Magazzino extends Fragment {
 				scatola.addView( vistaPezzo );
 				((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( rep.getName() );
 				((TextView)vistaPezzo.findViewById( R.id.magazzino_archivi )).setText( String.valueOf(rep.getExtension("fonti")) );
-				vistaPezzo.setOnClickListener( new View.OnClickListener() {
-					public void onClick( View vista ) {
-						if( getActivity().getIntent().getBooleanExtra("magazzinoScegliArchivio",false) ) {
-							Intent intento = new Intent();
-							intento.putExtra("idArchivio", rep.getId() );
-							getActivity().setResult( Activity.RESULT_OK, intento );
-							getActivity().finish();
-						} else {
-							Memoria.setPrimo( rep );
-							startActivity( new Intent( getContext(), Archivio.class ) );
-						}
+				vistaPezzo.setOnClickListener( v -> {
+					if( getActivity().getIntent().getBooleanExtra("magazzinoScegliArchivio",false) ) {
+						Intent intento = new Intent();
+						intento.putExtra("idArchivio", rep.getId() );
+						getActivity().setResult( Activity.RESULT_OK, intento );
+						getActivity().finish();
+					} else {
+						Memoria.setPrimo( rep );
+						startActivity( new Intent( getContext(), Archivio.class ) );
 					}
-				});
+				} );
 				registerForContextMenu( vistaPezzo );
 				vistaPezzo.setTag( rep );
 			}
-			vista.findViewById( R.id.magazzino_fab ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View v ) {
-					nuovoArchivio( getContext(), null );
-				}
-			});
+			vista.findViewById( R.id.fab ).setOnClickListener( v -> nuovoArchivio( getContext(), null ) );
 		}
 		return vista;
 	}

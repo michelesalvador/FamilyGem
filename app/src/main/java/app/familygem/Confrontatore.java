@@ -75,34 +75,29 @@ public class Confrontatore extends AppCompatActivity {
 				bottoneAggiungi.setLayoutParams( params );
 				bottoneAggiungi.setText( R.string.add );
 				bottoneAggiungi.setBackgroundColor( 0xff00dd00 );
-				bottoneAggiungi.setOnClickListener( new View.OnClickListener() {
-					@Override
-					public void onClick( View v ) {
-						Confronto.getFronte().destino = 1;
-						vaiAvanti();
-					}
+				bottoneAggiungi.setOnClickListener( v -> {
+					Confronto.getFronte().destino = 1;
+					vaiAvanti();
 				});
 				(( LinearLayout)findViewById( R.id.confronto_bottoni )).addView( bottoneAggiungi, 1 );
 			}
 
-			// Accetta la novità
-			bottoneOk.setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View vista ) {
-					//vista.setEnabled( false );
-					Confronto.getFronte().destino = destino;
-					vaiAvanti();
-				}
+			// Prosegue in automatico se non c'è una doppia azione da scegliere
+			if( Confronto.autoProsegui && !Confronto.getFronte().doppiaOpzione ) {
+				Confronto.getFronte().destino = destino;
+				vaiAvanti();
+			}
+
+			// Bottone per accettare la novità
+			bottoneOk.setOnClickListener( vista -> {
+				Confronto.getFronte().destino = destino;
+				vaiAvanti();
 			});
 
-			findViewById(R.id.confronto_bottone_ignora ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View v ) {
-					Confronto.getFronte().destino = 0;
-					vaiAvanti();
-				}
+			findViewById(R.id.confronto_bottone_ignora ).setOnClickListener( v -> {
+				Confronto.getFronte().destino = 0;
+				vaiAvanti();
 			});
-
 		} else
 			onBackPressed(); // Ritorna a Compara
 	}

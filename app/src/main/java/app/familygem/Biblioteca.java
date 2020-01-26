@@ -53,12 +53,7 @@ public class Biblioteca extends Fragment {
 		RecyclerView vistaFonti = vista.findViewById( R.id.riciclatore );
 		adattatore = new BibliotecAdapter();
 		vistaFonti.setAdapter( adattatore );
-		vista.findViewById( R.id.ricicla_fab ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				nuovaFonte( getContext(), null );
-			}
-		});
+		vista.findViewById( R.id.fab ).setOnClickListener( v -> nuovaFonte( getContext(), null ) );
 		return vista;
 	}
 

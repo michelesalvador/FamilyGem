@@ -17,7 +17,6 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,7 +79,7 @@ public class Individuo extends AppCompatActivity {
 		tabLayout.getTabAt( getIntent().getIntExtra( "scheda", 1 ) ).select();
 
 		// per animare il FAB
-		final FloatingActionButton fab = findViewById( R.id.persona_fab );
+		final FloatingActionButton fab = findViewById( R.id.fab );
 		vistaPagina.addOnPageChangeListener( new ViewPager.OnPageChangeListener() {
 			@Override
 			public void onPageScrolled( int posizione,  // 0 tra la prima e la seconda, 1 tra la seconda e la terza...
@@ -139,8 +138,8 @@ public class Individuo extends AppCompatActivity {
  		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
 		barraCollasso.setTitle( U.epiteto(uno) ); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
 		//s.l( "barraCollasso "+barraCollasso+" '"+U.epiteto( uno )+"'");
-		U.unaFoto( Globale.gc, uno, (ImageView)findViewById(R.id.persona_foto) );
-		U.unaFoto( Globale.gc, uno, (ImageView)findViewById(R.id.persona_sfondo) );
+		U.unaFoto( Globale.gc, uno, findViewById(R.id.persona_foto) );
+		U.unaFoto( Globale.gc, uno, findViewById(R.id.persona_sfondo) );
 		if( Globale.editato ) {
 			// Ricostruisce le tre schede ritornando alla pagina
 			for( int i=0; i<3; i++ ) {
@@ -153,213 +152,198 @@ public class Individuo extends AppCompatActivity {
 		}
 
 		// Menu FAB
-		findViewById( R.id.persona_fab ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View vista ) {
-				PopupMenu popup = new PopupMenu( Individuo.this, vista );
-				Menu menu = popup.getMenu();
-				switch( tabLayout.getSelectedTabPosition() ){
-					case 0: // Individuo Media
-						menu.add( 0, 10, 0, R.string.new_media );
-						menu.add( 0, 11, 0, R.string.new_shared_media );
-						menu.add( 0, 12, 0, R.string.link_shared_media );
-						break;
-					case 1: // Individuo Eventi
-						menu.add( 0, 20, 0, R.string.name );
-						// Sesso
-						if( U.sesso(uno) == 0 )
-							menu.add( 0, 21, 0, R.string.sex );
-						// Eventi principali
-						SubMenu subEvento = menu.addSubMenu( 0, 0, 0, R.string.event );
-						CharSequence[] pochiEventiDefiniz = { getText(R.string.birth), getText(R.string.baptism), getText(R.string.residence), getText(R.string.occupation), getText(R.string.death), getText(R.string.burial) };
-						int i;
-						for( i = 0; i < pochiEventiDefiniz.length; i++ )
-							subEvento.add( 0, 40+i, 0, pochiEventiDefiniz[i] );
-						// Lista semplificata di altri eventi
-						SubMenu subAltri = subEvento.addSubMenu( 0, 0, 0, R.string.other );
-						altriEventi = new TreeMap<>( EventFact.DISPLAY_TYPE );
-						for( String tag : pochiEventiTag )
-							altriEventi.remove( tag );
-						Set<String> eventiFamiglia = EventFact.FAMILY_EVENT_FACT_TAGS;
-						for( String tag : EventFact.PERSONAL_EVENT_FACT_TAGS )
-							eventiFamiglia.remove( tag );
-						for( String tag : eventiFamiglia ) {
-							//s.l( "matrimoniali = " + tag +" : "+ altriEventi.get( tag ) );
-							altriEventi.remove( tag );
-						}
-						Iterator<Map.Entry<String,String>> eventi = altriEventi.entrySet().iterator();
-						while( eventi.hasNext() ) {	// Rimuove i tag lunghi e _speciali
-							Map.Entry<String,String> ev = eventi.next();
-							if( ev.getKey().length() > 4 || ev.getKey().startsWith( "_" ) )
-								eventi.remove();
-						}
-						i = 0;
-						for( Map.Entry<String,String> event : altriEventi.entrySet() ) {
-							subAltri.add( 0, 50+i, 0, event.getValue() + " - " + event.getKey() );
-							i++;
-						}
-						SubMenu subNota = menu.addSubMenu( 0, 0, 0, R.string.note );
-						subNota.add( 0, 22, 0, R.string.new_note );
-						subNota.add( 0, 23, 0, R.string.new_shared_note );
-						subNota.add( 0, 24, 0, R.string.link_shared_note );
-						if( Globale.preferenze.esperto ) {
-							SubMenu subFonte = menu.addSubMenu( 0, 0, 0, R.string.source );
-							subFonte.add( 0, 25, 0, R.string.new_source_note );
-							subFonte.add( 0, 26, 0, R.string.new_source );
-							subFonte.add( 0, 27, 0, R.string.link_source );
-						}
-						break;
-					case 2: // Individuo Familiari
-						menu.add( 0, 30, 0, R.string.new_relative );
-						if( U.ciSonoIndividuiCollegabili( uno ) )
-							menu.add( 0, 31, 0, R.string.link_person );
-				}
-				popup.show();
-				popup.setOnMenuItemClickListener( new PopupMenu.OnMenuItemClickListener() {
-					@Override
-					public boolean onMenuItemClick( MenuItem item ) {
-						CharSequence[] familiari = { getText(R.string.parent), getText(R.string.sibling), getText(R.string.spouse), getText(R.string.child) };
-															// DUBBIO : "Padre" , "Madre" ?	"Marito"  "Moglie" ?
-						AlertDialog.Builder builder = new AlertDialog.Builder( Individuo.this );
-						switch( item.getItemId() ) {
-							// Scheda Eventi
-							case 0:
-								break;
-							// Media
-							case 10: // Cerca media locale
-								U.appAcquisizioneImmagine( Individuo.this, null, 2173, uno );
-								break;
-							case 11: // Cerca oggetto media
-								U.appAcquisizioneImmagine( Individuo.this, null, 2174, uno );
-								break;
-							case 12:	// Collega media in Galleria
-								Intent inten = new Intent( Individuo.this, Principe.class );
-								inten.putExtra( "galleriaScegliMedia", true );
-								startActivityForResult( inten,43614 );
-								break;
-							case 20: // Crea nome
-								Name nome = new Name();
-								nome.setValue( "//" );
-								uno.addName( nome );
-								Memoria.aggiungi( nome );
-								startActivity( new Intent( Individuo.this, Nome.class ) );
-								break;
-							case 21: // Crea sesso
-								String[] sessoNomi = { getString(R.string.male), getString(R.string.female), getString(R.string.unknown) };
-								new AlertDialog.Builder( tabLayout.getContext() )
-										.setSingleChoiceItems( sessoNomi, -1, new DialogInterface.OnClickListener() {
-											public void onClick( DialogInterface dialo, int i ) {
-												EventFact genere = new EventFact();
-												genere.setTag( "SEX" );
-												String[] sessoValori = { "M", "F", "U" };
-												genere.setValue( sessoValori[i] );
-												uno.addEventFact( genere );
-												dialo.dismiss();
-												IndividuoEventi tabEventi = (IndividuoEventi) getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" );
-												tabEventi.aggiorna( 1 );
-												U.salvaJson( true, uno );
-											}
-										}).show();
-								break;
-							case 22: { // Crea nota
-								Note nota = new Note();
-								nota.setValue( "" );
-								uno.addNote( nota );
-								Memoria.aggiungi( nota );
-								startActivity( new Intent( Individuo.this, Nota.class ) );
-								// todo? Dettaglio.edita( View vistaValore );
-								break;
-							}
-							case 23: // Crea nota condivisa
-								Quaderno.nuovaNota( Individuo.this, uno );
-								break;
-							case 24:	// Collega nota condivisa
-								Intent inte = new Intent( Individuo.this, Principe.class );
-								inte.putExtra( "quadernoScegliNota", true );
-								startActivityForResult( inte,4074 );
-								break;
-							case 25:	// Nuova fonte-nota
-								SourceCitation citaz = new SourceCitation();
-								citaz.setValue( "" );
-								uno.addSourceCitation( citaz );
-								Memoria.aggiungi( citaz );
-								startActivity( new Intent( Individuo.this, CitazioneFonte.class ) );
-								break;
-							case 26:	// Nuova fonte
- 								Biblioteca.nuovaFonte( Individuo.this, uno );
-								break;
-							case 27:	// Collega fonte
-								Intent intento = new Intent( Individuo.this, Principe.class );
-								intento.putExtra( "bibliotecaScegliFonte", true );
-								startActivityForResult( intento,50473 );
-								break;
-							// Scheda Familiari
-							case 30:
-								builder.setItems( familiari, new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick( DialogInterface dialog, int quale ) {
-										Intent intento = new Intent( getApplicationContext(), EditaIndividuo.class );
-										intento.putExtra( "idIndividuo", uno.getId() );
-										intento.putExtra( "relazione", quale + 1 );
-										if( EditaIndividuo.controllaMultiMatrimoni(intento,Individuo.this,null) )
-											return;
-										startActivity( intento );
-									}
-								});
-								builder.show();
-								break;
-							case 31:
-								builder.setItems( familiari, new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick( DialogInterface dialog, int quale ) {
-										Intent intento = new Intent( getApplication(), Principe.class );
-										intento.putExtra( "idIndividuo", uno.getId() ); // solo per controllaMultiMatrimoni()
-										intento.putExtra( "anagrafeScegliParente", true );
-										intento.putExtra( "relazione", quale + 1 );
-										if( EditaIndividuo.controllaMultiMatrimoni(intento,Individuo.this,null) )
-											return;
-										startActivityForResult( intento,1401 );
-									}
-								});
-								builder.show();
-								break;
-							default:
-								String tagChiave = null;
-								if( item.getItemId() >= 50 ) {
-									tagChiave = altriEventi.keySet().toArray( new String[altriEventi.size()] )[item.getItemId() - 50];
-								} else if( item.getItemId() >= 40  )
-									tagChiave = pochiEventiTag[item.getItemId()-40];
-								if( tagChiave != null ) {
-									EventFact nuovoEvento = new EventFact();
-									nuovoEvento.setTag( tagChiave );
-									switch( tagChiave ) {
-										case "OCCU":
-											nuovoEvento.setValue("");
-											break;
-										case "RESI":
-											nuovoEvento.setPlace("");
-											break;
-										case "BIRT":
-										case "DEAT":
-										case "CHR":
-											nuovoEvento.setValue( "Y" );
-										case "BAPM":
-										case "BURI":
-											nuovoEvento.setPlace("");
-											nuovoEvento.setDate("");
-									}
-									uno.addEventFact( nuovoEvento );
-									Memoria.aggiungi( nuovoEvento );
-									startActivity( new Intent( Individuo.this, Evento.class ) );
-									return true;
-								}
-								return false;
-						}
-						return true;
+		findViewById( R.id.fab ).setOnClickListener( vista -> {
+			PopupMenu popup = new PopupMenu( Individuo.this, vista );
+			Menu menu = popup.getMenu();
+			switch( tabLayout.getSelectedTabPosition() ){
+				case 0: // Individuo Media
+					menu.add( 0, 10, 0, R.string.new_media );
+					menu.add( 0, 11, 0, R.string.new_shared_media );
+					menu.add( 0, 12, 0, R.string.link_shared_media );
+					break;
+				case 1: // Individuo Eventi
+					menu.add( 0, 20, 0, R.string.name );
+					// Sesso
+					if( U.sesso(uno) == 0 )
+						menu.add( 0, 21, 0, R.string.sex );
+					// Eventi principali
+					SubMenu subEvento = menu.addSubMenu( 0, 0, 0, R.string.event );
+					CharSequence[] pochiEventiDefiniz = { getText(R.string.birth), getText(R.string.baptism), getText(R.string.residence), getText(R.string.occupation), getText(R.string.death), getText(R.string.burial) };
+					int i;
+					for( i = 0; i < pochiEventiDefiniz.length; i++ )
+						subEvento.add( 0, 40+i, 0, pochiEventiDefiniz[i] );
+					// Lista semplificata di altri eventi
+					SubMenu subAltri = subEvento.addSubMenu( 0, 0, 0, R.string.other );
+					altriEventi = new TreeMap<>( EventFact.DISPLAY_TYPE );
+					for( String tag : pochiEventiTag )
+						altriEventi.remove( tag );
+					Set<String> eventiFamiglia = EventFact.FAMILY_EVENT_FACT_TAGS;
+					for( String tag : EventFact.PERSONAL_EVENT_FACT_TAGS )
+						eventiFamiglia.remove( tag );
+					for( String tag : eventiFamiglia ) {
+						altriEventi.remove( tag );
 					}
-				} );
+					Iterator<Map.Entry<String,String>> eventi = altriEventi.entrySet().iterator();
+					while( eventi.hasNext() ) {	// Rimuove i tag lunghi e _speciali
+						Map.Entry<String,String> ev = eventi.next();
+						if( ev.getKey().length() > 4 || ev.getKey().startsWith( "_" ) )
+							eventi.remove();
+					}
+					i = 0;
+					for( Map.Entry<String,String> event : altriEventi.entrySet() ) {
+						subAltri.add( 0, 50+i, 0, event.getValue() + " - " + event.getKey() );
+						i++;
+					}
+					SubMenu subNota = menu.addSubMenu( 0, 0, 0, R.string.note );
+					subNota.add( 0, 22, 0, R.string.new_note );
+					subNota.add( 0, 23, 0, R.string.new_shared_note );
+					subNota.add( 0, 24, 0, R.string.link_shared_note );
+					if( Globale.preferenze.esperto ) {
+						SubMenu subFonte = menu.addSubMenu( 0, 0, 0, R.string.source );
+						subFonte.add( 0, 25, 0, R.string.new_source_note );
+						subFonte.add( 0, 26, 0, R.string.new_source );
+						subFonte.add( 0, 27, 0, R.string.link_source );
+					}
+					break;
+				case 2: // Individuo Familiari
+					menu.add( 0, 30, 0, R.string.new_relative );
+					if( U.ciSonoIndividuiCollegabili( uno ) )
+						menu.add( 0, 31, 0, R.string.link_person );
 			}
-		} );
+			popup.show();
+			popup.setOnMenuItemClickListener( item -> {
+				CharSequence[] familiari = { getText(R.string.parent), getText(R.string.sibling), getText(R.string.spouse), getText(R.string.child) };
+													// DUBBIO : "Padre" , "Madre" ?	"Marito"  "Moglie" ?
+				AlertDialog.Builder builder = new AlertDialog.Builder( Individuo.this );
+				switch( item.getItemId() ) {
+					// Scheda Eventi
+					case 0:
+						break;
+					// Media
+					case 10: // Cerca media locale
+						U.appAcquisizioneImmagine( Individuo.this, null, 2173, uno );
+						break;
+					case 11: // Cerca oggetto media
+						U.appAcquisizioneImmagine( Individuo.this, null, 2174, uno );
+						break;
+					case 12:	// Collega media in Galleria
+						Intent inten = new Intent( Individuo.this, Principe.class );
+						inten.putExtra( "galleriaScegliMedia", true );
+						startActivityForResult( inten,43614 );
+						break;
+					case 20: // Crea nome
+						Name nome = new Name();
+						nome.setValue( "//" );
+						uno.addName( nome );
+						Memoria.aggiungi( nome );
+						startActivity( new Intent( Individuo.this, Nome.class ) );
+						break;
+					case 21: // Crea sesso
+						String[] sessoNomi = { getString(R.string.male), getString(R.string.female), getString(R.string.unknown) };
+						new AlertDialog.Builder( tabLayout.getContext() )
+								.setSingleChoiceItems( sessoNomi, -1, ( dialo, i ) -> {
+									EventFact genere = new EventFact();
+									genere.setTag( "SEX" );
+									String[] sessoValori = { "M", "F", "U" };
+									genere.setValue( sessoValori[i] );
+									uno.addEventFact( genere );
+									dialo.dismiss();
+									IndividuoEventi tabEventi = (IndividuoEventi) getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" );
+									tabEventi.aggiorna( 1 );
+									U.salvaJson( true, uno );
+								}).show();
+						break;
+					case 22: { // Crea nota
+						Note nota = new Note();
+						nota.setValue( "" );
+						uno.addNote( nota );
+						Memoria.aggiungi( nota );
+						startActivity( new Intent( Individuo.this, Nota.class ) );
+						// todo? Dettaglio.edita( View vistaValore );
+						break;
+					}
+					case 23: // Crea nota condivisa
+						Quaderno.nuovaNota( Individuo.this, uno );
+						break;
+					case 24:	// Collega nota condivisa
+						Intent inte = new Intent( Individuo.this, Principe.class );
+						inte.putExtra( "quadernoScegliNota", true );
+						startActivityForResult( inte,4074 );
+						break;
+					case 25:	// Nuova fonte-nota
+						SourceCitation citaz = new SourceCitation();
+						citaz.setValue( "" );
+						uno.addSourceCitation( citaz );
+						Memoria.aggiungi( citaz );
+						startActivity( new Intent( Individuo.this, CitazioneFonte.class ) );
+						break;
+					case 26:	// Nuova fonte
+						 Biblioteca.nuovaFonte( Individuo.this, uno );
+						break;
+					case 27:	// Collega fonte
+						Intent intento = new Intent( Individuo.this, Principe.class );
+						intento.putExtra( "bibliotecaScegliFonte", true );
+						startActivityForResult( intento,50473 );
+						break;
+					// Scheda Familiari
+					case 30:
+						builder.setItems( familiari, (dialog, quale) -> {
+							Intent intento1 = new Intent( getApplicationContext(), EditaIndividuo.class );
+							intento1.putExtra( "idIndividuo", uno.getId() );
+							intento1.putExtra( "relazione", quale + 1 );
+							if( EditaIndividuo.controllaMultiMatrimoni( intento1,Individuo.this,null) )
+								return;
+							startActivity( intento1 );
+						});
+						builder.show();
+						break;
+					case 31:
+						builder.setItems( familiari, (dialog, quale) -> {
+							Intent intento12 = new Intent( getApplication(), Principe.class );
+							intento12.putExtra( "idIndividuo", uno.getId() ); // solo per controllaMultiMatrimoni()
+							intento12.putExtra( "anagrafeScegliParente", true );
+							intento12.putExtra( "relazione", quale + 1 );
+							if( EditaIndividuo.controllaMultiMatrimoni( intento12,Individuo.this,null) )
+								return;
+							startActivityForResult( intento12,1401 );
+						} );
+						builder.show();
+						break;
+					default:
+						String tagChiave = null;
+						if( item.getItemId() >= 50 ) {
+							tagChiave = altriEventi.keySet().toArray( new String[altriEventi.size()] )[item.getItemId() - 50];
+						} else if( item.getItemId() >= 40  )
+							tagChiave = pochiEventiTag[item.getItemId()-40];
+						if( tagChiave != null ) {
+							EventFact nuovoEvento = new EventFact();
+							nuovoEvento.setTag( tagChiave );
+							switch( tagChiave ) {
+								case "OCCU":
+									nuovoEvento.setValue("");
+									break;
+								case "RESI":
+									nuovoEvento.setPlace("");
+									break;
+								case "BIRT":
+								case "DEAT":
+								case "CHR":
+									nuovoEvento.setValue( "Y" );
+								case "BAPM":
+								case "BURI":
+									nuovoEvento.setPlace("");
+									nuovoEvento.setDate("");
+							}
+							uno.addEventFact( nuovoEvento );
+							Memoria.aggiungi( nuovoEvento );
+							startActivity( new Intent( Individuo.this, Evento.class ) );
+							return true;
+						}
+						return false;
+				}
+				return true;
+			});
+		});
 	}
 
 	@Override

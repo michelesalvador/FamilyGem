@@ -53,14 +53,11 @@ public class Anagrafe extends Fragment {
 			adattatore = new AdattatoreAnagrafe();
 			vistaLista.setAdapter( adattatore );
 			gliIdsonoNumerici = verificaIdNumerici();
-			vista.findViewById( R.id.ricicla_fab ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View vista ) {
-					Intent intento = new Intent( getContext(), EditaIndividuo.class );
-					intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
-					startActivity( intento );
-				}
-			});
+			vista.findViewById( R.id.fab ).setOnClickListener( v -> {
+				Intent intento = new Intent( getContext(), EditaIndividuo.class );
+				intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
+				startActivity( intento );
+			} );
 		}
 		return vista;
 	}
@@ -403,7 +400,7 @@ public class Anagrafe extends Fragment {
 		int id = item.getItemId();
 		if( id == 0 ) {	// Apri Diagramma
 			Globale.individuo = idIndi;
-			getFragmentManager().beginTransaction().replace( R.id.contenitore_fragment, new Diagramma() )
+			getFragmentManager().beginTransaction().replace( R.id.contenitore_fragment, new Diagram() )
 					.addToBackStack(null).commit();
 		} else if( id == 1) {	// Famiglia come figlio
 			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), Famiglia.class );

@@ -10,6 +10,7 @@ public class Confronto {
 	private static final Confronto confronto = new Confronto();
 	private List<Fronte> lista = new ArrayList<>();
 	int posizione = 0;
+	static boolean autoProsegui; // stabilisce se accettare automaticamente tutti gli aggiornamenti
 
 	static Confronto getInstance() {
 		return confronto;

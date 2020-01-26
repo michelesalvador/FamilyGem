@@ -11,8 +11,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,11 +30,6 @@ import static app.familygem.Globale.gc;
 public class Galleria extends Fragment {
 
 	@Override
-	public void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-	}
-
-	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
 		setHasOptionsMenu( true );
 		View vista = inflater.inflate( R.layout.galleria, container, false );
@@ -50,23 +43,20 @@ public class Galleria extends Fragment {
 			griglia.setLayoutManager( gestoreLayout );
 			AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( visitaMedia.listaMedia, true );
 			griglia.setAdapter( adattatore );
-			vista.findViewById( R.id.galleria_fab ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View v ) {
-					U.appAcquisizioneImmagine( getContext(), Galleria.this, 4546, null );
-				}
-			});
+			vista.findViewById( R.id.fab ).setOnClickListener( v ->
+					U.appAcquisizioneImmagine( getContext(), Galleria.this, 4546, null )
+			);
 		}
 		return vista;
 	}
 
 	// todo bypassabile?
-	public static int popolarita( Media med ) {
+	static int popolarita( Media med ) {
 		RiferimentiMedia riferiMedia = new RiferimentiMedia( gc, med, false );
 		return riferiMedia.num;
 	}
 
-	public static Media nuovoMedia( Object contenitore ){
+	static Media nuovoMedia( Object contenitore ){
 		Media media = new Media();
 		media.setId( U.nuovoId(gc,Media.class) );
 		media.setFileTag("FILE"); // Necessario per poi esportare il Gedcom
@@ -80,7 +70,7 @@ public class Galleria extends Fragment {
 	}
 
 	// Scollega da un contenitore un media condiviso
-	public static void scollegaMedia( String idMedia, MediaContainer contenitore, View vista ) {
+	static void scollegaMedia( String idMedia, MediaContainer contenitore, View vista ) {
 		Iterator<MediaRef> refi = contenitore.getMediaRefs().iterator();
 		while( refi.hasNext() ) {
 			MediaRef ref = refi.next();
@@ -154,5 +144,4 @@ public class Galleria extends Fragment {
 		}
 		return false;
 	}
-
 }

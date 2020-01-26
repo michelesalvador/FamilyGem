@@ -63,12 +63,7 @@ public class Quaderno extends Fragment {
 			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
 					(listaNoteCondivise.size()+visitaNote.listaNote.size()) + " " + getString(R.string.notes).toLowerCase() );
 			setHasOptionsMenu(true);
-			vista.findViewById( R.id.magazzino_fab ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View v ) {
-					nuovaNota( getContext(), null );
-				}
-			});
+			vista.findViewById( R.id.fab ).setOnClickListener( v -> nuovaNota( getContext(), null ) );
 		}
 		return vista;
 	}
@@ -85,24 +80,22 @@ public class Quaderno extends Fragment {
 			RiferimentiNota contaUso = new RiferimentiNota( gc, nota.getId(), false );
 			vistaCita.setText( String.valueOf(contaUso.tot) );
 		}
-		vistaNota.setOnClickListener( new View.OnClickListener() {
-			public void onClick( View vista ) {
-				// Restituisce l'id di una nota a Individuo e Dettaglio
-				if( getActivity().getIntent().getBooleanExtra("quadernoScegliNota",false) ) {
-					Intent intento = new Intent();
-					intento.putExtra( "idNota", nota.getId() );
-					getActivity().setResult( AppCompatActivity.RESULT_OK, intento );
-					getActivity().finish();
-				} else { // Apre il dettaglio della nota
-					Intent intento = new Intent( scatola.getContext(), Nota.class );
-					if( nota.getId() != null ) { // Nota condivisa
-						Memoria.setPrimo( nota );
-					} else { // Nota semplice
-						new TrovaPila( gc, nota );
-						intento.putExtra( "daQuaderno", true );
-					}
-					scatola.getContext().startActivity( intento );
+		vistaNota.setOnClickListener( v -> {
+			// Restituisce l'id di una nota a Individuo e Dettaglio
+			if( getActivity().getIntent().getBooleanExtra("quadernoScegliNota",false) ) {
+				Intent intento = new Intent();
+				intento.putExtra( "idNota", nota.getId() );
+				getActivity().setResult( AppCompatActivity.RESULT_OK, intento );
+				getActivity().finish();
+			} else { // Apre il dettaglio della nota
+				Intent intento = new Intent( scatola.getContext(), Nota.class );
+				if( nota.getId() != null ) { // Nota condivisa
+					Memoria.setPrimo( nota );
+				} else { // Nota semplice
+					new TrovaPila( gc, nota );
+					intento.putExtra( "daQuaderno", true );
 				}
+				scatola.getContext().startActivity( intento );
 			}
 		});
 		vistaNota.setTag( nota );	// per il menu contestuale Elimina

@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.apache.commons.io.FileUtils;
@@ -221,8 +220,7 @@ public class ListaGriglia extends AppCompatActivity {
 
 					vista.setOnClickListener( this );
 				}
-				//new U.MostraMedia( vistaImmagine, true ).execute( media );
-				U.dipingiMedia( media, vistaImmagine, (ProgressBar)vista.findViewById(R.id.media_circolo) );
+				U.dipingiMedia( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
 			}
 
 			@Override // ok

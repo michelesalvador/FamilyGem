@@ -15,13 +15,7 @@
 		android:clipToPadding="false"
 		android:scrollbarStyle="outsideOverlay"/>
 
-	<com.google.android.material.floatingactionbutton.FloatingActionButton
-		android:id="@+id/ricicla_fab"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="end|bottom"
-		android:layout_margin="@dimen/fab_margin"
-		app:srcCompat="@drawable/piu"/>
+	<include layout="@layout/fab"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

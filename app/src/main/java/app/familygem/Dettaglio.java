@@ -86,111 +86,105 @@ public class Dettaglio extends AppCompatActivity {
 			onBackPressed(); // salta tutti gli altri dettagli senza oggetto
 		} else
 			impagina();
-		FloatingActionButton fab = findViewById( R.id.dettaglio_fab );
-		fab.setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View vista ) {
-				PopupMenu popup = menuFAB( vista );
-				popup.show();
-				popup.setOnMenuItemClickListener( new PopupMenu.OnMenuItemClickListener() {
-					@Override
-					public boolean onMenuItemClick( MenuItem item ) {
-						// FAB + mette un nuovo uovo e lo rende subito editabile
-						int id = item.getItemId();
-						if( id < 100 ) {
-							Object coso = ovi.get( id ).oggetto;
-							if( coso instanceof Address ) {	// coso è un new Address()
-								if( oggetto instanceof EventFact )
-									((EventFact)oggetto).setAddress( (Address)coso );
-								else if( oggetto instanceof Submitter )
-									((Submitter)oggetto).setAddress( (Address)coso );
-								else if( oggetto instanceof Repository )
-									((Repository)oggetto).setAddress( (Address)coso );
-							}
-							// Tag necessari per poi esportare in Gedcom
-							if( oggetto instanceof Repository ) {
-								if( coso.equals("Www") )
-									((Repository)oggetto).setWwwTag("WWW");
-								if( coso.equals("Email") )
-									((Repository)oggetto).setEmailTag("EMAIL");
-							} else if( oggetto instanceof Submitter ) {
-								if( coso.equals("Www") )
-									((Submitter)oggetto).setWwwTag("WWW");
-								if( coso.equals("Email") )
-									((Submitter)oggetto).setEmailTag("EMAIL");
-							}
-							View pezzo = creaPezzo( ovi.get(id).titolo, "", coso, ovi.get(id).multiLinea );
-							if( coso instanceof String )
-								edita( pezzo );
-							// todo : aprire Address nuovo per editarlo
-						} else if( id == 101 ) {
-							Magazzino.nuovoArchivio( Dettaglio.this, (Source)oggetto );
-						} else if( id == 102 ) {
-							Intent intento = new Intent( Dettaglio.this, Principe.class );
-							intento.putExtra( "magazzinoScegliArchivio", true );
-							startActivityForResult( intento,4562 );
-						} else if( id == 103 ) { // Nuova nota
-							Note nota = new Note();
-							nota.setValue( "" );
-							((NoteContainer)oggetto).addNote( nota );
-							Memoria.aggiungi( nota );
-							startActivity( new Intent( Dettaglio.this, Nota.class ) );
-						} else if( id == 104 ) { // Nuova nota condivisa
-							Quaderno.nuovaNota( Dettaglio.this, oggetto );
-						} else if( id == 105 ) { // Collega nota condivisa
-							Intent intento = new Intent( Dettaglio.this, Principe.class );
-							intento.putExtra( "quadernoScegliNota", true );
-							startActivityForResult( intento,7074 );
-						} else if( id == 106 ) { // Cerca media locale
-							U.appAcquisizioneImmagine( Dettaglio.this, null, 4173, (MediaContainer)oggetto );
-						} else if( id == 107 ) { // Cerca media condiviso
-							U.appAcquisizioneImmagine( Dettaglio.this, null, 4174, (MediaContainer)oggetto );
-						} else if( id == 108 ) { // Collega media condiviso
-							Intent inten = new Intent( Dettaglio.this, Principe.class );
-							inten.putExtra( "galleriaScegliMedia", true );
-							startActivityForResult( inten,43616 );
-						} else if( id == 109 ) { // Nuova fonte-nota
-							SourceCitation citaz = new SourceCitation();
-							citaz.setValue( "" );
-							if( oggetto instanceof Note ) ((Note)oggetto).addSourceCitation( citaz );
-							else ((SourceCitationContainer)oggetto).addSourceCitation( citaz );
-							Memoria.aggiungi( citaz );
-							startActivity( new Intent( Dettaglio.this, CitazioneFonte.class ) );
-						} else if( id == 110 ) {  // Nuova fonte
-							Biblioteca.nuovaFonte( Dettaglio.this, oggetto );
-						} else if( id == 111 ) { // Collega fonte
-  							Intent intent = new Intent( Dettaglio.this, Principe.class );
-							intent.putExtra( "bibliotecaScegliFonte", true );
-							startActivityForResult( intent, 5065 );
-						} else if( id == 120 || id == 121 ) { // Crea nuovo familiare
-							Intent intento = new Intent( Dettaglio.this, EditaIndividuo.class );
-							intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
-							intento.putExtra( "idFamiglia", ((Family)oggetto).getId() );
-							intento.putExtra( "relazione", id - 115 );
-							startActivity( intento );
-						} else if( id == 122 || id == 123 ) { // Collega persona esistente
-							Intent intento = new Intent( Dettaglio.this, Principe.class );
-							intento.putExtra( "anagrafeScegliParente", true );
-							intento.putExtra( "relazione", id - 117 );
-							startActivityForResult( intento, 34417 );
-						} else if( id == 124 ) { // Metti matrimonio
-							EventFact nuovoEvento = new EventFact();
-							nuovoEvento.setTag( "MARR" );
-							nuovoEvento.setDate( "" );
-							nuovoEvento.setPlace( "" );
-							((Family)oggetto).addEventFact( nuovoEvento );
-							Memoria.aggiungi( nuovoEvento );
-							startActivity( new Intent( Dettaglio.this, Evento.class ) );
-						} else if( id >= 200 ) { // Metti altro evento
-							EventFact nuovoEvento = new EventFact();
-							nuovoEvento.setTag( eventiVari.keySet().toArray( new String[eventiVari.size()] )[id - 200] );
-							((Family)oggetto).addEventFact( nuovoEvento );
-							creaPezzo( nuovoEvento.getDisplayType(), "", nuovoEvento, false );
-						}
-						return true;
+		FloatingActionButton fab = findViewById( R.id.fab );
+		fab.setOnClickListener( vista -> {
+			PopupMenu popup = menuFAB( vista );
+			popup.show();
+			popup.setOnMenuItemClickListener( item -> {
+				// FAB + mette un nuovo uovo e lo rende subito editabile
+				int id = item.getItemId();
+				if( id < 100 ) {
+					Object coso = ovi.get( id ).oggetto;
+					if( coso instanceof Address ) {	// coso è un new Address()
+						if( oggetto instanceof EventFact )
+							((EventFact)oggetto).setAddress( (Address)coso );
+						else if( oggetto instanceof Submitter )
+							((Submitter)oggetto).setAddress( (Address)coso );
+						else if( oggetto instanceof Repository )
+							((Repository)oggetto).setAddress( (Address)coso );
 					}
-				});
-			}
+					// Tag necessari per poi esportare in Gedcom
+					if( oggetto instanceof Repository ) {
+						if( coso.equals("Www") )
+							((Repository)oggetto).setWwwTag("WWW");
+						if( coso.equals("Email") )
+							((Repository)oggetto).setEmailTag("EMAIL");
+					} else if( oggetto instanceof Submitter ) {
+						if( coso.equals("Www") )
+							((Submitter)oggetto).setWwwTag("WWW");
+						if( coso.equals("Email") )
+							((Submitter)oggetto).setEmailTag("EMAIL");
+					}
+					View pezzo = creaPezzo( ovi.get(id).titolo, "", coso, ovi.get(id).multiLinea );
+					if( coso instanceof String )
+						edita( pezzo );
+					// todo : aprire Address nuovo per editarlo
+				} else if( id == 101 ) {
+					Magazzino.nuovoArchivio( Dettaglio.this, (Source)oggetto );
+				} else if( id == 102 ) {
+					Intent intento = new Intent( Dettaglio.this, Principe.class );
+					intento.putExtra( "magazzinoScegliArchivio", true );
+					startActivityForResult( intento,4562 );
+				} else if( id == 103 ) { // Nuova nota
+					Note nota = new Note();
+					nota.setValue( "" );
+					((NoteContainer)oggetto).addNote( nota );
+					Memoria.aggiungi( nota );
+					startActivity( new Intent( Dettaglio.this, Nota.class ) );
+				} else if( id == 104 ) { // Nuova nota condivisa
+					Quaderno.nuovaNota( Dettaglio.this, oggetto );
+				} else if( id == 105 ) { // Collega nota condivisa
+					Intent intento = new Intent( Dettaglio.this, Principe.class );
+					intento.putExtra( "quadernoScegliNota", true );
+					startActivityForResult( intento,7074 );
+				} else if( id == 106 ) { // Cerca media locale
+					U.appAcquisizioneImmagine( Dettaglio.this, null, 4173, (MediaContainer)oggetto );
+				} else if( id == 107 ) { // Cerca media condiviso
+					U.appAcquisizioneImmagine( Dettaglio.this, null, 4174, (MediaContainer)oggetto );
+				} else if( id == 108 ) { // Collega media condiviso
+					Intent inten = new Intent( Dettaglio.this, Principe.class );
+					inten.putExtra( "galleriaScegliMedia", true );
+					startActivityForResult( inten,43616 );
+				} else if( id == 109 ) { // Nuova fonte-nota
+					SourceCitation citaz = new SourceCitation();
+					citaz.setValue( "" );
+					if( oggetto instanceof Note ) ((Note)oggetto).addSourceCitation( citaz );
+					else ((SourceCitationContainer)oggetto).addSourceCitation( citaz );
+					Memoria.aggiungi( citaz );
+					startActivity( new Intent( Dettaglio.this, CitazioneFonte.class ) );
+				} else if( id == 110 ) {  // Nuova fonte
+					Biblioteca.nuovaFonte( Dettaglio.this, oggetto );
+				} else if( id == 111 ) { // Collega fonte
+					Intent intent = new Intent( Dettaglio.this, Principe.class );
+					intent.putExtra( "bibliotecaScegliFonte", true );
+					startActivityForResult( intent, 5065 );
+				} else if( id == 120 || id == 121 ) { // Crea nuovo familiare
+					Intent intento = new Intent( Dettaglio.this, EditaIndividuo.class );
+					intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
+					intento.putExtra( "idFamiglia", ((Family)oggetto).getId() );
+					intento.putExtra( "relazione", id - 115 );
+					startActivity( intento );
+				} else if( id == 122 || id == 123 ) { // Collega persona esistente
+					Intent intento = new Intent( Dettaglio.this, Principe.class );
+					intento.putExtra( "anagrafeScegliParente", true );
+					intento.putExtra( "relazione", id - 117 );
+					startActivityForResult( intento, 34417 );
+				} else if( id == 124 ) { // Metti matrimonio
+					EventFact nuovoEvento = new EventFact();
+					nuovoEvento.setTag( "MARR" );
+					nuovoEvento.setDate( "" );
+					nuovoEvento.setPlace( "" );
+					((Family)oggetto).addEventFact( nuovoEvento );
+					Memoria.aggiungi( nuovoEvento );
+					startActivity( new Intent( Dettaglio.this, Evento.class ) );
+				} else if( id >= 200 ) { // Metti altro evento
+					EventFact nuovoEvento = new EventFact();
+					nuovoEvento.setTag( eventiVari.keySet().toArray( new String[eventiVari.size()] )[id - 200] );
+					((Family)oggetto).addEventFact( nuovoEvento );
+					creaPezzo( nuovoEvento.getDisplayType(), "", nuovoEvento, false );
+				}
+				return true;
+			});
 		});
 		// Prova del menu: se è vuoto nasconde il fab
 		if( !menuFAB(null).getMenu().hasVisibleItems() ) // todo ok?
@@ -582,7 +576,7 @@ public class Dettaglio extends AppCompatActivity {
 
 	EditText vistaEdita;
 	void edita( final View vistaPezzo ) {
-		final FloatingActionButton fab = findViewById( R.id.dettaglio_fab );
+		final FloatingActionButton fab = findViewById( R.id.fab );
 		final ActionBar barra = getSupportActionBar();
 
 		// Termina l'eventuale editazione di un altro pezzo

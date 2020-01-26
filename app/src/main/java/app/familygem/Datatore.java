@@ -7,7 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Datatore {
+class Datatore {
 
 	Data data1;
 	Data data2;
@@ -23,7 +23,7 @@ public class Datatore {
 	static String[] mesiGedcom = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 	static String[] prefissi = { "", "ABT", "CAL", "EST", "AFT", "BEF", "BET", "FROM", "TO", "FROM", "(" }; // Todo "INT"
 
-	public Datatore( String dataGc ) {
+	Datatore( String dataGc ) {
 		data1 = new Data();
 		data2 = new Data();
 		analizza( dataGc );
@@ -132,7 +132,6 @@ public class Datatore {
 			if( tipo == 8 )
 				anno = "→"+anno;
 			if( tipo == 6 || tipo == 9 ) {
-				anno += tipo==6 ? "~" : "→";
 				if( data2.date != null && !data2.format.toPattern().equals(G_M) ) {
 					if( data2.doppia )
 						data2.date.setYear( data2.date.getYear() + 1 );
@@ -140,7 +139,7 @@ public class Datatore {
 					if( !anno.equals(anno2) ) {
 						if( anno2.length() > 3 && anno2.substring(0,2).equals(anno.substring(0,2)) ) // se sono dello stesso secolo
 							anno2 = anno2.substring( anno2.length()-2 ); // prende solo gli anni
-						anno += anno2;
+						anno += (tipo==6 ? "~" : "→") + anno2 ;
 					}
 				}
 			}

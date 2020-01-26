@@ -15,14 +15,13 @@
 		android:theme="@style/AppTheme"
 		android:allowBackup="true"
 		android:backupAgent="AgenteBackup"
+		android:usesCleartextTraffic="true"
 		android:supportsRtl="false"
-		tools:replace="android:supportsRtl">
-		<meta-data
-			android:name="com.google.android.geo.API_KEY"
-			android:value="AIzaSyBxL3Y0Ta-ccbmmEGxjyKN2yEb8WF2n428" />
+		tools:replace="android:supportsRtl"
+		android:requestLegacyExternalStorage="true">
 		<meta-data
 			android:name="com.google.android.backup.api_key"
-			android:value="AEdPqrEAAAAIeqibcFchy7ZZ1uALZBVy-FPsTXQbXFRa2VO-AQ" />
+			android:value="@string/backupKey" />
 		<activity
 			android:name=".Facciata"
 			android:noHistory="true" >
@@ -49,7 +48,9 @@
 					android:pathPattern="/condivisi/.*.zip" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".Alberi" />
+		<activity
+			android:name=".Alberi"
+			android:parentActivityName=".Principe" />
 		<activity
 			android:name=".AlberoNuovo"
 			android:label="@string/new_tree"
@@ -86,7 +87,7 @@
 			android:parentActivityName=".Compara" />
 		<activity
 			android:name=".DiagramSettings"
-			android:label="Diagram settings"
+			android:label="@string/diagram_settings"
 			android:parentActivityName=".Principe" />
 		<activity
 			android:name=".Individuo"

@@ -144,7 +144,7 @@ public class U {
 	}
 
 	// Restituisce il nome e cognome addobbato di un Name
-	public static String nomeCognome( Name n ) {
+	static String nomeCognome( Name n ) {
 		String completo = "";
 		String grezzo = n.getValue().trim();
 		if( grezzo.indexOf('/') > -1 ) // Se c'è un cognome tra '/'
@@ -164,7 +164,7 @@ public class U {
 	}
 
 	// Restituisce il cognome di una persona
-	public static String cognome( Person p ) {
+	static String cognome( Person p ) {
 		String cognome = "";
 		if( !p.getNames().isEmpty() ) {
 			String grezzo = p.getNames().get(0).getValue();
@@ -607,6 +607,7 @@ public class U {
 	}
 
 	// Salva in cache un'immagine trovabile in internet per poi riusarla
+	// todo? forse potrebbe anche non essere un task asincrono ma una semplice funzione
 	static class ImboscaImmagine extends AsyncTask<URL,Void,String> {
 		Media media;
 		ImboscaImmagine( Media media ) {
@@ -657,88 +658,85 @@ public class U {
 		}
 	}
 
-	// Scarica asincronicamente l'immagine da internet
+	// Scarica asincronicamente un'immagine da una pagina internet
 	static class ZuppaMedia extends AsyncTask<String, Integer, Bitmap> {
 		ImageView vistaImmagine;
 		ProgressBar circo;
 		Media media;
 		URL url;
+		int tagTipoFile = 0; // setTag deve stare nel thread principale, non nel doInBackground
+		int vistaImmagineWidth; // idem
 		ZuppaMedia( ImageView vistaImmagine, ProgressBar circo, Media media ) {
 			this.vistaImmagine = vistaImmagine;
 			this.circo = circo;
 			this.media = media;
+			vistaImmagineWidth = vistaImmagine.getWidth();
 		}
 		@Override
 		protected Bitmap doInBackground(String... parametri) {
 			Bitmap bitmap;
 			try {
-				// Prima prova con l'url diretto a un'immagine
-				// Todo Eliminare? l'url diretto all'immagine è gestito da Picasso
-				url = new URL( parametri[0] );
+				Connection connessione = Jsoup.connect(parametri[0]);
+				//if (connessione.equals(bitmap)) {	// TODO: verifica che un address sia associato all'hostname
+				Document doc = connessione.get();
+				List<Element> lista = doc.select("img");
+				if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
+					tagTipoFile = 3;
+					url = new URL( parametri[0] );
+					return generaIcona( vistaImmagine, R.layout.media_mondo, url.getProtocol() );	// ritorna una bitmap
+				}
+				int maxDimensioniConAlt = 1;
+				int maxDimensioni = 1;
+				int maxLunghezzaAlt = 0;
+				int maxLunghezzaSrc = 0;
+				Element imgGrandeConAlt = null;
+				Element imgGrande = null;
+				Element imgAltLungo = null;
+				Element imgSrcLungo = null;
+				for( Element img : lista ) {
+					int larga, alta;
+					if (img.attr("width").isEmpty()) larga = 1;
+					else larga = Integer.parseInt(img.attr("width"));
+					if (img.attr("height").isEmpty()) alta = 1;
+					else alta = Integer.parseInt(img.attr("height"));
+					if( larga * alta > maxDimensioniConAlt && !img.attr("alt").isEmpty() ) {	// la più grande con alt
+						imgGrandeConAlt = img;
+						maxDimensioniConAlt = larga * alta;
+					}
+					if( larga * alta > maxDimensioni ) {	// la più grande anche senza alt
+						imgGrande = img;
+						maxDimensioni = larga * alta;
+					}
+					if( img.attr("alt").length() > maxLunghezzaAlt ) { // quella con l'alt più lungo
+						imgAltLungo = img;
+						maxLunghezzaAlt = img.attr( "alt" ).length();
+					}
+					if( img.attr("src").length() > maxLunghezzaSrc ) { // quella col src più lungo
+						imgSrcLungo = img;
+						maxLunghezzaSrc = img.attr("src").length();
+					}
+				}
+				String percorso = null;
+				if( imgGrandeConAlt != null )
+					percorso = imgGrandeConAlt.absUrl( "src" );  //absolute URL on src
+				else if( imgGrande != null )
+					percorso = imgGrande.absUrl( "src" );
+				else if( imgAltLungo != null )
+					percorso = imgAltLungo.absUrl( "src" );
+				else if( imgSrcLungo != null )
+					percorso = imgSrcLungo.absUrl( "src" );
+				url = new URL(percorso);
 				InputStream inputStream = url.openConnection().getInputStream();
 				BitmapFactory.Options opzioni = new BitmapFactory.Options();
-				opzioni.inJustDecodeBounds = true;	// prende solo le info dell'immagine senza scaricarla
-				BitmapFactory.decodeStream( inputStream, null, opzioni );
-				// Se non lo trova cerca l'immagine principale in una pagina internet
-				if( opzioni.outWidth == -1 ) {
-					Connection connessione = Jsoup.connect(parametri[0]);
-					//if (connessione.equals(bitmap)) {	// TODO: verifica che un address sia associato all'hostname
-					Document doc = connessione.get();
-					List<Element> lista = doc.select("img");
-					if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
-						vistaImmagine.setTag( R.id.tag_tipo_file, 3 );
-						return generaIcona( vistaImmagine, R.layout.media_mondo, url.getProtocol() );	// ritorna una bitmap
-					}
-					int maxDimensioniConAlt = 1;
-					int maxDimensioni = 1;
-					int maxLunghezzaAlt = 0;
-					int maxLunghezzaSrc = 0;
-					Element imgGrandeConAlt = null;
-					Element imgGrande = null;
-					Element imgAltLungo = null;
-					Element imgSrcLungo = null;
-					for( Element img : lista ) {
-						int larga, alta;
-						if (img.attr("width").isEmpty()) larga = 1;
-						else larga = Integer.parseInt(img.attr("width"));
-						if (img.attr("height").isEmpty()) alta = 1;
-						else alta = Integer.parseInt(img.attr("height"));
-						if( larga * alta > maxDimensioniConAlt  &&  !img.attr("alt").isEmpty() ) {	// la più grande con alt
-							imgGrandeConAlt = img;
-							maxDimensioniConAlt = larga * alta;
-						}
-						if( larga * alta > maxDimensioni ) {	// la più grande anche senza alt
-							imgGrande = img;
-							maxDimensioni = larga * alta;
-						}
-						if( img.attr("alt").length() > maxLunghezzaAlt ) { // quella con l'alt più lungo
-							imgAltLungo = img;
-							maxLunghezzaAlt = img.attr( "alt" ).length();
-						}
-						if( img.attr("src").length() > maxLunghezzaSrc ) { // quella col src più lungo
-							imgSrcLungo = img;
-							maxLunghezzaSrc = img.attr("src").length();
-						}
-					}
-					String percorso = null;
-					if( imgGrandeConAlt != null )
-						percorso = imgGrandeConAlt.absUrl( "src" );  //absolute URL on src
-					else if( imgGrande != null )
-						percorso = imgGrande.absUrl( "src" );
-					else if( imgAltLungo != null )
-						percorso = imgAltLungo.absUrl( "src" );
-					else if( imgSrcLungo != null )
-						percorso = imgSrcLungo.absUrl( "src" );
-					url = new URL(percorso);
-					inputStream = url.openConnection().getInputStream();
-					BitmapFactory.decodeStream(inputStream, null, opzioni);
-				}
+				opzioni.inJustDecodeBounds = true; // prende solo le info dell'immagine senza scaricarla
+				BitmapFactory.decodeStream(inputStream, null, opzioni);
 				// Infine cerca di caricare l'immagine vera e propria ridimensionandola
-				if( opzioni.outWidth > vistaImmagine.getWidth() )
-					opzioni.inSampleSize = opzioni.outWidth / (vistaImmagine.getWidth()+1);
+				if( opzioni.outWidth > vistaImmagineWidth )
+					opzioni.inSampleSize = opzioni.outWidth / (vistaImmagineWidth+1);
 				inputStream = url.openConnection().getInputStream();
 				opzioni.inJustDecodeBounds = false;	// Scarica l'immagine
 				bitmap = BitmapFactory.decodeStream( inputStream, null, opzioni );
+				tagTipoFile = 1;
 			} catch( Exception e ) {
 				return null;
 			}
@@ -746,13 +744,13 @@ public class U {
 		}
 		@Override
 		protected void onPostExecute( Bitmap bitmap ) {
+			vistaImmagine.setTag( R.id.tag_tipo_file, tagTipoFile );
 			if( bitmap != null ) {
 				vistaImmagine.setImageBitmap( bitmap );
-				vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
 				vistaImmagine.setTag( R.id.tag_percorso, url.toString() );	// usato da Immagine
-				new ImboscaImmagine(media).execute( url );
-			} else
-				vistaImmagine.setImageResource( R.drawable.manichino );
+				if( tagTipoFile == 1 )
+					new ImboscaImmagine(media).execute( url );
+			}
 			if( circo != null ) // può arrivare molto in ritardo quando la pagina non esiste più
 				circo.setVisibility( View.GONE );
 		}
@@ -800,30 +798,26 @@ public class U {
 			listaIntenti.add( intento );
 			listaRisolvi.add( info );
 		}
-		AlertDialog.Builder dialog = new AlertDialog.Builder( contesto );
-		dialog.setAdapter( faiAdattatore( contesto, listaRisolvi ),
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						Intent intento = listaIntenti.get(id);
-						if( intento.getComponent().getPackageName().equals("app.familygem") ) {
-							// Crea un Media vuoto
-							Media med;
-							if( codice==4173 || codice==2173 ) { // Media inline
-								med = new Media();
-								med.setFileTag( "FILE" );
-								contenitore.addMedia( med );
-							} else // Media condiviso
-								med = Galleria.nuovoMedia( contenitore );
-							med.setFile( "" );
-							Memoria.setPrimo( med );
-							contesto.startActivity( intento );
-							U.salvaJson( true, Memoria.oggettoCapo() );
-						} else if( frammento != null )
-							frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
-						else
-							((AppCompatActivity)contesto).startActivityForResult( intento, codice );
-					}
+		new AlertDialog.Builder( contesto ).setAdapter( faiAdattatore( contesto, listaRisolvi ),
+				(dialog, id) -> {
+					Intent intento = listaIntenti.get(id);
+					if( intento.getComponent().getPackageName().equals("app.familygem") ) {
+						// Crea un Media vuoto
+						Media med;
+						if( codice==4173 || codice==2173 ) { // Media inline
+							med = new Media();
+							med.setFileTag( "FILE" );
+							contenitore.addMedia( med );
+						} else // Media condiviso
+							med = Galleria.nuovoMedia( contenitore );
+						med.setFile( "" );
+						Memoria.setPrimo( med );
+						contesto.startActivity( intento );
+						U.salvaJson( true, Memoria.oggettoCapo() );
+					} else if( frammento != null )
+						frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
+					else
+						((AppCompatActivity)contesto).startActivityForResult( intento, codice );
 				}).show();
 	}
 	// Strettamente legato a quello qui sopra
@@ -859,29 +853,20 @@ public class U {
 			U.dipingiMedia( media, vistaImmagine, null );
 			Globale.mediaCroppato = media; // Media parcheggiato in attesa di essere aggiornato col nuovo percorso file
 			Globale.editato = false; // per non innescare il recreate() che negli Android nuovi non fa comparire l'AlertDialog
+			// click fuori dal dialogo
 			new AlertDialog.Builder( contesto )
 					.setView(vistaImmagine)
 					.setMessage( R.string.want_crop_image )
-					.setPositiveButton( R.string.yes, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialog, int id ) {
-							tagliaImmagine( contesto, fileMedia, frammento );
-						}
-					}).setNeutralButton( R.string.no, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialog, int which ) {
-							// todo: anziché recreate() -> if( contesto instanceof Individuo) aggiorna() fragment 0
-							((AppCompatActivity)contesto).recreate();
-							Globale.editato = true; // per rinfrescare le pagine precedenti
-						}
-					}).setOnCancelListener(	new DialogInterface.OnCancelListener() {
-						@Override // click fuori dal dialogo
-						public void onCancel( DialogInterface dialog ) {
-							((AppCompatActivity)contesto).recreate();
-							Globale.editato = true;
-						}
+					.setPositiveButton( R.string.yes, ( dialog, id ) -> tagliaImmagine( contesto, fileMedia, frammento ) )
+					.setNeutralButton( R.string.no, ( dialog, which ) -> {
+						// todo: anziché recreate() -> if( contesto instanceof Individuo) aggiorna() fragment 0
+						((AppCompatActivity)contesto).recreate();
+						Globale.editato = true; // per rinfrescare le pagine precedenti
+					}).setOnCancelListener( dialog -> {
+						((AppCompatActivity)contesto).recreate();
+						Globale.editato = true;
 					}).show();
-			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, 400 );
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, dpToPx(320) );
 			vistaImmagine.setLayoutParams( params ); // l'assegnazione delle dimensioni deve venire DOPO la creazione del dialogo
 			return true;
 		}
@@ -1041,8 +1026,8 @@ public class U {
 		String titolo = U.titolo( persona );
 		if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
 		else vistaTitolo.setText( titolo );
-		dettagli( persona, (TextView) vistaIndi.findViewById( R.id.indi_dettagli ) );
-		unaFoto( Globale.gc, persona, (ImageView)vistaIndi.findViewById(R.id.indi_foto) );
+		dettagli( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
+		unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
 		if( !U.morto(persona) )
 			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( View.GONE );
 		if( U.sesso(persona) == 1 )
@@ -1061,7 +1046,7 @@ public class U {
 	}
 
 	// Aggiunge una singola nota a un layout, con i dettagli o no
-	public static void mettiNota( final LinearLayout scatola, final Note nota, boolean dettagli ) {
+	static void mettiNota( final LinearLayout scatola, final Note nota, boolean dettagli ) {
 		final Context contesto = scatola.getContext();
 		View vistaNota = LayoutInflater.from(contesto).inflate( R.layout.pezzo_nota, scatola, false);
 		scatola.addView( vistaNota );
@@ -1071,7 +1056,9 @@ public class U {
 		TextView vistaCitaFonti = vistaNota.findViewById( R.id.nota_fonti );
 		if( quanteCitaFonti > 0 && dettagli ) vistaCitaFonti.setText( String.valueOf(quanteCitaFonti) );
 		else vistaCitaFonti.setVisibility( View.GONE );
+		testoNota.setEllipsize( TextUtils.TruncateAt.END );
 		if( dettagli ) {
+			testoNota.setMaxLines( 10 );
 			vistaNota.setTag( R.id.tag_oggetto, nota );
 			if( contesto instanceof Individuo ) { // Fragment individuoEventi
 				((AppCompatActivity)contesto).getSupportFragmentManager()
@@ -1079,22 +1066,19 @@ public class U {
 						.registerForContextMenu( vistaNota );
 			} else	// ok nelle AppCompatActivity
 				((AppCompatActivity)contesto).registerForContextMenu( vistaNota );
-			vistaNota.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View v ) {
-					if( nota.getId() != null )
-						Memoria.setPrimo( nota );
-					else
-						Memoria.aggiungi( nota );
-					contesto.startActivity( new Intent( contesto, Nota.class ) );
-				}
-			} );
+			vistaNota.setOnClickListener( v -> {
+				if( nota.getId() != null )
+					Memoria.setPrimo( nota );
+				else
+					Memoria.aggiungi( nota );
+				contesto.startActivity( new Intent( contesto, Nota.class ) );
+			});
 		} else {
 			testoNota.setMaxLines( 3 );
-			testoNota.setEllipsize( TextUtils.TruncateAt.END );
 		}
 	}
 
-	public static void scollegaNota( Note nota, Object contenitore, View vista ) {
+	static void scollegaNota( Note nota, Object contenitore, View vista ) {
 		//s.l("Scollego " + nota + " da " + contenitore );
 		List<NoteRef> lista = ((NoteContainer)contenitore).getNoteRefs();
 		for( NoteRef ref : lista )
@@ -1181,13 +1165,11 @@ public class U {
 			} else	// AppCompatActivity
 				((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaCita );
 
-			vistaCita.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View v ) {
-					Intent intento = new Intent( scatola.getContext(), CitazioneFonte.class );
-					Memoria.aggiungi( citaz );
-					scatola.getContext().startActivity( intento );
-				}
-			} );
+			vistaCita.setOnClickListener( v -> {
+				Intent intento = new Intent( scatola.getContext(), CitazioneFonte.class );
+				Memoria.aggiungi( citaz );
+				scatola.getContext().startActivity( intento );
+			});
 		}
 	}
 
@@ -1198,19 +1180,17 @@ public class U {
 		((TextView)vistaFonte.findViewById( R.id.fonte_titolo )).setText( Biblioteca.titoloFonte(fonte) );
 		vistaFonte.setTag( R.id.tag_oggetto, fonte );
 		((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFonte );
-		vistaFonte.setOnClickListener( new View.OnClickListener() {
-			public void onClick( View v ) {
-				Memoria.setPrimo( fonte );
-				scatola.getContext().startActivity( new Intent( scatola.getContext(), Fonte.class) );
-			}
-		} );
+		vistaFonte.setOnClickListener( v -> {
+			Memoria.setPrimo( fonte );
+			scatola.getContext().startActivity( new Intent( scatola.getContext(), Fonte.class) );
+		});
 	}
 
 	// La view ritornata è usata da Condivisione
 	public static View linkaPersona( final LinearLayout scatola, final Person p, final int scheda ) {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_individuo_piccolo, scatola, false );
 		scatola.addView( vistaPersona );
-		U.unaFoto( Globale.gc, p, (ImageView)vistaPersona.findViewById(R.id.collega_foto) );
+		U.unaFoto( Globale.gc, p, vistaPersona.findViewById(R.id.collega_foto) );
 		((TextView)vistaPersona.findViewById( R.id.collega_nome )).setText( U.epiteto(p) );
 		String dati = U.dueAnni(p,false);
 		TextView vistaDettagli = vistaPersona.findViewById( R.id.collega_dati );
@@ -1222,13 +1202,11 @@ public class U {
 			vistaPersona.findViewById(R.id.collega_carta).setBackgroundResource( R.drawable.casella_maschio );
 		if( U.sesso(p) == 2 )
 			vistaPersona.findViewById(R.id.collega_carta).setBackgroundResource( R.drawable.casella_femmina );
-		vistaPersona.setOnClickListener( new View.OnClickListener() {
-			public void onClick( View v ) {
-				Intent intento = new Intent( scatola.getContext(), Individuo.class );
-				intento.putExtra( "idIndividuo", p.getId() );
-				intento.putExtra( "scheda", scheda );
-				scatola.getContext().startActivity( intento );
-			}
+		vistaPersona.setOnClickListener( v -> {
+			Intent intento = new Intent( scatola.getContext(), Individuo.class );
+			intento.putExtra( "idIndividuo", p.getId() );
+			intento.putExtra( "scheda", scheda );
+			scatola.getContext().startActivity( intento );
 		} );
 		return vistaPersona;
 	}
@@ -1237,15 +1215,13 @@ public class U {
 	static void linkaMedia( final LinearLayout scatola, final Media media ) {
 		View vistaMedia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_media, scatola, false );
 		scatola.addView( vistaMedia );
-		AdattatoreGalleriaMedia.arredaMedia( media, (TextView)vistaMedia.findViewById(R.id.media_testo), (TextView)vistaMedia.findViewById(R.id.media_num) );
+		AdattatoreGalleriaMedia.arredaMedia( media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num) );
 		LinearLayout.LayoutParams parami = (LinearLayout.LayoutParams)vistaMedia.getLayoutParams();
-		parami.height = 120;
-		U.dipingiMedia( media, (ImageView)vistaMedia.findViewById(R.id.media_img), (ProgressBar)vistaMedia.findViewById(R.id.media_circolo) );
-		vistaMedia.setOnClickListener( new View.OnClickListener() {
-			public void onClick( View v ) {
-				Memoria.setPrimo( media );
-				scatola.getContext().startActivity( new Intent( scatola.getContext(), Immagine.class) );
-			}
+		parami.height = dpToPx( 80 );
+		U.dipingiMedia( media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo) );
+		vistaMedia.setOnClickListener( v -> {
+			Memoria.setPrimo( media );
+			scatola.getContext().startActivity( new Intent( scatola.getContext(), Immagine.class) );
 		} );
 	}
 
@@ -1296,12 +1272,10 @@ public class U {
 				metti( scatolaNote, altroTag.nome, altroTag.testo );
 			// Grazie al mio contributo la data cambiamento può avere delle note
 			mettiNote( scatolaNote, cambi, false );
-			vistaCambio.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View v ) {
-					Memoria.aggiungi( cambi );
-					scatola.getContext().startActivity( new Intent( scatola.getContext(), Cambiamenti.class ) );
-				}
-			} );
+			vistaCambio.setOnClickListener( v -> {
+				Memoria.aggiungi( cambi );
+				scatola.getContext().startActivity( new Intent( scatola.getContext(), Cambiamenti.class ) );
+			});
 		}
 		return vistaCambio;
 	}
@@ -1327,7 +1301,6 @@ public class U {
 				aggiornando.getClass().getMethod( "setChange", Change.class ).invoke( aggiornando, chan );
 				// Estensione con l'id della zona, una stringa tipo 'America/Sao_Paulo'
 				chan.putExtension( "zona", TimeZone.getDefault().getID() );
-				//s.l( "DATA CAMBIO "+aggiornando.hashCode()+" "+ aggiornando.getClass().getSimpleName() +"\t"+ dataTempo.getValue() +" - "+dataTempo.getTime() );
 			} catch( Exception e ) {}
 		}
 		// in header ci sono ben due campi data ma nessuno è la data dell'ultima modifica dell'albero
@@ -1362,7 +1335,7 @@ public class U {
 		try {
 			FileUtils.writeStringToFile(
 					new File( Globale.contesto.getFilesDir(), idAlbero + ".json" ),
-					new JsonParser().toJson( gc )
+					new JsonParser().toJson( gc ), "UTF-8"
 			);
 		} catch (IOException e) {
 			Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
@@ -1378,6 +1351,10 @@ public class U {
 		if( ignoto == null ) return null;
 		else if( ignoto instanceof String ) return (String) ignoto;
 		else return ((JsonPrimitive)ignoto).getAsString();
+	}
+
+	static int dpToPx(float dips) {
+		return (int) (dips * Globale.contesto.getResources().getDisplayMetrics().density + 0.5f);
 	}
 
 	// Valuta se ci sono individui collegabili rispetto a un individuo.
@@ -1396,17 +1373,14 @@ public class U {
 		final Header[] testa = { Globale.gc.getHeader() };
 		if( testa[0] == null || testa[0].getSubmitterRef() == null ) {
 			new AlertDialog.Builder( contesto ).setMessage( R.string.make_main_submitter )
-					.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialog, int id ) {
-							if( testa[0] == null ) {
-								testa[0] = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo+".json" );
-								Globale.gc.setHeader(testa[0]);
-							}
-							testa[0].setSubmitterRef( idAutore );
-							U.salvaJson( true );
+					.setPositiveButton( android.R.string.yes, (dialog, id) -> {
+						if( testa[0] == null ) {
+							testa[0] = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo+".json" );
+							Globale.gc.setHeader(testa[0]);
 						}
-					} ).setNegativeButton( R.string.no, null ).show();
+						testa[0].setSubmitterRef( idAutore );
+						U.salvaJson( true );
+					}).setNegativeButton( R.string.no, null ).show();
 		}
 	}
 
@@ -1431,7 +1405,7 @@ public class U {
 	}
 
 	// Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
-	// restituisce true per bloccare Diagramma
+	// restituisce true per bloccare Diagram
 	public static boolean qualiGenitoriMostrare( final Context contesto, final Person perno, final Class attivita ) {
 		if( perno.getParentFamilies(Globale.gc).size() > 1 ) {
 			List<String> famigliePerno = new ArrayList<>();
@@ -1444,17 +1418,14 @@ public class U {
 				famigliePerno.add( etichetta );
 			}
 			new AlertDialog.Builder( contesto ).setTitle( R.string.which_parents )
-					.setItems( famigliePerno.toArray(new String[0]), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialog, int quale ) {
-							Intent intento = new Intent( contesto, attivita );
-							if( attivita.equals( Principe.class ) ) {
-								Globale.individuo = perno.getId();
-								intento.putExtra( "genitoriNum", quale );
-							} else if( attivita.equals( Famiglia.class ) )
-								Memoria.setPrimo( perno.getParentFamilies(Globale.gc).get(quale) );
-							contesto.startActivity( intento );
-						}
+					.setItems( famigliePerno.toArray(new String[0]), (dialog, quale) -> {
+						Intent intento = new Intent( contesto, attivita );
+						if( attivita.equals( Principe.class ) ) {
+							Globale.individuo = perno.getId();
+							intento.putExtra( "genitoriNum", quale );
+						} else if( attivita.equals( Famiglia.class ) )
+							Memoria.setPrimo( perno.getParentFamilies(Globale.gc).get(quale) );
+						contesto.startActivity( intento );
 					}).show();
 			return true;
 		} else if( attivita.equals( Famiglia.class ) ) {
@@ -1476,12 +1447,9 @@ public class U {
 				famigliePerno.add( etichetta );
 			}
 			new AlertDialog.Builder( contesto ).setTitle( R.string.which_spouses )
-					.setItems( famigliePerno.toArray(new String[0]), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialog, int quale ) {
-							Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( quale ) );
-							contesto.startActivity( new Intent( contesto, Famiglia.class ) );
-						}
+					.setItems( famigliePerno.toArray(new String[0]), (dialog, quale) -> {
+						Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( quale ) );
+						contesto.startActivity( new Intent( contesto, Famiglia.class ) );
 					}).show();
 		} else {
 			Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( 0 ) );
@@ -1494,10 +1462,6 @@ public class U {
 		tosta( contesto, contesto.getString( messaggio ) );
 	}
 	static void tosta( final Activity contesto, final String messaggio ) {
-		contesto.runOnUiThread( new Runnable() {
-			public void run() {
-				Toast.makeText( contesto, messaggio, Toast.LENGTH_LONG ).show();
-			}
-		} );
+		contesto.runOnUiThread( () -> Toast.makeText( contesto, messaggio, Toast.LENGTH_LONG ).show() );
 	}
 }

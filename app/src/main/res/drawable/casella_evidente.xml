@@ -4,7 +4,7 @@
 		android:type="radial"
 		android:startColor="#fff"
 		android:endColor="@color/evidenzia"
-		android:gradientRadius="180" />
+		android:gradientRadius="100dp" />
 	<stroke
 		android:width="2dp"
 		android:color="@color/evidenzia" />

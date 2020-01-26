@@ -63,13 +63,10 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Diagram()).commit();
 		}
 
-		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_testa ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				scatolissima.closeDrawer(GravityCompat.START);
-				startActivity( new Intent( Principe.this, Alberi.class ) );
-			}
-		} );
+		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_alberi ).setOnClickListener( v -> {
+			scatolissima.closeDrawer(GravityCompat.START);
+			startActivity( new Intent( Principe.this, Alberi.class ) );
+		});
 
 		// Nasconde le voci del menu più ostiche
 		if( !Globale.preferenze.esperto ) {
@@ -112,14 +109,11 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			testo.setText( Globale.preferenze.alberoAperto().nome );
 		}
 		Button bottoneSalva = menu.getHeaderView(0).findViewById( R.id.menu_salva );
-		bottoneSalva.setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View vista ) {
-				vista.setVisibility( View.GONE );
-				U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
-				scatolissima.closeDrawer(GravityCompat.START);
-				Globale.daSalvare = false;
-			}
+		bottoneSalva.setOnClickListener( vista -> {
+			vista.setVisibility( View.GONE );
+			U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+			scatolissima.closeDrawer(GravityCompat.START);
+			Globale.daSalvare = false;
 		});
 		if( Globale.daSalvare )
 			bottoneSalva.setVisibility( View.VISIBLE );
