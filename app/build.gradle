@@ -21,9 +21,10 @@ android {
 		applicationId "app.familygem"
 		minSdkVersion 19
 		targetSdkVersion 29
-		versionCode 7
-		versionName '0.7.4'
+		versionCode 10
+		versionName '0.7.7'
 		vectorDrawables.useSupportLibrary = true
+		resConfigs "en", "es", "it"
 		def backupKey = ""
 		def utenteAruba = ""
 		def passwordAruba = ""
@@ -55,6 +56,9 @@ android {
 	compileOptions {
 		sourceCompatibility JavaVersion.VERSION_1_8
 		targetCompatibility JavaVersion.VERSION_1_8
+	}
+	packagingOptions {
+		excludes += ['**/*.properties','META-INF/*.md','META-INF/*.xml']
 	}
 }
 

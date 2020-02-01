@@ -59,9 +59,6 @@ public class Alberi extends AppCompatActivity {
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.alberi );
-		// Alla prima apertura nasconde la freccia indietro
-		/*if( Globale.preferenze.idAprendo == 0 )
-			getSupportActionBar().setDisplayHomeAsUpEnabled( false );*/
 		lista = findViewById( R.id.lista_alberi );
 
 		if( Globale.preferenze.alberi != null ) {
@@ -235,13 +232,21 @@ public class Alberi extends AppCompatActivity {
 		findViewById(R.id.fab).setOnClickListener( v -> startActivity(
 				new Intent( Alberi.this, AlberoNuovo.class) )
 		);
+
+		// Apertura automatica dell'albero
+		if( getIntent().getBooleanExtra("apriAlberoAutomaticamente",false) && Globale.preferenze.idAprendo != 0 ) {
+			// todo mostra rotella
+			if( Alberi.apriGedcom( Globale.preferenze.idAprendo, false ) ) {
+				startActivity( new Intent( Alberi.this, Principe.class ) );
+			}
+		}
 	}
 
 	@Override
 	protected void onRestart() {
 		super.onRestart();
 		if( Globale.editato ) {
-			recreate();
+			aggiornaLista();
 			Globale.editato = false;
 		} else
 			findViewById( R.id.alberi_circolo ).setVisibility( View.GONE );
@@ -310,7 +315,7 @@ public class Alberi extends AppCompatActivity {
 		try {
 			String contenuto = FileUtils.readFileToString( new File( Globale.contesto.getFilesDir(), idAlbero + ".json" ), "UTF-8" );
 			gc = new JsonParser().fromJson( contenuto );
-		} catch( IOException e ) {
+		} catch( Exception e ) {
 			Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			return null;
 		}
@@ -708,16 +713,14 @@ public class Alberi extends AppCompatActivity {
 			AlertDialog.Builder dialog = new AlertDialog.Builder( this );
 			dialog.setMessage( errori==0 ? getText(R.string.all_ok) : getString(R.string.errors_found,errori) );
 			if( errori > 0 ) {
-				dialog.setPositiveButton( R.string.correct, new DialogInterface.OnClickListener() {
-					public void onClick( DialogInterface dialogo, int i ) {
-						dialogo.cancel();
-						Gedcom gcCorretto = trovaErrori( idAlbero, true );
-						U.salvaJson( gcCorretto, idAlbero );
-						Globale.gc = null; // così se era aperto poi lo ricarica corretto
-						trovaErrori( idAlbero, false );	// riapre per ammirere il risultato
-						aggiornaLista();
-					}
-				});
+				dialog.setPositiveButton( R.string.correct, (dialogo, i) -> {
+					dialogo.cancel();
+					Gedcom gcCorretto = trovaErrori( idAlbero, true );
+					U.salvaJson( gcCorretto, idAlbero );
+					Globale.gc = null; // così se era aperto poi lo ricarica corretto
+					trovaErrori( idAlbero, false );	// riapre per ammirere il risultato
+					aggiornaLista();
+				} );
 			}
 			dialog.setNeutralButton( android.R.string.cancel, null ).show();
 		}

@@ -2,7 +2,6 @@ package app.familygem;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -11,7 +10,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -127,140 +125,129 @@ public class EditaIndividuo extends AppCompatActivity {
 		editoreDataNescita = findViewById(R.id.editore_data_nascita);
 		editoreDataNescita.inizia( dataNascita );
 		editoreDataMorte = findViewById( R.id.editore_data_morte );
-		editoreDataMorte.inizia( (EditText)findViewById( R.id.data_morte ) );
+		editoreDataMorte.inizia( findViewById( R.id.data_morte ) );
 
-		bottonMorte.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
-			public void onCheckedChanged( CompoundButton coso, boolean attivo ) {
-				if( attivo )
-					findViewById(R.id.morte).setVisibility( View.VISIBLE );
-				else
-					findViewById(R.id.morte).setVisibility( View.GONE );
-			}
+		bottonMorte.setOnCheckedChangeListener( (coso, attivo) -> {
+			if (attivo)
+				findViewById(R.id.morte).setVisibility( View.VISIBLE );
+			else
+				findViewById(R.id.morte).setVisibility( View.GONE );
 		});
 
 		// Barra
 		ActionBar barra = getSupportActionBar();
 		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
-		barraAzione.findViewById( R.id.edita_annulla ).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				onBackPressed();
-			}
-		});
-		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
+		barraAzione.findViewById( R.id.edita_annulla ).setOnClickListener( v -> onBackPressed() );
+		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( v -> {
+			// Nome
+			String epiteto = ((EditText)findViewById(R.id.nome)).getText() + " /" + ((EditText)findViewById(R.id.cognome)).getText() + "/".trim();
+			if( p.getNames().isEmpty() ) {
+				List<Name> nomi = new ArrayList<>();
+				Name nomeCompleto = new Name();
+				nomeCompleto.setValue( epiteto );
+				nomi.add( nomeCompleto );
+				p.setNames( nomi );
+			} else
+				p.getNames().get(0).setValue( epiteto );
 
-				// Nome
-				String epiteto = ((EditText)findViewById(R.id.nome)).getText() + " /" + ((EditText)findViewById(R.id.cognome)).getText() + "/".trim();
-				if( p.getNames().isEmpty() ) {
-					List<Name> nomi = new ArrayList<>();
-					Name nomeCompleto = new Name();
-					nomeCompleto.setValue( epiteto );
-					nomi.add( nomeCompleto );
-					p.setNames( nomi );
-				} else
-					p.getNames().get(0).setValue( epiteto );
-
-				// Sesso
-				String sessoScelto = null;
-				if( ((RadioButton)findViewById(R.id.sesso1)).isChecked() )
-					sessoScelto = "M";
-				else if( ((RadioButton)findViewById(R.id.sesso2)).isChecked() )
-					sessoScelto = "F";
-				else if( ((RadioButton) findViewById(R.id.sesso3)).isChecked() )
-					sessoScelto = "U";
-				if( sessoScelto != null ) {
-					boolean mancaSesso = true;
-					for( EventFact fatto : p.getEventsFacts() ) {
-						if (fatto.getTag().equals("SEX")) {
-							fatto.setValue(sessoScelto);
-							mancaSesso = false;
-						}
-					}
-					if( mancaSesso ) {
-						EventFact sesso = new EventFact();
-						sesso.setTag( "SEX" );
-						sesso.setValue( sessoScelto );
-						p.addEventFact( sesso );
+			// Sesso
+			String sessoScelto = null;
+			if( ((RadioButton)findViewById(R.id.sesso1)).isChecked() )
+				sessoScelto = "M";
+			else if( ((RadioButton)findViewById(R.id.sesso2)).isChecked() )
+				sessoScelto = "F";
+			else if( ((RadioButton) findViewById(R.id.sesso3)).isChecked() )
+				sessoScelto = "U";
+			if( sessoScelto != null ) {
+				boolean mancaSesso = true;
+				for( EventFact fatto : p.getEventsFacts() ) {
+					if (fatto.getTag().equals("SEX")) {
+						fatto.setValue(sessoScelto);
+						mancaSesso = false;
 					}
 				}
+				if( mancaSesso ) {
+					EventFact sesso = new EventFact();
+					sesso.setTag( "SEX" );
+					sesso.setValue( sessoScelto );
+					p.addEventFact( sesso );
+				}
+			}
 
-				// Nascita
-				if( editoreDataNescita.datatore.tipo == 10 ) editoreDataNescita.genera( true );
-				String data = ((EditText)findViewById(R.id.data_nascita)).getText().toString();
-				String luogo = luogoNascita.getText().toString();
-				boolean trovato = false;
-				for (EventFact fatto : p.getEventsFacts()) {
-					if( fatto.getTag().equals("BIRT") ) {
-						/* TODO: if(  data.isEmpty() && luogo.isEmpty() && tagTuttoVuoto(fatto)
-						    p.getEventsFacts().remove(fatto);
-						    più in generale, eliminare un tag quando è vuoto */
+			// Nascita
+			editoreDataNescita.chiudi();
+			String data = ((EditText)findViewById(R.id.data_nascita)).getText().toString();
+			String luogo = luogoNascita.getText().toString();
+			boolean trovato = false;
+			for (EventFact fatto : p.getEventsFacts()) {
+				if( fatto.getTag().equals("BIRT") ) {
+					/* TODO: if(  data.isEmpty() && luogo.isEmpty() && tagTuttoVuoto(fatto)
+					    p.getEventsFacts().remove(fatto);
+					    più in generale, eliminare un tag quando è vuoto */
+					fatto.setDate( data );
+					fatto.setPlace( luogo );
+					Evento.ripulisciTag( fatto );
+					trovato = true;
+				}
+			}
+			// Se c'è qualche dato da salvare crea il tag
+			if( !trovato && ( !data.isEmpty() || !luogo.isEmpty() ) ) {
+				EventFact nascita = new EventFact();
+				nascita.setTag( "BIRT" );
+				nascita.setDate( data );
+				nascita.setPlace( luogo );
+				Evento.ripulisciTag( nascita );
+				p.addEventFact( nascita );
+			}
+
+			// Morte
+			editoreDataMorte.chiudi();
+			data = ((EditText)findViewById(R.id.data_morte)).getText().toString();
+			luogo = ((EditText)findViewById(R.id.luogo_morte)).getText().toString();
+			trovato = false;
+			for( EventFact fatto : p.getEventsFacts() ) {
+				if( fatto.getTag().equals("DEAT") ) {
+					if( !bottonMorte.isChecked() ) {
+						p.getEventsFacts().remove(fatto);
+					} else {
 						fatto.setDate( data );
 						fatto.setPlace( luogo );
 						Evento.ripulisciTag( fatto );
-						trovato = true;
 					}
+					trovato = true;
+					break;
 				}
-				// Se c'è qualche dato da salvare crea il tag
-				if( !trovato && ( !data.isEmpty() || !luogo.isEmpty() ) ) {
-					EventFact nascita = new EventFact();
-					nascita.setTag( "BIRT" );
-					nascita.setDate( data );
-					nascita.setPlace( luogo );
-					Evento.ripulisciTag( nascita );
-					p.addEventFact( nascita );
-				}
-
-				// Morte
-				if( editoreDataMorte.datatore.tipo == 10 ) editoreDataMorte.genera( true );
-				data = ((EditText)findViewById(R.id.data_morte)).getText().toString();
-				luogo = ((EditText)findViewById(R.id.luogo_morte)).getText().toString();
-				trovato = false;
-				for( EventFact fatto : p.getEventsFacts() ) {
-					if( fatto.getTag().equals("DEAT") ) {
-						if( !bottonMorte.isChecked() ) {
-							p.getEventsFacts().remove(fatto);
-						} else {
-							fatto.setDate( data );
-							fatto.setPlace( luogo );
-							Evento.ripulisciTag( fatto );
-						}
-						trovato = true;
-						break;
-					}
-				}
-				if( !trovato && bottonMorte.isChecked() ) {
-					EventFact morte = new EventFact();
-					morte.setTag( "DEAT" );
-					morte.setDate( data );
-					morte.setPlace( luogo );
-					Evento.ripulisciTag( morte );
-					p.addEventFact( morte );
-				}
-
-				// ID individuo nuovo
-				Object[] modificati = { p, null }; // il null serve per accogliere una eventuale Family
-				if( idIndi.equals("TIZIO_NUOVO") || relazione > 0 ) {
-					String nuovoId = U.nuovoId( gc, Person.class );
-					p.setId( nuovoId );
-					gc.addPerson( p );
-					if( Globale.preferenze.alberoAperto().radice == null )
-						Globale.preferenze.alberoAperto().radice = nuovoId;
-					Globale.preferenze.alberoAperto().individui++;
-					Globale.preferenze.salva();
-					Globale.individuo = nuovoId; // per mostrarlo orgogliosi in Diagramma
-					if( idFamiglia != null ) { // viene da Famiglia
-						Famiglia.aggrega( p, gc.getFamily(idFamiglia), relazione );
-						modificati[1] = gc.getFamily(idFamiglia);
-					} else if( relazione > 0 ) // viene da Diagramma o IndividuoFamiliari
-						modificati = aggiungiParente( idIndi, nuovoId, relazione, famigliaNum );
-				}
-				if( Globale.preferenze.autoSalva )
-					Toast.makeText( getBaseContext(), R.string.saved, Toast.LENGTH_SHORT ).show();
-				U.salvaJson( true, modificati );
-				onBackPressed();
 			}
+			if( !trovato && bottonMorte.isChecked() ) {
+				EventFact morte = new EventFact();
+				morte.setTag( "DEAT" );
+				morte.setDate( data );
+				morte.setPlace( luogo );
+				Evento.ripulisciTag( morte );
+				p.addEventFact( morte );
+			}
+
+			// ID individuo nuovo
+			Object[] modificati = { p, null }; // il null serve per accogliere una eventuale Family
+			if( idIndi.equals("TIZIO_NUOVO") || relazione > 0 ) {
+				String nuovoId = U.nuovoId( gc, Person.class );
+				p.setId( nuovoId );
+				gc.addPerson( p );
+				if( Globale.preferenze.alberoAperto().radice == null )
+					Globale.preferenze.alberoAperto().radice = nuovoId;
+				Globale.preferenze.alberoAperto().individui++;
+				Globale.preferenze.salva();
+				Globale.individuo = nuovoId; // per mostrarlo orgogliosi in Diagramma
+				if( idFamiglia != null ) { // viene da Famiglia
+					Famiglia.aggrega( p, gc.getFamily(idFamiglia), relazione );
+					modificati[1] = gc.getFamily(idFamiglia);
+				} else if( relazione > 0 ) // viene da Diagramma o IndividuoFamiliari
+					modificati = aggiungiParente( idIndi, nuovoId, relazione, famigliaNum );
+			}
+			if( Globale.preferenze.autoSalva )
+				Toast.makeText( getBaseContext(), R.string.saved, Toast.LENGTH_SHORT ).show();
+			U.salvaJson( true, modificati );
+			onBackPressed();
 		});
 		barra.setCustomView( barraAzione );
 		barra.setDisplayShowCustomEnabled( true );
@@ -277,41 +264,35 @@ public class EditaIndividuo extends AppCompatActivity {
 				&& !famSposi.get(0).getChildren(gc).isEmpty() ) { //  e ci sono già dei figli
 			String msg = contesto.getString( R.string.new_child_same_parents, U.epiteto(famSposi.get(0).getChildren(gc).get(0)), U.epiteto(perno) );
 			new AlertDialog.Builder( contesto ).setMessage( msg )
-					.setNeutralButton( R.string.same_family, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialogo, int quale ) {
-							if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
-								// apre Anagrafe
-								if( frammento != null )
-									frammento.startActivityForResult( intento,1401 );
-								else
-									((Activity)contesto).startActivityForResult( intento,1401 );
-							} else // apre EditaIndividuo
-								contesto.startActivity( intento );
-						}
-					} )
-					.setPositiveButton( R.string.new_family, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialogo, int quale ) {
-							Family famNuova = Chiesa.nuovaFamiglia(true);
-							SpouseRef sr = new SpouseRef();
-							sr.setRef( idPerno );
-							if( U.sesso(perno) == 2 )
-								famNuova.addWife( sr );
-							else famNuova.addHusband( sr );
-							SpouseFamilyRef sfr = new SpouseFamilyRef();
-							sfr.setRef( famNuova.getId() );
-							perno.addSpouseFamilyRef( sfr );
-							intento.putExtra( "famigliaNum", 1 );
-							if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
-								if( frammento != null )
-									frammento.startActivityForResult( intento,1401 );
-								else
-									((Activity)contesto).startActivityForResult( intento,1401 );
-							} else
-								contesto.startActivity( intento );
-						}
-					} ).show();
+					.setNeutralButton( R.string.same_family, (dialogo, quale) -> {
+						if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
+							// apre Anagrafe
+							if( frammento != null )
+								frammento.startActivityForResult( intento,1401 );
+							else
+								((Activity)contesto).startActivityForResult( intento,1401 );
+						} else // apre EditaIndividuo
+							contesto.startActivity( intento );
+					})
+					.setPositiveButton( R.string.new_family, (dialogo, quale) -> {
+						Family famNuova = Chiesa.nuovaFamiglia(true);
+						SpouseRef sr = new SpouseRef();
+						sr.setRef( idPerno );
+						if( U.sesso(perno) == 2 )
+							famNuova.addWife( sr );
+						else famNuova.addHusband( sr );
+						SpouseFamilyRef sfr = new SpouseFamilyRef();
+						sfr.setRef( famNuova.getId() );
+						perno.addSpouseFamilyRef( sfr );
+						intento.putExtra( "famigliaNum", 1 );
+						if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
+							if( frammento != null )
+								frammento.startActivityForResult( intento,1401 );
+							else
+								((Activity)contesto).startActivityForResult( intento,1401 );
+						} else
+							contesto.startActivity( intento );
+					}).show();
 			return true;
 		} else if( relazione == 4 && famSposi.size() > 1 ) {
 			List<String> famigliePerno = new ArrayList<>();
@@ -324,21 +305,18 @@ public class EditaIndividuo extends AppCompatActivity {
 				famigliePerno.add( etichetta );
 			}
 			new AlertDialog.Builder( contesto ).setTitle( R.string.which_family_add_child )
-					.setItems( famigliePerno.toArray(new String[0]), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick( DialogInterface dialog, int quale ) {
-							// qui viene creato questo Extra che passerà da Anagrafe per tornare all'Activity/Fragment chiamante
-							intento.putExtra( "famigliaNum", quale );
-							//s.l( contesto.getClass() +"  "+ intento );
-							if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
-								// apre Anagrafe
-								if( frammento != null )
-									frammento.startActivityForResult( intento,1401 );
-								else
-									((Activity)contesto).startActivityForResult( intento,1401 );
-							} else // apre EditaIndividuo
-								contesto.startActivity( intento );
-						}
+					.setItems( famigliePerno.toArray(new String[0]), (dialog, quale) -> {
+						// qui viene creato questo Extra che passerà da Anagrafe per tornare all'Activity/Fragment chiamante
+						intento.putExtra( "famigliaNum", quale );
+						//s.l( contesto.getClass() +"  "+ intento );
+						if( intento.getBooleanExtra( "anagrafeScegliParente", false ) ) {
+							// apre Anagrafe
+							if( frammento != null )
+								frammento.startActivityForResult( intento,1401 );
+							else
+								((Activity)contesto).startActivityForResult( intento,1401 );
+						} else // apre EditaIndividuo
+							contesto.startActivity( intento );
 					}).show();
 			return true;
 		}

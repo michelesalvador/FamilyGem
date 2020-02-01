@@ -1,5 +1,6 @@
 <resources>
 	<string name="app_name" translatable="false">Family Gem</string>
+	<string name="tagline">Create your own family tree</string>
 	<string name="delete">Delete</string>
 	<string name="cancel">Cancel</string>
 	<string name="done">Done</string>
@@ -28,6 +29,8 @@
 	<string name="modify_later">Later you can edit it.</string>
 	<string name="name_of_tree">Title of tree</string>
 	<string name="create">Create</string>
+	<string name="tree_created">New tree created.</string>
+	<string name="complex_tree_advanced_tools">This tree looks quite complex. To better manage it, do you want to show advanced tools?</string>
 	<string name="tree_imported_ok">Tree successfully imported.</string>
 	<string name="warning">Warning</string>
 	<string name="old_backup_overwrite">This is an old type of backup. All existing trees will be overwritten!\nProceed?</string>
@@ -143,12 +146,11 @@
 	<string name="descendants">Descendants</string>
 	<!-- Anagrafe -->
 	<string name="order_by">Sort by</string>
-	<string name="none">Nothing</string>
 	<string name="id">ID</string>
 	<string name="surname">Surname</string>
 	<string name="year">Year</string>
 	<string name="number_relatives">Number of relatives</string>
-	<string name="really_delete">Really delete %s?</string>
+	<string name="really_delete_person">Really want to delete this person?</string>
 	<string name="person_deleted">Person deleted.</string>
 	<!-- Individuo -->
 	<string name="events">Facts</string>
@@ -264,10 +266,11 @@
 	<string name="children">children</string>
 	<string name="family">Family</string>
 	<string name="marriage">Marriage</string>
-	<string name="really_delete_family">Are you sure you want to delete this family?\nThe family members will not be deleted.</string>
+	<string name="really_delete_family">This family will be deleted, but the family members will not be deleted.</string>
 	<!-- Note -->
-	<string name="shared_notes">shared notes</string>
-	<string name="simple_notes">simple notes</string>
+	<string name="shared_notes">Shared notes</string>
+	<string name="simple_note">Simple note</string>
+	<string name="simple_notes">Simple notes</string>
 	<string name="shared_note">Shared note</string>
 	<string name="written_in">Written in</string>
 	<string name="shared_by">Used by</string>

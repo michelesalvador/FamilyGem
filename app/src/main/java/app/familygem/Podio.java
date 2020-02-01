@@ -30,7 +30,8 @@ public class Podio extends Fragment {
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
 		List<Submitter> listAutori = gc.getSubmitters();
-		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listAutori.size() + " " + getString(R.string.submitters).toLowerCase() );
+		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listAutori.size() + " " +
+				getString(listAutori.size()==1 ? R.string.submitter : R.string.submitters).toLowerCase() );
 		setHasOptionsMenu(true);
 		View vista = inflater.inflate( R.layout.magazzino, container, false);
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
@@ -43,13 +44,6 @@ public class Podio extends Fragment {
 			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( nome );
 			vistaPezzo.findViewById( R.id.magazzino_archivi ).setVisibility( View.GONE );
 			vistaPezzo.setOnClickListener( v -> {
-				/* non usato
-				if( getActivity().getIntent().getBooleanExtra("podioScegliAutore",false) ) {
-					Intent intento = new Intent();
-					intento.putExtra("idAutore", autor.getId() );
-					getActivity().setResult( Activity.RESULT_OK, intento );
-					getActivity().finish();
-				} else{*/
 				Memoria.setPrimo( autor );
 				startActivity( new Intent( getContext(), Autore.class ) );
 			});
@@ -101,19 +95,18 @@ public class Podio extends Fragment {
 	}
 
 	// Menu contestuale
-	View vistaAutore;
+	Submitter subm;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaAutore = vista;
-		if( gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals( vista.getTag() ) )
+		subm = (Submitter) vista.getTag();
+		if( gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(subm) )
 			menu.add( 0, 0, 0, R.string.make_default );
-		if( !U.autoreHaCondiviso((Submitter)vista.getTag()) ) // può essere eliminato solo se non ha mai condiviso
+		if( !U.autoreHaCondiviso(subm) ) // può essere eliminato solo se non ha mai condiviso
 			menu.add( 0, 1, 0, R.string.delete );
 		// todo spiegare perché non può essere eliminato?
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		Submitter subm = (Submitter) vistaAutore.getTag();
 		switch( item.getItemId() ) {
 			case 0:
 				autorePrincipale(subm);
@@ -121,8 +114,8 @@ public class Podio extends Fragment {
 			case 1:
 				// Todo conferma elimina
 				eliminaAutore( subm );
-				vistaAutore.setVisibility( View.GONE );
 				U.salvaJson(false);
+				getActivity().recreate();
 				return true;
 		}
 		return false;

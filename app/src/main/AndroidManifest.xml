@@ -50,7 +50,8 @@
 		</activity>
 		<activity
 			android:name=".Alberi"
-			android:parentActivityName=".Principe" />
+			android:parentActivityName=".Principe"
+			android:launchMode="singleTask" />
 		<activity
 			android:name=".AlberoNuovo"
 			android:label="@string/new_tree"

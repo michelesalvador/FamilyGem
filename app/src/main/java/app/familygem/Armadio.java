@@ -58,11 +58,8 @@ public class Armadio {
 				break;
 			}
 		}
-		if( idAprendo == id ) {
-			if( alberi.isEmpty() )
-				idAprendo = 0;
-			else
-				idAprendo = alberi.get(0).id;
+		if( id == idAprendo ) {
+			idAprendo = 0;
 		}
 		salva();
 	}

@@ -2,6 +2,7 @@ package app.familygem;
 
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -88,14 +89,12 @@ public class IndividuoFamiliari extends Fragment {
 			}
 		}
 		View vistaPersona = U.mettiIndividuo( scatola, p, ruolo );
-		vistaPersona.setOnClickListener( new View.OnClickListener() {
-			public void onClick( View v ) {
-				Intent intento = new Intent( getContext(), Individuo.class);
-				intento.putExtra( "idIndividuo", p.getId() );
-				intento.putExtra( "scheda", 2 );	// apre la scheda famiglia
-				startActivity( intento );
-			}
-		} );
+		vistaPersona.setOnClickListener( v -> {
+			Intent intento = new Intent( getContext(), Individuo.class);
+			intento.putExtra( "idIndividuo", p.getId() );
+			intento.putExtra( "scheda", 2 );	// apre la scheda famiglia
+			startActivity( intento );
+		});
 		registerForContextMenu( vistaPersona );
 		vistaPersona.setTag( R.id.tag_famiglia, fam ); // Il principale scopo di questo tag è poter scollegare l'individuo dalla famiglia
 		                                               // ma è usato anche qui sotto per spostare i molteplici matrimoni
@@ -163,8 +162,14 @@ public class IndividuoFamiliari extends Fragment {
 			Famiglia.scollega( idIndividuo, familia );
 			vistaScheda.setVisibility( View.GONE );
 			U.salvaJson( true, familia, pers );
+			// todo aggiorna la data cambiamento nella scheda Fatti
 		} else if( id == 307 ) {	// Elimina
-			Anagrafe.elimina( idIndividuo, getContext(), vistaScheda );
+			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
+					.setPositiveButton(R.string.delete, (dialog, i) -> {
+						Anagrafe.eliminaPersona(getContext(), idIndividuo);
+						vistaScheda.setVisibility( View.GONE );
+						// todo idem aggiorna data cambiamento
+					}).setNeutralButton(R.string.cancel, null).show();
 		} else {
 			return false;
 		}

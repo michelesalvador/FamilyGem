@@ -40,7 +40,8 @@ public class Quaderno extends Fragment {
 			if( !listaNoteCondivise.isEmpty() ) {
 				if( !scegliNota ) {
 					View tit = inflater.inflate( R.layout.titoletto, scatola, true );
-					String txt = listaNoteCondivise.size() +" "+ getText(R.string.shared_notes);
+					String txt = listaNoteCondivise.size() +" "+
+							getString(listaNoteCondivise.size()==1 ? R.string.shared_note : R.string.shared_notes).toLowerCase();
 					((TextView)tit.findViewById(R.id.titolo_testo)).setText( txt );
 				}
 				for( Note not : listaNoteCondivise )
@@ -52,7 +53,8 @@ public class Quaderno extends Fragment {
 				gc.accept( visitaNote );
 				if( !visitaNote.listaNote.isEmpty() ) {
 					View tit = inflater.inflate( R.layout.titoletto, scatola, false );
-					String txt = visitaNote.listaNote.size() +" "+ getText(R.string.simple_notes);
+					String txt = visitaNote.listaNote.size() +" "+
+							getString(visitaNote.listaNote.size()==1 ? R.string.simple_note : R.string.simple_notes).toLowerCase();
 					((TextView)tit.findViewById(R.id.titolo_testo)).setText( txt );
 					//((TextView)tit.findViewById(R.id.titolo_numero)).setText( String.valueOf(visitaNote.listaNote.size()) );
 					scatola.addView( tit );
@@ -60,9 +62,9 @@ public class Quaderno extends Fragment {
 						registerForContextMenu( mettiNota(scatola,(Note)nota) );
 				}
 			}
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(
-					(listaNoteCondivise.size()+visitaNote.listaNote.size()) + " " + getString(R.string.notes).toLowerCase() );
-			setHasOptionsMenu(true);
+			int totaleNote = listaNoteCondivise.size()+visitaNote.listaNote.size();
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( totaleNote + " "
+					+ getString(totaleNote==1 ? R.string.note : R.string.notes).toLowerCase() );
 			vista.findViewById( R.id.fab ).setOnClickListener( v -> nuovaNota( getContext(), null ) );
 		}
 		return vista;
@@ -114,21 +116,23 @@ public class Quaderno extends Fragment {
 			refNota.setRef( id );
 			((NoteContainer)contenitore).addNoteRef( refNota );
 		}
+		U.salvaJson( true, notaNova );
 		Memoria.setPrimo( notaNova );
 		contesto.startActivity( new Intent( contesto, Nota.class ) );
 	}
 
-	private View vistaScelta;
+	private Note nota;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaScelta = vista;
+		nota = (Note) vista.getTag();
 		menu.add(0, 0, 0, R.string.delete );
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) { // Elimina
-			Object[] capi = U.eliminaNota( (Note)vistaScelta.getTag(), vistaScelta );
+			Object[] capi = U.eliminaNota( nota, null );
 			U.salvaJson( false, capi );
+			getActivity().recreate();
 		} else {
 			return false;
 		}

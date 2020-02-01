@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -51,7 +50,7 @@ public class Diagram extends Fragment {
 	private float zoomValue = 0.7f;
 	private float density;
 	private int STROKE;
-	private PopupWindow popup;
+	private View popup;
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle state) {
@@ -62,8 +61,6 @@ public class Diagram extends Fragment {
 		getActivity().findViewById(R.id.toolbar).setVisibility( View.GONE );
 		final View view = inflater.inflate( R.layout.diagram, container, false );
 		view.findViewById( R.id.diagram_hamburger ).setOnClickListener( v -> {
-			if( popup != null )
-				popup.dismiss();
 			DrawerLayout scatolissima = getActivity().findViewById(R.id.scatolissima);
 			scatolissima.openDrawer( GravityCompat.START );
 		});
@@ -187,6 +184,21 @@ public class Diagram extends Fragment {
 				}
 			}
 
+			// UI suggestion popup
+			if( gc.getPeople().size() == 1 && gc.getFamilies().size() == 0 && fulcrumCard != null ) {
+				View popupView = LayoutInflater.from(getContext()).inflate(R.layout.popup, box);
+				LinearLayout layout = popupView.findViewById( R.id.popup_layout );
+				View node = box.getChildAt(0);
+				box.removeView(node);
+				layout.addView(node);
+				//box.addView( popupView );
+				popup = popupView.findViewById( R.id.popup_fumetto );
+				popup.setOnClickListener( vista -> {
+					vista.setVisibility(View.INVISIBLE);
+				});
+				zoomValue = 1.4f;
+			}
+
 			// Add the lines
 			RelativeLayout.LayoutParams paramLines = new RelativeLayout.LayoutParams( toPx(graph.width), toPx(graph.height) );
 			box.addView( new Lines(getContext()), 0, paramLines );
@@ -201,19 +213,8 @@ public class Diagram extends Fragment {
 					zoomBox.panTo( -margini.exactCenterX() + zoomBox.getWidth() / zoomBox.getRealZoom() / 2,
 							-margini.exactCenterY() + zoomBox.getHeight() / zoomBox.getRealZoom() / 2, false );
 				}
-				if( gc.getPeople().size() == 1 && box.getChildCount() == 2 )
-					popup = popUpMessage();
 			});
 		}, 100);
-	}
-
-	// UI suggestion
-	PopupWindow popUpMessage() {
-		View layout = LayoutInflater.from(getContext()).inflate(R.layout.popup, null);
-		PopupWindow popup = new PopupWindow( layout,
-				ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT );
-		popup.showAtLocation(box, Gravity.CENTER, 0, -U.dpToPx(80));
-		return popup;
 	}
 
 	// Node with one person or couple + marriage
@@ -468,11 +469,9 @@ public class Diagram extends Fragment {
 
 	// Menu contestuale
 	private String idPersona;
-	private View vistaScelta;
 	private Person pers;
 	@Override
 	public void onCreateContextMenu( @NonNull ContextMenu menu, @NonNull View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaScelta = vista;
 		idPersona = ((GraphicCard)vista).card.person.getId();
 		pers = gc.getPerson( idPersona );
 		if( !idPersona.equals(Globale.individuo) )
@@ -489,7 +488,7 @@ public class Diagram extends Fragment {
 			menu.add(0, 6, 0, R.string.unlink);
 		menu.add(0, 7, 0, R.string.delete);
 		if( popup != null )
-			popup.dismiss();
+			popup.setVisibility(View.INVISIBLE);
 	}
 
 	@Override
@@ -529,13 +528,18 @@ public class Diagram extends Fragment {
 			startActivity( intento );
 		} else if( id == 6 ) {	// Scollega
 			Family[] famiglie = Anagrafe.scollega( idPersona );
-			getActivity().recreate();
+			box.removeAllViews();
+			drawDiagram();
 			Snackbar.make( getView(), R.string.person_unlinked, Snackbar.LENGTH_LONG ).show();
 			U.aggiornaDate( pers );
 			U.salvaJson( false, (Object[])famiglie );
 		} else if( id == 7 ) {	// Elimina
-			Anagrafe.elimina( idPersona, getContext(), vistaScelta );
-			//getActivity().recreate(); todo
+			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
+					.setPositiveButton(R.string.delete, (dialog, i) -> {
+						Anagrafe.eliminaPersona(getContext(), idPersona);
+						box.removeAllViews();
+						drawDiagram();
+					}).setNeutralButton(R.string.cancel, null).show();
 		} else
 			return false;
 		return true;

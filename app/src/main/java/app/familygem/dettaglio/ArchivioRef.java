@@ -47,12 +47,9 @@ public class ArchivioRef extends Dettaglio {
 		scatola.addView( cartaRepo );
 		((TextView) cartaRepo.findViewById( R.id.fonte_titolo ) ).setText( repo.getName() );
 		((CardView) cartaRepo).setCardBackgroundColor( contesto.getResources().getColor(R.color.archivio) );
-		cartaRepo.setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				Memoria.setPrimo( repo );
-				contesto.startActivity( new Intent( contesto, Archivio.class ) );
-			}
+		cartaRepo.setOnClickListener( v -> {
+			Memoria.setPrimo( repo );
+			contesto.startActivity( new Intent( contesto, Archivio.class ) );
 		});
 		return cartaRepo;
 	}

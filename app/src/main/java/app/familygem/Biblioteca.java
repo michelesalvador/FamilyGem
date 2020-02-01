@@ -47,8 +47,10 @@ public class Biblioteca extends Fragment {
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
 		listaFonti = gc.getSources();
-		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listaFonti.size() + " " + getString(R.string.sources).toLowerCase() );
-		setHasOptionsMenu(true);
+		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listaFonti.size() + " " +
+				getString(listaFonti.size()==1 ? R.string.source : R.string.sources).toLowerCase() );
+		if( listaFonti.size() > 1 )
+			setHasOptionsMenu(true);
 		View vista = inflater.inflate(R.layout.ricicla_vista, container, false);
 		RecyclerView vistaFonti = vista.findViewById( R.id.riciclatore );
 		adattatore = new BibliotecAdapter();
@@ -151,24 +153,22 @@ public class Biblioteca extends Fragment {
 						fonte.putExtension( "citaz", quanteCitazioni(fonte) );
 				}
 			}
-			Collections.sort( listaFonti, new Comparator<Source>() {
-				public int compare( Source f1, Source f2 ) {
-					switch( ordine ) {
-						case 1:	// Ordina per id numerico
-							return U.soloNumeri(f1.getId()) - U.soloNumeri(f2.getId());
-						case 2:
-							return U.soloNumeri(f2.getId()) - U.soloNumeri(f1.getId());
-						case 3:	// Ordine alfabeto dei titoli
-							return titoloFonte(f1).compareToIgnoreCase( titoloFonte(f2) );
-						case 4:
-							return titoloFonte(f2).compareToIgnoreCase( titoloFonte(f1) );
-						case 5:	// Ordina per numero di citazioni
-							return U.castaJsonInt(f1.getExtension("citaz")) - U.castaJsonInt(f2.getExtension("citaz"));
-						case 6:
-							return U.castaJsonInt(f2.getExtension("citaz")) - U.castaJsonInt(f1.getExtension("citaz"));
-					}
-					return 0;
+			Collections.sort( listaFonti, (f1, f2) -> {
+				switch( ordine ) {
+					case 1:	// Ordina per id numerico
+						return U.soloNumeri(f1.getId()) - U.soloNumeri(f2.getId());
+					case 2:
+						return U.soloNumeri(f2.getId()) - U.soloNumeri(f1.getId());
+					case 3:	// Ordine alfabeto dei titoli
+						return titoloFonte(f1).compareToIgnoreCase( titoloFonte(f2) );
+					case 4:
+						return titoloFonte(f2).compareToIgnoreCase( titoloFonte(f1) );
+					case 5:	// Ordina per numero di citazioni
+						return U.castaJsonInt(f1.getExtension("citaz")) - U.castaJsonInt(f2.getExtension("citaz"));
+					case 6:
+						return U.castaJsonInt(f2.getExtension("citaz")) - U.castaJsonInt(f1.getExtension("citaz"));
 				}
+				return 0;
 			});
 		}
 	}
@@ -240,6 +240,7 @@ public class Biblioteca extends Fragment {
 			if( contenitore instanceof Note ) ((Note)contenitore).addSourceCitation( citaFonte );
 			else ((SourceCitationContainer)contenitore).addSourceCitation( citaFonte );
 		}
+		U.salvaJson( true, fonte );
 		Memoria.setPrimo( fonte );
 		contesto.startActivity( new Intent( contesto, Fonte.class ) );
 	}
@@ -323,18 +324,18 @@ public class Biblioteca extends Fragment {
 		return false;
 	}
 
-	private View vistaScelta;
+	private String idFonte;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaScelta = vista;
+		idFonte = ((TextView)vista.findViewById(R.id.biblioteca_id)).getText().toString();
 		menu.add(0, 0, 0, R.string.delete );
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {	// Elimina
-			vistaScelta.setVisibility( View.GONE );
-			Object[] oggetti = eliminaFonte( gc.getSource(((TextView)vistaScelta.findViewById(R.id.biblioteca_id)).getText().toString()) );
+			Object[] oggetti = eliminaFonte( gc.getSource(idFonte) );
 			U.salvaJson( false, oggetti );
+			getActivity().recreate();
 		} else {
 			return false;
 		}

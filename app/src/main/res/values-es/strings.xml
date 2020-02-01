@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="tagline">Crea tu propio árbol genealógico</string>
 	<string name="delete">Eliminar</string>
 	<string name="cancel">Cancelar</string>
 	<string name="done">Listo</string>
@@ -81,11 +82,10 @@
 	<string name="child">Hijo/a</string>
 	<string name="person_unlinked">Persona desvinculada.</string>
 	<string name="order_by">Ordenar por</string>
-	<string name="none">Nada</string>
 	<string name="id">ID</string>
 	<string name="surname">Apellido</string>
 	<string name="number_relatives">Número de familiares</string>
-	<string name="really_delete">¿Quiere realmente eliminar %s?</string>
+	<string name="really_delete_person">¿Quieres realmente eliminar a esta persona?</string>
 	<string name="person_deleted">Persona eliminada.</string>
 	<string name="events">Hechos</string>
 	<string name="relatives">Familiares</string>
@@ -185,8 +185,9 @@
 	<string name="children">hijos</string>
 	<string name="family">Familia</string>
 	<string name="marriage">Boda</string>
-	<string name="shared_notes">notas compartidas</string>
-	<string name="simple_notes">notas simples</string>
+	<string name="shared_notes">Notas compartidas</string>
+	<string name="simple_note">Nota simple</string>
+	<string name="simple_notes">Notas simples</string>
 	<string name="male">Varón</string>
 	<string name="female">Mujer</string>
 	<string name="unknown">No conocido</string>
@@ -284,7 +285,7 @@
 	<string name="downloading">Descargando.</string>
 	<string name="delete_imported_tree">Eliminar el árbol importado</string>
 	<string name="all_imported_delete">Todas las actualizaciones han sido importadas.\n¿Desea eliminar el árbol importado?</string>
-	<string name="really_delete_family">¿Seguro que quiere eliminar esta familia?\nLas personas que la componen no serán eliminadas.</string>
+	<string name="really_delete_family">Esta familia será eliminada, pero las personas que la componen no serán eliminadas.</string>
 	<string name="year">Año</string>
 	<string name="ancestors">Antepasados</string>
 	<string name="descendants">Descendientes</string>
@@ -292,9 +293,11 @@
 	<string name="siblings">Hermanos</string>
 	<string name="uncles">Tíos</string>
 	<string name="accept_all">Aceptar todas</string>
-	<string name="long_press_menu">Mantener presionado para mostrar el menú. Pulsar para abrir la tarjeta.</string>
+	<string name="long_press_menu">Mantener presionado para mostrar el menú.\nPulsar para abrir la tarjeta.</string>
 	<string name="one_update_choice">Una actualización necesita una elección</string>
 	<string name="many_updates_choice">%d actualizaciones necesitan una elección</string>
 	<string name="updates_replace_add">Tiene que elegir si las actualizaciones deben reemplazar los elementos existentes o añadirse como nuevos elementos.</string>
 	<string name="shared_medias">Multimedia compartidos</string>
+	<string name="complex_tree_advanced_tools">Este árbol parece bastante complejo.\nPara manejarlo mejor, ¿quieres mostrar herramientas avanzadas?</string>
+	<string name="tree_created">Nuevo árbol creado.</string>
 </resources>

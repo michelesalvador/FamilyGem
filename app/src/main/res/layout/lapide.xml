@@ -29,7 +29,7 @@
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/uno"
 		android:layout_centerHorizontal="true"
-		android:text="Create your own family trees"
+		android:text="@string/tagline"
 		android:textColor="#000"
 		android:textSize="16sp"
 		android:textStyle="italic" />

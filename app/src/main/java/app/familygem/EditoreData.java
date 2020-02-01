@@ -85,27 +85,28 @@ public class EditoreData extends LinearLayout {
 					impostaCeccoDoppia( data2 );
 					elencoTipi.setText( tipiData[datatore.tipo] );
 					veroImputTesto = false;
-					genera( false );
+					genera();
 					return true;
 				});
 			});
 			findViewById( R.id.editadata_doppia1 ).setOnClickListener( vista -> {
 				data1.doppia = ((CompoundButton)vista).isChecked();
 				veroImputTesto = false;
-				genera( false );
+				genera();
 			});
 			findViewById( R.id.editadata_doppia2 ).setOnClickListener( vista -> {
 				data2.doppia = ((CompoundButton)vista).isChecked();
 				veroImputTesto = false;
-				genera( false );
+				genera();
 			});
 			findViewById( R.id.editadata_circa ).setVisibility( GONE );
 		} else {
 			findViewById( R.id.editadata_circa ).setOnClickListener( vista -> {
+				findViewById( R.id.editadata_seconda ).setVisibility( GONE ); // casomai fosse visibile per tipi 6 o 9
 				datatore.tipo = ((CompoundButton)vista).isChecked() ? 1 : 0;
 				veroImputTesto = false;
-				genera( false );
-			} );
+				genera();
+			});
 			findViewById( R.id.editadata_avanzate ).setVisibility( GONE );
 		}
 
@@ -117,11 +118,12 @@ public class EditoreData extends LinearLayout {
 
 		// Al primo focus mostra sè stesso (EditoreData) nascondendo la tastiera
 		tastiera = (InputMethodManager) getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
-		editaTesto.setOnFocusChangeListener( ( v, ciapa ) -> {
-			if( ciapa ) {
-				if( datatore.tipo == 10 )
-					genera( false ); // solo per togliere le parentesi alla frase
-				else {
+		editaTesto.setOnFocusChangeListener( ( v, ciapaFocus ) -> {
+			if( ciapaFocus ) {
+				if( datatore.tipo == 10 ) {
+					//genera(); // Toglie le parentesi alla frase
+					editaTesto.setText( datatore.frase );
+				} else {
 					tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
 					/*Window finestra = ((Activity)getContext()).getWindow(); non aiuta la scomparsa della tastiera
 					finestra.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );*/
@@ -154,11 +156,11 @@ public class EditoreData extends LinearLayout {
 			public void onTextChanged( CharSequence testo, int i, int i1, int i2 ) {}
 			@Override
 			public void afterTextChanged( Editable testo ) {
-				//s.l("\tafterTextChanged "+veroImputTesto);
 				// non so perché ma in android 5 alla prima editazione viene chiamato 2 volte, che comunque non è un problema
 				if( veroImputTesto )
 					impostaTutto();
 				veroImputTesto = true;
+				s.l("afterTextChanged",datatore.tipo);
 			}
 		} );
 	}
@@ -209,19 +211,12 @@ public class EditoreData extends LinearLayout {
 	// Chiamato quando clicco sul campo editabile, e dopo ogni editazione del testo
 	void impostaTutto() {
 		datatore.analizza( editaTesto.getText().toString() );
-
 		((CheckBox)findViewById( R.id.editadata_circa )).setChecked( datatore.tipo == 1 );
-
 		((TextView)findViewById( R.id.editadata_tipi )).setText( tipiData[datatore.tipo] );
 
 		// Primo carro
-		if( datatore.tipo == 10 ) // Data frase
-			findViewById( R.id.editadata_prima ).setVisibility( GONE );
-		else {
-			impostaCarro( data1, findViewById( R.id.prima_giorno ), findViewById( R.id.prima_mese ),
-					findViewById( R.id.prima_secolo ), findViewById( R.id.prima_anno ) );
-			findViewById( R.id.editadata_prima ).setVisibility( VISIBLE );
-		}
+		impostaCarro( data1, findViewById( R.id.prima_giorno ), findViewById( R.id.prima_mese ),
+				findViewById( R.id.prima_secolo ), findViewById( R.id.prima_anno ) );
 
 		// Secondo carro
 		if( datatore.tipo == 6 || datatore.tipo == 9 ) {
@@ -307,11 +302,11 @@ public class EditoreData extends LinearLayout {
 		// Il ceckbox della data doppia
 		impostaCeccoDoppia( data );
 		veroImputTesto = false;
-		genera( false );
+		genera();
 	}
 
 	// Ricostruisce la stringa con la data finale e la mette in editaTesto
-	void genera( boolean appenaPrimaDiSalvare ) {
+	void genera() {
 		String rifatta;
 		if( datatore.tipo == 0 )
 			rifatta = rifai( data1 );
@@ -320,13 +315,12 @@ public class EditoreData extends LinearLayout {
 		else if( datatore.tipo == 9 )
 			rifatta = "FROM " + rifai( data1 ) + " TO " + rifai( data2 );
 		else if( datatore.tipo == 10 ) {
-			if( appenaPrimaDiSalvare )
-				rifatta = "(" + editaTesto.getText() + ")"; // mette le parentesi intorno a una data frase
-			else
-				rifatta = datatore.frase;
+			// La frase viene sostituita da data esatta
+			datatore.tipo = 0;
+			((TextView)findViewById( R.id.editadata_tipi )).setText( tipiData[0] );
+			rifatta = rifai( data1 );
 		} else
 			rifatta = prefissi[datatore.tipo] + " " + rifai( data1 );
-
 		editaTesto.setText( rifatta );
 	}
 
@@ -345,6 +339,13 @@ public class EditoreData extends LinearLayout {
 				fatta = data.format.format( data.date );
 		}
 		return fatta;
+	}
+
+	// Chiamato dall'esterno in sostanza solo per aggiungere le parentesi alla data-frase
+	void chiudi() {
+		if( datatore.tipo == 10 ) {
+			editaTesto.setText( "(" + editaTesto.getText() + ")" );
+		}
 	}
 
 	String s( int id ) {

@@ -130,16 +130,17 @@ public class Galleria extends Fragment {
 	}
 
 	// Menu contestuale
-	View vistaFoto;
+	private Media media;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaFoto = vista;
+		media = (Media) vista.getTag( R.id.tag_oggetto );
 		menu.add(0, 0, 0, R.string.delete );
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {
-			U.salvaJson( false, eliminaMedia( (Media)vistaFoto.getTag( R.id.tag_oggetto ), vistaFoto ) );
+			U.salvaJson( false, eliminaMedia( media, null ) );
+			getActivity().recreate();
 			return true;
 		}
 		return false;

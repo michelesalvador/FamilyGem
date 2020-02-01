@@ -32,7 +32,7 @@ public class Globale extends Application {
 
 	public static void avvia( Context contesto ) {
 		Gson gson = new Gson();
-		String stringone = "{\"alberi\":[],\"idAprendo\":0,\"autoSalva\":true,\"caricaAlbero\":true}";	// preferenze vuote
+		String stringone = "{\"alberi\":[],\"autoSalva\":true}"; // preferenze vuote
 							// i boolean false non hanno bisogno di essere inizializzati
 		try {
 			File filePreferenze = new File( contesto.getFilesDir(), "preferenze.json");

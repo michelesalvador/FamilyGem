@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import android.text.InputType;
@@ -249,25 +250,29 @@ public class Dettaglio extends AppCompatActivity {
 		if( oggetto instanceof Source && findViewById(R.id.citazione_fonte) == null ) { // todo dubbio: non dovrebbe essere citazione_ARCHIVIO ?
 			SubMenu subArchivio = menu.addSubMenu( 0, 100, 0, R.string.repository );
 			subArchivio.add( 0, 101, 0, R.string.new_repository );
-			subArchivio.add( 0, 102, 0, R.string.link_repository );
+			if( !gc.getRepositories().isEmpty() )
+				subArchivio.add( 0, 102, 0, R.string.link_repository );
 		}
 		if( oggetto instanceof NoteContainer ) {
 			SubMenu subNota = menu.addSubMenu( 0, 100, 0, R.string.note );
 			subNota.add( 0, 103, 0, R.string.new_note );
 			subNota.add( 0, 104, 0, R.string.new_shared_note );
-			subNota.add( 0, 105, 0, R.string.link_shared_note );
+			if( !gc.getNotes().isEmpty() )
+				subNota.add( 0, 105, 0, R.string.link_shared_note );
 		}
 		if( oggetto instanceof MediaContainer ) {
 			SubMenu subMedia = menu.addSubMenu( 0, 100, 0, R.string.media );
 			subMedia.add( 0, 106, 0, R.string.new_media );
 			subMedia.add( 0, 107, 0, R.string.new_shared_media );
-			subMedia.add( 0, 108, 0, R.string.link_shared_media );
+			if( !gc.getMedia().isEmpty() )
+				subMedia.add( 0, 108, 0, R.string.link_shared_media );
 		}
 		if( ( oggetto instanceof SourceCitationContainer || oggetto instanceof Note ) && Globale.preferenze.esperto ) {
 			SubMenu subFonte = menu.addSubMenu( 0, 100, 0, R.string.source );
 			subFonte.add( 0, 109, 0, R.string.new_source_note );
 			subFonte.add( 0, 110, 0, R.string.new_source );
-			subFonte.add( 0, 111, 0, R.string.link_source );
+			if( !gc.getSources().isEmpty() )
+				subFonte.add( 0, 111, 0, R.string.link_source );
 		}
 		return popup;
 	}
@@ -361,16 +366,13 @@ public class Dettaglio extends AppCompatActivity {
 				TextView testoGoccia = vistaGoccia.findViewById( R.id.bava_goccia );
 				if( Memoria.getPila().indexOf(passo) < Memoria.getPila().size() - 1 ) {
 					if( passo.oggetto instanceof Visitable ) // le estensioni GedcomTag non sono Visitable ed è impossibile trovargli la pila
-						vistaGoccia.setOnClickListener( new View.OnClickListener() {
-							@Override
-							public void onClick( View v ) {
-								new TrovaPila( gc, passo.oggetto );
-								Intent intento = new Intent( Dettaglio.this, Memoria.classi.get(passo.oggetto.getClass()) );
-								if( passo.oggetto instanceof Person ) // Solo Individuo richiede l'id
-									intento.putExtra( "idIndividuo", ((Person)passo.oggetto).getId() );
-								startActivity( intento );
-							}
-						} );
+						vistaGoccia.setOnClickListener( v -> {
+							new TrovaPila( gc, passo.oggetto );
+							Intent intento = new Intent( Dettaglio.this, Memoria.classi.get(passo.oggetto.getClass()) );
+							if( passo.oggetto instanceof Person ) // Solo Individuo richiede l'id
+								intento.putExtra( "idIndividuo", ((Person)passo.oggetto).getId() );
+							startActivity( intento );
+						});
 				} else {
 					passo.tag = tag;
 					testoGoccia.setTypeface( null, Typeface.BOLD );
@@ -461,11 +463,8 @@ public class Dettaglio extends AppCompatActivity {
 		((TextView)vistaPezzo.findViewById( R.id.fatto_testo )).setText( testo );
 		final EditText vistaEditabile = vistaPezzo.findViewById( R.id.fatto_edita );
 		vistaEditabile.setText( testo ); // ok nella maggior parte dei casi, ma il testo mostrato in vistaEditabile non si aggiorna dopo onActivityResult()
-		vistaEditabile.post( new Runnable() {
-			@Override
-			public void run() {
-				vistaEditabile.setText( testo ); // un po' ridondante, ma aggiorna il testo in vistaEditabile dopo onActivityResult()
-			}
+		vistaEditabile.post( () -> {
+			vistaEditabile.setText( testo ); // un po' ridondante, ma aggiorna il testo in vistaEditabile dopo onActivityResult()
 		});
 		if( multiLinea ) {
 			vistaEditabile.setInputType( InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE );
@@ -473,46 +472,32 @@ public class Dettaglio extends AppCompatActivity {
 		}
 		View.OnClickListener clicco = null;
 		if( coso instanceof Integer ) {	// Nome e cognome in modalità inesperto
-			clicco = new View.OnClickListener() {
-				public void onClick( View vista ) {
-					edita( vista );
-				}
-			};
-		} else if( coso instanceof String ) {	// Metodo
-			clicco = new View.OnClickListener() {
-				public void onClick( View vista ) {
-					edita( vista );
-				}
-			};
+			clicco = this::edita;
+		} else if( coso instanceof String ) { // Metodo
+			clicco = this::edita;
 			// Se si tratta di una data
 			if( coso.equals("Date") ) {
 				editoreData = vistaPezzo.findViewById( R.id.fatto_data );
 				editoreData.inizia( vistaEditabile );
 			}
-		} else if( coso instanceof Address ) {	// Indirizzo
-			clicco = new View.OnClickListener() {
-				public void onClick( View vista ) {
-					Memoria.aggiungi( coso );
-					startActivity( new Intent( Dettaglio.this, Indirizzo.class ) );
-				}
+		} else if( coso instanceof Address ) { // Indirizzo
+			clicco = vista -> {
+				Memoria.aggiungi( coso );
+				startActivity( new Intent( Dettaglio.this, Indirizzo.class ) );
 			};
-		} else if( coso instanceof EventFact ) {	// Evento
-			clicco = new View.OnClickListener() {
-				public void onClick( View vista ) {
-					Memoria.aggiungi( coso );
-					startActivity( new Intent( Dettaglio.this, Evento.class ) );
-				}
+		} else if( coso instanceof EventFact ) { // Evento
+			clicco = vista -> {
+				Memoria.aggiungi( coso );
+				startActivity( new Intent( Dettaglio.this, Evento.class ) );
 			};
 			// Gli EventFact (in particolare in Famiglia) possono avere delle note e dei media
 			LinearLayout scatolaNote = vistaPezzo.findViewById( R.id.fatto_note );
 			U.mettiNote( scatolaNote, coso, false );
 			U.mettiMedia( scatolaNote, coso, false );
-		} else if( coso instanceof GedcomTag ) {	// Estensione
-			clicco = new View.OnClickListener() {
-				public void onClick( View vista ) {
-					Memoria.aggiungi( coso );
-					startActivity( new Intent( Dettaglio.this, Estensione.class ) );
-				}
+		} else if( coso instanceof GedcomTag ) { // Estensione
+			clicco = vista -> {
+				Memoria.aggiungi( coso );
+				startActivity( new Intent( Dettaglio.this, Estensione.class ) );
 			};
 		}
 		vistaPezzo.setOnClickListener( clicco );
@@ -624,25 +609,17 @@ public class Dettaglio extends AppCompatActivity {
 		qualeMenu = 0;
 		invalidateOptionsMenu();
 		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(box.getContext()), false);
-		barraAzione.findViewById(R.id.edita_annulla).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				vistaEdita.setText( vistaTesto.getText() );
-				ripristina( vistaPezzo, barra, fab );
-			}
-		} );
-		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				salva( vistaPezzo, barra, fab );
-			}
-		} );
+		barraAzione.findViewById(R.id.edita_annulla).setOnClickListener( v -> {
+			vistaEdita.setText( vistaTesto.getText() );
+			ripristina( vistaPezzo, barra, fab );
+		});
+		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( v -> salva( vistaPezzo, barra, fab ) );
 		barra.setCustomView( barraAzione );
 		barra.setDisplayShowCustomEnabled( true );
 	}
 
 	void salva( View vistaPezzo, ActionBar barra, FloatingActionButton fab ) {
-		if( editoreData != null && editoreData.datatore.tipo==10 ) editoreData.genera( true ); // In sostanza solo per aggiungere le parentesi alla data frase
+		if( editoreData != null ) editoreData.chiudi(); // In sostanza solo per aggiungere le parentesi alla data frase
 		String testo = vistaEdita.getText().toString();
 		Object oggettoPezzo = vistaPezzo.getTag(R.id.tag_oggetto);
 		if( oggettoPezzo instanceof Integer ) { // Salva nome e cognome per inesperti
@@ -702,9 +679,10 @@ public class Dettaglio extends AppCompatActivity {
 		if( id == 1 ) { // Autore principale
 			Podio.autorePrincipale( (Submitter)oggetto );
 		} else if( id == 2 ) { // Famiglia
-			Chiesa.eliminaFamiglia( this, ((Family)oggetto).getId(), null );
+			Chiesa.eliminaFamiglia( this, ((Family)oggetto).getId(), false );
 		} else if( id == 3 ) { // Tutti gli altri
 			// todo: conferma eliminazione di tutti gli oggetti..
+			//	Memoria.annullaIstanze(oggetto);
 			elimina();
 			U.salvaJson(true); // l'aggiornamento delle date avviene negli Override di elimina()
 			onBackPressed();
@@ -840,15 +818,19 @@ public class Dettaglio extends AppCompatActivity {
 				i.putExtra( "idIndividuo", pers.getId() );
 				startActivity( i );
 				return true;
-			case 17:	// Scollega
+			case 17: // Scollega
 				Famiglia.scollega( pers.getId(), (Family)oggetto );
 				box.removeView( vistaPezzo );
 				U.aggiornaDate( pers );
 				trovaUnAltroRappresentanteDellaFamiglia( pers );
 				break;
-			case 18:
-				Anagrafe.elimina( pers.getId(), this, vistaPezzo );
-				trovaUnAltroRappresentanteDellaFamiglia( pers );
+			case 18: // Elimina membro
+				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
+						.setPositiveButton(R.string.delete, (dialog, id) -> {
+							Anagrafe.eliminaPersona(this, pers.getId());
+							box.removeView( vistaPezzo );
+							trovaUnAltroRappresentanteDellaFamiglia( pers );
+						}).setNeutralButton(R.string.cancel, null).show();
 				return true;
 			case 20: // Nota
 				U.scollegaNota( (Note)oggettoPezzo, oggetto, vistaPezzo );

@@ -2,24 +2,32 @@
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/popup_layout"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
 	android:orientation="vertical"
 	android:gravity="center_horizontal">
-	<TextView
-		android:id="@+id/popup_text"
+	<LinearLayout
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:background="@drawable/popup_baloon"
-		android:paddingLeft="15dp"
-		android:paddingTop="5dp"
-		android:paddingRight="12dp"
-		android:paddingBottom="8dp"
-		android:text="@string/long_press_menu"
-		android:textColor="#000000"
-		android:textSize="16sp"/>
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		app:srcCompat="@drawable/popup_fiato"/>
+		android:id="@+id/popup_fumetto"
+		android:orientation="vertical"
+		android:gravity="center_horizontal"
+		android:layout_marginBottom="5dp">
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:background="@drawable/popup_baloon"
+			android:paddingLeft="15dp"
+			android:paddingTop="8dp"
+			android:paddingRight="10dp"
+			android:paddingBottom="10dp"
+			android:text="@string/long_press_menu"
+			android:textColor="#000000"
+			android:textSize="12sp"/>
+		<ImageView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:srcCompat="@drawable/popup_fiato"/>
+	</LinearLayout>
 </LinearLayout>

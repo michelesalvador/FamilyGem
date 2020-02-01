@@ -2,7 +2,6 @@ package app.familygem;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
@@ -35,7 +34,8 @@ public class Chiesa extends Fragment {
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
 		if( gc != null ) {
 			List<Family> listaFamiglie = gc.getFamilies();
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaFamiglie.size() + " " + getString( R.string.families ).toLowerCase() );
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaFamiglie.size() + " "
+					+ getString(listaFamiglie.size()==1 ? R.string.family : R.string.families).toLowerCase() );
 			for( final Family fam : listaFamiglie )
 				mettiFamiglia( scatola, fam );
 			setHasOptionsMenu( true );
@@ -65,7 +65,7 @@ public class Chiesa extends Fragment {
 		return testo;
 	}
 
-	public static void mettiFamiglia( final LinearLayout scatola, final Family fam ) {
+	static void mettiFamiglia( final LinearLayout scatola, final Family fam ) {
 		View vistaFamiglia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_famiglia, scatola, false );
 		scatola.addView( vistaFamiglia );
 		((TextView)vistaFamiglia.findViewById( R.id.famiglia_testo )).setText( testoFamiglia(scatola.getContext(),gc,fam) );
@@ -82,55 +82,52 @@ public class Chiesa extends Fragment {
 	}
 
 	// Chiede conferma di eliminare una famiglia, rimuove i ref dai membri
-	static void eliminaFamiglia( final Context contesto, final String idFamiglia, final View vista ) {
-		new AlertDialog.Builder( contesto ).setMessage( R.string.really_delete_family )
+	static void eliminaFamiglia( Activity attivita, String idFamiglia, boolean ricrea ) {
+		new AlertDialog.Builder(attivita).setMessage( R.string.really_delete_family )
 				.setNeutralButton( android.R.string.cancel, null )
-				.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick( DialogInterface dialogo, int quale ) {
-						Family f = gc.getFamily( idFamiglia );
-						Set<Person> membri = new HashSet<>();
-						// Prima rimuove i ref alla famiglia negli indi membri
-						for( Person marito : f.getHusbands(gc) ) {
-							Iterator<SpouseFamilyRef> refi = marito.getSpouseFamilyRefs().iterator();
-							while( refi.hasNext() ) {
-								SpouseFamilyRef sfr = refi.next();
-								if( sfr.getRef().equals(f.getId()) ) {
-									refi.remove();
-									membri.add( marito );
-								}
+				.setPositiveButton( android.R.string.yes, (dialogo, quale) -> {
+					Family f = gc.getFamily( idFamiglia );
+					Set<Person> membri = new HashSet<>();
+					// Prima rimuove i ref alla famiglia negli indi membri
+					for( Person marito : f.getHusbands(gc) ) {
+						Iterator<SpouseFamilyRef> refi = marito.getSpouseFamilyRefs().iterator();
+						while( refi.hasNext() ) {
+							SpouseFamilyRef sfr = refi.next();
+							if( sfr.getRef().equals(f.getId()) ) {
+								refi.remove();
+								membri.add( marito );
 							}
 						}
-						for( Person moglie : f.getWives(gc) ) {
-							Iterator<SpouseFamilyRef> refi = moglie.getSpouseFamilyRefs().iterator();
-							while( refi.hasNext() ) {
-								SpouseFamilyRef sfr = refi.next();
-								if( sfr.getRef().equals(f.getId()) ) {
-									refi.remove();
-									membri.add( moglie );
-								}
-							}
-						}
-						for( Person figlio : f.getChildren(gc) ) {
-							Iterator<ParentFamilyRef> refi = figlio.getParentFamilyRefs().iterator();
-							while( refi.hasNext() ) {
-								ParentFamilyRef pfr = refi.next();
-								if( pfr.getRef().equals(f.getId()) ) {
-									refi.remove();
-									membri.add( figlio );
-								}
-							}
-						}
-						// Poi può rimuovere la famiglia
-						gc.getFamilies().remove(f);
-						gc.createIndexes();	// necessario per aggiornare gli individui
-						Memoria.annullaIstanze(f);
-						U.salvaJson( true, membri.toArray(new Object[0]) );
-						if( vista != null )
-							vista.setVisibility( View.GONE );
-						else
-							((Activity)contesto).onBackPressed();
 					}
+					for( Person moglie : f.getWives(gc) ) {
+						Iterator<SpouseFamilyRef> refi = moglie.getSpouseFamilyRefs().iterator();
+						while( refi.hasNext() ) {
+							SpouseFamilyRef sfr = refi.next();
+							if( sfr.getRef().equals(f.getId()) ) {
+								refi.remove();
+								membri.add( moglie );
+							}
+						}
+					}
+					for( Person figlio : f.getChildren(gc) ) {
+						Iterator<ParentFamilyRef> refi = figlio.getParentFamilyRefs().iterator();
+						while( refi.hasNext() ) {
+							ParentFamilyRef pfr = refi.next();
+							if( pfr.getRef().equals(f.getId()) ) {
+								refi.remove();
+								membri.add( figlio );
+							}
+						}
+					}
+					// Poi può rimuovere la famiglia
+					gc.getFamilies().remove(f);
+					gc.createIndexes();	// necessario per aggiornare gli individui
+					Memoria.annullaIstanze(f);
+					U.salvaJson( true, membri.toArray(new Object[0]) );
+					if( ricrea )
+						attivita.recreate();
+					else
+						attivita.onBackPressed();
 				}).show();
 	}
 
@@ -142,7 +139,7 @@ public class Chiesa extends Fragment {
 		return nuova;
 	}
 
-	View vistaScelta;
+	private View vistaScelta;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
 		vistaScelta = vista;
@@ -151,7 +148,7 @@ public class Chiesa extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {	// Elimina
-			eliminaFamiglia( getContext(), (String) vistaScelta.getTag(), vistaScelta );
+			eliminaFamiglia( getActivity(), (String) vistaScelta.getTag(), true );
 		} else {
 			return false;
 		}

@@ -37,7 +37,7 @@ import app.familygem.dettaglio.Nota;
 
 public class Memoria {
 
-	public static Map<Class,Class> classi = new HashMap<>();
+	static Map<Class,Class> classi = new HashMap<>();
 	private static final Memoria memoria = new Memoria();
 	List<Pila> lista = new ArrayList<>();
 
@@ -59,7 +59,7 @@ public class Memoria {
 	}
 
 	// Restituisce l'ultima pila creata se ce n'è almeno una, oppure ne crea una vuota
-	public static Pila getPila() {
+	static Pila getPila() {
 		if( memoria.lista.size() > 0 )
 			return memoria.lista.get( memoria.lista.size() - 1 );
 		else
@@ -87,7 +87,7 @@ public class Memoria {
 		Passo passo = new Passo();
 		passo.oggetto = oggetto;
 		getPila().add( passo );
-		stampa();
+		//stampa();
 		return passo;
 	}
 
@@ -115,7 +115,7 @@ public class Memoria {
 			return getPila().peek().oggetto;
 	}
 
-	public static void arretra() {
+	static void arretra() {
 		while( getPila().size() > 0 && getPila().lastElement().filotto )
 			getPila().pop();
 		if( getPila().size() > 0 )
@@ -129,9 +129,8 @@ public class Memoria {
 	public static void annullaIstanze( Object oggio ) {
 		for( Pila pila : memoria.lista ) {
 			for( Passo passo : pila ) {
-				if( passo.oggetto.equals( oggio ) )
+				if( passo.oggetto != null && passo.oggetto.equals( oggio ) )
 					passo.oggetto = null;
-
 			}
 		}
 	}
@@ -139,18 +138,20 @@ public class Memoria {
 	public static void stampa() {
 		for( Pila pila : memoria.lista ) {
 			for( Passo passo : pila ) {
-				String filotto = passo.filotto? "< " : "";
+				String filotto = passo.filotto ? "< " : "";
 				if( passo.tag != null )
 					s.p( filotto + passo.tag + " " );
+				else if( passo.oggetto != null )
+					s.p( filotto + passo.oggetto.getClass().getSimpleName() );
 				else
-					s.p( filotto + passo.oggetto.getClass().getSimpleName()  );
+					s.p( filotto + "Null" ); // capita in rarissimi casi
 			}
 			s.l( "" );
 		}
 		s.l("- - - -");
 	}
 
-	public static class Pila extends Stack<Passo> {}
+	static class Pila extends Stack<Passo> {}
 
 	public static class Passo {
 		public Object oggetto;

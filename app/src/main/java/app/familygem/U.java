@@ -1064,7 +1064,7 @@ public class U {
 				((AppCompatActivity)contesto).getSupportFragmentManager()
 						.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )	// non garantito in futuro
 						.registerForContextMenu( vistaNota );
-			} else	// ok nelle AppCompatActivity
+			} else if( scatola.getId() != R.id.dispensa_scatola ) // nelle AppCompatActivity tranne che nella dispensa
 				((AppCompatActivity)contesto).registerForContextMenu( vistaNota );
 			vistaNota.setOnClickListener( v -> {
 				if( nota.getId() != null )
@@ -1079,7 +1079,6 @@ public class U {
 	}
 
 	static void scollegaNota( Note nota, Object contenitore, View vista ) {
-		//s.l("Scollego " + nota + " da " + contenitore );
 		List<NoteRef> lista = ((NoteContainer)contenitore).getNoteRefs();
 		for( NoteRef ref : lista )
 			if( ref.getNote(Globale.gc).equals( nota ) ) {
@@ -1179,7 +1178,8 @@ public class U {
 		scatola.addView( vistaFonte );
 		((TextView)vistaFonte.findViewById( R.id.fonte_titolo )).setText( Biblioteca.titoloFonte(fonte) );
 		vistaFonte.setTag( R.id.tag_oggetto, fonte );
-		((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFonte );
+		if( scatola.getId() != R.id.dispensa_scatola ) // nella dispensa niente menù contestuale
+			((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFonte );
 		vistaFonte.setOnClickListener( v -> {
 			Memoria.setPrimo( fonte );
 			scatola.getContext().startActivity( new Intent( scatola.getContext(), Fonte.class) );
@@ -1225,7 +1225,7 @@ public class U {
 		} );
 	}
 
-	// Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipite
+	// Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipiti
 	public static void mettiDispensa( LinearLayout scatola, Object cosa, int tit ) {
 		View vista = LayoutInflater.from(scatola.getContext()).inflate( R.layout.dispensa, scatola, false );
 		TextView vistaTit = vista.findViewById( R.id.dispensa_titolo );

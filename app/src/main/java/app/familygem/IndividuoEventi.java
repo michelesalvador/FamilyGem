@@ -1,6 +1,5 @@
 package app.familygem;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -96,12 +95,10 @@ public class IndividuoEventi extends Fragment {
 		registerForContextMenu( vistaFatto );
 		if( oggetto instanceof Name ) {
 			U.mettiMedia( scatolaAltro, oggetto, false );
-			vistaFatto.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View v ) {
-					Memoria.aggiungi( oggetto );
-					startActivity( new Intent( getContext(), Nome.class ) );
-				}
-			} );
+			vistaFatto.setOnClickListener( v -> {
+				Memoria.aggiungi( oggetto );
+				startActivity( new Intent( getContext(), Nome.class ) );
+			});
 		} else if( oggetto instanceof EventFact ) {
 			// Evento Sesso
 			if( ((EventFact)oggetto).getTag()!=null && ((EventFact)oggetto).getTag().equals("SEX") ) {
@@ -119,35 +116,25 @@ public class IndividuoEventi extends Fragment {
 					sessoCapitato++;
 				}
 				if( sessoCapitato > 2 ) sessoCapitato = -1;
-				vistaFatto.setOnClickListener( new View.OnClickListener() {
-					public void onClick( View vista ) {
-						new AlertDialog.Builder( vista.getContext() )
-						.setSingleChoiceItems( sessi.values().toArray(new String[0]), sessoCapitato, new DialogInterface.OnClickListener() {
-							public void onClick( DialogInterface dialog, int item) {
-								((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
-								dialog.dismiss();
-								aggiorna( 1 );
-								U.salvaJson( true, uno );
-							}
-						}).show();
-					}
-				});
+				vistaFatto.setOnClickListener( vista -> new AlertDialog.Builder( vista.getContext() )
+				.setSingleChoiceItems( sessi.values().toArray(new String[0]), sessoCapitato, (dialog, item) -> {
+					((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
+					dialog.dismiss();
+					aggiorna( 1 );
+					U.salvaJson( true, uno );
+				}).show() );
 			} else { // Tutti gli altri eventi
 				U.mettiMedia( scatolaAltro, oggetto, false );
-				vistaFatto.setOnClickListener( new View.OnClickListener() {
-					public void onClick( View vista ) {
-						Memoria.aggiungi( oggetto );
-						startActivity( new Intent( getContext(), Evento.class ) );
-					}
+				vistaFatto.setOnClickListener( v -> {
+					Memoria.aggiungi( oggetto );
+					startActivity( new Intent( getContext(), Evento.class ) );
 				});
 			}
 		} else if( oggetto instanceof GedcomTag ) {
-			vistaFatto.setOnClickListener( new View.OnClickListener() {
-				public void onClick( View vista ) {
-					Memoria.aggiungi( oggetto );
-					startActivity( new Intent( getContext(), app.familygem.dettaglio.Estensione.class ) );
-				}
-			} );
+			vistaFatto.setOnClickListener( v -> {
+				Memoria.aggiungi( oggetto );
+				startActivity( new Intent( getContext(), app.familygem.dettaglio.Estensione.class ) );
+			});
 		}
 	}
 

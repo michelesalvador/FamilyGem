@@ -17,6 +17,7 @@ import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
+import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.model.Visitable;
 import org.folg.gedcom.model.Visitor;
 import java.util.Iterator;
@@ -25,7 +26,7 @@ import app.familygem.Memoria;
 
 public class TrovaPila extends Visitor {
 
-	public List<Memoria.Passo> pila;
+	private List<Memoria.Passo> pila;
 	private Object scopo;
 	private boolean trovato;
 
@@ -55,7 +56,7 @@ public class TrovaPila extends Visitor {
 					passi.remove();
 			}
 			trovato = true;
-			Memoria.stampa();
+			//Memoria.stampa();
 		}
 		return true;
 	}
@@ -79,6 +80,10 @@ public class TrovaPila extends Visitor {
 	@Override
 	public boolean visit( Repository passo ) {
 		return opera(passo,"REPO",true);
+	}
+	@Override
+	public boolean visit( Submitter passo ) {
+		return opera(passo,"SUBM",true);
 	}
 	@Override
 	public boolean visit( Media passo ) {

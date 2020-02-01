@@ -14,6 +14,7 @@ import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
+import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.model.Visitor;
 
 public class VisitorTotale extends Visitor {
@@ -45,6 +46,10 @@ public class VisitorTotale extends Visitor {
 	@Override
 	public boolean visit( Repository r ) {
 		return visita( r, true );
+	}
+	@Override
+	public boolean visit( Submitter s ) {
+		return visita( s, true );
 	}
 	@Override
 	public boolean visit( Media m ) {

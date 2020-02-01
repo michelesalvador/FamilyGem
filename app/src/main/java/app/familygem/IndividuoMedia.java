@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
@@ -91,8 +90,8 @@ public class IndividuoMedia extends Fragment {
 	void aggiorna() {
 		// ricarica il fragment
 		getActivity().getSupportFragmentManager().beginTransaction().detach( this ).attach( this ).commit();
-		U.unaFoto( Globale.gc, uno, (ImageView)getActivity().findViewById(R.id.persona_foto) );
-		U.unaFoto( Globale.gc, uno, (ImageView)getActivity().findViewById(R.id.persona_sfondo) );
+		U.unaFoto( Globale.gc, uno, getActivity().findViewById(R.id.persona_foto) );
+		U.unaFoto( Globale.gc, uno, getActivity().findViewById(R.id.persona_sfondo) );
 		// Scheda eventi
 		IndividuoEventi tabEventi = (IndividuoEventi) getActivity().getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" );
 		tabEventi.aggiorna( 1 );

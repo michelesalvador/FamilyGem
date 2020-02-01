@@ -7,7 +7,6 @@ import android.app.backup.BackupManager;
 import android.app.backup.RestoreObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -52,7 +51,7 @@ public class AlberoNuovo extends AppCompatActivity {
 		super.onCreate( bandolo );
 		setContentView(R.layout.albero_nuovo);
 
-		// Parte con un albero vuoto
+		// Crea un albero vuoto
 		findViewById( R.id.bottone_albero_vuoto ).setOnClickListener( vista -> {
 			View vistaMessaggio = LayoutInflater.from( vista.getContext() ).inflate(R.layout.albero_nomina, null);
 			AlertDialog.Builder builder = new AlertDialog.Builder( vista.getContext() );
@@ -65,20 +64,21 @@ public class AlberoNuovo extends AppCompatActivity {
 				int num = Globale.preferenze.max() + 1;
 				File fileJson = new File( getFilesDir(), num + ".json" );
 				Globale.gc = new Gedcom();
-				Globale.gc.setHeader( creaTestata( fileJson.getName() ) ); //.getAbsolutePath()
+				Globale.gc.setHeader( creaTestata( fileJson.getName() ) );
 				Globale.gc.createIndexes();
 				JsonParser jp = new JsonParser();
 				try {
 					FileUtils.writeStringToFile( fileJson, jp.toJson(Globale.gc), "UTF-8" );
-				} catch (IOException e) {
-					Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-					e.printStackTrace();
+				} catch (Exception e) {
+					Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+					return;
 				}
 				Globale.preferenze.aggiungi( new Armadio.Cassetto(
 						num, nuovoNome.getText().toString(), null, 0, 0, null, null, 0, null ));
-				Globale.preferenze.idAprendo = num;
 				Globale.preferenze.salva();
-				startActivity( new Intent( AlberoNuovo.this, Principe.class ) );
+				Globale.editato = true; // forza Alberi ad aggiornare la lista
+				onBackPressed();
+				Toast.makeText( this, R.string.tree_created, Toast.LENGTH_SHORT ).show();
 			}).setNeutralButton( R.string.cancel, null ).create().show();
 			vistaMessaggio.post( () -> {
 				nuovoNome.requestFocus();
@@ -151,15 +151,6 @@ public class AlberoNuovo extends AppCompatActivity {
 		}
 	}
 
-	// Apre il diagramma oppure l'elenco degli alberi
-	static void caricaAlbero( Context contesto, int idAlbero ) {
-		if( Globale.preferenze.caricaAlbero && Alberi.apriGedcom(idAlbero,true) ) {
-			// Apre il nuovo albero in diagramma
-			contesto.startActivity( new Intent( contesto, Principe.class ) );
-		} else
-			contesto.startActivity( new Intent( contesto, Alberi.class ) );
-	}
-
 	// Scarica da internet un file zip nella cartella Download
 	void scaricaEsempio() {
 		DownloadManager gestoreScarico = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
@@ -177,7 +168,6 @@ public class AlberoNuovo extends AppCompatActivity {
 				.setTitle( getString(R.string.simpsons_tree) )
 				.setDescription( getString(R.string.downloading) )
 				.setNotificationVisibility( DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-				.setVisibleInDownloadsUi(false)
 				.setDestinationUri( Uri.parse( "file://" + percorsoZip ) );
 		gestoreScarico.enqueue( richiesta );
 		BroadcastReceiver alCompletamento = new BroadcastReceiver() {
@@ -238,11 +228,12 @@ public class AlberoNuovo extends AppCompatActivity {
 			Globale.preferenze.aggiungi( cassetto );
 			fileImpostazioni.delete();
 			//fileZip.delete();
+			Globale.editato = true; // affinché venga aggiornato Alberi che ha launchMode=singleTask
 			// Albero proveniente da condivisione destinato al confronto
 			if( cassa.grado == 9 && confronta(contesto,cassetto) ) {
 				cassetto.grado = 20; // lo marchia come derivato
 			} else { // Albero di esempio, di backup, o di condivisione
-				caricaAlbero( contesto, numAlbero );
+				contesto.startActivity( new Intent( contesto, Alberi.class ) );
 			}
 			Globale.preferenze.salva();
 			U.tosta( (Activity)contesto, R.string.tree_imported_ok );
@@ -305,28 +296,20 @@ public class AlberoNuovo extends AppCompatActivity {
 				String idRadice = U.trovaRadice(gc);
 				Globale.preferenze.aggiungi( new Armadio.Cassetto( nuovoNum, nomeAlbero, percorsoCartella,
 						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc,idRadice), idRadice, null, 0, null ) );
-				// Se necessario propone di mostrare le funzioni avanzate ToDo il dialogo va pensato meglio quando farlo comparire
+				Globale.preferenze.salva();
+				// Se necessario propone di mostrare le funzioni avanzate
 				if( !gc.getSources().isEmpty() && !Globale.preferenze.esperto ) {
-					/*AlertDialog.Builder dialog = new AlertDialog.Builder( this );
-					dialog.setMessage( "L'albero che hai importato sembra piuttosto complesso.\nPer gestirlo vuoi mostrare le funzioni avanzate di Family Ged?" );
-					dialog.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
-						public void onClick( DialogInterface dialogo, int i ) {
-							dialogo.cancel();
-							Globale.preferenze.esperto = true;
-							Globale.preferenze.salva();
-						}
-					});
-					dialog.setNegativeButton( android.R.string.no, new DialogInterface.OnClickListener() {
-						public void onClick( DialogInterface dialogo, int i ) {
-							dialogo.cancel();
-						}
-					}).show();*/
-					Globale.preferenze.esperto = true;
-					Globale.preferenze.salva();
-				}
-				caricaAlbero( this, nuovoNum );
-			} catch( Exception e ) {	//IOException | SAXParseException | URISyntaxException |FileNotFoundException |
-				Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+					new AlertDialog.Builder(this).setMessage( R.string.complex_tree_advanced_tools )
+							.setPositiveButton( android.R.string.yes, (dialog, i) -> {
+								Globale.preferenze.esperto = true;
+								Globale.preferenze.salva();
+								concludiImportaGedcom();
+							}).setNegativeButton( android.R.string.no, (dialog, i) -> concludiImportaGedcom() )
+							.show();
+				} else
+					concludiImportaGedcom();
+			} catch( Exception e ) {
+				Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			}
 		}
 
@@ -353,37 +336,40 @@ public class AlberoNuovo extends AppCompatActivity {
 					AlertDialog.Builder builder = new AlertDialog.Builder( AlberoNuovo.this );
 					builder.setTitle( R.string.warning );
 					builder.setMessage( R.string.old_backup_overwrite );
-					builder.setPositiveButton( android.R.string.yes, new DialogInterface.OnClickListener() {
-						public void onClick( DialogInterface dialog, int id ) {
-							try {
-								ZipInputStream zis2 = new ZipInputStream( getContentResolver().openInputStream( data.getData() ) );
-								ZipEntry zipEntry2;
-								int len;
-								byte[] buffer = new byte[1024];
-								while( (zipEntry2 = zis2.getNextEntry()) != null ) {
-									File newFile = new File( getFilesDir(), zipEntry2.getName() );
-									FileOutputStream fos = new FileOutputStream(newFile);
-									while ((len = zis2.read(buffer)) > 0) {
-										fos.write(buffer, 0, len);
-									}
-									fos.close();
+					builder.setPositiveButton( android.R.string.yes, (dialog, id) -> {
+						try {
+							ZipInputStream zis2 = new ZipInputStream( getContentResolver().openInputStream( data.getData() ) );
+							ZipEntry zipEntry2;
+							int len;
+							byte[] buffer = new byte[1024];
+							while( (zipEntry2 = zis2.getNextEntry()) != null ) {
+								File newFile = new File( getFilesDir(), zipEntry2.getName() );
+								FileOutputStream fos = new FileOutputStream(newFile);
+								while ((len = zis2.read(buffer)) > 0) {
+									fos.write(buffer, 0, len);
 								}
-								zis2.closeEntry();
-								zis2.close();
-								Globale.avvia( getApplicationContext() );
-								startActivity( new Intent( AlberoNuovo.this, Alberi.class ));
-							} catch( IOException e ) {
-								e.printStackTrace();
+								fos.close();
 							}
+							zis2.closeEntry();
+							zis2.close();
+							Globale.avvia( getApplicationContext() );
+							startActivity( new Intent( AlberoNuovo.this, Alberi.class ));
+						} catch( IOException e ) {
+							e.printStackTrace();
 						}
-					}).setNeutralButton( android.R.string.cancel, null )
-							.create().show();
+					}).setNeutralButton( android.R.string.cancel, null ).create().show();
 				} else
 					Toast.makeText( AlberoNuovo.this, R.string.backup_invalid, Toast.LENGTH_LONG ).show();
 			} catch( Exception e ) {
 				Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 			}
 		}
+	}
+
+	void concludiImportaGedcom() {
+		Globale.editato = true;
+		onBackPressed();
+		Toast.makeText( this, R.string.tree_imported_ok, Toast.LENGTH_SHORT ).show();
 	}
 
 	// Confronta le date di invio degli alberi esistenti

@@ -49,18 +49,20 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		arredaTestataMenu();
 
 		if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
+			Fragment fragment;
 			if( getIntent().getBooleanExtra("anagrafeScegliParente",false) )
-				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Anagrafe()).commit();
+				fragment = new Anagrafe();
 			else if( getIntent().getBooleanExtra("galleriaScegliMedia",false) )
-				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Galleria()).commit();
+				fragment = new Galleria();
 			else if( getIntent().getBooleanExtra("bibliotecaScegliFonte",false) )
-				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Biblioteca()).commit();
+				fragment = new Biblioteca();
 			else if( getIntent().getBooleanExtra("quadernoScegliNota",false) )
-				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Quaderno()).commit();
+				fragment = new Quaderno();
 			else if( getIntent().getBooleanExtra("magazzinoScegliArchivio",false) )
-				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Magazzino()).commit();
+				fragment = new Magazzino();
 			else // la normale apertura
-				getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Diagram()).commit();
+				fragment = new Diagram();
+			getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, fragment).commit();
 		}
 
 		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_alberi ).setOnClickListener( v -> {
@@ -83,7 +85,6 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		super.onRestart();
 		if( Globale.editato ) {
 			recreate();
-			Globale.editato = false;
 		}
 	}
 
@@ -161,7 +162,6 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			ft.commit();
 		}
 		scatolissima.closeDrawer(GravityCompat.START);
-
 		return true;
 	}
 

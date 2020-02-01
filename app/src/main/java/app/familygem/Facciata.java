@@ -50,18 +50,14 @@ public class Facciata extends AppCompatActivity {
 					else if( perm == PackageManager.PERMISSION_GRANTED )
 						scaricaCondiviso( dataId );
 				}
-			} else if( Globale.preferenze.idAprendo == 0 )	// cioè praticamente alla prima apertura
-				startActivity( new Intent( Facciata.this, Alberi.class) );
-			else if( Globale.preferenze.caricaAlbero ) {
-				if( Globale.gc == null ) {
-					if( !Alberi.apriGedcom( Globale.preferenze.idAprendo, false ) )
-						// tentativo di aprire un file mancante
-						U.tosta( Facciata.this, getString(R.string.cant_find_file) );
-						// Todo qui non dovrebbe starci un return ?  Da provare...
+			} else {
+				Intent intent = new Intent( Facciata.this, Alberi.class );
+				if( Globale.preferenze.caricaAlbero ) {
+					intent.putExtra( "apriAlberoAutomaticamente", true );
+					intent.setFlags( Intent.FLAG_ACTIVITY_NO_ANIMATION ); // forse inefficace ma tantè
 				}
-				startActivity( new Intent( Facciata.this, Principe.class ) );
-			} else
-				startActivity( new Intent( Facciata.this, Alberi.class ) );
+				startActivity( intent );
+			}
 		}).start();
 	}
 

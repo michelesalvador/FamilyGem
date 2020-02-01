@@ -1,11 +1,8 @@
 package app.familygem;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,14 +17,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,9 +41,11 @@ public class Anagrafe extends Fragment {
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
 		View vista = inflater.inflate( R.layout.ricicla_vista, container, false );
 		if( gc != null ) {
-			setHasOptionsMenu(true);
 			listaIndividui = gc.getPeople();
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " " + getString(R.string.persons).toLowerCase() );
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " "
+					+ getString(listaIndividui.size()==1 ? R.string.person : R.string.persons).toLowerCase() );
+			if( listaIndividui.size() > 1 )
+				setHasOptionsMenu(true);
 			RecyclerView vistaLista = vista.findViewById( R.id.riciclatore );
 			vistaLista.setPadding( 12, 12, 12, vistaLista.getPaddingBottom() );
 			adattatore = new AdattatoreAnagrafe();
@@ -108,8 +106,8 @@ public class Anagrafe extends Fragment {
 			}
 			vistaIndi.findViewById(R.id.indi_carta).setBackgroundResource( sfondo );
 
-			U.dettagli( persona, (TextView) vistaIndi.findViewById( R.id.indi_dettagli ) );
-			U.unaFoto( Globale.gc, persona, (ImageView)vistaIndi.findViewById(R.id.indi_foto) );
+			U.dettagli( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
+			U.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
 			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( U.morto(persona) ? View.VISIBLE : View.GONE );
 			vistaIndi.setTag( persona.getId() );
 		}
@@ -190,46 +188,44 @@ public class Anagrafe extends Fragment {
 
 	void ordinaIndividui() {
 		if( ordine > 0 ) {  // 0 ovvero rimane l'ordinamento già esistente
-			Collections.sort(listaIndividui, new Comparator<Person>() {
-				public int compare(Person p1, Person p2) {
-					switch( ordine ) {
-						case 1: // Ordina per ID Gedcom
-							if( gliIdsonoNumerici )
-								return U.soloNumeri(p1.getId()) - U.soloNumeri(p2.getId());
-							else
-								return p1.getId().compareToIgnoreCase(p2.getId());
-						case 2:
-							if( gliIdsonoNumerici )
-								return U.soloNumeri(p2.getId()) - U.soloNumeri(p1.getId());
-							else
-								return p2.getId().compareToIgnoreCase(p1.getId());
-						case 3: // Ordina per cognome
-							if (p1.getNames().size() == 0) // i nomi null vanno in fondo
-								return (p2.getNames().size() == 0) ? 0 : 1;
-							if (p2.getNames().size() == 0)
-								return -1;
-							return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
-						case 4:
-							if (p1.getNames().size() == 0)
-								return p2.getNames().size() == 0 ? 0 : 1;
-							if (p2.getNames().size() == 0)
-								return -1;
-							return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
-						case 5: // Ordina per anno
-							return annoBase(p1) - annoBase(p2);
-						case 6:
-							if( annoBase(p2) == 9999 ) // Quelli senza anno vanno in fondo
-								return -1;
-							if( annoBase(p1) == 9999 )
-								return annoBase(p2) == 9999 ? 0 : 1;
-							return annoBase(p2) - annoBase(p1);
-						case 7:	// Ordina per numero di familiari
-							return quantiFamiliari(p1) - quantiFamiliari(p2);
-						case 8:
-							return quantiFamiliari(p2) - quantiFamiliari(p1);
-					}
-					return 0;
+			Collections.sort(listaIndividui, ( p1, p2 ) -> {
+				switch( ordine ) {
+					case 1: // Ordina per ID Gedcom
+						if( gliIdsonoNumerici )
+							return U.soloNumeri(p1.getId()) - U.soloNumeri(p2.getId());
+						else
+							return p1.getId().compareToIgnoreCase(p2.getId());
+					case 2:
+						if( gliIdsonoNumerici )
+							return U.soloNumeri(p2.getId()) - U.soloNumeri(p1.getId());
+						else
+							return p2.getId().compareToIgnoreCase(p1.getId());
+					case 3: // Ordina per cognome
+						if (p1.getNames().size() == 0) // i nomi null vanno in fondo
+							return (p2.getNames().size() == 0) ? 0 : 1;
+						if (p2.getNames().size() == 0)
+							return -1;
+						return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
+					case 4:
+						if (p1.getNames().size() == 0)
+							return p2.getNames().size() == 0 ? 0 : 1;
+						if (p2.getNames().size() == 0)
+							return -1;
+						return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
+					case 5: // Ordina per anno
+						return annoBase(p1) - annoBase(p2);
+					case 6:
+						if( annoBase(p2) == 9999 ) // Quelli senza anno vanno in fondo
+							return -1;
+						if( annoBase(p1) == 9999 )
+							return annoBase(p2) == 9999 ? 0 : 1;
+						return annoBase(p2) - annoBase(p1);
+					case 7:	// Ordina per numero di familiari
+						return quantiFamiliari(p1) - quantiFamiliari(p2);
+					case 8:
+						return quantiFamiliari(p2) - quantiFamiliari(p1);
 				}
+				return 0;
 			});
 		}
 	}
@@ -381,11 +377,9 @@ public class Anagrafe extends Fragment {
 	}
 
 	// Menu contestuale
-	private View vistaScelta;
 	private String idIndi;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
-		vistaScelta = vista;
 		idIndi = (String) vista.getTag();
 		menu.add(0, 0, 0, R.string.diagram );
 		if( !gc.getPerson(idIndi).getParentFamilies(gc).isEmpty() )
@@ -411,7 +405,11 @@ public class Anagrafe extends Fragment {
 			intento.putExtra( "idIndividuo", idIndi );
 			startActivity( intento );
 		} else if( id == 4 ) {	// Elimina
-			elimina( idIndi, getContext(), vistaScelta );
+			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_person )
+					.setPositiveButton( R.string.delete, ( dialog, i ) -> {
+						eliminaPersona(getContext(), idIndi);
+						getActivity().recreate();
+					}).setNeutralButton( R.string.cancel, null ).show();
 		} else {
 			return false;
 		}
@@ -442,32 +440,20 @@ public class Anagrafe extends Fragment {
 		return famiglie.toArray( new Family[0] );
 	}
 
-	// Chiede conferma per eliminare una persona dal gedcom
-	public static void elimina( final String idEliminando, final Context contesto, final View vista ) {
-		AlertDialog.Builder alert = new AlertDialog.Builder( contesto );
-		alert.setMessage( contesto.getString(R.string.really_delete,U.epiteto(gc.getPerson(idEliminando))) );
-		alert.setPositiveButton( R.string.delete, new DialogInterface.OnClickListener() {
-			public void onClick( DialogInterface dialog, int id ) {
-				Family[] famiglie = scollega( idEliminando );
-				gc.getPeople().remove( gc.getPerson( idEliminando ) );
-				gc.createIndexes();	// necessario
-				Globale.preferenze.alberoAperto().individui--;
-				String idNuovaRadice = U.trovaRadice(gc);	// Todo dovrebbe essere: trovaParentePiuProssimo
-				if( Globale.preferenze.alberoAperto().radice!=null && Globale.preferenze.alberoAperto().radice.equals(idEliminando) ) {
-					Globale.preferenze.alberoAperto().radice = idNuovaRadice;
-				}
-				Globale.preferenze.salva();
-				if( Globale.individuo != null && Globale.individuo.equals(idEliminando) )
-					Globale.individuo = idNuovaRadice;
-				if( vista == null )
-					//contesto.startActivity( new Intent( contesto, Principe.class ) );
-					((Activity)contesto).onBackPressed();
-				else {
-					vista.setVisibility( View.GONE );
-					Snackbar.make( vista, R.string.person_deleted, Snackbar.LENGTH_SHORT ).show();
-				}
-				U.salvaJson( true, (Object[])famiglie );
-			}
-		}).setNeutralButton( R.string.cancel, null ).show();
+	// Elimina una persona dal gedcom, trova eventuale nuova radice
+	static void eliminaPersona(Context contesto, String idEliminando) {
+		Family[] famiglie = scollega( idEliminando );
+		gc.getPeople().remove( gc.getPerson( idEliminando ) );
+		gc.createIndexes();	// necessario
+		Globale.preferenze.alberoAperto().individui--;
+		String idNuovaRadice = U.trovaRadice(gc);	// Todo dovrebbe essere: trovaParentePiuProssimo
+		if( Globale.preferenze.alberoAperto().radice!=null && Globale.preferenze.alberoAperto().radice.equals(idEliminando) ) {
+			Globale.preferenze.alberoAperto().radice = idNuovaRadice;
+		}
+		Globale.preferenze.salva();
+		if( Globale.individuo != null && Globale.individuo.equals(idEliminando) )
+			Globale.individuo = idNuovaRadice;
+		Toast.makeText( contesto, R.string.person_deleted, Toast.LENGTH_SHORT ).show();
+		U.salvaJson( true, (Object[])famiglie );
 	}
 }

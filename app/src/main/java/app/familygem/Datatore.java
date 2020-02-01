@@ -71,10 +71,11 @@ class Datatore {
 	}
 	
 	// Riconosce il tipo di data e crea la classe Data
-	public void analizza( String dataGc ) {
+	void analizza( String dataGc ) {
 
 		// Resetta i valori che contano
 		tipo = 0;
+		data1.date = null;
 
 		dataGc = dataGc.trim();
 		String dataGcMaiusc = dataGc.toUpperCase();

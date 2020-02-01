@@ -35,9 +35,11 @@ public class Magazzino extends Fragment {
 		View vista = inflater.inflate( R.layout.magazzino, container, false);
 		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
 		if( gc != null ) {
-			setHasOptionsMenu(true);
 			List<Repository> listArchivi = gc.getRepositories();
-			((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listArchivi.size() + " " + getString(R.string.repositories).toLowerCase() );
+			((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listArchivi.size() + " "
+					+ getString(listArchivi.size()==1 ? R.string.repository : R.string.repositories).toLowerCase() );
+			if( listArchivi.size() > 1 )
+				setHasOptionsMenu(true);
 			for( Repository rep : listArchivi ) {
 				if( rep.getExtension("fonti") == null )
 					rep.putExtension( "fonti", quanteFonti(rep,gc) );
@@ -89,7 +91,7 @@ public class Magazzino extends Fragment {
 	}
 
 	// Crea un archivio nuovo, se riceve una fonte glielo collega
-	public static void nuovoArchivio( Context contesto, Source fonte ) {
+	static void nuovoArchivio( Context contesto, Source fonte ) {
 		Repository arch = new Repository();
 		arch.setId( U.nuovoId( gc, Repository.class ) );
 		arch.setName( "" );
@@ -99,6 +101,7 @@ public class Magazzino extends Fragment {
 			archRef.setRef( arch.getId() );
 			fonte.setRepositoryRef( archRef );
 		}
+		U.salvaJson( true, arch );
 		Memoria.setPrimo( arch );
 		contesto.startActivity( new Intent( contesto, Archivio.class ) );
 	}
@@ -147,20 +150,19 @@ public class Magazzino extends Fragment {
 	}
 
 	// Menu contestuale
-	View vistaArchio;
+	Repository archivio;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaArchio = vista;
+		archivio =  (Repository) vista.getTag();
 		menu.add( 0, 0, 0, R.string.delete );
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		switch( item.getItemId() ) {
-			case 0:
-				vistaArchio.setVisibility( View.GONE );
-				Source[] fonti = elimina( (Repository)vistaArchio.getTag() );
-				U.salvaJson( false, (Object[])fonti );
-				return true;
+		if ( item.getItemId() == 0 ) {
+			Source[] fonti = elimina( archivio );
+			U.salvaJson( false, (Object[])fonti );
+			getActivity().recreate();
+			return true;
 		}
 		return false;
 	}

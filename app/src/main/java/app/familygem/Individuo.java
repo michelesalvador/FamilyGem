@@ -155,11 +155,12 @@ public class Individuo extends AppCompatActivity {
 		findViewById( R.id.fab ).setOnClickListener( vista -> {
 			PopupMenu popup = new PopupMenu( Individuo.this, vista );
 			Menu menu = popup.getMenu();
-			switch( tabLayout.getSelectedTabPosition() ){
+			switch( tabLayout.getSelectedTabPosition() ) {
 				case 0: // Individuo Media
 					menu.add( 0, 10, 0, R.string.new_media );
 					menu.add( 0, 11, 0, R.string.new_shared_media );
-					menu.add( 0, 12, 0, R.string.link_shared_media );
+					if( !gc.getMedia().isEmpty() )
+						menu.add( 0, 12, 0, R.string.link_shared_media );
 					break;
 				case 1: // Individuo Eventi
 					menu.add( 0, 20, 0, R.string.name );
@@ -197,12 +198,14 @@ public class Individuo extends AppCompatActivity {
 					SubMenu subNota = menu.addSubMenu( 0, 0, 0, R.string.note );
 					subNota.add( 0, 22, 0, R.string.new_note );
 					subNota.add( 0, 23, 0, R.string.new_shared_note );
-					subNota.add( 0, 24, 0, R.string.link_shared_note );
+					if( !gc.getNotes().isEmpty() )
+						subNota.add( 0, 24, 0, R.string.link_shared_note );
 					if( Globale.preferenze.esperto ) {
 						SubMenu subFonte = menu.addSubMenu( 0, 0, 0, R.string.source );
 						subFonte.add( 0, 25, 0, R.string.new_source_note );
 						subFonte.add( 0, 26, 0, R.string.new_source );
-						subFonte.add( 0, 27, 0, R.string.link_source );
+						if( !gc.getSources().isEmpty() )
+							subFonte.add( 0, 27, 0, R.string.link_source );
 					}
 					break;
 				case 2: // Individuo Familiari
@@ -213,7 +216,7 @@ public class Individuo extends AppCompatActivity {
 			popup.show();
 			popup.setOnMenuItemClickListener( item -> {
 				CharSequence[] familiari = { getText(R.string.parent), getText(R.string.sibling), getText(R.string.spouse), getText(R.string.child) };
-													// DUBBIO : "Padre" , "Madre" ?	"Marito"  "Moglie" ?
+													// todo dubbio: "Padre" , "Madre" ?	"Marito"  "Moglie" ?
 				AlertDialog.Builder builder = new AlertDialog.Builder( Individuo.this );
 				switch( item.getItemId() ) {
 					// Scheda Eventi
@@ -423,7 +426,7 @@ public class Individuo extends AppCompatActivity {
 		switch ( item.getItemId() ) {
 			case 0:	// Diagramma
 				Globale.individuo = uno.getId();
-				startActivity( new Intent( getApplicationContext(), Principe.class ) );
+				startActivity( new Intent( this, Principe.class ) );
 				return true;
 			case 1:	// Famiglia come figlio
 				U.qualiGenitoriMostrare( this, uno, Famiglia.class );
@@ -437,12 +440,16 @@ public class Individuo extends AppCompatActivity {
 				Snackbar.make( tabLayout, getString( R.string.this_is_root, U.epiteto(uno) ), Snackbar.LENGTH_LONG ).show();
 				return true;
 			case 4: // Modifica
-				Intent intent = new Intent( this, EditaIndividuo.class );
-				intent.putExtra( "idIndividuo", uno.getId() );
-				startActivity( intent );
+				Intent intent1 = new Intent( this, EditaIndividuo.class );
+				intent1.putExtra( "idIndividuo", uno.getId() );
+				startActivity( intent1 );
 				return true;
 			case 5:	// Elimina
-				Anagrafe.elimina( uno.getId(), this, null );
+				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
+						.setPositiveButton(R.string.delete, (dialog, i) -> {
+							Anagrafe.eliminaPersona(this, uno.getId());
+							onBackPressed();
+						}).setNeutralButton(R.string.cancel, null).show();
 				return true;
 			default:
 				onBackPressed();

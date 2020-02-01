@@ -5,7 +5,6 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import android.view.View;
 import android.widget.TextView;
 
 public class Lapide extends AppCompatActivity {
@@ -20,11 +19,8 @@ public class Lapide extends AppCompatActivity {
 
 		TextView collega = findViewById( R.id.lapide_link );
 		collega.setPaintFlags( collega.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG );
-		collega.setOnClickListener( new View.OnClickListener() {
-			@Override
-			public void onClick( View v ) {
-				startActivity( new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.familygem.app")) );
-			}
-		});
+		collega.setOnClickListener( v -> startActivity(
+				new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.familygem.app")) )
+		);
 	}
 }

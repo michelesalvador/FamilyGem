@@ -214,19 +214,22 @@ public class Conferma extends AppCompatActivity {
 					new AlertDialog.Builder( Conferma.this )
 							.setMessage( R.string.all_imported_delete )
 							.setPositiveButton( android.R.string.ok, (d, i) -> {
-								Alberi.eliminaAlbero( Conferma.this, Globale.idAlbero2 );
-								AlberoNuovo.caricaAlbero( Conferma.this, Globale.preferenze.idAprendo );
-							}).setNegativeButton( R.string.no, (d, i) ->
-									AlberoNuovo.caricaAlbero( Conferma.this, Globale.preferenze.idAprendo )
-							).setOnCancelListener( dialog ->
-									AlberoNuovo.caricaAlbero(Conferma.this, Globale.preferenze.idAprendo )
-							).show();
+								Alberi.eliminaAlbero( this, Globale.idAlbero2 );
+								concludi();
+							}).setNegativeButton( R.string.no, (d, i) -> concludi() )
+							.setOnCancelListener( dialog -> concludi() ).show();
 				} else
-					AlberoNuovo.caricaAlbero( Conferma.this, Globale.preferenze.idAprendo );
+					concludi();
 				Confronto.getLista().clear();
 				Confronto.getInstance().posizione = 0;
 			});
 		} else onBackPressed();
+	}
+
+	// Apre l'elenco degli alberi
+	void concludi() {
+		Globale.editato = true;
+		startActivity( new Intent( this, Alberi.class ) );
 	}
 
 	// Calcola l'id più alto per una certa classe confrontando albero nuovo e vecchio
