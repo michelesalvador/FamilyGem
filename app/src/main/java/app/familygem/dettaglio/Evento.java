@@ -51,6 +51,7 @@ public class Evento extends Dettaglio {
 	public void elimina() {
 		((PersonFamilyCommonContainer)Memoria.oggettoContenitore()).getEventsFacts().remove( e );
 		U.aggiornaDate( Memoria.oggettoCapo() );
+		Memoria.annullaIstanze(e);
 	}
 
 	// Elimina i principali tag vuoti e eventualmente aggiunge la Y

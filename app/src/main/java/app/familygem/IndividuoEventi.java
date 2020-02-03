@@ -187,6 +187,7 @@ public class IndividuoEventi extends Fragment {
 			case 202: // Elimina
 				if( U.preserva(oggettoPezzo) ) return false;
 				uno.getNames().remove( oggettoPezzo );
+				Memoria.annullaIstanze( oggettoPezzo );
 				vistaPezzo.setVisibility( View.GONE );
 				cosa = 2;
 				break;
@@ -204,6 +205,7 @@ public class IndividuoEventi extends Fragment {
 			case 205:
 				// todo Conferma elimina
 				uno.getEventsFacts().remove( oggettoPezzo );
+				Memoria.annullaIstanze( oggettoPezzo );
 				vistaPezzo.setVisibility( View.GONE );
 				break;
 			case 206:
@@ -220,6 +222,7 @@ public class IndividuoEventi extends Fragment {
 			case 220: 	// Citazione fonte
 				// todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
 				uno.getSourceCitations().remove( oggettoPezzo );
+				Memoria.annullaIstanze(oggettoPezzo);
 				vistaPezzo.setVisibility( View.GONE );
 				break;
 			default:

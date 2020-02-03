@@ -12,6 +12,7 @@
 	<!-- Principe -->
 	<string name="drawer_open">Open navigation drawer</string>
 	<string name="drawer_close">Close navigation drawer</string>
+	<string name="revert">Undo changes</string>
 	<string name="trees">Trees</string>
 	<string name="diagram">Diagram</string>
 	<string name="media">Media</string>
@@ -322,6 +323,7 @@
 	<string name="empty_media">Empty Media</string>
 	<string name="which_parents">Which parents?</string>
 	<string name="which_spouses">Which spouses?</string>
+	<string name="empty_family_delete">There are some empty families left.\nDo you want to delete them?</string>
 	<!-- Altro -->
 	<string name="version_name">Version %s</string>
 	<string name="make_default">Main submitter</string>

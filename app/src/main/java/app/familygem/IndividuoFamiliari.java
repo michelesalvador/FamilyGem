@@ -59,12 +59,12 @@ public class IndividuoFamiliari extends Fragment {
 				}
 				// Coniugi e figli
 				for( Family famiglia : uno.getSpouseFamilies(gc) ) {
-					if( U.sesso(uno) == 1 )
-						for( Person moglie : famiglia.getWives(gc) )
-							creaTessera( moglie, getString(R.string.wife), 0, famiglia );
-					else
-						for( Person marito : famiglia.getHusbands(gc) )
+					for( Person marito : famiglia.getHusbands(gc) )
+						if( !marito.equals(uno) )
 							creaTessera( marito, getString(R.string.husband), 0, famiglia );
+					for( Person moglie : famiglia.getWives(gc) )
+						if( !moglie.equals(uno) )
+							creaTessera( moglie, getString(R.string.wife), 0, famiglia );
 					for( Person figlio : famiglia.getChildren(gc) ) {
 						creaTessera( figlio, null, 3, famiglia );
 					}
@@ -106,22 +106,21 @@ public class IndividuoFamiliari extends Fragment {
 	}
 
 	// Menu contestuale
-	View vistaScheda;
-	String idIndividuo;
-	Person pers;
-	int posFam;
+	private String idIndividuo;
+	private Person pers;
+	private Family familia;
+	private int posFam;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaScheda = vista;
 		idIndividuo = (String)vista.getTag();
 		pers = gc.getPerson(idIndividuo);
+		familia = (Family)vista.getTag( R.id.tag_famiglia );
 		// posizione della famiglia coniugale per chi ne ha più di una
 		posFam = -1;
-		Family fam = (Family)vista.getTag( R.id.tag_famiglia );
-		if( uno.getSpouseFamilyRefs().size() > 1 && !fam.getChildren(gc).contains(pers) ) { // solo i coniugi, non i figli
+		if( uno.getSpouseFamilyRefs().size() > 1 && !familia.getChildren(gc).contains(pers) ) { // solo i coniugi, non i figli
 			List<SpouseFamilyRef> refi = uno.getSpouseFamilyRefs();
 			for( SpouseFamilyRef sfr : refi )
-				if( sfr.getRef().equals( fam.getId() ) )
+				if( sfr.getRef().equals( familia.getId() ) )
 					posFam = refi.indexOf( sfr );
 		}
 		// Meglio usare numeri che non confliggano con i menu contestuali delle altre schede individuo
@@ -158,21 +157,34 @@ public class IndividuoFamiliari extends Fragment {
 			intento.putExtra( "idIndividuo", idIndividuo );
 			startActivity( intento );
 		} else if( id == 306 ) { // Scollega da questa famiglia
-			Family familia = (Family)vistaScheda.getTag(R.id.tag_famiglia);
 			Famiglia.scollega( idIndividuo, familia );
-			vistaScheda.setVisibility( View.GONE );
+			aggiorna();
+			U.controllaFamiglieVuote(getContext(), this::aggiorna, false, familia);
 			U.salvaJson( true, familia, pers );
-			// todo aggiorna la data cambiamento nella scheda Fatti
 		} else if( id == 307 ) {	// Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
 						Anagrafe.eliminaPersona(getContext(), idIndividuo);
-						vistaScheda.setVisibility( View.GONE );
-						// todo idem aggiorna data cambiamento
+						if( !U.controllaFamiglieVuote(getContext(), () -> concludi(pers), false, familia) )
+							concludi( pers );
 					}).setNeutralButton(R.string.cancel, null).show();
 		} else {
 			return false;
 		}
 		return true;
+	}
+	// Conclude un paio di metodi qui sopra
+	void concludi(Person pers) {
+		if( pers.equals(uno) ) // nel caso sia imparentato con sè stesso
+			getActivity().onBackPressed();
+		else
+			aggiorna();
+	}
+
+	// Rinfresca il contenuto del frammento Familiari
+	void aggiorna() {
+		getActivity().getSupportFragmentManager().beginTransaction().detach(this).attach(this).commit();
+		getActivity().invalidateOptionsMenu();
+		// todo aggiorna la data cambiamento nella scheda Fatti
 	}
 }

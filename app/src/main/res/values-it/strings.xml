@@ -11,6 +11,7 @@
 	<!-- Principe -->
 	<string name="drawer_open">Apri menu</string>
 	<string name="drawer_close">Chiudi menu</string>
+	<string name="revert">Annulla modifiche</string>
 	<string name="trees">Alberi</string>
 	<string name="diagram">Diagramma</string>
 	<string name="media">Media</string>
@@ -321,6 +322,7 @@
 	<string name="empty_media">Media vuoto</string>
 	<string name="which_parents">Quali genitori?</string>
 	<string name="which_spouses">Quali coniugi?</string>
+	<string name="empty_family_delete">È rimasta qualche famiglia vuota.\nVuoi eliminarla?</string>
 	<!-- Altro -->
 	<string name="version_name">Versione %s</string>
 	<string name="make_default">Autore principale</string>

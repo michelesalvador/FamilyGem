@@ -406,9 +406,10 @@ public class Anagrafe extends Fragment {
 			startActivity( intento );
 		} else if( id == 4 ) {	// Elimina
 			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_person )
-					.setPositiveButton( R.string.delete, ( dialog, i ) -> {
-						eliminaPersona(getContext(), idIndi);
-						getActivity().recreate();
+					.setPositiveButton( R.string.delete, (dialog, i) -> {
+						Family[] famiglie = eliminaPersona(getContext(), idIndi);
+						if( !U.controllaFamiglieVuote(getContext(), getActivity()::recreate, true, famiglie) )
+							getActivity().recreate();
 					}).setNeutralButton( R.string.cancel, null ).show();
 		} else {
 			return false;
@@ -440,10 +441,12 @@ public class Anagrafe extends Fragment {
 		return famiglie.toArray( new Family[0] );
 	}
 
-	// Elimina una persona dal gedcom, trova eventuale nuova radice
-	static void eliminaPersona(Context contesto, String idEliminando) {
+	// Elimina una persona dal gedcom, trova eventuale nuova radice, restituisce famiglie modificate
+	static Family[] eliminaPersona(Context contesto, String idEliminando) {
 		Family[] famiglie = scollega( idEliminando );
-		gc.getPeople().remove( gc.getPerson( idEliminando ) );
+		Person eliminando = gc.getPerson( idEliminando );
+		Memoria.annullaIstanze( eliminando );
+		gc.getPeople().remove( eliminando );
 		gc.createIndexes();	// necessario
 		Globale.preferenze.alberoAperto().individui--;
 		String idNuovaRadice = U.trovaRadice(gc);	// Todo dovrebbe essere: trovaParentePiuProssimo
@@ -455,5 +458,6 @@ public class Anagrafe extends Fragment {
 			Globale.individuo = idNuovaRadice;
 		Toast.makeText( contesto, R.string.person_deleted, Toast.LENGTH_SHORT ).show();
 		U.salvaJson( true, (Object[])famiglie );
+		return famiglie;
 	}
 }

@@ -21,8 +21,8 @@ android {
 		applicationId "app.familygem"
 		minSdkVersion 19
 		targetSdkVersion 29
-		versionCode 10
-		versionName '0.7.7'
+		versionCode 12
+		versionName '0.7.9'
 		vectorDrawables.useSupportLibrary = true
 		resConfigs "en", "es", "it"
 		def backupKey = ""

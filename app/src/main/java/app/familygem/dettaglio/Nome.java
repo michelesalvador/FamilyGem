@@ -21,12 +21,15 @@ public class Nome extends Dettaglio {
 		if( Globale.preferenze.esperto )
 			metti( getString(R.string.value), "Value" );
 		else {
-			String epiteto = n.getValue();
-			String nome = epiteto.replaceAll( "/.*?/", "" ).trim();
-			creaPezzo( getString(R.string.name), nome, 4043, false );
+			String nome = "";
 			String cognome = "";
-			if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
-				cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
+			String epiteto = n.getValue();
+			if( epiteto != null ) {
+				nome = epiteto.replaceAll( "/.*?/", "" ).trim();
+				if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
+					cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
+			}
+			creaPezzo( getString(R.string.name), nome, 4043, false );
 			creaPezzo( getString(R.string.surname), cognome, 6064, false );
 		}
 		metti( getString(R.string.type), "Type", false, false );  // _type non Gedcom standard

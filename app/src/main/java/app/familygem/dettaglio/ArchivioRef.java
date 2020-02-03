@@ -60,5 +60,6 @@ public class ArchivioRef extends Dettaglio {
 		Source contenitore = (Source) Memoria.oggettoContenitore();
 		contenitore.setRepositoryRef( null );
 		U.aggiornaDate( contenitore );
+		Memoria.annullaIstanze(r);
 	}
 }

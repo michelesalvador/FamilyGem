@@ -86,13 +86,10 @@ public class InfoAlbero extends AppCompatActivity {
 			if( h == null) {
 				Button bottoneCrea = scatola.findViewById( R.id.info_crea_testata );
 				bottoneCrea.setVisibility( View.VISIBLE );
-				bottoneCrea.setOnClickListener( new View.OnClickListener() {
-					@Override
-					public void onClick( View view ) {
-						gc.setHeader( AlberoNuovo.creaTestata( file.getName() ) );
-						U.salvaJson( gc, idAlbero );
-						recreate();
-					}
+				bottoneCrea.setOnClickListener( view -> {
+					gc.setHeader( AlberoNuovo.creaTestata( file.getName() ) );
+					U.salvaJson( gc, idAlbero );
+					recreate();
 				});
 			} else {
 				scatola.findViewById( R.id.info_testata ).setVisibility( View.VISIBLE );
@@ -149,7 +146,8 @@ public class InfoAlbero extends AppCompatActivity {
 					poni( est.nome, est.testo );
 				}
 				spazio();
-				// todo rimuovi l'ultimo spazio()
+				if( righetta != null )
+					((TableLayout)findViewById( R.id.info_tabella ) ).removeView( righetta );
 
 				U.mettiNote( scatola, h, true );
 			}
@@ -197,12 +195,13 @@ public class InfoAlbero extends AppCompatActivity {
 		}
 	}
 
+	TableRow righetta;
 	void spazio(){
 		if( testoMesso ) {
-			TableRow riga = new TableRow( getApplicationContext() );
+			righetta = new TableRow( getApplicationContext() );
 			View cella = new View( getApplicationContext() );
 			cella.setBackgroundResource( R.color.primario );
-			riga.addView( cella );
+			righetta.addView( cella );
 			TableRow.LayoutParams param = (TableRow.LayoutParams) cella.getLayoutParams();
 			param.weight = 1;
 			param.span = 2;
@@ -210,7 +209,7 @@ public class InfoAlbero extends AppCompatActivity {
 			param.topMargin = 5;
 			param.bottomMargin = 5;
 			cella.setLayoutParams( param );
-			( (TableLayout) findViewById( R.id.info_tabella ) ).addView( riga );
+			( (TableLayout) findViewById( R.id.info_tabella ) ).addView( righetta );
 			testoMesso = false;
 		}
 	}

@@ -68,10 +68,11 @@ public class Podio extends Fragment {
 		gc.getSubmitters().remove( aut );
 		if( gc.getSubmitters().isEmpty() )
 			gc.setSubmitters( null );
+		Memoria.annullaIstanze(aut);
 	}
 
 	// Crea un Autore nuovo, se riceve un contesto lo apre in modalità editore
-	public static Submitter nuovoAutore( Context contesto ) {
+	static Submitter nuovoAutore( Context contesto ) {
 		Submitter subm = new Submitter();
 		subm.setId( U.nuovoId(gc,Submitter.class) );
 		subm.setName( "" );

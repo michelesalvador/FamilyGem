@@ -1,6 +1,5 @@
 package app.familygem;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -17,11 +16,11 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
 import org.folg.gedcom.model.EventFact;
+import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaRef;
 import org.folg.gedcom.model.Name;
@@ -149,6 +148,7 @@ public class Individuo extends AppCompatActivity {
 					getSupportFragmentManager().beginTransaction().detach( scheda ).attach( scheda ).commit();
 				// ToDo tornando indietro dopo una editazione non aggiorna la scheda 0 coi media...
 			}
+			invalidateOptionsMenu();
 		}
 
 		// Menu FAB
@@ -447,8 +447,9 @@ public class Individuo extends AppCompatActivity {
 			case 5:	// Elimina
 				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
 						.setPositiveButton(R.string.delete, (dialog, i) -> {
-							Anagrafe.eliminaPersona(this, uno.getId());
-							onBackPressed();
+							Family[] famiglie = Anagrafe.eliminaPersona(this, uno.getId());
+							if( !U.controllaFamiglieVuote( this, this::onBackPressed, true, famiglie) )
+								onBackPressed();
 						}).setNeutralButton(R.string.cancel, null).show();
 				return true;
 			default:

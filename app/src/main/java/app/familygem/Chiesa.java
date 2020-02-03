@@ -81,54 +81,46 @@ public class Chiesa extends Fragment {
 		vistaFamiglia.setTag( fam.getId() );	// solo per il menu contestuale Elimina qui in Chiesa
 	}
 
-	// Chiede conferma di eliminare una famiglia, rimuove i ref dai membri
-	static void eliminaFamiglia( Activity attivita, String idFamiglia, boolean ricrea ) {
-		new AlertDialog.Builder(attivita).setMessage( R.string.really_delete_family )
-				.setNeutralButton( android.R.string.cancel, null )
-				.setPositiveButton( android.R.string.yes, (dialogo, quale) -> {
-					Family f = gc.getFamily( idFamiglia );
-					Set<Person> membri = new HashSet<>();
-					// Prima rimuove i ref alla famiglia negli indi membri
-					for( Person marito : f.getHusbands(gc) ) {
-						Iterator<SpouseFamilyRef> refi = marito.getSpouseFamilyRefs().iterator();
-						while( refi.hasNext() ) {
-							SpouseFamilyRef sfr = refi.next();
-							if( sfr.getRef().equals(f.getId()) ) {
-								refi.remove();
-								membri.add( marito );
-							}
-						}
-					}
-					for( Person moglie : f.getWives(gc) ) {
-						Iterator<SpouseFamilyRef> refi = moglie.getSpouseFamilyRefs().iterator();
-						while( refi.hasNext() ) {
-							SpouseFamilyRef sfr = refi.next();
-							if( sfr.getRef().equals(f.getId()) ) {
-								refi.remove();
-								membri.add( moglie );
-							}
-						}
-					}
-					for( Person figlio : f.getChildren(gc) ) {
-						Iterator<ParentFamilyRef> refi = figlio.getParentFamilyRefs().iterator();
-						while( refi.hasNext() ) {
-							ParentFamilyRef pfr = refi.next();
-							if( pfr.getRef().equals(f.getId()) ) {
-								refi.remove();
-								membri.add( figlio );
-							}
-						}
-					}
-					// Poi può rimuovere la famiglia
-					gc.getFamilies().remove(f);
-					gc.createIndexes();	// necessario per aggiornare gli individui
-					Memoria.annullaIstanze(f);
-					U.salvaJson( true, membri.toArray(new Object[0]) );
-					if( ricrea )
-						attivita.recreate();
-					else
-						attivita.onBackPressed();
-				}).show();
+	// Elimina una famiglia, rimuove i ref dai membri
+	static void eliminaFamiglia( String idFamiglia ) {
+		Family f = gc.getFamily( idFamiglia );
+		Set<Person> membri = new HashSet<>();
+		// Prima rimuove i ref alla famiglia negli indi membri
+		for( Person marito : f.getHusbands(gc) ) {
+			Iterator<SpouseFamilyRef> refi = marito.getSpouseFamilyRefs().iterator();
+			while( refi.hasNext() ) {
+				SpouseFamilyRef sfr = refi.next();
+				if( sfr.getRef().equals(f.getId()) ) {
+					refi.remove();
+					membri.add( marito );
+				}
+			}
+		}
+		for( Person moglie : f.getWives(gc) ) {
+			Iterator<SpouseFamilyRef> refi = moglie.getSpouseFamilyRefs().iterator();
+			while( refi.hasNext() ) {
+				SpouseFamilyRef sfr = refi.next();
+				if( sfr.getRef().equals(f.getId()) ) {
+					refi.remove();
+					membri.add( moglie );
+				}
+			}
+		}
+		for( Person figlio : f.getChildren(gc) ) {
+			Iterator<ParentFamilyRef> refi = figlio.getParentFamilyRefs().iterator();
+			while( refi.hasNext() ) {
+				ParentFamilyRef pfr = refi.next();
+				if( pfr.getRef().equals(f.getId()) ) {
+					refi.remove();
+					membri.add( figlio );
+				}
+			}
+		}
+		// Poi può rimuovere la famiglia
+		gc.getFamilies().remove(f);
+		gc.createIndexes();	// necessario per aggiornare gli individui
+		Memoria.annullaIstanze(f);
+		U.salvaJson( true, membri.toArray(new Object[0]) );
 	}
 
 	static Family nuovaFamiglia( boolean aggiungi ) {
@@ -148,7 +140,11 @@ public class Chiesa extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {	// Elimina
-			eliminaFamiglia( getActivity(), (String) vistaScelta.getTag(), true );
+			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_family )
+					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
+						eliminaFamiglia( (String) vistaScelta.getTag() );
+						getActivity().recreate();
+					}).setNeutralButton(android.R.string.cancel, null).show();
 		} else {
 			return false;
 		}

@@ -31,5 +31,6 @@ public class Indirizzo extends Dettaglio {
 	public void elimina() {
 		eliminaIndirizzo( Memoria.oggettoContenitore() );
 		U.aggiornaDate( Memoria.oggettoCapo() );
+		Memoria.annullaIstanze(a);
 	}
 }

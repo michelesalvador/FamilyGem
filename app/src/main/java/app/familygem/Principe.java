@@ -2,6 +2,7 @@ package app.familygem;
 
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.navigation.NavigationView;
@@ -115,6 +116,23 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
 			scatolissima.closeDrawer(GravityCompat.START);
 			Globale.daSalvare = false;
+		});
+		bottoneSalva.setOnLongClickListener( vista -> {
+			PopupMenu popup = new PopupMenu(this, vista);
+			popup.getMenu().add(0, 0, 0, R.string.revert);
+			popup.show();
+			popup.setOnMenuItemClickListener( item -> {
+				if( item.getItemId() == 0 ) {
+					Alberi.apriGedcom( Globale.preferenze.idAprendo, false );
+					getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new Diagram())
+							.addToBackStack(null).commit();
+					scatolissima.closeDrawer(GravityCompat.START);
+					bottoneSalva.setVisibility( View.GONE );
+					Globale.daSalvare = false;
+				}
+				return true;
+			});
+			return true;
 		});
 		if( Globale.daSalvare )
 			bottoneSalva.setVisibility( View.VISIBLE );

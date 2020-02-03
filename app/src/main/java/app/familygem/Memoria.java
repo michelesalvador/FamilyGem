@@ -125,12 +125,16 @@ public class Memoria {
 		//stampa();
 	}
 
-	// Quando un oggetto viene eliminato, lo rende null in tutti i passi.
+	// Quando un oggetto viene eliminato, lo rende null in tutti i passi,
+	// e anche gli oggetti negli eventuali passi seguenti vengono annullati.
 	public static void annullaIstanze( Object oggio ) {
 		for( Pila pila : memoria.lista ) {
+			boolean seguente = false;
 			for( Passo passo : pila ) {
-				if( passo.oggetto != null && passo.oggetto.equals( oggio ) )
+				if( passo.oggetto != null && (passo.oggetto.equals(oggio) || seguente) ) {
 					passo.oggetto = null;
+					seguente = true;
+				}
 			}
 		}
 	}

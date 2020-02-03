@@ -160,7 +160,6 @@ public class EditoreData extends LinearLayout {
 				if( veroImputTesto )
 					impostaTutto();
 				veroImputTesto = true;
-				s.l("afterTextChanged",datatore.tipo);
 			}
 		} );
 	}
@@ -280,7 +279,6 @@ public class EditoreData extends LinearLayout {
 		int mese = ruotaMese.getValue();
 		int secolo = ruotaSecolo.getValue();
 		int anno = ruotaAnno.getValue();
-		s.l("DATA",giorno, mese,secolo,anno);
 		// Imposta i giorni del mese in ruotaGiorno
 		calenda.set( secolo*100+anno, mese-1, 1 );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
@@ -333,7 +331,6 @@ public class EditoreData extends LinearLayout {
 				Date unAnnoDopo = new Date();
 				unAnnoDopo.setYear( data.date.getYear() + 1 );
 				String secondoAnno = String.format( Locale.ENGLISH, "%tY", unAnnoDopo );
-				//s.l("secondoAnno "+secondoAnno);
 				fatta = data.format.format( data.date ) +"/"+ secondoAnno.substring( 2 );
 			} else // Le altre date normali
 				fatta = data.format.format( data.date );

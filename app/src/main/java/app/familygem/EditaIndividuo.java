@@ -399,10 +399,7 @@ public class EditaIndividuo extends AppCompatActivity {
 				// Perno senza famiglia che si coniuga con persona single già in una famiglia: perno diventa coniuge nella famiglia esistente
 				if( famSposi.isEmpty() && !famDestinoSposi.isEmpty() &&
 						(famDestinoSposi.get(0).getHusbandRefs().isEmpty() || famDestinoSposi.get(0).getWifeRefs().isEmpty()) ) {
-					if( U.sesso( perno ) == 2 )
-						famDestinoSposi.get(0).addWife( refSposo );
-					else
-						famDestinoSposi.get(0).addHusband( refSposo );
+					aggiungiConiuge(famDestinoSposi.get(0), refSposo);
 					refFamSposo.setRef( famDestinoSposi.get(0).getId() );
 					perno.addSpouseFamilyRef( refFamSposo );
 					stocca( famDestinoSposi.get(0), perno );
@@ -410,10 +407,7 @@ public class EditaIndividuo extends AppCompatActivity {
 				// Se perno è l'unico coniuge mette il nuovo sposo nella famiglia esistente
 				else if( !famSposi.isEmpty() && (famSposi.get(0).getHusbandRefs().isEmpty() || famSposi.get(0).getWifeRefs().isEmpty()) ) {
 					refSposo.setRef( nuovoId );
-					if( U.sesso( nuovo ) == 2 )
-						famSposi.get(0).addWife( refSposo );
-					else
-						famSposi.get(0).addHusband( refSposo );
+					aggiungiConiuge(famSposi.get(0), refSposo);
 					refFamSposo.setRef( famSposi.get(0).getId() );
 					nuovo.addSpouseFamilyRef( refFamSposo );
 					stocca( famSposi.get(0), nuovo );
@@ -426,10 +420,7 @@ public class EditaIndividuo extends AppCompatActivity {
 						famNuova.addHusband( refSposo );
 					SpouseRef refConiuge = new SpouseRef();
 					refConiuge.setRef( nuovoId );
-					if( U.sesso( nuovo ) == 2 )
-						famNuova.addWife( refConiuge );
-					else
-						famNuova.addHusband( refConiuge );
+					aggiungiConiuge(famNuova, refConiuge);
 					perno.addSpouseFamilyRef( refFamSposo );
 					nuovo.addSpouseFamilyRef( refFamSposo );
 					stocca( famNuova, perno, nuovo );
@@ -475,5 +466,13 @@ public class EditaIndividuo extends AppCompatActivity {
 	// Stocca gli oggetti pronti per aggiornargli la data di cambio
 	static void stocca( Object ... oggetti ) {
 		Collections.addAll( cambiati, oggetti);
+	}
+
+	// Aggiunge il coniuge in una coppia husband-wife indipendentemente dal sesso
+	public static void aggiungiConiuge(Family famiglia, SpouseRef refNuovo) {
+		if( !famiglia.getHusbandRefs().isEmpty() )
+			famiglia.addWife( refNuovo );
+		else
+			famiglia.addHusband( refNuovo );
 	}
 }

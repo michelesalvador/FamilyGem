@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -99,6 +98,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import app.familygem.dettaglio.ArchivioRef;
+import app.familygem.dettaglio.Autore;
 import app.familygem.dettaglio.Cambiamenti;
 import app.familygem.dettaglio.CitazioneFonte;
 import app.familygem.dettaglio.Famiglia;
@@ -146,20 +146,22 @@ public class U {
 	// Restituisce il nome e cognome addobbato di un Name
 	static String nomeCognome( Name n ) {
 		String completo = "";
-		String grezzo = n.getValue().trim();
-		if( grezzo.indexOf('/') > -1 ) // Se c'è un cognome tra '/'
-			completo = grezzo.substring( 0, grezzo.indexOf('/') ).trim(); // nome
-		if (n.getNickname() != null)
-			completo += " \"" + n.getNickname() + "\"";
-		if( grezzo.indexOf('/') < grezzo.lastIndexOf('/') ) {
-			completo += " " + grezzo.substring( grezzo.indexOf('/') + 1, grezzo.lastIndexOf('/') ).trim(); // cognome
+		if( n.getValue() != null ) {
+			String grezzo = n.getValue().trim();
+			if( grezzo.indexOf('/') > -1 ) // Se c'è un cognome tra '/'
+				completo = grezzo.substring( 0, grezzo.indexOf('/') ).trim(); // nome
+			if (n.getNickname() != null)
+				completo += " \"" + n.getNickname() + "\"";
+			if( grezzo.indexOf('/') < grezzo.lastIndexOf('/') ) {
+				completo += " " + grezzo.substring( grezzo.indexOf('/') + 1, grezzo.lastIndexOf('/') ).trim(); // cognome
+			}
+			if( grezzo.length() - 1 > grezzo.lastIndexOf('/') )
+				completo += " " + grezzo.substring( grezzo.lastIndexOf('/') + 1 ).trim(); // dopo il cognome
+			if( n.getPrefix() != null )
+				completo = n.getPrefix().trim() + " " + completo;
+			if( n.getSuffix() != null )
+				completo += " " + n.getSuffix().trim();
 		}
-		if( grezzo.length() - 1 > grezzo.lastIndexOf('/') )
-			completo += " " + grezzo.substring( grezzo.lastIndexOf('/') + 1 ).trim(); // dopo il cognome
-		if( n.getPrefix() != null )
-			completo = n.getPrefix().trim() + " " + completo;
-		if( n.getSuffix() != null )
-			completo += " " + n.getSuffix().trim();
 		return completo.trim();
 	}
 
@@ -362,6 +364,7 @@ public class U {
 			if( gt.getChildren().isEmpty() )
 				gt.setChildren( null );
 		}
+		Memoria.annullaIstanze(estensione);
 		if( vista != null )
 			vista.setVisibility( View.GONE );
 	}
@@ -804,14 +807,16 @@ public class U {
 					if( intento.getComponent().getPackageName().equals("app.familygem") ) {
 						// Crea un Media vuoto
 						Media med;
-						if( codice==4173 || codice==2173 ) { // Media inline
+						if( codice==4173 || codice==2173 ) { // Media semplice
 							med = new Media();
 							med.setFileTag( "FILE" );
 							contenitore.addMedia( med );
-						} else // Media condiviso
+							Memoria.aggiungi( med );
+						} else { // Media condiviso
 							med = Galleria.nuovoMedia( contenitore );
+							Memoria.setPrimo( med );
+						}
 						med.setFile( "" );
-						Memoria.setPrimo( med );
 						contesto.startActivity( intento );
 						U.salvaJson( true, Memoria.oggettoCapo() );
 					} else if( frammento != null )
@@ -1225,6 +1230,20 @@ public class U {
 		} );
 	}
 
+	// Aggiunge un autore al layout
+	static void linkAutore( LinearLayout scatola, Submitter autor ) {
+		Context contesto = scatola.getContext();
+		View vista = LayoutInflater.from(contesto).inflate( R.layout.pezzo_nota, scatola, false);
+		scatola.addView( vista );
+		TextView testoNota = vista.findViewById( R.id.nota_testo );
+		testoNota.setText( autor.getName() );
+		vista.findViewById( R.id.nota_fonti ).setVisibility( View.GONE );
+		vista.setOnClickListener( v -> {
+			Memoria.setPrimo( autor );
+			contesto.startActivity( new Intent( contesto, Autore.class ) );
+		});
+	}
+
 	// Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipiti
 	public static void mettiDispensa( LinearLayout scatola, Object cosa, int tit ) {
 		View vista = LayoutInflater.from(scatola.getContext()).inflate( R.layout.dispensa, scatola, false );
@@ -1238,7 +1257,6 @@ public class U {
 				mettiQualsiasi( dispensa, o );
 		} else
 			mettiQualsiasi( dispensa, cosa );
-
 	}
 
 	// Riconosce il tipo di record e aggiunge il link appropriato alla scatola
@@ -1255,6 +1273,8 @@ public class U {
 			mettiNota( scatola, (Note)record, true );
 		else if( record instanceof Media )
 			linkaMedia( scatola, (Media)record );
+		else if( record instanceof Submitter )
+			linkAutore( scatola, (Submitter)record );
 	}
 
 	// Aggiunge al layout il pezzo con la data e tempo di Cambiamento
@@ -1455,6 +1475,32 @@ public class U {
 			Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( 0 ) );
 			contesto.startActivity( new Intent( contesto, Famiglia.class ) );
 		}
+	}
+
+	// Controlla che una o più famiglie siano vuote e propone di eliminarle
+	static boolean controllaFamiglieVuote(Context contesto, Runnable cheFare, boolean ancheKo, Family... famiglie) {
+		List<Family> vuote = new ArrayList<>();
+		for( Family fam : famiglie ) {
+			int membri = fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size();
+			if( membri <= 1 && fam.getEventsFacts().isEmpty() && fam.getAllMedia(Globale.gc).isEmpty()
+					&& fam.getAllNotes(Globale.gc).isEmpty() && fam.getSourceCitations().isEmpty() ) {
+				vuote.add(fam);
+			}
+		}
+		if( vuote.size() > 0 ) {
+			new AlertDialog.Builder(contesto).setMessage( R.string.empty_family_delete )
+					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
+						for(Family f : vuote)
+							Chiesa.eliminaFamiglia( f.getId() ); // Così capita di salvare più volte insieme... ma vabè
+						cheFare.run();
+					}).setNeutralButton(android.R.string.cancel, (dialog, i) -> {
+						if(ancheKo) cheFare.run();
+					}).setOnCancelListener( dialog -> {
+						if(ancheKo) cheFare.run();
+					}).show();
+			return true;
+		}
+		return false;
 	}
 
 	// Mostra un messaggio Toast anche da un thread collaterale

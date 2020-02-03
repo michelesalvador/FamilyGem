@@ -95,6 +95,8 @@ public class Diagram extends Fragment {
 				intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
 				startActivity( intento );
 			});
+			// se eventualmente era stato cambiato lo zoom
+			zoomBox.post( () -> zoomBox.realZoomTo(0.7f, true) );
 			return;
 		}
 
@@ -503,7 +505,7 @@ public class Diagram extends Fragment {
 			U.qualiGenitoriMostrare( getContext(), pers, Famiglia.class );
 		} else if( id == 2 ) {	// Famiglia come coniuge
 			U.qualiConiugiMostrare( getContext(), pers );
-		} else if( id == 3 ) {	// Aggiungi parente
+		} else if( id == 3 ) {	// Collega persona nuova
 			new AlertDialog.Builder( getActivity() ).setItems( parenti, ( dialog, quale ) -> {
 				Intent intento = new Intent( getContext(), EditaIndividuo.class );
 				intento.putExtra( "idIndividuo", idPersona );
@@ -512,7 +514,7 @@ public class Diagram extends Fragment {
 					return; // se perno è sposo in più famiglie dialogo chiede a chi aggiungere un figlio
 				startActivity( intento );
 			}).show();
-		} else if( id == 4 ) {	// Collega persona
+		} else if( id == 4 ) {	// Collega persona esistente
 			new AlertDialog.Builder( getActivity() ).setItems( parenti, ( dialog, quale ) -> {
 				Intent intento = new Intent( getContext(), Principe.class );
 				intento.putExtra( "idIndividuo", idPersona ); // serve solo a quel pistino di controllaMultiMatrimoni()
@@ -528,21 +530,25 @@ public class Diagram extends Fragment {
 			startActivity( intento );
 		} else if( id == 6 ) {	// Scollega
 			Family[] famiglie = Anagrafe.scollega( idPersona );
-			box.removeAllViews();
-			drawDiagram();
+			ripristina();
 			Snackbar.make( getView(), R.string.person_unlinked, Snackbar.LENGTH_LONG ).show();
 			U.aggiornaDate( pers );
+			U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
 			U.salvaJson( false, (Object[])famiglie );
 		} else if( id == 7 ) {	// Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
-						Anagrafe.eliminaPersona(getContext(), idPersona);
-						box.removeAllViews();
-						drawDiagram();
+						Family[] famiglie = Anagrafe.eliminaPersona(getContext(), idPersona);
+						ripristina();
+						U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
 					}).setNeutralButton(R.string.cancel, null).show();
 		} else
 			return false;
 		return true;
+	}
+	private void ripristina() {
+		box.removeAllViews();
+		drawDiagram();
 	}
 
 	// Aggiunge il parente che è stata scelto in Anagrafe

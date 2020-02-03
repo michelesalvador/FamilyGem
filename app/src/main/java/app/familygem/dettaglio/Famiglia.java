@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import app.familygem.Dettaglio;
+import app.familygem.EditaIndividuo;
 import app.familygem.Individuo;
 import app.familygem.R;
 import app.familygem.U;
@@ -52,27 +53,25 @@ public class Famiglia extends Dettaglio {
 		View vistaPersona = U.mettiIndividuo( box, p, getString(ruolo) );
 		vistaPersona.setTag( R.id.tag_oggetto, p ); // per il menu contestuale in Dettaglio
 		registerForContextMenu( vistaPersona );
-		vistaPersona.setOnClickListener( new View.OnClickListener() {
-			public void onClick( View v ) {
-				// un genitore con una o più famiglie in cui è figlio
-				if( (ruolo==R.string.husband || ruolo==R.string.wife) && !p.getParentFamilies(gc).isEmpty() ) {
-					U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
-				} // un figlio con una o più famiglie in cui è coniuge
-				else if( (ruolo==R.string.son || ruolo==R.string.daughter) && !p.getSpouseFamilies(gc).isEmpty() ) {
-					U.qualiConiugiMostrare( Famiglia.this, p );
-				} // un figlio non sposato che ha più famiglie genitoriali
-				else if( p.getParentFamilies(gc).size() > 1 ) {
-					U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
-				} // un coniuge senza genitori ma con più famiglie coniugali
-				else if( p.getSpouseFamilies(gc).size() > 1 ) {
-					U.qualiConiugiMostrare( Famiglia.this, p );
-				} else {
-					Intent intento = new Intent( Famiglia.this, Individuo.class );
-					intento.putExtra( "idIndividuo", p.getId() );
-					startActivity( intento );
-				}
+		vistaPersona.setOnClickListener( v -> {
+			// un genitore con una o più famiglie in cui è figlio
+			if( (ruolo==R.string.husband || ruolo==R.string.wife) && !p.getParentFamilies(gc).isEmpty() ) {
+				U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
+			} // un figlio con una o più famiglie in cui è coniuge
+			else if( (ruolo==R.string.son || ruolo==R.string.daughter) && !p.getSpouseFamilies(gc).isEmpty() ) {
+				U.qualiConiugiMostrare( Famiglia.this, p );
+			} // un figlio non sposato che ha più famiglie genitoriali
+			else if( p.getParentFamilies(gc).size() > 1 ) {
+				U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
+			} // un coniuge senza genitori ma con più famiglie coniugali
+			else if( p.getSpouseFamilies(gc).size() > 1 ) {
+				U.qualiConiugiMostrare( Famiglia.this, p );
+			} else {
+				Intent intento = new Intent( Famiglia.this, Individuo.class );
+				intento.putExtra( "idIndividuo", p.getId() );
+				startActivity( intento );
 			}
-		} );
+		});
 		if( unRappresentanteDellaFamiglia == null )
 			unRappresentanteDellaFamiglia = p;
 	}
@@ -84,8 +83,16 @@ public class Famiglia extends Dettaglio {
 				// il ref dell'indi nella famiglia
 				SpouseRef sr = new SpouseRef();
 				sr.setRef( tizio.getId() );
-				if( U.sesso(tizio) == 1 ) fam.addHusband( sr );
-				else fam.addWife( sr );
+				// Aggiunta coniuge: il primo in base al sesso, il secondo riempiendo il ruolo vuoto, i seguenti per sesso
+				if( fam.getHusbandRefs().isEmpty() && fam.getWifeRefs().isEmpty() ) {
+					if( U.sesso(tizio) == 2 ) fam.addWife( sr );
+					else fam.addHusband( sr );
+				} else if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() ) {
+					EditaIndividuo.aggiungiConiuge( fam, sr );
+				} else {
+					if( U.sesso(tizio) == 2 ) fam.addWife( sr );
+					else fam.addHusband( sr );
+				}
 
 				// il ref della famiglia nell'indi
 				SpouseFamilyRef sfr = new SpouseFamilyRef();

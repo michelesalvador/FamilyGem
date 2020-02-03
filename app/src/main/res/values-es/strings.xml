@@ -300,4 +300,6 @@
 	<string name="shared_medias">Multimedia compartidos</string>
 	<string name="complex_tree_advanced_tools">Este árbol parece bastante complejo.\nPara manejarlo mejor, ¿quieres mostrar herramientas avanzadas?</string>
 	<string name="tree_created">Nuevo árbol creado.</string>
+	<string name="revert">Deshacer cambios</string>
+	<string name="empty_family_delete">Quedan algunas familias vacías.\n¿Quieres eliminarlas?</string>
 </resources>

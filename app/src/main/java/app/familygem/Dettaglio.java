@@ -679,10 +679,13 @@ public class Dettaglio extends AppCompatActivity {
 		if( id == 1 ) { // Autore principale
 			Podio.autorePrincipale( (Submitter)oggetto );
 		} else if( id == 2 ) { // Famiglia
-			Chiesa.eliminaFamiglia( this, ((Family)oggetto).getId(), false );
+			new AlertDialog.Builder(this).setMessage( R.string.really_delete_family )
+					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
+						Chiesa.eliminaFamiglia( ((Family)oggetto).getId() );
+						onBackPressed();
+					}).setNeutralButton(android.R.string.cancel, null).show();
 		} else if( id == 3 ) { // Tutti gli altri
 			// todo: conferma eliminazione di tutti gli oggetti..
-			//	Memoria.annullaIstanze(oggetto);
 			elimina();
 			U.salvaJson(true); // l'aggiornamento delle date avviene negli Override di elimina()
 			onBackPressed();
@@ -844,6 +847,7 @@ public class Dettaglio extends AppCompatActivity {
 					((Note)oggetto).getSourceCitations().remove( oggettoPezzo );
 				else
 					((SourceCitationContainer)oggetto).getSourceCitations().remove( oggettoPezzo );
+				Memoria.annullaIstanze(oggettoPezzo);
 				box.removeView( vistaPezzo );
 				break;
 			case 40: // Media
@@ -859,6 +863,7 @@ public class Dettaglio extends AppCompatActivity {
 				break;
 			case 55: // Evento di Famiglia
 				((Family)oggetto).getEventsFacts().remove( oggettoPezzo );
+				Memoria.annullaIstanze( oggettoPezzo );
 				box.removeView( vistaPezzo );
 				break;
 			case 60: // Estensione
@@ -871,6 +876,7 @@ public class Dettaglio extends AppCompatActivity {
 				return true;
 			case 80: // Citazione archivio
 				((Source)oggetto).setRepositoryRef( null );
+				Memoria.annullaIstanze(oggettoPezzo);
 				box.removeView( vistaPezzo );
 				break;
 			case 90: // Scegli archivio in Magazzino
@@ -907,6 +913,16 @@ public class Dettaglio extends AppCompatActivity {
 				unRappresentanteDellaFamiglia = fam.getChildren(gc).get(0);
 			else
 				unRappresentanteDellaFamiglia = null;
+		}
+	}
+
+	// Chiude tastiera eventualmente visibile
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if( vistaEdita != null ) {
+			InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE );
+			imm.hideSoftInputFromWindow( vistaEdita.getWindowToken(), 0 );
 		}
 	}
 
