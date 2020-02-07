@@ -29,6 +29,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.otaliastudios.zoom.ZoomLayout;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
+import java.util.ArrayList;
+import java.util.List;
 import app.familygem.dettaglio.Famiglia;
 import graph.gedcom.AncestryNode;
 import graph.gedcom.IndiCard;
@@ -58,7 +60,7 @@ public class Diagram extends Fragment {
 		density = getResources().getDisplayMetrics().density;
 		STROKE = toPx(2);
 
-		getActivity().findViewById(R.id.toolbar).setVisibility( View.GONE );
+		getActivity().findViewById(R.id.toolbar).setVisibility( View.GONE ); // Necessario in caso di backPressed dopo onActivityresult
 		final View view = inflater.inflate( R.layout.diagram, container, false );
 		view.findViewById( R.id.diagram_hamburger ).setOnClickListener( v -> {
 			DrawerLayout scatolissima = getActivity().findViewById(R.id.scatolissima);
@@ -433,22 +435,31 @@ public class Diagram extends Fragment {
 	}
 
 	class Lines extends View {
-		Paint paint = new Paint();
-		Path path = new Path();
+		Paint paint = new Paint( Paint.ANTI_ALIAS_FLAG );
+		List<Path> paths = new ArrayList<>();
 		public Lines( Context context ) {
-			super( context );
+			super(context);
+			paths.add( new Path() );
 		}
 		@Override
 		protected void onDraw( Canvas canvas) {
+			float restartX = 0;
+			int whichPath = 0;
+			for(Line line : graph.getLines()) {
+				float x1 = toPx(line.x1), y1 = toPx(line.y1), x2 = toPx(line.x2), y2 = toPx(line.y2);
+				if( Math.max(x1,x2) - restartX > 16384 ) {
+					restartX = Math.min(x1,x2);
+					whichPath++;
+					paths.add( new Path() );
+				}
+				paths.get(whichPath).moveTo( x1, y1 );
+				paths.get(whichPath).cubicTo( x1, y2, x2, y1, x2, y2 );
+			}
 			paint.setStyle( Paint.Style.STROKE );
 			paint.setColor( Color.WHITE );
 			paint.setStrokeWidth(STROKE);
-			for(Line line : graph.getLines()) {
-				float x1 = toPx(line.x1), y1 = toPx(line.y1), x2 = toPx(line.x2), y2 = toPx(line.y2);
-				path.moveTo( x1, y1 );
-				path.cubicTo( x1, y2, x2, y1, x2, y2 );
-			}
-			canvas.drawPath( path, paint );
+			for( Path path : paths )
+				canvas.drawPath( path, paint );
 		}
 	}
 

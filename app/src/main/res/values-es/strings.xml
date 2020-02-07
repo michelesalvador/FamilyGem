@@ -30,7 +30,7 @@
 	<string name="generation">Generación</string>
 	<string name="generations">Generaciones</string>
 	<string name="no_useful_data">No puedo obtener datos útiles.</string>
-	<string name="make_backup">Hacer una copia de seguridad</string>
+	<string name="make_backup">Guardar copia de seguridad Zip</string>
 	<string name="settings">Configuración</string>
 	<string name="about">Acerca</string>
 	<string name="save">Guardar</string>

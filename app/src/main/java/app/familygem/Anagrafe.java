@@ -172,6 +172,13 @@ public class Anagrafe extends Fragment {
 		}
 	}
 
+	// Andandosene dall'attività senza aver scelto un parente resetta l'extra
+	@Override
+	public void onPause() {
+		super.onPause();
+		getActivity().getIntent().removeExtra("anagrafeScegliParente");
+	}
+
 	// Verifica se tutti gli id delle persone contengono numeri
 	// Appena un id contiene solo lettere restituisce falso
 	boolean verificaIdNumerici() {

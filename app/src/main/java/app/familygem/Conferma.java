@@ -62,8 +62,7 @@ public class Conferma extends AppCompatActivity {
 			((TextView)findViewById(R.id.conferma_testo )).setText( testo );
 
 			findViewById(R.id.conferma_annulla ).setOnClickListener( v -> {
-				Confronto.getLista().clear();
-				Confronto.getInstance().posizione = 0;
+				Confronto.reset();
 				startActivity( new Intent( Conferma.this, Alberi.class ) );
 			});
 
@@ -220,14 +219,13 @@ public class Conferma extends AppCompatActivity {
 							.setOnCancelListener( dialog -> concludi() ).show();
 				} else
 					concludi();
-				Confronto.getLista().clear();
-				Confronto.getInstance().posizione = 0;
 			});
 		} else onBackPressed();
 	}
 
 	// Apre l'elenco degli alberi
 	void concludi() {
+		Confronto.reset();
 		Globale.editato = true;
 		startActivity( new Intent( this, Alberi.class ) );
 	}

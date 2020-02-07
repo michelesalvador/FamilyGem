@@ -32,7 +32,6 @@ import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import app.familygem.dettaglio.Fonte;
 import app.familygem.visita.ListaCitazioniFonte;
@@ -141,6 +140,12 @@ public class Biblioteca extends Fragment {
 				startActivity( new Intent( getContext(), Fonte.class ) );
 			}
 		}
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		getActivity().getIntent().removeExtra("bibliotecaScegliFonte");
 	}
 
 	// Mette in ordine le fonti secondo uno dei criteri

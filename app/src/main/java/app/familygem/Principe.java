@@ -2,9 +2,9 @@ package app.familygem;
 
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -18,6 +18,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import org.folg.gedcom.model.Media;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import app.familygem.visita.ListaMedia;
 
@@ -25,6 +27,11 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 
 	DrawerLayout scatolissima;
 	Toolbar toolbar;
+	NavigationView menuPrincipe;
+	List<Integer> idMenu = Arrays.asList( R.id.nav_diagramma, R.id.nav_persone, R.id.nav_famiglie,
+			R.id.nav_media, R.id.nav_note, R.id.nav_fonti, R.id.nav_archivi, R.id.nav_autore );
+	List<Class> frammenti = Arrays.asList( Diagram.class, Anagrafe.class, Chiesa.class,
+			Galleria.class, Quaderno.class, Biblioteca.class, Magazzino.class, Podio.class );
 
 	@Override
 	protected void onCreate( Bundle savedInstanceState ) {
@@ -40,7 +47,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		scatolissima.addDrawerListener(toggle);
 		toggle.syncState();
 
-		NavigationView menuPrincipe = findViewById(R.id.menu);
+		menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
 		Globale.vistaPrincipe = scatolissima;
 		if( Globale.gc == null ) {
@@ -80,7 +87,14 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		}
 	}
 
-	// Aggiorna i contenuti quando si torna indietro con backPressed()
+	// Chiamato praticamente sempre tranne che onBackPressed
+	@Override
+	public void onAttachFragment( @NonNull Fragment fragment ) {
+		super.onAttachFragment( fragment );
+		aggiornaInterfaccia(fragment);
+	}
+
+	// Aggiorna i contenuti quando si torna indietro al primo backPressed()
 	@Override
 	public void onRestart() {
 		super.onRestart();
@@ -138,46 +152,40 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			bottoneSalva.setVisibility( View.VISIBLE );
 	}
 
+	// Evidenzia voce del menu e mostra/nasconde toolbar
+	void aggiornaInterfaccia(Fragment fragment) {
+		if( fragment == null )
+			fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
+		if( fragment != null ) {
+			int numFram = frammenti.indexOf(fragment.getClass());
+			if( menuPrincipe != null )
+				menuPrincipe.setCheckedItem(idMenu.get(numFram));
+			if( toolbar == null )
+				toolbar = findViewById(R.id.toolbar);
+			if( toolbar != null )
+				toolbar.setVisibility( numFram == 0 ? View.GONE : View.VISIBLE );
+		}
+	}
+
 	@Override
 	public void onBackPressed() {
 		if( scatolissima.isDrawerOpen(GravityCompat.START) ) {
 			scatolissima.closeDrawer(GravityCompat.START);
 		} else {
 			super.onBackPressed();
+			aggiornaInterfaccia(null);
 		}
 	}
 
 	@Override
 	public boolean onNavigationItemSelected(MenuItem item) {
-		int id = item.getItemId();
 		Fragment fragment = null;
-		if (id == R.id.nav_diagramma) {
-			fragment = new Diagram();
-		} else if (id == R.id.nav_persone) {
-			fragment = new Anagrafe();
-		} else if (id == R.id.nav_fonti) {
-			fragment = new Biblioteca();
-		} else if (id == R.id.nav_archivi) {
-			fragment = new Magazzino();
-		} else if (id == R.id.nav_media) {
-			// ToDo: Se clicco  IndividuoMedia > FAB > CollegaMedia....  "galleriaScegliMedia" viene passato all'intent dell'activity con valore 'true'
-			// todo: però rimane true anche quando poi torno in Galleria cliccando nel drawer, con conseguenti errori:
-			// vengono visualizzati solo gli oggetti media
-			// cliccandone uno esso viene aggiunto ai media dell'ultima persona vista !
-			fragment = new Galleria();
-		} else if (id == R.id.nav_famiglie) {
-			fragment = new Chiesa();
-		} else if (id == R.id.nav_note) {
-			fragment = new Quaderno();
-		} else if (id == R.id.nav_autore) {
-			fragment = new Podio();
-		}
+		try {
+			fragment = (Fragment) frammenti.get( idMenu.indexOf(item.getItemId()) ).newInstance();
+		} catch(Exception e) {}
 		if( fragment != null ) {
-			toolbar.setVisibility( View.VISIBLE );
-			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-			ft.replace( R.id.contenitore_fragment, fragment );
-			ft.addToBackStack(null);
-			ft.commit();
+			getSupportFragmentManager().beginTransaction().replace( R.id.contenitore_fragment, fragment )
+					.addToBackStack(null).commit();
 		}
 		scatolissima.closeDrawer(GravityCompat.START);
 		return true;

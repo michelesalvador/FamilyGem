@@ -40,7 +40,6 @@ public class Compara extends AppCompatActivity {
 		Globale.idAlbero2 = idAlbero2; // servirà alle immagini di Confrontatore e a Conferma
 		Globale.gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
 		Globale.gc2 = Alberi.apriGedcomTemporaneo( idAlbero2, false );
-		Confronto.autoProsegui = false; // Lo resetta se eventualmente era stato scelto l'automatismo
 
 		TimeZone.setDefault( TimeZone.getTimeZone("Europe/Rome") ); // riconduce tutte le date al fuso orario di Aruba
 		try {
@@ -108,31 +107,36 @@ public class Compara extends AppCompatActivity {
 		Button botton1 = findViewById(R.id.compara_bottone1 );
 		Button botton2 = findViewById(R.id.compara_bottone2 );
 		if( Confronto.getLista().size() > 0 ) {
+			// Rivedi singolarmente
 			botton1.setOnClickListener( v -> {
-				Confronto.next(); // 'posizione' che è 0 diventa 1
-				startActivity( new Intent( Compara.this, Confrontatore.class ) );
-			} );
+				startActivity( new Intent( Compara.this, Confrontatore.class ).putExtra("posizione", 1) );
+			});
+			// Accetta tutto
 			botton2.setOnClickListener( v -> {
-				int quanteScelte = 0;
+				v.setEnabled(false);
+				Confronto.get().quanteScelte = 0;
 				for( Confronto.Fronte fronte : Confronto.getLista() ) {
 					if( fronte.doppiaOpzione )
-						quanteScelte++;
+						Confronto.get().quanteScelte++;
 				}
-				if( quanteScelte > 0 ) {
+				if( Confronto.get().quanteScelte > 0 ) {
 					new AlertDialog.Builder(this)
-							.setTitle( quanteScelte == 1 ? getString(R.string.one_update_choice)
-									: getString(R.string.many_updates_choice, quanteScelte) )
+							.setTitle( Confronto.get().quanteScelte == 1 ? getString(R.string.one_update_choice)
+									: getString(R.string.many_updates_choice, Confronto.get().quanteScelte) )
 							.setMessage(R.string.updates_replace_add)
-							.setPositiveButton( android.R.string.ok, (dialogo,quale) -> {
-								Confronto.autoProsegui = true;
-								Confronto.next();
-								startActivity( new Intent(Compara.this, Confrontatore.class) );
-							}).setNeutralButton( android.R.string.cancel, null ).show();
+							.setPositiveButton( android.R.string.ok, (dialog,id) -> {
+								Confronto.get().autoProsegui = true;
+								Confronto.get().scelteFatte = 1;
+								startActivity( new Intent(Compara.this, Confrontatore.class).putExtra("posizione", 1) );
+							}).setNeutralButton( android.R.string.cancel, (dialog,id) -> botton2.setEnabled(true) )
+							.setOnCancelListener( dialog -> botton2.setEnabled(true) ).show();
 					return;
 				}
-				Confronto.autoProsegui = true;
-				Confronto.next();
-				startActivity( new Intent( Compara.this, Confrontatore.class ) );
+				Confronto.get().autoProsegui = true;
+				Intent intent = new Intent( Compara.this, Confrontatore.class );
+				intent.putExtra( "posizione", 1 );
+				intent.setFlags( Intent.FLAG_ACTIVITY_NO_HISTORY );
+				startActivity( intent );
 			} );
 		} else {
 			botton1.setText( R.string.delete_imported_tree );
@@ -143,6 +147,13 @@ public class Compara extends AppCompatActivity {
 			});
 			botton2.setVisibility( View.GONE );
 		}
+	}
+
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		findViewById(R.id.compara_bottone2 ).setEnabled( true ); // se eventualmente
+		Confronto.get().autoProsegui = false; // Lo resetta se eventualmente era stato scelto l'automatismo
 	}
 
 	// Vede se aggiungere i due oggetti alla lista di quelli da valutare
@@ -263,6 +274,6 @@ public class Compara extends AppCompatActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		Confronto.prev(); // in pratica resetta il singleton Confronto
+		Confronto.reset(); // resetta il singleton Confronto
 	}
 }

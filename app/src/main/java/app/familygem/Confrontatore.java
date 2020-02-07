@@ -36,15 +36,22 @@ public class Confrontatore extends AppCompatActivity {
 
 		if( Confronto.getLista().size() > 0 ) {
 
+			int max;
+			int posizione;
+			if( Confronto.get().autoProsegui ) {
+				max = Confronto.get().quanteScelte;
+				posizione = Confronto.get().scelteFatte;
+			} else {
+				max = Confronto.getLista().size();
+				posizione = getIntent().getIntExtra("posizione",0);
+			}
 			ProgressBar barra = findViewById( R.id.confronto_progresso );
-			barra.setMax( Confronto.getLista().size() );
-			int posizione = Confronto.getInstance().posizione;
+			barra.setMax( max );
 			barra.setProgress( posizione );
+			((TextView)findViewById( R.id.confronto_stato )).setText( posizione+"/"+max );
 
-			((TextView)findViewById( R.id.confronto_stato )).setText( posizione+"/"+Confronto.getLista().size() );
-
-			final Object o = Confronto.getFronte().oggetto;
-			final Object o2 = Confronto.getFronte().oggetto2;
+			final Object o = Confronto.getFronte(this).oggetto;
+			final Object o2 = Confronto.getFronte(this).oggetto2;
 			if( o != null ) classe = o.getClass();
 			else classe = o2.getClass();
 			arredaScheda( Globale.gc, R.id.confronto_vecchio, o );
@@ -64,7 +71,7 @@ public class Confrontatore extends AppCompatActivity {
 				destino = 3;
 				bottoneOk.setText( R.string.delete );
 				bottoneOk.setBackgroundColor( 0xffff0000 );
-			} else if( Confronto.getFronte().doppiaOpzione ) {
+			} else if( Confronto.getFronte(this).doppiaOpzione ) {
 				// Altro bottone Aggiungi
 				Button bottoneAggiungi = new Button( this );
 				bottoneAggiungi.setTextSize( TypedValue.COMPLEX_UNIT_SP,16 );
@@ -76,26 +83,26 @@ public class Confrontatore extends AppCompatActivity {
 				bottoneAggiungi.setText( R.string.add );
 				bottoneAggiungi.setBackgroundColor( 0xff00dd00 );
 				bottoneAggiungi.setOnClickListener( v -> {
-					Confronto.getFronte().destino = 1;
+					Confronto.getFronte(this).destino = 1;
 					vaiAvanti();
 				});
 				(( LinearLayout)findViewById( R.id.confronto_bottoni )).addView( bottoneAggiungi, 1 );
 			}
 
 			// Prosegue in automatico se non c'è una doppia azione da scegliere
-			if( Confronto.autoProsegui && !Confronto.getFronte().doppiaOpzione ) {
-				Confronto.getFronte().destino = destino;
+			if( Confronto.get().autoProsegui && !Confronto.getFronte(this).doppiaOpzione ) {
+				Confronto.getFronte(this).destino = destino;
 				vaiAvanti();
 			}
 
 			// Bottone per accettare la novità
 			bottoneOk.setOnClickListener( vista -> {
-				Confronto.getFronte().destino = destino;
+				Confronto.getFronte(this).destino = destino;
 				vaiAvanti();
 			});
 
 			findViewById(R.id.confronto_bottone_ignora ).setOnClickListener( v -> {
-				Confronto.getFronte().destino = 0;
+				Confronto.getFronte(this).destino = 0;
 				vaiAvanti();
 			});
 		} else
@@ -204,11 +211,17 @@ public class Confrontatore extends AppCompatActivity {
 	}
 
 	void vaiAvanti() {
-		if( Confronto.getInstance().posizione == Confronto.getLista().size() ) {
+		if( getIntent().getIntExtra("posizione",0) == Confronto.getLista().size() ) {
 			startActivity( new Intent( Confrontatore.this, Conferma.class ) );
 		} else {
-			Confronto.next();
-			startActivity( new Intent( Confrontatore.this, Confrontatore.class ) );
+			Intent intent = new Intent( Confrontatore.this, Confrontatore.class );
+			intent.putExtra( "posizione", getIntent().getIntExtra("posizione",0) + 1 );
+			if( Confronto.getFronte(this).doppiaOpzione )
+				Confronto.get().scelteFatte++;
+			else if( Confronto.get().autoProsegui ) {
+				intent.setFlags( Intent.FLAG_ACTIVITY_NO_HISTORY );
+			}
+			startActivity( intent );
 		}
 	}
 
@@ -221,6 +234,7 @@ public class Confrontatore extends AppCompatActivity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		Confronto.prev();
+		if( Confronto.get().autoProsegui )
+			Confronto.get().scelteFatte--;
 	}
 }

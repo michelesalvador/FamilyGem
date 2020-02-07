@@ -2,6 +2,7 @@
 
 package app.familygem;
 
+import android.app.Activity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,15 +10,16 @@ public class Confronto {
 
 	private static final Confronto confronto = new Confronto();
 	private List<Fronte> lista = new ArrayList<>();
-	int posizione = 0;
-	static boolean autoProsegui; // stabilisce se accettare automaticamente tutti gli aggiornamenti
+	boolean autoProsegui; // stabilisce se accettare automaticamente tutti gli aggiornamenti
+	int quanteScelte; // Scelte totali in caso di autoProsegui
+	int scelteFatte; // Posizione in caso di autoProsegui
 
-	static Confronto getInstance() {
+	static Confronto get() {
 		return confronto;
 	}
 
 	public static List<Fronte> getLista() {
-		return getInstance().lista;
+		return get().lista;
 	}
 
 	static Fronte addFronte( Object oggetto, Object oggetto2, int tipo ) {
@@ -29,21 +31,14 @@ public class Confronto {
 		return fronte;
 	}
 
-	static Fronte getFronte() {
-		return getLista().get( getInstance().posizione - 1 ) ;
+	static Fronte getFronte(Activity attivita) {
+		return getLista().get( attivita.getIntent().getIntExtra("posizione",0) - 1 );
 	}
 
-	static void next() {
-		getInstance().posizione++;
-	}
-
-	static void prev() {
-		getInstance().posizione--;
-		// Tornando indietro prima di Compara resetta la situazione
-		if( getInstance().posizione < 0 ) {
-			getInstance().lista.clear();
-			getInstance().posizione = 0;
-		}
+	// Da chiamare quando si esce dal processo di confronto
+	static void reset() {
+		getLista().clear();
+		get().autoProsegui = false;
 	}
 
 	static class Fronte {

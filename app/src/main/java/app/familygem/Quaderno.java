@@ -25,11 +25,6 @@ import static app.familygem.Globale.gc;
 public class Quaderno extends Fragment {
 	
 	@Override
-	public void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-	}
-
-	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
 		boolean scegliNota = getActivity().getIntent().getBooleanExtra("quadernoScegliNota",false );
 		View vista = inflater.inflate( R.layout.magazzino, container, false );
@@ -68,6 +63,13 @@ public class Quaderno extends Fragment {
 			vista.findViewById( R.id.fab ).setOnClickListener( v -> nuovaNota( getContext(), null ) );
 		}
 		return vista;
+	}
+
+	// Andandosene dall'attività senza aver scelto una nota condivisa resetta l'extra
+	@Override
+	public void onPause() {
+		super.onPause();
+		getActivity().getIntent().removeExtra("quadernoScegliNota");
 	}
 
 	View mettiNota( final LinearLayout scatola, final Note nota ) {

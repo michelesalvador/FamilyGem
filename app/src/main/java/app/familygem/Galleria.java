@@ -50,6 +50,13 @@ public class Galleria extends Fragment {
 		return vista;
 	}
 
+	// Andandosene dall'attività resetta l'extra se non è stato scelto un media condiviso
+	@Override
+	public void onPause() {
+		super.onPause();
+		getActivity().getIntent().removeExtra("galleriaScegliMedia");
+	}
+
 	// todo bypassabile?
 	static int popolarita( Media med ) {
 		RiferimentiMedia riferiMedia = new RiferimentiMedia( gc, med, false );

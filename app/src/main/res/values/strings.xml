@@ -45,7 +45,7 @@
 	<string name="generation">Generation</string>
 	<string name="generations">Generations</string>
 	<string name="no_useful_data">Can\'t get useful data.</string>
-	<string name="make_backup">Make backup</string>
+	<string name="make_backup">Save Zip backup</string>
 	<string name="save">Save</string>
 	<string name="open">Open</string>
 	<string name="tree_info">Info</string>

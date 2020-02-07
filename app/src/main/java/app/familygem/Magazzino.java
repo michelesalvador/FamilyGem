@@ -80,6 +80,12 @@ public class Magazzino extends Fragment {
 		return vista;
 	}
 
+	@Override
+	public void onPause() {
+		super.onPause();
+		getActivity().getIntent().removeExtra("magazzinoScegliArchivio");
+	}
+
 	// Conta quante fonti sono presenti nel tal archivio
 	static int quanteFonti( Repository rep, Gedcom gc ) {
 		int quante = 0;
