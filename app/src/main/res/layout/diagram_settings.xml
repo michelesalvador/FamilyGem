@@ -13,9 +13,15 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:text="@string/generations_display_diagram"/>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
 			android:text="@string/ancestors"
 			android:textColor="#000"
-			android:textSize="16sp"/>
+			android:textSize="16sp"
+			android:layout_marginTop="20dp"/>
 
 		<SeekBar
 			android:id="@+id/settings_ancestors"

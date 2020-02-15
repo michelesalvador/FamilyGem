@@ -91,7 +91,8 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 	@Override
 	public void onAttachFragment( @NonNull Fragment fragment ) {
 		super.onAttachFragment( fragment );
-		aggiornaInterfaccia(fragment);
+		if( !(fragment instanceof NuovoParente) )
+			aggiornaInterfaccia(fragment);
 	}
 
 	// Aggiorna i contenuti quando si torna indietro al primo backPressed()

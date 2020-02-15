@@ -168,7 +168,7 @@ public class Confrontatore extends AppCompatActivity {
 		else if( o instanceof Family ) {
 			tipoRecord( R.string.family );
 			Family f = (Family) o;
-			txt = Chiesa.testoFamiglia( this, gc, f );
+			txt = U.testoFamiglia( this, gc, f, false );
 			data = dataOra( f.getChange() );
 		}
 		TextView testoTitolo = carta.findViewById( R.id.confronto_titolo );

@@ -197,9 +197,10 @@
 	<string name="death_date">Fecha defunción</string>
 	<string name="death_place">Lugar defunción</string>
 	<string name="saved">Guardado</string>
-	<string name="new_child_same_parents">¿El nuevo hijo tiene los mismos padres de %s (misma familia), o %s es el único padre en común (quiere crear una nueva familia)?</string>
-	<string name="same_family">Misma familia</string>
 	<string name="new_family">Nueva familia</string>
+	<string name="which_family_add_parent">¿A qué familia quiere añadir un padre?</string>
+	<string name="which_family_add_sibling">¿A qué familia quiere añadir un hermano?</string>
+	<string name="which_family_add_spouse">¿A qué familia quiere añadir un cónyuge?</string>
 	<string name="which_family_add_child">¿A qué familia quiere añadir un hijo?</string>
 	<string name="january">Enero</string>
 	<string name="february">Febrero</string>
@@ -267,8 +268,7 @@
 	<string name="shared_by">Utilizado por</string>
 	<string name="usually_your_name">Normalmente tu nombre y apellido.</string>
 	<string name="view_updates">Revisar individualmente</string>
-	<string name="which_parents">¿Cuáles padres?</string>
-	<string name="which_spouses">¿Cuáles cónyuges?</string>
+	<string name="which_family">¿Cual familia?</string>
 	<string name="written_in">Escrita en</string>
 	<string name="accepted_news">Ha aceptado %d actualizaciones:\n\t%d añadiduras\n\t%d reemplazos\n\t%d eliminaciones</string>
 	<string name="into">Dentro de</string>
@@ -302,4 +302,9 @@
 	<string name="tree_created">Nuevo árbol creado.</string>
 	<string name="revert">Deshacer cambios</string>
 	<string name="empty_family_delete">Quedan algunas familias vacías.\n¿Quieres eliminarlas?</string>
+	<string name="no_name">Sin nombre</string>
+	<string name="empty_name">Nombre vacío</string>
+	<string name="empty_family">Familia vacía</string>
+	<string name="new_family_of">Nueva familia de %s</string>
+	<string name="generations_display_diagram">Establece cuántas generaciones mostrar en el diagrama.</string>
 </resources>

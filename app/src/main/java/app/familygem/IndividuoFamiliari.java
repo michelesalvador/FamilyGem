@@ -147,7 +147,7 @@ public class IndividuoFamiliari extends Fragment {
 		} else if( id == 301 ) {	// Famiglia come figlio
 			U.qualiGenitoriMostrare( getContext(), pers, Famiglia.class );
 		} else if( id == 302 ) {	// Famiglia come coniuge
-			U.qualiConiugiMostrare( getContext(), pers );
+			U.qualiConiugiMostrare( getContext(), pers, familia );
 		} else if( id == 303 ) {	// Sposta su
 			spostaRiferimentoFamiglia( -1 );
 		} else if( id == 304 ) {	// Sposta giù

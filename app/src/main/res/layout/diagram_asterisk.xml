@@ -7,4 +7,6 @@
 	android:paddingRight="6dp"
 	android:text="*"
 	android:textColor="@color/evidenzia"
-	android:textSize="60sp" />
+	android:textSize="60sp"
+	android:height="55dp"
+	android:layout_marginTop="-10dp"/>

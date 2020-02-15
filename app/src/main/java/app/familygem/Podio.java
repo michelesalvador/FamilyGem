@@ -23,11 +23,6 @@ import static app.familygem.Globale.gc;
 public class Podio extends Fragment {
 
 	@Override
-	public void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-	}
-
-	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
 		List<Submitter> listAutori = gc.getSubmitters();
 		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listAutori.size() + " " +

@@ -58,7 +58,7 @@ public class TrovaLuogo extends AppCompatAutoCompleteTextView {
 				@Override
 				protected FilterResults performFiltering( CharSequence constraint ) {
 					FilterResults filterResults = new FilterResults();
-					if (constraint != null && !BuildConfig.utenteGeoNames.isEmpty()) {
+					if( constraint != null ) {
 						//searchCriteria.setQ(constraint.toString());
 						searchCriteria.setNameStartsWith(constraint.toString());
 						try {

@@ -800,7 +800,7 @@ public class Dettaglio extends AppCompatActivity {
 				U.qualiGenitoriMostrare( this, pers, Famiglia.class );
 				return true;
 			case 13: // Famiglia come coniuge
-				U.qualiConiugiMostrare( this, pers );
+				U.qualiConiugiMostrare( this, pers, null );
 				return true;
 			case 14: // Figlio sposta su
 				Family fa = (Family) oggetto;

@@ -141,6 +141,7 @@
 	<string name="person_unlinked">This person has been unlinked.</string>
 	<!-- Diagram settings -->
 	<string name="diagram_settings">Diagram settings</string>
+	<string name="generations_display_diagram">Set how many generations to show in the diagram.</string>
 	<string name="ancestors">Ancestors</string>
 	<string name="uncles">Uncles</string>
 	<string name="siblings">Siblings</string>
@@ -285,9 +286,10 @@
 	<string name="death_date">Death date</string>
 	<string name="death_place">Death place</string>
 	<string name="saved">Saved</string>
-	<string name="new_child_same_parents">Does the new child have the same parents of %s (same family), or is %s the only parent in common (a new family need to be created)?</string>
-	<string name="same_family">Same family</string>
 	<string name="new_family">New family</string>
+	<string name="which_family_add_parent">To which family you add the parent?</string>
+	<string name="which_family_add_sibling">To which family you add the sibling?</string>
+	<string name="which_family_add_spouse">To which family you add the spouse?</string>
 	<string name="which_family_add_child">To which family you add the child?</string>
 	<!-- EditoreData -->
 	<string name="double_date">Double</string>
@@ -315,14 +317,16 @@
 	<string name="from_to">From… to</string>
 	<string name="date_phrase">Phrase</string>
 	<!-- U -->
+	<string name="no_name">No name</string>
+	<string name="empty_name">Empty name</string>
 	<string name="months">months</string>
 	<string name="days">days</string>
 	<string name="want_crop_image">Do you want to crop this image?</string>
 	<string name="no">No</string>
 	<string name="not_granted">%s not granted.</string>
 	<string name="empty_media">Empty Media</string>
-	<string name="which_parents">Which parents?</string>
-	<string name="which_spouses">Which spouses?</string>
+	<string name="empty_family">Empty family</string>
+	<string name="which_family">Which family?</string>
 	<string name="empty_family_delete">There are some empty families left.\nDo you want to delete them?</string>
 	<!-- Altro -->
 	<string name="version_name">Version %s</string>
@@ -330,4 +334,5 @@
 	<string name="citations">Citations</string>
 	<string name="sources_number">Number of sources</string>
 	<string name="extension">Extension</string>
+	<string name="new_family_of">New family of %s</string>
 </resources>

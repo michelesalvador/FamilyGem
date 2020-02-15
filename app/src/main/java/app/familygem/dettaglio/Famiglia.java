@@ -59,13 +59,13 @@ public class Famiglia extends Dettaglio {
 				U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
 			} // un figlio con una o più famiglie in cui è coniuge
 			else if( (ruolo==R.string.son || ruolo==R.string.daughter) && !p.getSpouseFamilies(gc).isEmpty() ) {
-				U.qualiConiugiMostrare( Famiglia.this, p );
+				U.qualiConiugiMostrare( Famiglia.this, p, null );
 			} // un figlio non sposato che ha più famiglie genitoriali
 			else if( p.getParentFamilies(gc).size() > 1 ) {
 				U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
 			} // un coniuge senza genitori ma con più famiglie coniugali
 			else if( p.getSpouseFamilies(gc).size() > 1 ) {
-				U.qualiConiugiMostrare( Famiglia.this, p );
+				U.qualiConiugiMostrare( Famiglia.this, p, null );
 			} else {
 				Intent intento = new Intent( Famiglia.this, Individuo.class );
 				intento.putExtra( "idIndividuo", p.getId() );
@@ -83,16 +83,7 @@ public class Famiglia extends Dettaglio {
 				// il ref dell'indi nella famiglia
 				SpouseRef sr = new SpouseRef();
 				sr.setRef( tizio.getId() );
-				// Aggiunta coniuge: il primo in base al sesso, il secondo riempiendo il ruolo vuoto, i seguenti per sesso
-				if( fam.getHusbandRefs().isEmpty() && fam.getWifeRefs().isEmpty() ) {
-					if( U.sesso(tizio) == 2 ) fam.addWife( sr );
-					else fam.addHusband( sr );
-				} else if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() ) {
-					EditaIndividuo.aggiungiConiuge( fam, sr );
-				} else {
-					if( U.sesso(tizio) == 2 ) fam.addWife( sr );
-					else fam.addHusband( sr );
-				}
+				EditaIndividuo.aggiungiConiuge( fam, sr );
 
 				// il ref della famiglia nell'indi
 				SpouseFamilyRef sfr = new SpouseFamilyRef();

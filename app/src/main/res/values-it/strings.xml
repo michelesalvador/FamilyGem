@@ -140,6 +140,7 @@
 	<string name="person_unlinked">Persona scollegata.</string>
 	<!-- Diagram settings -->
 	<string name="diagram_settings">Impostazioni diagramma</string>
+	<string name="generations_display_diagram">Scegli quante generazioni mostrare nel diagramma.</string>
 	<string name="ancestors">Antenati</string>
 	<string name="uncles">Zii</string>
 	<string name="siblings">Fratelli</string>
@@ -284,9 +285,10 @@
 	<string name="death_date">Data morte</string>
 	<string name="death_place">Luogo morte</string>
 	<string name="saved">Salvato</string>
-	<string name="new_child_same_parents">Il nuovo figlio ha gli stessi genitori di %s (stessa famiglia), oppure %s è l\'unico genitore in comune (bisogna creare una nuova famiglia)?</string>
-	<string name="same_family">Stessa famiglia</string>
 	<string name="new_family">Nuova famiglia</string>
+	<string name="which_family_add_parent">A quale famiglia vuoi aggiungere un genitore?</string>
+	<string name="which_family_add_sibling">A quale famiglia vuoi aggiungere un fratello?</string>
+	<string name="which_family_add_spouse">A quale famiglia vuoi aggiungere un coniuge?</string>
 	<string name="which_family_add_child">A quale famiglia vuoi aggiungere un figlio?</string>
 	<!-- EditoreData -->
 	<string name="double_date">Doppia</string>
@@ -314,14 +316,16 @@
 	<string name="from_to">Da… a</string>
 	<string name="date_phrase">Frase</string>
 	<!-- U -->
+	<string name="no_name">Senza nome</string>
+	<string name="empty_name">Nome vuoto</string>
 	<string name="months">mesi</string>
 	<string name="days">giorni</string>
 	<string name="want_crop_image">Vuoi ritagliare questa immagine?</string>
 	<string name="no">No</string>
 	<string name="not_granted">%s non concesso.</string>
 	<string name="empty_media">Media vuoto</string>
-	<string name="which_parents">Quali genitori?</string>
-	<string name="which_spouses">Quali coniugi?</string>
+	<string name="empty_family">Famiglia vuota</string>
+	<string name="which_family">Quale famiglia?</string>
 	<string name="empty_family_delete">È rimasta qualche famiglia vuota.\nVuoi eliminarla?</string>
 	<!-- Altro -->
 	<string name="version_name">Versione %s</string>
@@ -329,4 +333,5 @@
 	<string name="citations">Citazioni</string>
 	<string name="sources_number">Numero di fonti</string>
 	<string name="extension">Altro</string>
+	<string name="new_family_of">Nuova famiglia di %s</string>
 </resources>

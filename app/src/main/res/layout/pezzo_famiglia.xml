@@ -4,22 +4,46 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:clipToPadding="false"
-	app:cardCornerRadius="2dp"
+	app:cardCornerRadius="3dp"
 	app:cardElevation="3dp"
 	app:cardUseCompatPadding="true"
-	app:contentPadding="8dp"
+	app:contentPadding="6dp"
+	app:contentPaddingLeft="8dp"
 	android:foreground="?android:attr/selectableItemBackground" >
 
-	<TextView
-		android:id="@+id/famiglia_testo"
-		style="@android:style/Widget.TextView.SpinnerItem"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:singleLine="false"
-		android:text="Marito Cognonome
-Moglie Cognome
-3 figli" />
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
 
+		<View
+			android:id="@+id/famiglia_strut"
+			android:layout_width="1dp"
+			android:layout_height="0dp"
+			android:layout_alignTop="@id/famiglia_genitori"
+			android:layout_alignBottom="@id/famiglia_figli"
+			android:layout_centerHorizontal="true"
+			android:background="#CCC" />
+
+		<TextView
+			android:id="@+id/famiglia_genitori"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignRight="@id/famiglia_strut"
+			android:layout_alignParentLeft="true"
+			android:layout_marginRight="4dp"
+			android:textSize="15sp"
+			android:textColor="#000"
+			android:text="Marito Cognomone Lungo che Va Acapo\nMoglie Cognome Anche esso lungo e andante a CApo" />
+
+		<TextView
+			android:id="@+id/famiglia_figli"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignLeft="@id/famiglia_strut"
+			android:layout_alignParentRight="true"
+			android:textSize="15sp"
+			android:textColor="#000"
+			android:layout_marginLeft="8dp" />
+	</RelativeLayout>
 
 </androidx.cardview.widget.CardView>

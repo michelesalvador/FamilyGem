@@ -6,6 +6,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -289,28 +290,36 @@ public class Individuo extends AppCompatActivity {
 						startActivityForResult( intento,50473 );
 						break;
 					// Scheda Familiari
-					case 30:
-						builder.setItems( familiari, (dialog, quale) -> {
-							Intent intento1 = new Intent( getApplicationContext(), EditaIndividuo.class );
-							intento1.putExtra( "idIndividuo", uno.getId() );
-							intento1.putExtra( "relazione", quale + 1 );
-							if( EditaIndividuo.controllaMultiMatrimoni( intento1,Individuo.this,null) )
-								return;
-							startActivity( intento1 );
-						});
-						builder.show();
+					case 30:// Collega persona nuova
+						if( Globale.preferenze.esperto ) {
+							DialogFragment dialog = new NuovoParente(uno, true, null);
+							dialog.show(getSupportFragmentManager(), "scegli");
+						} else {
+							builder.setItems( familiari, (dialog, quale) -> {
+								Intent intento1 = new Intent( getApplicationContext(), EditaIndividuo.class );
+								intento1.putExtra( "idIndividuo", uno.getId() );
+								intento1.putExtra( "relazione", quale + 1 );
+								if( EditaIndividuo.controllaMultiMatrimoni( intento1,Individuo.this,null) )
+									return;
+								startActivity( intento1 );
+							}).show();
+						}
 						break;
-					case 31:
-						builder.setItems( familiari, (dialog, quale) -> {
-							Intent intento12 = new Intent( getApplication(), Principe.class );
-							intento12.putExtra( "idIndividuo", uno.getId() ); // solo per controllaMultiMatrimoni()
-							intento12.putExtra( "anagrafeScegliParente", true );
-							intento12.putExtra( "relazione", quale + 1 );
-							if( EditaIndividuo.controllaMultiMatrimoni( intento12,Individuo.this,null) )
-								return;
-							startActivityForResult( intento12,1401 );
-						} );
-						builder.show();
+					case 31: // Collega persona esistente
+						if( Globale.preferenze.esperto ) {
+							DialogFragment dialog = new NuovoParente(uno, false, null);
+							dialog.show(getSupportFragmentManager(), "scegli");
+						} else {
+							builder.setItems( familiari, (dialog, quale) -> {
+								Intent intento12 = new Intent( getApplication(), Principe.class );
+								intento12.putExtra( "idIndividuo", uno.getId() ); // solo per controllaMultiMatrimoni()
+								intento12.putExtra( "anagrafeScegliParente", true );
+								intento12.putExtra( "relazione", quale + 1 );
+								if( EditaIndividuo.controllaMultiMatrimoni( intento12,Individuo.this,null) )
+									return;
+								startActivityForResult( intento12,1401 );
+							}).show();
+						}
 						break;
 					default:
 						String tagChiave = null;
@@ -387,10 +396,17 @@ public class Individuo extends AppCompatActivity {
 				citaz.setRef( data.getStringExtra("idFonte") );
 				uno.addSourceCitation( citaz );
 			} else if( requestCode == 1401  ) { // Parente
-				Object[] modificati = EditaIndividuo.aggiungiParente( uno.getId(),
-						data.getStringExtra("idParente"),
-						data.getIntExtra("relazione",0),
-						data.getIntExtra("famigliaNum",0) );
+				Object[] modificati;
+				if( Globale.preferenze.esperto )
+					modificati = EditaIndividuo.aggiungiParente2( uno.getId(),
+							data.getStringExtra("idParente"),
+							data.getStringExtra("idFamiglia"),
+							data.getIntExtra("relazione", 0) );
+				else
+					modificati = EditaIndividuo.aggiungiParente( uno.getId(),
+							data.getStringExtra("idParente"),
+							data.getStringExtra("idFamiglia"),
+							data.getIntExtra("relazione",0) );
 				U.salvaJson( true, modificati );
 				return;
 			}
@@ -432,7 +448,7 @@ public class Individuo extends AppCompatActivity {
 				U.qualiGenitoriMostrare( this, uno, Famiglia.class );
 				return true;
 			case 2:	// Famiglia come coniuge
-				U.qualiConiugiMostrare( this, uno );
+				U.qualiConiugiMostrare( this, uno, null );
 				return true;
 			case 3: // Imposta come radice
 				Globale.preferenze.alberoAperto().radice = uno.getId();

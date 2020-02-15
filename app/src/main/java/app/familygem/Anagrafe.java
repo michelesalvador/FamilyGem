@@ -160,6 +160,7 @@ public class Anagrafe extends Fragment {
 				intent.putExtra( "idParente", (String) vista.getTag() );
 				intent.putExtra( "relazione", getActivity().getIntent().getIntExtra( "relazione", 0 ) );
 				intent.putExtra( "famigliaNum", getActivity().getIntent().getIntExtra( "famigliaNum", 0 ) );
+				intent.putExtra( "idFamiglia", getActivity().getIntent().getStringExtra( "idFamiglia" ) );
 				getActivity().setResult( AppCompatActivity.RESULT_OK, intent );
 				getActivity().finish();
 			} else { // Normale collegamento alla scheda individuo
@@ -406,7 +407,7 @@ public class Anagrafe extends Fragment {
 		} else if( id == 1) {	// Famiglia come figlio
 			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), Famiglia.class );
 		} else if( id == 2 ) {	// Famiglia come coniuge
-			U.qualiConiugiMostrare( getContext(), gc.getPerson(idIndi) );
+			U.qualiConiugiMostrare( getContext(), gc.getPerson(idIndi), null );
 		} else if( id == 3 ) {	// Modifica
 			Intent intento = new Intent( getContext(), EditaIndividuo.class );
 			intento.putExtra( "idIndividuo", idIndi );

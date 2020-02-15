@@ -125,7 +125,7 @@ public class U {
 	static String epiteto( Person p ) {
 		if( p != null && !p.getNames().isEmpty() )
 			return nomeCognome( p.getNames().get(0) );
-		return "";
+		return "[" + Globale.contesto.getString(R.string.no_name) + "]";
 	}
 
 	// riceve una Person e restituisce il titolo nobiliare
@@ -162,7 +162,8 @@ public class U {
 			if( n.getSuffix() != null )
 				completo += " " + n.getSuffix().trim();
 		}
-		return completo.trim();
+		completo = completo.trim();
+		return completo.isEmpty() ? "["+Globale.contesto.getString(R.string.empty_name)+"]" : completo;
 	}
 
 	// Restituisce il cognome di una persona
@@ -1192,7 +1193,7 @@ public class U {
 	}
 
 	// La view ritornata è usata da Condivisione
-	public static View linkaPersona( final LinearLayout scatola, final Person p, final int scheda ) {
+	public static View linkaPersona( LinearLayout scatola, Person p, int scheda ) {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_individuo_piccolo, scatola, false );
 		scatola.addView( vistaPersona );
 		U.unaFoto( Globale.gc, p, vistaPersona.findViewById(R.id.collega_foto) );
@@ -1216,8 +1217,37 @@ public class U {
 		return vistaPersona;
 	}
 
+	static String testoFamiglia( Context contesto, Gedcom gc, Family fam, boolean unaLinea ) {
+		String testo = "";
+		for( Person marito : fam.getHusbands(gc) )
+			testo += U.epiteto( marito ) + "\n";
+		for( Person moglie : fam.getWives(gc) )
+			testo += U.epiteto( moglie ) + "\n";
+		if( fam.getChildren(gc).size() == 1 ) {
+			testo += U.epiteto( fam.getChildren(gc).get(0) );
+		} else if( fam.getChildren(gc).size() > 1 )
+			testo += fam.getChildren(gc).size() + " " + contesto.getString(R.string.children);
+		if( testo.endsWith("\n") ) testo = testo.substring( 0, testo.length()-1 );
+		if( unaLinea )
+			testo = testo.replaceAll( "\n", ", " );
+		if( testo.isEmpty() )
+			testo = "[" + contesto.getString(R.string.empty_family) + " vuota]";
+		return testo;
+	}
+
 	// Usato da dispensa
-	static void linkaMedia( final LinearLayout scatola, final Media media ) {
+	static void linkaFamiglia( LinearLayout scatola, Family fam ) {
+		View vistaFamiglia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_famiglia_piccolo, scatola, false );
+		scatola.addView( vistaFamiglia );
+		((TextView)vistaFamiglia.findViewById( R.id.famiglia_testo )).setText( testoFamiglia(scatola.getContext(),Globale.gc,fam,false) );
+		vistaFamiglia.setOnClickListener( v -> {
+			Memoria.setPrimo( fam );
+			scatola.getContext().startActivity( new Intent( scatola.getContext(), Famiglia.class ) );
+		});
+	}
+
+	// Usato da dispensa
+	static void linkaMedia( LinearLayout scatola, Media media ) {
 		View vistaMedia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_media, scatola, false );
 		scatola.addView( vistaMedia );
 		AdattatoreGalleriaMedia.arredaMedia( media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num) );
@@ -1266,7 +1296,7 @@ public class U {
 		else if( record instanceof Source )
 			linkaFonte( scatola, (Source)record );
 		else if( record instanceof Family )
-			Chiesa.mettiFamiglia( scatola, (Family)record );
+			linkaFamiglia( scatola, (Family)record );
 		else if( record instanceof Repository )
 			ArchivioRef.mettiArchivio( scatola, (Repository)record );
 		else if( record instanceof Note )
@@ -1424,21 +1454,37 @@ public class U {
 		return inviatore;
 	}
 
+	// Elenco di stringhe dei membri rappresentativi delle famiglie
+	static String[] elencoFamiglie(List<Family> listaFamiglie) {
+		List<String> famigliePerno = new ArrayList<>();
+		for( Family fam : listaFamiglie ) {
+			String etichetta = testoFamiglia(Globale.contesto, Globale.gc, fam, true);
+			famigliePerno.add( etichetta );
+		}
+		return famigliePerno.toArray(new String[0]);
+	}
+
+	// Elenco di stringhe dei coniugi di una persona
+	/*@Deprecated
+	static String[] elencoConiugi(Person person) {
+		List<String> famigliePerno = new ArrayList<>();
+		for( Family fam : person.getSpouseFamilies( Globale.gc ) ) {
+			String etichetta = "";
+			if( !fam.getHusbands(Globale.gc).isEmpty() )
+				etichetta = U.epiteto( fam.getHusbands(Globale.gc).get(0) );
+			if( !fam.getWives(Globale.gc).isEmpty() )
+				etichetta += " & " + U.epiteto( fam.getWives(Globale.gc).get(0) );
+			famigliePerno.add( etichetta );
+		}
+		return famigliePerno.toArray(new String[0]);
+	}*/
+
 	// Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
 	// restituisce true per bloccare Diagram
-	public static boolean qualiGenitoriMostrare( final Context contesto, final Person perno, final Class attivita ) {
+	public static boolean qualiGenitoriMostrare( Context contesto, Person perno, Class attivita ) {
 		if( perno.getParentFamilies(Globale.gc).size() > 1 ) {
-			List<String> famigliePerno = new ArrayList<>();
-			for( Family fam : perno.getParentFamilies( Globale.gc ) ) {
-				String etichetta = "";
-				if( !fam.getHusbands(Globale.gc).isEmpty() )
-					etichetta = U.epiteto( fam.getHusbands(Globale.gc).get(0) );
-				if( !fam.getWives(Globale.gc).isEmpty() )
-					etichetta += " & " + U.epiteto( fam.getWives(Globale.gc).get(0) );
-				famigliePerno.add( etichetta );
-			}
-			new AlertDialog.Builder( contesto ).setTitle( R.string.which_parents )
-					.setItems( famigliePerno.toArray(new String[0]), (dialog, quale) -> {
+			new AlertDialog.Builder( contesto ).setTitle( R.string.which_family )
+					.setItems( elencoFamiglie(perno.getParentFamilies(Globale.gc)), (dialog, quale) -> {
 						Intent intento = new Intent( contesto, attivita );
 						if( attivita.equals( Principe.class ) ) {
 							Globale.individuo = perno.getId();
@@ -1455,24 +1501,15 @@ public class U {
 		return false;
 	}
 
-	public static void qualiConiugiMostrare( final Context contesto, final Person perno ) {
-		if( perno.getSpouseFamilies(Globale.gc).size() > 1 ) {
-			List<String> famigliePerno = new ArrayList<>();
-			for( Family fam : perno.getSpouseFamilies( Globale.gc ) ) {
-				String etichetta = "";
-				if( !fam.getHusbands(Globale.gc).isEmpty() )
-					etichetta = U.epiteto( fam.getHusbands(Globale.gc).get(0) );
-				if( !fam.getWives(Globale.gc).isEmpty() )
-					etichetta += " & " + U.epiteto( fam.getWives(Globale.gc).get(0) );
-				famigliePerno.add( etichetta );
-			}
-			new AlertDialog.Builder( contesto ).setTitle( R.string.which_spouses )
-					.setItems( famigliePerno.toArray(new String[0]), (dialog, quale) -> {
+	public static void qualiConiugiMostrare(Context contesto, Person perno, Family famiglia) {
+		if( perno.getSpouseFamilies(Globale.gc).size() > 1 && famiglia == null ) {
+			new AlertDialog.Builder( contesto ).setTitle( R.string.which_family )
+					.setItems( elencoFamiglie(perno.getSpouseFamilies(Globale.gc)), (dialog, quale) -> {
 						Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( quale ) );
 						contesto.startActivity( new Intent( contesto, Famiglia.class ) );
 					}).show();
 		} else {
-			Memoria.setPrimo( perno.getSpouseFamilies( Globale.gc ).get( 0 ) );
+			Memoria.setPrimo( famiglia != null ? famiglia : perno.getSpouseFamilies(Globale.gc).get(0) );
 			contesto.startActivity( new Intent( contesto, Famiglia.class ) );
 		}
 	}

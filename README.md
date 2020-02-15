@@ -21,6 +21,14 @@ There are 2 modules:
 - **app** is the actual _Family Gem_ app.
 - **lab** is the _Family Lab_ app, a playground used only to develop new features.
 
+The code provided in this repository should compile and build a working version of _Family Gem_, but with some limitations:
+|Missing|Limitation|
+|-|-|
+|App signature|Loose saved trees when install over a signed version|
+|Server account|Can't share trees|
+|GeoNames "demo" account|Place names suggestions probably don't appear|
+|Backup key|Android Backup Service is not available|
+
 The code (classes, variables, comments...) is all written in italian, because I'm italian and I love to write in my native language. I know it's not so kind, because everyone expects an english code, but I started like this as an hobby project and I will continue like this.
 
 Official website: www.familygem.app

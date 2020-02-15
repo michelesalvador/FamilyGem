@@ -1,6 +1,5 @@
 package app.familygem;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
@@ -14,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.folg.gedcom.model.Family;
-import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.ParentFamilyRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
@@ -49,30 +47,27 @@ public class Chiesa extends Fragment {
 		return vista;
 	}
 
-	static String testoFamiglia( Context contesto, Gedcom gc, Family fam ) {
-		String testo = "";
-		for( Person marito : fam.getHusbands(gc) )
-			testo += U.epiteto( marito ) + "\n";
-		for( Person moglie : fam.getWives(gc) )
-			testo += U.epiteto( moglie ) + "\n";
-		if( fam.getChildren(gc).size() == 1 ) {
-			String fillio = contesto.getString( U.sesso(fam.getChildren(gc).get(0)) == 2 ? R.string.daughter : R.string.son );
-			testo += "1 " + fillio.toLowerCase();
-		} else if( fam.getChildren(gc).size() > 1 )
-			testo += fam.getChildren(gc).size() + " " + contesto.getString(R.string.children);
-		if( testo.endsWith("\n") ) testo = testo.substring( 0, testo.length()-1 );
-		return testo;
-	}
-
-	static void mettiFamiglia( final LinearLayout scatola, final Family fam ) {
+	void mettiFamiglia( LinearLayout scatola, Family fam ) {
 		View vistaFamiglia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_famiglia, scatola, false );
 		scatola.addView( vistaFamiglia );
-		((TextView)vistaFamiglia.findViewById( R.id.famiglia_testo )).setText( testoFamiglia(scatola.getContext(),gc,fam) );
-		if( scatola.getContext() instanceof Principe ) // Fragment Chiesa
-			((AppCompatActivity)scatola.getContext()).getSupportFragmentManager()
-					.findFragmentById( R.id.contenitore_fragment ).registerForContextMenu( vistaFamiglia );
-		else // AppCompatActivity
-			((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFamiglia );
+		String genitori = "";
+		for( Person marito : fam.getHusbands(gc) )
+			genitori += U.epiteto( marito ) + "\n";
+		for( Person moglie : fam.getWives(gc) )
+			genitori += U.epiteto( moglie ) + "\n";
+		if( !genitori.isEmpty() )
+			genitori = genitori.substring( 0, genitori.length() - 1 );
+		((TextView)vistaFamiglia.findViewById( R.id.famiglia_genitori )).setText( genitori );
+		String figli = "";
+		for( Person figlio : fam.getChildren(gc) )
+			figli += U.epiteto( figlio ) + "\n";
+		if( !figli.isEmpty() )
+			figli = figli.substring( 0, figli.length() - 1 );
+		if( figli.isEmpty() )
+			vistaFamiglia.findViewById( R.id.famiglia_strut ).setVisibility( View.GONE );
+		else
+			((TextView)vistaFamiglia.findViewById( R.id.famiglia_figli )).setText( figli );
+		registerForContextMenu( vistaFamiglia );
 		vistaFamiglia.setOnClickListener( v -> {
 			Memoria.setPrimo( fam );
 			scatola.getContext().startActivity( new Intent( scatola.getContext(), Famiglia.class ) );
