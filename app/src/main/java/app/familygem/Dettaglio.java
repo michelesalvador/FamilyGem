@@ -679,11 +679,17 @@ public class Dettaglio extends AppCompatActivity {
 		if( id == 1 ) { // Autore principale
 			Podio.autorePrincipale( (Submitter)oggetto );
 		} else if( id == 2 ) { // Famiglia
-			new AlertDialog.Builder(this).setMessage( R.string.really_delete_family )
-					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
-						Chiesa.eliminaFamiglia( ((Family)oggetto).getId() );
-						onBackPressed();
-					}).setNeutralButton(android.R.string.cancel, null).show();
+			Family fam = (Family) oggetto;
+			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
+				new AlertDialog.Builder(this).setMessage( R.string.really_delete_family )
+						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
+							Chiesa.eliminaFamiglia( fam.getId() );
+							onBackPressed();
+						}).setNeutralButton(android.R.string.cancel, null).show();
+			} else {
+				Chiesa.eliminaFamiglia( fam.getId() );
+				onBackPressed();
+			}
 		} else if( id == 3 ) { // Tutti gli altri
 			// todo: conferma eliminazione di tutti gli oggetti..
 			elimina();

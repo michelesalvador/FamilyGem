@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.EventFact;
+import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.GedcomTag;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Note;
@@ -21,7 +22,9 @@ import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
+import org.folg.gedcom.model.SpouseRef;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +35,7 @@ import static app.familygem.Globale.gc;
 public class IndividuoEventi extends Fragment {
 
 	Person uno;
-	View vistaCambi;
+	private View vistaCambi;
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,8 +75,8 @@ public class IndividuoEventi extends Fragment {
 		return vistaEventi;
 	}
 
-	int sessoCapitato;
-	void piazzaEvento( LinearLayout scatola, String titolo, String testo, final Object oggetto ) {
+	private int sessoCapitato;
+	private void piazzaEvento( LinearLayout scatola, String titolo, String testo, final Object oggetto ) {
 		View vistaFatto = LayoutInflater.from(scatola.getContext()).inflate( R.layout.individuo_eventi_pezzo, scatola, false);
 		scatola.addView( vistaFatto );
 		((TextView)vistaFatto.findViewById( R.id.evento_titolo )).setText( titolo );
@@ -117,12 +120,13 @@ public class IndividuoEventi extends Fragment {
 				}
 				if( sessoCapitato > 2 ) sessoCapitato = -1;
 				vistaFatto.setOnClickListener( vista -> new AlertDialog.Builder( vista.getContext() )
-				.setSingleChoiceItems( sessi.values().toArray(new String[0]), sessoCapitato, (dialog, item) -> {
-					((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
-					dialog.dismiss();
-					aggiorna( 1 );
-					U.salvaJson( true, uno );
-				}).show() );
+					.setSingleChoiceItems( sessi.values().toArray(new String[0]), sessoCapitato, (dialog, item) -> {
+						((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
+						aggiornaRuoliConiugali(uno);
+						dialog.dismiss();
+						aggiorna( 1 );
+						U.salvaJson( true, uno );
+					}).show() );
 			} else { // Tutti gli altri eventi
 				U.mettiMedia( scatolaAltro, oggetto, false );
 				vistaFatto.setOnClickListener( v -> {
@@ -135,6 +139,41 @@ public class IndividuoEventi extends Fragment {
 				Memoria.aggiungi( oggetto );
 				startActivity( new Intent( getContext(), app.familygem.dettaglio.Estensione.class ) );
 			});
+		}
+	}
+
+	// In tutte le famiglie coniugali rimuove gli spouse ref di tizio e ne aggiunge uno corrispondente al sesso
+	// Serve soprattutto in caso di esportazione del Gedcom per avere allineati gli HUSB e WIFE con il sesso
+	static void aggiornaRuoliConiugali(Person tizio) {
+		SpouseRef spouseRef = new SpouseRef();
+		spouseRef.setRef(tizio.getId());
+		boolean rimosso = false;
+		for( Family fam : tizio.getSpouseFamilies(gc) ) {
+			if( U.sesso(tizio) == 2 ) { // La fa diventare wife
+				Iterator<SpouseRef> refiSposo = fam.getHusbandRefs().iterator();
+				while( refiSposo.hasNext() ) {
+					if( refiSposo.next().getRef().equals(tizio.getId()) ) {
+						refiSposo.remove();
+						rimosso = true;
+					}
+				}
+				if (rimosso) {
+					fam.addWife(spouseRef);
+					rimosso = false;
+				}
+			} else { // Per tutti gli altri sessi diventa husband
+				Iterator<SpouseRef> refiSposo = fam.getWifeRefs().iterator();
+				while( refiSposo.hasNext() ) {
+					if( refiSposo.next().getRef().equals(tizio.getId()) ) {
+						refiSposo.remove();
+						rimosso = true;
+					}
+				}
+				if (rimosso) {
+					fam.addHusband(spouseRef);
+					rimosso = false;
+				}
+			}
 		}
 	}
 

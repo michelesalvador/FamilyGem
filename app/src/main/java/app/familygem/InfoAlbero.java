@@ -16,6 +16,7 @@ import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Person;
+import org.folg.gedcom.model.Submitter;
 import java.io.File;
 import app.familygem.visita.ListaMedia;
 
@@ -48,12 +49,9 @@ public class InfoAlbero extends AppCompatActivity {
 				} else {
 					Button bottoneAggiorna = findViewById( R.id.info_aggiorna );
 					bottoneAggiorna.setVisibility( View.VISIBLE );
-					bottoneAggiorna.setOnClickListener( new View.OnClickListener() {
-						@Override
-						public void onClick( View v ) {
-							aggiornaDati( gc, questoAlbero);
-							recreate();
-						}
+					bottoneAggiorna.setOnClickListener( v -> {
+						aggiornaDati( gc, questoAlbero);
+						recreate();
 					});
 				}
 				i += "\n\n" + getText(R.string.persons) + ": "+ questoAlbero.individui
@@ -74,7 +72,8 @@ public class InfoAlbero extends AppCompatActivity {
 					i += "\n\n" + getText(R.string.shares) + ":";
 					for( Armadio.Invio invio : questoAlbero.condivisioni ) {
 						i += "\n" + dataIdVersoData(invio.data);
-						if( gc.getSubmitter(invio.submitter) != null ) i += " - " + gc.getSubmitter( invio.submitter ).getName();
+						if( gc.getSubmitter(invio.submitter) != null )
+							i += " - " + nomeAutore( gc.getSubmitter(invio.submitter) );
 					}
 				}
 			}
@@ -122,14 +121,10 @@ public class InfoAlbero extends AppCompatActivity {
 					}
 				}
 				spazio();
-				if( h.getSubmitter(gc) != null ) {
-					String nome = h.getSubmitter( gc ).getName();
-					if( nome == null || nome.isEmpty() )
-						nome = getString( android.R.string.unknownName );
-					poni( getText( R.string.submitter ), nome );	// todo: renderlo cliccabile?
-				}
+				if( h.getSubmitter(gc) != null )
+					poni( getText( R.string.submitter ), nomeAutore(h.getSubmitter(gc)) ); // todo: renderlo cliccabile?
 				if( gc.getSubmission() != null )
-					poni( getText(R.string.submission), gc.getSubmission().getDescription() );	// todo: cliccabile
+					poni( getText(R.string.submission), gc.getSubmission().getDescription() ); // todo: cliccabile
 				spazio();
 				if( h.getGedcomVersion() != null ) {
 					poni( getText(R.string.gedcom), h.getGedcomVersion().getVersion() );
@@ -164,14 +159,22 @@ public class InfoAlbero extends AppCompatActivity {
 				id.substring(8,10) +":"+ id.substring(10,12) +":"+ id.substring(12);
 	}
 
+	static String nomeAutore( Submitter autor ) {
+		String nome = autor.getName();
+		if( nome == null )
+			nome = "[" + Globale.contesto.getString(R.string.no_name) + "]";
+		else if( nome.isEmpty() )
+			nome = "[" + Globale.contesto.getString(R.string.empty_name) + "]";
+		return nome;
+	}
+
 	static void aggiornaDati( Gedcom gc, Armadio.Cassetto albero ) {
 		albero.individui = gc.getPeople().size();
-		albero.generazioni = quanteGenerazioni( gc, albero.radice!=null?albero.radice:U.trovaRadice(gc) );
+		albero.generazioni = quanteGenerazioni( gc, albero.radice!=null ? albero.radice : U.trovaRadice(gc) );
 		ListaMedia visitaMedia = new ListaMedia( gc, 0 );
 		gc.accept( visitaMedia );
 		albero.media = visitaMedia.lista.size();
 		Globale.preferenze.salva();
-		Globale.editato = true; // per aggiornare Alberi quando torna indietro
 	}
 
 	boolean testoMesso;  // impedisce di mettere più di uno spazio() consecutivo

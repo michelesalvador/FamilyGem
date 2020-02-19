@@ -1,3 +1,5 @@
+// DialogFragment che crea il dialogo per collegare un parente in modalità esperto
+
 package app.familygem;
 
 import android.app.Dialog;
@@ -11,18 +13,17 @@ import android.widget.Spinner;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class NuovoParente extends DialogFragment {
 
-	Person perno;
+	private Person perno;
 	private boolean parenteNuovo;
 	private Fragment frammento;
+	private AlertDialog dialog;
 	private Spinner spinner;
 	private List<VoceFamiglia> voci = new ArrayList<>();
 	private int relazione;
@@ -38,7 +39,7 @@ public class NuovoParente extends DialogFragment {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		//builder.setTitle( nuovo ? R.string.new_relative : R.string.link_person );
 		View vista = requireActivity().getLayoutInflater().inflate( R.layout.nuovo_parente, null );
-		// Spinner per segliere la famiglia
+		// Spinner per scegliere la famiglia
 		spinner = vista.findViewById(R.id.nuovoparente_famiglie);
 		ArrayAdapter<VoceFamiglia> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -76,6 +77,8 @@ public class NuovoParente extends DialogFragment {
 				intento.putExtra( "idFamiglia", idFamiglia );
 				startActivity( intento );
 			} else {
+				if( voceFamiglia.esistente ) // veicola l'intenzione di congiungersi a famiglia esistente
+					idFamiglia = "FAMIGLIA_ESISTENTE";
 				Intent intento = new Intent( getContext(), Principe.class );
 				intento.putExtra( "anagrafeScegliParente", true );
 				intento.putExtra( "relazione", relazione );
@@ -86,17 +89,24 @@ public class NuovoParente extends DialogFragment {
 					getActivity().startActivityForResult( intento,1401 );  // ???
 			}
 		}).setNeutralButton( R.string.cancel, null );
-		return builder.create();
+		dialog = builder.create();
+		return dialog;
 	}
 
-	private void popolaSpinner(int relazione) {
+	@Override
+	public void onStart() {
+		super.onStart();
+		dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false); // Initially disabled
+	}
+
+	private void popolaSpinner( int relazione) {
 		this.relazione = relazione;
 		voci.clear();
 		if( relazione == 1 ) { // Genitore
 			for( Family fam : perno.getParentFamilies(Globale.gc) ) {
 				voci.add( new VoceFamiglia(getContext(),fam) );
 			}
-			voci.add( new VoceFamiglia(getContext()) );
+			voci.add( new VoceFamiglia(getContext(),false) );
 		} else if( relazione == 2 ) { // Fratello
 			for( Family fam : perno.getParentFamilies(Globale.gc) ) {
 				voci.add( new VoceFamiglia(getContext(),fam) );
@@ -113,17 +123,21 @@ public class NuovoParente extends DialogFragment {
 					voci.add( new VoceFamiglia(getContext(),madre) );
 				}
 			}
-			voci.add( new VoceFamiglia(getContext()) );
+			voci.add( new VoceFamiglia(getContext(),false) );
 		} else if( relazione == 3 || relazione == 4 ) { // Coniuge / Figlio
 			for( Family fam : perno.getSpouseFamilies(Globale.gc) ) {
 				voci.add( new VoceFamiglia(getContext(),fam) );
 			}
 			voci.add( new VoceFamiglia(getContext(),perno) );
 		}
+		if( !parenteNuovo ) {
+			voci.add( new VoceFamiglia(getContext(), true) );
+		}
 		ArrayAdapter<VoceFamiglia> adapter = (ArrayAdapter) spinner.getAdapter();
 		adapter.clear();
 		adapter.addAll(voci);
 		((View)spinner.getParent()).setVisibility( View.VISIBLE );
+		dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
 	}
 
 	// Classe per le voci degli elenchi di famiglie nei dialoghi "A quale famiglia vuoi aggiungere...?"
@@ -131,19 +145,24 @@ public class NuovoParente extends DialogFragment {
 		Context contesto;
 		Family famiglia;
 		Person genitore;
+		boolean esistente; // perno cercerà di inseririrsi in famiglia già esistente
 
+		// Famiglia esistente
 		VoceFamiglia(Context contesto, Family famiglia) {
 			this.contesto = contesto;
 			this.famiglia = famiglia;
 		}
 
+		// Nuova famiglia di un genitore
 		VoceFamiglia(Context contesto, Person genitore) {
 			this.contesto = contesto;
 			this.genitore = genitore;
 		}
 
-		VoceFamiglia(Context contesto) {
+		// Nuova famiglia vuota (false) OPPURE famiglia acquisita dal destinatario (true)
+		VoceFamiglia(Context contesto, boolean esistente) {
 			this.contesto = contesto;
+			this.esistente = esistente;
 		}
 
 		@Override
@@ -152,6 +171,8 @@ public class NuovoParente extends DialogFragment {
 				return U.testoFamiglia(contesto, Globale.gc, famiglia, true);
 			else if( genitore != null )
 				return contesto.getString(R.string.new_family_of, U.epiteto(genitore));
+			else if( esistente )
+				return contesto.getString(R.string.existing_family);
 			else
 				return contesto.getString(R.string.new_family);
 		}

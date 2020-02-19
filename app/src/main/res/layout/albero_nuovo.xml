@@ -14,7 +14,7 @@
 
 		<Button
 			android:id="@+id/bottone_albero_vuoto"
-			style="@android:style/Widget.Holo.Light.Button"
+			style="@style/AppTheme.BottoneColorato"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="16dp"
@@ -22,7 +22,7 @@
 
 		<Button
 			android:id="@+id/bottone_scarica_esempio"
-			style="@android:style/Widget.Holo.Light.Button"
+			style="@style/AppTheme.BottoneNormale"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="16dp"
@@ -30,7 +30,7 @@
 
 		<Button
 			android:id="@+id/bottone_importa_gedcom"
-			style="@android:style/Widget.Holo.Light.Button"
+			style="@style/AppTheme.BottoneNormale"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="16dp"
@@ -38,7 +38,7 @@
 
 		<Button
 			android:id="@+id/bottone_recupera_backup"
-			style="@android:style/Widget.Holo.Light.Button"
+			style="@style/AppTheme.BottoneNormale"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/import_backup" />

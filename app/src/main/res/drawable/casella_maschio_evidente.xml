@@ -10,7 +10,7 @@
 		<shape>
 			<gradient
 				android:type="radial"
-				android:startColor="#FFF"
+				android:startColor="@color/evidenziaChiaro"
 				android:endColor="@color/evidenzia"
 				android:gradientRadius="150dp" />
 			<stroke

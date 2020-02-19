@@ -43,7 +43,7 @@
 				<TextView
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="@string/shared_tree_root"
+					android:text="@string/root"
 					android:textSize="18sp"
 					android:textStyle="bold" />
 
@@ -59,7 +59,7 @@
 				android:id="@+id/condividi_tit_autore"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/tree_submitter"
+				android:text="@string/submitter"
 				android:textSize="18sp"
 				android:textStyle="bold" />
 
@@ -83,7 +83,8 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center_horizontal"
-				android:text="@string/share_tree" />
+				android:text="@string/share_tree"
+				style="@style/AppTheme.BottoneColorato"/>
 
 		</LinearLayout>
 	</ScrollView>

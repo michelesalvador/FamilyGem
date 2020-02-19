@@ -37,12 +37,14 @@
 				android:id="@+id/compara_bottone1"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/view_updates" />
+				android:text="@string/view_updates"
+				style="@style/AppTheme.BottoneColorato"/>
 			<Button
 				android:id="@+id/compara_bottone2"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/accept_all" />
+				android:text="@string/accept_all"
+				style="@style/AppTheme.BottoneColorato"/>
 		</LinearLayout>
 
 	</LinearLayout>

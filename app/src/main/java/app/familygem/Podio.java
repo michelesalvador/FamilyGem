@@ -33,10 +33,7 @@ public class Podio extends Fragment {
 		for( final Submitter autor : listAutori ) {
 			View vistaPezzo = inflater.inflate( R.layout.magazzino_pezzo, scatola, false );
 			scatola.addView( vistaPezzo );
-			String nome = autor.getName();
-			if( nome == null || nome.isEmpty() )
-				nome = getString( android.R.string.unknownName );
-			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( nome );
+			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( InfoAlbero.nomeAutore(autor) );
 			vistaPezzo.findViewById( R.id.magazzino_archivi ).setVisibility( View.GONE );
 			vistaPezzo.setOnClickListener( v -> {
 				Memoria.setPrimo( autor );

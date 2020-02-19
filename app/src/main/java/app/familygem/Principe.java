@@ -101,6 +101,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		super.onRestart();
 		if( Globale.editato ) {
 			recreate();
+			Globale.editato = false;
 		}
 	}
 

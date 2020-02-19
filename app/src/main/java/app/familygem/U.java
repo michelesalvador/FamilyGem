@@ -1226,7 +1226,7 @@ public class U {
 		if( fam.getChildren(gc).size() == 1 ) {
 			testo += U.epiteto( fam.getChildren(gc).get(0) );
 		} else if( fam.getChildren(gc).size() > 1 )
-			testo += fam.getChildren(gc).size() + " " + contesto.getString(R.string.children);
+			testo += contesto.getString(R.string.num_children, fam.getChildren(gc).size());
 		if( testo.endsWith("\n") ) testo = testo.substring( 0, testo.length()-1 );
 		if( unaLinea )
 			testo = testo.replaceAll( "\n", ", " );
@@ -1463,21 +1463,6 @@ public class U {
 		}
 		return famigliePerno.toArray(new String[0]);
 	}
-
-	// Elenco di stringhe dei coniugi di una persona
-	/*@Deprecated
-	static String[] elencoConiugi(Person person) {
-		List<String> famigliePerno = new ArrayList<>();
-		for( Family fam : person.getSpouseFamilies( Globale.gc ) ) {
-			String etichetta = "";
-			if( !fam.getHusbands(Globale.gc).isEmpty() )
-				etichetta = U.epiteto( fam.getHusbands(Globale.gc).get(0) );
-			if( !fam.getWives(Globale.gc).isEmpty() )
-				etichetta += " & " + U.epiteto( fam.getWives(Globale.gc).get(0) );
-			famigliePerno.add( etichetta );
-		}
-		return famigliePerno.toArray(new String[0]);
-	}*/
 
 	// Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
 	// restituisce true per bloccare Diagram

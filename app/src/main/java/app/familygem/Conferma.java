@@ -226,7 +226,6 @@ public class Conferma extends AppCompatActivity {
 	// Apre l'elenco degli alberi
 	void concludi() {
 		Confronto.reset();
-		Globale.editato = true;
 		startActivity( new Intent( this, Alberi.class ) );
 	}
 

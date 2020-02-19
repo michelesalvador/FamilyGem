@@ -5,10 +5,10 @@
 	android:layout_height="match_parent">
 
 	<ProgressBar
-		android:id="@+id/facciata_circolo"
 		android:layout_width="70dp"
 		android:layout_height="70dp"
 		android:layout_centerHorizontal="true"
 		android:layout_centerVertical="true" />
+	<!-- La rotella compare quando un albero viene importato -->
 
 </RelativeLayout>

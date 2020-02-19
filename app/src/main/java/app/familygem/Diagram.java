@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -91,10 +90,8 @@ public class Diagram extends Fragment {
 
 		// Empty diagram
 		if( !graph.startFrom(Globale.individuo, Globale.preferenze.alberoAperto().radice, U.trovaRadice(gc)) ) {
-			Button button = new Button(getContext());
-			button.setText( R.string.new_person );
-			box.addView( button );
-			button.setOnClickListener( view -> {
+			View button = LayoutInflater.from(getContext()).inflate(R.layout.diagram_button, box, true);
+			button.findViewById( R.id.diagram_new ).setOnClickListener( view -> {
 				Intent intento =  new Intent( getContext(), EditaIndividuo.class );
 				intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
 				startActivity( intento );
@@ -293,7 +290,7 @@ public class Diagram extends Fragment {
 					background.setBackgroundResource( R.drawable.casella_maschio );
 				else if( U.sesso(person) == 2 )
 					background.setBackgroundResource( R.drawable.casella_femmina );
-				if( card.acquired )
+				if( card.acquired && !person.getId().equals(Globale.individuo) )
 					background.setAlpha( 0.7f );
 
 				U.unaFoto( Globale.gc, person, view.findViewById( R.id.card_photo ) );

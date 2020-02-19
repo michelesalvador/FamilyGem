@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/menu_testa"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="@dimen/nav_header_height"
-	android:background="@drawable/menu_sfondo"
-	android:theme="@style/ThemeOverlay.AppCompat.Dark">
+	android:background="@drawable/menu_sfondo">
 
 	<ImageView
 		android:id="@+id/menu_immagine"
@@ -23,28 +22,45 @@
 		android:layout_marginLeft="16dp"
 		android:layout_marginRight="16dp"
 		android:ellipsize="end"
-		android:maxLines="3"
+		android:maxLines="2"
 		android:shadowColor="#000"
 		android:shadowDy="2"
 		android:shadowRadius="5"
-		android:text="Alberello cogliatell con nominetto lungotto e financo uscente dal riquadro ma solo se c'è testo in abbondanza"
 		android:textColor="#fff"
-		android:textSize="24sp"/>
+		android:textSize="26sp"/>
 
-	<Button
+	<LinearLayout
 		android:id="@+id/menu_alberi"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_above="@+id/menu_titolo"
-		android:layout_marginLeft="16dp"
 		android:layout_marginBottom="8dp"
-		android:text="@string/trees"
-		android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-		android:theme="@style/AppTheme" />
+		android:background="@drawable/menu_alberi_sfondo"
+		android:gravity="center_vertical"
+		android:paddingLeft="16dp"
+		android:paddingTop="12dp"
+		android:paddingRight="32dp"
+		android:paddingBottom="12dp"
+		android:foreground="?android:attr/selectableItemBackground" >
+
+		<ImageView
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			app:srcCompat="@drawable/menu_lista" />
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="32dp"
+			android:text="@string/trees"
+			android:textColor="#000"
+			android:textSize="15sp" />
+	</LinearLayout>
 
 	<Button
 		android:id="@+id/menu_salva"
-		style="@style/Widget.AppCompat.Button.Colored"
+		style="@style/AppTheme.BottoneColorato"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_above="@+id/menu_titolo"
@@ -52,7 +68,5 @@
 		android:layout_marginRight="16dp"
 		android:layout_marginBottom="8dp"
 		android:text="@string/save"
-		android:textColor="#fff"
 		android:visibility="gone"/>
-
 </RelativeLayout>

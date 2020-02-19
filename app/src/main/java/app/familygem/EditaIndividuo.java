@@ -66,7 +66,7 @@ public class EditaIndividuo extends AppCompatActivity {
 					cogno = U.cognome( perno );
 				else if( idFamiglia != null ) {
 					Family fam = gc.getFamily(idFamiglia);
-					if( !fam.getHusbands(gc).isEmpty() )
+					if( fam != null && !fam.getHusbands(gc).isEmpty() )
 						cogno = U.cognome( fam.getHusbands(gc).get(0) );
 				}
 			} else if( relazione == 6 ) { // = figlio da Famiglia
@@ -173,6 +173,7 @@ public class EditaIndividuo extends AppCompatActivity {
 					sesso.setValue( sessoScelto );
 					p.addEventFact( sesso );
 				}
+				IndividuoEventi.aggiornaRuoliConiugali(p);
 			}
 
 			// Nascita
@@ -236,7 +237,6 @@ public class EditaIndividuo extends AppCompatActivity {
 				gc.addPerson( p );
 				if( Globale.preferenze.alberoAperto().radice == null )
 					Globale.preferenze.alberoAperto().radice = nuovoId;
-				Globale.preferenze.alberoAperto().individui++;
 				Globale.preferenze.salva();
 				Globale.individuo = nuovoId; // per mostrarlo orgogliosi in Diagramma
 				if( relazione >= 5 ) { // viene da Famiglia
@@ -363,71 +363,81 @@ public class EditaIndividuo extends AppCompatActivity {
 			contesto.startActivity( intento );
 	}
 
-	// Nuova versione dell'aggiunta di un parente a perno, per ora solo per utenti esperti
+	// Nuova versione dell'aggiunta di un parente a perno
 	static Object[] aggiungiParente2( String idPerno, String nuovoId, String idFamiglia, int relazione ) {
-		Person perno = gc.getPerson( idPerno );
 		Person nuovo = gc.getPerson( nuovoId );
-		SpouseRef refSposo = new SpouseRef();
-		ChildRef refFiglio = new ChildRef();
-		Person genitore = null;
-		SpouseRef refGenitore = new SpouseRef();
-		boolean fNuova = idFamiglia == null;
+		// Si crea una nuova famiglia in cui finiscono sia Perno che Nuovo
 		if( idFamiglia != null && idFamiglia.startsWith("NUOVA_FAMIGLIA_DI") ) {
-			refGenitore.setRef( idFamiglia.substring(17) );
-			genitore = gc.getPerson(refGenitore.getRef());
+			idPerno = idFamiglia.substring(17);
+			relazione = relazione==2 ? 4 : relazione;
+			idFamiglia = null;
+		} // Perno cerca di inserirsi nella famiglia di Nuovo
+		// todo: Perno finisce nella prima famiglia. chiedere in quale
+		else if( idFamiglia != null && idFamiglia.equals("FAMIGLIA_ESISTENTE") ) {
+			if( relazione == 1 || relazione == 3 )
+				idFamiglia = !nuovo.getSpouseFamilyRefs().isEmpty() ? nuovo.getSpouseFamilyRefs().get(0).getRef() : null;
+			else if( relazione == 2 || relazione == 4 )
+				idFamiglia = !nuovo.getParentFamilyRefs().isEmpty() ? nuovo.getParentFamilyRefs().get(0).getRef() : null;
+			if( idFamiglia != null ) {
+				nuovoId = null;
+				nuovo = null;
+			}
+		} // Nuovo è accolto nella famiglia di Perno
+		else if( idFamiglia != null ) {
+			idPerno = null;
 		}
-		Family famiglia = fNuova || genitore!=null ? Chiesa.nuovaFamiglia(true) : gc.getFamily(idFamiglia);
+		Family famiglia = idFamiglia != null ? gc.getFamily(idFamiglia) : Chiesa.nuovaFamiglia(true);;
+		Person perno = gc.getPerson( idPerno );
+		SpouseRef refSposo1 = new SpouseRef(), refSposo2 = new SpouseRef();
+		ChildRef refFiglio1 = new ChildRef(), refFiglio2 = new ChildRef();
 		ParentFamilyRef refFamGenitori = new ParentFamilyRef();
-		SpouseFamilyRef refFamSposo = new SpouseFamilyRef();
+		SpouseFamilyRef refFamSposi = new SpouseFamilyRef();
 		refFamGenitori.setRef( famiglia.getId() );
-		refFamSposo.setRef( famiglia.getId() );
-		cambiati = new HashSet<>();
-		if( relazione == 1) { // Genitore
-			refSposo.setRef( nuovoId );
-			aggiungiConiuge( famiglia, refSposo );
-			refFamSposo.setRef( famiglia.getId() );
-			nuovo.addSpouseFamilyRef( refFamSposo );
-			if(fNuova) {
-				refFiglio.setRef( idPerno );
-				famiglia.addChild( refFiglio );
-				perno.addParentFamilyRef( refFamGenitori );
-			}
-		} else if( relazione == 2) { // Fratello
-			refFiglio.setRef( nuovoId );
-			famiglia.addChild( refFiglio );
-			nuovo.addParentFamilyRef( refFamGenitori );
-			if(fNuova) {
-				ChildRef refPerno = new ChildRef();
-				refPerno.setRef( idPerno );
-				famiglia.addChild( refPerno );
-				perno.addParentFamilyRef( refFamGenitori );
-			} else if( genitore != null ) {
-				aggiungiConiuge( famiglia, refGenitore );
-				genitore.addSpouseFamilyRef( refFamSposo );
-			}
-		} else if( relazione == 3) { // Coniuge
-			refSposo.setRef( nuovoId );
-			aggiungiConiuge(famiglia, refSposo);
-			nuovo.addSpouseFamilyRef(refFamSposo);
-			if( fNuova || genitore != null ) {
-				refGenitore.setRef( idPerno );
-				aggiungiConiuge( famiglia, refGenitore );
-				perno.addSpouseFamilyRef( refFamSposo );
-			}
-		} else if( relazione == 4) { // Figlio
-			refFiglio.setRef( nuovoId );
-			famiglia.addChild( refFiglio );
-			nuovo.addParentFamilyRef( refFamGenitori );
-			if( fNuova || genitore != null ) {
-				refSposo.setRef( idPerno );
-				aggiungiConiuge( famiglia, refSposo );
-				perno.addSpouseFamilyRef( refFamSposo );
-			}
+		refFamSposi.setRef( famiglia.getId() );
+
+		// Popolamento dei ref
+		switch (relazione) {
+			case 1: // Genitore
+				refSposo1.setRef(nuovoId);
+				refFiglio1.setRef(idPerno);
+				if (nuovo != null) nuovo.addSpouseFamilyRef( refFamSposi );
+				if (perno != null) perno.addParentFamilyRef( refFamGenitori );
+				break;
+			case 2: // Fratello
+				refFiglio1.setRef(idPerno);
+				refFiglio2.setRef(nuovoId);
+				if (perno != null) perno.addParentFamilyRef( refFamGenitori );
+				if (nuovo != null) nuovo.addParentFamilyRef( refFamGenitori );
+				break;
+			case 3: // Coniuge
+				refSposo1.setRef(idPerno);
+				refSposo2.setRef(nuovoId);
+				if (perno != null) perno.addSpouseFamilyRef( refFamSposi );
+				if (nuovo != null) nuovo.addSpouseFamilyRef( refFamSposi );
+				break;
+			case 4: // Figlio
+				refSposo1.setRef(idPerno);
+				refFiglio1.setRef(nuovoId);
+				if (perno != null) perno.addSpouseFamilyRef( refFamSposi );
+				if (nuovo != null) nuovo.addParentFamilyRef( refFamGenitori );
 		}
-		if(fNuova)
-			stocca( famiglia, nuovo, perno);
-		else
-			stocca( famiglia, nuovo);
+
+		if( refSposo1.getRef() != null )
+			aggiungiConiuge( famiglia, refSposo1 );
+		if( refSposo2.getRef() != null )
+			aggiungiConiuge( famiglia, refSposo2 );
+		if( refFiglio1.getRef() != null )
+			famiglia.addChild( refFiglio1 );
+		if( refFiglio2.getRef() != null )
+			famiglia.addChild( refFiglio2 );
+
+		Set<Object> cambiati = new HashSet<>();
+		if (perno != null && nuovo != null)
+			Collections.addAll( cambiati, famiglia, perno, nuovo);
+		else if (perno != null)
+			Collections.addAll( cambiati, famiglia, perno);
+		else if (nuovo != null)
+			Collections.addAll( cambiati, famiglia, nuovo);
 		return cambiati.toArray();
 	}
 
@@ -566,20 +576,10 @@ public class EditaIndividuo extends AppCompatActivity {
 		Collections.addAll( cambiati, oggetti);
 	}
 
-	// Aggiunta il coniuge in una famiglia: il primo in base al sesso, il secondo riempiendo il ruolo vuoto, i seguenti per sesso
+	// Aggiunge il coniuge in una famiglia: sempre e solo in base al sesso
 	public static void aggiungiConiuge(Family fam, SpouseRef sr) {
 		Person tizio = Globale.gc.getPerson( sr.getRef() );
-		if( fam.getHusbandRefs().isEmpty() && fam.getWifeRefs().isEmpty() ) {
-			if( U.sesso(tizio) == 2 ) fam.addWife( sr );
-			else fam.addHusband( sr );
-		} else if( fam.getHusbandRefs().isEmpty() ) {
-			fam.addHusband( sr );
-		} else if( fam.getWifeRefs().isEmpty() ) {
-			fam.addWife( sr );
-		} else {
-			if( U.sesso(tizio) == 2 ) fam.addWife( sr );
-			else fam.addHusband( sr );
-		}
+		if( U.sesso(tizio) == 2 ) fam.addWife( sr );
+		else fam.addHusband( sr );
 	}
-
 }

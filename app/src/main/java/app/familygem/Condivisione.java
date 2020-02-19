@@ -1,10 +1,12 @@
 package app.familygem;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -70,13 +72,10 @@ public class Condivisione extends AppCompatActivity {
 				LinearLayout scatolaRadice = findViewById(R.id.condividi_radice);
 				scatolaRadice.setVisibility( View.VISIBLE );
 				View vistaRadice = U.linkaPersona( scatolaRadice, radice, 1 );
-				vistaRadice.setOnClickListener( new View.OnClickListener() {
-					@Override
-					public void onClick( View v ) {
-						Intent intento = new Intent( Condivisione.this, Principe.class );
-						intento.putExtra( "anagrafeScegliParente", true );
-						startActivityForResult( intento,5007 );
-					}
+				vistaRadice.setOnClickListener( v -> {
+					Intent intento = new Intent( Condivisione.this, Principe.class );
+					intento.putExtra( "anagrafeScegliParente", true );
+					startActivityForResult( intento,5007 );
 				});
 			}
 			// Nome autore
@@ -95,56 +94,69 @@ public class Condivisione extends AppCompatActivity {
 			editaAutore.setText( nomeAutore );
 
 			// Raccoglie i dati della condivisione e posta al database
-			findViewById( R.id.bottone_condividi ).setOnClickListener( new View.OnClickListener() {
-				@Override
-				public void onClick( View v ) {
-					if( uploadSuccesso )
-						concludi();
-					else {
-						v.setEnabled( false );
-						findViewById( R.id.condividi_circolo ).setVisibility(View.VISIBLE);
+			findViewById( R.id.bottone_condividi ).setOnClickListener( v -> {
+				if( uploadSuccesso )
+					concludi();
+				else {
+					if( controlla(editaTitolo, R.string.please_title) || controlla(editaAutore, R.string.please_name) )
+						return;
 
-						// Titolo dell'albero
-						String titoloEditato = editaTitolo.getText().toString();
-						if( !casso.nome.equals(titoloEditato) ) {
-							casso.nome = titoloEditato;
-							Globale.preferenze.salva();
-						}
+					v.setEnabled( false );
+					findViewById( R.id.condividi_circolo ).setVisibility(View.VISIBLE);
 
-						// Aggiornamento del submitter
-						boolean gcModificato = false;
-						Header testata = gc.getHeader();
-						if( testata == null ) {
-							testata = AlberoNuovo.creaTestata( casso.id + ".json" );
-							gc.setHeader( testata );
-						}
-						if( autore[0] == null ) {
-							autore[0] = Podio.nuovoAutore( null );
-							gcModificato = true;
-						}
-						if( testata.getSubmitterRef() == null ) {
-							testata.setSubmitterRef( autore[0].getId() );
-							gcModificato = true;
-						}
-						String nomeAutoreEditato = editaAutore.getText().toString();
-						if( !nomeAutoreEditato.equals(nomeAutore) ) {
-							nomeAutore = nomeAutoreEditato;
-							autore[0].setName( nomeAutore );
-							U.aggiornaDate( autore[0] );
-							gcModificato = true;
-						}
-						idAutore = autore[0].getId();
-						if( gcModificato )
-							U.salvaJson( gc, idAlbero ); // baypassando la preferenza di non salvare in atomatico
-
-						// Invia i dati
-						if( !BuildConfig.utenteAruba.isEmpty() )
-							new PostaDatiCondivisione().execute( Condivisione.this );
+					// Titolo dell'albero
+					String titoloEditato = editaTitolo.getText().toString();
+					if( !casso.nome.equals(titoloEditato) ) {
+						casso.nome = titoloEditato;
+						Globale.preferenze.salva();
 					}
+
+					// Aggiornamento del submitter
+					boolean gcModificato = false;
+					Header testata = gc.getHeader();
+					if( testata == null ) {
+						testata = AlberoNuovo.creaTestata( casso.id + ".json" );
+						gc.setHeader( testata );
+					}
+					if( autore[0] == null ) {
+						autore[0] = Podio.nuovoAutore( null );
+						gcModificato = true;
+					}
+					if( testata.getSubmitterRef() == null ) {
+						testata.setSubmitterRef( autore[0].getId() );
+						gcModificato = true;
+					}
+					String nomeAutoreEditato = editaAutore.getText().toString();
+					if( !nomeAutoreEditato.equals(nomeAutore) ) {
+						nomeAutore = nomeAutoreEditato;
+						autore[0].setName( nomeAutore );
+						U.aggiornaDate( autore[0] );
+						gcModificato = true;
+					}
+					idAutore = autore[0].getId();
+					if( gcModificato )
+						U.salvaJson( gc, idAlbero ); // baypassando la preferenza di non salvare in atomatico
+
+					// Invia i dati
+					if( !BuildConfig.utenteAruba.isEmpty() )
+						new PostaDatiCondivisione().execute( Condivisione.this );
 				}
 			});
 		} else
 			findViewById( R.id.condividi_scatola ).setVisibility( View.GONE );
+	}
+
+	// Verifica che un campo sia compilato
+	boolean controlla(EditText campo, int msg) {
+		String testo = campo.getText().toString();
+		if( testo.isEmpty() ) {
+			campo.requestFocus();
+			InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(campo, InputMethodManager.SHOW_IMPLICIT);
+			Toast.makeText(this, msg, Toast.LENGTH_SHORT ).show();
+			return true;
+		}
+		return false;
 	}
 
 	// Inserisce il sommario della condivisione nel database di www.familygem.app

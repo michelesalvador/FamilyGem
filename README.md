@@ -33,6 +33,14 @@ The code (classes, variables, comments...) is all written in italian, because I'
 
 Official website: www.familygem.app
 
-The APK file is stored on [Uptodown](https://family-gem.en.uptodown.com).
+You can find _Family Gem_ on [Google Play](https://play.google.com/store/apps/details?id=app.familygem).
 
-For questions, problems, suggestions please [open an issue](https://github.com/michelesalvador/FamilyGem/issues).
+The APK file is available on:
+- [GitHub releases](https://github.com/michelesalvador/FamilyGem/releases)
+- [IzzyOnDroid](https://apt.izzysoft.de/fdroid/index/apk/app.familygem) (F-Droid repository)
+- [Uptodown](https://family-gem.en.uptodown.com)
+
+For questions, bugs, suggestions you can:
+- [Open an issue](https://github.com/michelesalvador/FamilyGem/issues)
+- Open a topic on the [Family Gem Google group](https://groups.google.com/forum/#!forum/family-gem) (Google account required)
+- Directly email to the Google group: family-gem@googlegroups.com (no account required).

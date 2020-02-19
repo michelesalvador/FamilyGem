@@ -29,15 +29,15 @@ public class Famiglia extends Dettaglio {
 		f = (Family) casta( Family.class );
 		mettiBava( "FAM", f.getId() );
 		for( Person marito : f.getHusbands(gc) )
-			membro( marito, !f.getChildRefs().isEmpty() ? R.string.father : R.string.husband );
+			membro( marito, !f.getChildRefs().isEmpty() ? 1 : 2 );
 		for( Person moglie : f.getWives(gc) )
-			membro( moglie, !f.getChildRefs().isEmpty() ? R.string.mother : R.string.wife );
+			membro( moglie, !f.getChildRefs().isEmpty() ? 1 : 2 );
 		for( EventFact ef : f.getEventsFacts() ) {
 			if( ef.getTag().equals("MARR") )
 				metti( getString(R.string.marriage), ef );
 		}
 		for( Person figlio : f.getChildren(gc) )
-			membro( figlio, ( U.sesso(figlio)==2 )? R.string.daughter : R.string.son );
+			membro( figlio, 3 );
 		for( EventFact ef : f.getEventsFacts() ) {
 			if( !ef.getTag().equals( "MARR" ) )
 				metti( ef.getDisplayType(), ef );
@@ -49,16 +49,36 @@ public class Famiglia extends Dettaglio {
 		U.cambiamenti( box, f.getChange() );
 	}
 
-	void membro( final Person p, final int ruolo ) {
+	void membro( Person p, int relazione ) {
+		int ruolo = 0;
+		if( U.sesso(p) == 1 ) {
+			switch( relazione ) {
+				case 1: ruolo = R.string.father; break;
+				case 2: ruolo = R.string.husband; break;
+				case 3: ruolo = R.string.son;
+			}
+		} else if( U.sesso(p) == 2 ) {
+			switch( relazione ) {
+				case 1: ruolo = R.string.mother; break;
+				case 2: ruolo = R.string.wife; break;
+				case 3: ruolo = R.string.daughter;
+			}
+		} else {
+			switch( relazione ) {
+				case 1: ruolo = R.string.parent; break;
+				case 2: ruolo = R.string.spouse; break;
+				case 3: ruolo = R.string.child;
+			}
+		}
 		View vistaPersona = U.mettiIndividuo( box, p, getString(ruolo) );
 		vistaPersona.setTag( R.id.tag_oggetto, p ); // per il menu contestuale in Dettaglio
 		registerForContextMenu( vistaPersona );
 		vistaPersona.setOnClickListener( v -> {
 			// un genitore con una o più famiglie in cui è figlio
-			if( (ruolo==R.string.husband || ruolo==R.string.wife) && !p.getParentFamilies(gc).isEmpty() ) {
+			if( (relazione==1 || relazione==2) && !p.getParentFamilies(gc).isEmpty() ) {
 				U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
 			} // un figlio con una o più famiglie in cui è coniuge
-			else if( (ruolo==R.string.son || ruolo==R.string.daughter) && !p.getSpouseFamilies(gc).isEmpty() ) {
+			else if( relazione == 3 && !p.getSpouseFamilies(gc).isEmpty() ) {
 				U.qualiConiugiMostrare( Famiglia.this, p, null );
 			} // un figlio non sposato che ha più famiglie genitoriali
 			else if( p.getParentFamilies(gc).size() > 1 ) {

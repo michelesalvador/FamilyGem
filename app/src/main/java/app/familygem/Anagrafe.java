@@ -456,7 +456,6 @@ public class Anagrafe extends Fragment {
 		Memoria.annullaIstanze( eliminando );
 		gc.getPeople().remove( eliminando );
 		gc.createIndexes();	// necessario
-		Globale.preferenze.alberoAperto().individui--;
 		String idNuovaRadice = U.trovaRadice(gc);	// Todo dovrebbe essere: trovaParentePiuProssimo
 		if( Globale.preferenze.alberoAperto().radice!=null && Globale.preferenze.alberoAperto().radice.equals(idEliminando) ) {
 			Globale.preferenze.alberoAperto().radice = idNuovaRadice;

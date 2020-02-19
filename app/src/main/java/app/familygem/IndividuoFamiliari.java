@@ -20,7 +20,7 @@ import static app.familygem.Globale.gc;
 
 public class IndividuoFamiliari extends Fragment {
 
-	View vistaFamiglia;
+	private View vistaFamiglia;
 	Person uno;
 
 	@Override
@@ -33,12 +33,12 @@ public class IndividuoFamiliari extends Fragment {
 				List<Family> listaFamiglie = uno.getParentFamilies(gc);
 				for( Family famiglia : listaFamiglie  ) {
 					for( Person padre : famiglia.getHusbands(gc) )
-						creaTessera( padre, getString(R.string.father), 0, famiglia );
+						creaTessera( padre, 1, famiglia );
 					for( Person madre : famiglia.getWives(gc) )
-						creaTessera( madre, getString(R.string.mother), 0, famiglia );
+						creaTessera( madre, 1, famiglia );
 					for( Person fratello : famiglia.getChildren(gc) )	// solo i figli degli stessi due genitori, non i fratellastri
 						if( !fratello.equals(uno) )
-							creaTessera( fratello, null, 1, famiglia );
+							creaTessera( fratello, 3, famiglia );
 				}
 				// Fratellastri e sorellastre
 				for( Family famiglia : uno.getParentFamilies(gc) ) {
@@ -47,26 +47,26 @@ public class IndividuoFamiliari extends Fragment {
 						famigliePadre.removeAll( listaFamiglie );
 						for( Family fam : famigliePadre )
 							for( Person fratellastro : fam.getChildren(gc) )
-								creaTessera( fratellastro, null, 2, fam );
+								creaTessera( fratellastro, 4, fam );
 					}
 					for( Person madre : famiglia.getWives(gc) ) {
 						List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
 						famiglieMadre.removeAll( listaFamiglie );
 						for( Family fam : famiglieMadre )
 							for( Person fratellastro : fam.getChildren(gc) )
-								creaTessera( fratellastro, null, 2, fam );
+								creaTessera( fratellastro, 4, fam );
 					}
 				}
 				// Coniugi e figli
 				for( Family famiglia : uno.getSpouseFamilies(gc) ) {
 					for( Person marito : famiglia.getHusbands(gc) )
 						if( !marito.equals(uno) )
-							creaTessera( marito, getString(R.string.husband), 0, famiglia );
+							creaTessera( marito, 2, famiglia );
 					for( Person moglie : famiglia.getWives(gc) )
 						if( !moglie.equals(uno) )
-							creaTessera( moglie, getString(R.string.wife), 0, famiglia );
+							creaTessera( moglie, 2, famiglia );
 					for( Person figlio : famiglia.getChildren(gc) ) {
-						creaTessera( figlio, null, 3, famiglia );
+						creaTessera( figlio, 5, famiglia );
 					}
 				}
 			}
@@ -74,21 +74,35 @@ public class IndividuoFamiliari extends Fragment {
 		return vistaFamiglia;
 	}
 
-	void creaTessera( final Person p, String ruolo, int relazione, Family fam ) {
+	void creaTessera( final Person p, int relazione, Family fam ) {
 		LinearLayout scatola = vistaFamiglia.findViewById( R.id.contenuto_scheda );
-		if( ruolo == null ) {
+		int ruolo = 0;
+		if( U.sesso(p) == 1 ) {
 			switch( relazione ) {
-				case 1:
-					ruolo = ( U.sesso(p)==2 )? getString(R.string.sister) : getString(R.string.brother);
-					break;
-				case 2:
-					ruolo = ( U.sesso(p)==2 )? getString(R.string.step_sister) : getString(R.string.step_brother);
-					break;
-				case 3:
-					ruolo = ( U.sesso(p)==2 )? getString(R.string.daughter) : getString(R.string.son);
+				case 1: ruolo = R.string.father; break;
+				case 2: ruolo = R.string.husband; break;
+				case 3: ruolo = R.string.brother; break;
+				case 4: ruolo = R.string.half_brother; break;
+				case 5: ruolo = R.string.son;
+			}
+		} else if( U.sesso(p) == 2 ) {
+			switch( relazione ) {
+				case 1: ruolo = R.string.mother; break;
+				case 2: ruolo = R.string.wife; break;
+				case 3:	ruolo = R.string.sister; break;
+				case 4: ruolo = R.string.half_sister; break;
+				case 5: ruolo = R.string.daughter;
+			}
+		} else {
+			switch( relazione ) {
+				case 1: ruolo = R.string.parent; break;
+				case 2: ruolo = R.string.spouse; break;
+				case 3:	ruolo = R.string.sibling; break;
+				case 4: ruolo = R.string.half_sibling; break;
+				case 5: ruolo = R.string.child;
 			}
 		}
-		View vistaPersona = U.mettiIndividuo( scatola, p, ruolo );
+		View vistaPersona = U.mettiIndividuo( scatola, p, getString(ruolo) );
 		vistaPersona.setOnClickListener( v -> {
 			Intent intento = new Intent( getContext(), Individuo.class);
 			intento.putExtra( "idIndividuo", p.getId() );
@@ -100,7 +114,7 @@ public class IndividuoFamiliari extends Fragment {
 		                                               // ma è usato anche qui sotto per spostare i molteplici matrimoni
 	}
 
-	void spostaRiferimentoFamiglia( int direzione ) {
+	private void spostaRiferimentoFamiglia( int direzione ) {
 		Collections.swap( uno.getSpouseFamilyRefs(), posFam, posFam + direzione );
 		getActivity().getSupportFragmentManager().beginTransaction().detach( this ).attach( this ).commit();
 	}

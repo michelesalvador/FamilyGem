@@ -4,10 +4,15 @@
 	<string name="cancel">Annulla</string>
 	<string name="done">Fatto</string>
 	<string name="change_date">Data modifica</string>
-	<string name="something_wrong">Qualcosa è andato storto</string>
-	<!-- Facciata -->
+	<string name="something_wrong">Qualcosa è andato storto.</string>
 	<string name="cant_understand_uri">Non capisco l\'uri che ho ricevuto.</string>
-	<string name="download_completed">Download completato.</string>
+	<string name="version_name">Versione %s</string>
+	<string name="make_default">Autore principale</string>
+	<string name="citations">Citazioni</string>
+	<string name="sources_number">Numero di fonti</string>
+	<string name="extension">Altro</string>
+	<string name="new_family_of">Nuova famiglia di %s</string>
+	<string name="existing_family">Famiglia già esistente</string>
 	<!-- Principe -->
 	<string name="drawer_open">Apri menu</string>
 	<string name="drawer_close">Chiudi menu</string>
@@ -53,7 +58,6 @@
 	<string name="share_tree">Condividi</string>
 	<string name="compare">Confronta</string>
 	<string name="export_gedcom">Esporta Gedcom</string>
-	<string name="cant_find_file">Non trovo il file.</string>
 	<string name="no_results">Nessun risultato.</string>
 	<string name="really_delete_tree">Vuoi davvero eliminare questo albero?</string>
 	<string name="all_ok">Tutto a posto.</string>
@@ -62,7 +66,7 @@
 	<!-- Opzioni -->
 	<string name="settings">Impostazioni</string>
 	<string name="auto_save">Salvataggio automatico</string>
-	<string name="load_tree_startup">Carica l\'albero all\'avvio</string>
+	<string name="load_tree_startup">All\'avvio carica l\'ultimo albero aperto</string>
 	<string name="show_advanced_functions">Mostra le funzioni avanzate</string>
 	<string name="about">Informazioni</string>
 	<!-- InfoAlbero -->
@@ -90,9 +94,9 @@
 	<string name="destination">Destinazione</string>
 	<string name="time">Ora</string>
 	<!-- Condivisione -->
-	<string name="shared_tree_root">Radice dell\'albero condiviso</string>
+	<string name="please_title">Per favore scrivi un titolo.</string>
+	<string name="please_name">Per favore scrivi un nome.</string>
 	<string name="ideally_recipient">Idealmente il destinatario della condivisione.</string>
-	<string name="tree_submitter">Autore dell\'albero</string>
 	<string name="changes_submitter">Autore delle modifiche</string>
 	<string name="usually_your_name">Solitamente il tuo nome e cognome.</string>
 	<string name="correctly_uploaded">Albero caricato correttamente.</string>
@@ -133,9 +137,9 @@
 	<string name="modify">Modifica</string>
 	<string name="unlink">Scollega</string>
 	<string name="parent">Genitore</string>
-	<string name="sibling">Fratello / sorella</string>
+	<string name="sibling">Fratello/sorella</string>
 	<string name="spouse">Coniuge</string>
-	<string name="child">Figlio / figlia</string>
+	<string name="child">Figlio/a</string>
 	<string name="long_press_menu">Tieni premuto per mostrare il menu.\nTocca per aprire la scheda.</string>
 	<string name="person_unlinked">Persona scollegata.</string>
 	<!-- Diagram settings -->
@@ -191,8 +195,9 @@
 	<string name="husband">Marito</string>
 	<string name="sister">Sorella</string>
 	<string name="brother">Fratello</string>
-	<string name="step_sister">Sorellastra</string>
-	<string name="step_brother">Fratellastro</string>
+	<string name="half_sibling">Fratellastro/sorellastra</string>
+	<string name="half_brother">Fratellastro</string>
+	<string name="half_sister">Sorellastra</string>
 	<string name="daughter">Figlia</string>
 	<string name="son">Figlio</string>
 	<!-- Dettaglio -->
@@ -261,10 +266,10 @@
 	<string name="line_3">Linea 3</string>
 	<string name="postal_code">CAP</string>
 	<string name="city">Città</string>
-	<string name="state">Stato / provincia</string>
+	<string name="state">Stato/provincia</string>
 	<string name="country">Nazione</string>
 	<!-- Famiglia -->
-	<string name="children">figli</string>
+	<string name="num_children">%d figli</string>
 	<string name="family">Famiglia</string>
 	<string name="marriage">Matrimonio</string>
 	<string name="really_delete_family">Questa famiglia sarà eliminata, ma le persone che la compongono non saranno eliminate.</string>
@@ -327,11 +332,4 @@
 	<string name="empty_family">Famiglia vuota</string>
 	<string name="which_family">Quale famiglia?</string>
 	<string name="empty_family_delete">È rimasta qualche famiglia vuota.\nVuoi eliminarla?</string>
-	<!-- Altro -->
-	<string name="version_name">Versione %s</string>
-	<string name="make_default">Autore principale</string>
-	<string name="citations">Citazioni</string>
-	<string name="sources_number">Numero di fonti</string>
-	<string name="extension">Altro</string>
-	<string name="new_family_of">Nuova famiglia di %s</string>
 </resources>

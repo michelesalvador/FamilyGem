@@ -4,11 +4,11 @@
 	<color name="primarioScuro">#720426</color>
 	<color name="primarioChiaro">#be4265</color>
 	<color name="evidenzia">#E99725</color>
-	<color name="maschio">#44aaff</color>
+	<color name="evidenziaChiaro">#FFE6AA</color>
+	<color name="maschio">#44AAff</color>
 	<color name="femmina">#ff66dd</color>
 	<color name="fonte">#ffcc66</color>
 	<color name="citazioneFonte">#ffeeaa</color>
 	<color name="archivio">#aa9988</color>
 	<color name="archivioCitazione">#ddccbb</color>
-	<color name="trasparente">#00000000</color>
 </resources>

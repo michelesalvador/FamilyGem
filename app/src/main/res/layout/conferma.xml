@@ -34,13 +34,15 @@
 				android:id="@+id/conferma_annulla"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@android:string/cancel" />
+				android:text="@android:string/cancel"
+				style="@style/AppTheme.BottoneNormale"/>
 
 			<Button
 				android:id="@+id/conferma_ok"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/confirm" />
+				android:text="@string/confirm"
+				style="@style/AppTheme.BottoneColorato"/>
 		</LinearLayout>
 	</LinearLayout>
 </ScrollView>

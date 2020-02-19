@@ -2,7 +2,6 @@ package app.familygem;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
@@ -104,21 +103,14 @@ public class Alberi extends AppCompatActivity {
 					} else {
 						vistaAlbero.setBackgroundColor( Color.TRANSPARENT ); // bisogna dirglielo esplicitamente altrimenti colora a caso
 						vistaAlbero.setOnClickListener( v -> {
+							View rotella = findViewById( R.id.alberi_circolo );
+							rotella.setVisibility(View.VISIBLE);
 							if( !( Globale.gc != null && idAlbero == Globale.preferenze.idAprendo ) ) // se non è già aperto
-								if( !apriGedcom( idAlbero, true ) )
+								if( !apriGedcom( idAlbero, true ) ) {
+									rotella.setVisibility(View.GONE);
 									return;
-							startActivity( new Intent( Alberi.this, Principe.class ) );
-							/*findViewById( R.id.alberi_circolo ).setVisibility( View.VISIBLE );
-							new Thread( new Runnable() {
-								@Override
-								public void run() {
-									int id_num = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(position)).get("id") );
-									if( !( Globale.gc!=null && id_num==Globale.preferenze.idAprendo ) ) // se non è già aperto
-										if( apriGedcom( id_num, true ) ) // TODo: in caso di Exception (ad es. x file inesistente) il Toast crasha
-											return;
-									startActivity( new Intent( Alberi.this, Principe.class ) );
 								}
-							}).start();*/
+							startActivity( new Intent( Alberi.this, Principe.class ) );
 						});
 					}
 					vistaAlbero.findViewById(R.id.albero_menu).setOnClickListener( vista -> {
@@ -234,22 +226,24 @@ public class Alberi extends AppCompatActivity {
 		);
 
 		// Apertura automatica dell'albero
-		if( getIntent().getBooleanExtra("apriAlberoAutomaticamente",false) && Globale.preferenze.idAprendo != 0 ) {
-			// todo mostra rotella
-			if( Alberi.apriGedcom( Globale.preferenze.idAprendo, false ) ) {
-				startActivity( new Intent( Alberi.this, Principe.class ) );
-			}
+		if( getIntent().getBooleanExtra("apriAlberoAutomaticamente",false) && Globale.preferenze.idAprendo > 0 ) {
+			View rotella = findViewById( R.id.alberi_circolo );
+			rotella.setVisibility( View.VISIBLE );
+			rotella.postDelayed(() -> {
+				if( Alberi.apriGedcom( Globale.preferenze.idAprendo, false ) ) {
+					startActivity( new Intent( Alberi.this, Principe.class ) );
+				} else
+					rotella.setVisibility( View.GONE );
+			},100);
 		}
 	}
 
+	// Essendo Alberi launchMode=singleTask, onRestart viene chiamato anche con startActivity (tranne il primo)
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		if( Globale.editato ) {
-			aggiornaLista();
-			Globale.editato = false;
-		} else
-			findViewById( R.id.alberi_circolo ).setVisibility( View.GONE );
+		findViewById( R.id.alberi_circolo ).setVisibility( View.GONE );
+		aggiornaLista();
 	}
 
 	void aggiornaLista() {
@@ -261,8 +255,6 @@ public class Alberi extends AppCompatActivity {
 			// Se Gedcom già aperto aggiorna i dati
 			if( Globale.gc != null && Globale.preferenze.idAprendo == alb.id && alb.individui < 100 )
 				InfoAlbero.aggiornaDati( Globale.gc, alb );
-
-			//s.l( alb.generazioni + " = " + alb.nome );
 			dato.put( "dati", scriviDati( this, alb ) );
 			alberelli.add( dato );
 		}
@@ -450,7 +442,6 @@ public class Alberi extends AppCompatActivity {
 		eliminaFileCartelle( cartella );
 		if( Globale.preferenze.idAprendo == idAlbero ) {
 			Globale.gc = null;
-			Globale.editato = true;
 		}
 		Globale.preferenze.elimina( idAlbero );
 	}

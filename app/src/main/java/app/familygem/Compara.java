@@ -142,7 +142,6 @@ public class Compara extends AppCompatActivity {
 			botton1.setText( R.string.delete_imported_tree );
 			botton1.setOnClickListener( v -> {
 				Alberi.eliminaAlbero( Compara.this, idAlbero2 );
-				Globale.editato = true;
 				onBackPressed();
 			});
 			botton2.setVisibility( View.GONE );

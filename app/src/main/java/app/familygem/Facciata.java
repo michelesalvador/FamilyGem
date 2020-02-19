@@ -15,21 +15,22 @@ import java.io.InputStream;
 
 public class Facciata extends AppCompatActivity {
 
-	Thread apertura;
-
 	@Override
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.facciata );
-		findViewById( R.id.facciata_circolo ).setOnClickListener( v -> {
-			apertura.interrupt();
-			// ToDo https://stackoverflow.com/questions/36843785
-			startActivity( new Intent( Facciata.this, Alberi.class ) );
-		});
+		// Non ricordo esattamente perché, ma un new Thread è necessario per intercettare gli alberi importati
 		new Thread( () -> {
-			/* Apertura in seguito al click su due tipi di link:
-				https://www.familygem.app/share.php?tree=20190802224208 Messaggio breve
-				https://www.familygem.app/condivisi/20190802224208.zip  Pagina di condivisione del sito
+			/* Apertura in seguito al click su vari tipi di link:
+			https://www.familygem.app/share.php?tree=20190802224208
+				Messaggio breve
+				funziona in Gmail, in SMS ma non in Chrome. (Whatsapp da provare)
+			intent://www.familygem.app/condivisi/20200218134922.zip#Intent;scheme=https;end
+				Link ufficiale nella pagina di condivisione del sito
+				è l'unico che sembra avere certezza di funzionare, almeno in Chrome
+			https://www.familygem.app/condivisi/20190802224208.zip
+				URL diretto allo zip
+				Funziona nei vecchi android, nei nuovi semplicemente il file viene scaricato
 			*/
 			Intent intento = getIntent();
 			Uri uri = intento.getData();
@@ -40,7 +41,7 @@ public class Facciata extends AppCompatActivity {
 				else if( uri.getLastPathSegment().endsWith( ".zip" ) ) // click sulla pagina di invito
 					dataId = uri.getLastPathSegment().replace(".zip","");
 				else {
-					U.tosta( Facciata.this, R.string.cant_understand_uri );
+					U.tosta( this, R.string.cant_understand_uri );
 					return;
 				}
 				if( !BuildConfig.utenteAruba.isEmpty() ) {
@@ -51,7 +52,7 @@ public class Facciata extends AppCompatActivity {
 						scaricaCondiviso( dataId );
 				}
 			} else {
-				Intent intent = new Intent( Facciata.this, Alberi.class );
+				Intent intent = new Intent( this, Alberi.class );
 				if( Globale.preferenze.caricaAlbero ) {
 					intent.putExtra( "apriAlberoAutomaticamente", true );
 					intent.setFlags( Intent.FLAG_ACTIVITY_NO_ANIMATION ); // forse inefficace ma tantè
@@ -80,13 +81,13 @@ public class Facciata extends AppCompatActivity {
 			}
 			fos.close();
 			if( client.completePendingCommand() ) {
-				//U.tosta( this, R.string.download_completed ); // non occorre
 				AlberoNuovo.decomprimiZip( this, percorsoZip, null );
 			}
 			client.logout();
 			client.disconnect();
 		} catch ( Exception e) {
 			U.tosta( this, e.getLocalizedMessage() );
+			startActivity( new Intent( this, Alberi.class ) );
 		}
 	}
 

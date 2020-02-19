@@ -20,7 +20,7 @@ public class Armadio {
 
 	void traghetta() { // todo questo traghettatore poi se ne può andare
 		Cassetto alb = alberoAperto();
-		if( alb.cartelle == null ) {
+		if( alb != null && alb.cartelle == null ) {
 			alb.cartelle = new LinkedHashSet<>();
 			alb.cartelle.add( alb.cartella );
 			alb.cartella = null;

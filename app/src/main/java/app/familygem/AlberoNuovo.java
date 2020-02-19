@@ -76,7 +76,6 @@ public class AlberoNuovo extends AppCompatActivity {
 				Globale.preferenze.aggiungi( new Armadio.Cassetto(
 						num, nuovoNome.getText().toString(), null, 0, 0, null, null, 0, null ));
 				Globale.preferenze.salva();
-				Globale.editato = true; // forza Alberi ad aggiornare la lista
 				onBackPressed();
 				Toast.makeText( this, R.string.tree_created, Toast.LENGTH_SHORT ).show();
 			}).setNeutralButton( R.string.cancel, null ).create().show();
@@ -228,7 +227,6 @@ public class AlberoNuovo extends AppCompatActivity {
 			Globale.preferenze.aggiungi( cassetto );
 			fileImpostazioni.delete();
 			//fileZip.delete();
-			Globale.editato = true; // affinché venga aggiornato Alberi che ha launchMode=singleTask
 			// Albero proveniente da condivisione destinato al confronto
 			if( cassa.grado == 9 && confronta(contesto,cassetto) ) {
 				cassetto.grado = 20; // lo marchia come derivato
@@ -367,7 +365,6 @@ public class AlberoNuovo extends AppCompatActivity {
 	}
 
 	void concludiImportaGedcom() {
-		Globale.editato = true;
 		onBackPressed();
 		Toast.makeText( this, R.string.tree_imported_ok, Toast.LENGTH_SHORT ).show();
 	}

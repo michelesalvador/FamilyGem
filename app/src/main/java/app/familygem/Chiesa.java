@@ -134,11 +134,17 @@ public class Chiesa extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {	// Elimina
-			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_family )
-					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
-						eliminaFamiglia( (String) vistaScelta.getTag() );
-						getActivity().recreate();
-					}).setNeutralButton(android.R.string.cancel, null).show();
+			Family fam = gc.getFamily( (String)vistaScelta.getTag() );
+			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
+				new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_family )
+						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
+							eliminaFamiglia( fam.getId() );
+							getActivity().recreate();
+						}).setNeutralButton(android.R.string.cancel, null).show();
+			} else {
+				eliminaFamiglia( fam.getId() );
+				getActivity().recreate();
+			}
 		} else {
 			return false;
 		}
