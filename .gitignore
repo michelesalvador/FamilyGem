@@ -3,6 +3,7 @@
 /gradle/
 /build/
 *.iml
-*.properties
+chiavi.properties
+local.properties
 /app/build/
 /lab/build/

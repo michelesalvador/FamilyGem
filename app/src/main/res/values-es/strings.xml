@@ -307,4 +307,5 @@
 	<string name="new_family_of">Nueva familia de %s</string>
 	<string name="generations_display_diagram">Establece cuántas generaciones mostrar en el diagrama.</string>
 	<string name="existing_family">Familia ya existente</string>
+	<string name="refresh">Actualizar</string>
 </resources>

@@ -74,6 +74,7 @@
 	<string name="root">Radice</string>
 	<string name="media_folders">Cartelle media</string>
 	<string name="shares">Condivisioni</string>
+	<string name="refresh">Aggiorna</string>
 	<string name="header">Intestazione</string>
 	<string name="create_header">Crea l\'intestazione</string>
 	<string name="file">File</string>
@@ -221,6 +222,9 @@
 	<string name="aka">Pseudonimo</string>
 	<string name="romanized">Romanizzato</string>
 	<string name="phonetic">Fonetica</string>
+	<string name="immigrant">Immigrato/a</string>
+	<string name="maiden">Nubile</string>
+	<string name="married">Sposato/a</string>
 	<!-- Evento -->
 	<string name="place">Luogo</string>
 	<string name="cause">Causa</string>
@@ -272,6 +276,7 @@
 	<string name="num_children">%d figli</string>
 	<string name="family">Famiglia</string>
 	<string name="marriage">Matrimonio</string>
+	<string name="divorce">Divorzio</string>
 	<string name="really_delete_family">Questa famiglia sarà eliminata, ma le persone che la compongono non saranno eliminate.</string>
 	<!-- Note -->
 	<string name="shared_notes">Note condivise</string>

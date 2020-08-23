@@ -213,11 +213,19 @@ public class Anagrafe extends Fragment {
 							return (p2.getNames().size() == 0) ? 0 : 1;
 						if (p2.getNames().size() == 0)
 							return -1;
+						if (p1.getNames().get(0).getValue() == null) // anche i nomi con value null vanno in fondo
+							return (p2.getNames().get(0).getValue() == null) ? 0 : 1;
+						if (p2.getNames().get(0).getValue() == null)
+							return -1;
 						return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
 					case 4:
 						if (p1.getNames().size() == 0)
 							return p2.getNames().size() == 0 ? 0 : 1;
 						if (p2.getNames().size() == 0)
+							return -1;
+						if (p1.getNames().get(0).getValue() == null)
+							return (p2.getNames().get(0).getValue() == null) ? 0 : 1;
+						if (p2.getNames().get(0).getValue() == null)
 							return -1;
 						return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
 					case 5: // Ordina per anno

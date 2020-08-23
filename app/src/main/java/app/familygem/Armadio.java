@@ -83,10 +83,19 @@ public class Armadio {
 	}
 
 	Cassetto getAlbero( int idAlbero ) {
-		for( Cassetto cass : alberi ) {
-			if( cass.id == idAlbero )
-				return cass;
+		/* Da quando ho installato Android Studio 4.0, quando compilo con minifyEnabled true
+		   misteriosamente 'alberi' qui è null.
+		   Però non è null se DOPO c'è 'alberi = Globale.preferenze.alberi'
+		   Davvero incomprensibile!
+		*/
+		if( alberi == null ) {
+			alberi = Globale.preferenze.alberi;
 		}
+		if( alberi != null )
+			for( Cassetto cass : alberi ) {
+				if( cass.id == idAlbero )
+					return cass;
+			}
 		return null;
 	}
 

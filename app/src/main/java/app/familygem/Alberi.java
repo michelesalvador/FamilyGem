@@ -31,6 +31,7 @@ import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaRef;
+import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.ParentFamilyRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
@@ -53,12 +54,14 @@ public class Alberi extends AppCompatActivity {
 
 	ListView lista;
 	List<Map<String,String>> alberelli;
+	View rotella;
 
 	@Override
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.alberi );
 		lista = findViewById( R.id.lista_alberi );
+		rotella = findViewById( R.id.alberi_circolo );
 
 		if( Globale.preferenze.alberi != null ) {
 
@@ -75,16 +78,15 @@ public class Alberi extends AppCompatActivity {
 				@Override
 				public View getView( final int posiz, View convertView, ViewGroup parent ) {
 					View vistaAlbero = super.getView( posiz, convertView, parent );
-					//final int idAlbero = Integer.parseInt( (String)((HashMap)lista.getItemAtPosition(posiz)).get("id") );
-					final int idAlbero = Integer.parseInt( alberelli.get(posiz).get("id") );
-					//s.l("idAlbero "+idAlbero + " "+Globale.preferenze.getAlbero(idAlbero).derivato);
-					final boolean derivato = Globale.preferenze.getAlbero(idAlbero).grado == 20;
-					final boolean esaurito = Globale.preferenze.getAlbero(idAlbero).grado == 30;
+					int idAlbero = Integer.parseInt( alberelli.get(posiz).get("id") );
+					Armadio.Cassetto cassetto = Globale.preferenze.getAlbero(idAlbero);
+					boolean derivato = cassetto.grado == 20;
+					boolean esaurito = cassetto.grado == 30;
 					if( derivato ) {
 						vistaAlbero.setBackgroundColor( getResources().getColor( R.color.evidenzia ) );
 						vistaAlbero.setOnClickListener( v -> {
-							if( !AlberoNuovo.confronta( Alberi.this, Globale.preferenze.getAlbero(idAlbero) ) ) {
-								Globale.preferenze.getAlbero(idAlbero).grado = 10; // viene retrocesso
+							if( !AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
+								cassetto.grado = 10; // viene retrocesso
 								Globale.preferenze.salva();
 								aggiornaLista();
 								Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
@@ -93,8 +95,8 @@ public class Alberi extends AppCompatActivity {
 					} else if ( esaurito ) {
 						vistaAlbero.setBackgroundColor( 0xffdddddd );
 						vistaAlbero.setOnClickListener( v -> {
-							if( !AlberoNuovo.confronta( Alberi.this, Globale.preferenze.getAlbero(idAlbero) ) ) {
-								Globale.preferenze.getAlbero(idAlbero).grado = 10; // viene retrocesso
+							if( !AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
+								cassetto.grado = 10; // viene retrocesso
 								Globale.preferenze.salva();
 								aggiornaLista();
 								Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
@@ -103,7 +105,6 @@ public class Alberi extends AppCompatActivity {
 					} else {
 						vistaAlbero.setBackgroundColor( Color.TRANSPARENT ); // bisogna dirglielo esplicitamente altrimenti colora a caso
 						vistaAlbero.setOnClickListener( v -> {
-							View rotella = findViewById( R.id.alberi_circolo );
 							rotella.setVisibility(View.VISIBLE);
 							if( !( Globale.gc != null && idAlbero == Globale.preferenze.idAprendo ) ) // se non è già aperto
 								if( !apriGedcom( idAlbero, true ) ) {
@@ -115,7 +116,6 @@ public class Alberi extends AppCompatActivity {
 					}
 					vistaAlbero.findViewById(R.id.albero_menu).setOnClickListener( vista -> {
 						boolean esiste = new File( getFilesDir(), idAlbero + ".json" ).exists();
-						final Armadio.Cassetto cassetto = Globale.preferenze.getAlbero(idAlbero);
 						PopupMenu popup = new PopupMenu( Alberi.this, vista );
 						Menu menu = popup.getMenu();
 						if( idAlbero == Globale.preferenze.idAprendo && Globale.daSalvare )
@@ -130,7 +130,7 @@ public class Alberi extends AppCompatActivity {
 							menu.add(0, 3, 0, R.string.find_errors );
 						if( esiste && !derivato && !esaurito ) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
 							menu.add(0, 4, 0, R.string.share_tree );
-						if( esiste && !derivato && !esaurito && Globale.preferenze.getAlbero(idAlbero).grado != 0 // cioè dev'essere 9 o 10
+						if( esiste && !derivato && !esaurito && cassetto.grado != 0 // cioè dev'essere 9 o 10
 								&& cassetto.condivisioni != null && Globale.preferenze.alberi.size() > 1 )
 							menu.add(0, 5, 0, R.string.compare );
 						if( esiste && Globale.preferenze.esperto && !esaurito )
@@ -227,22 +227,27 @@ public class Alberi extends AppCompatActivity {
 
 		// Apertura automatica dell'albero
 		if( getIntent().getBooleanExtra("apriAlberoAutomaticamente",false) && Globale.preferenze.idAprendo > 0 ) {
-			View rotella = findViewById( R.id.alberi_circolo );
-			rotella.setVisibility( View.VISIBLE );
-			rotella.postDelayed(() -> {
+			lista.postDelayed(() -> {
 				if( Alberi.apriGedcom( Globale.preferenze.idAprendo, false ) ) {
+					rotella.setVisibility( View.VISIBLE );
 					startActivity( new Intent( Alberi.this, Principe.class ) );
-				} else
-					rotella.setVisibility( View.GONE );
+				}
 			},100);
 		}
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// Nasconde la rotella, in particolare quando si ritorna indietro a questa activity
+		rotella.setVisibility( View.GONE );
+	}
+
 	// Essendo Alberi launchMode=singleTask, onRestart viene chiamato anche con startActivity (tranne il primo)
+	// però ovviamente solo se Alberi ha chiamato onStop (facendo veloce chiama solo onPause)
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		findViewById( R.id.alberi_circolo ).setVisibility( View.GONE );
 		aggiornaLista();
 	}
 
@@ -594,7 +599,6 @@ public class Alberi extends AppCompatActivity {
 			num = 0;
 			for( MediaRef mr : p.getMediaRefs() ) {
 				Media med = gc.getMedia( mr.getRef() );
-				//s.l( mr.getRef() +"  > " + med);
 				if( med == null ) {
 					if( correggi ) {
 						p.getMediaRefs().remove( mr );
@@ -691,7 +695,16 @@ public class Alberi extends AppCompatActivity {
 				}
 			}
 		}
-		// Aggiunge un tag (FILE) ai Media che non l'hanno
+		// Aggiunge un tag 'TYPE' ai name type che non l'hanno
+		for( Person person : gc.getPeople() ) {
+			for( Name name : person.getNames() ) {
+				if( name.getType() != null && name.getTypeTag() == null ) {
+					if( correggi ) name.setTypeTag( "TYPE" );
+					else errori++;
+				}
+			}
+		}
+		// Aggiunge un tag 'FILE' ai Media che non l'hanno
 		ListaMedia visitaMedia = new ListaMedia( gc, 0 );
 		gc.accept( visitaMedia );
 		for( Media med : visitaMedia.lista ) {

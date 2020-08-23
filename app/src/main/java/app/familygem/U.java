@@ -57,6 +57,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -110,7 +111,11 @@ import app.familygem.visita.RiferimentiNota;
 import app.familygem.visita.TrovaPila;
 
 public class U {
-	
+
+	static String s(int id) {
+		return Globale.contesto.getString(id);
+	}
+
 	// restituisce l'id della Person iniziale di un Gedcom
 	static String trovaRadice( Gedcom gc ) {
 		if( gc.getHeader() != null)
@@ -125,7 +130,7 @@ public class U {
 	static String epiteto( Person p ) {
 		if( p != null && !p.getNames().isEmpty() )
 			return nomeCognome( p.getNames().get(0) );
-		return "[" + Globale.contesto.getString(R.string.no_name) + "]";
+		return "[" + s(R.string.no_name) + "]";
 	}
 
 	// riceve una Person e restituisce il titolo nobiliare
@@ -141,6 +146,15 @@ public class U {
 				if( n.getType().equals( "TITL" ) )
 					return  n.getValue();
 		return "";
+	}
+
+	static String[] NAME_TYPES = { "aka", "birth", "immigrant", "maiden", "married" };
+	static String[] TIPI_NOME = { s(R.string.aka), s(R.string.birth), s(R.string.immigrant), s(R.string.maiden), s(R.string.married) };
+
+	// Riceve un NAME_TYPE e restituisce la corrispondente traduzione
+	static String tipoNomeTradotto(String type) {
+		int index = Arrays.asList(NAME_TYPES).indexOf(type);
+		return index >= 0 ? TIPI_NOME[index] : type;
 	}
 
 	// Restituisce il nome e cognome addobbato di un Name
@@ -163,7 +177,7 @@ public class U {
 				completo += " " + n.getSuffix().trim();
 		}
 		completo = completo.trim();
-		return completo.isEmpty() ? "["+Globale.contesto.getString(R.string.empty_name)+"]" : completo;
+		return completo.isEmpty() ? "[" + s(R.string.empty_name) + "]" : completo;
 	}
 
 	// Restituisce il cognome di una persona
@@ -394,32 +408,19 @@ public class U {
 	static String uriPercorsoFile( Uri uri ) {
 		if( uri == null ) return null;
 		if( uri.getScheme().equalsIgnoreCase( "file" )) {
-			// file:///storage/emulated/0/DCIM/Camera/Simpsons.ged	  da File Manager
-			// file:///storage/emulated/0/Android/data/com.dropbox.android/files/u1114176864/scratch/Simpsons.ged
-			return uri.getPath();	// gli toglie  file://
+			// Toglie 'file://'
+			return uri.getPath();
 		}
-		String cosaCercare = OpenableColumns.DISPLAY_NAME;
-		// Uri is different in versions after KITKAT (Android 4.4), we need to deal with different Uris
-		//s.l( "uri Authority = " + uri.getAuthority() );
-		//s.l( "isDocumentUri = " + DocumentsContract.isDocumentUri( Globale.contesto, uri) );	// false solo in G.Drive legacy
-		// content://com.google.android.apps.docs.storage.legacy/enc%3DAPsNYqUd_MITZZJxxda1wvQP2ojY7f9xQCAPJoePEFIgSa-5%0A
-		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT 	// 21 sul mio cellu e 19
-				&& DocumentsContract.isDocumentUri( Globale.contesto, uri )	// sempre true tranne con Google drive legacy
-				) {
-			//s.l( "Document Id = " + DocumentsContract.getDocumentId(uri) );
+		if( DocumentsContract.isDocumentUri(Globale.contesto, uri) ) { // sempre true tranne con Google drive legacy
 			switch( uri.getAuthority() ) {
-				case "lab.gedcomy.localstorage.documents":	// ????? da testare
+				case "lab.gedcomy.localstorage.documents":	// todo da testare
 					return DocumentsContract.getDocumentId( uri );
 				case "com.android.externalstorage.documents":	// memoria interna e scheda SD
-					final String docId = DocumentsContract.getDocumentId(uri);
+					String docId = DocumentsContract.getDocumentId(uri);
 					// semplicemente prende l'ultima parte dell'uri
-					// ad esempio 'primary:DCIM/Camera/Simpsons.ged'
-					// oppure '3132-6232:famiglia/a_famigliotta_250.ged'
-					final String[] split = docId.split(":");
-
+					String[] split = docId.split(":");
 					if( split[0].equalsIgnoreCase("primary")) {
 						return Environment.getExternalStorageDirectory() + "/" + split[1];
-						// Environment.getExternalStorageDirectory() restituisce sempre /storage/emulated/0 anche per la sd card
 					} else {
 						File[] luoghi = Globale.contesto.getExternalFilesDirs(null);
 						for( File luogo : luoghi ) {
@@ -434,28 +435,39 @@ public class U {
 						}
 					}
 					break;
-				case "com.android.providers.downloads.documents":	// file dalla cartella Download
-					final String id = DocumentsContract.getDocumentId(uri);	// un numero tipo '2326'
+				case "com.android.providers.downloads.documents": // file dalla cartella Download
+					String id = DocumentsContract.getDocumentId( uri );
 					if( id.startsWith( "raw:/" ) )
 						return id.replaceFirst("raw:", "");
-					cosaCercare = MediaStore.Files.FileColumns.DATA;
-					if( id.matches("\\d+") && Build.VERSION.SDK_INT < Build.VERSION_CODES.P )
-						uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), U.soloNumeri(id) );
+					if( id.matches("\\d+") ) {
+						String[] contentUriPrefixesToTry = new String[] {
+								"content://downloads/public_downloads",
+								"content://downloads/my_downloads"
+						};
+						for( String contentUriPrefix : contentUriPrefixesToTry ) {
+							Uri uriRicostruito = ContentUris.withAppendedId( Uri.parse(contentUriPrefix), Long.parseLong(id) );
+							try {
+								String nomeFile = trovaNomeFile( uriRicostruito );
+								if( nomeFile != null )
+									return nomeFile;
+							} catch(Exception e) {}
+						}
+					}
 			}
 		}
-		String nomeFile = trovaNomeFile( uri, cosaCercare );
-		if( nomeFile == null )
-			nomeFile = trovaNomeFile( uri, OpenableColumns.DISPLAY_NAME );
-		return nomeFile;
+		// Altrimenti prova con l'uri originale
+		return trovaNomeFile( uri );
 	}
 
-	// Di default restituisce solo il nome del file 'famiglia.ged'
-	// se il file è preso in downloads.documents restituisce il percorso completo
-	private static String trovaNomeFile( Uri uri, String cosaCercare ) {
-		String[] projection = { cosaCercare };
-		Cursor cursore = Globale.contesto.getContentResolver().query( uri, projection, null, null, null);
+	// Riceve l'URI (eventualmente ricostruito) di un file preso dal file manager
+	// Se riesce restituisce il percorso completo, altrimenti il singolo nome del file
+	private static String trovaNomeFile( Uri uri ) {
+		Cursor cursore = Globale.contesto.getContentResolver().query( uri, null, null, null, null);
 		if( cursore != null && cursore.moveToFirst() ) {
-			String nomeFile = cursore.getString( 0 );
+			int indice = cursore.getColumnIndex( MediaStore.Files.FileColumns.DATA );
+			if( indice < 0 )
+				indice = cursore.getColumnIndex( OpenableColumns.DISPLAY_NAME );
+			String nomeFile = cursore.getString( indice );
 			cursore.close();
 			return nomeFile;
 		}
@@ -784,10 +796,11 @@ public class U {
 		// Gallerie
 		Intent intentoGalleria = new Intent( Intent.ACTION_GET_CONTENT );
 		intentoGalleria.setType("image/*");
-		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) { // da KitKat: Android 4.4, api level 19
-			String[] mimeTypes = { "image/*", "audio/*", "video/*", "application/*", "text/*" };
-			intentoGalleria.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+		String[] mimeTypes = { "image/*", "audio/*", "video/*", "application/*", "text/*" };
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+			mimeTypes[0] = "*/*"; // Altrimenti KitKat non vede gli 'application/*' in Downloads
 		}
+		intentoGalleria.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
 		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoGalleria,0) ) {
 			Intent finalIntent = new Intent( intentoGalleria );
 			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
@@ -907,8 +920,7 @@ public class U {
 		File fileMedia = null;
 		try {
 			Uri uri = data.getData();
-			String percorso = null;
-			if( uri != null ) percorso = U.uriPercorsoFile( uri );
+			String percorso = U.uriPercorsoFile( uri );
 			if( percorso != null && percorso.lastIndexOf('/') > 0 ) {	// se è un percorso completo del file
 				// Punta direttamente il file
 				fileMedia = new File( percorso );
@@ -1231,7 +1243,7 @@ public class U {
 		if( unaLinea )
 			testo = testo.replaceAll( "\n", ", " );
 		if( testo.isEmpty() )
-			testo = "[" + contesto.getString(R.string.empty_family) + " vuota]";
+			testo = "[" + contesto.getString(R.string.empty_family) + "]";
 		return testo;
 	}
 
@@ -1526,10 +1538,10 @@ public class U {
 	}
 
 	// Mostra un messaggio Toast anche da un thread collaterale
-	static void tosta( final Activity contesto, final int messaggio ) {
+	static void tosta( Activity contesto, int messaggio ) {
 		tosta( contesto, contesto.getString( messaggio ) );
 	}
-	static void tosta( final Activity contesto, final String messaggio ) {
+	static void tosta( Activity contesto, String messaggio ) {
 		contesto.runOnUiThread( () -> Toast.makeText( contesto, messaggio, Toast.LENGTH_LONG ).show() );
 	}
 }

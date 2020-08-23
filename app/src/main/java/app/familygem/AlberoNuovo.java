@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import androidx.core.app.ActivityCompat;
@@ -243,7 +244,11 @@ public class AlberoNuovo extends AppCompatActivity {
 	// Fa scegliere un file Gedcom da importare
 	void importaGedcom() {
 		Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-		intent.setType( "application/*" );
+		// KitKat disabilita i file .ged nella cartella Download se il type è 'application/*'
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT )
+			intent.setType( "*/*" );
+		else
+			intent.setType( "application/*" );
 		startActivityForResult( intent,630 );
 	}
 
@@ -260,14 +265,13 @@ public class AlberoNuovo extends AppCompatActivity {
 				String nomeAlbero;
 				String percorsoCartella = null;
 				int nuovoNum = Globale.preferenze.max() + 1;
-				if( percorso.lastIndexOf('/') > 0 ) {	// se è un percorso completo del file gedcom
+				if( percorso != null && percorso.lastIndexOf('/') > 0 ) { // è un percorso completo del file gedcom
 					// Apre direttamente il file ged
 					fileGedcom = new File( percorso );
 					// Percorso della cartella da cui ha caricato il gedcom
 					percorsoCartella = fileGedcom.getParent();
 					nomeAlbero = fileGedcom.getName();
-				}
-				else {	// è solo il nome del file 'famiglia.ged'
+				} else { // È solo il nome del file 'famiglia.ged' oppure null
 					// Copia il contenuto del Gedcom in un file temporaneo
 					InputStream input = getContentResolver().openInputStream(uri);
 					fileGedcom = new File( getCacheDir(), "temp.ged" );

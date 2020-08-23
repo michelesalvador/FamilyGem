@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -30,7 +31,6 @@ import org.folg.gedcom.model.Media;
 import org.folg.gedcom.parser.ModelParser;
 import org.folg.gedcom.tools.CountsCollector;
 import org.folg.gedcom.tools.GedcomAnalyzer;
-import org.xml.sax.SAXParseException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -46,24 +46,18 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class Officina extends AppCompatActivity {
 
@@ -82,18 +76,19 @@ public class Officina extends AppCompatActivity {
 
 		findViewById(R.id.bottone_vario).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				percorsi_di_Sistema();
+				//percorsi_di_Sistema();
 				//new LoadImageFromURL().execute("http://www.cafleurebon.com/wp-content/uploads/2017/03/fica-mana-symbol-182x300.jpg");
 				//new U.ZuppaMedia( (ImageView)findViewById(R.id.immagine), (ProgressBar)findViewById(R.id.circolo), null ).execute("https://www.google.com");
 				//database();
 				//mandaOggettoAttivita();
-				//prendi_file_da_FileManager();
+				prendi_file_da_FileManager();
 				/*if( BuildConfig.utenteAruba != null )
 					new InvioFTP().execute( getCacheDir() + "/Notepad3_4.18.512.992_Setup.zip" );*/
 				//new PostaDatiCondivisione().execute( BuildConfig.passwordAruba, "Tìtolo Albèro pròtto", "nòòme Mìtto Gròsso", "Bèllo Ciìao" );
 				//creaZipConCartella();
 				//listaAttivita( Officina.this );
 				//apriFileConApp( getExternalFilesDir(null)+"/Document.pdf" ); //Environment.getExternalStorageDirectory()+"/Documents/nuovo.txt"
+				//startActivity( new Intent( Officina.this, BigPaths.class ) );
 			}
 		});
 
@@ -264,21 +259,24 @@ public class Officina extends AppCompatActivity {
 
 	// Venendo da Windows, cercavo una semplice finestra di apertura file... ma qui siamo nel mondo degli uri
 	void prendi_file_da_FileManager() {
-		Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
-		//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT );
-		// uno differenza tra i 2 è che ACTION_OPEN_DOCUMENT (da api 19) consente multeplici mimetype
+		Intent intent = new Intent( Intent.ACTION_GET_CONTENT ); // sistema classico
+		//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT ); // da API 19
+		// uno differenza tra i 2 è che ACTION_OPEN_DOCUMENT consente molteplici mimetype
 		// entrambi producono un simpatico uri, ACTION_OPEN_DOCUMENT forse solo content://
 		//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT_TREE );
 		// produce uri tipo content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FCamera
 		//Intent intent = new Intent( Intent.ACTION_PICK );	// fa scegliere in una lista con alcuni provider di immagini, audio, video
 		//Intent intent = new Intent( Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI );
 			// riduce la lista di provider solo a quelli che dispensano immagini: Galleria e Foto
-		intent.setType( "*/*" );	// permette di aprire qualsiasi tipo di file
 		//intent.setDataAndType( android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "*/*" ); // bho non cambia niente
 		//intent.setType( "application/octet-stream" );	// sarebbe quello corretto per abilitare solo i file .ged
 		// ma disabilita i .ged in Download e in GoogleDrive (?!!??)
-		//intent.setType( "application/*" );	// una giusta via di mezzo:
-		// mostra solo i provider di file, ma abilita quasi tutti i file
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) // per API uguali o minori di 19 e 20
+			intent.setType( "*/*" );	// permette di aprire qualsiasi tipo di file, anche in Download
+		else
+			intent.setType( "application/*" );	// una giusta via di mezzo:
+			// mostra solo i provider di file, e abilita quasi tutti i file
+			// purtroppo però in Kitkat i .ged in Download sono disabilitati
 		//intent.addCategory( Intent.CATEGORY_OPENABLE );	// dovrebbe mostrare solo i file apribili.. ma non vedo differenza
 		startActivityForResult( intent,123 );
 	}
@@ -320,9 +318,74 @@ public class Officina extends AppCompatActivity {
 		}*/
 	}
 
+	// Studio dei cursori per ricavare il percorso del file dall'uri
+	void ricavaNomeFileDaUri(Uri uri) {
+
+		// Trova sempre il nome del file anche quando non è esplicito nell'uri
+		// funziona solo con i  content:/  non con i  file:///
+		String[] proiez = { OpenableColumns.DISPLAY_NAME };
+		Cursor cursore = getContentResolver().query( uri, proiez,null,null,null,null);
+		String nomeFile = null;
+		if( cursore != null && cursore.moveToFirst() ) {
+			//int indice = cursore.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+			nomeFile = cursore.getString( 0 ); // l'indice è sempre 0
+			cursore.close();
+		}
+		s.l( "Nome file cursore= " + nomeFile);    // solo il nome del file 'famiglia.ged'
+
+		// i tre cursor funzionano sui file mediatici presi con ACTION_PICK, sugli altri restituisce null
+		// questo primo con projection null funziona coi file:///
+		String primo;
+		String[] proiec = { MediaStore.Images.ImageColumns.DATA };
+		Cursor cursor2 = this.getContentResolver().query( uri, proiec, null, null, null);
+		if (cursor2 == null) {
+			primo = uri.getPath();
+		} else {
+			cursor2.moveToFirst();
+			//int idx = cursor2.getColumnIndexOrThrow( MediaStore.Images.ImageColumns.DATA );
+			primo = cursor2.getString( 0 );
+			cursor2.close();
+		}
+
+		String[] projectione = { MediaStore.Files.FileColumns.DATA };
+		String terzo = null;
+		Cursor cursorr = getContentResolver().query(uri, projectione, null, null, null);
+		if (cursorr != null) {
+			int column_indexe = cursorr.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA);
+			cursorr.moveToFirst();
+			terzo = cursorr.getString(column_indexe);
+			cursorr.close();
+		}
+
+		Cursor cursor4 = null;
+		String quarto = null;
+		try {
+			String[] proj = {MediaStore.Images.Media.DATA};
+			cursor4 = getContentResolver().query(uri, proj, null, null, null);
+			if (cursor4 != null) {
+				int column_index4 = cursor4.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+				cursor4.moveToFirst();
+				quarto = cursor4.getString(column_index4);
+			}
+		} finally {
+			if (cursor4 != null) {
+				cursor4.close();
+			}
+		}
+		s.l( "cursori= "+ primo +"\n"+ terzo +"\n"+ quarto );
+
+		// FileDescriptor : NON se ne ricava niente
+		try {
+			ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor( uri, "r");
+			FileDescriptor fd = pfd.getFileDescriptor();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		//??? super.onActivityResult(requestCode, resultCode, data);    Inutile
+		super.onActivityResult(requestCode, resultCode, data);
 		s.l( "requestCode: " + requestCode +"  resultCode: " + resultCode + "   " + data );
 		// Importa un file Gedcom
 		if( resultCode == RESULT_OK && requestCode == 123 ) {
@@ -330,80 +393,24 @@ public class Officina extends AppCompatActivity {
 				// Ricava un content-Uri, che non è un percorso file
 				Uri uri = data.getData();   // content:/percorso/nomefile.ged
 				//File fileGedcom = new File( uri.getPath() );	// magari! Invece non è un percorso valido
-				s.l( "uri= "+uri +"\nuri Path= "+ uri.getPath() +"\nuri EncodedPath= "+ uri.getEncodedPath() );
+				s.l( "uri= "+uri
+						//+"\nuri Path= "+ uri.getPath() // /document/primary:Download/Google.mhtml
+						//+"\nuri EncodedPath= "+ uri.getEncodedPath() // /document/primary%3ADownload%2FGoogle.mhtml
+				);
 
-				// Seguono tentativi di ricavare il percorso del file .ged dall'uri
-
-				// Trova sempre il nome del file anche quando non è esplicito nell'uri
-				// funziona solo con i  content:/  non con i  file:///
-				String[] proiez = { OpenableColumns.DISPLAY_NAME };
-				Cursor cursore = getContentResolver().query( uri, proiez,null,null,null,null);
-				int indice = 999;
-				String nomeFile = null;
-				if( cursore != null && cursore.moveToFirst() ) {
-					//indice = cursore.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-					nomeFile = cursore.getString( 0 );
-					cursore.close();
-				}
-				s.l("indice=" + indice 	// indice = 0
-						+ "  Nome file cursore= " + nomeFile);    // solo il nome del file 'famiglia.ged'
-
-				// i tre cursor funzionano sui file mediatici presi con ACTION_PICK, sugli altri restituisce null
-				// questo primo con projection null funziona coi file:///
-				String primo;
-				String[] proiec = { MediaStore.Images.ImageColumns.DATA };
-				Cursor cursor2 = this.getContentResolver().query( uri, proiec, null, null, null);
-				if (cursor2 == null) {
-					primo = uri.getPath();
-				} else {
-					cursor2.moveToFirst();
-					//int idx = cursor2.getColumnIndexOrThrow( MediaStore.Images.ImageColumns.DATA );
-					primo = cursor2.getString( 0 );
-					cursor2.close();
-				}
-
-				String[] projectione = { MediaStore.Files.FileColumns.DATA };
-				String terzo = null;
-				Cursor cursorr = getContentResolver().query(uri, projectione, null, null, null);
-				if (cursorr != null) {
-					int column_indexe = cursorr.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA);
-					cursorr.moveToFirst();
-					terzo = cursorr.getString(column_indexe);
-					cursorr.close();
-				}
-
-				Cursor cursor4 = null;
-				String quarto = null;
-				try {
-					String[] proj = {MediaStore.Images.Media.DATA};
-					cursor4 = getContentResolver().query(uri, proj, null, null, null);
-					if (cursor4 != null) {
-						int column_index4 = cursor4.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-						cursor4.moveToFirst();
-						quarto = cursor4.getString(column_index4);
-					}
-				} finally {
-					if (cursor4 != null) {
-						cursor4.close();
-					}
-				}
-
-				// FileDescriptor : NON se ne ricava niente
-				ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor( uri, "r");
-				FileDescriptor fd = pfd.getFileDescriptor();
-
-				s.l( "cursori= "+ primo +"\n"+ terzo +"\n"+ quarto
-						+"\n"+ fd );
+				//ricavaNomeFileDaUri(uri);
 
 				// Il percorso /storage/...
 				String percorsoFile = U.uriPercorsoFile( uri );
 						// trova  /storage/emulated/0/famiglia/a_famigliotta_250.ged
 						// e anche  /storage/external_SD/famiglia/a_famigliotta_250.ged
 						// invece restituisce null da Google drive
+				s.l("percorsoFile =",percorsoFile);
 				File fileGedcom;
-				if( percorsoFile.lastIndexOf('/') > 0 ) {
+				if( percorsoFile != null && percorsoFile.lastIndexOf('/') > 0 ) {
 					fileGedcom = new File( percorsoFile );
-				} else {
+				} else { // È solo il nome del file 'famiglia.ged' oppure null
+
 					/* da android uri a java uri, non funziona
 					// IllegalArgumentException: Expected file scheme in URI: content://com.google.android.apps.docs.storage/document/acc%3D1%3Bdoc%3D890
 					URI juri = new URI( uri.toString() );
@@ -419,21 +426,20 @@ public class Officina extends AppCompatActivity {
 				ModelParser mp = new ModelParser();
 				Gedcom gc = mp.parseGedcom( fileGedcom );
 				gc.createIndexes();
-				s.l( "percorsoFile= " + percorsoFile
-						+"\nfile.getAbsolutePath= "+ fileGedcom.getAbsolutePath()	// restituisce lo stesso percorso
-						+"\ntizio= "+ gc.getPerson(U.trovaRadice(gc)).getNames().get(0).getDisplayValue() );
+				s.l( "file.getAbsolutePath= "+ fileGedcom.getAbsolutePath(),	// restituisce lo stesso percorso
+						"\ntizio= "+ gc.getPerson(U.trovaRadice(gc)).getNames().get(0).getDisplayValue() );
 
 				// Percorso della cartella da cui ha caricato il gedcom
 				String percorsoCartella = fileGedcom.getParent();
 				String[] nomiFile = new File( percorsoCartella ).list();
-				s.l( percorsoCartella 	+"   "+ nomiFile[0] );
+				s.l( percorsoCartella 	+" -> "+ nomiFile[0] );
 
 				File unFile = new File( percorsoCartella, nomiFile[ nomiFile.length-1 ] );
 				if( unFile.exists() )
 					s.l( unFile.getAbsolutePath() +" esiste!" );
 				else
 					s.l( unFile.getAbsolutePath() +" NON esiste" );
-			} catch (  IOException | SAXParseException e) {	// |URISyntaxException | FileNotFoundException
+			} catch (Exception e) {	//  IOException | SAXParseException |URISyntaxException | FileNotFoundException
 				e.printStackTrace();
 			}
 		}
@@ -542,7 +548,7 @@ public class Officina extends AppCompatActivity {
 
 		File dirDocumenti = Environment.getExternalStoragePublicDirectory( // da API 8
 				Environment.DIRECTORY_DOCUMENTS ); // da API 19
-		s.l( "Environment.getExternalStoragePublicDirectory= " + dirDocumenti );
+		s.l( "Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)= " + dirDocumenti );
 		// /storage/emulated/0/Documents
 		try {
 			File nuovoFile = new File(dirDocumenti,"nuovo.txt" );
@@ -552,6 +558,13 @@ public class Officina extends AppCompatActivity {
 		} catch( IOException e ) {
 			e.printStackTrace();
 		}
+
+		File dirDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); // da API 8
+		s.l("Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS)=", dirDownloads);
+		// /storage/emulated/0/Download
+		File dirDownloads2 = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+		s.l("getExternalFilesDir(DIRECTORY_DOWNLOADS)=", dirDownloads2);
+		// /storage/emulated/0/Android/data/app.familylab/files/Download
 
 		s.l( "Environment.getDataDirectory= " + Environment.getDataDirectory() );
 		// /data

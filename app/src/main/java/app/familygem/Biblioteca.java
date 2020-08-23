@@ -152,7 +152,7 @@ public class Biblioteca extends Fragment {
 	// L'ordine poi diventa permanente nel Json
 	private void ordinaFonti() {
 		if( ordine > 0 ) {
-			if( ordine == 3 ) {
+			if( ordine == 5 || ordine == 6 ) {
 				for( Source fonte : listaFonti ) {
 					if( fonte.getExtension("citaz") == null )
 						fonte.putExtension( "citaz", quanteCitazioni(fonte) );

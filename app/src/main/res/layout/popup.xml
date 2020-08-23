@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:id="@+id/popup_layout"
 	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:orientation="vertical"
-	android:gravity="center_horizontal">
+	android:layout_height="wrap_content">
 	<LinearLayout
+		android:id="@+id/popup_fumetto"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:id="@+id/popup_fumetto"
 		android:orientation="vertical"
 		android:gravity="center_horizontal"
-		android:layout_marginBottom="5dp">
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent">
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:background="@drawable/popup_baloon"
-			android:paddingLeft="15dp"
 			android:paddingTop="8dp"
-			android:paddingRight="10dp"
+			android:paddingStart="15dp"
+			android:paddingEnd="10dp"
 			android:paddingBottom="10dp"
 			android:text="@string/long_press_menu"
 			android:textColor="#000000"
@@ -30,4 +29,4 @@
 			android:layout_height="wrap_content"
 			app:srcCompat="@drawable/popup_fiato"/>
 	</LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

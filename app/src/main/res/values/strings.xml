@@ -36,7 +36,7 @@
 	<string name="name_of_tree">Title of tree</string>
 	<string name="create">Create</string>
 	<string name="tree_created">New tree created.</string>
-	<string name="complex_tree_advanced_tools">This tree looks quite complex. To better manage it, do you want to show advanced tools?</string>
+	<string name="complex_tree_advanced_tools">This tree looks quite complex.\nTo better manage it, do you want to show advanced tools?</string>
 	<string name="tree_imported_ok">Tree successfully imported.</string>
 	<string name="warning">Warning</string>
 	<string name="old_backup_overwrite">This is an old type of backup. All existing trees will be overwritten!\nProceed?</string>
@@ -75,6 +75,7 @@
 	<string name="root">Root</string>
 	<string name="media_folders">Media folders</string>
 	<string name="shares">Shares</string>
+	<string name="refresh">Refresh</string>
 	<string name="header">Header</string>
 	<string name="create_header">Create header</string>
 	<string name="file">File</string>
@@ -222,6 +223,9 @@
 	<string name="aka">Aka</string>
 	<string name="romanized">Romanized</string>
 	<string name="phonetic">Phonetic</string>
+	<string name="immigrant">Immigrant</string>
+	<string name="maiden">Maiden</string>
+	<string name="married">Married</string>
 	<!-- Evento -->
 	<string name="place">Place</string>
 	<string name="cause">Cause</string>
@@ -273,6 +277,7 @@
 	<string name="num_children">%d children</string>
 	<string name="family">Family</string>
 	<string name="marriage">Marriage</string>
+	<string name="divorce">Divorce</string>
 	<string name="really_delete_family">This family will be deleted, but the family members will not be deleted.</string>
 	<!-- Note -->
 	<string name="shared_notes">Shared notes</string>

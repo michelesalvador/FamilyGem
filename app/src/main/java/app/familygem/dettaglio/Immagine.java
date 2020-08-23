@@ -41,8 +41,8 @@ public class Immagine extends Dettaglio {
 		immaginona( m );
 		metti( getString(R.string.title), "Title" );
 		metti( getString(R.string.type), "Type", false, false );	// _type
-		if(Globale.preferenze.esperto) metti( getString(R.string.file), "File" );	// Angelina Guadagnoli.jpg
-			// dovrebbe essere max 259 characters
+		if(Globale.preferenze.esperto) metti( getString(R.string.file), "File" );	// 'Angelina Guadagnoli.jpg' visibile solo agli esperti
+			// todo dovrebbe essere max 259 characters
 		metti( getString(R.string.format), "Format", Globale.preferenze.esperto, false );	// jpeg
 		metti( getString(R.string.primary), "Primary" );	// _prim
 		metti( getString(R.string.scrapbook), "Scrapbook", false, false );	// _scbk the multimedia object should be in the scrapbook

@@ -137,14 +137,12 @@ public class Individuo extends AppCompatActivity {
 			((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
  		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
 		barraCollasso.setTitle( U.epiteto(uno) ); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
-		//s.l( "barraCollasso "+barraCollasso+" '"+U.epiteto( uno )+"'");
 		U.unaFoto( Globale.gc, uno, findViewById(R.id.persona_foto) );
 		U.unaFoto( Globale.gc, uno, findViewById(R.id.persona_sfondo) );
 		if( Globale.editato ) {
 			// Ricostruisce le tre schede ritornando alla pagina
 			for( int i=0; i<3; i++ ) {
 				Fragment scheda = getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":"+i );
-				//s.l(i+" "+scheda);
 				if( scheda != null ) // alla prima creazione dell'activity sono null
 					getSupportFragmentManager().beginTransaction().detach( scheda ).attach( scheda ).commit();
 				// ToDo tornando indietro dopo una editazione non aggiorna la scheda 0 coi media...
@@ -252,6 +250,7 @@ public class Individuo extends AppCompatActivity {
 									genere.setValue( sessoValori[i] );
 									uno.addEventFact( genere );
 									dialo.dismiss();
+									IndividuoEventi.aggiornaRuoliConiugali( uno );
 									IndividuoEventi tabEventi = (IndividuoEventi) getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" );
 									tabEventi.aggiorna( 1 );
 									U.salvaJson( true, uno );
@@ -340,7 +339,6 @@ public class Individuo extends AppCompatActivity {
 								case "BIRT":
 								case "DEAT":
 								case "CHR":
-									nuovoEvento.setValue( "Y" );
 								case "BAPM":
 								case "BURI":
 									nuovoEvento.setPlace("");

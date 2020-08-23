@@ -44,8 +44,12 @@ public class IndividuoEventi extends Fragment {
 			LinearLayout scatola = vistaEventi.findViewById( R.id.contenuto_scheda );
 			uno = gc.getPerson( getActivity().getIntent().getStringExtra( "idIndividuo" ) );
 			if( uno != null ) {
-				for( Name nome : uno.getNames())
-					piazzaEvento( scatola, getString(R.string.name), U.nomeCognome( nome ), nome );
+				for( Name nome : uno.getNames()) {
+					String tit = getString(R.string.name);
+					if( nome.getType() != null && !nome.getType().isEmpty() )
+						tit += " (" + U.tipoNomeTradotto(nome.getType()).toLowerCase() + ")";
+					piazzaEvento( scatola, tit, U.nomeCognome(nome), nome );
+				}
 				for (EventFact fatto : uno.getEventsFacts() ) {
 					String tst = "";
 					if( fatto.getValue() != null ) {
@@ -57,9 +61,9 @@ public class IndividuoEventi extends Fragment {
 					}
 					if( fatto.getType() != null )	tst += fatto.getType() + "\n";
 					if( fatto.getDate() != null ) 	tst += fatto.getDate() + "\n";
+					if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
 					Address indirizzo = fatto.getAddress();
 					if( indirizzo != null )	tst += Dettaglio.indirizzo(indirizzo) + "\n";
-					if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
 					if( fatto.getCause() != null )	tst += fatto.getCause() + "\n";
 					if( tst.endsWith("\n") )	tst = tst.substring( 0, tst.length()-1 );	// Rimuove l'ultimo acapo
 					piazzaEvento( scatola, fatto.getDisplayType(), tst, fatto );
@@ -76,7 +80,7 @@ public class IndividuoEventi extends Fragment {
 	}
 
 	private int sessoCapitato;
-	private void piazzaEvento( LinearLayout scatola, String titolo, String testo, final Object oggetto ) {
+	private void piazzaEvento( LinearLayout scatola, String titolo, String testo, Object oggetto ) {
 		View vistaFatto = LayoutInflater.from(scatola.getContext()).inflate( R.layout.individuo_eventi_pezzo, scatola, false);
 		scatola.addView( vistaFatto );
 		((TextView)vistaFatto.findViewById( R.id.evento_titolo )).setText( titolo );
@@ -105,7 +109,7 @@ public class IndividuoEventi extends Fragment {
 		} else if( oggetto instanceof EventFact ) {
 			// Evento Sesso
 			if( ((EventFact)oggetto).getTag()!=null && ((EventFact)oggetto).getTag().equals("SEX") ) {
-				final Map<String,String> sessi = new LinkedHashMap<>();
+				Map<String,String> sessi = new LinkedHashMap<>();
 				sessi.put( "M", getString(R.string.male) );
 				sessi.put( "F", getString(R.string.female) );
 				sessi.put( "U", getString(R.string.unknown) );

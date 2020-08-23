@@ -41,7 +41,7 @@ public class DiagramSettings extends AppCompatActivity {
 			@Override
 			public void onStopTrackingTouch( SeekBar seekBar ) {
 				Globale.preferenze.diagram.ancestors = seekBar.getProgress();
-				Globale.preferenze.salva();
+				salva();
 			}
 		});
 
@@ -62,7 +62,7 @@ public class DiagramSettings extends AppCompatActivity {
 			@Override
 			public void onStopTrackingTouch( SeekBar seekBar ) {
 				Globale.preferenze.diagram.uncles = seekBar.getProgress();
-				Globale.preferenze.salva();
+				salva();
 			}
 		});
 
@@ -71,7 +71,7 @@ public class DiagramSettings extends AppCompatActivity {
 		siblings.setChecked( Globale.preferenze.diagram.siblings );
 		siblings.setOnCheckedChangeListener( (button, active) -> {
 			Globale.preferenze.diagram.siblings = active;
-			Globale.preferenze.salva();
+			salva();
 		});
 
 		// Number of descendants
@@ -87,7 +87,7 @@ public class DiagramSettings extends AppCompatActivity {
 			@Override
 			public void onStopTrackingTouch( SeekBar seekBar ) {
 				Globale.preferenze.diagram.descendants = seekBar.getProgress();
-				Globale.preferenze.salva();
+				salva();
 			}
 		});
 
@@ -111,5 +111,10 @@ public class DiagramSettings extends AppCompatActivity {
 		indicator.setY(seekBar.getY() - indicator.getHeight());
 		anima.cancel();
 		anima.start();
+	}
+
+	private void salva() {
+		Globale.preferenze.salva();
+		Globale.editato = true;
 	}
 }
