@@ -59,7 +59,7 @@ public class Evento extends Dettaglio {
 		if( ef.getDate()!=null && ef.getDate().isEmpty() ) ef.setDate( null );
 		if( ef.getPlace()!=null && ef.getPlace().isEmpty() ) ef.setPlace( null );
 
-		if( ef.getTag()!=null && ( ef.getTag().equals("BIRT") || ef.getTag().equals("CHR") || ef.getTag().equals("DEAT") ) ) {
+		if( ef.getTag()!=null && ( ef.getTag().equals("BIRT") || ef.getTag().equals("CHR") || ef.getTag().equals("DEAT") || ef.getTag().equals("MARR") ) ) {
 			if( ef.getDate() == null && ef.getPlace() == null )
 				ef.setValue( "Y" );
 			else

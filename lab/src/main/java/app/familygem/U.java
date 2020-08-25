@@ -25,7 +25,6 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.util.Pair;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -40,7 +39,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -261,24 +259,21 @@ public class U {
 			// file:///storage/emulated/0/Android/data/com.dropbox.android/files/u1114176864/scratch/Simpsons.ged
 			return uri.getPath();	// gli toglie  file://
 		}
-		String cosaCercare = OpenableColumns.DISPLAY_NAME;
 		// Uri is different in versions after KITKAT (Android 4.4), we need to deal with different Uris
 		s.l( "uri Authority = " + uri.getAuthority() );
 		//s.l( "isDocumentUri = " + DocumentsContract.isDocumentUri( Globale.contesto, uri) );	// false solo in G.Drive legacy
 		// content://com.google.android.apps.docs.storage.legacy/enc%3DAPsNYqUd_MITZZJxxda1wvQP2ojY7f9xQCAPJoePEFIgSa-5%0A
-		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT 	// 21 sul mio cellu e 19
-				&& DocumentsContract.isDocumentUri( Globale.contesto, uri )	// sempre true tranne con Google drive legacy
-				) {
+		if( DocumentsContract.isDocumentUri(Globale.contesto, uri) ) { // sempre true tranne con Google drive legacy
 			//s.l( "Document Id = " + DocumentsContract.getDocumentId(uri) );
 			switch( uri.getAuthority() ) {
 				case "lab.gedcomy.localstorage.documents":	// ????? da testare
 					return DocumentsContract.getDocumentId( uri );
 				case "com.android.externalstorage.documents":	// memoria interna e scheda SD
-					final String docId = DocumentsContract.getDocumentId(uri);
+					String docId = DocumentsContract.getDocumentId(uri);
 					// semplicemente prende l'ultima parte dell'uri
 					// ad esempio 'primary:DCIM/Camera/Simpsons.ged'
 					// oppure '3132-6232:famiglia/a_famigliotta_250.ged'
-					final String[] split = docId.split(":");
+					String[] split = docId.split(":");
 					if( split[0].equalsIgnoreCase("primary")) {
 						return Environment.getExternalStorageDirectory() + "/" + split[1];
 						// Environment.getExternalStorageDirectory() restituisce sempre /storage/emulated/0 anche per la sd card
@@ -300,41 +295,89 @@ public class U {
 				case "com.android.providers.downloads.documents":	// file dalla cartella Download
 					/* Gli arriva un uri tipo	content://com.android.providers.downloads.documents/document/2326
 					   e lo ricostruisce tipo	content://downloads/public_downloads/2326
-					   così il cursor può interpretarlo anziché restituire null    */
-					final String id = DocumentsContract.getDocumentId(uri);	// un numero tipo '2326'
+					   così il cursor può interpretarlo anziché restituire null */
+					String id = DocumentsContract.getDocumentId( uri );	// un numero tipo '2326'
 					s.l( uri +" -> " + id);
-					/* A partire da android 9 l'id può essere un percorso completo tipo 'raw:/storage/emulated/0/Download/miofile.zip'
+					/* A partire da android 8 l'id può essere un percorso completo tipo 'raw:/storage/emulated/0/Download/miofile.zip'
 					   oppure l'uri può avere un id non numerico: 'content://com.android.providers.downloads.documents/document/msf%3A287'
 					   nel qual caso l'uri va bene così com'è */
 					if( id.startsWith("raw:/") )
 						return id.replaceFirst("raw:", "");
-					cosaCercare = MediaStore.Files.FileColumns.DATA; // = '_data'
-					if( id.matches("\\d+") && Build.VERSION.SDK_INT < Build.VERSION_CODES.P ) // negli android prima del 9 l'id numerico va ricostruito
-						uri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id) );
-					s.l( uri+"   "+cosaCercare );
+					if( id.matches("\\d+") ) { // && Build.VERSION.SDK_INT < Build.VERSION_CODES.P
+						// L'idea era che solo negli android prima del 9 l'id numerico andasse ricostruito..
+						// Poi ho scoperto che 'my_downloads' funziona nell'emulatore di Android 9 e 10!
+						String[] contentUriPrefixesToTry = new String[] {
+								"content://downloads/percorso_inesistente", // segnala l'errore e passa oltre
+								"content://downloads/public_downloads", // ok percorso classico che ho sempre usato
+
+								/* Aggiunto come percorso alternativo per alcuni device (Samsung)
+								Non dà mai errore ma di solito non trova nessun file.
+								Però misteriosamente in Android 9 e 10, SOLO IN FAMILY GEM, il cursore con l'uri 'content://downloads/my_downloads/59'
+								trova una riga completa di colonna '_data: /storage/emulated/0/Download/the_Simpsons-1.zip'
+								Invece nello stesso emulatore Android 10 qui in Family Lab il cursore trova 0 righe, anche se tutto è apparentemente identico!... */
+								"content://downloads/my_downloads",
+
+								/* il cursore trova il file con questo percorso, ma dà subito errore:
+								requires android.permission.ACCESS_ALL_DOWNLOADS, or grantUriPermission()
+								Credo riguardi solo app che vogliono essere provider di download.. */
+								"content://downloads/all_downloads"
+						};
+						for( String contentUriPrefix : contentUriPrefixesToTry ) {
+							s.l("URI prefix: ", contentUriPrefix );
+							Uri uriRicostruito = ContentUris.withAppendedId( Uri.parse(contentUriPrefix), Long.parseLong(id) );
+							try {
+								String nomeFile = trovaNomeFile( uriRicostruito );
+								if( nomeFile != null )
+									return nomeFile;
+							} catch( Exception e ) {
+								e.printStackTrace();
+							}
+						}
+					}
 				/*case "com.google.android.apps.docs.storage":	// Google drive 1
 					// com.google.android.apps.docs.storage.legacy
 				}*/
 			}
 		}
-		String nomeFile = trovaNomeFile( uri, cosaCercare );
-		if( nomeFile == null )
-			nomeFile = trovaNomeFile( uri, OpenableColumns.DISPLAY_NAME );
-		return nomeFile;
+		// id non numerico e tutti gli altri casi non previsti sopra
+		return trovaNomeFile( uri );
 	}
-	// Di default restituisce solo il nome del file 'famiglia.ged'
-	// se il file è preso in downloads.documents restituisce il percorso completo
-	private static String trovaNomeFile( Uri uri, String cosaCercare ) {
-		String[] projection = { cosaCercare };
-		Cursor cursore = Globale.contesto.getContentResolver().query( uri, projection, null, null, null);
+
+	// Riceve l'URI di un file preso dal file manager
+	// Restituisce il percorso completo '/storage/emulated/0/Download/famiglia.ged', oppure il singolo nome del file 'famiglia.ged'
+	// Da Android 9 (DI SOLITO) il cursore non ha più la colonna '_data' (percorso completo),
+	// ma solo il nome del file nella colonna '_display_name'
+	private static String trovaNomeFile( Uri uri ) {
+		s.l( "URI: ", uri );
+		//String[] projection = { cosaCercare };
+		// Se l'uri è sbagliato, query() interrompe con 'java.lang.IllegalArgumentException: Unknown URI: content://downloads/percorso_sbagliato_ai_downloads/1234'
+		Cursor cursore = Globale.contesto.getContentResolver().query( uri, null, null, null, null);
+		if( cursore != null ) s.l("cursore", cursore, "Cursore righe: " + cursore.getCount(),	" posizione: " + cursore.getPosition());
+		else s.l("Cursore null");
 		if( cursore != null && cursore.moveToFirst() ) {
-			//int indice = cursore.getColumnIndexOrThrow( cosaCercare );
-			String nomeFile = cursore.getString( 0 );
+			s.l( contenutoCursore(cursore) );
+			// Cerca la colonna con il percorso completo del file
+			int indice = cursore.getColumnIndex( MediaStore.Files.FileColumns.DATA ); // colonna '_data'
+			if( indice < 0 ) // Altrimenti si accontenta del singolo nome del file
+				indice = cursore.getColumnIndex( OpenableColumns.DISPLAY_NAME ); // colonna '_display_name'
+			s.l( "colonna", cursore.getColumnName(indice) );
+			String nomeFile = cursore.getString( indice );
 			cursore.close();
-			s.l("cursore = " + nomeFile );
 			return nomeFile;
 		}
 		return null;
+	}
+
+	static String contenutoCursore( Cursor cursore ) {
+		String txt = "Cursore righe: " + cursore.getCount() +
+				" posizione: " + cursore.getPosition()  +
+				" richiesta: " + cursore.getNotificationUri() +	"\n";
+		for( String nomeColonna : cursore.getColumnNames() ) {
+			int idColonna = cursore.getColumnIndexOrThrow(nomeColonna);
+			//int tipoColonna = cursore.getType(idColonna);
+			txt += ".\t\t" + nomeColonna + ": " + cursore.getString(idColonna) + "\n";
+		}
+		return txt;
 	}
 
 	// fa comparire l'immagine in una vista

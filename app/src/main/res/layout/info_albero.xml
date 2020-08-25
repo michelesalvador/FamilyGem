@@ -23,9 +23,8 @@
 			android:id="@+id/info_aggiorna"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_gravity="right"
-			android:text="♺"
-			android:textSize="24sp"
+			android:layout_gravity="center_horizontal"
+			android:text="@string/refresh"
 			android:visibility="gone" />
 
 		<LinearLayout

@@ -281,7 +281,7 @@
     <string name="old_backup_overwrite">Este es un viejo tipo de copia de seguridad. Todos los árboles se sobrescribirán!\n¿Desea continuar?</string>
     <string name="move_before">Mover antes</string>
     <string name="move_after">Mover después</string>
-    <string name="downloading">Descargando.</string>
+    <string name="downloading">Descargando…</string>
     <string name="delete_imported_tree">Eliminar el árbol importado</string>
     <string name="all_imported_delete">Todas las actualizaciones han sido importadas.\n¿Desea eliminar el árbol importado?</string>
     <string name="really_delete_family">Esta familia será eliminada, pero las personas que la componen no serán eliminadas.</string>
@@ -307,4 +307,5 @@
     <string name="new_family_of">Nueva familia de %s</string>
     <string name="generations_display_diagram">Establece cuántas generaciones mostrar en el diagrama.</string>
     <string name="existing_family">Familia ya existente</string>
+    <string name="refresh">Actualizar</string>
 </resources>

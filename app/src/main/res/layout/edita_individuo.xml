@@ -115,7 +115,6 @@
 			android:layout_height="wrap_content"
 			android:hint="@string/birth_place"
 			android:imeOptions="actionNext"
-			android:inputType="textCapWords|textPostalAddress"
 			android:nextFocusForward="@id/data_morte" />
 	</com.google.android.material.textfield.TextInputLayout>
 

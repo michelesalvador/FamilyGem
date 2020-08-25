@@ -2,11 +2,11 @@ package app.familygem;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Gravity;
@@ -49,10 +49,11 @@ public class Diagram extends Fragment {
 	private Graph graph;
 	private ZoomLayout zoomBox;
 	private RelativeLayout box;
-	private View fulcrumCard;
+	private GraphicCard fulcrumView;
 	private float zoomValue = 0.7f;
 	private float density;
 	private int STROKE;
+	private int GLOW_SPACE = 35; // space to display glow, in dp
 	private View popup;
 
 	@Override
@@ -114,113 +115,165 @@ public class Diagram extends Fragment {
 				box.addView(new GraphicProgeny(getContext(), (ProgenyNode) node));
 		}
 
-		box.postDelayed( () -> {
-			// Get the dimensions of various nodes converting from pixel to dip
-			for (int i = 0; i < box.getChildCount(); i++) {
-				View nodeView = box.getChildAt( i );
-				if( nodeView instanceof GraphicUnitNode) {
-					// Get the bond width
-					GraphicUnitNode graphicUnitNode = (GraphicUnitNode) nodeView;
-					Bond bond = nodeView.findViewById( R.id.tag_bond );
-					if( bond != null )
-						graphicUnitNode.unitNode.bondWidth = toDp(bond.getWidth());
-					// Get dimensions of each graphic card
-					for( int c = 0; c < graphicUnitNode.getChildCount(); c++ ) {
-						View cardView = graphicUnitNode.getChildAt( c );
-						if( cardView instanceof GraphicCard ) {
-							GraphicCard graphicCard = (GraphicCard) cardView;
-							graphicCard.card.width = toDp(cardView.getWidth()) ;
-							graphicCard.card.height = toDp(cardView.getHeight());
+		// Only one person in the diagram
+		if( gc.getPeople().size() == 1 && gc.getFamilies().size() == 0 ) {
+
+			// Add the suggestion balloon
+			View popupView = LayoutInflater.from(getContext()).inflate(R.layout.popup, box);
+			ConstraintLayout popupLayout = popupView.findViewById( R.id.popup_layout );
+			View singleNode = box.getChildAt(0);
+			box.removeView(singleNode);
+			ConstraintLayout.LayoutParams nodeParams = new ConstraintLayout.LayoutParams(
+					ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+			nodeParams.topToBottom = R.id.popup_fumetto;
+			nodeParams.topMargin = toPx(6);
+			nodeParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
+			nodeParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
+			singleNode.setId( R.id.tag_fulcrum );
+			popupLayout.addView(singleNode, nodeParams);
+			popup = popupView.findViewById( R.id.popup_fumetto );
+			popup.setOnClickListener( vista -> {
+				vista.setVisibility(View.INVISIBLE);
+			});
+
+			// Add the glow to the fulcrum card
+			if( fulcrumView != null ) {
+				box.post( () -> {
+					ConstraintLayout.LayoutParams glowParams = new ConstraintLayout.LayoutParams(
+							singleNode.getWidth() + toPx(GLOW_SPACE*2), singleNode.getHeight() + toPx(GLOW_SPACE*2) );
+					glowParams.topToTop = R.id.tag_fulcrum;
+					glowParams.bottomToBottom = R.id.tag_fulcrum;
+					glowParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
+					glowParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
+					fulcrumView.card.width = toDp(singleNode.getWidth());
+					fulcrumView.card.height = toDp(singleNode.getHeight());
+					popupLayout.addView( new FulcrumGlow(getContext()), 0, glowParams );
+					zoomBox.realZoomTo(1, false); // only to center the box
+					zoomBox.post( () -> {
+						zoomBox.realZoomTo(1.4f, true);
+					});
+				});
+			}
+
+		} else { // Two or more persons in the diagram
+
+			box.postDelayed( () -> {
+				// Get the dimensions of various nodes converting from pixel to dip
+				for (int i = 0; i < box.getChildCount(); i++) {
+					View nodeView = box.getChildAt( i );
+					if( nodeView instanceof GraphicUnitNode) {
+						// Get the bond width
+						GraphicUnitNode graphicUnitNode = (GraphicUnitNode) nodeView;
+						Bond bond = nodeView.findViewById( R.id.tag_bond );
+						if( bond != null )
+							graphicUnitNode.unitNode.bondWidth = toDp(bond.getWidth());
+						// Get dimensions of each graphic card
+						for( int c = 0; c < graphicUnitNode.getChildCount(); c++ ) {
+							View cardView = graphicUnitNode.getChildAt( c );
+							if( cardView instanceof GraphicCard ) {
+								GraphicCard graphicCard = (GraphicCard) cardView;
+								graphicCard.card.width = toDp(cardView.getWidth()) ;
+								graphicCard.card.height = toDp(cardView.getHeight());
+							}
+						}
+					} // Get dimensions of each ancestry node
+					else if( nodeView instanceof GraphicAncestry) {
+						GraphicAncestry graphicAncestry = (GraphicAncestry) nodeView;
+						graphicAncestry.node.width = toDp(nodeView.getWidth());
+						graphicAncestry.node.height = toDp(nodeView.getHeight());
+						if( graphicAncestry.node.isCouple() ) {
+							graphicAncestry.node.horizontalCenter = toDp(
+									graphicAncestry.findViewById( R.id.ancestry_father ).getWidth() +
+											graphicAncestry.findViewById( R.id.ancestry_connector ).getWidth() / 2);
+						} else
+							graphicAncestry.node.horizontalCenter = toDp(nodeView.getWidth() / 2);
+					} // Get the dimensions of each progeny node
+					else if( nodeView instanceof GraphicProgeny ) {
+						GraphicProgeny graphicProgeny = (GraphicProgeny) nodeView;
+						ProgenyNode progeny = graphicProgeny.progenyNode;
+						progeny.width = toDp(graphicProgeny.getWidth());
+						for(int p=0; p <graphicProgeny.getChildCount(); p++) {
+							View miniCard = graphicProgeny.getChildAt(p);
+							progeny.miniChildren.get(p).width = toDp(miniCard.getWidth());
 						}
 					}
-				} // Get dimensions of each ancestry node
-				else if( nodeView instanceof GraphicAncestry) {
-					GraphicAncestry graphicAncestry = (GraphicAncestry) nodeView;
-					graphicAncestry.node.width = toDp(nodeView.getWidth());
-					graphicAncestry.node.height = toDp(nodeView.getHeight());
-					if( graphicAncestry.node.isCouple() ) {
-						graphicAncestry.node.horizontalCenter = toDp(
-								graphicAncestry.findViewById( R.id.ancestry_father ).getWidth() +
-								graphicAncestry.findViewById( R.id.ancestry_connector ).getWidth() / 2);
-					} else
-						graphicAncestry.node.horizontalCenter = toDp(nodeView.getWidth() / 2);
-				} // Get the dimensions of each progeny node
-				else if( nodeView instanceof GraphicProgeny ) {
-					GraphicProgeny graphicProgeny = (GraphicProgeny) nodeView;
-					ProgenyNode progeny = graphicProgeny.progenyNode;
-					progeny.width = toDp(graphicProgeny.getWidth());
-					for(int p=0; p <graphicProgeny.getChildCount(); p++) {
-						View miniCard = graphicProgeny.getChildAt(p);
-						progeny.miniChildren.get(p).width = toDp(miniCard.getWidth());
+				}
+
+				// Let the graph calculate positions of Nodes and Lines
+				graph.arrange();
+
+				// Final position of the nodes from dips to pixels
+				for (int i = 0; i < box.getChildCount(); i++) {
+					View nodeView = box.getChildAt( i );
+					if( nodeView instanceof GraphicUnitNode) {
+						GraphicUnitNode graphicUnitNode = (GraphicUnitNode) nodeView;
+						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) graphicUnitNode.getLayoutParams();
+						params.leftMargin = toPx(graphicUnitNode.unitNode.x);
+						params.topMargin = toPx(graphicUnitNode.unitNode.y);
+						graphicUnitNode.setLayoutParams( params );
+						// Bond height
+						if( graphicUnitNode.unitNode.isCouple() ) {
+							Bond bond = graphicUnitNode.findViewById( R.id.tag_bond  );
+							RelativeLayout.LayoutParams bondParams = (RelativeLayout.LayoutParams) bond.getLayoutParams();
+							bondParams.height = toPx(graphicUnitNode.unitNode.height);
+							bond.setLayoutParams( bondParams );
+						}
+					} else if( nodeView instanceof GraphicAncestry ) {
+						AncestryNode ancestry = ((GraphicAncestry) nodeView).node;
+						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) nodeView.getLayoutParams();
+						params.leftMargin = toPx(ancestry.x);
+						params.topMargin = toPx(ancestry.y);
+						nodeView.setLayoutParams(params);
+					} else if( nodeView instanceof GraphicProgeny ) {
+						ProgenyNode progeny = ((GraphicProgeny) nodeView).progenyNode;
+						RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) nodeView.getLayoutParams();
+						params.leftMargin = toPx(progeny.x);
+						params.topMargin = toPx(progeny.y);
+						nodeView.setLayoutParams( params );
 					}
 				}
-			}
 
-			// Let the graph calculate positions of Nodes and Lines
-			graph.arrange();
+				// Add the lines
+				RelativeLayout.LayoutParams paramLines = new RelativeLayout.LayoutParams( toPx(graph.width), toPx(graph.height) );
+				box.addView( new Lines(getContext()), 0, paramLines );
 
-			// Final position of the nodes from dips to pixels
-			for (int i = 0; i < box.getChildCount(); i++) {
-				View nodeView = box.getChildAt( i );
-				if( nodeView instanceof GraphicUnitNode) {
-					GraphicUnitNode graphicUnitNode = (GraphicUnitNode) nodeView;
-					RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) graphicUnitNode.getLayoutParams();
-					params.leftMargin = toPx(graphicUnitNode.unitNode.x);
-					params.topMargin = toPx(graphicUnitNode.unitNode.y);
-					graphicUnitNode.setLayoutParams( params );
-					// Bond height
-					if( graphicUnitNode.unitNode.isCouple() ) {
-						Bond bond = graphicUnitNode.findViewById( R.id.tag_bond  );
-						RelativeLayout.LayoutParams bondParams = (RelativeLayout.LayoutParams) bond.getLayoutParams();
-						bondParams.height = toPx(graphicUnitNode.unitNode.height);
-						bond.setLayoutParams( bondParams );
-					}
-				} else if( nodeView instanceof GraphicAncestry ) {
-					AncestryNode ancestry = ((GraphicAncestry) nodeView).node;
-					RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) nodeView.getLayoutParams();
-					params.leftMargin = toPx(ancestry.x);
-					params.topMargin = toPx(ancestry.y);
-					nodeView.setLayoutParams(params);
-				} else if( nodeView instanceof GraphicProgeny ) {
-					ProgenyNode progeny = ((GraphicProgeny) nodeView).progenyNode;
-					RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) nodeView.getLayoutParams();
-					params.leftMargin = toPx(progeny.x);
-					params.topMargin = toPx(progeny.y);
-					nodeView.setLayoutParams( params );
+				// Pan to diagram fulcrum
+				if( fulcrumView != null ) {
+					zoomBox.post( () -> {
+						IndiCard fulCard = graph.getFulcrum();
+						int padding = box.getPaddingTop(); // box padding (50dp in px)
+						zoomBox.realZoomTo(zoomValue, false); // Restore previous zoom
+						zoomBox.panTo( -toPx(fulCard.centerX()) + zoomBox.getWidth()/zoomBox.getRealZoom()/2 - padding,
+								-toPx(fulCard.centerY()) + zoomBox.getHeight()/zoomBox.getRealZoom()/2 - padding, false);
+						// Add the glow
+						RelativeLayout.LayoutParams glowParams = new RelativeLayout.LayoutParams(
+								toPx(fulCard.width+GLOW_SPACE*2), toPx(fulCard.height+GLOW_SPACE*2) );
+						glowParams.setMargins(toPx(fulCard.x-GLOW_SPACE), toPx(fulCard.y-GLOW_SPACE), -toPx(GLOW_SPACE), -toPx(GLOW_SPACE));
+						box.addView( new FulcrumGlow(getContext()), 0, glowParams );
+					});
 				}
-			}
+			}, 100);
+		}
+	}
 
-			// UI suggestion popup
-			if( gc.getPeople().size() == 1 && gc.getFamilies().size() == 0 && fulcrumCard != null ) {
-				View popupView = LayoutInflater.from(getContext()).inflate(R.layout.popup, box);
-				LinearLayout layout = popupView.findViewById( R.id.popup_layout );
-				View node = box.getChildAt(0);
-				box.removeView(node);
-				layout.addView(node);
-				//box.addView( popupView );
-				popup = popupView.findViewById( R.id.popup_fumetto );
-				popup.setOnClickListener( vista -> {
-					vista.setVisibility(View.INVISIBLE);
-				});
-				zoomValue = 1.4f;
-			}
-
-			// Add the lines
-			RelativeLayout.LayoutParams paramLines = new RelativeLayout.LayoutParams( toPx(graph.width), toPx(graph.height) );
-			box.addView( new Lines(getContext()), 0, paramLines );
-
-			// Pan to diagram fulcrum
-			zoomBox.post( () -> {
-				if( fulcrumCard != null ) {
-					zoomBox.realZoomTo(zoomValue, false); // Restore previous zoom
-					Rect margini = new Rect();
-					fulcrumCard.getDrawingRect( margini );
-					box.offsetDescendantRectToMyCoords( fulcrumCard, margini );
-					zoomBox.panTo( -margini.exactCenterX() + zoomBox.getWidth() / zoomBox.getRealZoom() / 2,
-							-margini.exactCenterY() + zoomBox.getHeight() / zoomBox.getRealZoom() / 2, false );
-				}
-			});
-		}, 100);
+	// Glow around fulcrum card
+	class FulcrumGlow extends View {
+		Paint paint = new Paint( Paint.ANTI_ALIAS_FLAG );
+		BlurMaskFilter bmf = new BlurMaskFilter(toPx(25), BlurMaskFilter.Blur.NORMAL);
+		int extend = 5; // draw a rectangle a little bigger
+		public FulcrumGlow( Context context ) {
+			super(context);
+			//setBackgroundColor( 0x330099FF );
+		}
+		@Override
+		protected void onDraw( Canvas canvas) {
+			paint.setColor( getResources().getColor(R.color.evidenzia) );
+			paint.setMaskFilter(bmf);
+			setLayerType(View.LAYER_TYPE_SOFTWARE, paint);
+			IndiCard fulcrum = graph.getFulcrum();
+			canvas.drawRect( toPx(GLOW_SPACE-extend), toPx(GLOW_SPACE-extend),
+					toPx(fulcrum.width+GLOW_SPACE+extend), toPx(fulcrum.height+GLOW_SPACE+extend), paint );
+		}
 	}
 
 	// Node with one person or couple + marriage
@@ -230,7 +283,7 @@ public class Diagram extends Fragment {
 			super(context);
 			this.unitNode = unitNode;
 			setClipChildren( false );
-			//setBackgroundColor( 0x33FF00FF );
+			//setBackgroundColor( 0xff00FF00 );
 			if( unitNode.husband != null )
 				addView( new GraphicCard(context, unitNode.husband, true) );
 			if( unitNode.wife != null )
@@ -279,13 +332,7 @@ public class Diagram extends Fragment {
 						background.setBackgroundResource( R.drawable.casella_femmina_evidente );
 					else
 						background.setBackgroundResource( R.drawable.casella_neutro_evidente );
-					int paddingVert = toPx( 6 );
-					int paddingHoriz = toPx( 8 );
-					view.findViewById(R.id.card_layout).setPadding( paddingHoriz, paddingVert, paddingHoriz, paddingVert );
-					ConstraintLayout.LayoutParams luttoParams = (ConstraintLayout.LayoutParams) lutto.getLayoutParams();
-					luttoParams.topMargin = toPx(2);
-					luttoParams.rightMargin = toPx(2);
-					fulcrumCard = this;
+					fulcrumView = this;
 				} else if( U.sesso(person) == 1 )
 					background.setBackgroundResource( R.drawable.casella_maschio );
 				else if( U.sesso(person) == 2 )
@@ -384,24 +431,31 @@ public class Diagram extends Fragment {
 			this.node = node;
 			//setBackgroundColor( 0x440000FF );
 			View view = getLayoutInflater().inflate(R.layout.diagram_ancestry,this, true);
-			TextView testoAvi = view.findViewById( R.id.ancestry_father );
-			TextView testoAve = view.findViewById( R.id.ancestry_mother );
-			testoAvi.setClickable( true );
+			TextView first = view.findViewById( R.id.ancestry_father );
+			TextView second = view.findViewById( R.id.ancestry_mother );
 			if( node.miniFather == null ) {
-				testoAvi.setVisibility( View.GONE );
-				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) testoAve.getLayoutParams();
+				first.setVisibility( View.GONE );
+				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) second.getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				testoAvi.setText( String.valueOf(node.miniFather.amount) );
-				testoAvi.setOnClickListener( v -> clickCard(node.miniFather.person) );
+				first.setText( String.valueOf(node.miniFather.amount) );
+				if( U.sesso(node.miniFather.person) == 1 )
+					first.setBackgroundResource( R.drawable.casella_maschio );
+				else if( U.sesso(node.miniFather.person) == 2 )
+					first.setBackgroundResource( R.drawable.casella_femmina );
+				first.setOnClickListener( v -> clickCard(node.miniFather.person) );
 			}
 			if( node.miniMother == null ) {
-				testoAve.setVisibility( View.GONE );
+				second.setVisibility( View.GONE );
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) findViewById( R.id.ancestry_connector ).getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				testoAve.setText( String.valueOf(node.miniMother.amount) );
-				testoAve.setOnClickListener( v -> clickCard(node.miniMother.person) );
+				second.setText( String.valueOf(node.miniMother.amount) );
+				if( U.sesso(node.miniMother.person) == 1 )
+					second.setBackgroundResource( R.drawable.casella_maschio );
+				else if( U.sesso(node.miniMother.person) == 2 )
+					second.setBackgroundResource( R.drawable.casella_femmina );
+				second.setOnClickListener( v -> clickCard(node.miniMother.person) );
 			}
 			if( node.miniFather == null && node.miniMother == null )
 				this.setVisibility( INVISIBLE );
@@ -449,32 +503,53 @@ public class Diagram extends Fragment {
 		}
 	}
 
+	// Generate the view of lines connecting the cards
 	class Lines extends View {
 		Paint paint = new Paint( Paint.ANTI_ALIAS_FLAG );
-		List<Path> paths = new ArrayList<>();
+		List<Path> paths = new ArrayList<>(); // Each path contains many lines
+		//int[] colors = { Color.WHITE, Color.YELLOW, Color.RED, Color.MAGENTA, Color.CYAN, Color.GREEN, Color.GRAY };
 		public Lines( Context context ) {
 			super(context);
 			paths.add( new Path() );
+			paint.setStyle( Paint.Style.STROKE );
+			paint.setStrokeWidth( STROKE );
+			paint.setColor( Color.WHITE );
 		}
 		@Override
 		protected void onDraw( Canvas canvas) {
-			float restartX = 0;
-			int whichPath = 0;
+			float restartX = 0; // (re)starting point of every path
+			int maxBitmapWidth = canvas.getMaximumBitmapWidth() // is 16384 on emulators, 4096 on my physical devices
+					- STROKE * 3; // the space actually occupied by the line is a little bit larger
+			int pathNum = 0; // index of paths
+			//float pathSize = 0; // size of every single path
+			//s.l( "Max width:", maxBitmapWidth, "Stroke:", STROKE );
+			// Put the lines in one or more paths
 			for(Line line : graph.getLines()) {
 				float x1 = toPx(line.x1), y1 = toPx(line.y1), x2 = toPx(line.x2), y2 = toPx(line.y2);
-				if( Math.max(x1,x2) - restartX > 16384 ) {
-					restartX = Math.min(x1,x2);
-					whichPath++;
-					paths.add( new Path() );
+				float lineWidth = Math.max(x1,x2) - Math.min(x1,x2);
+				if( lineWidth <= maxBitmapWidth ) {
+					float pathRight = Math.max(x1,x2) - restartX;
+					// Start another path
+					if( pathRight > maxBitmapWidth ) {
+						pathNum++;
+						restartX = Math.min(x1,x2);
+						paths.add( new Path() );
+						//pathSize = Math.max(x1,x2) - restartX;
+					}
+					/*else if( pathRight > pathSize )
+						pathSize = pathRight;*/
+					paths.get(pathNum).moveTo( x1, y1 );
+					paths.get(pathNum).cubicTo( x1, y2, x2, y1, x2, y2 );
+					//s.l( pathNum+":", "["+restartX+"]\t", pathSize, "\t("+lineWidth +"/"+ (y2-y1)+")" );
 				}
-				paths.get(whichPath).moveTo( x1, y1 );
-				paths.get(whichPath).cubicTo( x1, y2, x2, y1, x2, y2 );
+				//else s.l("\tLine too large:", lineWidth ,">", maxBitmapWidth);*/
 			}
-			paint.setStyle( Paint.Style.STROKE );
-			paint.setColor( Color.WHITE );
-			paint.setStrokeWidth(STROKE);
-			for( Path path : paths )
+			// Draw the paths
+			//pathNum = 0;
+			for( Path path : paths ) {
+				//paint.setColor( colors[pathNum++ % colors.length] );
 				canvas.drawPath( path, paint );
+			}
 		}
 	}
 

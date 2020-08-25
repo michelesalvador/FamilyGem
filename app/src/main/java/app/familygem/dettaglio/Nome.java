@@ -32,13 +32,13 @@ public class Nome extends Dettaglio {
 			creaPezzo( getString(R.string.name), nome, 4043, false );
 			creaPezzo( getString(R.string.surname), cognome, 6064, false );
 		}
-		metti( getString(R.string.type), "Type", false, false );  // _type non Gedcom standard
 		metti( getString(R.string.prefix), "Prefix" );
 		metti( getString(R.string.given), "Given", Globale.preferenze.esperto, false );
 		metti( getString(R.string.nickname), "Nickname" );
 		metti( getString(R.string.surname_prefix), "SurnamePrefix" );
 		metti( getString(R.string.surname), "Surname", Globale.preferenze.esperto, false );
 		metti( getString(R.string.suffix), "Suffix" );
+		metti( getString(R.string.type), "Type", true, false );  // _TYPE in GEDCOM 5.5, TYPE in GEDCOM 5.5.1
 		metti( getString(R.string.married_name), "MarriedName", false, false ); // _marrnm
 		metti( getString(R.string.aka), "Aka", false, false );	// _aka
 		metti( getString(R.string.romanized), "Romn", false, false );

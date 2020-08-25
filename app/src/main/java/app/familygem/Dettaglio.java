@@ -105,7 +105,9 @@ public class Dettaglio extends AppCompatActivity {
 							((Repository)oggetto).setAddress( (Address)coso );
 					}
 					// Tag necessari per poi esportare in Gedcom
-					if( oggetto instanceof Repository ) {
+					if( oggetto instanceof Name && coso.equals("Type") ) {
+						((Name)oggetto).setTypeTag("TYPE");
+					} else if( oggetto instanceof Repository ) {
 						if( coso.equals("Www") )
 							((Repository)oggetto).setWwwTag("WWW");
 						if( coso.equals("Email") )
@@ -121,9 +123,9 @@ public class Dettaglio extends AppCompatActivity {
 						edita( pezzo );
 					// todo : aprire Address nuovo per editarlo
 				} else if( id == 101 ) {
-					Magazzino.nuovoArchivio( Dettaglio.this, (Source)oggetto );
+					Magazzino.nuovoArchivio( this, (Source)oggetto );
 				} else if( id == 102 ) {
-					Intent intento = new Intent( Dettaglio.this, Principe.class );
+					Intent intento = new Intent( this, Principe.class );
 					intento.putExtra( "magazzinoScegliArchivio", true );
 					startActivityForResult( intento,4562 );
 				} else if( id == 103 ) { // Nuova nota
@@ -131,19 +133,19 @@ public class Dettaglio extends AppCompatActivity {
 					nota.setValue( "" );
 					((NoteContainer)oggetto).addNote( nota );
 					Memoria.aggiungi( nota );
-					startActivity( new Intent( Dettaglio.this, Nota.class ) );
+					startActivity( new Intent( this, Nota.class ) );
 				} else if( id == 104 ) { // Nuova nota condivisa
-					Quaderno.nuovaNota( Dettaglio.this, oggetto );
+					Quaderno.nuovaNota( this, oggetto );
 				} else if( id == 105 ) { // Collega nota condivisa
-					Intent intento = new Intent( Dettaglio.this, Principe.class );
+					Intent intento = new Intent( this, Principe.class );
 					intento.putExtra( "quadernoScegliNota", true );
 					startActivityForResult( intento,7074 );
 				} else if( id == 106 ) { // Cerca media locale
-					U.appAcquisizioneImmagine( Dettaglio.this, null, 4173, (MediaContainer)oggetto );
+					U.appAcquisizioneImmagine( this, null, 4173, (MediaContainer)oggetto );
 				} else if( id == 107 ) { // Cerca media condiviso
-					U.appAcquisizioneImmagine( Dettaglio.this, null, 4174, (MediaContainer)oggetto );
+					U.appAcquisizioneImmagine( this, null, 4174, (MediaContainer)oggetto );
 				} else if( id == 108 ) { // Collega media condiviso
-					Intent inten = new Intent( Dettaglio.this, Principe.class );
+					Intent inten = new Intent( this, Principe.class );
 					inten.putExtra( "galleriaScegliMedia", true );
 					startActivityForResult( inten,43616 );
 				} else if( id == 109 ) { // Nuova fonte-nota
@@ -152,21 +154,21 @@ public class Dettaglio extends AppCompatActivity {
 					if( oggetto instanceof Note ) ((Note)oggetto).addSourceCitation( citaz );
 					else ((SourceCitationContainer)oggetto).addSourceCitation( citaz );
 					Memoria.aggiungi( citaz );
-					startActivity( new Intent( Dettaglio.this, CitazioneFonte.class ) );
+					startActivity( new Intent( this, CitazioneFonte.class ) );
 				} else if( id == 110 ) {  // Nuova fonte
-					Biblioteca.nuovaFonte( Dettaglio.this, oggetto );
+					Biblioteca.nuovaFonte( this, oggetto );
 				} else if( id == 111 ) { // Collega fonte
-					Intent intent = new Intent( Dettaglio.this, Principe.class );
+					Intent intent = new Intent( this, Principe.class );
 					intent.putExtra( "bibliotecaScegliFonte", true );
 					startActivityForResult( intent, 5065 );
 				} else if( id == 120 || id == 121 ) { // Crea nuovo familiare
-					Intent intento = new Intent( Dettaglio.this, EditaIndividuo.class );
+					Intent intento = new Intent( this, EditaIndividuo.class );
 					intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
 					intento.putExtra( "idFamiglia", ((Family)oggetto).getId() );
 					intento.putExtra( "relazione", id - 115 );
 					startActivity( intento );
 				} else if( id == 122 || id == 123 ) { // Collega persona esistente
-					Intent intento = new Intent( Dettaglio.this, Principe.class );
+					Intent intento = new Intent( this, Principe.class );
 					intento.putExtra( "anagrafeScegliParente", true );
 					intento.putExtra( "relazione", id - 117 );
 					startActivityForResult( intento, 34417 );
@@ -177,7 +179,14 @@ public class Dettaglio extends AppCompatActivity {
 					nuovoEvento.setPlace( "" );
 					((Family)oggetto).addEventFact( nuovoEvento );
 					Memoria.aggiungi( nuovoEvento );
-					startActivity( new Intent( Dettaglio.this, Evento.class ) );
+					startActivity( new Intent( this, Evento.class ) );
+				} else if( id == 125 ) { // Metti divorzio
+					EventFact nuovoEvento = new EventFact();
+					nuovoEvento.setTag( "DIV" );
+					nuovoEvento.setDate( "" );
+					((Family)oggetto).addEventFact( nuovoEvento );
+					Memoria.aggiungi( nuovoEvento );
+					startActivity( new Intent( this, Evento.class ) );
 				} else if( id >= 200 ) { // Metti altro evento
 					EventFact nuovoEvento = new EventFact();
 					nuovoEvento.setTag( eventiVari.keySet().toArray( new String[eventiVari.size()] )[id - 200] );
@@ -194,7 +203,7 @@ public class Dettaglio extends AppCompatActivity {
 
 	// Menu del FAB: solo coi metodi che non sono già presenti in box
 	PopupMenu menuFAB( View vista ) {
-		PopupMenu popup = new PopupMenu( Dettaglio.this, vista );
+		PopupMenu popup = new PopupMenu( this, vista );
 		Menu menu = popup.getMenu();
 		String[] conIndirizzo = { "Www", "Email", "Phone", "Fax" }; // questi oggetti compaiono nel FAB di Evento se esiste un Indirizzo
 		int u = 0;
@@ -227,6 +236,7 @@ public class Dettaglio extends AppCompatActivity {
 			}
 			SubMenu subEvento = menu.addSubMenu( 0, 100, 0, R.string.event );
 			subEvento.add( 0, 124, 0, R.string.marriage );
+			subEvento.add( 0, 125, 0, R.string.divorce );
 			// Crea la lista degli altri eventi che si possono inserire
 			Set<String> eventiIndividuo = EventFact.PERSONAL_EVENT_FACT_TAGS;
 			for( String tag : EventFact.FAMILY_EVENT_FACT_TAGS )
@@ -240,6 +250,8 @@ public class Dettaglio extends AppCompatActivity {
 				if( ev.getKey().length() > 4 || ev.getKey().startsWith( "_" ) )
 					eventi.remove();
 			}
+			eventiVari.remove( "MARR" );
+			eventiVari.remove( "DIV" );
 			SubMenu subAltri = subEvento.addSubMenu( 0, 100, 0, R.string.other );
 			int i = 0;
 			for( TreeMap.Entry<String,String> event : eventiVari.entrySet() ) {
@@ -368,7 +380,7 @@ public class Dettaglio extends AppCompatActivity {
 					if( passo.oggetto instanceof Visitable ) // le estensioni GedcomTag non sono Visitable ed è impossibile trovargli la pila
 						vistaGoccia.setOnClickListener( v -> {
 							new TrovaPila( gc, passo.oggetto );
-							Intent intento = new Intent( Dettaglio.this, Memoria.classi.get(passo.oggetto.getClass()) );
+							Intent intento = new Intent( this, Memoria.classi.get(passo.oggetto.getClass()) );
 							if( passo.oggetto instanceof Person ) // Solo Individuo richiede l'id
 								intento.putExtra( "idIndividuo", ((Person)passo.oggetto).getId() );
 							startActivity( intento );
@@ -436,32 +448,33 @@ public class Dettaglio extends AppCompatActivity {
 		} catch( Exception e ) {
 			testo = "ERROR: " + e.getMessage();
 		}
-		// Tranne che per i 3 fatidici eventi con 'Y', todo forse per gli esperti lasciare la 'Y'?
-		if(!( oggetto instanceof EventFact && metodo.equals("Value") && testo!=null && testo.equals("Y") && ((EventFact)oggetto).getTag()!=null &&
-				( ((EventFact)oggetto).getTag().equals("BIRT") || ((EventFact)oggetto).getTag().equals("CHR") || ((EventFact)oggetto).getTag().equals("DEAT") ) ))
+		// Mette il pezzo, tranne che per i Value con 'Y' per gli inesperti
+		if(!( !Globale.preferenze.esperto && oggetto instanceof EventFact && metodo.equals("Value") && testo!=null && testo.equals("Y") && ((EventFact)oggetto).getTag()!=null &&
+				( ((EventFact)oggetto).getTag().equals("BIRT") || ((EventFact)oggetto).getTag().equals("CHR") || ((EventFact)oggetto).getTag().equals("DEAT") || ((EventFact)oggetto).getTag().equals("MARR") ) ))
 			creaPezzo( titolo, testo, metodo, multiLinea );
 	}
 
-	// diverse firme per intercettare i vari tipi di oggetto
+	// Diverse firme per intercettare i vari tipi di oggetto
 	public void metti( String titolo, Address indirizzo ) {
 		Address indirizzoNonNullo = indirizzo==null ? new Address() : indirizzo;
 		new Uovo( titolo, indirizzoNonNullo, true, false );
 		creaPezzo( titolo, indirizzo(indirizzo), indirizzoNonNullo, false );
 	}
 
+	// Eventi della Famiglia
 	public void metti( String titolo, EventFact evento ) {
 		EventFact eventoNonNullo = evento==null ? new EventFact() : evento;
-		new Uovo( titolo, eventoNonNullo, true, false );
 		creaPezzo( titolo, evento(evento), eventoNonNullo, false );
 	}
 
-	public View creaPezzo( String titolo, final String testo, final Object coso, boolean multiLinea ) {
+	public View creaPezzo( String titolo, String testo, Object coso, boolean multiLinea ) {
 		if( testo == null ) return null;
 		View vistaPezzo = LayoutInflater.from(box.getContext()).inflate( R.layout.pezzo_fatto, box, false );
 		box.addView( vistaPezzo );
 		((TextView)vistaPezzo.findViewById( R.id.fatto_titolo )).setText( titolo );
 		((TextView)vistaPezzo.findViewById( R.id.fatto_testo )).setText( testo );
-		final EditText vistaEditabile = vistaPezzo.findViewById( R.id.fatto_edita );
+		// todo: e se spostassi vistaEditabile.setText in edita()? Da testare con editoreData e onActivityResult()...
+		EditText vistaEditabile = vistaPezzo.findViewById( R.id.fatto_edita );
 		vistaEditabile.setText( testo ); // ok nella maggior parte dei casi, ma il testo mostrato in vistaEditabile non si aggiorna dopo onActivityResult()
 		vistaEditabile.post( () -> {
 			vistaEditabile.setText( testo ); // un po' ridondante, ma aggiorna il testo in vistaEditabile dopo onActivityResult()
@@ -483,21 +496,21 @@ public class Dettaglio extends AppCompatActivity {
 		} else if( coso instanceof Address ) { // Indirizzo
 			clicco = vista -> {
 				Memoria.aggiungi( coso );
-				startActivity( new Intent( Dettaglio.this, Indirizzo.class ) );
+				startActivity( new Intent( this, Indirizzo.class ) );
 			};
 		} else if( coso instanceof EventFact ) { // Evento
 			clicco = vista -> {
 				Memoria.aggiungi( coso );
-				startActivity( new Intent( Dettaglio.this, Evento.class ) );
+				startActivity( new Intent( this, Evento.class ) );
 			};
-			// Gli EventFact (in particolare in Famiglia) possono avere delle note e dei media
+			// Gli EventFact della famiglia possono avere delle note e dei media
 			LinearLayout scatolaNote = vistaPezzo.findViewById( R.id.fatto_note );
 			U.mettiNote( scatolaNote, coso, false );
 			U.mettiMedia( scatolaNote, coso, false );
 		} else if( coso instanceof GedcomTag ) { // Estensione
 			clicco = vista -> {
 				Memoria.aggiungi( coso );
-				startActivity( new Intent( Dettaglio.this, Estensione.class ) );
+				startActivity( new Intent( this, Estensione.class ) );
 			};
 		}
 		vistaPezzo.setOnClickListener( clicco );
@@ -545,15 +558,24 @@ public class Dettaglio extends AppCompatActivity {
 			((Submitter)contenitore).setAddress( null );
 	}
 
+	// Compone il testo dell'evento in Famiglia
 	public static String evento( EventFact ef ) {
 		if( ef == null ) return null;
 		String txt = "";
-		if( ef.getValue() != null )
-			txt = ef.getValue() + "\n";
+		if( ef.getValue() != null ) {
+			if( ef.getValue().equals("Y") && ef.getTag() != null && ef.getTag().equals("MARR") )
+				txt = Globale.contesto.getString(R.string.yes);
+			else
+				txt = ef.getValue();
+			txt += "\n";
+		}
 		if( ef.getDate() != null )
 			txt += ef.getDate() + "\n";
 		if( ef.getPlace() != null )
 			txt += ef.getPlace();
+		Address indirizzo = ef.getAddress();
+		if( indirizzo != null )
+			txt += indirizzo(indirizzo) + "\n";
 		if( txt.endsWith( "\n" ) )
 			txt = txt.substring( 0, txt.length() - 1 );
 		return txt;
@@ -568,36 +590,55 @@ public class Dettaglio extends AppCompatActivity {
 		for( int i=0; i < box.getChildCount(); i++ ) {
 			View altroPezzo = box.getChildAt(i);
 			EditText vistaEdita = altroPezzo.findViewById( R.id.fatto_edita );
-			if( vistaEdita != null ) {
-				if( vistaEdita.isShown() ) {
-					TextView vistaTesto = altroPezzo.findViewById( R.id.fatto_testo );
-					if( !vistaEdita.getText().toString().equals(vistaTesto.getText().toString()) ) // se c'è stata editazione
-						salva( altroPezzo, barra, fab );
-					else
-						ripristina( altroPezzo, barra, fab );
-				}
+			if( vistaEdita != null && vistaEdita.isShown() ) {
+				TextView vistaTesto = altroPezzo.findViewById( R.id.fatto_testo );
+				if( !vistaEdita.getText().toString().equals(vistaTesto.getText().toString()) ) // se c'è stata editazione
+					salva( altroPezzo, barra, fab );
+				else
+					ripristina( altroPezzo, barra, fab );
 			}
 		}
 		// Poi rende editabile questo pezzo
-		final TextView vistaTesto = vistaPezzo.findViewById( R.id.fatto_testo );
+		TextView vistaTesto = vistaPezzo.findViewById( R.id.fatto_testo );
 		vistaTesto.setVisibility( View.GONE );
-		vistaEdita = vistaPezzo.findViewById( R.id.fatto_edita );
-		vistaEdita.setVisibility( View.VISIBLE );
 		fab.hide();
-
-		// Se non si tratta di una data mostra la tastiera
-		if( !vistaPezzo.getTag(R.id.tag_oggetto).equals("Date") ) {
-			// Se è un luogo sostituisce vistaEdita con TrovaLuogo
-			if( vistaPezzo.getTag(R.id.tag_oggetto).equals("Place") && !(vistaEdita instanceof TrovaLuogo) ) {
+		Object contenutoPezzo = vistaPezzo.getTag(R.id.tag_oggetto);
+		boolean mostraTastiera = false;
+		vistaEdita = vistaPezzo.findViewById( R.id.fatto_edita );
+		// Luogo
+		if( contenutoPezzo.equals("Place") ) {
+			mostraTastiera = true;
+			// Se non l'ha già fatto, sostituisce vistaEdita con TrovaLuogo
+			if( !(vistaEdita instanceof TrovaLuogo) ) {
 				ViewGroup parent = (ViewGroup) vistaPezzo;  // todo: si potrebbe usare direttamente vistaPezzo se fosse un ViewGroup o LinearLayout anzicé View
 				int index = parent.indexOfChild( vistaEdita );
 				parent.removeView( vistaEdita );
 				vistaEdita = new TrovaLuogo( vistaEdita.getContext(), null );
 				vistaEdita.setId( R.id.fatto_edita );
 				vistaEdita.setText( vistaTesto.getText() );
-				vistaEdita.setInputType( InputType.TYPE_TEXT_FLAG_CAP_WORDS );
 				parent.addView( vistaEdita, index );
-			}
+			} else
+				vistaEdita.setVisibility( View.VISIBLE );
+		} // Name type
+		else if( oggetto instanceof Name && contenutoPezzo.equals("Type") ) {
+			if( !(vistaEdita instanceof TipoNome) ) {
+				ViewGroup parent = (ViewGroup) vistaPezzo;
+				int index = parent.indexOfChild( vistaEdita );
+				parent.removeView( vistaEdita );
+				vistaEdita =  new TipoNome( vistaEdita.getContext(), null );
+				vistaEdita.setText( vistaTesto.getText() );
+				parent.addView( vistaEdita, index );
+			} else
+				vistaEdita.setVisibility( View.VISIBLE );
+		} // Data
+		else if( contenutoPezzo.equals("Date") ) {
+			vistaEdita.setVisibility( View.VISIBLE );
+		} // Tutti gli altri casi normali di editazione
+		else {
+			mostraTastiera = true;
+			vistaEdita.setVisibility( View.VISIBLE );
+		}
+		if( mostraTastiera ) {
 			InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE );
 			imm.toggleSoftInput( InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY );
 		}
@@ -627,7 +668,7 @@ public class Dettaglio extends AppCompatActivity {
 			String cognome = ((EditText)box.getChildAt(1).findViewById(R.id.fatto_edita)).getText().toString();
 			((Name)oggetto).setValue( nome + " /" + cognome + "/" );
 		} else try { // Tutti gli altri normali metodi
-			oggetto.getClass().getMethod( "set" + oggettoPezzo, String.class )	.invoke( oggetto, testo );
+			oggetto.getClass().getMethod( "set" + oggettoPezzo, String.class ).invoke( oggetto, testo );
 		} catch( Exception e ) {
 			//e.printStackTrace();
 			Toast.makeText( box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
@@ -876,7 +917,7 @@ public class Dettaglio extends AppCompatActivity {
 				U.eliminaEstensione( (GedcomTag)oggettoPezzo, oggetto, vistaPezzo );
 				break;
 			case 70: // Scegli fonte in Biblioteca
-				Intent inte = new Intent( Dettaglio.this, Principe.class );
+				Intent inte = new Intent( this, Principe.class );
 				inte.putExtra( "bibliotecaScegliFonte", true );
 				startActivityForResult( inte,7047 );
 				return true;
@@ -886,7 +927,7 @@ public class Dettaglio extends AppCompatActivity {
 				box.removeView( vistaPezzo );
 				break;
 			case 90: // Scegli archivio in Magazzino
-				Intent intn = new Intent( Dettaglio.this, Principe.class );
+				Intent intn = new Intent( this, Principe.class );
 				intn.putExtra( "magazzinoScegliArchivio", true );
 				startActivityForResult( intn,5390 );
 				return true;

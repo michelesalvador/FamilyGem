@@ -111,7 +111,6 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 			// Galleria in modalità normale apre Immagine
 			} else {
 				Intent intento = new Intent( v.getContext(), Immagine.class );
-				//s.l("contenitore "+contenitore.getClass() );
 				if( media.getId() != null ) { // tutti i Media record
 					Memoria.setPrimo( media );
 				} else if( (attiva instanceof Individuo && contenitore instanceof Person) // media di primo livello nell'Indi

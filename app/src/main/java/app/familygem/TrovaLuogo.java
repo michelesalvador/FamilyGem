@@ -3,6 +3,7 @@
 package app.familygem;
 
 import android.content.Context;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
@@ -25,6 +26,7 @@ public class TrovaLuogo extends AppCompatAutoCompleteTextView {
 		super( contesto, as );
 		AdattatoreLista adattatoreLista = new AdattatoreLista( contesto, android.R.layout.simple_spinner_dropdown_item );
 		setAdapter(adattatoreLista);
+		setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 		//setThreshold(2);
 
 		// GeoNames settings
