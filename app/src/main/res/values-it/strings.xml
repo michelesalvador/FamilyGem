@@ -6,7 +6,7 @@
     <string name="done">Fatto</string>
     <string name="change_date">Data modifica</string>
     <string name="something_wrong">Qualcosa è andato storto.</string>
-    <string name="cant_understand_uri">Non capisco l\'uri che ho ricevuto.</string>
+    <string name="cant_understand_uri">Non capisco l\'URI che ho ricevuto.</string>
     <string name="version_name">Versione %s</string>
     <string name="make_default">Autore principale</string>
     <string name="citations">Citazioni</string>
@@ -31,7 +31,7 @@
     <string name="empty_tree">Crea un albero vuoto</string>
     <string name="download_example">Scarica un esempio</string>
     <string name="import_gedcom">Importa un file GEDCOM</string>
-    <string name="import_backup">Recupera un backup Zip</string>
+    <string name="import_backup">Recupera un backup ZIP</string>
     <string name="modify_later">In seguito potrai modificarlo.</string>
     <string name="name_of_tree">Titolo dell\'albero</string>
     <string name="create">Crea</string>
@@ -50,7 +50,7 @@
     <string name="generation">Generazione</string>
     <string name="generations">Generazioni</string>
     <string name="no_useful_data">Non riesco a ricavare dati utilizzabili.</string>
-    <string name="make_backup">Salva backup Zip</string>
+    <string name="make_backup">Salva backup ZIP</string>
     <string name="save">Salva</string>
     <string name="open">Apri</string>
     <string name="tree_info">Informazioni</string>
@@ -230,8 +230,8 @@
     <string name="place">Luogo</string>
     <string name="cause">Causa</string>
     <string name="www">Sito web</string>
-    <string name="email">Email</string>
-    <string name="rin">Rin</string>
+    <string name="email">E-mail</string>
+    <string name="rin">ID automatizzato del record</string>
     <string name="user_id">ID utente</string>
     <!-- CitazioneFonte -->
     <string name="source_citation">Citazione fonte</string>
@@ -260,8 +260,8 @@
     <string name="shared_media">Media condiviso</string>
     <string name="format">Formato</string>
     <string name="primary">Principale</string>
-    <string name="scrapbook">Scrapbook</string>
-    <string name="slideshow">SlideShow</string>
+    <string name="scrapbook">Album</string>
+    <string name="slideshow">Presentazione</string>
     <string name="blob">Blob</string>
     <string name="used_by">Usato da</string>
     <string name="into">Dentro a</string>
@@ -297,10 +297,10 @@
     <string name="death_place">Luogo morte</string>
     <string name="saved">Salvato</string>
     <string name="new_family">Nuova famiglia</string>
-    <string name="which_family_add_parent">A quale famiglia vuoi aggiungere un genitore?</string>
-    <string name="which_family_add_sibling">A quale famiglia vuoi aggiungere un fratello?</string>
-    <string name="which_family_add_spouse">A quale famiglia vuoi aggiungere un coniuge?</string>
-    <string name="which_family_add_child">A quale famiglia vuoi aggiungere un figlio?</string>
+    <string name="which_family_add_parent">In quale famiglia vuoi aggiungere il genitore\?</string>
+    <string name="which_family_add_sibling">In quale famiglia vuoi aggiungere il fratello\?</string>
+    <string name="which_family_add_spouse">In quale famiglia vuoi aggiungere il coniuge\?</string>
+    <string name="which_family_add_child">In quale famiglia vuoi aggiungere il figlio\?</string>
     <!-- EditoreData -->
     <string name="double_date">Doppia</string>
     <string name="january">Gennaio</string>
