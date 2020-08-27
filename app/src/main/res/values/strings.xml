@@ -32,7 +32,7 @@
     <string name="empty_tree">Start an empty tree</string>
     <string name="download_example">Download an example</string>
     <string name="import_gedcom">Import a GEDCOM file</string>
-    <string name="import_backup">Recover a Zip backup</string>
+    <string name="import_backup">Recover a ZIP backup</string>
     <string name="modify_later">Later you can edit it.</string>
     <string name="name_of_tree">Title of tree</string>
     <string name="create">Create</string>
@@ -42,7 +42,7 @@
     <string name="warning">Warning</string>
     <string name="old_backup_overwrite">This is an old type of backup. All existing trees will be overwritten!\nProceed?</string>
     <string name="backup_invalid">This backup is invalid.</string>
-    <string name="invalid_gedcom">Invalid Gedcom.</string>
+    <string name="invalid_gedcom">Invalid GEDCOM.</string>
     <string name="tree">Tree</string>
     <string name="simpsons_tree">The Simpsons Family Tree</string>
     <string name="downloading">Downloading…</string>
@@ -51,7 +51,7 @@
     <string name="generation">Generation</string>
     <string name="generations">Generations</string>
     <string name="no_useful_data">Can\'t get useful data.</string>
-    <string name="make_backup">Save Zip backup</string>
+    <string name="make_backup">Save ZIP backup</string>
     <string name="save">Save</string>
     <string name="open">Open</string>
     <string name="tree_info">Info</string>
@@ -230,9 +230,9 @@
     <!-- Evento -->
     <string name="place">Place</string>
     <string name="cause">Cause</string>
-    <string name="www">Web site</string>
-    <string name="email">Email</string>
-    <string name="rin">Rin</string>
+    <string name="www">Website</string>
+    <string name="email">E-mail</string>
+    <string name="rin">Automated record ID</string>
     <string name="user_id">User ID</string>
     <!-- CitazioneFonte -->
     <string name="source_citation">Source citation</string>
@@ -262,7 +262,7 @@
     <string name="format">Format</string>
     <string name="primary">Primary</string>
     <string name="scrapbook">Scrapbook</string>
-    <string name="slideshow">SlideShow</string>
+    <string name="slideshow">Slide show</string>
     <string name="blob">Blob</string>
     <string name="used_by">Used by</string>
     <string name="into">Into</string>
@@ -298,10 +298,10 @@
     <string name="death_place">Death place</string>
     <string name="saved">Saved</string>
     <string name="new_family">New family</string>
-    <string name="which_family_add_parent">To which family you add the parent?</string>
-    <string name="which_family_add_sibling">To which family you add the sibling?</string>
-    <string name="which_family_add_spouse">To which family you add the spouse?</string>
-    <string name="which_family_add_child">To which family you add the child?</string>
+    <string name="which_family_add_parent">Which family should the parent be added to\?</string>
+    <string name="which_family_add_sibling">Which family should the sibling be added to\?</string>
+    <string name="which_family_add_spouse">Which family should the spouse be added to\?</string>
+    <string name="which_family_add_child">Which family should the child be added to\?</string>
     <!-- EditoreData -->
     <string name="double_date">Double</string>
     <string name="january">January</string>
@@ -335,7 +335,7 @@
     <string name="want_crop_image">Do you want to crop this image?</string>
     <string name="no">No</string>
     <string name="not_granted">%s not granted.</string>
-    <string name="empty_media">Empty Media</string>
+    <string name="empty_media">Empty media</string>
     <string name="empty_family">Empty family</string>
     <string name="which_family">Which family?</string>
     <string name="empty_family_delete">There are some empty families left.\nDo you want to delete them?</string>
