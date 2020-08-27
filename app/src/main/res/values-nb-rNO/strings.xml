@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_with">Del med</string>
-    <string name="usually_your_name">Vanligvis ditt for- og etternavn</string>
+    <string name="usually_your_name">Vanligvis ditt for- og etternavn.</string>
     <string name="export_gedcom">Eksporter GEDCOM</string>
     <string name="cant_understand_uri">Kan ikke tolke mottatt URI.</string>
     <string name="no">Nei</string>
@@ -132,7 +132,7 @@
     <string name="downloading">Laster ned…</string>
     <string name="simpsons_tree">Simpsons-familietreet</string>
     <string name="tree">Tre</string>
-    <string name="invalid_gedcom">Ugyldig GEDCOM</string>
+    <string name="invalid_gedcom">Ugyldig GEDCOM.</string>
     <string name="warning">Advarse</string>
     <string name="tree_created">Nytt tre opprettet.</string>
     <string name="create">Opprett</string>
@@ -156,7 +156,7 @@
     <string name="sources_number">Antall kilder</string>
     <string name="citations">Siteringer</string>
     <string name="version_name">Versjon %s</string>
-    <string name="something_wrong">Noe gikk galt</string>
+    <string name="something_wrong">Noe gikk galt.</string>
     <string name="change_date">Endre dato</string>
     <string name="done">Ferdig</string>
     <string name="cancel">Avbryt</string>
