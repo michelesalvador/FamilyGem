@@ -318,4 +318,6 @@
     <string name="cancel">Abbrechen</string>
     <string name="delete">Löschen</string>
     <string name="tagline">Erstelle Deinen eigenen Stammbaum</string>
+    <string name="www">Website</string>
+    <string name="email">E-Mail</string>
 </resources>
