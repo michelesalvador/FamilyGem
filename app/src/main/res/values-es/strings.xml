@@ -5,7 +5,7 @@
     <string name="cancel">Cancelar</string>
     <string name="done">Listo</string>
     <string name="change_date">Fecha modificación</string>
-    <string name="something_wrong">Algo no ha funcionado</string>
+    <string name="something_wrong">Algo no ha funcionado.</string>
     <string name="drawer_open">Abrir el menú</string>
     <string name="drawer_close">Cerrar el menú</string>
     <string name="trees">Árboles</string>
@@ -20,7 +20,7 @@
     <string name="empty_tree">Crear un nuevo árbol</string>
     <string name="download_example">Descargar un ejemplo</string>
     <string name="import_gedcom">Importar un archivo GEDCOM</string>
-    <string name="import_backup">Recuperar una copia de seguridad Zip</string>
+    <string name="import_backup">Recuperar una copia de seguridad ZIP</string>
     <string name="modify_later">Más tarde conseguirá editarlo.</string>
     <string name="name_of_tree">Titúlo del árbol</string>
     <string name="create">Crear</string>
@@ -30,7 +30,7 @@
     <string name="generation">Generación</string>
     <string name="generations">Generaciones</string>
     <string name="no_useful_data">No puedo obtener datos útiles.</string>
-    <string name="make_backup">Guardar copia de seguridad Zip</string>
+    <string name="make_backup">Guardar copia de seguridad ZIP</string>
     <string name="settings">Configuración</string>
     <string name="about">Acerca</string>
     <string name="save">Guardar</string>
@@ -147,7 +147,7 @@
     <string name="cause">Causa</string>
     <string name="www">Sitio web</string>
     <string name="email">Correo electrónico</string>
-    <string name="rin">Rin</string>
+    <string name="rin">Id. de registro automatizado</string>
     <string name="user_id">Nombre de usuario</string>
     <string name="source_citation">Referencia fuente</string>
     <string name="inexistent_source_citation">Referencia fuente inexistente</string>
@@ -199,10 +199,10 @@
     <string name="death_place">Lugar defunción</string>
     <string name="saved">Guardado</string>
     <string name="new_family">Nueva familia</string>
-    <string name="which_family_add_parent">¿A qué familia quiere añadir un padre?</string>
-    <string name="which_family_add_sibling">¿A qué familia quiere añadir un hermano?</string>
-    <string name="which_family_add_spouse">¿A qué familia quiere añadir un cónyuge?</string>
-    <string name="which_family_add_child">¿A qué familia quiere añadir un hijo?</string>
+    <string name="which_family_add_parent">¿A qué familia quiere añadir el padre\?</string>
+    <string name="which_family_add_sibling">¿A qué familia quiere añadir el hermano\?</string>
+    <string name="which_family_add_spouse">¿A qué familia quiere añadir el cónyuge\?</string>
+    <string name="which_family_add_child">¿A qué familia quiere añadir el hijo\?</string>
     <string name="january">Enero</string>
     <string name="february">Febrero</string>
     <string name="march">Marzo</string>
@@ -236,7 +236,7 @@
     <string name="extension">Otro</string>
     <string name="this_is_root">%s es la persona principal del árbol.</string>
     <string name="add">Añadir</string>
-    <string name="cant_understand_uri">No puedo comprender el uri recibido.</string>
+    <string name="cant_understand_uri">No puedo comprender el URI recibido.</string>
     <string name="click_this_link">Hacer click en el enlace para ver mi árbol genealógico: %s</string>
     <string name="compare">Comparar</string>
     <string name="confirm">Confirmar</string>
@@ -308,4 +308,8 @@
     <string name="generations_display_diagram">Establece cuántas generaciones mostrar en el diagrama.</string>
     <string name="existing_family">Familia ya existente</string>
     <string name="refresh">Actualizar</string>
+    <string name="immigrant">Inmigrado</string>
+    <string name="divorce">Divorcio</string>
+    <string name="married">Casado/a</string>
+    <string name="maiden">Soltera</string>
 </resources>

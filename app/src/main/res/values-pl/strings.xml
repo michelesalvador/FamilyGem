@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Family Gem</string>
     <string name="tagline">Stwórz własne drzewo genealogiczne</string>
@@ -6,7 +7,7 @@
     <string name="done">Gotowe</string>
     <string name="change_date">Zmień datę</string>
     <string name="something_wrong">Coś poszło nie tak.</string>
-    <string name="cant_understand_uri">Nie rozumiem otrzymanego adresu uri.</string>
+    <string name="cant_understand_uri">Nie rozumiem otrzymanego adresu URI.</string>
     <string name="version_name">Wersja %s</string>
     <string name="make_default">Główny zgłaszający</string>
     <string name="citations">Cytaty</string>
@@ -28,18 +29,19 @@
     <string name="new_tree">Nowe drzewo</string>
     <string name="empty_tree">Uruchom puste drzewo</string>
     <string name="download_example">Pobierz przykład</string>
-    <string name="import_gedcom">Zaimportuj plik Gedcom</string>
-    <string name="import_backup">Przywracanie kopii zapasowej z pliku zip </string>
+    <string name="import_gedcom">Zaimportuj plik GEDCOM</string>
+    <string name="import_backup">Przywracanie kopii zapasowej z pliku ZIP</string>
     <string name="modify_later">Później możesz go edytować.</string>
     <string name="name_of_tree">Tytuł drzewa</string>
     <string name="create">Utwórz</string>
     <string name="tree_created">Utworzono nowe drzewo.</string>
-    <string name="complex_tree_advanced_tools">To drzewo wygląda na dość złożone. Aby lepiej nim zarządzać, czy chcesz pokazać zaawansowane narzędzia?</string>
+    <string name="complex_tree_advanced_tools">To drzewo wygląda na dość złożone.
+\nAby lepiej nim zarządzać, czy chcesz pokazać zaawansowane narzędzia\?</string>
     <string name="tree_imported_ok">Drzewo zostało pomyślnie zaimportowane.</string>
     <string name="warning">Ostrzeżenie</string>
     <string name="old_backup_overwrite">To jest stary typ kopii zapasowej. Wszystkie istniejące drzewa zostaną zastąpione!\nKontynuować?</string>
     <string name="backup_invalid">Ta kopia zapasowa jest nieprawidłowa.</string>
-    <string name="invalid_gedcom">Nieprawidłowy Gedcom.</string>
+    <string name="invalid_gedcom">Nieprawidłowy GEDCOM.</string>
     <string name="tree">Drzewo</string>
     <string name="simpsons_tree">Drzewo genealogiczne Simpsonów</string>
     <string name="downloading">Pobieranie…</string>
@@ -47,7 +49,7 @@
     <string name="generation">Pokolenie</string>
     <string name="generations">Pokoleń</string>
     <string name="no_useful_data">Nie można uzyskać przydatnych danych.</string>
-    <string name="make_backup">Zapisz kopię zapasową do pliku zip</string>
+    <string name="make_backup">Zapisz kopię zapasową do pliku ZIP</string>
     <string name="save">Zapisz</string>
     <string name="open">Otwórz</string>
     <string name="tree_info">Informacje</string>
@@ -55,7 +57,7 @@
     <string name="find_errors">Znajdź błędy</string>
     <string name="share_tree">Udostępnij</string>
     <string name="compare">Porównaj</string>
-    <string name="export_gedcom">Eksportuj Gedcom</string>
+    <string name="export_gedcom">Eksportuj GEDCOM</string>
     <string name="no_results">Brak wyników.</string>
     <string name="really_delete_tree">Naprawdę chcesz usunąć to drzewo?</string>
     <string name="all_ok">Wszystko jest OK.</string>
@@ -85,7 +87,7 @@
     <string name="date">Data</string>
     <string name="submitter">Udostępniający</string>
     <string name="submission">Podległość</string>
-    <string name="gedcom">Gedcom</string>
+    <string name="gedcom">GEDCOM</string>
     <string name="form">Format</string>
     <string name="destination">Docelowy</string>
     <string name="time">Czas</string>
