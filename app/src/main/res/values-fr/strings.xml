@@ -107,7 +107,7 @@
     <string name="correct">Correct</string>
     <string name="errors_found">%d erreurs trouvées.</string>
     <string name="all_ok">Tout est en ordre.</string>
-    <string name="really_delete_tree">Voulez-vous vraiment supprimer cet arbre \?</string>
+    <string name="really_delete_tree">Voulez-vous vraiment supprimer cet arbre \?</string>
     <string name="no_results">Pas de résultats.</string>
     <string name="export_gedcom">Exporter comme GEDCOM</string>
     <string name="compare">Comparer</string>
@@ -132,7 +132,7 @@
     <string name="warning">Avertissement</string>
     <string name="tree_imported_ok">Arbre importé avec succès.</string>
     <string name="complex_tree_advanced_tools">Cet arbre a l\'air assez complexe.
-\nPour mieux le gérer, voulez-vous afficher des outils avancés \?</string>
+\nPour mieux le gérer, voulez-vous afficher des outils avancés \?</string>
     <string name="tree_created">Nouvel arbre créé.</string>
     <string name="create">Créer</string>
     <string name="name_of_tree">Titre de l\'arbre</string>
