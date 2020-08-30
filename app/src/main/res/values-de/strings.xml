@@ -291,8 +291,8 @@
     <string name="tree">Stammbaum</string>
     <string name="invalid_gedcom">GEDCOM-Datei ist ungültig.</string>
     <string name="backup_invalid">Das Backup ist ungültig.</string>
-    <string name="old_backup_overwrite">Alter Backup Typ. Alle bestehenden Stammbäume werden überschrieben !
-\nAusführen \?</string>
+    <string name="old_backup_overwrite">Alter Backup Typ. Alle bestehenden Stammbäume werden überschrieben!
+\nAusführen\?</string>
     <string name="warning">Warnung</string>
     <string name="tree_imported_ok">Stammbaum erfolgreich importiert.</string>
     <string name="complex_tree_advanced_tools">Dieser Stammbaum sieht sehr komplex aus.
