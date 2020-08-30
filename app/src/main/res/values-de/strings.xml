@@ -18,7 +18,7 @@
     <string name="create_header">Header erstellen</string>
     <string name="new_person">Erstelle eine neue Person</string>
     <string name="header">Datei-Header</string>
-    <string name="repositories">Archieve</string>
+    <string name="repositories">Archive</string>
     <string name="rename">Umbenennen</string>
     <string name="modify_later">Du kannst den Titel auch später beabeiten.</string>
     <string name="empty_tree">Neuen Stammbaum anlegen</string>
@@ -56,8 +56,8 @@
     <string name="to">Zu</string>
     <string name="from">Von</string>
     <string name="between">Zwischen... und</string>
-    <string name="before">Zuvor</string>
-    <string name="after">Danach</string>
+    <string name="before">Vor</string>
+    <string name="after">Nach</string>
     <string name="estimated">Geschätzt</string>
     <string name="calculated">Berechnet</string>
     <string name="approximate">Ungefähr</string>
@@ -188,10 +188,10 @@
     <string name="yes">Ja</string>
     <string name="this_is_root">%s ist die Hauptperson des Stammbaums.</string>
     <string name="make_root">Als Wurzel setzen</string>
-    <string name="relatives">Beziehungen</string>
+    <string name="relatives">Verbindungen</string>
     <string name="person_deleted">Person gelöscht.</string>
     <string name="really_delete_person">Diese Person wirklich löschen \?</string>
-    <string name="number_relatives">Anzahl der Beziehungen</string>
+    <string name="number_relatives">Anzahl der Verbindungen</string>
     <string name="year">Jahr</string>
     <string name="surname">Nachname</string>
     <string name="id">ID</string>
@@ -266,7 +266,7 @@
     <string name="root">Wurzel</string>
     <string name="item_exists_but_file">Der Stammbaum Eintrag ist vorhanden, aber die zugehörige Datei fehlt:</string>
     <string name="about">Über</string>
-    <string name="show_advanced_functions">Erweiterte Werkzeuge zeigen</string>
+    <string name="show_advanced_functions">Erweiterte Werkzeuge anzeigen</string>
     <string name="load_tree_startup">Letzten Stammbaum beim Start laden</string>
     <string name="auto_save">Automatisches Speichern</string>
     <string name="settings">Einstellungen</string>
@@ -283,7 +283,7 @@
     <string name="tree_info">Info</string>
     <string name="open">Öffnen</string>
     <string name="save">Sichern</string>
-    <string name="make_backup">Sichere ZIP Backup</string>
+    <string name="make_backup">Als ZIP Backup exportieren</string>
     <string name="generation">Generation</string>
     <string name="generations">Generationen</string>
     <string name="persons">Personen</string>
