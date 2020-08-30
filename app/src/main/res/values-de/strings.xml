@@ -198,10 +198,10 @@
     <string name="order_by">Sortiert nach</string>
     <string name="descendants">Nachkommen</string>
     <string name="siblings">Geschwister</string>
-    <string name="uncles">Onkels</string>
+    <string name="uncles">Onkels/Tanten</string>
     <string name="ancestors">Vorfahren</string>
-    <string name="generations_display_diagram">Wie mehrere Generationen in einem Diagram dargestellt werden können.</string>
-    <string name="diagram_settings">Diagram einstellungen</string>
+    <string name="generations_display_diagram">Wieviele Generationen in einem Diagramm dargestellt werden.</string>
+    <string name="diagram_settings">Diagramm einstellungen</string>
     <string name="person_unlinked">Die Verbindung dieser Person wurde getrennt.</string>
     <string name="child">Kind</string>
     <string name="spouse">Ehepartner</string>
