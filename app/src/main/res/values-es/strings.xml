@@ -292,7 +292,8 @@
     <string name="siblings">Hermanos</string>
     <string name="uncles">Tíos</string>
     <string name="accept_all">Aceptar todas</string>
-    <string name="long_press_menu">Mantener presionado para mostrar el menú.\nPulsar para abrir la tarjeta.</string>
+    <string name="long_press_menu">Mantener presionado para mostrar el menú.
+\nPulsar para abrir la tarjeta.</string>
     <string name="one_update_choice">Una actualización necesita una elección</string>
     <string name="many_updates_choice">%d actualizaciones necesitan una elección</string>
     <string name="updates_replace_add">Tiene que elegir si las actualizaciones deben reemplazar los elementos existentes o añadirse como nuevos elementos.</string>
