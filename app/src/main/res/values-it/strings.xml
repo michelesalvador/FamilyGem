@@ -131,7 +131,7 @@
     <string name="all_imported_delete">Tutti gli aggiornamenti sono stati importati.\nVuoi eliminare l\'albero importato?</string>
     <!-- Diagram -->
     <string name="new_person">Inserisci una persona</string>
-    <string name="card">Scheda</string>
+    <string name="card">Profilo</string>
     <string name="family_as_child">Famiglia (come figlio)</string>
     <string name="family_as_spouse">Famiglia (come coniuge)</string>
     <string name="new_relative">Collega nuova persona</string>
@@ -142,7 +142,8 @@
     <string name="sibling">Fratello/sorella</string>
     <string name="spouse">Coniuge</string>
     <string name="child">Figlio/a</string>
-    <string name="long_press_menu">Tieni premuto per mostrare il menu.\nTocca per aprire la scheda.</string>
+    <string name="long_press_menu">Tieni premuto per mostrare il menu.
+\nTocca per aprire il profilo.</string>
     <string name="person_unlinked">Persona scollegata.</string>
     <!-- Diagram settings -->
     <string name="diagram_settings">Impostazioni diagramma</string>
