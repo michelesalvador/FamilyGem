@@ -30,7 +30,7 @@
     <string name="empty_tree">Uruchom puste drzewo</string>
     <string name="download_example">Pobierz przykład</string>
     <string name="import_gedcom">Zaimportuj plik GEDCOM</string>
-    <string name="import_backup">Przywracanie kopii zapasowej z pliku ZIP</string>
+    <string name="import_backup">Przywróć kopię zapasową z pliku ZIP</string>
     <string name="modify_later">Później możesz go edytować.</string>
     <string name="name_of_tree">Tytuł drzewa</string>
     <string name="create">Utwórz</string>
