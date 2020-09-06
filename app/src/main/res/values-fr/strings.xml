@@ -168,4 +168,6 @@
     <string name="cancel">Annuler</string>
     <string name="delete">Supprimer</string>
     <string name="tagline">Créez votre propre arbre généalogique</string>
+    <string name="want_crop_image">Voulez-vous rogner cette image \?</string>
+    <string name="no">Non</string>
 </resources>
