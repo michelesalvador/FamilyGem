@@ -4,7 +4,7 @@
     <string name="estimated">Приблизно</string>
     <string name="after">Після</string>
     <string name="before">Раніше</string>
-    <string name="from_to">Від... для</string>
+    <string name="from_to">Від… для</string>
     <string name="date_phrase">Фраза</string>
     <string name="no_name">Без імені</string>
     <string name="empty_name">Порожнє ім\'я</string>
@@ -49,7 +49,7 @@
     <string name="id">ID</string>
     <string name="order_by">Сортувати за</string>
     <string name="descendants">Нащадки</string>
-    <string name="siblings">Брати і сестри</string>
+    <string name="siblings">Брати/сестри</string>
     <string name="uncles">Дядьки</string>
     <string name="ancestors">Предки</string>
     <string name="generations_display_diagram">Встановіть, скільки поколінь відображати на схемі.</string>
