@@ -104,7 +104,7 @@
     <string name="load_tree_startup">Charger le dernier arbre ouvert au démarrage</string>
     <string name="auto_save">Sauvegarde automatique</string>
     <string name="settings">Paramètres</string>
-    <string name="correct">Correct</string>
+    <string name="correct">Corriger</string>
     <string name="errors_found">%d erreurs trouvées.</string>
     <string name="all_ok">Tout est en ordre.</string>
     <string name="really_delete_tree">Voulez-vous vraiment supprimer cet arbre \?</string>
