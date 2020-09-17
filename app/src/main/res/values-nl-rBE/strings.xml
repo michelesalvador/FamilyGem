@@ -61,7 +61,7 @@
     <string name="new_note">Nieuwe notitie</string>
     <string name="other">Andere</string>
     <string name="burial">Begrafenis</string>
-    <string name="death">Overleden</string>
+    <string name="death">Overlijden</string>
     <string name="occupation">Beroep</string>
     <string name="residence">Woonplaats</string>
     <string name="baptism">Doop</string>
@@ -234,7 +234,7 @@
     <string name="cant_understand_uri">Kan de ontvangen URI niet begrijpen.</string>
     <string name="something_wrong">Er is iets fout gegaan.</string>
     <string name="make_root">Ingesteld als root</string>
-    <string name="birth">Geboren</string>
+    <string name="birth">Geboorte</string>
     <string name="id">Identiteit</string>
     <string name="diagram_settings">Schema instellingen</string>
     <string name="diagram">Schema</string>
@@ -259,7 +259,7 @@
     <string name="which_family_add_parent">Aan welk gezin moet de ouder worden toegevoegd\?</string>
     <string name="new_family">Nieuwe familie</string>
     <string name="saved">Opgeslagen</string>
-    <string name="death_date">Sterfdatum</string>
+    <string name="death_date">Overlijdensdatum</string>
     <string name="birth_place">Geboorteplaats</string>
     <string name="birth_date">Geboortedatum</string>
     <string name="unknown">Onbekend</string>
