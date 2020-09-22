@@ -195,4 +195,10 @@
     <string name="cancel">Скасувати</string>
     <string name="delete">Видалити</string>
     <string name="tagline">Створіть власне генеалогічне дерево</string>
+    <string name="move_down">Рухатися вниз</string>
+    <string name="move_up">Рухатися вгору</string>
+    <string name="primary_media">Первинні медіа</string>
+    <string name="link_source">Джерело посилання</string>
+    <string name="new_source">Нове джерело</string>
+    <string name="new_source_note">Нове джерело-примітка</string>
 </resources>
