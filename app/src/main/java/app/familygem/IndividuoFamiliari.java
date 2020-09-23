@@ -27,7 +27,7 @@ public class IndividuoFamiliari extends Fragment {
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
 		vistaFamiglia = inflater.inflate(R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
-			uno = gc.getPerson( getActivity().getIntent().getStringExtra("idIndividuo") );
+			uno = gc.getPerson( Globale.individuo );
 			if( uno != null ) {
 				// Famiglie di origine: genitori e fratelli
 				List<Family> listaFamiglie = uno.getParentFamilies(gc);
@@ -104,8 +104,9 @@ public class IndividuoFamiliari extends Fragment {
 		}
 		View vistaPersona = U.mettiIndividuo( scatola, p, getString(ruolo) );
 		vistaPersona.setOnClickListener( v -> {
-			Intent intento = new Intent( getContext(), Individuo.class);
-			intento.putExtra( "idIndividuo", p.getId() );
+			getActivity().finish(); // Rimuove l'attività attale dallo stack
+			Memoria.replacePrimo( p );
+			Intent intento = new Intent(getContext(), Individuo.class);
 			intento.putExtra( "scheda", 2 );	// apre la scheda famiglia
 			startActivity( intento );
 		});
@@ -139,10 +140,11 @@ public class IndividuoFamiliari extends Fragment {
 		}
 		// Meglio usare numeri che non confliggano con i menu contestuali delle altre schede individuo
 		menu.add( 0, 300, 0, R.string.diagram );
-		if( !pers.getParentFamilies(gc).isEmpty() )
-			menu.add(0, 301, 0, pers.getSpouseFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_child );
-		if( !pers.getSpouseFamilies(gc).isEmpty() )
-			menu.add(0, 302, 0, pers.getParentFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_spouse );
+		String[] familyLabels = Diagram.getFamilyLabels( getContext(), pers );
+		if( familyLabels[0] != null )
+			menu.add( 0, 301, 0, familyLabels[0] );
+		if( familyLabels[1] != null )
+			menu.add( 0, 302, 0, familyLabels[1] );
 		if( posFam > 0 )
 			menu.add( 0, 303, 0, R.string.move_before );
 		if( posFam >= 0 && posFam < uno.getSpouseFamilyRefs().size()-1 )
@@ -156,10 +158,9 @@ public class IndividuoFamiliari extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id == 300 ) {	// Diagramma
-			Globale.individuo = idIndividuo;
-			startActivity( new Intent( getContext(), Principe.class ) );
+			U.qualiGenitoriMostrare( getContext(), pers, 1 );
 		} else if( id == 301 ) {	// Famiglia come figlio
-			U.qualiGenitoriMostrare( getContext(), pers, Famiglia.class );
+			U.qualiGenitoriMostrare( getContext(), pers, 2 );
 		} else if( id == 302 ) {	// Famiglia come coniuge
 			U.qualiConiugiMostrare( getContext(), pers, familia );
 		} else if( id == 303 ) {	// Sposta su

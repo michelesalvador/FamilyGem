@@ -52,7 +52,9 @@ public class TrovaLuogo extends AppCompatAutoCompleteTextView {
 		}
 		@Override
 		public String getItem(int index) {
-			return places.get(index);
+			if( places.size() > 0 )
+				return places.get(index);
+			return null;
 		}
 		@Override
 		public Filter getFilter() {

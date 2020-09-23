@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import org.folg.gedcom.model.Media;
 import java.util.Arrays;
 import java.util.List;
@@ -95,17 +96,27 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			aggiornaInterfaccia(fragment);
 	}
 
-	// Aggiorna i contenuti quando si torna indietro al primo backPressed()
+	// Aggiorna i contenuti quando si torna indietro con backPressed()
 	@Override
 	public void onRestart() {
 		super.onRestart();
 		if( Globale.editato ) {
-			recreate();
-			Globale.editato = false;
+			if( frammentoAttuale(Diagram.class) ) { // Diagramma già si aggiorna col suo onRestart
+				arredaTestataMenu(); // praticamente solo per mostrare il bottone Salva
+			} else {
+				recreate();
+				Globale.editato = false;
+			}
 		}
 	}
 
-	// Titolo e immagine a caso del Gedcom
+	// Riceve una classe tipo 'Diagram.class' e dice se è il fragment attualmente visibile sulla scena
+	private boolean frammentoAttuale(Class classe) {
+		Fragment attuale = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
+		return classe.isInstance( attuale );
+	}
+
+	// Titolo, immagine a caso, bottone Salva nella testata del menu
 	void arredaTestataMenu() {
 		NavigationView menu = scatolissima.findViewById(R.id.menu);
 		ImageView immagine = menu.getHeaderView(0).findViewById( R.id.menu_immagine );
@@ -132,6 +143,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
 			scatolissima.closeDrawer(GravityCompat.START);
 			Globale.daSalvare = false;
+			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
 		});
 		bottoneSalva.setOnLongClickListener( vista -> {
 			PopupMenu popup = new PopupMenu(this, vista);
@@ -186,8 +198,18 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			fragment = (Fragment) frammenti.get( idMenu.indexOf(item.getItemId()) ).newInstance();
 		} catch(Exception e) {}
 		if( fragment != null ) {
-			getSupportFragmentManager().beginTransaction().replace( R.id.contenitore_fragment, fragment )
-					.addToBackStack(null).commit();
+			if( fragment instanceof Diagram ) {
+				int cosaAprire = 0; // Mostra il diagramma senza chiedere dei molteplici genitori
+				// Se sono già in diagramma e clicco Diagramma, mostra la persona radice
+				if( frammentoAttuale(Diagram.class) ) {
+					Globale.individuo = Globale.preferenze.alberoAperto().radice;
+					cosaAprire = 1; // Eventualmente chiede dei molteplici genitori
+				}
+				U.qualiGenitoriMostrare( this, Globale.gc.getPerson(Globale.individuo), cosaAprire );
+			} else {
+				getSupportFragmentManager().beginTransaction().replace( R.id.contenitore_fragment, fragment )
+						.addToBackStack(null).commit();
+			}
 		}
 		scatolissima.closeDrawer(GravityCompat.START);
 		return true;

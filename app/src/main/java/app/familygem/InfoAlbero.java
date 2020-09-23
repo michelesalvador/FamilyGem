@@ -12,12 +12,16 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import org.folg.gedcom.model.CharacterSet;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
+import org.folg.gedcom.model.GedcomVersion;
+import org.folg.gedcom.model.Generator;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.Submitter;
 import java.io.File;
+import java.util.Locale;
 import app.familygem.visita.ListaMedia;
 
 public class InfoAlbero extends AppCompatActivity {
@@ -82,10 +86,10 @@ public class InfoAlbero extends AppCompatActivity {
 
 		if( gc != null ) {
 			Header h = gc.getHeader();
+			Button bottoneHeader = scatola.findViewById( R.id.info_gestisci_testata );
 			if( h == null) {
-				Button bottoneCrea = scatola.findViewById( R.id.info_crea_testata );
-				bottoneCrea.setVisibility( View.VISIBLE );
-				bottoneCrea.setOnClickListener( view -> {
+				bottoneHeader.setText( R.string.create_header );
+				bottoneHeader.setOnClickListener( view -> {
 					gc.setHeader( AlberoNuovo.creaTestata( file.getName() ) );
 					U.salvaJson( gc, idAlbero );
 					recreate();
@@ -143,6 +147,43 @@ public class InfoAlbero extends AppCompatActivity {
 				spazio();
 				if( righetta != null )
 					((TableLayout)findViewById( R.id.info_tabella ) ).removeView( righetta );
+
+				// Bottone per aggiorna l'header GEDCOM coi parametri di Family Gem
+				bottoneHeader.setOnClickListener( view -> {
+					h.setFile( idAlbero + ".json" );
+					CharacterSet caratteri = h.getCharacterSet();
+					if( caratteri == null ) {
+						caratteri = new CharacterSet();
+						h.setCharacterSet( caratteri );
+					}
+					caratteri.setValue( "UTF-8" );
+					caratteri.setVersion( null );
+
+					Locale loc = new Locale( Locale.getDefault().getLanguage() );
+					h.setLanguage( loc.getDisplayLanguage(Locale.ENGLISH) );
+
+					Generator programma = h.getGenerator();
+					if( programma == null ) {
+						programma = new Generator();
+						h.setGenerator( programma );
+					}
+					programma.setName( getString(R.string.app_name) );
+					programma.setVersion( BuildConfig.VERSION_NAME );
+					programma.setValue( "FAMILY_GEM" );
+					programma.setGeneratorCorporation( null );
+
+					GedcomVersion versioneGc = h.getGedcomVersion();
+					if( versioneGc == null ) {
+						versioneGc = new GedcomVersion();
+						h.setGedcomVersion( versioneGc );
+					}
+					versioneGc.setVersion( "5.5.1" );
+					versioneGc.setForm( "LINEAGE-LINKED" );
+					h.setDestination( null );
+
+					U.salvaJson( gc, idAlbero );
+					recreate();
+				});
 
 				U.mettiNote( scatola, h, true );
 			}

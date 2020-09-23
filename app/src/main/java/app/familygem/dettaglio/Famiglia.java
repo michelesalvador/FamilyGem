@@ -14,9 +14,12 @@ import java.util.Iterator;
 import java.util.List;
 import app.familygem.Dettaglio;
 import app.familygem.EditaIndividuo;
+import app.familygem.Globale;
 import app.familygem.Individuo;
+import app.familygem.Memoria;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.s;
 import static app.familygem.Globale.gc;
 
 public class Famiglia extends Dettaglio {
@@ -74,22 +77,35 @@ public class Famiglia extends Dettaglio {
 		vistaPersona.setTag( R.id.tag_oggetto, p ); // per il menu contestuale in Dettaglio
 		registerForContextMenu( vistaPersona );
 		vistaPersona.setOnClickListener( v -> {
-			// un genitore con una o più famiglie in cui è figlio
-			if( (relazione==1 || relazione==2) && !p.getParentFamilies(gc).isEmpty() ) {
-				U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
+			List<Family> parentFam = p.getParentFamilies(gc);
+			List<Family> spouseFam = p.getSpouseFamilies(gc);
+			// un coniuge con una o più famiglie in cui è figlio
+			if( (relazione==1 || relazione==2) && !parentFam.isEmpty() ) {
+				U.qualiGenitoriMostrare( this, p, 2 );
 			} // un figlio con una o più famiglie in cui è coniuge
 			else if( relazione == 3 && !p.getSpouseFamilies(gc).isEmpty() ) {
-				U.qualiConiugiMostrare( Famiglia.this, p, null );
+				U.qualiConiugiMostrare( this, p, null );
 			} // un figlio non sposato che ha più famiglie genitoriali
-			else if( p.getParentFamilies(gc).size() > 1 ) {
-				U.qualiGenitoriMostrare( Famiglia.this, p, Famiglia.class );
+			else if( parentFam.size() > 1 ) {
+				if( parentFam.size() == 2 ) { // Swappa tra le 2 famiglie genitoriali
+					Globale.individuo = p.getId();
+					Globale.numFamiglia = parentFam.indexOf(f) == 0 ? 1 : 0;
+					Memoria.replacePrimo( parentFam.get(Globale.numFamiglia) );
+					recreate();
+				} else // Più di due famiglie
+					U.qualiGenitoriMostrare( this, p, 2 );
 			} // un coniuge senza genitori ma con più famiglie coniugali
-			else if( p.getSpouseFamilies(gc).size() > 1 ) {
-				U.qualiConiugiMostrare( Famiglia.this, p, null );
+			else if( spouseFam.size() > 1 ) {
+				if( spouseFam.size() == 2 ) { // Swappa tra le 2 famiglie coniugali
+					Globale.individuo = p.getId();
+					Family altraFamiglia = spouseFam.get( spouseFam.indexOf(f) == 0 ? 1 : 0 );
+					Memoria.replacePrimo( altraFamiglia );
+					recreate();
+				} else
+					U.qualiConiugiMostrare( this, p, null );
 			} else {
-				Intent intento = new Intent( Famiglia.this, Individuo.class );
-				intento.putExtra( "idIndividuo", p.getId() );
-				startActivity( intento );
+				Memoria.setPrimo( p );
+				startActivity( new Intent(this, Individuo.class) );
 			}
 		});
 		if( unRappresentanteDellaFamiglia == null )

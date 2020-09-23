@@ -32,8 +32,7 @@
 			android:layout_alignParentLeft="true"
 			android:layout_marginRight="4dp"
 			android:textSize="15sp"
-			android:textColor="#000"
-			android:text="Marito Cognomone Lungo che Va Acapo\nMoglie Cognome Anche esso lungo e andante a CApo" />
+			android:textColor="#000"/>
 
 		<TextView
 			android:id="@+id/famiglia_figli"

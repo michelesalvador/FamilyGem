@@ -21,8 +21,6 @@
 		android:layout_alignParentBottom="true"
 		android:background="#9fff"
 		android:padding="4dp"
-		android:text="Titolo dell'immagine
-nome_file.jpg"
 		android:textColor="#000" />
 
 	<TextView
@@ -37,7 +35,6 @@ nome_file.jpg"
 		android:paddingTop="2dp"
 		android:paddingRight="5dp"
 		android:paddingBottom="2dp"
-		android:text="123"
 		android:textColor="#fff" />
 
 	<ProgressBar

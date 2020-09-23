@@ -26,7 +26,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import com.google.android.material.snackbar.Snackbar;
 import com.otaliastudios.zoom.ZoomLayout;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
@@ -46,7 +45,7 @@ import static app.familygem.Globale.gc;
 
 public class Diagram extends Fragment {
 
-	private Graph graph;
+	Graph graph;
 	private ZoomLayout zoomBox;
 	private RelativeLayout box;
 	private GraphicCard fulcrumView;
@@ -55,10 +54,10 @@ public class Diagram extends Fragment {
 	private int STROKE;
 	private int GLOW_SPACE = 35; // space to display glow, in dp
 	private View popup;
+	private boolean forceDraw;
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle state) {
-
 		density = getResources().getDisplayMetrics().density;
 		STROKE = toPx(2);
 
@@ -74,36 +73,56 @@ public class Diagram extends Fragment {
 
 		zoomBox = view.findViewById( R.id.diagram_zoom );
 		box = view.findViewById( R.id.diagram_box );
+		graph = new Graph( Globale.gc ); // Create a diagram model
+		forceDraw = true; // To be sure the diagram will be draw
 
-		// Create a diagram model
-		graph = new Graph( Globale.gc );
-		graph.maxAncestors( Globale.preferenze.diagram.ancestors )
-				.maxUncles( Globale.preferenze.diagram.uncles )
-				.displaySiblings( Globale.preferenze.diagram.siblings )
-				.maxDescendants( Globale.preferenze.diagram.descendants )
-				.showFamily( getActivity().getIntent().getIntExtra("genitoriNum", 0) );
-		getActivity().getIntent().removeExtra("genitoriNum"); // Reset the value for next calls
-		drawDiagram();
 		return view;
 	}
 
-	private void drawDiagram() {
+	// Individua il fulcro da cui partire, mostra eventuale bottone 'Crea la prima persona' oppure avvia il diagramma
+	@Override
+	public void onStart() {
+		super.onStart();
+		// Ragioni per cui bisogna proseguire, in particolare cose che sono cambiate
+		if( forceDraw || (fulcrumView != null && !fulcrumView.card.person.getId().equals(Globale.individuo))
+				|| Globale.editato || (graph != null && graph.whichFamily != Globale.numFamiglia) ) {
+			forceDraw = false;
+			Globale.editato = false;
 
-		// Empty diagram
-		if( !graph.startFrom(Globale.individuo, Globale.preferenze.alberoAperto().radice, U.trovaRadice(gc)) ) {
-			View button = LayoutInflater.from(getContext()).inflate(R.layout.diagram_button, box, true);
-			button.findViewById( R.id.diagram_new ).setOnClickListener( view -> {
-				Intent intento =  new Intent( getContext(), EditaIndividuo.class );
-				intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
-				startActivity( intento );
-			});
-			// se eventualmente era stato cambiato lo zoom
-			zoomBox.post( () -> zoomBox.realZoomTo(0.7f, true) );
-			if( !Globale.preferenze.esperto )
-				((View)zoomBox.getParent()).findViewById( R.id.diagram_options ).setVisibility( View.GONE );
-			return;
+			String[] ids = { Globale.individuo, Globale.preferenze.alberoAperto().radice, U.trovaRadice(gc) };
+			Person fulcrum = null;
+			for( String id : ids ) {
+				fulcrum = gc.getPerson(id);
+				if (fulcrum != null)
+					break;
+			}
+			// Empty diagram
+			if( fulcrum == null ) {
+				View button = LayoutInflater.from(getContext()).inflate(R.layout.diagram_button, box, true);
+				button.findViewById( R.id.diagram_new ).setOnClickListener( view -> {
+					Intent intento =  new Intent( getContext(), EditaIndividuo.class );
+					intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
+					startActivity( intento );
+				});
+				// se eventualmente era stato cambiato lo zoom
+				zoomBox.post( () -> zoomBox.realZoomTo(0.7f, true) );
+				if( !Globale.preferenze.esperto )
+					((View)zoomBox.getParent()).findViewById( R.id.diagram_options ).setVisibility( View.GONE );
+			} else {
+				Globale.individuo = fulcrum.getId(); // Casomai lo ribadisce
+				graph.maxAncestors( Globale.preferenze.diagram.ancestors )
+						.maxUncles( Globale.preferenze.diagram.uncles )
+						.displaySiblings( Globale.preferenze.diagram.siblings )
+						.maxDescendants( Globale.preferenze.diagram.descendants )
+						.showFamily( Globale.numFamiglia )
+						.startFrom( fulcrum );
+				drawDiagram();
+			}
 		}
-		graph.showFamily(0); // Reset the value for next calls
+	}
+
+	void drawDiagram() {
+		box.removeAllViews();
 
 		// Place graphic nodes in the box taking them from the list of nodes
 		for(Node node : graph.getNodes()) {
@@ -360,9 +379,8 @@ public class Diagram extends Fragment {
 				setOnClickListener( v -> {
 					Person person1 = card.person;
 					if( person1.getId().equals(Globale.individuo) ) {
-						Intent intent = new Intent( getContext(), Individuo.class );
-						intent.putExtra( "idIndividuo", person1.getId() );
-						startActivity( intent );
+						Memoria.setPrimo( person1 );
+						startActivity( new Intent(getContext(), Individuo.class) );
 					} else {
 						clickCard( person1 );
 					}
@@ -380,10 +398,9 @@ public class Diagram extends Fragment {
 			getLayoutInflater().inflate( R.layout.diagram_asterisk, this, true );
 			registerForContextMenu(this);
 			setOnClickListener( v -> {
-				Intent intent = new Intent( getContext(), Individuo.class );
-				intent.putExtra( "idIndividuo", card.person.getId() );
-				startActivity( intent );
-			} );
+				Memoria.setPrimo( card.person );
+				startActivity(new Intent(getContext(), Individuo.class));
+			});
 		}
 	}
 
@@ -507,7 +524,6 @@ public class Diagram extends Fragment {
 	class Lines extends View {
 		Paint paint = new Paint( Paint.ANTI_ALIAS_FLAG );
 		List<Path> paths = new ArrayList<>(); // Each path contains many lines
-		//int[] colors = { Color.WHITE, Color.YELLOW, Color.RED, Color.MAGENTA, Color.CYAN, Color.GREEN, Color.GRAY };
 		public Lines( Context context ) {
 			super(context);
 			paths.add( new Path() );
@@ -521,8 +537,6 @@ public class Diagram extends Fragment {
 			int maxBitmapWidth = canvas.getMaximumBitmapWidth() // is 16384 on emulators, 4096 on my physical devices
 					- STROKE * 3; // the space actually occupied by the line is a little bit larger
 			int pathNum = 0; // index of paths
-			//float pathSize = 0; // size of every single path
-			//s.l( "Max width:", maxBitmapWidth, "Stroke:", STROKE );
 			// Put the lines in one or more paths
 			for(Line line : graph.getLines()) {
 				float x1 = toPx(line.x1), y1 = toPx(line.y1), x2 = toPx(line.x2), y2 = toPx(line.y2);
@@ -534,31 +548,43 @@ public class Diagram extends Fragment {
 						pathNum++;
 						restartX = Math.min(x1,x2);
 						paths.add( new Path() );
-						//pathSize = Math.max(x1,x2) - restartX;
 					}
-					/*else if( pathRight > pathSize )
-						pathSize = pathRight;*/
 					paths.get(pathNum).moveTo( x1, y1 );
 					paths.get(pathNum).cubicTo( x1, y2, x2, y1, x2, y2 );
-					//s.l( pathNum+":", "["+restartX+"]\t", pathSize, "\t("+lineWidth +"/"+ (y2-y1)+")" );
 				}
-				//else s.l("\tLine too large:", lineWidth ,">", maxBitmapWidth);*/
 			}
 			// Draw the paths
-			//pathNum = 0;
 			for( Path path : paths ) {
-				//paint.setColor( colors[pathNum++ % colors.length] );
 				canvas.drawPath( path, paint );
 			}
 		}
 	}
 
 	private void clickCard(Person person) {
-		if( U.qualiGenitoriMostrare(getContext(), person, Principe.class) )
-			return;
+		selectParentFamily( person );
+	}
+
+	// Ask which family to display in the diagram if fulcrum has many parent families
+	private void selectParentFamily( Person fulcrum ) { //, Family excluded
+		List<Family> families = fulcrum.getParentFamilies(gc);
+		//families.remove( excluded ); // No perché cambia la sequenza delle famiglie
+		// todo Si potrebbe disabilitare la famiglia 'excluded', ma occorre un adapter
+		if( families.size() > 1 ) {
+			new AlertDialog.Builder(getContext()).setTitle( R.string.which_family )
+					.setItems( U.elencoFamiglie(families), (dialog, which) -> {
+						completeSelect( fulcrum, which );
+					}).show();
+		} else {
+			completeSelect( fulcrum, 0 );
+		}
+	}
+	// Complete above function
+	private void completeSelect( Person fulcrum, int whichFamily ) {
 		zoomValue = zoomBox.getRealZoom();
-		box.removeAllViews();
-		Globale.individuo = person.getId();
+		Globale.individuo = fulcrum.getId();
+		Globale.numFamiglia = whichFamily;
+		graph.showFamily( Globale.numFamiglia );
+		graph.startFrom( fulcrum );
 		drawDiagram();
 	}
 
@@ -570,28 +596,46 @@ public class Diagram extends Fragment {
 		return (int) (dips * density + 0.5f);
 	}
 
-	// Menu contestuale
+	// Generate the 2 family (as child and as spouse) labels for contextual menu
+	static String[] getFamilyLabels(Context c, Person person) {
+		String[] labels = { null, null };
+		List<Family> parentFams = person.getParentFamilies(gc);
+		List<Family> spouseFams = person.getSpouseFamilies(gc);
+		if( parentFams.size() > 0 )
+			labels[0] = spouseFams.isEmpty() ? c.getString(R.string.family) : c.getString(R.string.family_as_child);
+		if( spouseFams.size() > 0 )
+			labels[1] = parentFams.isEmpty() ? c.getString(R.string.family) : c.getString(R.string.family_as_spouse);
+		return labels;
+	}
+
 	private Person pers;
 	private String idPersona;
-	private Family spouseFam;
+	private Family parentFam; // Displayed family in which the person is child
+	private Family spouseFam; // Selected family in which the person is spouse
 	@Override
 	public void onCreateContextMenu( @NonNull ContextMenu menu, @NonNull View vista, ContextMenu.ContextMenuInfo info ) {
 		if( vista instanceof GraphicCard ) {
 			pers = ((GraphicCard)vista).card.person;
+			parentFam = ((GraphicCard)vista).card.parentFamily;
 			spouseFam = ((GraphicUnitNode)vista.getParent()).unitNode.family;
 		} else if( vista instanceof Asterisk ) {
 			pers = ((Asterisk)vista).card.person;
+			parentFam = ((Asterisk)vista).card.parentFamily;
 			spouseFam = ((GraphicUnitNode)vista.getParent().getParent()).unitNode.family;
 		}
 		idPersona = pers.getId();
+		String[] familyLabels = getFamilyLabels( getContext(), pers );
+
+		if( idPersona.equals(Globale.individuo) && pers.getParentFamilies(gc).size() > 1 )
+			menu.add(0, -1, 0, R.string.diagram );
 		if( !idPersona.equals(Globale.individuo) )
 			menu.add(0, 0, 0, R.string.card );
-		if( !pers.getParentFamilies(gc).isEmpty() )
-			menu.add(0, 1, 0, pers.getSpouseFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_child );
-		if( !pers.getSpouseFamilies(gc).isEmpty() )
-			menu.add(0, 2, 0, pers.getParentFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_spouse );
+		if( familyLabels[0] != null )
+			menu.add(0, 1, 0, familyLabels[0] );
+		if( familyLabels[1] != null )
+			menu.add(0, 2, 0, familyLabels[1] );
 		menu.add(0, 3, 0, R.string.new_relative);
-		if( U.ciSonoIndividuiCollegabili(gc.getPerson(idPersona)) )
+		if( U.ciSonoIndividuiCollegabili(pers) )
 			menu.add(0, 4, 0, R.string.link_person);
 		menu.add(0, 5, 0, R.string.modify);
 		if( !pers.getParentFamilies(gc).isEmpty() || !pers.getSpouseFamilies(gc).isEmpty() )
@@ -605,56 +649,63 @@ public class Diagram extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		CharSequence[] parenti = { getText(R.string.parent), getText(R.string.sibling), getText(R.string.spouse), getText(R.string.child) };
 		int id = item.getItemId();
-		if( id == 0 ) {	// Apri scheda individuo
-			Intent intento = new Intent( getContext(), Individuo.class );
-			intento.putExtra( "idIndividuo", idPersona );
-			startActivity( intento );
-		} else if( id == 1) {	// Famiglia come figlio
-			U.qualiGenitoriMostrare( getContext(), pers, Famiglia.class );
-		} else if( id == 2 ) {	// Famiglia come coniuge
+		if( id == -1 ) { // Diagramma per fulcro figlio in più famiglie
+			if( pers.getParentFamilies(gc).size() > 2 ) // Più di due famiglie
+				selectParentFamily( pers );
+			else // Due famiglie
+				completeSelect( pers, Globale.numFamiglia == 0 ? 1 : 0 );
+		} else if( id == 0 ) { // Apri scheda individuo
+			Memoria.setPrimo( pers );
+			startActivity( new Intent(getContext(), Individuo.class) );
+		} else if( id == 1 ) { // Famiglia come figlio
+			if( idPersona.equals(Globale.individuo) ) { // Se è fulcro apre direttamente la famiglia
+				Memoria.setPrimo( parentFam );
+				startActivity( new Intent( getContext(), Famiglia.class ) );
+			} else
+				U.qualiGenitoriMostrare( getContext(), pers, 2 );
+		} else if( id == 2 ) { // Famiglia come coniuge
 			U.qualiConiugiMostrare( getContext(), pers,
 					idPersona.equals(Globale.individuo) ? spouseFam : null ); // Se è fulcro apre direttamente la famiglia
-		} else if( id == 3 ) {	// Collega persona nuova
+		} else if( id == 3 ) { // Collega persona nuova
 			if( Globale.preferenze.esperto ) {
-				DialogFragment dialog = new NuovoParente(pers, true, null);
+				DialogFragment dialog = new NuovoParente(pers, parentFam, spouseFam, true, null);
 				dialog.show(getActivity().getSupportFragmentManager(), "scegli");
 			} else {
 				new AlertDialog.Builder( getContext() ).setItems( parenti, ( dialog, quale ) -> {
 					Intent intento = new Intent( getContext(), EditaIndividuo.class );
 					intento.putExtra( "idIndividuo", idPersona );
 					intento.putExtra( "relazione", quale + 1 );
-					if( EditaIndividuo.controllaMultiMatrimoni(intento,getContext(),null) )
-						return; // se perno è sposo in più famiglie dialogo chiede a chi aggiungere un coniuge o un figlio
+					if( U.controllaMultiMatrimoni(intento,getContext(),null) ) // aggiunge 'idFamiglia' o 'collocazione'
+						return; // se perno è sposo in più famiglie, chiede a chi aggiungere un coniuge o un figlio
 					startActivity( intento );
 				}).show();
 			}
-		} else if( id == 4 ) {	// Collega persona esistente
+		} else if( id == 4 ) { // Collega persona esistente
 			if( Globale.preferenze.esperto ) {
-				DialogFragment dialog = new NuovoParente(pers, false, Diagram.this);
+				DialogFragment dialog = new NuovoParente(pers, parentFam, spouseFam, false, Diagram.this);
 				dialog.show(getActivity().getSupportFragmentManager(), "scegli");
 			} else {
-				new AlertDialog.Builder( getActivity() ).setItems( parenti, ( dialog, quale ) -> {
+				new AlertDialog.Builder(getContext()).setItems( parenti, (dialog, quale) -> {
 					Intent intento = new Intent( getContext(), Principe.class );
-					intento.putExtra( "idIndividuo", idPersona ); // serve solo a quel pistino di controllaMultiMatrimoni()
+					intento.putExtra( "idIndividuo", idPersona );
 					intento.putExtra( "anagrafeScegliParente", true );
 					intento.putExtra( "relazione", quale + 1 );
-					if( EditaIndividuo.controllaMultiMatrimoni(intento,getContext(),Diagram.this) )
+					if( U.controllaMultiMatrimoni(intento, getContext(), Diagram.this) )
 						return;
 					startActivityForResult( intento,1401 );
 				}).show();
 			}
-		} else if( id == 5 ) {	// Modifica
+		} else if( id == 5 ) { // Modifica
 			Intent intento = new Intent( getContext(), EditaIndividuo.class );
 			intento.putExtra( "idIndividuo", idPersona );
 			startActivity( intento );
-		} else if( id == 6 ) {	// Scollega
+		} else if( id == 6 ) { // Scollega
 			Family[] famiglie = Anagrafe.scollega( idPersona );
 			ripristina();
-			Snackbar.make( getView(), R.string.person_unlinked, Snackbar.LENGTH_LONG ).show();
 			U.aggiornaDate( pers );
 			U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
-			U.salvaJson( false, (Object[])famiglie );
-		} else if( id == 7 ) {	// Elimina
+			U.salvaJson( false, famiglie );
+		} else if( id == 7 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
 						Family[] famiglie = Anagrafe.eliminaPersona(getContext(), idPersona);
@@ -666,28 +717,21 @@ public class Diagram extends Fragment {
 		return true;
 	}
 	private void ripristina() {
-		box.removeAllViews();
-		drawDiagram();
+		forceDraw = true;
+		onStart();
 	}
 
 	// Aggiunge il parente che è stata scelto in Anagrafe
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		if( requestCode == 1401  ) {
-			if( resultCode == AppCompatActivity.RESULT_OK ) {
-				Object[] modificati;
-				if( Globale.preferenze.esperto )
-					modificati = EditaIndividuo.aggiungiParente2( idPersona,
-							data.getStringExtra("idParente"),
-							data.getStringExtra("idFamiglia"),
-							data.getIntExtra("relazione", 0) );
-				else
-					modificati = EditaIndividuo.aggiungiParente( idPersona,
-							data.getStringExtra( "idParente"),
-							data.getStringExtra("idFamiglia"),
-							data.getIntExtra("relazione", 0) );
-				U.salvaJson( true, modificati );
-			}
+		if( resultCode == AppCompatActivity.RESULT_OK && requestCode == 1401 ) {
+			Object[] modificati = EditaIndividuo.aggiungiParente(
+					data.getStringExtra("idIndividuo"), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione
+					data.getStringExtra("idParente"),
+					data.getStringExtra("idFamiglia"),
+					data.getIntExtra("relazione", 0),
+					data.getStringExtra("collocazione") );
+			U.salvaJson( true, modificati );
 		}
 	}
 }

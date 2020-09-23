@@ -4,6 +4,5 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginRight="8dp"
-		android:text="SOUR"
 		android:typeface="monospace"
 		android:background="?android:attr/selectableItemBackground" />

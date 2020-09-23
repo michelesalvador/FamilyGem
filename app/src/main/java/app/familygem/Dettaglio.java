@@ -1,7 +1,5 @@
 package app.familygem;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -19,6 +17,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -255,7 +254,10 @@ public class Dettaglio extends AppCompatActivity {
 			SubMenu subAltri = subEvento.addSubMenu( 0, 100, 0, R.string.other );
 			int i = 0;
 			for( TreeMap.Entry<String,String> event : eventiVari.entrySet() ) {
-				subAltri.add( 0, 200+i, 0, event.getValue() + " - " + event.getKey() );
+				String eventLabel = event.getValue();
+				if( Globale.preferenze.esperto )
+					eventLabel += " - " + event.getKey();
+				subAltri.add( 0, 200+i, 0, eventLabel );
 				i++;
 			}
 		}
@@ -380,10 +382,7 @@ public class Dettaglio extends AppCompatActivity {
 					if( passo.oggetto instanceof Visitable ) // le estensioni GedcomTag non sono Visitable ed è impossibile trovargli la pila
 						vistaGoccia.setOnClickListener( v -> {
 							new TrovaPila( gc, passo.oggetto );
-							Intent intento = new Intent( this, Memoria.classi.get(passo.oggetto.getClass()) );
-							if( passo.oggetto instanceof Person ) // Solo Individuo richiede l'id
-								intento.putExtra( "idIndividuo", ((Person)passo.oggetto).getId() );
-							startActivity( intento );
+							startActivity( new Intent(this, Memoria.classi.get(passo.oggetto.getClass())) );
 						});
 				} else {
 					passo.tag = tag;
@@ -582,9 +581,9 @@ public class Dettaglio extends AppCompatActivity {
 	}
 
 	EditText vistaEdita;
-	void edita( final View vistaPezzo ) {
-		final FloatingActionButton fab = findViewById( R.id.fab );
-		final ActionBar barra = getSupportActionBar();
+	void edita( View vistaPezzo ) {
+		FloatingActionButton fab = findViewById( R.id.fab );
+		ActionBar barra = getSupportActionBar();
 
 		// Termina l'eventuale editazione di un altro pezzo
 		for( int i=0; i < box.getChildCount(); i++ ) {
@@ -645,6 +644,22 @@ public class Dettaglio extends AppCompatActivity {
 		vistaEdita.requestFocus();
 		vistaEdita.setSelection( vistaEdita.getText().length() );	// cursore alla fine
 
+		// Intercetta il 'Done' e 'Next' sulla tastiera
+		vistaEdita.setOnEditorActionListener( (vista, actionId, keyEvent) -> {
+			if( actionId == EditorInfo.IME_ACTION_DONE )
+				salva( vistaPezzo, barra, fab );
+			else if( actionId == EditorInfo.IME_ACTION_NEXT ) {
+				if( !vistaEdita.getText().toString().equals(vistaTesto.getText().toString()) )
+					salva( vistaPezzo, barra, fab );
+				else
+					ripristina( vistaPezzo, barra, fab );
+				View nextPezzo = box.getChildAt(box.indexOfChild(vistaPezzo) + 1);
+				if( nextPezzo.getTag(R.id.tag_oggetto) instanceof String )
+					edita(nextPezzo);
+			}
+			return false;
+		});
+
 		// ActionBar personalizzata
 		barra.setDisplayHomeAsUpEnabled( false );	// nasconde freccia <-
 		qualeMenu = 0;
@@ -696,7 +711,8 @@ public class Dettaglio extends AppCompatActivity {
 		invalidateOptionsMenu();
 		InputMethodManager imm = (InputMethodManager)getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow( vistaPezzo.getWindowToken(), 0 );
-		fab.show();
+		if( !(oggetto instanceof Note && !Globale.preferenze.esperto) ) // Le note in modalità inesperto non hanno fab
+			fab.show();
 	}
 
 	// Menu opzioni
@@ -707,10 +723,15 @@ public class Dettaglio extends AppCompatActivity {
 			if( oggetto instanceof Submitter && ( gc.getHeader()==null || // Autore non principale
 					gc.getHeader().getSubmitter(gc)==null || !gc.getHeader().getSubmitter(gc).equals(oggetto) ))
 				menu.add( 0, 1, 0, R.string.make_default );
+			if( oggetto instanceof Media ) {
+				if( box.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
+					menu.add( 0, 2, 0, R.string.crop );
+				menu.add( 0, 3, 0, R.string.choose_file );
+			}
 			if( oggetto instanceof Family )
-				menu.add( 0, 2, 0, R.string.delete );
+				menu.add( 0, 4, 0, R.string.delete );
 			else if( !(oggetto instanceof Submitter && U.autoreHaCondiviso((Submitter)oggetto)) ) // autore che ha condiviso non può essere eliminato
-				menu.add( 0, 3, 0, R.string.delete );
+				menu.add( 0, 5, 0, R.string.delete );
 		}
 		return true;
 	}
@@ -719,7 +740,15 @@ public class Dettaglio extends AppCompatActivity {
 		int id = item.getItemId();
 		if( id == 1 ) { // Autore principale
 			Podio.autorePrincipale( (Submitter)oggetto );
-		} else if( id == 2 ) { // Famiglia
+		} else if( id == 2 ) { // Immagine: ritaglia
+			ImageView vistaImg = box.findViewById( R.id.immagine_foto );
+			String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
+			File fileMedia = new File ( percorso );
+			Globale.mediaCroppato = (Media)oggetto;
+			U.tagliaImmagine( this, fileMedia, null );
+		} else if( id == 3 ) { // Immagine: scegli
+			U.appAcquisizioneImmagine( this, null, 5173, null );
+		} else if( id == 4 ) {	// Famiglia
 			Family fam = (Family) oggetto;
 			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
 				new AlertDialog.Builder(this).setMessage( R.string.really_delete_family )
@@ -731,7 +760,7 @@ public class Dettaglio extends AppCompatActivity {
 				Chiesa.eliminaFamiglia( fam.getId() );
 				onBackPressed();
 			}
-		} else if( id == 3 ) { // Tutti gli altri
+		} else if( id == 5 ) { // Tutti gli altri
 			// todo: conferma eliminazione di tutti gli oggetti..
 			elimina();
 			U.salvaJson(true); // l'aggiornamento delle date avviene negli Override di elimina()
@@ -764,12 +793,18 @@ public class Dettaglio extends AppCompatActivity {
 			if( oggettoPezzo instanceof Person ) {
 				pers = (Person) oggettoPezzo;
 				Family fam = (Family) oggetto;
+				// Genera le etichette per le voci 'famiglia' (come figlio e come coniuge)
+				String[] etichetteFam = { null, null };
+				if( pers.getParentFamilies(gc).size() > 1 && pers.getSpouseFamilies(gc).size() > 1 ) {
+					etichetteFam[0] = getString(R.string.family_as_child);
+					etichetteFam[1] = getString(R.string.family_as_spouse);
+				}
 				menu.add(0, 10, 0, R.string.diagram );
 				menu.add(0, 11, 0, R.string.card );
-				if( !pers.getParentFamilies(gc).isEmpty() && !pers.getParentFamilies(gc).get(0).equals( fam ) )
-						menu.add(0, 12, 0, R.string.family_as_child );
-				if( !pers.getSpouseFamilies(gc).isEmpty() && !pers.getSpouseFamilies(gc).get(0).equals( fam ) )
-						menu.add(0, 13, 0, R.string.family_as_spouse );
+				if( etichetteFam[0] != null )
+					menu.add( 0, 12, 0, etichetteFam[0] );
+				if( etichetteFam[1] != null )
+					menu.add( 0, 13, 0, etichetteFam[1] );
 				if( fam.getChildren(gc).indexOf(pers) > 0 )
 					menu.add( 0, 14, 0, R.string.move_up );
 				if( fam.getChildren(gc).indexOf(pers) < fam.getChildren(gc).size()-1 && fam.getChildren(gc).indexOf(pers) >= 0 )
@@ -779,28 +814,36 @@ public class Dettaglio extends AppCompatActivity {
 				menu.add( 0, 17, 0, R.string.unlink );
 				menu.add( 0, 18, 0, R.string.delete );
 			} else if( oggettoPezzo instanceof Note ) {
+				menu.add( 0, 20, 0, R.string.copy );
 				if( ( (Note) oggettoPezzo ).getId() != null )
-					menu.add( 0, 20, 0, R.string.unlink );
-				menu.add( 0, 21, 0, R.string.delete );
-			} else if( oggettoPezzo instanceof SourceCitation )
-				menu.add( 0, 30, 0, R.string.delete );
-			else if( oggettoPezzo instanceof Media ) {
+					menu.add( 0, 21, 0, R.string.unlink );
+				menu.add( 0, 22, 0, R.string.delete );
+			} else if( oggettoPezzo instanceof SourceCitation ) {
+				menu.add( 0, 30, 0, R.string.copy );
+				menu.add( 0, 31, 0, R.string.delete );
+			} else if( oggettoPezzo instanceof Media ) {
 				if( ( (Media) oggettoPezzo ).getId() != null )
 					menu.add( 0, 40, 0, R.string.unlink );
 				menu.add( 0, 41, 0, R.string.delete );
-			} else if( oggettoPezzo instanceof Address )
-				menu.add( 0, 50, 0, R.string.delete );
-			else if( oggettoPezzo instanceof EventFact )
-				menu.add( 0, 55, 0, R.string.delete );
-			else if( oggettoPezzo instanceof GedcomTag )
-				menu.add( 0, 60, 0, R.string.delete );
-			else if( oggettoPezzo instanceof Source )
-				menu.add( 0, 70, 0, R.string.choose_source );
-			else if( oggettoPezzo instanceof RepositoryRef )
-				menu.add( 0, 80, 0, R.string.delete );
-			else if( oggettoPezzo instanceof Repository )
-				menu.add( 0, 90, 0, R.string.choose_repository );
-			else if( oggettoPezzo instanceof Integer ) {
+			} else if( oggettoPezzo instanceof Address ) {
+				menu.add( 0, 50, 0, R.string.copy );
+				menu.add( 0, 51, 0, R.string.delete );
+			} else if( oggettoPezzo instanceof EventFact ) {
+				menu.add( 0, 55, 0, R.string.copy );
+				menu.add( 0, 56, 0, R.string.delete );
+			} else if( oggettoPezzo instanceof GedcomTag ) {
+				menu.add( 0, 60, 0, R.string.copy );
+				menu.add( 0, 61, 0, R.string.delete );
+			} else if( oggettoPezzo instanceof Source ) {
+				menu.add( 0, 70, 0, R.string.copy );
+				menu.add( 0, 71, 0, R.string.choose_source );
+			} else if( oggettoPezzo instanceof RepositoryRef ) {
+				menu.add( 0, 80, 0, R.string.copy );
+				menu.add( 0, 81, 0, R.string.delete );
+			} else if( oggettoPezzo instanceof Repository ) {
+				menu.add( 0, 90, 0, R.string.copy );
+				menu.add( 0, 91, 0, R.string.choose_repository );
+			} else if( oggettoPezzo instanceof Integer ) {
 				if( oggettoPezzo.equals( 43614 ) ) { // Immaginona
 					// è un'immagine ritagliabile
 					if( vistaPezzo.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
@@ -818,14 +861,15 @@ public class Dettaglio extends AppCompatActivity {
 	public boolean onContextItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			// TODo tutti gli elimina necessitano di conferma eliminazione
+			// Copia
 			case 0:	// Pezzo editabile
-				ClipboardManager clipboard = (ClipboardManager) getSystemService(box.getContext().CLIPBOARD_SERVICE);
-				ClipData clip = ClipData.newPlainText(
-						((TextView)vistaPezzo.findViewById( R.id.fatto_titolo )).getText(),
-						((TextView)vistaPezzo.findViewById( R.id.fatto_testo )).getText() );
-				clipboard.setPrimaryClip(clip);
+			case 50: // Address
+			case 55: // Evento
+			case 60: // Estensione
+				U.copiaNegliAppunti( ((TextView)vistaPezzo.findViewById( R.id.fatto_titolo )).getText(),
+						((TextView)vistaPezzo.findViewById(R.id.fatto_testo)).getText() );
 				return true;
-			case 1: // Elimina
+			case 1: // Elimina pezzo editabile
 				try {
 					oggetto.getClass().getMethod( "set" + oggettoPezzo, String.class ).invoke( oggetto, (Object)null );
 				} catch( Exception e ) {
@@ -835,16 +879,14 @@ public class Dettaglio extends AppCompatActivity {
 				box.removeView( vistaPezzo );
 				break;
 			case 10: // Diagramma
-				Globale.individuo = pers.getId();
-				startActivity( new Intent( this, Principe.class ) );
+				U.qualiGenitoriMostrare( this, pers, 1 );
 				return true;
 			case 11: // Scheda persona
-				Intent intento = new Intent( this, Individuo.class );
-				intento.putExtra( "idIndividuo", pers.getId() );
-				startActivity( intento );
+				Memoria.setPrimo( pers );
+				startActivity( new Intent(this, Individuo.class) );
 				return true;
 			case 12: // Famiglia come figlio
-				U.qualiGenitoriMostrare( this, pers, Famiglia.class );
+				U.qualiGenitoriMostrare( this, pers, 2 );
 				return true;
 			case 13: // Famiglia come coniuge
 				U.qualiConiugiMostrare( this, pers, null );
@@ -883,13 +925,21 @@ public class Dettaglio extends AppCompatActivity {
 						}).setNeutralButton(R.string.cancel, null).show();
 				return true;
 			case 20: // Nota
+				U.copiaNegliAppunti( getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText() );
+				return true;
+			case 21:
 				U.scollegaNota( (Note)oggettoPezzo, oggetto, vistaPezzo );
 				break;
-			case 21:
+			case 22:
 				Object[] capi = U.eliminaNota( (Note)oggettoPezzo, vistaPezzo );
 				U.salvaJson( true, capi );
 				return true;
 			case 30: // Citazione fonte
+				U.copiaNegliAppunti( getText(R.string.source_citation),
+						((TextView)vistaPezzo.findViewById( R.id.fonte_titolo )).getText() + "\n"
+						+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText() );
+				return true;
+			case 31:
 				if( oggetto instanceof Note ) // Note non estende SourceCitationContainer
 					((Note)oggetto).getSourceCitations().remove( oggettoPezzo );
 				else
@@ -904,29 +954,43 @@ public class Dettaglio extends AppCompatActivity {
 				Object[] capiMedia = Galleria.eliminaMedia( (Media)oggettoPezzo, vistaPezzo );
 				U.salvaJson( true, capiMedia ); // un media condiviso può dover aggiornare le date di più capi
 				return true;
-			case 50: // Address
+			case 51:
 				eliminaIndirizzo( oggetto );
 				box.removeView( vistaPezzo );
 				break;
-			case 55: // Evento di Famiglia
+			case 56: // Evento di Famiglia
 				((Family)oggetto).getEventsFacts().remove( oggettoPezzo );
 				Memoria.annullaIstanze( oggettoPezzo );
 				box.removeView( vistaPezzo );
 				break;
-			case 60: // Estensione
+			case 61: // Estensione
 				U.eliminaEstensione( (GedcomTag)oggettoPezzo, oggetto, vistaPezzo );
 				break;
-			case 70: // Scegli fonte in Biblioteca
+			// Fonte
+			case 70: // Copia
+				U.copiaNegliAppunti( getText(R.string.source), ((TextView)vistaPezzo.findViewById(R.id.fonte_titolo)).getText() );
+				return true;
+			case 71: // Scegli in Biblioteca
 				Intent inte = new Intent( this, Principe.class );
 				inte.putExtra( "bibliotecaScegliFonte", true );
 				startActivityForResult( inte,7047 );
 				return true;
-			case 80: // Citazione archivio
+			// Citazione archivio
+			case 80: // Copia
+				U.copiaNegliAppunti( getText(R.string.repository_citation),
+						((TextView)vistaPezzo.findViewById( R.id.fonte_titolo )).getText() + "\n"
+						+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText() );
+				return true;
+			case 81: // Elimina
 				((Source)oggetto).setRepositoryRef( null );
 				Memoria.annullaIstanze(oggettoPezzo);
 				box.removeView( vistaPezzo );
 				break;
-			case 90: // Scegli archivio in Magazzino
+			// Archivio
+			case 90: // Copia
+				U.copiaNegliAppunti( getText(R.string.repository), ((TextView)vistaPezzo.findViewById(R.id.fonte_titolo)).getText() );
+				return true;
+			case 91: // Scegli in Magazzino
 				Intent intn = new Intent( this, Principe.class );
 				intn.putExtra( "magazzinoScegliArchivio", true );
 				startActivityForResult( intn,5390 );

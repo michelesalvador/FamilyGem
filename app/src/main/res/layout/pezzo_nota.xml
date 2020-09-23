@@ -14,10 +14,8 @@
 		android:paddingTop="6dp"
 		android:paddingRight="10dp"
 		android:paddingBottom="8dp"
-		android:text="Invitati solo i parenti stretti.
-Non ci sono scuse per un tale comportamento."
 		android:textColor="#444"
-		android:textSize="16sp" />
+		android:textSize="16sp"/>
 
 	<TextView
 		android:id="@+id/nota_fonti"
@@ -26,6 +24,5 @@ Non ci sono scuse per un tale comportamento."
 		android:layout_alignParentBottom="true"
 		android:layout_alignParentRight="true"
 		android:background="@color/citazioneFonte"
-		android:padding="4dp"
-		android:text="3" />
+		android:padding="4dp"/>
 </RelativeLayout>

@@ -42,7 +42,7 @@ public class IndividuoEventi extends Fragment {
 		View vistaEventi = inflater.inflate( R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
 			LinearLayout scatola = vistaEventi.findViewById( R.id.contenuto_scheda );
-			uno = gc.getPerson( getActivity().getIntent().getStringExtra( "idIndividuo" ) );
+			uno = gc.getPerson( Globale.individuo );
 			if( uno != null ) {
 				for( Name nome : uno.getNames()) {
 					String tit = getString(R.string.name);
@@ -190,25 +190,31 @@ public class IndividuoEventi extends Fragment {
 		vistaPezzo = vista;
 		oggettoPezzo = vista.getTag( R.id.tag_oggetto );
 		if( oggettoPezzo instanceof Name ) {
+			menu.add( 0, 200, 0, R.string.copy );
 			if( uno.getNames().indexOf(oggettoPezzo) > 0 )
-				menu.add( 0, 200, 0, R.string.move_up );
+				menu.add( 0, 201, 0, R.string.move_up );
 			if( uno.getNames().indexOf(oggettoPezzo) < uno.getNames().size()-1 )
-				menu.add( 0, 201, 0, R.string.move_down );
-			menu.add( 0, 202, 0, R.string.delete );
+				menu.add( 0, 202, 0, R.string.move_down );
+			menu.add( 0, 203, 0, R.string.delete );
 		} else if( oggettoPezzo instanceof EventFact ) {
+			menu.add( 0, 210, 0, R.string.copy );
 			if( uno.getEventsFacts().indexOf(oggettoPezzo) > 0 )
-				menu.add( 0, 203, 0, R.string.move_up );
+				menu.add( 0, 211, 0, R.string.move_up );
 			if( uno.getEventsFacts().indexOf(oggettoPezzo) < uno.getEventsFacts().size()-1 )
-				menu.add( 0, 204, 0, R.string.move_down );
-			menu.add( 0, 205, 0, R.string.delete );
+				menu.add( 0, 212, 0, R.string.move_down );
+			menu.add( 0, 213, 0, R.string.delete );
 		} else if( oggettoPezzo instanceof GedcomTag ) {
-			menu.add( 0, 206, 0, R.string.delete );
+			menu.add( 0, 220, 0, R.string.copy );
+			menu.add( 0, 221, 0, R.string.delete );
 		} else if( oggettoPezzo instanceof Note ) {
+			menu.add( 0, 225, 0, R.string.copy );
 			if( ((Note)oggettoPezzo).getId() != null )
-				menu.add( 0, 210, 0, R.string.unlink );
-			menu.add( 0, 211, 0, R.string.delete );
-		} else if( oggettoPezzo instanceof SourceCitation )
-			menu.add( 0, 220, 0, R.string.delete );
+				menu.add( 0, 226, 0, R.string.unlink );
+			menu.add( 0, 227, 0, R.string.delete );
+		} else if( oggettoPezzo instanceof SourceCitation ) {
+			menu.add( 0, 230, 0, R.string.copy );
+			menu.add( 0, 231, 0, R.string.delete );
+		}
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
@@ -217,17 +223,23 @@ public class IndividuoEventi extends Fragment {
 		int cosa = 0; // cosa aggiornare dopo la modifica
 		switch( item.getItemId() ) {
 			// Nome
-			case 200: // Sposta su
+			case 200: // Copia nome
+			case 210: // Copia evento
+			case 220: // Copia estensione
+				U.copiaNegliAppunti( ((TextView)vistaPezzo.findViewById( R.id.evento_titolo )).getText(),
+					((TextView)vistaPezzo.findViewById(R.id.evento_testo)).getText() );
+				return true;
+			case 201: // Sposta su
 				nomi.add( nomi.indexOf(oggettoPezzo)-1, (Name)oggettoPezzo );
 				nomi.remove( nomi.lastIndexOf(oggettoPezzo) );
 				cosa = 2;
 				break;
-			case 201: // Sposta giù
+			case 202: // Sposta giù
 				nomi.add( nomi.indexOf(oggettoPezzo)+2, (Name)oggettoPezzo );
 				nomi.remove( nomi.indexOf(oggettoPezzo) );
 				cosa = 2;
 				break;
-			case 202: // Elimina
+			case 203: // Elimina
 				if( U.preserva(oggettoPezzo) ) return false;
 				uno.getNames().remove( oggettoPezzo );
 				Memoria.annullaIstanze( oggettoPezzo );
@@ -235,34 +247,45 @@ public class IndividuoEventi extends Fragment {
 				cosa = 2;
 				break;
 			// Evento generico
-			case 203: // Sposta su
+			case 211: // Sposta su
 				fatti.add( fatti.indexOf(oggettoPezzo)-1, (EventFact)oggettoPezzo );
 				fatti.remove( fatti.lastIndexOf(oggettoPezzo) );
 				cosa = 1;
 				break;
-			case 204: // Sposta giu
+			case 212: // Sposta giu
 				fatti.add( fatti.indexOf(oggettoPezzo)+2, (EventFact)oggettoPezzo );
 				fatti.remove( fatti.indexOf(oggettoPezzo) );
 				cosa = 1;
 				break;
-			case 205:
+			case 213:
 				// todo Conferma elimina
 				uno.getEventsFacts().remove( oggettoPezzo );
 				Memoria.annullaIstanze( oggettoPezzo );
 				vistaPezzo.setVisibility( View.GONE );
 				break;
-			case 206:
+			// Estensione
+			case 221: // Elimina
 				U.eliminaEstensione( (GedcomTag)oggettoPezzo, uno, vistaPezzo );
 				break;
-			case 210: 	// Nota
+			// Nota
+			case 225: // Copia
+				U.copiaNegliAppunti( getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText() );
+				return true;
+			case 226: // Scollega
 				U.scollegaNota( (Note)oggettoPezzo, uno, vistaPezzo );
 				break;
-			case 211:
+			case 227:
 				Object[] capi = U.eliminaNota( (Note)oggettoPezzo, vistaPezzo );
 				U.salvaJson( true, capi );
 				aggiorna( 0 );
 				return true;
-			case 220: 	// Citazione fonte
+			// Citazione fonte
+			case 230: // Copia
+				U.copiaNegliAppunti( getText(R.string.source_citation),
+						((TextView)vistaPezzo.findViewById( R.id.fonte_titolo )).getText() + "\n"
+						+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText() );
+				return true;
+			case 231: // Elimina
 				// todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
 				uno.getSourceCitations().remove( oggettoPezzo );
 				Memoria.annullaIstanze(oggettoPezzo);

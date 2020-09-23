@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -35,7 +34,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import app.familygem.dettaglio.CitazioneFonte;
 import app.familygem.dettaglio.Evento;
-import app.familygem.dettaglio.Famiglia;
 import app.familygem.dettaglio.Nome;
 import app.familygem.dettaglio.Nota;
 import static app.familygem.Globale.gc;
@@ -50,14 +48,11 @@ public class Individuo extends AppCompatActivity {
 	@Override
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
-		String id = getIntent().getStringExtra( "idIndividuo" );
 		if( gc == null ) {
 			Alberi.apriGedcom( Globale.preferenze.idAprendo, false );
 		}
-		uno = gc.getPerson( id );
-		//Globale.individuo = id;	// passava l'id alle schede fragment
-		if( Memoria.getOggetto() != uno ) // per evitare di ricreare pile già iniziate
-			Memoria.setPrimo( uno, "INDI" );
+		uno = (Person) Memoria.getOggetto();
+		Globale.individuo = uno.getId();
 		setContentView(R.layout.individuo);
 
 		// Barra
@@ -125,7 +120,7 @@ public class Individuo extends AppCompatActivity {
 	protected void onStart() {
 		super.onStart();
 		if( uno == null || Globale.editato )
-			uno = gc.getPerson( getIntent().getStringExtra( "idIndividuo" ) );
+			uno = gc.getPerson( Globale.individuo );
 
 		if( uno == null ) { // ritornando indietro nella Scheda di un individuo che è stato eliminato
 			onBackPressed();
@@ -191,7 +186,10 @@ public class Individuo extends AppCompatActivity {
 					}
 					i = 0;
 					for( Map.Entry<String,String> event : altriEventi.entrySet() ) {
-						subAltri.add( 0, 50+i, 0, event.getValue() + " - " + event.getKey() );
+						String eventLabel = event.getValue();
+						if( Globale.preferenze.esperto )
+							eventLabel += " - " + event.getKey();
+						subAltri.add( 0, 50+i, 0, eventLabel );
 						i++;
 					}
 					SubMenu subNota = menu.addSubMenu( 0, 0, 0, R.string.note );
@@ -291,14 +289,14 @@ public class Individuo extends AppCompatActivity {
 					// Scheda Familiari
 					case 30:// Collega persona nuova
 						if( Globale.preferenze.esperto ) {
-							DialogFragment dialog = new NuovoParente(uno, true, null);
+							DialogFragment dialog = new NuovoParente(uno, null, null, true, null);
 							dialog.show(getSupportFragmentManager(), "scegli");
 						} else {
 							builder.setItems( familiari, (dialog, quale) -> {
 								Intent intento1 = new Intent( getApplicationContext(), EditaIndividuo.class );
 								intento1.putExtra( "idIndividuo", uno.getId() );
 								intento1.putExtra( "relazione", quale + 1 );
-								if( EditaIndividuo.controllaMultiMatrimoni( intento1,Individuo.this,null) )
+								if( U.controllaMultiMatrimoni( intento1,Individuo.this,null) )
 									return;
 								startActivity( intento1 );
 							}).show();
@@ -306,17 +304,17 @@ public class Individuo extends AppCompatActivity {
 						break;
 					case 31: // Collega persona esistente
 						if( Globale.preferenze.esperto ) {
-							DialogFragment dialog = new NuovoParente(uno, false, null);
+							DialogFragment dialog = new NuovoParente(uno, null, null, false, null);
 							dialog.show(getSupportFragmentManager(), "scegli");
 						} else {
 							builder.setItems( familiari, (dialog, quale) -> {
-								Intent intento12 = new Intent( getApplication(), Principe.class );
-								intento12.putExtra( "idIndividuo", uno.getId() ); // solo per controllaMultiMatrimoni()
-								intento12.putExtra( "anagrafeScegliParente", true );
-								intento12.putExtra( "relazione", quale + 1 );
-								if( EditaIndividuo.controllaMultiMatrimoni( intento12,Individuo.this,null) )
+								Intent intento2 = new Intent( getApplication(), Principe.class );
+								intento2.putExtra( "idIndividuo", uno.getId() );
+								intento2.putExtra( "anagrafeScegliParente", true );
+								intento2.putExtra( "relazione", quale + 1 );
+								if( U.controllaMultiMatrimoni(intento2, Individuo.this, null) )
 									return;
-								startActivityForResult( intento12,1401 );
+								startActivityForResult( intento2,1401 );
 							}).show();
 						}
 						break;
@@ -394,17 +392,12 @@ public class Individuo extends AppCompatActivity {
 				citaz.setRef( data.getStringExtra("idFonte") );
 				uno.addSourceCitation( citaz );
 			} else if( requestCode == 1401  ) { // Parente
-				Object[] modificati;
-				if( Globale.preferenze.esperto )
-					modificati = EditaIndividuo.aggiungiParente2( uno.getId(),
-							data.getStringExtra("idParente"),
-							data.getStringExtra("idFamiglia"),
-							data.getIntExtra("relazione", 0) );
-				else
-					modificati = EditaIndividuo.aggiungiParente( uno.getId(),
-							data.getStringExtra("idParente"),
-							data.getStringExtra("idFamiglia"),
-							data.getIntExtra("relazione",0) );
+				Object[] modificati = EditaIndividuo.aggiungiParente(
+						data.getStringExtra("idIndividuo"), // corrisponde a uno.getId()
+						data.getStringExtra("idParente"),
+						data.getStringExtra("idFamiglia"),
+						data.getIntExtra("relazione", 0),
+						data.getStringExtra("collocazione") );
 				U.salvaJson( true, modificati );
 				return;
 			}
@@ -425,10 +418,11 @@ public class Individuo extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add( 0, 0, 0, R.string.diagram );
-		if( !uno.getParentFamilies( gc ).isEmpty() )
-			menu.add( 0, 1, 0, uno.getSpouseFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_child );
-		if( !uno.getSpouseFamilies( gc ).isEmpty() )
-			menu.add( 0, 2, 0, uno.getParentFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_spouse );
+		String[] familyLabels = Diagram.getFamilyLabels( this, uno );
+		if( familyLabels[0] != null )
+			menu.add( 0, 1, 0, familyLabels[0] );
+		if( familyLabels[1] != null )
+			menu.add( 0, 2, 0, familyLabels[1] );
 		if( Globale.preferenze.alberoAperto().radice == null || !Globale.preferenze.alberoAperto().radice.equals(uno.getId()) )
 			menu.add( 0, 3, 0, R.string.make_root );
 		menu.add( 0, 4, 0, R.string.modify );
@@ -439,11 +433,10 @@ public class Individuo extends AppCompatActivity {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch ( item.getItemId() ) {
 			case 0:	// Diagramma
-				Globale.individuo = uno.getId();
-				startActivity( new Intent( this, Principe.class ) );
+				U.qualiGenitoriMostrare( this, uno, 1 );
 				return true;
 			case 1:	// Famiglia come figlio
-				U.qualiGenitoriMostrare( this, uno, Famiglia.class );
+				U.qualiGenitoriMostrare( this, uno, 2 );
 				return true;
 			case 2:	// Famiglia come coniuge
 				U.qualiConiugiMostrare( this, uno, null );
@@ -451,7 +444,7 @@ public class Individuo extends AppCompatActivity {
 			case 3: // Imposta come radice
 				Globale.preferenze.alberoAperto().radice = uno.getId();
 				Globale.preferenze.salva();
-				Snackbar.make( tabLayout, getString( R.string.this_is_root, U.epiteto(uno) ), Snackbar.LENGTH_LONG ).show();
+				Toast.makeText(this, getString(R.string.this_is_root, U.epiteto(uno)), Toast.LENGTH_LONG).show();
 				return true;
 			case 4: // Modifica
 				Intent intent1 = new Intent( this, EditaIndividuo.class );

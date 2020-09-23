@@ -27,6 +27,7 @@
 		<ImageView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			app:srcCompat="@drawable/popup_fiato"/>
+			app:srcCompat="@drawable/popup_fiato"
+			android:layout_marginTop="-2dp"/>
 	</LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,3 +1,5 @@
+// Activity per valutare un record dell'albero importato, con eventuale confronto col corrispondente record dell'albero vecchio
+
 package app.familygem;
 
 import android.content.Intent;
@@ -199,8 +201,7 @@ public class Confrontatore extends AppCompatActivity {
 	// Titolo della pagina
 	void tipoRecord( int string ) {
 		TextView testoTipo = findViewById( R.id.confronto_tipo );
-		if( testoTipo.getText().equals( "Persona" ) )
-			testoTipo.setText( getString(string) );
+		testoTipo.setText( getString(string) );
 	}
 
 	String dataOra( Change cambi ) {
@@ -211,18 +212,22 @@ public class Confrontatore extends AppCompatActivity {
 	}
 
 	void vaiAvanti() {
+		Intent intent = new Intent();
 		if( getIntent().getIntExtra("posizione",0) == Confronto.getLista().size() ) {
-			startActivity( new Intent( Confrontatore.this, Conferma.class ) );
+			// Terminati i confronti
+			intent.setClass( this, Conferma.class );
 		} else {
-			Intent intent = new Intent( Confrontatore.this, Confrontatore.class );
+			// Prossimo confronto
+			intent.setClass( this, Confrontatore.class );
 			intent.putExtra( "posizione", getIntent().getIntExtra("posizione",0) + 1 );
+		}
+		if( Confronto.get().autoProsegui ) {
 			if( Confronto.getFronte(this).doppiaOpzione )
 				Confronto.get().scelteFatte++;
-			else if( Confronto.get().autoProsegui ) {
-				intent.setFlags( Intent.FLAG_ACTIVITY_NO_HISTORY );
-			}
-			startActivity( intent );
+			else
+				finish(); // rimuove il fronte attuale dallo stack
 		}
+		startActivity( intent );
 	}
 
 	@Override

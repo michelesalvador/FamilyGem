@@ -21,13 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
+import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import app.familygem.dettaglio.Famiglia;
 import static app.familygem.Globale.gc;
 
 public class Anagrafe extends Fragment {
@@ -154,21 +154,53 @@ public class Anagrafe extends Fragment {
 		}
 		@Override
 		public void onClick( View vista ) {
-			// Anagrafe per scegliere il parente e restituire l'id a Diagramma a Individuo o a Famiglia
-			if( getActivity().getIntent().getBooleanExtra( "anagrafeScegliParente", false ) ) {
-				Intent intent = new Intent();
-				intent.putExtra( "idParente", (String) vista.getTag() );
-				intent.putExtra( "relazione", getActivity().getIntent().getIntExtra( "relazione", 0 ) );
-				intent.putExtra( "famigliaNum", getActivity().getIntent().getIntExtra( "famigliaNum", 0 ) );
-				intent.putExtra( "idFamiglia", getActivity().getIntent().getStringExtra( "idFamiglia" ) );
+			// Anagrafe per scegliere il parente e restituire i valori a Diagramma, Individuo, Famiglia o Condivisione
+			Person parente = gc.getPerson((String)vista.getTag());
+			Intent intent = getActivity().getIntent();
+			if( intent.getBooleanExtra("anagrafeScegliParente", false) ) {
+				intent.putExtra( "idParente", parente.getId() );
+				// Cerca una eventuale famiglia esistente che possa ospitare perno
+				String collocazione = intent.getStringExtra("collocazione");
+				if( collocazione != null && collocazione.equals("FAMIGLIA_ESISTENTE") ) {
+					String idFamiglia = null;
+					switch( intent.getIntExtra("relazione",0) ) {
+						case 1: // Genitore
+							if( parente.getSpouseFamilyRefs().size() > 0 )
+								idFamiglia = parente.getSpouseFamilyRefs().get(0).getRef();
+							break;
+						case 2:
+							if( parente.getParentFamilyRefs().size() > 0 )
+								idFamiglia = parente.getParentFamilyRefs().get(0).getRef();
+							break;
+						case 3:
+							for( Family fam : parente.getSpouseFamilies(gc) ) {
+								if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() ) {
+									idFamiglia = fam.getId();
+									break;
+								}
+							}
+							break;
+						case 4:
+							for( Family fam : parente.getParentFamilies(gc) ) {
+								if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() ) {
+									idFamiglia = fam.getId();
+									break;
+								}
+							}
+							break;
+					}
+					if( idFamiglia != null ) // aggiungiParente() userà la famiglia trovata
+						intent.putExtra( "idFamiglia", idFamiglia );
+					else // aggiungiParente() creerà una nuova famiglia
+						intent.removeExtra( "collocazione" );
+				}
 				getActivity().setResult( AppCompatActivity.RESULT_OK, intent );
 				getActivity().finish();
 			} else { // Normale collegamento alla scheda individuo
-				Intent intento = new Intent( getContext(), Individuo.class );
-				intento.putExtra( "idIndividuo", (String) vista.getTag() );
 				// todo Click sulla foto apre la scheda media..
 				// intento.putExtra( "scheda", 0 );
-				startActivity( intento );
+				Memoria.setPrimo( parente );
+				startActivity( new Intent(getContext(), Individuo.class) );
 			}
 		}
 	}
@@ -246,11 +278,15 @@ public class Anagrafe extends Fragment {
 		}
 	}
 
-	// Restituisce una stringa con cognome e nome attaccati: 'dalla ValleFrancesco Maria '
-	private String cognomeNome(Person tizio) {
-		String tutto = tizio.getNames().get(0).getValue();
+	// Restituisce una stringa con cognome e nome attaccati:
+	// 'SalvadorMichele ' oppure 'ValleFrancesco Maria ' oppure ' Donatella '
+	static String cognomeNome( Person tizio ) {
+		Name epiteto = tizio.getNames().get(0);
+		String tutto = epiteto.getValue();
 		String cognome = " ";
-		if( tutto.lastIndexOf("/") - tutto.indexOf("/") > 1 )	// se c'è un cognome tra i due '/'
+		if( epiteto.getSurname() != null )
+			cognome = epiteto.getSurname();
+		else if( tutto.lastIndexOf("/") - tutto.indexOf("/") > 1 )	// se c'è un cognome tra i due '/'
 			cognome = tutto.substring( tutto.indexOf("/")+1, tutto.lastIndexOf("/") );
 		tutto = cognome.concat( tutto );
 		if( tutto.indexOf("/") > 0 )
@@ -409,11 +445,9 @@ public class Anagrafe extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id == 0 ) {	// Apri Diagramma
-			Globale.individuo = idIndi;
-			getFragmentManager().beginTransaction().replace( R.id.contenitore_fragment, new Diagram() )
-					.addToBackStack(null).commit();
+			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), 1 );
 		} else if( id == 1) {	// Famiglia come figlio
-			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), Famiglia.class );
+			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), 2 );
 		} else if( id == 2 ) {	// Famiglia come coniuge
 			U.qualiConiugiMostrare( getContext(), gc.getPerson(idIndi), null );
 		} else if( id == 3 ) {	// Modifica

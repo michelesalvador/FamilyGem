@@ -28,7 +28,7 @@ public class IndividuoMedia extends Fragment {
 		View vistaMedia = inflater.inflate(R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
 			final LinearLayout scatola = vistaMedia.findViewById( R.id.contenuto_scheda );
-			uno = gc.getPerson( getActivity().getIntent().getStringExtra("idIndividuo") );
+			uno = gc.getPerson( Globale.individuo );
 			if( uno != null ) {
 				visitaMedia = new ListaMediaContenitore( gc, true );
 				uno.accept( visitaMedia );

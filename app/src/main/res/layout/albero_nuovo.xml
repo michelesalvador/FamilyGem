@@ -3,49 +3,61 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:fillViewport="true" >
+	android:fillViewport="true">
 
-	<LinearLayout
+	<RelativeLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:orientation="vertical"
-		android:gravity="center"
-		android:padding="30dp">
+		android:layout_height="wrap_content">
 
-		<Button
-			android:id="@+id/bottone_albero_vuoto"
-			style="@style/AppTheme.BottoneColorato"
+		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginBottom="16dp"
-			android:text="@string/empty_tree"
-			android:minWidth="350dp"/>
+			android:layout_centerHorizontal="true"
+			android:layout_centerVertical="true"
+			android:orientation="vertical"
+			android:padding="30dp">
 
-		<Button
-			android:id="@+id/bottone_scarica_esempio"
-			style="@style/AppTheme.BottoneNormale"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="16dp"
-			android:text="@string/download_example"
-			android:minWidth="350dp"/>
+			<Button
+				android:id="@+id/bottone_albero_vuoto"
+				style="@style/AppTheme.BottoneColorato"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				android:minWidth="350dp"
+				android:text="@string/empty_tree"/>
+			<Button
+				android:id="@+id/bottone_scarica_esempio"
+				style="@style/AppTheme.BottoneNormale"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				android:minWidth="350dp"
+				android:text="@string/download_example"/>
+			<Button
+				android:id="@+id/bottone_importa_gedcom"
+				style="@style/AppTheme.BottoneNormale"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				android:minWidth="350dp"
+				android:text="@string/import_gedcom"/>
+			<Button
+				android:id="@+id/bottone_recupera_backup"
+				style="@style/AppTheme.BottoneNormale"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:minWidth="350dp"
+				android:text="@string/import_backup"/>
+		</LinearLayout>
 
-		<Button
-			android:id="@+id/bottone_importa_gedcom"
-			style="@style/AppTheme.BottoneNormale"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginBottom="16dp"
-			android:text="@string/import_gedcom"
-			android:minWidth="350dp"/>
+		<ProgressBar
+			android:id="@+id/nuovo_circolo"
+			android:layout_width="70dp"
+			android:layout_height="70dp"
+			android:layout_centerHorizontal="true"
+			android:layout_centerVertical="true"
+			android:visibility="gone"/>
 
-		<Button
-			android:id="@+id/bottone_recupera_backup"
-			style="@style/AppTheme.BottoneNormale"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/import_backup"
-			android:minWidth="350dp"/>
+	</RelativeLayout>
 
-	</LinearLayout>
 </ScrollView>

@@ -25,13 +25,14 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
 			android:text="@string/refresh"
-			android:visibility="gone" />
+			android:layout_marginTop="10dp"
+			android:visibility="gone"/>
 
 		<LinearLayout
 			android:id="@+id/info_testata"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:layout_marginTop="20dp"
+			android:layout_marginTop="30dp"
 			android:orientation="vertical"
 			android:visibility="gone">
 
@@ -56,12 +57,12 @@
 		</LinearLayout>
 
 		<Button
-			android:id="@+id/info_crea_testata"
+			android:id="@+id/info_gestisci_testata"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
-			android:layout_marginTop="30dp"
-			android:text="@string/create_header"
-			android:visibility="gone" />
+			android:layout_marginTop="20dp"
+			android:text="Update header"/>
+			<!-- todo traduci -->
 	</LinearLayout>
 </ScrollView>

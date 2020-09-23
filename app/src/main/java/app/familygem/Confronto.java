@@ -31,6 +31,7 @@ public class Confronto {
 		return fronte;
 	}
 
+	// Restituisce il fronte attualmente attivo
 	static Fronte getFronte(Activity attivita) {
 		return getLista().get( attivita.getIntent().getIntExtra("posizione",0) - 1 );
 	}

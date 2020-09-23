@@ -16,7 +16,6 @@
 		android:layout_height="wrap_content"
 		android:singleLine="false"
 		android:textSize="15sp"
-		android:textColor="#000"
-		android:text="Marito Cognonome\nMoglie Cognome\n3 figli"/>
+		android:textColor="#000"/>
 
 </androidx.cardview.widget.CardView>

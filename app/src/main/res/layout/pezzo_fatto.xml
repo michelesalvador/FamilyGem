@@ -10,7 +10,6 @@
 		android:id="@+id/fatto_titolo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="Titolo del pezzo"
 		android:textColor="#999"
 		android:textSize="20sp" />
 
@@ -18,7 +17,6 @@
 		android:id="@+id/fatto_testo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="Nel mezzo del cammin di nostra vita mi ritrovai per una selva oscura che la diritta via era smarrita. Oh gaudio o giubilio che piacer infinito mi colse quando la vidi!"
 		android:textColor="#000"
 		android:textSize="16sp" />
 

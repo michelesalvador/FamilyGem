@@ -19,7 +19,6 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:ellipsize="end"
-		android:maxLines="2"
-		android:text="Titolazzo fontuzza" />
+		android:maxLines="2"/>
 
 </androidx.cardview.widget.CardView>

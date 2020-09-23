@@ -15,6 +15,7 @@ public class Globale extends Application {
 	public static Context contesto;
 	public static Armadio preferenze;
 	public static String individuo;	// "I1";
+	public static int numFamiglia; // Quale famiglia dei genitori mostrare in diagramma, normalmente la 0
 	static View vistaPrincipe;
 	static int ordineMagazzino;
 	public static boolean editato; // C'è stata un'editazione in EditaIndividuo o in Dettaglio e quindi il contenuto delle attività precedenti va aggiornato
@@ -32,7 +33,7 @@ public class Globale extends Application {
 
 	public static void avvia( Context contesto ) {
 		Gson gson = new Gson();
-		String stringone = "{\"alberi\":[],\"autoSalva\":true}"; // preferenze vuote
+		String stringone = "{ referrer:start, alberi:[], autoSalva:true }"; // preferenze vuote
 							// i boolean false non hanno bisogno di essere inizializzati
 		try {
 			File filePreferenze = new File( contesto.getFilesDir(), "preferenze.json");

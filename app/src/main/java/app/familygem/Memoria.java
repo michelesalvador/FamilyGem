@@ -72,6 +72,7 @@ public class Memoria {
 		return pila;
 	}
 
+	// Aggiunge il primo oggetto in una nuova pila
 	public static void setPrimo( Object oggetto ) {
 		setPrimo( oggetto, null );
 	}
@@ -81,14 +82,28 @@ public class Memoria {
 		Passo passo = aggiungi( oggetto );
 		if( tag != null )
 			passo.tag = tag;
+		else if( oggetto instanceof Person )
+			passo.tag = "INDI";
 	}
 
+	// Aggiunge un oggetto alla fine dell'ultima pila esistente
 	public static Passo aggiungi( Object oggetto ) {
 		Passo passo = new Passo();
 		passo.oggetto = oggetto;
 		getPila().add( passo );
 		//stampa();
 		return passo;
+	}
+
+	// Mette il primo oggetto se non ci sono pile oppure sostituisce il primo oggetto nell'ultima pila esistente
+	// In altre parole mette il primo oggetto senza aggiungere ulteriori pile
+	public static void replacePrimo( Object oggetto ) {
+		if( memoria.lista.size() == 0 ) {
+			setPrimo( oggetto );
+		} else {
+			getPila().clear();
+			aggiungi( oggetto );
+		}
 	}
 
 	// L'oggetto contenuto nel primo passo della pila
@@ -146,7 +161,7 @@ public class Memoria {
 				if( passo.tag != null )
 					s.p( filotto + passo.tag + " " );
 				else if( passo.oggetto != null )
-					s.p( filotto + passo.oggetto.getClass().getSimpleName() );
+					s.p( filotto + passo.oggetto.getClass().getSimpleName() + " " );
 				else
 					s.p( filotto + "Null" ); // capita in rarissimi casi
 			}

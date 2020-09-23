@@ -30,7 +30,7 @@ The code provided in this repository should compile and build a working version 
 |GeoNames "demo" account|Place names suggestions probably don't appear|
 |Backup key|Android Backup Service is not available|
 
-The code (classes, variables, comments...) is all almost written in italian, because I'm italian and I love to write in my native language. I know it's not so kind, because everyone expects an english code, but I started like this and it's hard to change at this point.
+The code (classes, variables, comments...) is almost all written in Italian, because I'm Italian and I love to write in my native language. I know it's not so kind, because everyone expects an English code, but I started like this and it's hard to change at this point.
 
 ## Translation
 The translation of Family Gem is managed on [Weblate](https://hosted.weblate.org/projects/family-gem/app/).<br>

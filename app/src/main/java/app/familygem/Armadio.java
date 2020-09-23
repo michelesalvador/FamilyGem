@@ -11,6 +11,9 @@ import java.util.List;
 
 public class Armadio {
 
+	String referrer; // È 'start' appena installata l'app (cioè quando non esiste 'preferenze.json')
+	                 // Se l'installazione proviene da una condivisione accoglie un dataid tipo '20191003215337'
+	                 // Ben presto diventa null e rimane tale, a meno di cancellare tutti i dati
 	List<Cassetto> alberi;
 	public int idAprendo;
 	boolean autoSalva;

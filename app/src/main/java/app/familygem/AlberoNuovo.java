@@ -22,7 +22,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,65 +53,79 @@ public class AlberoNuovo extends AppCompatActivity {
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView(R.layout.albero_nuovo);
+		View rotella = findViewById( R.id.nuovo_circolo );
+		String referrer = Globale.preferenze.referrer; // Dataid proveniente da una condivisione
+		boolean esisteDataId = referrer != null && referrer.matches("[0-9]{14}");
 
 		// Crea un albero vuoto
-		findViewById( R.id.bottone_albero_vuoto ).setOnClickListener( vista -> {
-			View vistaMessaggio = LayoutInflater.from( vista.getContext() ).inflate(R.layout.albero_nomina, null);
-			AlertDialog.Builder builder = new AlertDialog.Builder( vista.getContext() );
-			builder.setView( vistaMessaggio ).setTitle( R.string.title );
-			TextView vistaTesto = vistaMessaggio.findViewById( R.id.nuovo_nome_testo );
-			vistaTesto.setText( R.string.modify_later );
-			vistaTesto.setVisibility( View.VISIBLE );
-			final EditText nuovoNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
-			builder.setPositiveButton( R.string.create, ( dialog, id ) -> {
-				int num = Globale.preferenze.max() + 1;
-				File fileJson = new File( getFilesDir(), num + ".json" );
-				Globale.gc = new Gedcom();
-				Globale.gc.setHeader( creaTestata( fileJson.getName() ) );
-				Globale.gc.createIndexes();
-				JsonParser jp = new JsonParser();
-				try {
-					FileUtils.writeStringToFile( fileJson, jp.toJson(Globale.gc), "UTF-8" );
-				} catch (Exception e) {
-					Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-					return;
-				}
-				Globale.preferenze.aggiungi( new Armadio.Cassetto(
-						num, nuovoNome.getText().toString(), null, 0, 0, null, null, 0, null ));
-				Globale.preferenze.salva();
-				onBackPressed();
-				Toast.makeText( this, R.string.tree_created, Toast.LENGTH_SHORT ).show();
-			}).setNeutralButton( R.string.cancel, null ).create().show();
-			vistaMessaggio.post( () -> {
-				nuovoNome.requestFocus();
-				InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				inputMethodManager.showSoftInput(nuovoNome, InputMethodManager.SHOW_IMPLICIT);
+		Button alberoVuoto = findViewById( R.id.bottone_albero_vuoto );
+		if( esisteDataId ) {
+			alberoVuoto.setText( "Download the shared tree" ); // todo traduci
+			alberoVuoto.setOnClickListener( v -> {
+				rotella.setVisibility( View.VISIBLE );
+				Facciata.scaricaCondiviso(this, referrer);
 			});
-		});
+		} else {
+			alberoVuoto.setOnClickListener( v -> {
+				View vistaMessaggio = LayoutInflater.from(this).inflate(R.layout.albero_nomina, null);
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setView( vistaMessaggio ).setTitle( R.string.title );
+				TextView vistaTesto = vistaMessaggio.findViewById( R.id.nuovo_nome_testo );
+				vistaTesto.setText( R.string.modify_later );
+				vistaTesto.setVisibility( View.VISIBLE );
+				EditText nuovoNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
+				builder.setPositiveButton( R.string.create, (dialog, id) -> salva(nuovoNome.getText().toString()) )
+						.setNeutralButton( R.string.cancel, null ).create().show();
+				nuovoNome.setOnEditorActionListener( (view, action, event) -> {
+					if( action == EditorInfo.IME_ACTION_DONE ) {
+						salva( nuovoNome.getText().toString() );
+						return true; // completa le azioni di salva()
+					}
+					return false; // Eventuali altri action che non esistono
+				});
+				vistaMessaggio.post( () -> {
+					nuovoNome.requestFocus();
+					InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					inputMethodManager.showSoftInput(nuovoNome, InputMethodManager.SHOW_IMPLICIT);
+				});
+			});
+		}
 
-		findViewById(R.id.bottone_scarica_esempio).setOnClickListener( v -> {
-			int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-			if( perm == PackageManager.PERMISSION_DENIED )
-				ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 5641 );
-			else if( perm == PackageManager.PERMISSION_GRANTED )
-				scaricaEsempio();
-		});
+		Button scaricaEsempio = findViewById(R.id.bottone_scarica_esempio);
+		if( esisteDataId ) {
+			scaricaEsempio.setVisibility( View.GONE );
+		} else {
+			scaricaEsempio.setOnClickListener( v -> {
+				rotella.setVisibility( View.VISIBLE );
+				int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				if( perm == PackageManager.PERMISSION_DENIED )
+					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 5641 );
+				else if( perm == PackageManager.PERMISSION_GRANTED )
+					scaricaEsempio();
+			});
+		}
 
-		findViewById(R.id.bottone_importa_gedcom).setOnClickListener( v -> {
-			int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-			if( perm == PackageManager.PERMISSION_DENIED )
-				ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
-			else if( perm == PackageManager.PERMISSION_GRANTED )
-				importaGedcom();
-		});
+		Button importaGedcom = findViewById(R.id.bottone_importa_gedcom);
+		if( esisteDataId ) {
+			importaGedcom.setVisibility( View.GONE );
+		} else {
+			importaGedcom.setOnClickListener( v -> {
+				int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+				if( perm == PackageManager.PERMISSION_DENIED )
+					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
+				else if( perm == PackageManager.PERMISSION_GRANTED )
+					importaGedcom();
+			});
+		}
 
-		findViewById(R.id.bottone_recupera_backup).setOnClickListener( v -> {
+		Button recuperaBackup = findViewById(R.id.bottone_recupera_backup);
+		recuperaBackup.setOnClickListener( v -> {
 			Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
 			intent.setType( "application/zip" );
 			startActivityForResult( intent, 219 );
 		});
 
-		findViewById(R.id.bottone_recupera_backup).setOnLongClickListener( v -> {
+		recuperaBackup.setOnLongClickListener( v -> {
 			if( getFilesDir().listFiles().length == 0 ) {
 				BackupManager mBackupManager = new BackupManager(v.getContext());
 				//mBackupManager.dataChanged();
@@ -151,6 +167,26 @@ public class AlberoNuovo extends AppCompatActivity {
 		}
 	}
 
+	// Salva un nuovo albero
+	void salva( String titolo ) {
+		int num = Globale.preferenze.max() + 1;
+		File fileJson = new File( getFilesDir(), num + ".json" );
+		Globale.gc = new Gedcom();
+		Globale.gc.setHeader( creaTestata( fileJson.getName() ) );
+		Globale.gc.createIndexes();
+		JsonParser jp = new JsonParser();
+		try {
+			FileUtils.writeStringToFile( fileJson, jp.toJson(Globale.gc), "UTF-8" );
+		} catch (Exception e) {
+			Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+			return;
+		}
+		Globale.preferenze.aggiungi( new Armadio.Cassetto(num, titolo, null, 0, 0, null, null, 0, null) );
+		Globale.preferenze.salva();
+		onBackPressed();
+		Toast.makeText( this, R.string.tree_created, Toast.LENGTH_SHORT ).show();
+	}
+
 	// Scarica da internet un file zip nella cartella Download
 	void scaricaEsempio() {
 		DownloadManager gestoreScarico = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
@@ -166,7 +202,8 @@ public class AlberoNuovo extends AppCompatActivity {
 				+ "/the_Simpsons.zip";
 		DownloadManager.Request richiesta = new DownloadManager.Request( Uri.parse( url ) )
 				.setTitle( getString(R.string.simpsons_tree) )
-				.setDescription( getString(R.string.downloading) )
+				.setDescription( "Family Gem example" ) // todo traduci
+				.setMimeType("application/zip")
 				.setNotificationVisibility( DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 				.setDestinationUri( Uri.parse( "file://" + percorsoZip ) );
 		gestoreScarico.enqueue( richiesta );
@@ -231,6 +268,17 @@ public class AlberoNuovo extends AppCompatActivity {
 			// Albero proveniente da condivisione destinato al confronto
 			if( cassa.grado == 9 && confronta(contesto,cassetto) ) {
 				cassetto.grado = 20; // lo marchia come derivato
+			} // Albero condiviso scaricato automaticamente dopo la prima installazione
+			else if( Globale.preferenze.referrer != null ) {
+				Globale.preferenze.referrer = null;
+				if( contesto instanceof Alberi ) { // Download dal dialogo in Alberi
+					Alberi alberi = (Alberi) contesto;
+					alberi.runOnUiThread( () -> {
+						alberi.rotella.setVisibility( View.GONE );
+						alberi.aggiornaLista();
+					});
+				} else // Downolad da AlberoNuovo
+					contesto.startActivity( new Intent( contesto, Alberi.class ) );
 			} else { // Albero di esempio, di backup, o di condivisione
 				contesto.startActivity( new Intent( contesto, Alberi.class ) );
 			}
@@ -379,7 +427,8 @@ public class AlberoNuovo extends AppCompatActivity {
 		if( albero2.condivisioni != null )
 			for( Armadio.Cassetto alb : Globale.preferenze.alberi )
 				if( alb.id != albero2.id && alb.condivisioni != null && alb.grado != 20  && alb.grado != 30 )
-					for( Armadio.Invio invio : alb.condivisioni )
+					for( int i = alb.condivisioni.size()-1; i >= 0; i-- ) { // Le condivisioni dall'ultima alla prima
+						Armadio.Invio invio = alb.condivisioni.get(i);
 						for( Armadio.Invio invio2 : albero2.condivisioni )
 							if( invio.data != null && invio.data.equals( invio2.data ) ) {
 								Intent intento = new Intent( contesto, Compara.class );
@@ -389,6 +438,7 @@ public class AlberoNuovo extends AppCompatActivity {
 								contesto.startActivity( intento );
 								return true;
 							}
+					}
 		return false;
 	}
 

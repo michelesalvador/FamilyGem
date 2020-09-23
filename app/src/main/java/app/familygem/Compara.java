@@ -36,7 +36,7 @@ public class Compara extends AppCompatActivity {
 		super.onCreate( bandolo );
 		setContentView( R.layout.compara );
 		int idAlbero = getIntent().getIntExtra("idAlbero",1);
-		final int idAlbero2 = getIntent().getIntExtra("idAlbero2",1);
+		int idAlbero2 = getIntent().getIntExtra("idAlbero2",1);
 		Globale.idAlbero2 = idAlbero2; // servirà alle immagini di Confrontatore e a Conferma
 		Globale.gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
 		Globale.gc2 = Alberi.apriGedcomTemporaneo( idAlbero2, false );
@@ -50,6 +50,7 @@ public class Compara extends AppCompatActivity {
 		}
 
 		formatoDataOggetto = new SimpleDateFormat( "d MMM yyyyHH:mm:ss", Locale.ENGLISH );
+		Confronto.reset(); // Necessario svuotarlo, ad esempio dopo un cambio di configurazione
 
 		// Confronta tutti i record dei due Gedcom
 		for( Family o2 : Globale.gc2.getFamilies() )
@@ -119,7 +120,9 @@ public class Compara extends AppCompatActivity {
 					if( fronte.doppiaOpzione )
 						Confronto.get().quanteScelte++;
 				}
-				if( Confronto.get().quanteScelte > 0 ) {
+				Intent intent = new Intent( Compara.this, Confrontatore.class );
+				intent.putExtra( "posizione", 1 );
+				if( Confronto.get().quanteScelte > 0 ) { // Dialogo di richiesta revisione
 					new AlertDialog.Builder(this)
 							.setTitle( Confronto.get().quanteScelte == 1 ? getString(R.string.one_update_choice)
 									: getString(R.string.many_updates_choice, Confronto.get().quanteScelte) )
@@ -127,17 +130,14 @@ public class Compara extends AppCompatActivity {
 							.setPositiveButton( android.R.string.ok, (dialog,id) -> {
 								Confronto.get().autoProsegui = true;
 								Confronto.get().scelteFatte = 1;
-								startActivity( new Intent(Compara.this, Confrontatore.class).putExtra("posizione", 1) );
+								startActivity( intent );
 							}).setNeutralButton( android.R.string.cancel, (dialog,id) -> botton2.setEnabled(true) )
 							.setOnCancelListener( dialog -> botton2.setEnabled(true) ).show();
-					return;
+				} else { // Avvio in automatico
+					Confronto.get().autoProsegui = true;
+					startActivity( intent );
 				}
-				Confronto.get().autoProsegui = true;
-				Intent intent = new Intent( Compara.this, Confrontatore.class );
-				intent.putExtra( "posizione", 1 );
-				intent.setFlags( Intent.FLAG_ACTIVITY_NO_HISTORY );
-				startActivity( intent );
-			} );
+			});
 		} else {
 			botton1.setText( R.string.delete_imported_tree );
 			botton1.setOnClickListener( v -> {

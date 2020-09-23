@@ -23,7 +23,8 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:hint="@string/name"
-			android:inputType="textCapWords|textPersonName" />
+			android:inputType="textCapWords|textPersonName"
+			android:nextFocusForward="@+id/cognome"/>
 	</com.google.android.material.textfield.TextInputLayout>
 
 	<com.google.android.material.textfield.TextInputLayout
@@ -39,7 +40,8 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:hint="@string/surname"
-			android:inputType="textCapWords|textPersonName" />
+			android:inputType="textCapWords|textPersonName"
+			android:nextFocusForward="@+id/data_nascita"/>
 	</com.google.android.material.textfield.TextInputLayout>
 
 	<RadioGroup
@@ -88,7 +90,9 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:hint="@string/birth_date"
-			android:inputType="textCapCharacters" />
+			android:inputType="textCapCharacters"
+			android:imeOptions="actionNext"
+			android:nextFocusForward="@+id/luogo_nascita"/>
 
 	</com.google.android.material.textfield.TextInputLayout>
 
@@ -113,12 +117,10 @@
 			android:id="@+id/luogo_nascita"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:hint="@string/birth_place"
-			android:imeOptions="actionNext"
-			android:nextFocusForward="@id/data_morte" />
+			android:hint="@string/birth_place"/>
 	</com.google.android.material.textfield.TextInputLayout>
 
-	<Switch
+	<androidx.appcompat.widget.SwitchCompat
 		android:id="@+id/defunto"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -126,15 +128,14 @@
 		android:text="@string/dead"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/luogo_nascita_label" />
+		app:layout_constraintTop_toBottomOf="@+id/luogo_nascita_label"/>
 
-	 <LinearLayout
-		android:orientation="vertical"
+	<LinearLayout
 		android:id="@+id/morte"
+		android:orientation="vertical"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="8dp"
-		android:visibility="gone"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/defunto">
@@ -152,7 +153,9 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:hint="@string/death_date"
-				android:inputType="textCapCharacters" />
+				android:inputType="textCapCharacters"
+				android:imeOptions="actionNext"
+				android:nextFocusForward="@id/luogo_morte"/>
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<app.familygem.EditoreData

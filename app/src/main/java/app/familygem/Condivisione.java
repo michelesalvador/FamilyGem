@@ -73,7 +73,7 @@ public class Condivisione extends AppCompatActivity {
 				scatolaRadice.setVisibility( View.VISIBLE );
 				View vistaRadice = U.linkaPersona( scatolaRadice, radice, 1 );
 				vistaRadice.setOnClickListener( v -> {
-					Intent intento = new Intent( Condivisione.this, Principe.class );
+					Intent intento = new Intent( this, Principe.class );
 					intento.putExtra( "anagrafeScegliParente", true );
 					startActivityForResult( intento,5007 );
 				});

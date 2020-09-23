@@ -20,7 +20,6 @@
 			android:id="@+id/indi_ruolo"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Moglie"
 			android:textAllCaps="true"
 			android:textSize="15sp" />
 
@@ -30,8 +29,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_ruolo"
-			android:layout_toLeftOf="@+id/indi_foto"
-			android:text='Nome "Sopradetto" Cognonome Lungotto' />
+			android:layout_toLeftOf="@+id/indi_foto"/>
 
 
 		<TextView
@@ -39,7 +37,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_nome"
-			android:text="Re di Danimarca"
 			android:textColor="#000"
 			android:textStyle="italic" />
 
@@ -48,9 +45,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_titolo"
-			android:layout_toLeftOf="@+id/indi_foto"
-			android:text="1824 - 1913 (43)
-Bello Lago di Ginevra - Castello Roganzuolo" />
+			android:layout_toLeftOf="@+id/indi_foto"/>
 
 		<ImageView
 			android:id="@+id/indi_foto"

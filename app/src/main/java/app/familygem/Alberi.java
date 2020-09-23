@@ -14,16 +14,21 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import android.view.LayoutInflater;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+import com.android.installreferrer.api.InstallReferrerClient;
+import com.android.installreferrer.api.InstallReferrerStateListener;
+import com.android.installreferrer.api.ReferrerDetails;
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.Family;
@@ -55,6 +60,7 @@ public class Alberi extends AppCompatActivity {
 	ListView lista;
 	List<Map<String,String>> alberelli;
 	View rotella;
+	View welcome;
 
 	@Override
 	protected void onCreate( Bundle bandolo ) {
@@ -62,6 +68,22 @@ public class Alberi extends AppCompatActivity {
 		setContentView( R.layout.alberi );
 		lista = findViewById( R.id.lista_alberi );
 		rotella = findViewById( R.id.alberi_circolo );
+
+		// Al primissimo avvio
+		String referrer = Globale.preferenze.referrer;
+		if( referrer != null && referrer.equals("start") )
+			recuperaReferrer();
+		// Se è stato memorizzato un dataid (che appena usato sarà cancellato)
+		else if( referrer != null && referrer.matches("[0-9]{14}") ) {
+			new AlertDialog.Builder(this).setTitle( "A new family tree" ) // todo traduci
+					.setMessage( "There is STILL a shared tree you can download." ) // todo traduci
+					.setPositiveButton( "Download", (dialog, id) -> { // todo traduci
+						rotella.setVisibility( View.VISIBLE );
+						Facciata.scaricaCondiviso( this, referrer );
+					}).setNeutralButton( R.string.cancel, null ).show();
+		} // Se non c'è nessun albero
+		else if( Globale.preferenze.alberi.isEmpty() )
+			mostraWelcome();
 
 		if( Globale.preferenze.alberi != null ) {
 
@@ -152,15 +174,21 @@ public class Alberi extends AppCompatActivity {
 								intento.putExtra( "idAlbero", idAlbero );
 								startActivity(intento);
 							} else if( id == 2 ) { // Rinomina albero
-								View vistaMessaggio = LayoutInflater.from( Alberi.this ).inflate(R.layout.albero_nomina, lista, false );
 								AlertDialog.Builder builder = new AlertDialog.Builder( Alberi.this );
+								View vistaMessaggio = getLayoutInflater().inflate(R.layout.albero_nomina, lista, false );
 								builder.setView( vistaMessaggio ).setTitle( R.string.title );
-								final EditText editaNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
+								EditText editaNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
 								editaNome.setText( alberelli.get(posiz).get("titolo") );
-								builder.setPositiveButton( R.string.rename, ( dialog, i1 ) -> {
+								AlertDialog dialogo = builder.setPositiveButton( R.string.rename, ( dialog, i1 ) -> {
 									Globale.preferenze.rinomina( idAlbero, editaNome.getText().toString() );
 									aggiornaLista();
-								}).setNeutralButton( R.string.cancel, null ).create().show();
+								}).setNeutralButton( R.string.cancel, null ).create();
+								editaNome.setOnEditorActionListener( (view, action, event) -> {
+									if( action == EditorInfo.IME_ACTION_DONE )
+										dialogo.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+									return false;
+								});
+								dialogo.show();
 								vistaMessaggio.post( () -> {
 									editaNome.requestFocus();
 									editaNome.setSelection(editaNome.getText().length());
@@ -220,10 +248,12 @@ public class Alberi extends AppCompatActivity {
 		barra.setCustomView( barraAlberi );
 		barra.setDisplayShowCustomEnabled( true );
 
-		// Fab
-		findViewById(R.id.fab).setOnClickListener( v -> startActivity(
-				new Intent( Alberi.this, AlberoNuovo.class) )
-		);
+		// FAB
+		findViewById(R.id.fab).setOnClickListener( v -> {
+			if( welcome != null )
+				welcome.setVisibility( View.GONE );
+			startActivity( new Intent(Alberi.this, AlberoNuovo.class) );
+		});
 
 		// Apertura automatica dell'albero
 		if( getIntent().getBooleanExtra("apriAlberoAutomaticamente",false) && Globale.preferenze.idAprendo > 0 ) {
@@ -251,6 +281,68 @@ public class Alberi extends AppCompatActivity {
 		aggiornaLista();
 	}
 
+	// Cerca di recuperare dal Play Store il dataID casomai l'app sia stata installata in seguito ad una condivisione
+	// Se trova il dataid propone di scaricare l'albero condiviso
+	void recuperaReferrer() {
+		InstallReferrerClient irc = InstallReferrerClient.newBuilder(this).build();
+		irc.startConnection( new InstallReferrerStateListener() {
+			@Override
+			public void onInstallReferrerSetupFinished( int risposta ) {
+				switch( risposta ) {
+					case InstallReferrerClient.InstallReferrerResponse.OK:
+						try {
+							ReferrerDetails dettagli = irc.getInstallReferrer();
+							// Normalmente 'referrer' è una stringa tipo 'utm_source=google-play&utm_medium=organic'
+							// Ma se l'app è stata installata dal link nella pagina di condivisione sarà un data-id come '20191003215337'
+							String referrer = dettagli.getInstallReferrer();
+							if( referrer != null && referrer.matches("[0-9]{14}") ) { // È un data-id
+								Globale.preferenze.referrer = referrer;
+								new AlertDialog.Builder( Alberi.this ).setTitle( "A new family tree" ) // todo traduci
+										.setMessage( "You can now download the tree shared with you." ) // todo traduci
+										.setPositiveButton( "Download", (dialog, id) -> { // todo traduci
+											rotella.setVisibility( View.VISIBLE );
+											Facciata.scaricaCondiviso(Alberi.this, referrer);
+										}).setNeutralButton( R.string.cancel, (di, id) -> mostraWelcome() )
+										.setOnCancelListener( d -> mostraWelcome() ).show();
+							} else { // È qualunque altra cosa
+								Globale.preferenze.referrer = null; // lo annulla così non lo cercherà più
+								mostraWelcome();
+							}
+							Globale.preferenze.salva();
+							irc.endConnection();
+						} catch( Exception e ) {
+							U.tosta( Alberi.this, e.getLocalizedMessage() );
+						}
+						break;
+					// App Play Store inesistente sul device o comunque risponde in modo errato
+					case InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED:
+					// Questo non l'ho mai visto comparire
+					case InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE:
+						Globale.preferenze.referrer = null; // così non torniamo più qui
+						Globale.preferenze.salva();
+						mostraWelcome();
+				}
+			}
+			@Override
+			public void onInstallReferrerServiceDisconnected() {
+				// Mai visto comparire
+				U.tosta( Alberi.this, "Install Referrer Service Disconnected" );
+			}
+		});
+	}
+
+	// Fumetto di benvenuto
+	void mostraWelcome() {
+		if( welcome == null ) { // evita rischio di duplicati
+			new Handler().postDelayed( () -> { // compare dopo un secondo
+				welcome = getLayoutInflater().inflate(R.layout.benvenuto, null );
+				((LinearLayout)findViewById(R.id.alberi_fab_box)).addView( welcome, 0,
+						new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT) );
+				welcome.setOnClickListener( vista -> vista.setVisibility(View.GONE) );
+			}, 1000);
+		}
+	}
+
 	void aggiornaLista() {
 		alberelli.clear();
 		for( Armadio.Cassetto alb : Globale.preferenze.alberi ) {
@@ -269,7 +361,7 @@ public class Alberi extends AppCompatActivity {
 	static String scriviDati( Context contesto, Armadio.Cassetto alb ) {
 		String dati = alb.individui + " " +
 				contesto.getString(alb.individui == 1 ? R.string.person : R.string.persons).toLowerCase();
-		if( alb.generazioni > 0 )
+		if( alb.individui > 1 && alb.generazioni > 0 )
 			dati += " - " + alb.generazioni + " " +
 					contesto.getString(alb.generazioni == 1 ? R.string.generation : R.string.generations).toLowerCase();
 		if( alb.media > 0 )
@@ -302,6 +394,7 @@ public class Alberi extends AppCompatActivity {
 			Globale.preferenze.salva();
 		}
 		Globale.individuo = Globale.preferenze.alberoAperto().radice;
+		Globale.numFamiglia = 0; // eventualmente lo resetta se era > 0
 		Globale.daSalvare = false; // eventualmente lo resetta se era true
 		return true;
 	}
