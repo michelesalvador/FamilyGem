@@ -15,8 +15,8 @@
     <string name="new_family_of">Nuova famiglia di %s</string>
     <string name="existing_family">Famiglia già esistente</string>
     <!-- Principe -->
-    <string name="drawer_open">Apri menu</string>
-    <string name="drawer_close">Chiudi menu</string>
+    <string name="drawer_open">Apri pannello di navigazione</string>
+    <string name="drawer_close">Chiudi pannello di navigazione</string>
     <string name="revert">Annulla modifiche</string>
     <string name="trees">Alberi</string>
     <string name="diagram">Diagramma</string>
@@ -44,7 +44,7 @@
     <string name="invalid_gedcom">GEDCOM non valido.</string>
     <string name="tree">Albero</string>
     <string name="simpsons_tree">Albero dei Simpson</string>
-    <string name="downloading">Download in corso…</string>
+    <string name="downloading">Scaricamento in corso…</string>
     <!-- Alberi -->
     <string name="persons">Persone</string>
     <string name="generation">Generazione</string>
@@ -131,7 +131,7 @@
     <string name="all_imported_delete">Tutti gli aggiornamenti sono stati importati.\nVuoi eliminare l\'albero importato?</string>
     <!-- Diagram -->
     <string name="new_person">Inserisci una persona</string>
-    <string name="card">Scheda</string>
+    <string name="card">Profilo</string>
     <string name="family_as_child">Famiglia (come figlio)</string>
     <string name="family_as_spouse">Famiglia (come coniuge)</string>
     <string name="new_relative">Collega nuova persona</string>
@@ -142,7 +142,8 @@
     <string name="sibling">Fratello/sorella</string>
     <string name="spouse">Coniuge</string>
     <string name="child">Figlio/a</string>
-    <string name="long_press_menu">Tieni premuto per mostrare il menu.\nTocca per aprire la scheda.</string>
+    <string name="long_press_menu">Tieni premuto per mostrare il menu.
+\nTocca per aprire il profilo.</string>
     <string name="person_unlinked">Persona scollegata.</string>
     <!-- Diagram settings -->
     <string name="diagram_settings">Impostazioni diagramma</string>

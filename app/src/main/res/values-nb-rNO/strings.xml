@@ -257,8 +257,8 @@
     <string name="want_crop_image">Ønsker du å beskjære dette bildet\?</string>
     <string name="empty_name">Tomt navn</string>
     <string name="no_name">Uten navn</string>
-    <string name="from_to">Fra … til</string>
-    <string name="between">Mellom … og</string>
+    <string name="from_to">Fra… til</string>
+    <string name="between">Mellom… og</string>
     <string name="female">Kvinne</string>
     <string name="male">Mann</string>
     <string name="shared_by">Brukt av</string>
