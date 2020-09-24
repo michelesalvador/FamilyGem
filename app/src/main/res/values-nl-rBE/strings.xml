@@ -86,7 +86,6 @@
     <string name="uncles">Ooms</string>
     <string name="ancestors">Voorouders</string>
     <string name="generations_display_diagram">Stel in hoeveel generaties u in het diagram wilt weergeven.</string>
-    <string name="person_unlinked">Deze persoon is ontkoppeld.</string>
     <string name="long_press_menu">Lang indrukken om het menu weer te geven.
 \nTik om het profiel te openen.</string>
     <string name="child">Kind</string>
@@ -194,7 +193,6 @@
     <string name="generations">Generaties</string>
     <string name="generation">Generatie</string>
     <string name="persons">Personen</string>
-    <string name="downloading">Downloaden…</string>
     <string name="simpsons_tree">Stamboom: The Simpsons</string>
     <string name="tree">Boom</string>
     <string name="invalid_gedcom">Ongeldige GEDCOM.</string>

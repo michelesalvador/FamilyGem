@@ -21,10 +21,10 @@ android {
 		applicationId "app.familygem"
 		minSdkVersion 19
 		targetSdkVersion 29
-		versionCode 16
-		versionName '0.7.13'
+		versionCode 17
+		versionName '0.7.14'
 		vectorDrawables.useSupportLibrary = true
-		resConfigs "en", "es", "it", "pl", "nb-rNO"
+		resConfigs "en", "de", "es", "fr", "hr", "it", "nb-rNO", "nl-rBE", "pl", "uk"
 		def backupKey = ""
 		def utenteAruba = ""
 		def passwordAruba = ""

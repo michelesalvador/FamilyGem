@@ -54,7 +54,6 @@
     <string name="ancestors">Предки</string>
     <string name="generations_display_diagram">Встановіть, скільки поколінь відображати на схемі.</string>
     <string name="diagram_settings">Налаштування діаграми</string>
-    <string name="person_unlinked">Цю особу від’єднано.</string>
     <string name="long_press_menu">Тривале натискання відображає меню.
 \n Торкніться, щоб відкрити профіль.</string>
     <string name="child">Дитина</string>
@@ -150,7 +149,6 @@
     <string name="generations">Покоління</string>
     <string name="generation">Покоління</string>
     <string name="persons">Особи</string>
-    <string name="downloading">Завантаження…</string>
     <string name="simpsons_tree">Сімейне дерево Сімпсонів</string>
     <string name="tree">Дерево</string>
     <string name="invalid_gedcom">Недійсний GEDCOM.</string>

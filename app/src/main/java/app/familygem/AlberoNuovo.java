@@ -60,7 +60,7 @@ public class AlberoNuovo extends AppCompatActivity {
 		// Crea un albero vuoto
 		Button alberoVuoto = findViewById( R.id.bottone_albero_vuoto );
 		if( esisteDataId ) {
-			alberoVuoto.setText( "Download the shared tree" ); // todo traduci
+			alberoVuoto.setText( R.string.download_shared_tree );
 			alberoVuoto.setOnClickListener( v -> {
 				rotella.setVisibility( View.VISIBLE );
 				Facciata.scaricaCondiviso(this, referrer);
@@ -202,8 +202,8 @@ public class AlberoNuovo extends AppCompatActivity {
 				+ "/the_Simpsons.zip";
 		DownloadManager.Request richiesta = new DownloadManager.Request( Uri.parse( url ) )
 				.setTitle( getString(R.string.simpsons_tree) )
-				.setDescription( "Family Gem example" ) // todo traduci
-				.setMimeType("application/zip")
+				.setDescription( getString(R.string.family_gem_example) )
+				.setMimeType( "application/zip" )
 				.setNotificationVisibility( DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 				.setDestinationUri( Uri.parse( "file://" + percorsoZip ) );
 		gestoreScarico.enqueue( richiesta );

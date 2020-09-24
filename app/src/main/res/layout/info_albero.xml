@@ -62,7 +62,7 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
 			android:layout_marginTop="20dp"
-			android:text="Update header"/>
-			<!-- todo traduci -->
+			android:text="@string/update_header"/>
+
 	</LinearLayout>
 </ScrollView>

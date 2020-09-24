@@ -252,7 +252,7 @@ public class Chiesa extends Fragment {
 		menu.add( R.string.order_by ).setEnabled(false);
 		menu.add( 0,1,0, R.string.id );
 		menu.add( 0,2,0, R.string.surname );
-		menu.add( 0,3,0, "Number of members" ); // todo traduci
+		menu.add( 0,3,0, R.string.number_members );
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {

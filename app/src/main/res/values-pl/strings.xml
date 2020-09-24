@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Family Gem</string>
     <string name="tagline">Stwórz własne drzewo genealogiczne</string>
     <string name="delete">Usuń</string>
     <string name="cancel">Anuluj</string>
@@ -44,7 +43,6 @@
     <string name="invalid_gedcom">Nieprawidłowy GEDCOM.</string>
     <string name="tree">Drzewo</string>
     <string name="simpsons_tree">Drzewo genealogiczne Simpsonów</string>
-    <string name="downloading">Pobieranie…</string>
     <string name="persons">Osoby</string>
     <string name="generation">Pokolenie</string>
     <string name="generations">Pokoleń</string>
@@ -134,7 +132,6 @@
     <string name="spouse">Małżonka</string>
     <string name="child">Dziecko</string>
     <string name="long_press_menu">Przytrzymaj dłużej, aby wyświetlić menu.\nDotknij, aby otworzyć profil.</string>
-    <string name="person_unlinked">Ta osoba została odłączona.</string>
     <string name="diagram_settings">Ustawienia diagramu</string>
     <string name="generations_display_diagram">Ustaw liczbę pokoleń do wyświetlenia na schemacie.</string>
     <string name="ancestors">Przodków</string>

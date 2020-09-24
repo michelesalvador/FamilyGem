@@ -28,6 +28,7 @@
     <string name="submitters">Autori</string>
     <!-- AlberoNuovo -->
     <string name="new_tree">Nuovo albero</string>
+    <string name="download_shared_tree">Scarica l\'albero condiviso</string>
     <string name="empty_tree">Crea un albero vuoto</string>
     <string name="download_example">Scarica un esempio</string>
     <string name="import_gedcom">Importa un file GEDCOM</string>
@@ -44,8 +45,12 @@
     <string name="invalid_gedcom">GEDCOM non valido.</string>
     <string name="tree">Albero</string>
     <string name="simpsons_tree">Albero dei Simpson</string>
-    <string name="downloading">Scaricamento in corso…</string>
+    <string name="family_gem_example">Un esempio per Family Gem</string>
     <!-- Alberi -->
+    <string name="a_new_tree">Un nuovo albero genealogico</string>
+    <string name="you_can_download">Ora puoi scaricare l\'albero condiviso con te.</string>
+    <string name="download">Scarica</string>
+    <string name="tap_add_tree">Tocca per aggiungere un albero.</string>
     <string name="persons">Persone</string>
     <string name="generation">Generazione</string>
     <string name="generations">Generazioni</string>
@@ -78,6 +83,7 @@
     <string name="refresh">Aggiorna</string>
     <string name="header">Intestazione</string>
     <string name="create_header">Crea l\'intestazione</string>
+    <string name="update_header">Aggiorna l\'intestazione</string>
     <string name="file">File</string>
     <string name="characrter_set">Codifica</string>
     <string name="version">Versione</string>
@@ -144,7 +150,6 @@
     <string name="child">Figlio/a</string>
     <string name="long_press_menu">Tieni premuto per mostrare il menu.
 \nTocca per aprire il profilo.</string>
-    <string name="person_unlinked">Persona scollegata.</string>
     <!-- Diagram settings -->
     <string name="diagram_settings">Impostazioni diagramma</string>
     <string name="generations_display_diagram">Scegli quante generazioni mostrare nel diagramma.</string>
@@ -275,6 +280,7 @@
     <string name="state">Stato/provincia</string>
     <string name="country">Nazione</string>
     <!-- Famiglia -->
+    <string name="number_members">Numero dei membri</string>
     <string name="num_children">%d figli</string>
     <string name="family">Famiglia</string>
     <string name="marriage">Matrimonio</string>

@@ -52,6 +52,10 @@ public class Individuo extends AppCompatActivity {
 			Alberi.apriGedcom( Globale.preferenze.idAprendo, false );
 		}
 		uno = (Person) Memoria.getOggetto();
+		// Se l'app va in background e viene stoppata, 'Memoria' è resettata e quindi 'uno' sarà null
+		if( uno == null && bandolo != null )
+			uno = gc.getPerson( bandolo.getString("idUno") ); // In Bundle è salvato l'id dell'individuo
+		// In effetti Memoria viene resettata, ma Globale.individuo sembra vivo e vegeto.. vabbè, comunque il Bundle fa il suo lavoro
 		Globale.individuo = uno.getId();
 		setContentView(R.layout.individuo);
 
@@ -352,6 +356,12 @@ public class Individuo extends AppCompatActivity {
 				return true;
 			});
 		});
+	}
+
+	@Override
+	public void onSaveInstanceState (Bundle bandolo) {
+		super.onSaveInstanceState( bandolo );
+		bandolo.putString( "idUno", uno.getId() );
 	}
 
 	@Override

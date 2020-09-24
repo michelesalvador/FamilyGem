@@ -129,7 +129,6 @@
     <string name="generations">Generasjoner</string>
     <string name="generation">Generasjon</string>
     <string name="persons">Personer</string>
-    <string name="downloading">Laster ned…</string>
     <string name="simpsons_tree">Simpsons-familietreet</string>
     <string name="tree">Tre</string>
     <string name="invalid_gedcom">Ugyldig GEDCOM.</string>
@@ -186,7 +185,6 @@
     <string name="siblings">Søsken</string>
     <string name="ancestors">Forfedre</string>
     <string name="diagram_settings">Diagraminnstillinger</string>
-    <string name="person_unlinked">Denne personen har blitt avlenket.</string>
     <string name="long_press_menu">Trykk lenge for å vise menyen.
 \nTrykk for å åpne profilen.</string>
     <string name="sibling">Søsken</string>

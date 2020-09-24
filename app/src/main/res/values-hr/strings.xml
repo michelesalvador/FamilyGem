@@ -116,7 +116,6 @@
     <string name="days">dana</string>
     <string name="submitters">Podnositelji</string>
     <string name="ignore">Preskoči</string>
-    <string name="person_unlinked">Ova je osoba odspojena.</string>
     <string name="revert">Poništi promjene</string>
     <string name="version_name">Verzija %s</string>
     <string name="child">Dijete</string>
@@ -293,7 +292,6 @@
     <string name="new_relative">Poveži novu osobu</string>
     <string name="generations">Generacije</string>
     <string name="tagline">Stvori vlastito obiteljsko stablo</string>
-    <string name="downloading">Preuzimanje …</string>
     <string name="months">mjeseci</string>
     <string name="unlink">Odspoji</string>
     <string name="auto_save">Automatsko spremanje</string>

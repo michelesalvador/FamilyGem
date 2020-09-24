@@ -122,7 +122,6 @@ public class NuovoParente extends DialogFragment {
 		//Save the fragment's instance
 		if( frammento != null )
 			getActivity().getSupportFragmentManager().putFragment(bandolo, "frammento", frammento);
-
 	}
 
 	// Dice se in una famiglia c'è spazio vuoto per aggiungere uno dei due genitori

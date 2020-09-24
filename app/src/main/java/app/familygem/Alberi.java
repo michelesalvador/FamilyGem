@@ -75,9 +75,9 @@ public class Alberi extends AppCompatActivity {
 			recuperaReferrer();
 		// Se è stato memorizzato un dataid (che appena usato sarà cancellato)
 		else if( referrer != null && referrer.matches("[0-9]{14}") ) {
-			new AlertDialog.Builder(this).setTitle( "A new family tree" ) // todo traduci
-					.setMessage( "There is STILL a shared tree you can download." ) // todo traduci
-					.setPositiveButton( "Download", (dialog, id) -> { // todo traduci
+			new AlertDialog.Builder(this).setTitle( R.string.a_new_tree )
+					.setMessage( R.string.you_can_download )
+					.setPositiveButton( R.string.download, (dialog, id) -> {
 						rotella.setVisibility( View.VISIBLE );
 						Facciata.scaricaCondiviso( this, referrer );
 					}).setNeutralButton( R.string.cancel, null ).show();
@@ -297,9 +297,9 @@ public class Alberi extends AppCompatActivity {
 							String referrer = dettagli.getInstallReferrer();
 							if( referrer != null && referrer.matches("[0-9]{14}") ) { // È un data-id
 								Globale.preferenze.referrer = referrer;
-								new AlertDialog.Builder( Alberi.this ).setTitle( "A new family tree" ) // todo traduci
-										.setMessage( "You can now download the tree shared with you." ) // todo traduci
-										.setPositiveButton( "Download", (dialog, id) -> { // todo traduci
+								new AlertDialog.Builder( Alberi.this ).setTitle( R.string.a_new_tree )
+										.setMessage( R.string.you_can_download )
+										.setPositiveButton( R.string.download, (dialog, id) -> {
 											rotella.setVisibility( View.VISIBLE );
 											Facciata.scaricaCondiviso(Alberi.this, referrer);
 										}).setNeutralButton( R.string.cancel, (di, id) -> mostraWelcome() )

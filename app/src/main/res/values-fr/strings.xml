@@ -122,7 +122,6 @@
     <string name="generations">Générations</string>
     <string name="generation">Génération</string>
     <string name="persons">Personnes</string>
-    <string name="downloading">Téléchargement…</string>
     <string name="simpsons_tree">L\'arbre généalogique des Simpson</string>
     <string name="tree">Arbre</string>
     <string name="invalid_gedcom">GEDCOM invalide.</string>
