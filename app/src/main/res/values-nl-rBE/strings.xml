@@ -173,7 +173,7 @@
     <string name="item_exists_but_file">De boomvermelding staat in de index, maar om een of andere reden ontbreekt het gerelateerde bestand:</string>
     <string name="about">Over</string>
     <string name="show_advanced_functions">Toon geavanceerd gereedschap</string>
-    <string name="load_tree_startup">Laad de laatst geopende boom bij het opstarten</string>
+    <string name="load_tree_startup">De laatst geopende boom laden bij het opstarten</string>
     <string name="auto_save">Automatisch opslaan</string>
     <string name="settings">Instellingen</string>
     <string name="errors_found">%d fouten gevonden.</string>
@@ -213,7 +213,7 @@
     <string name="empty_tree">Start een lege boom</string>
     <string name="new_tree">Nieuwe boom</string>
     <string name="submitters">Indieners</string>
-    <string name="repositories">Opslagplaatsen</string>
+    <string name="repositories">Begraafplaatsen</string>
     <string name="families">Families</string>
     <string name="notes">Opmerkingen</string>
     <string name="sources">Bronnen</string>
@@ -313,9 +313,17 @@
     <string name="place">Plaats</string>
     <string name="maiden">Ongetrouwd</string>
     <string name="married">Getrouwd</string>
-    <string name="change_date">Verander datum</string>
+    <string name="change_date">Datum wijziging</string>
     <string name="done">Gedaan</string>
     <string name="cancel">Annuleren</string>
     <string name="delete">Verwijderen</string>
     <string name="tagline">Maak uw eigen stamboom</string>
+    <string name="number_members">Aantal leden</string>
+    <string name="update_header">Update koptekst</string>
+    <string name="tap_add_tree">Tik om een stamboom toe te voegen.</string>
+    <string name="download">Downloaden</string>
+    <string name="you_can_download">U kunt nu de stamboom downloaden die met u is gedeeld.</string>
+    <string name="a_new_tree">Een nieuwe stamboom</string>
+    <string name="family_gem_example">Family Gem voorbeeld</string>
+    <string name="download_shared_tree">Download de gedeelde stamboom</string>
 </resources>
