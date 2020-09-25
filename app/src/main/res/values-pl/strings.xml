@@ -311,4 +311,12 @@
     <string name="married">Żonaty</string>
     <string name="maiden">Panna</string>
     <string name="refresh">Odśwież</string>
+    <string name="number_members">Liczba członków</string>
+    <string name="update_header">Zaktualizuj nagłówek</string>
+    <string name="tap_add_tree">Stuknij, aby dodać drzewo genealogiczne.</string>
+    <string name="download">Pobierz</string>
+    <string name="you_can_download">Możesz teraz pobrać udostępnione drzewo.</string>
+    <string name="a_new_tree">Nowe drzewo genealogiczne</string>
+    <string name="family_gem_example">Przykład Family Gem</string>
+    <string name="download_shared_tree">Pobierz drzewo udostępnione</string>
 </resources>
