@@ -1407,13 +1407,15 @@ public class U {
 	}
 
 	static void salvaJson( Gedcom gc, int idAlbero ) {
-		try {
-			// Eventualmente aggiorna la versione di Family Gem
-			Header h = gc.getHeader();
-			if( h != null && h.getGenerator() != null && h.getGenerator().getName().equals("Family Gem")
-					&& !h.getGenerator().getVersion().equals(BuildConfig.VERSION_NAME) ) {
+		// Eventualmente aggiorna la versione di Family Gem
+		Header h = gc.getHeader();
+		if( h != null && h.getGenerator() != null
+				&& h.getGenerator().getValue() != null && h.getGenerator().getValue().equals("FAMILY_GEM") ) {
+			if( (h.getGenerator().getVersion() != null && !h.getGenerator().getVersion().equals(BuildConfig.VERSION_NAME))
+					|| h.getGenerator().getVersion() == null )
 				h.getGenerator().setVersion( BuildConfig.VERSION_NAME );
-			}
+		}
+		try {
 			FileUtils.writeStringToFile(
 					new File( Globale.contesto.getFilesDir(), idAlbero + ".json" ),
 					new JsonParser().toJson( gc ), "UTF-8"

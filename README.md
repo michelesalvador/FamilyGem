@@ -7,8 +7,8 @@ It's completely free and open source.
 Project started on beginning of 2018.<br>
 Family Gem is written in Java within Eclipse and Android Studio.<br>
 Minimum supported version is Android 4.4 KitKat (API 19), maximum is Android 10 (API 29).<br>
-The intent is that data structure respects as much as possible the GEDCOM standard, in the latest versions 5.5 and 5.5.1.<br>
-It's strongly based on the java [Gedcom parser](https://github.com/FamilySearch/Gedcom) by Family Search.<br>
+The intent is that data structure respects as much as possible the latest version of GEDCOM standard: [5.5.1](https://www.familysearch.org/developers/docs/gedcom/) and possibly also [5.5.5](https://www.gedcom.org/gedcom.html).<br>
+Family Gem is strongly based on the java library [Gedcom by FamilySearch](https://github.com/FamilySearch/Gedcom).<br>
 Author is Michele Salvador, an italian self-taught programmer and genealogy enthusiast.
 
 With Family Gem you can:
@@ -33,9 +33,9 @@ The code provided in this repository should compile and build a working version 
 The code (classes, variables, comments...) is almost all written in Italian, because I'm Italian and I love to write in my native language. I know it's not so kind, because everyone expects an English code, but I started like this and it's hard to change at this point.
 
 ## Translation
-The translation of Family Gem is managed on [Weblate](https://hosted.weblate.org/projects/family-gem/app/).<br>
-You need to login to Weblate to freely work there, but also without login you can make suggestions to already existing translations.<br>
-Contribution to translate in any language is really appreciated!
+The translation of Family Gem user interface is managed on [Weblate](https://hosted.weblate.org/projects/family-gem/app/).<br>
+Contribution to translate in any language is really appreciated!<br>
+You need to login to Weblate to freely work there, but also without login you can make suggestions to already existing translations.
 
 ## Resources
 Official website: www.familygem.app

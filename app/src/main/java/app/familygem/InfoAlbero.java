@@ -108,7 +108,7 @@ public class InfoAlbero extends AppCompatActivity {
 				poni( getText(R.string.copyright), h.getCopyright() );
 				spazio();
 				if (h.getGenerator() != null) {
-					poni( getText(R.string.software), h.getGenerator().getName() );
+					poni( getText(R.string.software), h.getGenerator().getName() != null ? h.getGenerator().getName() : h.getGenerator().getValue() );
 					poni( getText(R.string.version), h.getGenerator().getVersion() );
 					if( h.getGenerator().getGeneratorCorporation() != null ) {
 						poni( getText(R.string.corporation), h.getGenerator().getGeneratorCorporation().getValue() );
