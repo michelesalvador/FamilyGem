@@ -40,12 +40,12 @@
     <string name="drawer_close">Übersicht schließen</string>
     <string name="drawer_open">Übersicht öffnen</string>
     <string name="empty_family_delete">Es sind einige leere Familie übrig.
-\nWillst Du diese löschen\?</string>
+\nMöchtest Du diese löschen\?</string>
     <string name="which_family">Welche Familie\?</string>
     <string name="empty_family">Leere Familie</string>
     <string name="not_granted">%s nicht erteilt.</string>
     <string name="no">Nein</string>
-    <string name="want_crop_image">Willst Du das Bild zuschneiden\?</string>
+    <string name="want_crop_image">Möchtest Du das Bild zuschneiden\?</string>
     <string name="days">Tage</string>
     <string name="months">Monate</string>
     <string name="empty_name">Leerer Name</string>
@@ -166,7 +166,7 @@
     <string name="move_before">Davor verschieben</string>
     <string name="no_useful_data">Keine Daten erhalten.</string>
     <string name="make_default">Hauptautor</string>
-    <string name="make_main_submitter">Willst Du diesen Autor als Hauptautor des Stammbaums\?</string>
+    <string name="make_main_submitter">Möchtest Du diesen Autor als Hauptautor des Stammbaums setzen\?</string>
     <string name="changes_submitter">Autor der Änderungen</string>
     <string name="submitter">Autor</string>
     <string name="submitters">Autoren</string>
@@ -213,7 +213,7 @@
     <string name="family_as_child">Familie (als Kind)</string>
     <string name="card">Profil</string>
     <string name="all_imported_delete">Alle Aktualisierungen wurden importiert.
-\nWillst du den importierten Stammbaum löschen\?</string>
+\nMöchtest Du den importierten Stammbaum löschen\?</string>
     <string name="confirm">Bestätigen</string>
     <string name="accepted_news">Du hast %d Aktualisierungen bestätigt:
 \n%d hinzugefügt
@@ -240,7 +240,7 @@
     <string name="click_this_link">Klick auf diesen Link um meinen Stammbaum zu sehen: %s</string>
     <string name="sharing_tree">Stammbaum teilen</string>
     <string name="correctly_uploaded">Stammbaum erfolgreich hochgeladen.</string>
-    <string name="usually_your_name">Benütze Deinen Vor- und Nachnamen.</string>
+    <string name="usually_your_name">Normalerweise Dein Vor- und Nachnamen.</string>
     <string name="please_name">Bitte Name eingeben.</string>
     <string name="please_title">Bitte Titel eingeben.</string>
     <string name="time">Uhrzeit</string>
@@ -293,8 +293,8 @@
 \nAusführen\?</string>
     <string name="warning">Warnung</string>
     <string name="tree_imported_ok">Stammbaum erfolgreich importiert.</string>
-    <string name="complex_tree_advanced_tools">Dieser Stammbaum sieht sehr komplex aus.
-\nMöchtest du erweiterte Werkzeuge anzeigen, um ihn besser zu verwalten\?</string>
+    <string name="complex_tree_advanced_tools">Dieser Stammbaum sieht recht komplex aus.
+\nMöchtest Du die erweiterten Werkzeuge anzeigen, um ihn besser zu verwalten\?</string>
     <string name="tree_created">Neuer Stammbaum erstellt.</string>
     <string name="create">Erstelle</string>
     <string name="name_of_tree">Titel des Stammbaums</string>
@@ -318,4 +318,12 @@
     <string name="tagline">Erstelle Deinen eigenen Stammbaum</string>
     <string name="www">Website</string>
     <string name="email">E-Mail</string>
+    <string name="you_can_download">Jetzt kannst Du den mit dir geteilten Baum herunterladen.</string>
+    <string name="tap_add_tree">Einmal tippen um einen Stammbaum hinzuzufügen.</string>
+    <string name="number_members">Anzahl der Mitglieder</string>
+    <string name="update_header">Kopfzeile aktualisieren</string>
+    <string name="download">Herunterladen</string>
+    <string name="a_new_tree">Neuer Stammbaum</string>
+    <string name="family_gem_example">Family Gem Beispiel</string>
+    <string name="download_shared_tree">Geteilten Stammbaum herunterladen</string>
 </resources>
