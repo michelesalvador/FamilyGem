@@ -311,4 +311,12 @@
     <string name="divorce">Divorcio</string>
     <string name="married">Casado/a</string>
     <string name="maiden">Soltera</string>
+    <string name="number_members">Número de miembros</string>
+    <string name="update_header">Cabecera de la actualización</string>
+    <string name="tap_add_tree">Pulse para añadir un árbol genealógico.</string>
+    <string name="download">Descárgate</string>
+    <string name="you_can_download">Ahora puede descargar el árbol compartido con usted.</string>
+    <string name="a_new_tree">Un nuevo árbol genealógico</string>
+    <string name="family_gem_example">Ejemplo de Family Gem</string>
+    <string name="download_shared_tree">Descarga el árbol compartido</string>
 </resources>
