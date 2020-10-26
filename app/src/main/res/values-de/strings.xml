@@ -14,7 +14,7 @@
     <string name="new_shared_media">Neue geteilte Datei</string>
     <string name="long_press_menu">Lange Druck um das Menu anzuzeigen.
 \nEinmal tippen um das Profil zu öffnen.</string>
-    <string name="name">Vorname</string>
+    <string name="name">Name</string>
     <string name="create_header">Header erstellen</string>
     <string name="new_person">Eine neue Person erstellen</string>
     <string name="header">Datei-Header</string>
@@ -181,7 +181,7 @@
     <string name="occupation">Beruf</string>
     <string name="residence">Wohnort</string>
     <string name="baptism">Taufe</string>
-    <string name="birth">Geburtsdatum</string>
+    <string name="birth">Geburt</string>
     <string name="event">Ereignis</string>
     <string name="sex">Geschlecht</string>
     <string name="yes">Ja</string>
