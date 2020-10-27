@@ -130,7 +130,7 @@
     <string name="user_id">Benutzer ID</string>
     <string name="rin">Automatische Datensatz ID</string>
     <string name="cause">Grund</string>
-    <string name="place">Platz</string>
+    <string name="place">Ort</string>
     <string name="married">Verheiratet</string>
     <string name="immigrant">Immigriert</string>
     <string name="phonetic">Ausprache</string>
@@ -182,7 +182,7 @@
     <string name="residence">Wohnort</string>
     <string name="baptism">Taufe</string>
     <string name="birth">Geburtsdatum</string>
-    <string name="event">Ereigniss</string>
+    <string name="event">Ereignis</string>
     <string name="sex">Geschlecht</string>
     <string name="yes">Ja</string>
     <string name="this_is_root">%s ist die Hauptperson des Stammbaums.</string>
