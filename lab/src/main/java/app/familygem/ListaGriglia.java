@@ -220,7 +220,7 @@ public class ListaGriglia extends AppCompatActivity {
 
 					vista.setOnClickListener( this );
 				}
-				U.dipingiMedia( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
+				F.dipingiMedia( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
 			}
 
 			@Override // ok
@@ -259,7 +259,7 @@ public class ListaGriglia extends AppCompatActivity {
 				gestore = (gestoreVistaMedia) vista.getTag();
 			}
 			final Media media = (Media)lista.get(posizione);
-			U.mostraMedia( gestore.immagine, media );
+			F.mostraMedia( gestore.immagine, media );
 
 			if( dettagli ) {
 				String testo = "";

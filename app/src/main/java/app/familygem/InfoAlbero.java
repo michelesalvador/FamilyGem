@@ -167,9 +167,9 @@ public class InfoAlbero extends AppCompatActivity {
 						programma = new Generator();
 						h.setGenerator( programma );
 					}
-					programma.setName( getString(R.string.app_name) );
-					programma.setVersion( BuildConfig.VERSION_NAME );
 					programma.setValue( "FAMILY_GEM" );
+					programma.setName( getString(R.string.app_name) );
+					//programma.setVersion( BuildConfig.VERSION_NAME ); // lo farà salvaJson()
 					programma.setGeneratorCorporation( null );
 
 					GedcomVersion versioneGc = h.getGedcomVersion();

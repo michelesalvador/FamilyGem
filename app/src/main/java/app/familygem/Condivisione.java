@@ -112,34 +112,30 @@ public class Condivisione extends AppCompatActivity {
 					}
 
 					// Aggiornamento del submitter
-					boolean gcModificato = false;
 					Header testata = gc.getHeader();
 					if( testata == null ) {
 						testata = AlberoNuovo.creaTestata( casso.id + ".json" );
 						gc.setHeader( testata );
-					}
+					} else
+						testata.setDateTime( U.dataTempoAdesso() );
 					if( autore[0] == null ) {
 						autore[0] = Podio.nuovoAutore( null );
-						gcModificato = true;
 					}
 					if( testata.getSubmitterRef() == null ) {
 						testata.setSubmitterRef( autore[0].getId() );
-						gcModificato = true;
 					}
 					String nomeAutoreEditato = editaAutore.getText().toString();
 					if( !nomeAutoreEditato.equals(nomeAutore) ) {
 						nomeAutore = nomeAutoreEditato;
 						autore[0].setName( nomeAutore );
 						U.aggiornaDate( autore[0] );
-						gcModificato = true;
 					}
 					idAutore = autore[0].getId();
-					if( gcModificato )
-						U.salvaJson( gc, idAlbero ); // baypassando la preferenza di non salvare in atomatico
+					U.salvaJson( gc, idAlbero ); // baypassando la preferenza di non salvare in atomatico
 
 					// Invia i dati
 					if( !BuildConfig.utenteAruba.isEmpty() )
-						new PostaDatiCondivisione().execute( Condivisione.this );
+						new PostaDatiCondivisione().execute( this );
 				}
 			});
 		} else

@@ -14,19 +14,20 @@ import org.folg.gedcom.model.Media;
 import java.io.File;
 import java.util.List;
 import app.familygem.Dettaglio;
+import app.familygem.F;
 import app.familygem.Galleria;
 import app.familygem.Globale;
 import app.familygem.Lavagna;
 import app.familygem.Memoria;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.s;
 import app.familygem.visita.RiferimentiMedia;
 import static app.familygem.Globale.gc;
 
 public class Immagine extends Dettaglio {
 
 	Media m;
+	View vistaMedia;
 
 	@Override
 	public void impagina() {
@@ -38,7 +39,7 @@ public class Immagine extends Dettaglio {
 			setTitle( R.string.media );
 			mettiBava( "OBJE", null );
 		}
-		immaginona( m );
+		immaginona( m, box.getChildCount() );
 		metti( getString(R.string.title), "Title" );
 		metti( getString(R.string.type), "Type", false, false );	// _type
 		if(Globale.preferenze.esperto) metti( getString(R.string.file), "File" );	// 'Angelina Guadagnoli.jpg' visibile solo agli esperti
@@ -60,16 +61,16 @@ public class Immagine extends Dettaglio {
 			U.mettiDispensa( box, Memoria.oggettoCapo(), R.string.into );
 	}
 
-	void immaginona( final Media m ) {
-		final View vistaMedia = LayoutInflater.from(this).inflate( R.layout.immagine_immagine, box, false );
-		box.addView( vistaMedia );
-		final ImageView vistaImg = vistaMedia.findViewById( R.id.immagine_foto );
-		U.dipingiMedia( m, vistaImg, vistaMedia.findViewById(R.id.immagine_circolo) );
+	void immaginona( Media m, int posizione ) {
+		vistaMedia = LayoutInflater.from(this).inflate( R.layout.immagine_immagine, box, false );
+		box.addView( vistaMedia, posizione );
+		ImageView vistaImg = vistaMedia.findViewById( R.id.immagine_foto );
+		F.dipingiMedia( m, vistaImg, vistaMedia.findViewById(R.id.immagine_circolo) );
 		vistaMedia.setOnClickListener( vista -> {
 			String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
 			int tipoFile = (int)vistaImg.getTag(R.id.tag_tipo_file);
 			if( tipoFile == 0 ) {	// Il file è da trovare
-				U.appAcquisizioneImmagine( Immagine.this, null, 5173, null );
+				F.appAcquisizioneImmagine( this, null, 5173, null );
 			} else if( tipoFile == 2 || tipoFile == 3 ) { // Apri file con altra app
 				// Non male anche se la lista di app generiche fa schifo
 				// todo se il tipo è 3 ma è un url (pagina web senza immagini) cerca di aprirlo come un file://
@@ -105,6 +106,12 @@ public class Immagine extends Dettaglio {
 		});
 		vistaMedia.setTag( R.id.tag_oggetto, 43614 );	// per il suo menu contestuale
 		registerForContextMenu( vistaMedia );
+	}
+
+	public void aggiornaImmagine() {
+		int posizione = box.indexOfChild( vistaMedia );
+		box.removeView( vistaMedia );
+		immaginona( m, posizione );
 	}
 
 	@Override

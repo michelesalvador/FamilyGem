@@ -130,7 +130,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				int caso = new Random().nextInt( cercaMedia.lista.size() );
 				for( Media med : cercaMedia.lista )
 					if( --caso < 0 ) { // arriva a -1
-						U.dipingiMedia( med, immagine, null );
+						F.dipingiMedia( med, immagine, null );
 						immagine.setVisibility( ImageView.VISIBLE );
 						break;
 					}
@@ -217,6 +217,6 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		U.risultatoPermessi( this, codice, permessi, accordi, null );
+		F.risultatoPermessi( this, codice, permessi, accordi, null );
 	}
 }

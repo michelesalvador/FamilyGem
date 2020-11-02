@@ -136,8 +136,8 @@ public class Individuo extends AppCompatActivity {
 			((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
  		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
 		barraCollasso.setTitle( U.epiteto(uno) ); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
-		U.unaFoto( Globale.gc, uno, findViewById(R.id.persona_foto) );
-		U.unaFoto( Globale.gc, uno, findViewById(R.id.persona_sfondo) );
+		F.unaFoto( Globale.gc, uno, findViewById(R.id.persona_foto) );
+		F.unaFoto( Globale.gc, uno, findViewById(R.id.persona_sfondo) );
 		if( Globale.editato ) {
 			// Ricostruisce le tre schede ritornando alla pagina
 			for( int i=0; i<3; i++ ) {
@@ -225,10 +225,10 @@ public class Individuo extends AppCompatActivity {
 						break;
 					// Media
 					case 10: // Cerca media locale
-						U.appAcquisizioneImmagine( Individuo.this, null, 2173, uno );
+						F.appAcquisizioneImmagine( Individuo.this, null, 2173, uno );
 						break;
 					case 11: // Cerca oggetto media
-						U.appAcquisizioneImmagine( Individuo.this, null, 2174, uno );
+						F.appAcquisizioneImmagine( Individuo.this, null, 2174, uno );
 						break;
 					case 12:	// Collega media in Galleria
 						Intent inten = new Intent( Individuo.this, Principe.class );
@@ -372,20 +372,20 @@ public class Individuo extends AppCompatActivity {
 				Media media = new Media();
 				media.setFileTag("FILE");
 				uno.addMedia( media );
-				if( U.ritagliaImmagine( this, null, data, media ) ) { // restituisce true se è un'immagine ritagliabile
+				if( F.proponiRitaglio( this, null, data, media ) ) { // restituisce true se è un'immagine ritagliabile
 					U.salvaJson( false, uno );
 						// false così non scatta recreate() che negli Android nuovi fa scomparire il dialogo di richiesta ritaglio
 					return;
 				}
 			} else if( requestCode == 2174 ) { // File dalle app in nuovo Media condiviso, con proposta di ritagliarlo
 				Media media = Galleria.nuovoMedia( uno );
-				if( U.ritagliaImmagine( this, null, data, media ) ) {
+				if( F.proponiRitaglio( this, null, data, media ) ) {
 					U.salvaJson( false, media, uno );
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
 				// Ottiene l'immagine ritagliata da Android Image Cropper
-				U.fineRitaglioImmagine( data );
+				F.fineRitaglioImmagine( data );
 				U.salvaJson(true); // la data di cambio per i Media condivisi viene già salvata nel passaggio precedente
 						// todo passargli Globale.mediaCroppato ?
 				return;
@@ -414,8 +414,6 @@ public class Individuo extends AppCompatActivity {
 			U.salvaJson( true, uno );
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
 			Globale.editato = true;
-		else
-			Toast.makeText( this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
 	@Override
@@ -477,6 +475,6 @@ public class Individuo extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		U.risultatoPermessi( this, codice, permessi, accordi, uno );
+		F.risultatoPermessi( this, codice, permessi, accordi, uno );
 	}
 }

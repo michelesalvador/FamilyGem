@@ -3,6 +3,7 @@ package app.familygem;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.ActionBar;
@@ -58,6 +59,7 @@ import app.familygem.dettaglio.CitazioneFonte;
 import app.familygem.dettaglio.Estensione;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Famiglia;
+import app.familygem.dettaglio.Immagine;
 import app.familygem.dettaglio.Indirizzo;
 import app.familygem.dettaglio.Nota;
 import app.familygem.visita.TrovaPila;
@@ -140,9 +142,9 @@ public class Dettaglio extends AppCompatActivity {
 					intento.putExtra( "quadernoScegliNota", true );
 					startActivityForResult( intento,7074 );
 				} else if( id == 106 ) { // Cerca media locale
-					U.appAcquisizioneImmagine( this, null, 4173, (MediaContainer)oggetto );
+					F.appAcquisizioneImmagine( this, null, 4173, (MediaContainer)oggetto );
 				} else if( id == 107 ) { // Cerca media condiviso
-					U.appAcquisizioneImmagine( this, null, 4174, (MediaContainer)oggetto );
+					F.appAcquisizioneImmagine( this, null, 4174, (MediaContainer)oggetto );
 				} else if( id == 108 ) { // Collega media condiviso
 					Intent inten = new Intent( this, Principe.class );
 					inten.putExtra( "galleriaScegliMedia", true );
@@ -315,13 +317,13 @@ public class Dettaglio extends AppCompatActivity {
 				Media media = new Media();
 				media.setFileTag("FILE");
 				((MediaContainer)oggetto).addMedia( media );
-				if( U.ritagliaImmagine( this, null, data, media ) ) {
+				if( F.proponiRitaglio( this, null, data, media ) ) {
 					U.salvaJson( false, Memoria.oggettoCapo() );
 					return;
 				}
 			} else if( requestCode == 4174 ) { // File preso dal file manager diventa media condiviso
 				Media media = Galleria.nuovoMedia( oggetto );
-				if( U.ritagliaImmagine( this, null, data, media ) ) {
+				if( F.proponiRitaglio( this, null, data, media ) ) {
 					U.salvaJson( false, media, Memoria.oggettoCapo() );
 					return;
 				}
@@ -334,12 +336,12 @@ public class Dettaglio extends AppCompatActivity {
 				archRef.setRef( data.getStringExtra("idArchivio") );
 				((Source)oggetto).setRepositoryRef( archRef );
 			} else if( requestCode == 5173 ) { // Salva in Media un file scelto con le app da Immagine
-				if( U.ritagliaImmagine( this, null, data, (Media)oggetto ) ) {
+				if( F.proponiRitaglio( this, null, data, (Media)oggetto ) ) {
 					U.salvaJson( false, Memoria.oggettoCapo() );
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-				U.fineRitaglioImmagine( data );
+				F.fineRitaglioImmagine( data );
 			}
 			//  da menu contestuale 'Scegli...'
 			if( requestCode == 5390  ) { // Imposta l'archivio che è stato scelto in Magazzino da ArchivioRef
@@ -351,8 +353,6 @@ public class Dettaglio extends AppCompatActivity {
 					 // indica di ricaricare sia questo Dettaglio grazie al seguente onRestart(), sia Individuo o Famiglia
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE )
 			Globale.editato = true;
-		else
-			Toast.makeText( this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
 	// Aggiorna i contenuti quando si torna indietro con backPressed()
@@ -695,8 +695,11 @@ public class Dettaglio extends AppCompatActivity {
 		/*if( Memoria.getPila().size() == 1 ) {
 			recreate(); // Orrendo, serve per aggiornare la data Cambiamento dei record TODO punta direttamente a data Cambio
 		}*/
+		// In immagine modificato il percorso aggiorna l'immagine
+		if( this instanceof Immagine && oggettoPezzo.equals("File") )
+			((Immagine)this).aggiornaImmagine();
 		// Se ha modificato un autore chiede di referenziarlo in header
-		if( oggetto instanceof Submitter )
+		else if( oggetto instanceof Submitter )
 			U.autorePrincipale( this, ((Submitter)oggetto).getId() );
 	}
 
@@ -741,13 +744,9 @@ public class Dettaglio extends AppCompatActivity {
 		if( id == 1 ) { // Autore principale
 			Podio.autorePrincipale( (Submitter)oggetto );
 		} else if( id == 2 ) { // Immagine: ritaglia
-			ImageView vistaImg = box.findViewById( R.id.immagine_foto );
-			String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
-			File fileMedia = new File ( percorso );
-			Globale.mediaCroppato = (Media)oggetto;
-			U.tagliaImmagine( this, fileMedia, null );
+			croppaImmagine( box );
 		} else if( id == 3 ) { // Immagine: scegli
-			U.appAcquisizioneImmagine( this, null, 5173, null );
+			F.appAcquisizioneImmagine( this, null, 5173, null );
 		} else if( id == 4 ) {	// Famiglia
 			Family fam = (Family) oggetto;
 			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
@@ -996,14 +995,10 @@ public class Dettaglio extends AppCompatActivity {
 				startActivityForResult( intn,5390 );
 				return true;
 			case 100: // Immaginona ritaglia
-				ImageView vistaImg = vistaPezzo.findViewById( R.id.immagine_foto );
-				String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
-				File fileMedia = new File ( percorso );
-				Globale.mediaCroppato = (Media)oggetto;
-				U.tagliaImmagine( this, fileMedia, null );
+				croppaImmagine( vistaPezzo );
 				return true;
 			case 101: // scegli immagine
-				U.appAcquisizioneImmagine( this, null, 5173, null );
+				F.appAcquisizioneImmagine( this, null, 5173, null );
 				return true;
 			default:
 				return false;
@@ -1027,6 +1022,18 @@ public class Dettaglio extends AppCompatActivity {
 		}
 	}
 
+	// Riceve una View in cui c'è l'immagine da ritagliare e avvia il ritaglio
+	private void croppaImmagine( View vista ) {
+		ImageView vistaImg = vista.findViewById( R.id.immagine_foto );
+		File fileMedia = null;
+		String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
+		if( percorso != null )
+			fileMedia = new File( percorso );
+		Uri uriMedia = (Uri) vistaImg.getTag( R.id.tag_uri );
+		Globale.mediaCroppato = (Media)oggetto;
+		F.tagliaImmagine( this, fileMedia, uriMedia, null );
+	}
+
 	// Chiude tastiera eventualmente visibile
 	@Override
 	protected void onPause() {
@@ -1039,6 +1046,6 @@ public class Dettaglio extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		U.risultatoPermessi( this, codice, permessi, accordi, oggetto );
+		F.risultatoPermessi( this, codice, permessi, accordi, oggetto );
 	}
 }

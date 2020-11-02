@@ -78,8 +78,7 @@ public class Alberi extends AppCompatActivity {
 			new AlertDialog.Builder(this).setTitle( R.string.a_new_tree )
 					.setMessage( R.string.you_can_download )
 					.setPositiveButton( R.string.download, (dialog, id) -> {
-						rotella.setVisibility( View.VISIBLE );
-						Facciata.scaricaCondiviso( this, referrer );
+						Facciata.scaricaCondiviso( this, referrer, rotella );
 					}).setNeutralButton( R.string.cancel, null ).show();
 		} // Se non c'è nessun albero
 		else if( Globale.preferenze.alberi.isEmpty() )
@@ -148,18 +147,20 @@ public class Alberi extends AppCompatActivity {
 							menu.add(0, 1, 0, R.string.tree_info );
 						if( (!derivato && !esaurito) || Globale.preferenze.esperto )
 							menu.add(0, 2, 0, R.string.rename );
+						if( !esaurito || Globale.preferenze.esperto )
+							menu.add(0, 3, 0, R.string.media_folders );
 						if( !esaurito )
-							menu.add(0, 3, 0, R.string.find_errors );
+							menu.add(0, 4, 0, R.string.find_errors );
 						if( esiste && !derivato && !esaurito ) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
-							menu.add(0, 4, 0, R.string.share_tree );
+							menu.add(0, 5, 0, R.string.share_tree );
 						if( esiste && !derivato && !esaurito && cassetto.grado != 0 // cioè dev'essere 9 o 10
 								&& cassetto.condivisioni != null && Globale.preferenze.alberi.size() > 1 )
-							menu.add(0, 5, 0, R.string.compare );
+							menu.add(0, 6, 0, R.string.compare );
 						if( esiste && Globale.preferenze.esperto && !esaurito )
-							menu.add(0, 6, 0, R.string.export_gedcom );
+							menu.add(0, 7, 0, R.string.export_gedcom );
 						if( esiste && (!derivato || Globale.preferenze.esperto) && (!esaurito || Globale.preferenze.esperto) )
-							menu.add(0, 7, 0, R.string.make_backup );
-						menu.add(0, 8, 0, R.string.delete );
+							menu.add(0, 8, 0, R.string.make_backup );
+						menu.add(0, 9, 0, R.string.delete );
 						popup.show();
 						popup.setOnMenuItemClickListener( item -> {
 							int id = item.getItemId();
@@ -195,33 +196,37 @@ public class Alberi extends AppCompatActivity {
 									InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 									inputMethodManager.showSoftInput(editaNome, InputMethodManager.SHOW_IMPLICIT);
 								});
-							} else if( id == 3 ) { // Correggi errori
-								trovaErrori( idAlbero, false );
-							} else if( id == 4 ) { // Condividi albero
-								Intent intento = new Intent( Alberi.this, Condivisione.class);
+							} else if( id == 3 ) { // Media folders
+								Intent intento = new Intent( Alberi.this, CartelleMedia.class );
 								intento.putExtra( "idAlbero", idAlbero );
 								startActivity( intento );
-							} else if( id == 5 ) { // Confronta con alberi esistenti
+							} else if( id == 4 ) { // Correggi errori
+								trovaErrori( idAlbero, false );
+							} else if( id == 5 ) { // Condividi albero
+								Intent intento = new Intent( Alberi.this, Condivisione.class );
+								intento.putExtra( "idAlbero", idAlbero );
+								startActivity( intento );
+							} else if( id == 6 ) { // Confronta con alberi esistenti
 								if( AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
 									cassetto.grado = 20;
 									aggiornaLista();
 								} else
 									Toast.makeText( Alberi.this, R.string.no_results, Toast.LENGTH_LONG ).show();
-							} else if( id == 6 ) { // Esporta Gedcom
+							} else if( id == 7 ) { // Esporta Gedcom
 								int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
 								if( perm == PackageManager.PERMISSION_DENIED )
 									ActivityCompat.requestPermissions( Alberi.this,
 											new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(idAlbero), cassetto.nome }, 6366 );
 								else if( perm == PackageManager.PERMISSION_GRANTED )
 									esportaGedcom( idAlbero, cassetto.nome );
-							} else if( id == 7 ) { // Fai backup
+							} else if( id == 8 ) { // Fai backup
 								int perm = ContextCompat.checkSelfPermission(getApplicationContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
 								if( perm == PackageManager.PERMISSION_DENIED )
 									ActivityCompat.requestPermissions( Alberi.this,
 											new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, String.valueOf(idAlbero) }, 327 );
 								else if( perm == PackageManager.PERMISSION_GRANTED )
 									faiBackup(idAlbero);
-							} else if( id == 8 ) {	// Elimina albero
+							} else if( id == 9 ) {	// Elimina albero
 								new AlertDialog.Builder( Alberi.this ).setMessage( R.string.really_delete_tree )
 										.setPositiveButton( R.string.delete, ( dialog, id1 ) -> {
 											eliminaAlbero( Alberi.this, idAlbero );
@@ -300,8 +305,7 @@ public class Alberi extends AppCompatActivity {
 								new AlertDialog.Builder( Alberi.this ).setTitle( R.string.a_new_tree )
 										.setMessage( R.string.you_can_download )
 										.setPositiveButton( R.string.download, (dialog, id) -> {
-											rotella.setVisibility( View.VISIBLE );
-											Facciata.scaricaCondiviso(Alberi.this, referrer);
+											Facciata.scaricaCondiviso( Alberi.this, referrer, rotella );
 										}).setNeutralButton( R.string.cancel, (di, id) -> mostraWelcome() )
 										.setOnCancelListener( d -> mostraWelcome() ).show();
 							} else { // È qualunque altra cosa
@@ -435,20 +439,20 @@ public class Alberi extends AppCompatActivity {
 			gc.accept( visitaMedia );
 			Map<File,Integer> files = new HashMap<>();
 			for( Media med : visitaMedia.lista ) {
-				String percorsoMedia = U.percorsoMedia( idAlbero, med );
+				String percorsoMedia = F.percorsoMedia( idAlbero, med );
 				if( percorsoMedia != null )
 					files.put( new File( percorsoMedia ), 2 );
 			}
-			File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
+			File cartellaDocumenti = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
 			String finalPath;
 			if( files.isEmpty() ) {
 				FileUtils.copyFileToDirectory( fileGc, cartellaDocumenti ); // Crea la cartella se non esiste
-				finalPath = cartellaDocumenti.getAbsolutePath() + "/" + fileGc.getName();
+				finalPath = cartellaDocumenti + "/" + fileGc.getName();
 			} else {
 				// Crea la cartella Documents se per caso non esiste
-				new File(cartellaDocumenti.getAbsolutePath()).mkdirs();
+				cartellaDocumenti.mkdirs();
 				files.put( fileGc, 0 );
-				File fileZip = creaFileZip( this, files, cartellaDocumenti.getAbsolutePath()+"/"+ titolo + ".zip");
+				File fileZip = creaFileZip( this, files, cartellaDocumenti + "/" + titolo + ".zip");
 				finalPath = fileZip.getAbsolutePath();
 			}
 			// Rende il file visibile da Windows
@@ -461,7 +465,7 @@ public class Alberi extends AppCompatActivity {
 
 	// Fa il backup di un singolo albero in un file zip nella cartella '/storage/emulated/0/Documents'
 	void faiBackup( int idAlbero ) {
-		File cartellaDocumenti = new File( Environment.getExternalStorageDirectory() + "/Documents" );
+		File cartellaDocumenti = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
 		if( !cartellaDocumenti.exists() )
 			cartellaDocumenti.mkdir();    // crea solo la cartella Documents, non tutto il percorso
 
@@ -469,7 +473,7 @@ public class Alberi extends AppCompatActivity {
 		Armadio.Cassetto cassetto = Globale.preferenze.getAlbero( idAlbero );
 		String titolo = cassetto.nome;
 		File fileZip = zippaAlbero( getApplicationContext(), idAlbero, titolo, cassetto.radice, cassetto.grado,
-				cartellaDocumenti.getAbsolutePath() + "/" + titolo.replaceAll( "[\\\\/:*?\"<>|]", "_" ) + ".zip" );
+				cartellaDocumenti + "/" + titolo.replaceAll( "[\\\\/:*?\"<>|]", "_" ) + ".zip" );
 		MediaScannerConnection.scanFile( this, new String[]{ fileZip.getAbsolutePath() }, null, null );
 		Toast.makeText( getBaseContext(), fileZip.getAbsolutePath(), Toast.LENGTH_LONG ).show();
 	}
@@ -497,7 +501,7 @@ public class Alberi extends AppCompatActivity {
 		files.put( new File( contesto.getCacheDir(), "settings.json" ), 0 );
 		// in Map non possono esserci duplicati di File uguali (diversi Media che puntano allo stesso file)
 		for( Media med : visitaMedia.lista ) {
-			String percorsoMedia = U.percorsoMedia( idAlbero, med );
+			String percorsoMedia = F.percorsoMedia( idAlbero, med );
 			if( percorsoMedia != null )
 				files.put( new File( percorsoMedia ), 2 );
 		} // todo file da cartelle sparse vengono copiati nello zip ma il percorso nel Media rimane quello originale...

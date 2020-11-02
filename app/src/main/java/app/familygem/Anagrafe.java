@@ -107,7 +107,7 @@ public class Anagrafe extends Fragment {
 			vistaIndi.findViewById(R.id.indi_carta).setBackgroundResource( sfondo );
 
 			U.dettagli( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
-			U.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
+			F.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
 			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( U.morto(persona) ? View.VISIBLE : View.GONE );
 			vistaIndi.setTag( persona.getId() );
 		}

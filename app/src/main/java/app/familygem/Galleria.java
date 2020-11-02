@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
@@ -44,7 +43,7 @@ public class Galleria extends Fragment {
 			AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( visitaMedia.listaMedia, true );
 			griglia.setAdapter( adattatore );
 			vista.findViewById( R.id.fab ).setOnClickListener( v ->
-					U.appAcquisizioneImmagine( getContext(), Galleria.this, 4546, null )
+					F.appAcquisizioneImmagine( getContext(), Galleria.this, 4546, null )
 			);
 		}
 		return vista;
@@ -121,19 +120,17 @@ public class Galleria extends Fragment {
 		if( resultCode == Activity.RESULT_OK ) {
 			if( requestCode == 4546 ) { // File preso da app fornitrice viene salvato in Media ed eventualmente ritagliato
 				Media media = nuovoMedia( null );
-				if( U.ritagliaImmagine( getContext(), this, data, media ) ) { // se è un'immagine (quindi ritagliabile)
+				if( F.proponiRitaglio( getContext(), this, data, media ) ) { // se è un'immagine (quindi ritagliabile)
 					U.salvaJson( false, media );
 							// Non deve scattare onRestart() + recreate() perché poi il fragment di arrivo non è più lo stesso
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-				U.fineRitaglioImmagine( data );
+				F.fineRitaglioImmagine( data );
 			}
 			U.salvaJson( true, Globale.mediaCroppato );
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
 			Globale.editato = true;
-		else
-			Toast.makeText( getContext(), R.string.something_wrong, Toast.LENGTH_LONG ).show();
 	}
 
 	// Menu contestuale

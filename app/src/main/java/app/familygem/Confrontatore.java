@@ -146,7 +146,7 @@ public class Confrontatore extends AppCompatActivity {
 			txt = m.getFile();
 			data = dataOra( m.getChange() );
 			vistaFoto.setVisibility( View.VISIBLE );
-			U.dipingiMedia( m, vistaFoto, null );
+			F.dipingiMedia( m, vistaFoto, null );
 		}
 		else if( o instanceof Source ) {
 			tipoRecord( R.string.source );
@@ -165,7 +165,7 @@ public class Confrontatore extends AppCompatActivity {
 			txt = U.dettagli( p, null );
 			data = dataOra( p.getChange() );
 			vistaFoto.setVisibility( View.VISIBLE );
-			U.unaFoto( gc, p, vistaFoto );
+			F.unaFoto( gc, p, vistaFoto );
 		}
 		else if( o instanceof Family ) {
 			tipoRecord( R.string.family );

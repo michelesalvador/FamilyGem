@@ -3,12 +3,10 @@ package app.familygem;
 import android.app.Application;
 import android.content.Context;
 import android.view.View;
-import android.widget.Toast;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
-import org.folg.gedcom.parser.JsonParser;
 import java.io.File;
 import java.io.IOException;
 
@@ -19,6 +17,7 @@ public class Globale extends Application {
 	static int ordineBiblioteca = 0;
 	//static String fonte;
 	static int ordineMagazzino;
+	public static String fotoCamera; // percorso della foto scattata da un'app fotocamera
 	public static Media media;
 	public static Context contesto;
 	//static Preferences preferenze = Preferences.userRoot().node("/lab/gedcomy");

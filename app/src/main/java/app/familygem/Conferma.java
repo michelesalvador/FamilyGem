@@ -249,7 +249,7 @@ public class Conferma extends AppCompatActivity {
 		}
 	}
 	void vediSeCopiareFile( Media media ) {
-		String origine = U.percorsoMedia( Globale.idAlbero2, media );
+		String origine = F.percorsoMedia( Globale.idAlbero2, media );
 		if( origine != null ) {
 			File fileOrigine = new File( origine );
 			File dirMemoria = new File( getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo ); // dovrebbe stare fuori dal loop ma vabè
@@ -261,7 +261,7 @@ public class Conferma extends AppCompatActivity {
 				// Allora utilizza il file già esistente
 				media.setFile( fileGemello.getAbsolutePath() );
 			} else { // Altrimenti copia il file nuovo
-				File fileDestinazione = U.fileNomeProgressivo( dirMemoria.getAbsolutePath(), nomeFile );
+				File fileDestinazione = F.fileNomeProgressivo( dirMemoria.getAbsolutePath(), nomeFile );
 				try {
 					FileUtils.copyFile( fileOrigine, fileDestinazione );
 				} catch( IOException e ) {

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:paddingTop="20dp"
+		android:paddingStart="15dp"
+		android:paddingEnd="15dp"
+		android:paddingBottom="80dp"
+		android:clipToPadding="false"
+		android:scrollbarStyle="outsideOverlay">
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical">
+			<TextView
+				android:id="@+id/cartelle_spiega"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Media files are searched into the folders listed here."
+				android:layout_marginBottom="20dp"/>
+			<!-- todo traduci -->
+			<LinearLayout
+				android:id="@+id/cartelle_scatola"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical"/>
+		</LinearLayout>
+	</ScrollView>
+
+	<include layout="@layout/fab"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

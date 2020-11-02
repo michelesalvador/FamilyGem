@@ -15,8 +15,8 @@ import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Visitor;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import app.familygem.F;
 import app.familygem.Globale;
-import app.familygem.U;
 
 public class ListaMedia extends Visitor {
 
@@ -49,7 +49,7 @@ public class ListaMedia extends Visitor {
 
 	// Aggiunge solo quelli presunti bellini con anteprima
 	private void filtra( Media media ) {
-		String file = U.percorsoMedia( Globale.preferenze.idAprendo, media);
+		String file = F.percorsoMedia( Globale.preferenze.idAprendo, media);
 		if( file != null && file.lastIndexOf('.') > 0 ) {
 			String estensione = file.substring( file.lastIndexOf('.')+1 );
 			switch( estensione ) {

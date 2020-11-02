@@ -96,8 +96,11 @@ public class Armadio {
 		}
 		if( alberi != null )
 			for( Cassetto cass : alberi ) {
-				if( cass.id == idAlbero )
+				if( cass.id == idAlbero ) {
+					if( cass.uris == null ) // traghettatore inserito in Family Gem 0.7.15
+						cass.uris = new LinkedHashSet<>();
 					return cass;
+				}
 			}
 		return null;
 	}
@@ -134,6 +137,7 @@ public class Armadio {
 		@Deprecated
 		String cartella;
 		LinkedHashSet<String> cartelle;
+		LinkedHashSet<String> uris;
 		int individui;
 		int generazioni;
 		int media;
@@ -149,6 +153,7 @@ public class Armadio {
 			cartelle = new LinkedHashSet<>();
 			if( cartella != null )
 				cartelle.add( cartella );
+			uris = new LinkedHashSet<>();
 			this.individui = individui;
 			this.generazioni = generazioni;
 			this.radice = radice;

@@ -10,11 +10,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -49,74 +49,66 @@ import org.folg.gedcom.parser.ModelParser;
 
 public class AlberoNuovo extends AppCompatActivity {
 
+	View rotella;
+
 	@Override
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView(R.layout.albero_nuovo);
-		View rotella = findViewById( R.id.nuovo_circolo );
+		rotella = findViewById( R.id.nuovo_circolo );
 		String referrer = Globale.preferenze.referrer; // Dataid proveniente da una condivisione
 		boolean esisteDataId = referrer != null && referrer.matches("[0-9]{14}");
+
+		// Scarica l'albero condiviso
+		Button scaricaCondiviso = findViewById( R.id.bottone_scarica_condiviso );
+		if( esisteDataId )
+			// Non ha bisogno di permessi perché scarica e decomprime solo nello storage esterno dell'app
+			scaricaCondiviso.setOnClickListener( v -> Facciata.scaricaCondiviso(this, referrer, rotella) );
+		else
+			scaricaCondiviso.setVisibility( View.GONE );
 
 		// Crea un albero vuoto
 		Button alberoVuoto = findViewById( R.id.bottone_albero_vuoto );
 		if( esisteDataId ) {
-			alberoVuoto.setText( R.string.download_shared_tree );
-			alberoVuoto.setOnClickListener( v -> {
-				rotella.setVisibility( View.VISIBLE );
-				Facciata.scaricaCondiviso(this, referrer);
-			});
-		} else {
-			alberoVuoto.setOnClickListener( v -> {
-				View vistaMessaggio = LayoutInflater.from(this).inflate(R.layout.albero_nomina, null);
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setView( vistaMessaggio ).setTitle( R.string.title );
-				TextView vistaTesto = vistaMessaggio.findViewById( R.id.nuovo_nome_testo );
-				vistaTesto.setText( R.string.modify_later );
-				vistaTesto.setVisibility( View.VISIBLE );
-				EditText nuovoNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
-				builder.setPositiveButton( R.string.create, (dialog, id) -> salva(nuovoNome.getText().toString()) )
-						.setNeutralButton( R.string.cancel, null ).create().show();
-				nuovoNome.setOnEditorActionListener( (view, action, event) -> {
-					if( action == EditorInfo.IME_ACTION_DONE ) {
-						salva( nuovoNome.getText().toString() );
-						return true; // completa le azioni di salva()
-					}
-					return false; // Eventuali altri action che non esistono
-				});
-				vistaMessaggio.post( () -> {
-					nuovoNome.requestFocus();
-					InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					inputMethodManager.showSoftInput(nuovoNome, InputMethodManager.SHOW_IMPLICIT);
-				});
-			});
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
+				alberoVuoto.setBackgroundTintList( ColorStateList.valueOf(getResources().getColor(R.color.primarioChiaro)) );
 		}
+		alberoVuoto.setOnClickListener( v -> {
+			View vistaMessaggio = LayoutInflater.from(this).inflate(R.layout.albero_nomina, null);
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setView( vistaMessaggio ).setTitle( R.string.title );
+			TextView vistaTesto = vistaMessaggio.findViewById( R.id.nuovo_nome_testo );
+			vistaTesto.setText( R.string.modify_later );
+			vistaTesto.setVisibility( View.VISIBLE );
+			EditText nuovoNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
+			builder.setPositiveButton( R.string.create, (dialog, id) -> salva(nuovoNome.getText().toString()) )
+					.setNeutralButton( R.string.cancel, null ).create().show();
+			nuovoNome.setOnEditorActionListener( (view, action, event) -> {
+				if( action == EditorInfo.IME_ACTION_DONE ) {
+					salva( nuovoNome.getText().toString() );
+					return true; // completa le azioni di salva()
+				}
+				return false; // Eventuali altri action che non esistono
+			});
+			vistaMessaggio.post( () -> {
+				nuovoNome.requestFocus();
+				InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.showSoftInput(nuovoNome, InputMethodManager.SHOW_IMPLICIT);
+			});
+		});
 
 		Button scaricaEsempio = findViewById(R.id.bottone_scarica_esempio);
-		if( esisteDataId ) {
-			scaricaEsempio.setVisibility( View.GONE );
-		} else {
-			scaricaEsempio.setOnClickListener( v -> {
-				rotella.setVisibility( View.VISIBLE );
-				int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-				if( perm == PackageManager.PERMISSION_DENIED )
-					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 5641 );
-				else if( perm == PackageManager.PERMISSION_GRANTED )
-					scaricaEsempio();
-			});
-		}
+		// Non ha bisogno di permessi
+		scaricaEsempio.setOnClickListener( v -> scaricaEsempio() );
 
 		Button importaGedcom = findViewById(R.id.bottone_importa_gedcom);
-		if( esisteDataId ) {
-			importaGedcom.setVisibility( View.GONE );
-		} else {
-			importaGedcom.setOnClickListener( v -> {
-				int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
-				if( perm == PackageManager.PERMISSION_DENIED )
-					ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
-				else if( perm == PackageManager.PERMISSION_GRANTED )
-					importaGedcom();
-			});
-		}
+		importaGedcom.setOnClickListener( v -> {
+			int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+			if( perm == PackageManager.PERMISSION_DENIED )
+				ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
+			else if( perm == PackageManager.PERMISSION_GRANTED )
+				importaGedcom();
+		});
 
 		Button recuperaBackup = findViewById(R.id.bottone_recupera_backup);
 		recuperaBackup.setOnClickListener( v -> {
@@ -159,9 +151,7 @@ public class AlberoNuovo extends AppCompatActivity {
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) { // If request is cancelled, the result arrays are empty
 		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
-			if( codice == 5641 ) {
-				scaricaEsempio();
-			} else if( codice == 1390 ) {
+			if( codice == 1390 ) {
 				importaGedcom();
 			}
 		}
@@ -187,8 +177,9 @@ public class AlberoNuovo extends AppCompatActivity {
 		Toast.makeText( this, R.string.tree_created, Toast.LENGTH_SHORT ).show();
 	}
 
-	// Scarica da internet un file zip nella cartella Download
+	// Scarica da Google Drive il file zip dei Simpson nella cache esterna dell'app, quindi senza bisogno di permessi
 	void scaricaEsempio() {
+		rotella.setVisibility( View.VISIBLE );
 		DownloadManager gestoreScarico = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 		// Evita download multipli
 		Cursor curso = gestoreScarico.query( new DownloadManager.Query().setFilterByStatus(DownloadManager.STATUS_RUNNING) );
@@ -198,8 +189,7 @@ public class AlberoNuovo extends AppCompatActivity {
 			return;
 		}
 		String url = "https://drive.google.com/uc?export=download&id=1FT-60avkxrHv6G62pxXs9S6Liv5WkkKf";
-		final String percorsoZip = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-				+ "/the_Simpsons.zip";
+		String percorsoZip = getExternalCacheDir() + "/the_Simpsons.zip";
 		DownloadManager.Request richiesta = new DownloadManager.Request( Uri.parse( url ) )
 				.setTitle( getString(R.string.simpsons_tree) )
 				.setDescription( getString(R.string.family_gem_example) )
@@ -308,7 +298,7 @@ public class AlberoNuovo extends AppCompatActivity {
 		if( resultCode == RESULT_OK && requestCode == 630 ){
 			try {
 				Uri uri = data.getData();
-				String percorso = U.uriPercorsoFile( uri );	// in Google drive trova solo il nome del file
+				String percorso = F.uriPercorsoFile( uri );	// in Google drive trova solo il nome del file
 				File fileGedcom;
 				String nomeAlbero;
 				String percorsoCartella = null;
@@ -461,6 +451,8 @@ public class AlberoNuovo extends AppCompatActivity {
 		Locale loc = new Locale( Locale.getDefault().getLanguage() );
 		// C'è anche   Resources.getSystem().getConfiguration().locale.getLanguage() che ritorna lo stesso 'it'
 		testa.setLanguage( loc.getDisplayLanguage( Locale.ENGLISH ) );	// ok prende la lingua di sistema in inglese, non nella lingua locale
+		// in header ci sono due campi data: TRANSMISSION_DATE un po' forzatamente può contenere la data di ultima modifica
+		testa.setDateTime( U.dataTempoAdesso() );
 		return testa;
 	}
 

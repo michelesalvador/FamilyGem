@@ -359,7 +359,7 @@ public class Diagram extends Fragment {
 				if( card.acquired && !person.getId().equals(Globale.individuo) )
 					background.setAlpha( 0.7f );
 
-				U.unaFoto( Globale.gc, person, view.findViewById( R.id.card_photo ) );
+				F.unaFoto( Globale.gc, person, view.findViewById( R.id.card_photo ) );
 				TextView vistaNome = view.findViewById(R.id.card_name);
 				String nome = U.epiteto(person);
 				if( nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility()==View.VISIBLE )

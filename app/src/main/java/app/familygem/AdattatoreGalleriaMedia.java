@@ -12,7 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.Person;
@@ -96,7 +95,7 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 				vistaTesto.setVisibility( View.GONE );
 				vistaNumero.setVisibility( View.GONE );
 			}
-			U.dipingiMedia( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
+			F.dipingiMedia( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
 		}
 		@Override
 		public void onClick( View v ) {

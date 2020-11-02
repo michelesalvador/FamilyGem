@@ -1,16 +1,12 @@
 package app.familygem;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import android.os.Environment;
+import android.view.View;
 import org.apache.commons.net.ftp.FTPClient;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -48,11 +44,8 @@ public class Facciata extends AppCompatActivity {
 				return;
 			}
 			if( !BuildConfig.utenteAruba.isEmpty() ) {
-				int perm = ContextCompat.checkSelfPermission( getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-				if( perm == PackageManager.PERMISSION_DENIED )
-					ActivityCompat.requestPermissions( Facciata.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,dataId}, 1457 );
-				else if( perm == PackageManager.PERMISSION_GRANTED )
-					scaricaCondiviso( this, dataId );
+				// Non ha bisogno di richiedere permessi
+				scaricaCondiviso( this, dataId, null );
 			}
 		} else {
 			Intent intent = new Intent( this, Alberi.class );
@@ -65,7 +58,9 @@ public class Facciata extends AppCompatActivity {
 	}
 
 	// Si collega al server e scarica il file zip per importarlo
-	static void scaricaCondiviso( Context contesto,  String idData ) {
+	static void scaricaCondiviso( Context contesto, String idData, View rotella ) {
+		if( rotella != null )
+			rotella.setVisibility( View.VISIBLE );
 		// Un nuovo Thread è necessario per scaricare asincronicamente un file
 		new Thread( () -> {
 			try {
@@ -74,36 +69,36 @@ public class Facciata extends AppCompatActivity {
 				client.enterLocalPassiveMode();
 				client.login( BuildConfig.utenteAruba, BuildConfig.passwordAruba );
 				// Todo: Forse si potrebbe usare il download manager così da avere il file anche elencato in 'Downloads'
-				final String percorsoZip = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-						+ "/" + idData + ".zip";
-				FileOutputStream fos = new FileOutputStream(percorsoZip);
+				String percorsoZip = contesto.getExternalCacheDir() + "/" + idData + ".zip";
+				FileOutputStream fos = new FileOutputStream( percorsoZip );
 				String percorso = "/www.familygem.app/condivisi/" + idData + ".zip";
 				InputStream input = client.retrieveFileStream( percorso );
-				byte[] data = new byte[1024];
-				int count;
-				while ((count = input.read(data)) != -1) {
-					fos.write(data, 0, count);
-				}
-				fos.close();
-				if( client.completePendingCommand() ) {
-					AlberoNuovo.decomprimiZip( contesto, percorsoZip, null );
-				}
+				if( input != null ) {
+					byte[] data = new byte[1024];
+					int count;
+					while ((count = input.read(data)) != -1) {
+						fos.write(data, 0, count);
+					}
+					fos.close();
+					if( client.completePendingCommand() ) {
+						AlberoNuovo.decomprimiZip( contesto, percorsoZip, null );
+					}
+				} else // Non ha trovato il file sul server
+					scaricamentoFallito( contesto, contesto.getString(R.string.something_wrong), rotella );
 				client.logout();
 				client.disconnect();
-			} catch ( Exception e) {
-				e.printStackTrace();
-				U.tosta( (Activity)contesto, e.getLocalizedMessage() );
-				contesto.startActivity( new Intent( contesto, Alberi.class ) );
+			} catch( Exception e ) {
+				scaricamentoFallito( contesto, e.getLocalizedMessage(), rotella );
 			}
 		}).start();
 	}
 
-	@Override
-	public void onRequestPermissionsResult( int codice, final String[] permessi, int[] accordi ) {
-		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
-			if( codice == 1457 ) {
-				scaricaCondiviso( this, permessi[1] );
-			}
-		}
+	// Conclusione negativa del metodo qui sopra
+	static void scaricamentoFallito( Context contesto, String messaggio, View rotella ) {
+		U.tosta( (Activity)contesto, messaggio );
+		if( rotella != null )
+			((Activity)contesto).runOnUiThread( () -> rotella.setVisibility( View.GONE ) );
+		else
+			contesto.startActivity( new Intent(contesto, Alberi.class) );
 	}
 }

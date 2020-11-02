@@ -18,6 +18,14 @@
 			android:padding="30dp">
 
 			<Button
+				android:id="@+id/bottone_scarica_condiviso"
+				style="@style/AppTheme.BottoneColorato"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="16dp"
+				android:minWidth="350dp"
+				android:text="@string/download_shared_tree"/>
+			<Button
 				android:id="@+id/bottone_albero_vuoto"
 				style="@style/AppTheme.BottoneColorato"
 				android:layout_width="wrap_content"

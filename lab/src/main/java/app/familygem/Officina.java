@@ -16,9 +16,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
@@ -26,9 +30,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 import org.apache.commons.io.FileUtils;
-import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
-import org.folg.gedcom.parser.ModelParser;
 import org.folg.gedcom.tools.CountsCollector;
 import org.folg.gedcom.tools.GedcomAnalyzer;
 import java.io.BufferedInputStream;
@@ -77,11 +79,13 @@ public class Officina extends AppCompatActivity {
 		findViewById(R.id.bottone_vario).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
 				//percorsi_di_Sistema();
+				//for( ApplicationInfo info : getPackageManager().getInstalledApplications( PackageManager.GET_META_DATA) )
+				//	s.l(info.toString());
+				prendi_content_da_FileManager();
 				//new LoadImageFromURL().execute("http://www.cafleurebon.com/wp-content/uploads/2017/03/fica-mana-symbol-182x300.jpg");
 				//new U.ZuppaMedia( (ImageView)findViewById(R.id.immagine), (ProgressBar)findViewById(R.id.circolo), null ).execute("https://www.google.com");
 				//database();
 				//mandaOggettoAttivita();
-				prendi_file_da_FileManager();
 				/*if( BuildConfig.utenteAruba != null )
 					new InvioFTP().execute( getCacheDir() + "/Notepad3_4.18.512.992_Setup.zip" );*/
 				//new PostaDatiCondivisione().execute( BuildConfig.passwordAruba, "Tìtolo Albèro pròtto", "nòòme Mìtto Gròsso", "Bèllo Ciìao" );
@@ -94,8 +98,7 @@ public class Officina extends AppCompatActivity {
 
 		findViewById(R.id.bottone_libero).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				U.appAcquisizioneImmagine( Officina.this );
-
+				prendi_document_da_FileManager();
 				/* Condivisione di un file attraverso le app esistenti
 				Intent sendIntent = new Intent(Intent.ACTION_SEND);
 				sendIntent.setType("application/*");
@@ -110,9 +113,37 @@ public class Officina extends AppCompatActivity {
 
 		findViewById(R.id.immagine).setOnClickListener( new View.OnClickListener() {
 			public void onClick(View v) {
-				startActivity( new Intent( Officina.this, Diagram.class ) );
+				selezionaCartellaDalFileSystem();
+				//startActivity( new Intent( Officina.this, Diagram.class ) );
+				//importa_immagine_da_Fotocamera();
+				//F.appAcquisizioneImmagine( Officina.this );
 			}
 		});
+	}
+
+	void importa_immagine_da_Fotocamera() {
+		// L'intento di apertura della fotocamera di sistema
+		Intent intent = new Intent( MediaStore.ACTION_IMAGE_CAPTURE );
+		// Crea un file dove sarà salvata la fotografia, direttamente nella sottocartella dell'albero
+		// Non è necessario creare il file, ma la cartella deve esistere
+		File dir = new File( getExternalFilesDir(null) + "/" + 3 );
+		if( !dir.exists() )
+			dir.mkdir();
+		File fotoFile = F.fileNomeProgressivo( dir.getAbsolutePath(), "image.jpg" );
+		s.l("file", fotoFile );
+		Globale.fotoCamera = fotoFile.getAbsolutePath();
+
+		Uri fotoUri;
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
+			fotoUri = FileProvider.getUriForFile(Officina.this, BuildConfig.APPLICATION_ID + ".provider", fotoFile );
+		else
+			fotoUri = Uri.fromFile( fotoFile ); // In KitKat funziona così, semplice senza provider
+		s.l("fotoUri", fotoUri );
+
+		// Passa l'uri del file all'app della fotocamera
+		intent.putExtra( MediaStore.EXTRA_OUTPUT, fotoUri );
+		//intent.setData( imageUri ); // no rende l'intent invalido
+		startActivityForResult(intent,14051 );
 	}
 
 	static void listaAttivita( Context contesto ) {
@@ -254,17 +285,12 @@ public class Officina extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		U.risultatoPermessi( this, codice, permessi, accordi );
+		F.risultatoPermessi( this, codice, permessi, accordi );
 	}
 
 	// Venendo da Windows, cercavo una semplice finestra di apertura file... ma qui siamo nel mondo degli uri
-	void prendi_file_da_FileManager() {
+	void prendi_content_da_FileManager() {
 		Intent intent = new Intent( Intent.ACTION_GET_CONTENT ); // sistema classico
-		//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT ); // da API 19
-		// uno differenza tra i 2 è che ACTION_OPEN_DOCUMENT consente molteplici mimetype
-		// entrambi producono un simpatico uri, ACTION_OPEN_DOCUMENT forse solo content://
-		//Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT_TREE );
-		// produce uri tipo content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FCamera
 		//Intent intent = new Intent( Intent.ACTION_PICK );	// fa scegliere in una lista con alcuni provider di immagini, audio, video
 		//Intent intent = new Intent( Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI );
 			// riduce la lista di provider solo a quelli che dispensano immagini: Galleria e Foto
@@ -277,8 +303,31 @@ public class Officina extends AppCompatActivity {
 			intent.setType( "application/*" );	// una giusta via di mezzo:
 			// mostra solo i provider di file, e abilita quasi tutti i file
 			// purtroppo però in Kitkat i .ged in Download sono disabilitati
-		//intent.addCategory( Intent.CATEGORY_OPENABLE );	// dovrebbe mostrare solo i file apribili.. ma non vedo differenza
+		intent.setType( "*/*" ); // prende tutto
 		startActivityForResult( intent,123 );
+	}
+
+	// Simile al fratello qui sopra ma dedicato a ACTION_OPEN_DOCUMENT
+	void prendi_document_da_FileManager() {
+		Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT ); // da API 19
+		// consente molteplici mimetype, a differenza di ACTION_GET_CONTENT che ne consente uno solo
+		// entrambi producono un simpatico uri, ACTION_OPEN_DOCUMENT forse solo content://
+		//intent.addCategory( Intent.CATEGORY_OPENABLE ); // indica che vuole solo URI che possano essere aperti con ContentResolver.openFileDescriptor()
+		intent.setType("*/*"); // mimetype necessario altrimenti s'inchioda startActivityForResult()
+		startActivityForResult( intent,951 );
+	}
+
+	// Folder picker che fa uso di ACTION_OPEN_DOCUMENT_TREE
+	// produce uri tipo 'content://com.android.externalstorage.documents/tree/primary%3ADCIM%2FCamera'
+	void selezionaCartellaDalFileSystem() {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			Intent intent = new Intent( Intent.ACTION_OPEN_DOCUMENT_TREE );
+			//intent.addCategory(Intent.CATEGORY_DEFAULT);
+			//intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
+			//intent.addFlags( Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION );
+			//intent.addFlags( Intent.FLAG_GRANT_READ_URI_PERMISSION );  // ?
+			startActivityForResult( intent, 615 );
+		}
 	}
 
 	// Aprire un'immagine con la libreria Android Image Cropper
@@ -386,9 +435,15 @@ public class Officina extends AppCompatActivity {
 	@Override
 	protected void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		super.onActivityResult(requestCode, resultCode, data);
-		s.l( "requestCode: " + requestCode +"  resultCode: " + resultCode + "   " + data );
-		// Importa un file Gedcom
-		if( resultCode == RESULT_OK && requestCode == 123 ) {
+		s.l( "requestCode: " + requestCode, " resultCode: " + resultCode, "   " + data );
+		// Ricezione di una foto scattata con ACTION_IMAGE_CAPTURE
+		if( resultCode == RESULT_OK && requestCode == 14051 ) {
+			//Bundle bundle = data.getExtras(); // = null, purtroppo l'intent che arriva non ha nessun dato utile per ricavare l'uri
+			Media media = new Media();
+			F.proponiRitaglio( Officina.this, data, media );
+		}
+		// Importa un file (Gedcom) aperto con ACTION_GET_CONTENT
+		else if( resultCode == RESULT_OK && requestCode == 123 ) {
 			try {
 				// Ricava un content-Uri, che non è un percorso file
 				Uri uri = data.getData();   // content:/percorso/nomefile.ged
@@ -401,7 +456,7 @@ public class Officina extends AppCompatActivity {
 				//ricavaNomeFileDaUri(uri);
 
 				// Il percorso /storage/...
-				String percorsoFile = U.uriPercorsoFile( uri );
+				String percorsoFile = F.uriPercorsoFile( uri );
 						// trova  /storage/emulated/0/famiglia/a_famigliotta_250.ged
 						// e anche  /storage/external_SD/famiglia/a_famigliotta_250.ged
 						// invece restituisce null da Google drive
@@ -422,8 +477,9 @@ public class Officina extends AppCompatActivity {
 					fileGedcom = new File(getCacheDir(), "temp.ged");
 					FileUtils.copyInputStreamToFile(input, fileGedcom);
 				}
+				s.l("Finale", fileGedcom, fileGedcom.exists() );
 
-				ModelParser mp = new ModelParser();
+			/*	ModelParser mp = new ModelParser();
 				Gedcom gc = mp.parseGedcom( fileGedcom );
 				gc.createIndexes();
 				s.l( "file.getAbsolutePath= "+ fileGedcom.getAbsolutePath(),	// restituisce lo stesso percorso
@@ -438,16 +494,77 @@ public class Officina extends AppCompatActivity {
 				if( unFile.exists() )
 					s.l( unFile.getAbsolutePath() +" esiste!" );
 				else
-					s.l( unFile.getAbsolutePath() +" NON esiste" );
+					s.l( unFile.getAbsolutePath() +" NON esiste" );*/
 			} catch (Exception e) {	//  IOException | SAXParseException |URISyntaxException | FileNotFoundException
 				e.printStackTrace();
 			}
 		}
+		// Apertura di un file qualsiasi preso con ACTION_OPEN_DOCUMENT
+		else if( resultCode == RESULT_OK && requestCode == 951 ) {
+			Uri uri = data.getData();
+			if( uri != null ) {
+				s.l( "URI", uri, "\nisDocumentUri?", DocumentFile.isDocumentUri(this, uri) );
+				String percorso = F.uriPercorsoFile( uri );
+				if( percorso != null ) {
+					File file = new File( percorso );
+					s.l( "percorso", percorso, "exists?", file.exists() );
+				}
+
+				getContentResolver().takePersistableUriPermission( uri, Intent.FLAG_GRANT_READ_URI_PERMISSION );
+
+				// Tentativo di estrazione dell'uri della cartella contenitore -> temo sia IMPOSSIBILE!
+				DocumentFile docFile = DocumentFile.fromSingleUri( this, uri );
+				s.l( "DocumentFile name:", docFile.getName(), // ok 'famiglia.ged'
+																	// o 'The Simpsons Family Tree' da Downloads
+						"mimeType:", docFile.getType(), // 'application/octet-stream' 'application/zip'...
+						"parentFile:", docFile.getParentFile() ); // sempre 'null'
+			}
+		}
+		// Recupero del percorso di una cartella selezionata con ACTION_OPEN_DOCUMENT_TREE
+		else if( resultCode == RESULT_OK && requestCode == 615 ) {
+			Uri uri = data.getData();
+			if( uri != null ) {
+				//getContentResolver().takePersistableUriPermission( uri, Intent.FLAG_GRANT_READ_URI_PERMISSION );
+				String percorso = F.uriPercorsoCartella( uri );
+				s.l( "percorso", percorso );
+				if( percorso != null ) {
+					File cartella = new File(percorso);
+					s.l("esiste", cartella.exists() );
+				} else {
+					s.l( "useremo l'uri", uri );
+					return;
+					// Sistema proposto da Google. Da Android Lollipop in su
+			/*		DocumentFile documentDir = DocumentFile.fromTreeUri( this, uri);
+					s.l( "documentDir",
+							documentDir.getName(), // 1D0D-2818
+							documentDir.getUri() ); // content://com.android.externalstorage.documents/tree/1D0D-2818%3A/document/1D0D-2818%3A
+					for( DocumentFile df : documentDir.listFiles() )
+						s.l( "\t", df.getName() );
+					// Crea un filetto vuoto
+					documentDir.createFile( "text/plain", "vuoto.txt" );
+
+					// Salva l'uri come stringa e poi ricrea un uri per avere un DocumentFile
+					//String uriStringa = uri.getPath(); // Invalid URI: /tree/1D0D-2818:Cartella esterna
+					String uriStringa = uri.toString(); // ok, ha i %20 e funziona
+					//String uriStringa = Uri.decode( uri.toString() ); // decodificato funziona nella maggior parte delle cartelle ma NON in /Android/data/...
+					s.l( "uriStringa", uriStringa );
+					DocumentFile documentDir2 = DocumentFile.fromTreeUri( this, Uri.parse(uriStringa) );
+					s.l( "documentDir2", documentDir2.exists(), documentDir2.getName() );
+					// Trova il file all'interno della cartella
+					if( documentDir2.exists() ) {
+						DocumentFile filetto = documentDir2.findFile( "vuoto.txt" );
+						s.l( filetto.getName(), filetto.length(), filetto.lastModified() );
+					}*/
+				}
+			} else
+				s.l("URI è null");
+		}
+
 		// Esperimenti con GedcomAnalyzer
 		if( resultCode == RESULT_OK && requestCode == 4747 ) {
 			try {
 				Uri uri = data.getData();
-				String percorsoFile = U.uriPercorsoFile( uri );
+				String percorsoFile = F.uriPercorsoFile( uri );
 				File fileGedcom = new File( percorsoFile );
 				GedcomAnalyzer gcAnaliz = new GedcomAnalyzer();
 				gcAnaliz.analyzeGedcom( fileGedcom );
@@ -507,55 +624,78 @@ public class Officina extends AppCompatActivity {
 		if( resultCode == RESULT_OK && requestCode == 14463 ) { //CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE
 			if( data != null ) {
 				Media media = new Media();
-				U.ritagliaImmagine( Officina.this, data, media );
+				F.proponiRitaglio( Officina.this, data, media );
 			} else
 				s.l( "data è null" );
 		}
 		// Ottiene l'immagine ritagliata da Android Image Cropper
 		if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-			U.fineRitaglioImmagine( resultCode, data );
+			F.fineRitaglioImmagine( resultCode, data );
 			if( data != null )
 				((ImageView)findViewById(R.id.immagine)).setImageURI(  // come ho fatto a ignorarlo fin'ora?????
 						CropImage.getActivityResult(data).getUri() );
 		}
 	}
 
-	@SuppressLint("NewApi")
 	void percorsi_di_Sistema() {
 		// External storage
 		File dirEsterna = getExternalFilesDir(null);	// da API 8
+		s.l( "ExternalFilesDir=", dirEsterna );
 		// /storage/emulated/0/Android/data/app.familylab/files
 		// che in realtà è  /mnt/shell/emulated/0/Android/data/app.familylab/files
 		// viene cancellata con disinstallazione app
-		s.l( "ExternalFilesDir= " + dirEsterna );
-		//File nuovo = new File(dirEsterna.getAbsolutePath(), "creatoDaMe.txt"  );
-		//try { nuovo.createNewFile(); } catch ( IOException e ){ e.printStackTrace(); }
-		for( String nomeFile : dirEsterna.list() ) {
-			s.l( "File in ExternalFilesDir= " + nomeFile );
-		}
+		// Non c'è bisogno di nessun permesso per poter leggere e scrivere in questa cartella, in nessuna versione di Android
+		File sottocartella = new File( dirEsterna, "sottocartella" );
+		File nuovo = new File( sottocartella, "creatoDaMe.txt" );
+		try {
+			// Crea tutte le cartelle mancanti, il file e ci scrive dentro
+			//FileUtils.write( nuovo, "Contenuto del file", "ASCII" );
+			s.l( nuovo.getAbsolutePath(), nuovo.canRead(), FileUtils.readFileToString(nuovo, "ASCII") );
+		} catch ( IOException e ){ e.printStackTrace(); }
 
-		File[] luoghi = getApplicationContext().getExternalFilesDirs(null);	// richiede API 19 o superiore
-		// /storage/emulated/0/Android/data/lab.gedcomy/files
-		// /storage/external_SD/Android/data/lab.gedcomy/files
+		File externalDirPictures = getExternalFilesDir( Environment.DIRECTORY_PICTURES );
+		s.l("ExternalFilesDir(DIRECTORY_PICTURES)=",externalDirPictures);
+		// /storage/emulated/0/Android/data/app.familylab/files/Pictures
+
+		File[] luoghi = getExternalFilesDirs(null);	// richiede API 19 o superiore
+		// /storage/sdcard/Android/data/app.familylab/files   (KitKat)
+		// /storage/emulated/0/Android/data/app.familylab/files   (successivi)
+		// /storage/12F3-3214/Android/data/app.familylab/files
 		for( File luogo : luoghi ) {
 			//String dir = luogo.getAbsolutePath().substring(0, luogo.getAbsolutePath().indexOf("/Android"));
-			s.l("contesto.getExternalFilesDirs= " + luogo );
+			s.l("getExternalFilesDirs=", luogo );
+		}
+
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			File[] mediaDirs = getExternalMediaDirs(); // da API 21
+			// /storage/emulated/0/Android/media/app.familylab
+			// /storage/1AEB-1B06/Android/media/app.familylab
+			for( File dir : mediaDirs ) {
+				s.l("getExternalMediaDirs= " + dir );
+			}
 		}
 
 		s.l( "Environment.getExternalStorageDirectory= " + Environment.getExternalStorageDirectory()
 				+ "  stato= " + Environment.getExternalStorageState() );
+		// /storage/sdcard   mounted    (KitKat)
 		// /storage/emulated/0   mounted
 
 		File dirDocumenti = Environment.getExternalStoragePublicDirectory( // da API 8
-				Environment.DIRECTORY_DOCUMENTS ); // da API 19
+				Environment.DIRECTORY_DOCUMENTS ); // da API 19 KitKat
 		s.l( "Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS)= " + dirDocumenti );
-		// /storage/emulated/0/Documents
+		// Sia che la cartella esista che no comunque restituisce lo stesso percorso:
+		// /storage/sdcard/Documents    (in Android 4.4 KitKat)
+		// /storage/emulated/0/Documents    (in tutti i successivi)
+		s.l( "Documents esiste", dirDocumenti.exists() );
+		// C'è bisogno del permesso 'Storage' per poter leggere e scrivere in questa cartella
 		try {
-			File nuovoFile = new File(dirDocumenti,"nuovo.txt" );
-			FileUtils.write( nuovoFile, "ciao", "ASCII" );
-					/*if( dirDocumenti.exists() )
-						s.l( " esiste ");*/
-		} catch( IOException e ) {
+			File nuovoFile = new File( dirDocumenti,"nuovo.txt" );
+			// Crea la cartella, il file e ci scrive dentro in tutti gli Android fino al 10
+			// Ma in Android 11 non funziona più, e il permesso 'Storage' è solo per i Media, non per i File
+			/*FileUtils.write( nuovoFile, "ciao", "ASCII" );
+			if( nuovoFile.exists() )
+				s.l( nuovoFile.getAbsolutePath(), nuovoFile.canRead(), FileUtils.readFileToString(nuovoFile,"ASCII") );*/
+		} catch( Exception e ) {
 			e.printStackTrace();
 		}
 
@@ -575,6 +715,75 @@ public class Officina extends AppCompatActivity {
 				+"\nMediaStore.Files.FileColumns.DATA= " + MediaStore.Files.FileColumns.DATA	// _data
 				+"\nMediaStore.Images.ImageColumns.DATA= " + MediaStore.Images.ImageColumns.DATA	// _data
 				+"\nMediaStore.Images.Media.DATA= " + MediaStore.Images.Media.DATA );	// _data
+
+		Map<String,String> env = System.getenv();
+		s.l("System.getenv()");
+		for( Map.Entry<String,String> coso : env.entrySet() ) {
+			s.l("\t"+ coso.getKey() + " = "+ coso.getValue() );
+		}
+		/* Ricava molte cose, tra cui sul mio L90:
+			ANDROID_ROOT = /system
+			EMULATED_STORAGE_SOURCE = /mnt/shell/emulated
+			EXTERNAL_STORAGE = /storage/emulated/legacy
+			EXTERNAL_ADD_STORAGE = /storage/external_SD
+			SECONDARY_STORAGE = /storage/external_SD
+		 */
+
+		spremiStorageManager();
+	}
+
+	// La classe StorageManager esiste dall'API 9, ma molti metodi sono recenti (API 24, 26 o successive..)
+	// Però pare di riuscire a ricavare l'elenco dei storage volume e in paricolare i loro Uuid indietro fino a KitKat
+	@SuppressLint("NewApi")
+	void spremiStorageManager() {
+		StorageManager sm = (StorageManager) getSystemService(Context.STORAGE_SERVICE);
+		//sm.getUuidForPath( "" );
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+			for( StorageVolume sv : sm.getStorageVolumes() ) { // API 24
+				s.l( sv.getDescription(this),
+						// Internal shared storage
+						// SDCARD
+						sv.getUuid(),
+						// null
+						// 15FD-1C02
+						sv.toString()
+						// StorageVolume: Internal shared storage
+						// StorageVolume: SDCARD (15FD-1C02)
+				);
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+					s.l( "\t", sv.getMediaStoreVolumeName(),
+							// external_primary
+							// 15fd-1c02
+							sv.getDirectory() );
+							// /storage/emulated/0
+							// /storage/15FD-1C02
+			}
+		} else {
+			try {
+				StorageVolume[] volumi = (StorageVolume[])sm.getClass().getMethod("getVolumeList").invoke(sm);
+				s.l("volumi", volumi.length );
+				for ( StorageVolume sv : volumi ) {
+					s.l(    sv.getUuid(),
+							// Restituisce 'null' per lo storage principale e id tipo '1718-451C' per le SD esterne
+							// ufficialmente da API 24, funziona sul mio L90 con API 21 e sull'emulatore con KitKat API 19
+							sv.getDescription(this),
+							// Internal storage
+							// SD card
+							sv.toString()
+							/* In Lollipop molta roba:
+							StorageVolume:
+						    mStorageId=65537 mPath=/storage/emulated/0 mDescriptionId=17040849
+						    mPrimary=true mRemovable=false mEmulated=true mMtpReserveSpace=100
+						    mAllowMassStorage=false mMaxFileSize=0 mOwner=UserHandle{0} mUuid=null
+						    mUserLabel=null mState=mounted
+							*/
+							//sv.getDirectory() // da API 30,  in Lollipop NoSuchMethod
+					);
+				}
+			} catch( Exception e ) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	void database() {

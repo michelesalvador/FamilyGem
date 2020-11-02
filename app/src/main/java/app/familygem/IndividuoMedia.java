@@ -90,8 +90,8 @@ public class IndividuoMedia extends Fragment {
 	void aggiorna() {
 		// ricarica il fragment
 		getActivity().getSupportFragmentManager().beginTransaction().detach( this ).attach( this ).commit();
-		U.unaFoto( Globale.gc, uno, getActivity().findViewById(R.id.persona_foto) );
-		U.unaFoto( Globale.gc, uno, getActivity().findViewById(R.id.persona_sfondo) );
+		F.unaFoto( Globale.gc, uno, getActivity().findViewById(R.id.persona_foto) );
+		F.unaFoto( Globale.gc, uno, getActivity().findViewById(R.id.persona_sfondo) );
 		// Scheda eventi
 		IndividuoEventi tabEventi = (IndividuoEventi) getActivity().getSupportFragmentManager().findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" );
 		tabEventi.aggiorna( 1 );
