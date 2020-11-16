@@ -3,7 +3,7 @@
     <string name="sharing_completed">Завершено.</string>
     <string name="sharing_tree">Совместное использование семейного древа</string>
     <string name="shares">Общее</string>
-    <string name="from_to">От... до</string>
+    <string name="from_to">От… до</string>
     <string name="to">На</string>
     <string name="shared_notes">Общие заметки</string>
     <string name="blob">Blob</string>
@@ -53,7 +53,7 @@
     <string name="no_name">Без имени</string>
     <string name="date_phrase">Фраза</string>
     <string name="from">Из</string>
-    <string name="between">Между... и</string>
+    <string name="between">Между… и</string>
     <string name="before">До</string>
     <string name="after">После</string>
     <string name="estimated">Примерный</string>
