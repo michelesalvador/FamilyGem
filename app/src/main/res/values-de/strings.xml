@@ -23,7 +23,7 @@
     <string name="modify_later">Du kannst den Titel auch später bearbeiten.</string>
     <string name="empty_tree">Neuen Stammbaum anlegen</string>
     <string name="blob">Blob</string>
-    <string name="given">Taufname</string>
+    <string name="given">Vorname</string>
     <string name="cant_understand_uri">Die empfangene URI ist nicht bekannt.</string>
     <string name="something_wrong">Es ist ein Fehler aufgetreten.</string>
     <string name="repository_note">Bemerkungs-Archiv</string>
