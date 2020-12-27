@@ -2,6 +2,7 @@
 <resources>
     <string name="tagline">Crea il tuo albero genealogico</string>
     <string name="delete">Elimina</string>
+    <string name="sure_delete">Sei sicuro?</string>
     <string name="cancel">Annulla</string>
     <string name="done">Fatto</string>
     <string name="change_date">Data modifica</string>
@@ -78,7 +79,6 @@
     <!-- InfoAlbero -->
     <string name="item_exists_but_file">Esiste la voce nell\'indice degli alberi, ma per qualche ragione è scomparso il file corrispondente:</string>
     <string name="root">Radice</string>
-    <string name="media_folders">Cartelle media</string>
     <string name="shares">Condivisioni</string>
     <string name="refresh">Aggiorna</string>
     <string name="header">Intestazione</string>
@@ -101,6 +101,9 @@
     <string name="form">Forma</string>
     <string name="destination">Destinazione</string>
     <string name="time">Ora</string>
+    <!-- Cartelle media -->
+    <string name="media_folders">Cartelle media</string>
+    <string name="app_storage">Archiviazione app</string>
     <!-- Condivisione -->
     <string name="please_title">Per favore scrivi un titolo.</string>
     <string name="please_name">Per favore scrivi un nome.</string>

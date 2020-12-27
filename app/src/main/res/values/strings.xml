@@ -3,6 +3,7 @@
     <string name="app_name" translatable="false">Family Gem</string>
     <string name="tagline">Create your own family tree</string>
     <string name="delete">Delete</string>
+    <string name="sure_delete">Are you sure?</string>
     <string name="cancel">Cancel</string>
     <string name="done">Done</string>
     <string name="change_date">Change date</string>
@@ -74,7 +75,6 @@
     <string name="about">About</string>
     <string name="item_exists_but_file">The tree entry is in the index, but for some reason the related file is missing:</string>
     <string name="root">Root</string>
-    <string name="media_folders">Media folders</string>
     <string name="shares">Shares</string>
     <string name="refresh">Refresh</string>
     <string name="header">Header</string>
@@ -97,6 +97,8 @@
     <string name="form">Form</string>
     <string name="destination">Destination</string>
     <string name="time">Time</string>
+    <string name="media_folders">Media folders</string>
+    <string name="app_storage">App storage</string>
     <string name="please_title">Please write a title.</string>
     <string name="please_name">Please write a name.</string>
     <string name="ideally_recipient">Ideally the recipient of the sharing.</string>
@@ -176,7 +178,7 @@
     <string name="new_shared_note">New shared note</string>
     <string name="link_shared_note">Link shared note</string>
     <string name="source">Source</string>
-    <string name="new_source_note">New source-note</string>
+    <string name="new_source_note">New note-source</string>
     <string name="new_source">New source</string>
     <string name="link_source">Link source</string>
     <string name="primary_media">Primary media</string>
@@ -225,7 +227,7 @@
     <string name="user_id">User ID</string>
     <string name="source_citation">Source citation</string>
     <string name="inexistent_source_citation">Missing source citation</string>
-    <string name="source_note">Source-note</string>
+    <string name="source_note">Note-source</string>
     <string name="page">Page</string>
     <string name="text">Text</string>
     <string name="certainty">Certainty</string>
@@ -241,7 +243,7 @@
     <string name="cited_by">Cited in</string>
     <string name="repository_citation">Repository citation</string>
     <string name="inexistent_repository_citation">Missing repository citation</string>
-    <string name="repository_note">Repository-note</string>
+    <string name="repository_note">Note-repository</string>
     <string name="repository">Repository</string>
     <string name="shared_media">Shared media</string>
     <string name="format">Format</string>

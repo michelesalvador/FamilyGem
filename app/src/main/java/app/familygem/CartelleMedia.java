@@ -65,12 +65,12 @@ public class CartelleMedia extends AppCompatActivity {
 			// La cartella '/storage/.../Android/data/app.familygem/files/X' va preservata inquanto è quella di default dei media copiati
 			// Oltretutto in Android 11 non è più raggiungibile dall'utente con SAF
 			if( cart.equals(getExternalFilesDir(null) + "/" + idAlbero) ) {
-				vistaNome.setText( "App storage" ); // todo traduci?
+				vistaNome.setText( R.string.app_storage );
 				bottoneElimina.setVisibility( View.GONE );
 			} else {
 				vistaNome.setText( nomeCartella(cart) );
 				bottoneElimina.setOnClickListener( v -> {
-					new AlertDialog.Builder(this).setMessage( "Are you sure?" ) // todo traduci
+					new AlertDialog.Builder(this).setMessage( R.string.sure_delete )
 							.setPositiveButton( R.string.yes, (di,id) -> {
 								cartelle.remove( cart );
 								salva();
@@ -94,7 +94,7 @@ public class CartelleMedia extends AppCompatActivity {
 			} else
 				vistaUrl.setText( Uri.decode(stringUri) ); // lo mostra decodificato cioè un po' più leggibile
 			vistaUri.findViewById( R.id.cartella_elimina ).setOnClickListener( v -> {
-				new AlertDialog.Builder(this).setMessage( "Are you sure?" ) // todo traduci
+				new AlertDialog.Builder(this).setMessage( R.string.sure_delete )
 						.setPositiveButton( R.string.yes, (di,id) -> {
 							// Revoca il permesso per questo uri, se l'uri non è usato in nessun altro albero
 							boolean uriEsisteAltrove = false;
@@ -146,7 +146,7 @@ public class CartelleMedia extends AppCompatActivity {
 						salva();
 					} else {
 						// Non si può usare l'uri perché qui servono dei treeUri
-						Toast.makeText(this, "Could not add this position.", Toast.LENGTH_SHORT).show(); // todo traduci
+						Toast.makeText(this, "Could not add this position.", Toast.LENGTH_SHORT).show(); // non serve tradurre, KitKat se ne andrà
 					}
 				} else if( requestCode == 123 ) {
 					String percorso = F.uriPercorsoCartella( uri );
@@ -160,7 +160,7 @@ public class CartelleMedia extends AppCompatActivity {
 							uris.add( uri.toString() );
 							salva();
 						} else
-							Toast.makeText( this, "Can't read this position.", Toast.LENGTH_SHORT ).show(); // todo traduci
+							Toast.makeText( this, "Could not read this position.", Toast.LENGTH_SHORT ).show(); // todo traduci?
 					}
 				}
 			} else
