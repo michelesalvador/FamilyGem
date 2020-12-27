@@ -80,7 +80,9 @@ public class F {
 				String[] split = uri.getLastPathSegment().split(":");
 				if( split[0].equalsIgnoreCase("primary")) {
 					// Storage principale
-					return Environment.getExternalStorageDirectory() + "/" + split[1];
+					String percorso = Environment.getExternalStorageDirectory() + "/" + split[1];
+					if( new File(percorso).canRead() )
+						return percorso;
 				} else if( split[0].equalsIgnoreCase("home") ) {
 					// Cartella 'Documents' in Android 9 e 10
 					return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
@@ -91,7 +93,7 @@ public class F {
 						if( luogo.getAbsolutePath().indexOf("/Android") > 0 ) {
 							String dir = luogo.getAbsolutePath().substring(0, luogo.getAbsolutePath().indexOf("/Android"));
 							File trovando = new File( dir, split[1] );
-							if( trovando.exists() )
+							if( trovando.canRead() )
 								return trovando.getAbsolutePath();
 						}
 					}
@@ -246,7 +248,7 @@ public class F {
 							// Magari è un video
 							Bitmap bitmap = ThumbnailUtils.createVideoThumbnail( percorso,	MediaStore.Video.Thumbnails.MINI_KIND );
 							// Video thumbnail tramite l'URI
-							if( bitmap == null ) {
+							if( bitmap == null && uri[0] != null ) {
 								MediaMetadataRetriever mMMR = new MediaMetadataRetriever();
 								mMMR.setDataSource( Globale.contesto, uri[0] );
 								bitmap = mMMR.getFrameAtTime();
@@ -256,7 +258,8 @@ public class F {
 								// un File locale senza anteprima
 								String formato = media.getFormat();
 								if( formato == null )
-									formato = MimeTypeMap.getFileExtensionFromUrl( percorso );
+									formato = percorso != null ? MimeTypeMap.getFileExtensionFromUrl( percorso.replace(" ", "_") ) : "";
+									// Rimuove gli spazi bianchi che non fanno trovare l'estensione
 								if( formato.isEmpty() && uri[0] != null )
 									formato = MimeTypeMap.getFileExtensionFromUrl( uri[0].getLastPathSegment() );
 								bitmap = generaIcona( vistaImmagine, R.layout.media_file, formato );
@@ -307,16 +310,16 @@ public class F {
 		if( m.getFile() != null ) {
 			String nome = m.getFile().replace("\\", "/");
 			// Percorso FILE (quello nel gedcom)
-			if( new File(nome).isFile() )
+			if( new File(nome).canRead() )
 				return nome;
 			for( String dir : Globale.preferenze.getAlbero( idAlbero ).cartelle ) {
 				// Cartella media + percorso FILE
 				String percorsoRicostruito = dir + '/' + nome;
-				if( new File(percorsoRicostruito).isFile() )
+				if( new File(percorsoRicostruito).canRead() )
 					return percorsoRicostruito;
 				// Cartella media + nome del FILE
 				String percorsoFile = dir + '/' + new File(nome).getName();
-				if( new File(percorsoFile).isFile() )
+				if( new File(percorsoFile).canRead() )
 					return percorsoFile;
 			}
 			Object stringa = m.getExtension("cache");

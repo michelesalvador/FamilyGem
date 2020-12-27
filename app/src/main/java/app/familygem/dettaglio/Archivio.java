@@ -34,7 +34,8 @@ public class Archivio extends Dettaglio {
 		// Raccoglie e mostra le fonti che citano questo Repository
 		List<Source> fontiCitanti = new ArrayList<>();
 		for( Source fonte : Globale.gc.getSources() )
-			if( fonte.getRepositoryRef() != null && fonte.getRepositoryRef().getRef().equals(a.getId()) )
+			if( fonte.getRepositoryRef() != null && fonte.getRepositoryRef().getRef() != null
+					&& fonte.getRepositoryRef().getRef().equals(a.getId()) )
 				fontiCitanti.add( fonte );
 		if( !fontiCitanti.isEmpty() )
 			U.mettiDispensa( box, fontiCitanti.toArray(), R.string.sources );

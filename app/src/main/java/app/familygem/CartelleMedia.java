@@ -4,6 +4,7 @@ package app.familygem;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,6 +38,8 @@ public class CartelleMedia extends AppCompatActivity {
 		findViewById( R.id.fab ).setOnClickListener( v -> {
 			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 				Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+				intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+				intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 				startActivityForResult( intent, 123 );
 			} else {
 				// KitKat utilizza la selezione di un file per risalire alla cartella
@@ -93,6 +96,17 @@ public class CartelleMedia extends AppCompatActivity {
 			vistaUri.findViewById( R.id.cartella_elimina ).setOnClickListener( v -> {
 				new AlertDialog.Builder(this).setMessage( "Are you sure?" ) // todo traduci
 						.setPositiveButton( R.string.yes, (di,id) -> {
+							// Revoca il permesso per questo uri, se l'uri non è usato in nessun altro albero
+							boolean uriEsisteAltrove = false;
+							for( Armadio.Cassetto albero : Globale.preferenze.alberi ) {
+								for( String uri : albero.uris )
+									if( uri.equals(stringUri) && albero.id != idAlbero ) {
+										uriEsisteAltrove = true;
+										break;
+									}
+							}
+							if( !uriEsisteAltrove )
+								revokeUriPermission( Uri.parse(stringUri), Intent.FLAG_GRANT_READ_URI_PERMISSION );
 							uris.remove( stringUri );
 							salva();
 						}).setNeutralButton( R.string.cancel, null ).show();
@@ -140,6 +154,7 @@ public class CartelleMedia extends AppCompatActivity {
 						cartelle.add( percorso );
 						salva();
 					} else {
+						getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 						DocumentFile docDir = DocumentFile.fromTreeUri( this, uri );
 						if( docDir != null && docDir.canRead() ) {
 							uris.add( uri.toString() );

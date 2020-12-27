@@ -67,11 +67,6 @@ public class InfoAlbero extends AppCompatActivity {
 				if( questoAlbero.radice != null ) {
 					i += "\n" + getText(R.string.root) + ": " + U.epiteto( gc.getPerson(questoAlbero.radice) );
 				}
-				if( questoAlbero.cartelle != null && !questoAlbero.cartelle.isEmpty() ) {
-					i += "\n\n" + getText(R.string.media_folders) + ":";
-					for( String dir : questoAlbero.cartelle )
-						i += "\n" + dir;
-				}
 				if( questoAlbero.condivisioni != null && !questoAlbero.condivisioni.isEmpty() ) {
 					i += "\n\n" + getText(R.string.shares) + ":";
 					for( Armadio.Invio invio : questoAlbero.condivisioni ) {
@@ -84,9 +79,9 @@ public class InfoAlbero extends AppCompatActivity {
 		}
 		((TextView)findViewById(R.id.info_statistiche)).setText( i );
 
+		Button bottoneHeader = scatola.findViewById( R.id.info_gestisci_testata );
 		if( gc != null ) {
 			Header h = gc.getHeader();
-			Button bottoneHeader = scatola.findViewById( R.id.info_gestisci_testata );
 			if( h == null) {
 				bottoneHeader.setText( R.string.create_header );
 				bottoneHeader.setOnClickListener( view -> {
@@ -191,7 +186,8 @@ public class InfoAlbero extends AppCompatActivity {
 			for( Estensione est : U.trovaEstensioni(gc) ) {
 				U.metti( scatola, est.nome, est.testo );
 			}
-		}
+		} else
+			bottoneHeader.setVisibility( View.GONE );
 	}
 
 	String dataIdVersoData( String id ) {

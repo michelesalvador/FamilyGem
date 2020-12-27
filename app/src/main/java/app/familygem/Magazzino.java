@@ -90,7 +90,8 @@ public class Magazzino extends Fragment {
 	static int quanteFonti( Repository rep, Gedcom gc ) {
 		int quante = 0;
 		for( Source fon : gc.getSources() ) {
-			if( fon.getRepositoryRef() != null && fon.getRepositoryRef().getRef().equals(rep.getId()) )
+			if( fon.getRepositoryRef() != null && fon.getRepositoryRef().getRef() != null
+					&& fon.getRepositoryRef().getRef().equals(rep.getId()) )
 				quante++;
 		}
 		return quante;

@@ -30,7 +30,9 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 import org.apache.commons.io.FileUtils;
+import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
+import org.folg.gedcom.parser.ModelParser;
 import org.folg.gedcom.tools.CountsCollector;
 import org.folg.gedcom.tools.GedcomAnalyzer;
 import java.io.BufferedInputStream;
@@ -479,7 +481,7 @@ public class Officina extends AppCompatActivity {
 				}
 				s.l("Finale", fileGedcom, fileGedcom.exists() );
 
-			/*	ModelParser mp = new ModelParser();
+				ModelParser mp = new ModelParser();
 				Gedcom gc = mp.parseGedcom( fileGedcom );
 				gc.createIndexes();
 				s.l( "file.getAbsolutePath= "+ fileGedcom.getAbsolutePath(),	// restituisce lo stesso percorso
@@ -494,7 +496,7 @@ public class Officina extends AppCompatActivity {
 				if( unFile.exists() )
 					s.l( unFile.getAbsolutePath() +" esiste!" );
 				else
-					s.l( unFile.getAbsolutePath() +" NON esiste" );*/
+					s.l( unFile.getAbsolutePath() +" NON esiste" );
 			} catch (Exception e) {	//  IOException | SAXParseException |URISyntaxException | FileNotFoundException
 				e.printStackTrace();
 			}

@@ -98,8 +98,20 @@ public class F {
 				String[] split = segment.split(":");
 				if( split[0].equalsIgnoreCase("primary") ) {
 					// Storage principale
-					return Environment.getExternalStorageDirectory() + "/" + split[1];
+					String percorso = Environment.getExternalStorageDirectory() + "/" + split[1];
 					// /storage/emulated/0 ...
+					/* Il file può anche esistere ma ciò non è garanzia che si possa leggere.
+					In particolare Android 11 con il suo cazzo di scope storage non consente di leggere i file in quasi tutte le cartelle */
+					File trovato = new File( percorso );
+					if( trovato.exists() ) { // Il file può anche esistere
+						s.l( "Esiste", trovato );
+						if( trovato.canRead() ) { // ma non essere leggibile (Android 11)
+							s.l( "Posso leggere", trovato );
+							return percorso;
+						} else
+							s.l( "Non posso leggere", trovato );
+					} else
+						s.l( "Non esiste", trovato );
 				} else if( split[0].equalsIgnoreCase("home") ) {
 					// Cartella 'Documents' in Android 9 e 10
 					return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + split[1];
@@ -113,8 +125,12 @@ public class F {
 							s.l( "File trovando=", trovando );
 							// potrebbe capitare che in due schede SD c'è lo stesso percorso e nome file
 							// l'utente sceglie il secondo e gli arriva il primo.
-							if( trovando.exists() )
-								return trovando.getAbsolutePath();
+							if( trovando.isFile() ) {
+								if( trovando.canRead() )
+									return trovando.getAbsolutePath();
+								else
+									s.l("Esiste ma non è leggibile", trovando);
+							}
 						}
 					}
 				}
