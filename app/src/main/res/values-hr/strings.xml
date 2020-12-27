@@ -87,7 +87,7 @@
     <string name="sent_by">Šalje %s</string>
     <string name="scrapbook">Bilježnica skica</string>
     <string name="errors_found">Pronađenih grešaka: %d.</string>
-    <string name="item_exists_but_file">Unos u stablu nalazi se u indeksu, ali iz nekog razloga povezana datoteka nedostaje:</string>
+    <string name="item_exists_but_file">Unos u stablu nalazi se u indeksu, ali iz nekog razloga nedostaje povezana datoteka:</string>
     <string name="brother">Brat</string>
     <string name="simpsons_tree">Obiteljsko stablo obitelji Simpson</string>
     <string name="new_media">Novi medij</string>
@@ -199,7 +199,7 @@
     <string name="line_2">2. redak</string>
     <string name="sources_number">Broj izvora</string>
     <string name="move_after">Premjesti nakon</string>
-    <string name="blob">BLOB</string>
+    <string name="blob">Blob</string>
     <string name="year">Godina</string>
     <string name="baptism">Krštenje</string>
     <string name="tree_without_news">Stablo bez aktualiziranja</string>
@@ -209,7 +209,7 @@
     <string name="complex_tree_advanced_tools">Ovo stablo izgleda prilično složeno.
 \nŽeliš li vidjeti napredne alate koji olakšavaju upravljanje stablom\?</string>
     <string name="cant_understand_uri">Nerazumljena primljena URI adresa.</string>
-    <string name="tree_info">Informacije</string>
+    <string name="tree_info">Podaci</string>
     <string name="new_person">Stvori novu osobu</string>
     <string name="name_of_tree">Naslov stabla</string>
     <string name="change_date">Promijeni datum</string>
@@ -234,7 +234,7 @@
     <string name="empty_tree">Stvori prazno stablo</string>
     <string name="extension">Proširenje</string>
     <string name="type">Vrsta</string>
-    <string name="number_relatives">Broj srodnika</string>
+    <string name="number_relatives">Broj srodnih osoba</string>
     <string name="persons">Osobe</string>
     <string name="family_as_child">Obitelj (kao dijete)</string>
     <string name="language">Jezik</string>
@@ -318,4 +318,12 @@
     <string name="simple_notes">Jednostavne napomene</string>
     <string name="repositories">Spremišta</string>
     <string name="find_errors">Nađi greške</string>
+    <string name="number_members">Broj članova</string>
+    <string name="update_header">Aktualiziraj zaglavlje</string>
+    <string name="tap_add_tree">Dodirni za dodavanje obiteljskog stabla.</string>
+    <string name="download">Preuzmi</string>
+    <string name="you_can_download">Ne možeš preuzeti s tobom dijeljeno stablo.</string>
+    <string name="a_new_tree">Novo obiteljsko stablo</string>
+    <string name="family_gem_example">Family Gem primjer</string>
+    <string name="download_shared_tree">Preuzmi dijeljeno stablo</string>
 </resources>
