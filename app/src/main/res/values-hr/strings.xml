@@ -18,7 +18,7 @@
     <string name="num_children">Broj djece: %d</string>
     <string name="husband">Muž</string>
     <string name="characrter_set">Kodna stranica</string>
-    <string name="media_folders">Mape za medije</string>
+    <string name="media_folders">Mape medija</string>
     <string name="done">Gotovo</string>
     <string name="occupation">Zanimanje</string>
     <string name="postal_code">Poštanski broj</string>
@@ -280,7 +280,7 @@
 \n\tZamjene: %d
 \n\tBrisanja: %d</string>
     <string name="version">Verzija</string>
-    <string name="new_source_note">Napomena uz novi izvor</string>
+    <string name="new_source_note">Nova napomena uz izvor</string>
     <string name="choose_source">Odaberi izvor</string>
     <string name="root">Glavna osoba</string>
     <string name="abbreviation">Kratki naslov</string>
@@ -326,4 +326,6 @@
     <string name="a_new_tree">Novo obiteljsko stablo</string>
     <string name="family_gem_example">Family Gem primjer</string>
     <string name="download_shared_tree">Preuzmi dijeljeno stablo</string>
+    <string name="app_storage">Spremište programa</string>
+    <string name="sure_delete">Sigurno\?</string>
 </resources>
