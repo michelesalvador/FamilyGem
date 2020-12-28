@@ -144,7 +144,7 @@
     <string name="choose_repository">Выберите репозиторий</string>
     <string name="choose_source">Выберите источник</string>
     <string name="new_repository">Новый репозиторий</string>
-    <string name="son">Отец</string>
+    <string name="son">Сын</string>
     <string name="daughter">Дочь</string>
     <string name="half_sister">Сводная сестра</string>
     <string name="half_brother">Сводный брат</string>
