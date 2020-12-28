@@ -24,7 +24,7 @@ android {
 		versionCode 18
 		versionName '0.7.15'
 		vectorDrawables.useSupportLibrary = true
-		resConfigs "en", "de", "es", "fr", "hr", "it", "nb-rNO", "nl-rBE", "pl", "pt", "ru", "sr", "uk"
+		resConfigs "en", "de", "es", "fr", "hr", "it", "nb", "nl", "pl", "pt", "ru", "sr", "uk"
 		def backupKey = ""
 		def utenteAruba = ""
 		def passwordAruba = ""
