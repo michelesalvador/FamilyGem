@@ -14,13 +14,9 @@
 		android:roundIcon="@mipmap/vetrina_round"
 		android:theme="@style/AppTheme"
 		android:allowBackup="true"
-		android:backupAgent="AgenteBackup"
 		android:usesCleartextTraffic="true"
 		android:supportsRtl="false"
 		tools:replace="android:supportsRtl">
-		<meta-data
-			android:name="com.google.android.backup.api_key"
-			android:value="@string/backupKey" />
 		<provider
 			android:name="androidx.core.content.FileProvider"
 			android:authorities="${applicationId}.provider"
@@ -58,7 +54,6 @@
 		</activity>
 		<activity
 			android:name=".Alberi"
-			android:parentActivityName=".Principe"
 			android:launchMode="singleTask" />
 		<activity
 			android:name=".AlberoNuovo"
@@ -77,11 +72,11 @@
 			android:parentActivityName=".Opzioni" />
 		<activity
 			android:name=".InfoAlbero"
+			android:label="@string/tree_info"
 			android:parentActivityName=".Alberi" />
 		<activity
 			android:name=".CartelleMedia"
-			android:label="@string/media_folders"
-			android:parentActivityName=".Alberi" />
+			android:label="@string/media_folders" />
 		<activity
 			android:name=".Condivisione"
 			android:label="@string/share_tree"
@@ -93,7 +88,7 @@
 		<activity
 			android:name=".Confrontatore"
 			android:label="@string/import_news"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".Compara" />
 		<activity
 			android:name=".Conferma"
 			android:label="@string/confirm_news"
@@ -106,47 +101,34 @@
 			android:name=".Individuo"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity
-			android:name=".dettaglio.Famiglia"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Famiglia" />
 		<activity
-			android:name=".dettaglio.Nome"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Nome" />
 		<activity
-			android:name=".dettaglio.Archivio"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Archivio" />
 		<activity
-			android:name=".dettaglio.ArchivioRef"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.ArchivioRef" />
 		<activity
-			android:name=".dettaglio.Nota"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Nota" />
 		<activity
-			android:name=".dettaglio.Fonte"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Fonte" />
 		<activity
-			android:name=".dettaglio.CitazioneFonte"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.CitazioneFonte" />
 		<activity
-			android:name=".dettaglio.Immagine"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Immagine" />
 		<activity
-			android:name=".dettaglio.Evento"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Evento" />
 		<activity
-			android:name=".dettaglio.Indirizzo"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Indirizzo" />
 		<activity
-			android:name=".dettaglio.Autore"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Autore" />
 		<activity
-			android:name=".dettaglio.Estensione"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Estensione" />
 		<activity
-			android:name=".dettaglio.Cambiamenti"
-			android:parentActivityName=".Individuo" />
+			android:name=".dettaglio.Cambiamenti" />
 		<activity
 			android:name=".Lavagna"
-			android:parentActivityName=".Principe"
+			android:parentActivityName=".dettaglio.Immagine"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity android:name=".EditaIndividuo" />
 		<activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />

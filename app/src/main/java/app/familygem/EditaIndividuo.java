@@ -39,11 +39,13 @@ public class EditaIndividuo extends AppCompatActivity {
 	EditText dataMorte;
 	EditoreData editoreDataMorte;
 	EditText luogoMorte;
+	boolean nomeDaPieces; // Se il nome/cognome vengono dai pieces Given e Surname, lì devono tornare
 
 	@Override
 	protected void onCreate(Bundle bandolo) {
 		super.onCreate(bandolo);
-		setContentView(R.layout.edita_individuo );
+		U.gedcomSicuro(gc);
+		setContentView( R.layout.edita_individuo );
 		Bundle bundle = getIntent().getExtras();
 		idIndi = bundle.getString("idIndividuo");
 		idFamiglia = bundle.getString("idFamiglia");
@@ -92,13 +94,26 @@ public class EditaIndividuo extends AppCompatActivity {
 			p = gc.getPerson(idIndi);
 			// Nome e cognome
 			if( !p.getNames().isEmpty() ) {
-				String epiteto = p.getNames().get( 0 ).getDisplayValue();
-				String nome = epiteto.replaceAll( "/.*?/", "" ).trim(); // rimuove il cognome '/.../'
-				((EditText)findViewById( R.id.nome )).setText( nome );
-				if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') ) {
-					String cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
-					((EditText)findViewById( R.id.cognome )).setText( cognome );
+				String nome = "";
+				String cognome = "";
+				Name n = p.getNames().get( 0 );
+				String epiteto = n.getValue();
+				if( epiteto != null ) {
+					nome = epiteto.replaceAll( "/.*?/", "" ).trim(); // rimuove il cognome '/.../'
+					if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
+						cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
+				} else {
+					if( n.getGiven() != null ) {
+						nome = n.getGiven();
+						nomeDaPieces = true;
+					}
+					if( n.getSurname() != null ) {
+						cognome = n.getSurname();
+						nomeDaPieces = true;
+					}
 				}
+				((EditText)findViewById( R.id.nome )).setText( nome );
+				((EditText)findViewById( R.id.cognome )).setText( cognome );
 			}
 			// Sesso
 			switch( U.sesso(p) ) {
@@ -172,16 +187,26 @@ public class EditaIndividuo extends AppCompatActivity {
 	}
 
 	void salva() {
+		U.gedcomSicuro(gc); // È capitato un crash perché qui gc era null
+
 		// Nome
-		String epiteto = ((EditText)findViewById(R.id.nome)).getText() + " /" + ((EditText)findViewById(R.id.cognome)).getText() + "/".trim();
+		String nome = ((EditText)findViewById(R.id.nome)).getText().toString();
+		String cognome = ((EditText)findViewById(R.id.cognome)).getText().toString();
+		Name name;
 		if( p.getNames().isEmpty() ) {
 			List<Name> nomi = new ArrayList<>();
-			Name nomeCompleto = new Name();
-			nomeCompleto.setValue( epiteto );
-			nomi.add( nomeCompleto );
+			name = new Name();
+			nomi.add( name );
 			p.setNames( nomi );
 		} else
-			p.getNames().get(0).setValue( epiteto );
+			name = p.getNames().get(0);
+
+		if( nomeDaPieces ) {
+			name.setGiven( nome );
+			name.setSurname( cognome );
+		} else {
+			name.setValue( nome + " /" + cognome + "/".trim() );
+		}
 
 		// Sesso
 		String sessoScelto = null;

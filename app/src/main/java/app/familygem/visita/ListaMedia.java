@@ -49,7 +49,7 @@ public class ListaMedia extends Visitor {
 
 	// Aggiunge solo quelli presunti bellini con anteprima
 	private void filtra( Media media ) {
-		String file = F.percorsoMedia( Globale.preferenze.idAprendo, media);
+		String file = F.percorsoMedia( Globale.preferenze.idAprendo, media); // todo e le immagini dagli URI?
 		if( file != null && file.lastIndexOf('.') > 0 ) {
 			String estensione = file.substring( file.lastIndexOf('.')+1 );
 			switch( estensione ) {

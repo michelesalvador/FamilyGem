@@ -1,0 +1,33 @@
+0 HEAD
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Persona con /Alcuni Media/
+1 SEX M
+1 OBJE
+2 TITL PDF nello storage esterno da accedere con percorso diretto
+2 FILE È Carmelo.pdf
+1 OBJE
+2 TITL File di testo da accedere con percorso diretto
+2 FILE path.txt
+1 OBJE
+2 TITL Lo stesso file
+2 FILE path.txt
+2 NOTE Bisogna evitare il file duplicato, per spreco di spazio e soprattutto perché lo ZIP diventa invalido.
+1 OBJE
+2 TITL Primo omonimo
+2 FILE primo/omonimo.txt
+1 OBJE
+2 TITL Secondo omonimo
+2 FILE secondo/omonimo.txt
+2 NOTE Anche qui bisogna evitare il nome duplicato.
+1 OBJE
+2 TITL File di testo da accedere con URI
+2 FILE uri.txt
+1 OBJE
+2 TITL Immagine nella scheda SD da accedere con URI
+2 FILE anna.webp
+2 NOTE Probabilmente questo devi uploadarlo a mano.
+0 TRLR

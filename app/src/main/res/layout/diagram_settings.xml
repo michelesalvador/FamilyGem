@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
@@ -27,7 +28,7 @@
 			android:id="@+id/settings_ancestors"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="5"
+			android:max="9"
 			android:layout_marginTop="15dp"
 			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
 
@@ -43,11 +44,11 @@
 			android:id="@+id/settings_uncles"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="5"
+			android:max="9"
 			android:layout_marginTop="15dp"
 			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
 
-		<Switch
+		<androidx.appcompat.widget.SwitchCompat
 			android:id="@+id/settings_siblings"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -67,17 +68,31 @@
 			android:id="@+id/settings_descendants"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="5"
+			android:max="9"
 			android:layout_marginTop="15dp"
 			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
 
-		<TextView
+		<LinearLayout
 			android:id="@+id/settings_indicator"
-			android:layout_width="20dp"
-			android:layout_height="40dp"
-			android:gravity="center_horizontal"
-			android:paddingTop="2dp"
-			android:textColor="#FFFFFFFF"
-			android:textSize="18sp"/>
+			android:layout_width="50dp"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:gravity="center_horizontal">
+			<TextView
+				android:id="@+id/settings_indicator_text"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingStart="5dp"
+				android:paddingEnd="5dp"
+				android:paddingTop="2dp"
+				android:paddingBottom="2dp"
+				android:background="@color/evidenzia"
+				android:textColor="#FFFFFFFF"
+				android:textSize="18sp"/>
+			<ImageView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				app:srcCompat="@drawable/segnalino"/>
+		</LinearLayout>
 	</LinearLayout>
 </ScrollView>

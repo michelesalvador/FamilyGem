@@ -18,36 +18,45 @@
 		<View
 			android:layout_width="14dp"
 			android:layout_height="2dp"
-			android:background="#fff" />
+			android:background="?linesColor" />
 
 		<View
 			android:id="@+id/ancestry_connector_vertical"
 			android:layout_width="2dp"
 			android:layout_height="11dp"
-			android:background="#fff" />
+			android:background="?linesColor" />
 	</LinearLayout>
 
-	<TextView
+	<RelativeLayout
 		android:id="@+id/ancestry_father"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:background="@drawable/casella_neutro"
-		android:paddingLeft="6dp"
-		android:paddingTop="3dp"
-		android:paddingRight="6dp"
-		android:paddingBottom="3dp"
-		android:text="12" />
+		android:background="@drawable/casella_sfondo_base">
+		<TextView
+			android:id="@+id/ancestry_father_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:background="@drawable/casella_bordo_neutro"
+			android:paddingLeft="6dp"
+			android:paddingTop="3dp"
+			android:paddingRight="6dp"
+			android:paddingBottom="3dp"/>
+	</RelativeLayout>
 
-	<TextView
+	<RelativeLayout
 		android:id="@+id/ancestry_mother"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/ancestry_connector"
-		android:background="@drawable/casella_neutro"
-		android:paddingLeft="6dp"
-		android:paddingTop="3dp"
-		android:paddingRight="6dp"
-		android:paddingBottom="3dp"
-		android:text="345" />
-
+		android:background="@drawable/casella_sfondo_base"
+		android:layout_toRightOf="@id/ancestry_connector">
+		<TextView
+			android:id="@+id/ancestry_mother_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:background="@drawable/casella_bordo_neutro"
+			android:paddingLeft="6dp"
+			android:paddingTop="3dp"
+			android:paddingRight="6dp"
+			android:paddingBottom="3dp"/>
+	</RelativeLayout>
 </RelativeLayout>

@@ -25,13 +25,13 @@
 			android:textSize="18sp" />
 
 		<CheckBox
-			android:id="@+id/editadata_doppia1"
+			android:id="@+id/editadata_negativa1"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/double_date" />
+			android:text="B.C." />
 
 		<CheckBox
-			android:id="@+id/editadata_doppia2"
+			android:id="@+id/editadata_doppia1"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/double_date" />
@@ -71,6 +71,27 @@
 			android:layout_marginLeft="8dp"
 			android:theme="@style/Ruota" />
 
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/editadata_seconda_avanzate"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="end"
+		android:visibility="gone">
+
+		<CheckBox
+			android:id="@+id/editadata_negativa2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="B.C." />
+
+		<CheckBox
+			android:id="@+id/editadata_doppia2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/double_date" />
 	</LinearLayout>
 
 	<LinearLayout

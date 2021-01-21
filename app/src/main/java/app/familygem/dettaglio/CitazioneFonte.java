@@ -19,7 +19,7 @@ public class CitazioneFonte extends Dettaglio {
 		c = (SourceCitation) casta( SourceCitation.class );
 		if( c.getSource(gc) != null ) {  // source CITATION valida
 			setTitle( R.string.source_citation );
-			U.linkaFonte( box, c.getSource(gc) );
+			U.mettiFonte( box, c.getSource(gc), true );
 		} else if( c.getRef() != null ) {  // source CITATION di una fonte inesistente (magari eliminata)
 			setTitle( R.string.inexistent_source_citation );
 		} else {	// source NOTE

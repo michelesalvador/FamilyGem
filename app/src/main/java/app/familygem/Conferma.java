@@ -252,7 +252,7 @@ public class Conferma extends AppCompatActivity {
 		String origine = F.percorsoMedia( Globale.idAlbero2, media );
 		if( origine != null ) {
 			File fileOrigine = new File( origine );
-			File dirMemoria = new File( getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo ); // dovrebbe stare fuori dal loop ma vabè
+			File dirMemoria = getExternalFilesDir( String.valueOf(Globale.preferenze.idAprendo) ); // dovrebbe stare fuori dal loop ma vabè
 			String nomeFile = origine.substring( origine.lastIndexOf('/') + 1 );
 			File fileGemello = new File( dirMemoria.getAbsolutePath(), nomeFile );
 			if( fileGemello.isFile()	// se il file corrispondente esiste già

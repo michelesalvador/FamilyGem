@@ -195,12 +195,14 @@ public class Armadio {
 			this.condivisioni = condivisioni;
 			this.grado = grado;
 		}
-		void salva() {
+		File salva() {
+			File fileSettaggi = new File( Globale.contesto.getCacheDir(), "settings.json" );
+			Gson gson = new Gson();
+			String salvando = gson.toJson( this );
 			try {
-				Gson gson = new Gson();
-				String salvando = gson.toJson( this );
-				FileUtils.writeStringToFile( new File( Globale.contesto.getCacheDir(), "settings.json"), salvando, "UTF-8" );
+				FileUtils.writeStringToFile( fileSettaggi, salvando, "UTF-8" );
 			} catch (IOException e) {}
+			return fileSettaggi;
 		}
 	}
 }

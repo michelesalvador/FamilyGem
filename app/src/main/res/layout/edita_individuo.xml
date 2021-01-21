@@ -14,6 +14,7 @@
 		android:id="@+id/nome_label"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
+		android:hint="@string/given"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent">
@@ -22,7 +23,6 @@
 			android:id="@+id/nome"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:hint="@string/name"
 			android:inputType="textCapWords|textPersonName"
 			android:nextFocusForward="@+id/cognome"/>
 	</com.google.android.material.textfield.TextInputLayout>
@@ -31,6 +31,7 @@
 		android:id="@+id/cognome_label"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
+		android:hint="@string/surname"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/nome_label">
@@ -39,7 +40,6 @@
 			android:id="@+id/cognome"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:hint="@string/surname"
 			android:inputType="textCapWords|textPersonName"
 			android:nextFocusForward="@+id/data_nascita"/>
 	</com.google.android.material.textfield.TextInputLayout>
@@ -81,6 +81,7 @@
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="16dp"
+		android:hint="@string/birth_date"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/radioGroup">
@@ -89,7 +90,6 @@
 			android:id="@+id/data_nascita"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:hint="@string/birth_date"
 			android:inputType="textCapCharacters"
 			android:imeOptions="actionNext"
 			android:nextFocusForward="@+id/luogo_nascita"/>
@@ -109,6 +109,7 @@
 		android:id="@+id/luogo_nascita_label"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
+		android:hint="@string/birth_place"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/editore_data_nascita">
@@ -116,8 +117,7 @@
 		<app.familygem.TrovaLuogo
 			android:id="@+id/luogo_nascita"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:hint="@string/birth_place"/>
+			android:layout_height="wrap_content"/>
 	</com.google.android.material.textfield.TextInputLayout>
 
 	<androidx.appcompat.widget.SwitchCompat
@@ -145,6 +145,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="16dp"
+			android:hint="@string/death_date"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent">
 
@@ -152,7 +153,6 @@
 				android:id="@+id/data_morte"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="@string/death_date"
 				android:inputType="textCapCharacters"
 				android:imeOptions="actionNext"
 				android:nextFocusForward="@id/luogo_morte"/>
@@ -170,6 +170,7 @@
 		<com.google.android.material.textfield.TextInputLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
+			android:hint="@string/death_place"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/editore_data_morte">
@@ -178,7 +179,6 @@
 				android:id="@+id/luogo_morte"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="@string/death_place"
 				android:inputType="textCapWords" />
 		</com.google.android.material.textfield.TextInputLayout>
 

@@ -5,8 +5,5 @@
 		android:startColor="@color/evidenziaChiaro"
 		android:endColor="@color/evidenzia"
 		android:gradientRadius="150dp" />
-	<stroke
-		android:width="2dp"
-		android:color="@color/femmina"/>
-	<corners android:radius="3dp"/>
+	<corners android:radius="4dp"/>
 </shape>

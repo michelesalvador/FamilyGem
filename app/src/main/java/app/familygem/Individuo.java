@@ -48,13 +48,13 @@ public class Individuo extends AppCompatActivity {
 	@Override
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
-		if( gc == null ) {
-			Alberi.apriGedcom( Globale.preferenze.idAprendo, false );
-		}
+		U.gedcomSicuro( gc );
 		uno = (Person) Memoria.getOggetto();
 		// Se l'app va in background e viene stoppata, 'Memoria' è resettata e quindi 'uno' sarà null
-		if( uno == null && bandolo != null )
+		if( uno == null && bandolo != null ) {
 			uno = gc.getPerson( bandolo.getString("idUno") ); // In Bundle è salvato l'id dell'individuo
+			Memoria.setPrimo( uno ); // Altrimenti la memoria è senza una pila
+		}
 		// In effetti Memoria viene resettata, ma Globale.individuo sembra vivo e vegeto.. vabbè, comunque il Bundle fa il suo lavoro
 		Globale.individuo = uno.getId();
 		setContentView(R.layout.individuo);
@@ -133,7 +133,7 @@ public class Individuo extends AppCompatActivity {
 
 		// Tutto ciò che nella pagina può cambiare
 		if( Globale.preferenze.esperto )
-			((TextView)findViewById( R.id.persona_id )).setText( uno.getId() );
+			((TextView)findViewById( R.id.persona_id )).setText( "INDI " + uno.getId() );
  		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
 		barraCollasso.setTitle( U.epiteto(uno) ); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
 		F.unaFoto( Globale.gc, uno, findViewById(R.id.persona_foto) );
@@ -373,14 +373,13 @@ public class Individuo extends AppCompatActivity {
 				media.setFileTag("FILE");
 				uno.addMedia( media );
 				if( F.proponiRitaglio( this, null, data, media ) ) { // restituisce true se è un'immagine ritagliabile
-					U.salvaJson( false, uno );
-						// false così non scatta recreate() che negli Android nuovi fa scomparire il dialogo di richiesta ritaglio
+					U.salvaJson( true, uno );
 					return;
 				}
 			} else if( requestCode == 2174 ) { // File dalle app in nuovo Media condiviso, con proposta di ritagliarlo
 				Media media = Galleria.nuovoMedia( uno );
 				if( F.proponiRitaglio( this, null, data, media ) ) {
-					U.salvaJson( false, media, uno );
+					U.salvaJson( true, media, uno );
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
@@ -475,6 +474,6 @@ public class Individuo extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		F.risultatoPermessi( this, codice, permessi, accordi, uno );
+		F.risultatoPermessi( this, null, codice, permessi, accordi, uno );
 	}
 }

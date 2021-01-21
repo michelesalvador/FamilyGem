@@ -9,6 +9,7 @@ public class s {
 		for(Object obj : objects)
 			str += obj + " ";
 		System.out.println(".\t" + str);
+		//android.util.Log.v("v", str);
 	}
 	
 	public static void p( Object parola ) {

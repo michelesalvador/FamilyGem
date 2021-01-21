@@ -29,6 +29,15 @@ public class IndividuoFamiliari extends Fragment {
 		if( gc != null ) {
 			uno = gc.getPerson( Globale.individuo );
 			if( uno != null ) {
+				/* ToDo Mostrare/poter settare nelle famiglie geniotriali il pedigree, in particolare 'adopted'
+				LinearLayout scatola = vistaFamiglia.findViewById( R.id.contenuto_scheda );
+				for( ParentFamilyRef pfr : uno.getParentFamilyRefs() ) {
+					U.metti( scatola, "Ref", pfr.getRef() );
+					U.metti( scatola, "Primary", pfr.getPrimary() ); // Custom tag _PRIM _PRIMARY
+					U.metti( scatola, "Relationship Type", pfr.getRelationshipType() ); // Tag PEDI (pedigree)
+					for( Estensione altroTag : U.trovaEstensioni( pfr ) )
+						U.metti( scatola, altroTag.nome, altroTag.testo );
+				} */
 				// Famiglie di origine: genitori e fratelli
 				List<Family> listaFamiglie = uno.getParentFamilies(gc);
 				for( Family famiglia : listaFamiglie  ) {
@@ -118,6 +127,7 @@ public class IndividuoFamiliari extends Fragment {
 	private void spostaRiferimentoFamiglia( int direzione ) {
 		Collections.swap( uno.getSpouseFamilyRefs(), posFam, posFam + direzione );
 		getActivity().getSupportFragmentManager().beginTransaction().detach( this ).attach( this ).commit();
+		U.salvaJson( true, uno );
 	}
 
 	// Menu contestuale
@@ -151,7 +161,8 @@ public class IndividuoFamiliari extends Fragment {
 			menu.add( 0, 304, 0, R.string.move_after );
 		menu.add( 0, 305, 0, R.string.modify );
 		menu.add( 0, 306, 0, R.string.unlink );
-		menu.add( 0, 307, 0, R.string.delete );
+		if( !pers.equals(uno) ) // Qui non può eliminare sè stesso
+			menu.add( 0, 307, 0, R.string.delete );
 	}
 
 	@Override
@@ -180,20 +191,13 @@ public class IndividuoFamiliari extends Fragment {
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
 						Anagrafe.eliminaPersona(getContext(), idIndividuo);
-						if( !U.controllaFamiglieVuote(getContext(), () -> concludi(pers), false, familia) )
-							concludi( pers );
+						aggiorna();
+						U.controllaFamiglieVuote(getContext(), this::aggiorna, false, familia);
 					}).setNeutralButton(R.string.cancel, null).show();
 		} else {
 			return false;
 		}
 		return true;
-	}
-	// Conclude un paio di metodi qui sopra
-	void concludi(Person pers) {
-		if( pers.equals(uno) ) // nel caso sia imparentato con sè stesso
-			getActivity().onBackPressed();
-		else
-			aggiorna();
 	}
 
 	// Rinfresca il contenuto del frammento Familiari

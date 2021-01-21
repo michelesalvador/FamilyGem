@@ -44,7 +44,8 @@ public class Chiesa extends Fragment {
 					+ getString(listaFamiglie.size()==1 ? R.string.family : R.string.families).toLowerCase() );
 			for( Family fam : listaFamiglie )
 				mettiFamiglia( scatola, fam );
-			setHasOptionsMenu( true );
+			if( listaFamiglie.size() > 1 )
+				setHasOptionsMenu( true );
 			gliIdsonoNumerici = verificaIdNumerici();
 			vista.findViewById( R.id.fab ).setOnClickListener( v -> {
 				Family nuovaFamiglia = nuovaFamiglia(true);
@@ -73,10 +74,12 @@ public class Chiesa extends Fragment {
 			figli += U.epiteto( figlio ) + "\n";
 		if( !figli.isEmpty() )
 			figli = figli.substring( 0, figli.length() - 1 );
-		if( figli.isEmpty() )
+		TextView testoFigli = vistaFamiglia.findViewById( R.id.famiglia_figli );
+		if( figli.isEmpty() ) {
 			vistaFamiglia.findViewById( R.id.famiglia_strut ).setVisibility( View.GONE );
-		else
-			((TextView)vistaFamiglia.findViewById( R.id.famiglia_figli )).setText( figli );
+			testoFigli.setVisibility( View.GONE );
+		} else
+			testoFigli.setText( figli );
 		registerForContextMenu( vistaFamiglia );
 		vistaFamiglia.setOnClickListener( v -> {
 			Memoria.setPrimo( fam );

@@ -34,7 +34,7 @@ public class ListaGriglia extends AppCompatActivity {
 		griglia.setHasFixedSize(true); // dovrebbe aiutare
 
 		// Crea una lista di Media dai file
-		File dirMemoria = new File( getExternalFilesDir(null) +"/"+ Globale.preferenze.idAprendo );
+		File dirMemoria = getExternalFilesDir( String.valueOf(Globale.preferenze.idAprendo) );
 		List<File> files = (List<File>) FileUtils.listFiles( dirMemoria, TrueFileFilter.INSTANCE, null );
 		List<Media> listaMedia = new ArrayList<>();
 		Media ftp = new Media();

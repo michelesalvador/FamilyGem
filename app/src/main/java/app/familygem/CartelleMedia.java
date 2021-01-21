@@ -2,9 +2,10 @@
 
 package app.familygem;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.UriPermission;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,21 +36,31 @@ public class CartelleMedia extends AppCompatActivity {
 		idAlbero = getIntent().getIntExtra( "idAlbero", 0 );
 		cartelle = new ArrayList<>( Globale.preferenze.getAlbero(idAlbero).cartelle );
 		uris = new ArrayList<>( Globale.preferenze.getAlbero(idAlbero).uris );
-
 		aggiornaLista();
+		getSupportActionBar().setDisplayHomeAsUpEnabled( true );
 		findViewById( R.id.fab ).setOnClickListener( v -> {
-			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-				Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-				intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-				intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-				startActivityForResult( intent, 123 );
-			} else {
-				// KitKat utilizza la selezione di un file per risalire alla cartella
-				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-				intent.setType( "*/*");
-				startActivityForResult( intent, 456 );
-			}
+			int perm = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+			if( perm == PackageManager.PERMISSION_DENIED )
+				ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE }, 3517);
+			else if( perm == PackageManager.PERMISSION_GRANTED )
+				faiScegliereCartella();
 		});
+		if( Globale.preferenze.getAlbero(idAlbero).cartelle.isEmpty() && Globale.preferenze.getAlbero(idAlbero).uris.isEmpty() )
+			new Fabuloso( this, "Add a folder from this device." ).show(); // todo traduci
+	}
+
+	void faiScegliereCartella() {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+			intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+			startActivityForResult( intent, 123 );
+		} else {
+			// KitKat utilizza la selezione di un file per risalire alla cartella
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.setType( "*/*");
+			startActivityForResult( intent, 456 );
+		}
 	}
 
 	void aggiornaLista() {
@@ -133,6 +146,12 @@ public class CartelleMedia extends AppCompatActivity {
 	}
 
 	@Override
+	public boolean onOptionsItemSelected( MenuItem item ) {
+		onBackPressed();
+		return true;
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if( resultCode == Activity.RESULT_OK ) {
@@ -140,13 +159,10 @@ public class CartelleMedia extends AppCompatActivity {
 			if( uri != null ) {
 				// in KitKat è stato selezionato un file e ne ricaviamo il percorso della cartella
 				if( requestCode == 456 ) {
-					String percorso = F.uriPercorsoFile( uri );
-					if( percorso != null && percorso.lastIndexOf('/') > 0 ) {
-						cartelle.add( percorso.substring(0, percorso.lastIndexOf('/')) );
+					String percorso = F.uriPercorsoCartellaKitKat( this, uri );
+					if( percorso != null ) {
+						cartelle.add( percorso );
 						salva();
-					} else {
-						// Non si può usare l'uri perché qui servono dei treeUri
-						Toast.makeText(this, "Could not add this position.", Toast.LENGTH_SHORT).show(); // non serve tradurre, KitKat se ne andrà
 					}
 				} else if( requestCode == 123 ) {
 					String percorso = F.uriPercorsoCartella( uri );
@@ -181,5 +197,11 @@ public class CartelleMedia extends AppCompatActivity {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
+		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED && codice == 3517 )
+			faiScegliereCartella();
 	}
 }

@@ -14,9 +14,6 @@ allprojects {
         jcenter()
         mavenCentral()
         mavenLocal()
-        maven {
-            url "https://maven.google.com"  // per scaricare le librerie support
-        }
     }
 }
 

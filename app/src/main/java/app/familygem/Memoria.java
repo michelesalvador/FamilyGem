@@ -58,16 +58,17 @@ public class Memoria {
 		classi.put( Note.class, Nota.class );
 	}
 
-	// Restituisce l'ultima pila creata se ce n'è almeno una, oppure ne crea una vuota
+	// Restituisce l'ultima pila creata se ce n'è almeno una
+	// oppure ne restituisce una vuota giusto per non restituire null
 	static Pila getPila() {
 		if( memoria.lista.size() > 0 )
 			return memoria.lista.get( memoria.lista.size() - 1 );
 		else
-			return new Pila(); // una pila vuota giusto per non restituire null
+			return new Pila(); // una pila vuota che non viene aggiunta alla lista
 	}
 
 	public static Pila addPila() {
-		Pila pila =  new Pila();
+		Pila pila = new Pila();
 		memoria.lista.add( pila );
 		return pila;
 	}
@@ -84,6 +85,7 @@ public class Memoria {
 			passo.tag = tag;
 		else if( oggetto instanceof Person )
 			passo.tag = "INDI";
+		//stampa("setPrimo");
 	}
 
 	// Aggiunge un oggetto alla fine dell'ultima pila esistente
@@ -91,19 +93,22 @@ public class Memoria {
 		Passo passo = new Passo();
 		passo.oggetto = oggetto;
 		getPila().add( passo );
-		//stampa();
+		//stampa("aggiungi");
 		return passo;
 	}
 
 	// Mette il primo oggetto se non ci sono pile oppure sostituisce il primo oggetto nell'ultima pila esistente
 	// In altre parole mette il primo oggetto senza aggiungere ulteriori pile
 	public static void replacePrimo( Object oggetto ) {
+		String tag = oggetto instanceof Family ? "FAM" : "INDI";
 		if( memoria.lista.size() == 0 ) {
-			setPrimo( oggetto );
+			setPrimo( oggetto, tag );
 		} else {
 			getPila().clear();
-			aggiungi( oggetto );
+			Passo passo = aggiungi( oggetto );
+			passo.tag = tag;
 		}
+		//stampa("replacePrimo");
 	}
 
 	// L'oggetto contenuto nel primo passo della pila
@@ -137,7 +142,7 @@ public class Memoria {
 			getPila().pop();
 		if( getPila().isEmpty() )
 			memoria.lista.remove( getPila() );
-		//stampa();
+		//stampa("arretra");
 	}
 
 	// Quando un oggetto viene eliminato, lo rende null in tutti i passi,
@@ -154,7 +159,9 @@ public class Memoria {
 		}
 	}
 
-	public static void stampa() {
+	public static void stampa( String intro ) {
+		if( intro != null )
+			s.l( intro );
 		for( Pila pila : memoria.lista ) {
 			for( Passo passo : pila ) {
 				String filotto = passo.filotto ? "< " : "";

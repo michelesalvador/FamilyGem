@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +30,9 @@ import static app.familygem.Globale.gc;
 
 public class Galleria extends Fragment {
 
+	ListaMediaContenitore visitaMedia;
+	AdattatoreGalleriaMedia adattatore;
+
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
 		setHasOptionsMenu( true );
@@ -35,12 +40,12 @@ public class Galleria extends Fragment {
 		RecyclerView griglia = vista.findViewById( R.id.galleria );
 		griglia.setHasFixedSize( true );
 		if( gc != null ) {
-			ListaMediaContenitore visitaMedia = new ListaMediaContenitore( gc, !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
+			visitaMedia = new ListaMediaContenitore( gc, !getActivity().getIntent().getBooleanExtra("galleriaScegliMedia",false ) );
 			gc.accept( visitaMedia );
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size() + " " + getString(R.string.media).toLowerCase() );
+			arredaBarra();
 			RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( getContext(), 2 );
 			griglia.setLayoutManager( gestoreLayout );
-			AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( visitaMedia.listaMedia, true );
+			adattatore = new AdattatoreGalleriaMedia( visitaMedia.listaMedia, true );
 			griglia.setAdapter( adattatore );
 			vista.findViewById( R.id.fab ).setOnClickListener( v ->
 					F.appAcquisizioneImmagine( getContext(), Galleria.this, 4546, null )
@@ -54,6 +59,20 @@ public class Galleria extends Fragment {
 	public void onPause() {
 		super.onPause();
 		getActivity().getIntent().removeExtra("galleriaScegliMedia");
+	}
+
+	// Scrive il titolo nella barra
+	void arredaBarra() {
+		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size()
+				+ " " + getString(R.string.media).toLowerCase() );
+	}
+
+	// Aggiorna i contenuti della galleria
+	void ricrea() {
+		visitaMedia.listaMedia.clear();
+		gc.accept( visitaMedia );
+		adattatore.notifyDataSetChanged();
+		arredaBarra();
 	}
 
 	// todo bypassabile?
@@ -86,7 +105,8 @@ public class Galleria extends Fragment {
 		}
 		if( contenitore.getMediaRefs().isEmpty() )
 			contenitore.setMediaRefs( null );
-		vista.setVisibility( View.GONE );
+		if( vista != null )
+			vista.setVisibility( View.GONE );
 	}
 
 	// Elimina un media condiviso o locale e rimuove i riferimenti nei contenitori
@@ -143,10 +163,31 @@ public class Galleria extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {
-			U.salvaJson( false, eliminaMedia( media, null ) );
-			getActivity().recreate();
+			Object[] modificati = eliminaMedia( media, null );
+			ricrea();
+			U.salvaJson( false, modificati );
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
+		menu.add( 0,0,0, R.string.media_folders );
+	}
+	@Override
+	public boolean onOptionsItemSelected( MenuItem item ) {
+		if( item.getItemId() == 0 ) {
+			startActivity( new Intent( getContext(), CartelleMedia.class )
+					.putExtra( "idAlbero", Globale.preferenze.idAprendo )
+			);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
+		F.risultatoPermessi( getContext(), this, codice, permessi, accordi, null );
 	}
 }

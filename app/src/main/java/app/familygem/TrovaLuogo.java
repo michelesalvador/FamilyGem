@@ -52,9 +52,9 @@ public class TrovaLuogo extends AppCompatAutoCompleteTextView {
 		}
 		@Override
 		public String getItem(int index) {
-			if( places.size() > 0 )
+			if( places.size() > 0 && index < places.size() ) // Evita IndexOutOfBoundsException
 				return places.get(index);
-			return null;
+			return "";
 		}
 		@Override
 		public Filter getFilter() {
@@ -80,14 +80,12 @@ public class TrovaLuogo extends AppCompatAutoCompleteTextView {
 									str += ", " + topo.getAdminName1(); // Regione
 								if(!str.contains(topo.getCountryName()))
 									str += ", " + topo.getCountryName(); // Nazione
-								if( places.indexOf( str ) < 0 ) // Avoid duplicates
+								if( str != null && !places.contains( str ) ) // Avoid null and duplicates
 									places.add( str );
 							}
 							filterResults.values = places;
 							filterResults.count = places.size();
-						} catch( Exception e ) {
-							//e.printStackTrace();
-						}
+						} catch( Exception e ) {}
 					}
 					return filterResults;
 				}

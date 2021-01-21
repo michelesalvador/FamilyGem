@@ -33,7 +33,7 @@ import static app.familygem.Globale.gc;
 public class Anagrafe extends Fragment {
 
 	private List<Person> listaIndividui;
-	private AdattatoreAnagrafe adattatore;
+	public AdattatoreAnagrafe adattatore;
 	private int ordine;
 	private boolean gliIdsonoNumerici;
 
@@ -42,10 +42,7 @@ public class Anagrafe extends Fragment {
 		View vista = inflater.inflate( R.layout.ricicla_vista, container, false );
 		if( gc != null ) {
 			listaIndividui = gc.getPeople();
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " "
-					+ getString(listaIndividui.size()==1 ? R.string.person : R.string.persons).toLowerCase() );
-			if( listaIndividui.size() > 1 )
-				setHasOptionsMenu(true);
+			arredaBarra();
 			RecyclerView vistaLista = vista.findViewById( R.id.riciclatore );
 			vistaLista.setPadding( 12, 12, 12, vistaLista.getPaddingBottom() );
 			adattatore = new AdattatoreAnagrafe();
@@ -55,9 +52,18 @@ public class Anagrafe extends Fragment {
 				Intent intento = new Intent( getContext(), EditaIndividuo.class );
 				intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
 				startActivity( intento );
-			} );
+			});
 		}
 		return vista;
+	}
+
+	void arredaBarra() {
+		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " "
+				+ getString(listaIndividui.size()==1 ? R.string.person : R.string.persons).toLowerCase() );
+		if( listaIndividui.size() > 1 )
+			setHasOptionsMenu(true);
+		else
+			setHasOptionsMenu(false);
 	}
 
 	public class AdattatoreAnagrafe extends RecyclerView.Adapter<GestoreIndividuo> implements Filterable {
@@ -98,13 +104,13 @@ public class Anagrafe extends Fragment {
 				vistaTitolo.setVisibility( View.VISIBLE );
 			}
 
-			int sfondo;
+			int bordo;
 			switch( U.sesso(persona) ) {
-				case 1: sfondo = R.drawable.casella_maschio; break;
-				case 2: sfondo = R.drawable.casella_femmina; break;
-				default: sfondo = R.drawable.casella_neutro;
+				case 1: bordo = R.drawable.casella_bordo_maschio; break;
+				case 2: bordo = R.drawable.casella_bordo_femmina; break;
+				default: bordo = R.drawable.casella_bordo_neutro;
 			}
-			vistaIndi.findViewById(R.id.indi_carta).setBackgroundResource( sfondo );
+			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( bordo );
 
 			U.dettagli( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
 			F.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
@@ -245,9 +251,12 @@ public class Anagrafe extends Fragment {
 							return (p2.getNames().size() == 0) ? 0 : 1;
 						if (p2.getNames().size() == 0)
 							return -1;
-						if (p1.getNames().get(0).getValue() == null) // anche i nomi con value null vanno in fondo
-							return (p2.getNames().get(0).getValue() == null) ? 0 : 1;
-						if (p2.getNames().get(0).getValue() == null)
+						Name n1 = p1.getNames().get(0);
+						Name n2 = p2.getNames().get(0);
+						// anche i nomi con value, given e surname null vanno in fondo
+						if (n1.getValue() == null && n1.getGiven() == null && n1.getSurname() == null)
+							return (n2.getValue() == null) ? 0 : 1;
+						if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
 							return -1;
 						return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
 					case 4:
@@ -255,9 +264,11 @@ public class Anagrafe extends Fragment {
 							return p2.getNames().size() == 0 ? 0 : 1;
 						if (p2.getNames().size() == 0)
 							return -1;
-						if (p1.getNames().get(0).getValue() == null)
-							return (p2.getNames().get(0).getValue() == null) ? 0 : 1;
-						if (p2.getNames().get(0).getValue() == null)
+						n1 = p1.getNames().get(0);
+						n2 = p2.getNames().get(0);
+						if (n1.getValue() == null && n1.getGiven() == null && n1.getSurname() == null)
+							return (n2.getValue() == null) ? 0 : 1;
+						if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
 							return -1;
 						return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
 					case 5: // Ordina per anno
@@ -281,17 +292,28 @@ public class Anagrafe extends Fragment {
 	// Restituisce una stringa con cognome e nome attaccati:
 	// 'SalvadorMichele ' oppure 'ValleFrancesco Maria ' oppure ' Donatella '
 	static String cognomeNome( Person tizio ) {
-		Name epiteto = tizio.getNames().get(0);
-		String tutto = epiteto.getValue();
-		String cognome = " ";
-		if( epiteto.getSurname() != null )
-			cognome = epiteto.getSurname();
-		else if( tutto.lastIndexOf("/") - tutto.indexOf("/") > 1 )	// se c'è un cognome tra i due '/'
-			cognome = tutto.substring( tutto.indexOf("/")+1, tutto.lastIndexOf("/") );
-		tutto = cognome.concat( tutto );
-		if( tutto.indexOf("/") > 0 )
-			tutto = tutto.substring( 0, tutto.indexOf("/") );	// rimuove il cognome tra //
-		return tutto;
+		Name name = tizio.getNames().get(0);
+		String epiteto = name.getValue();
+		String nomeDato = "";
+		String cognome = " "; // deve esserci uno spazio per ordinare i nomi senza cognome
+		if( epiteto != null ) {
+			if( epiteto.indexOf('/') > 0 )
+				nomeDato = epiteto.substring( 0, epiteto.indexOf('/') );	// prende il nome prima di '/'
+			if( epiteto.lastIndexOf('/') - epiteto.indexOf('/') > 1 )	// se c'è un cognome tra i due '/'
+				cognome = epiteto.substring( epiteto.indexOf('/')+1, epiteto.lastIndexOf("/") );
+			String prefix = name.getPrefix(); // Solo il nomeDato proveniente dal value potrebbe avere un prefisso, dal given no perché già di suo è solo il nomeDato
+			if( prefix != null && nomeDato.startsWith(prefix) )
+				nomeDato = nomeDato.substring( prefix.length() ).trim();
+		} else {
+			if( name.getGiven() != null )
+				nomeDato = name.getGiven();
+			if( name.getSurname() != null )
+				cognome = name.getSurname();
+		}
+		String surPrefix = name.getSurnamePrefix();
+		if( surPrefix != null && cognome.startsWith(surPrefix) )
+			cognome = cognome.substring( surPrefix.length() ).trim();
+		return cognome.concat( nomeDato );
 	}
 
 	// riceve una Person e restituisce un anno base della sua esistenza
@@ -458,8 +480,9 @@ public class Anagrafe extends Fragment {
 			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_person )
 					.setPositiveButton( R.string.delete, (dialog, i) -> {
 						Family[] famiglie = eliminaPersona(getContext(), idIndi);
-						if( !U.controllaFamiglieVuote(getContext(), getActivity()::recreate, true, famiglie) )
-							getActivity().recreate();
+						adattatore.notifyDataSetChanged();
+						arredaBarra();
+						U.controllaFamiglieVuote(getContext(), null, false, famiglie);
 					}).setNeutralButton( R.string.cancel, null ).show();
 		} else {
 			return false;
@@ -469,6 +492,7 @@ public class Anagrafe extends Fragment {
 
 	// Cancella tutti i ref nelle famiglie della tal persona
 	// Restituisce l'elenco delle famiglie affette
+	//
 	static Family[] scollega( String idScollegando ) {
 		Person egli = gc.getPerson( idScollegando );
 		Set<Family> famiglie = new HashSet<>();

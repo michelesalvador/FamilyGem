@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -35,11 +36,16 @@ public class Compara extends AppCompatActivity {
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.compara );
-		int idAlbero = getIntent().getIntExtra("idAlbero",1);
-		int idAlbero2 = getIntent().getIntExtra("idAlbero2",1);
+		int idAlbero = getIntent().getIntExtra("idAlbero",1); // Albero vecchio
+		int idAlbero2 = getIntent().getIntExtra("idAlbero2",1); // Albero nuovo ricevuto in condivisione
 		Globale.idAlbero2 = idAlbero2; // servirà alle immagini di Confrontatore e a Conferma
 		Globale.gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
 		Globale.gc2 = Alberi.apriGedcomTemporaneo( idAlbero2, false );
+		if( Globale.gc == null || Globale.gc2 == null ) {
+			Toast.makeText( this, R.string.no_useful_data, Toast.LENGTH_LONG ).show();
+			onBackPressed();
+			return;
+		}
 
 		TimeZone.setDefault( TimeZone.getTimeZone("Europe/Rome") ); // riconduce tutte le date al fuso orario di Aruba
 		try {

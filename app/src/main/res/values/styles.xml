@@ -31,4 +31,15 @@
 		<item name="android:backgroundTint">@color/primarioChiaro</item>
 	</style>
 
+	<attr name="spouseColor" format="reference|color" />
+	<attr name="linesColor" format="reference|color" />
+	<style name="diagramScreen" parent="AppTheme">
+		<item name="spouseColor">@color/consorteSchermo</item>
+		<item name="linesColor">@color/lineeDiagrammaSchermo</item>
+	</style>
+	<style name="diagramPrint" parent="AppTheme">
+		<item name="spouseColor">@color/consorteStampa</item>
+		<item name="linesColor">@color/lineeDiagrammaStampa</item>
+	</style>
+
 </resources>

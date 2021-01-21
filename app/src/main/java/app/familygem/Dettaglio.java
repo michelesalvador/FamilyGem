@@ -45,6 +45,8 @@ import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
+import org.folg.gedcom.model.SpouseFamilyRef;
+import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.model.Visitable;
 import java.io.File;
@@ -78,12 +80,11 @@ public class Dettaglio extends AppCompatActivity {
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.dettaglio );
+		getSupportActionBar().setDisplayHomeAsUpEnabled( true );
 		box = findViewById( R.id.dettaglio_scatola );
-		if( gc == null ) {
-			Alberi.apriGedcom( Globale.preferenze.idAprendo, false );
-		}
-		oggetto = Memoria.getOggetto();
+		U.gedcomSicuro( gc );
 
+		oggetto = Memoria.getOggetto();
 		if( oggetto == null) {
 			onBackPressed(); // salta tutti gli altri dettagli senza oggetto
 		} else
@@ -360,11 +361,18 @@ public class Dettaglio extends AppCompatActivity {
 	public void onRestart() {
 		super.onRestart();
 		if( Globale.editato ) { // rinfresca il dettaglio
-			recreate();
+			ricrea();
 		}
 	}
 
 	public void impagina() {}
+
+	// Ricarica i contenuti del dettaglio, inclusa la data di modifica
+	public void ricrea() {
+		box.removeAllViews();
+		ovi.clear();
+		impagina();
+	}
 
 	// Inserisce la bava di lumaca
 	public void mettiBava( String tag ) {
@@ -654,7 +662,7 @@ public class Dettaglio extends AppCompatActivity {
 				else
 					ripristina( vistaPezzo, barra, fab );
 				View nextPezzo = box.getChildAt(box.indexOfChild(vistaPezzo) + 1);
-				if( nextPezzo.getTag(R.id.tag_oggetto) instanceof String )
+				if( nextPezzo != null && nextPezzo.getTag(R.id.tag_oggetto) instanceof String )
 					edita(nextPezzo);
 			}
 			return false;
@@ -676,7 +684,7 @@ public class Dettaglio extends AppCompatActivity {
 
 	void salva( View vistaPezzo, ActionBar barra, FloatingActionButton fab ) {
 		if( editoreData != null ) editoreData.chiudi(); // In sostanza solo per aggiungere le parentesi alla data frase
-		String testo = vistaEdita.getText().toString();
+		String testo = vistaEdita.getText().toString().trim();
 		Object oggettoPezzo = vistaPezzo.getTag(R.id.tag_oggetto);
 		if( oggettoPezzo instanceof Integer ) { // Salva nome e cognome per inesperti
 			String nome = ((EditText)box.getChildAt(0).findViewById(R.id.fatto_edita)).getText().toString();
@@ -693,7 +701,7 @@ public class Dettaglio extends AppCompatActivity {
 		ripristina( vistaPezzo, barra, fab );
 		U.salvaJson( true, Memoria.oggettoCapo() );
 		/*if( Memoria.getPila().size() == 1 ) {
-			recreate(); // Orrendo, serve per aggiornare la data Cambiamento dei record TODO punta direttamente a data Cambio
+			ricrea(); // Todo Bisognerebbe aggiornare la data Cambiamento del record, però magari senza ricaricare tutto.
 		}*/
 		// In immagine modificato il percorso aggiorna l'immagine
 		if( this instanceof Immagine && oggettoPezzo.equals("File") )
@@ -738,7 +746,7 @@ public class Dettaglio extends AppCompatActivity {
 		}
 		return true;
 	}
-	@Override	// è evocato quando viene scelta una voce del menu E cliccando freccia indietro
+	@Override // è evocato quando viene scelta una voce del menu E cliccando freccia indietro
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id == 1 ) { // Autore principale
@@ -764,7 +772,7 @@ public class Dettaglio extends AppCompatActivity {
 			elimina();
 			U.salvaJson(true); // l'aggiornamento delle date avviene negli Override di elimina()
 			onBackPressed();
-		} else {
+		} else if( id == android.R.id.home ){
 			onBackPressed();
 		}
 		return true;
@@ -805,10 +813,10 @@ public class Dettaglio extends AppCompatActivity {
 				if( etichetteFam[1] != null )
 					menu.add( 0, 13, 0, etichetteFam[1] );
 				if( fam.getChildren(gc).indexOf(pers) > 0 )
-					menu.add( 0, 14, 0, R.string.move_up );
+					menu.add( 0, 14, 0, R.string.move_before );
 				if( fam.getChildren(gc).indexOf(pers) < fam.getChildren(gc).size()-1 && fam.getChildren(gc).indexOf(pers) >= 0 )
 					// così esclude i genitori il cui indice è -1
-					menu.add( 0, 15, 0, R.string.move_down );
+					menu.add( 0, 15, 0, R.string.move_after );
 				menu.add( 0, 16, 0, R.string.modify );
 				menu.add( 0, 17, 0, R.string.unlink );
 				menu.add( 0, 18, 0, R.string.delete );
@@ -875,7 +883,6 @@ public class Dettaglio extends AppCompatActivity {
 					Toast.makeText( box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
 					break;
 				}
-				box.removeView( vistaPezzo );
 				break;
 			case 10: // Diagramma
 				U.qualiGenitoriMostrare( this, pers, 1 );
@@ -895,14 +902,12 @@ public class Dettaglio extends AppCompatActivity {
 				ChildRef refBimbo = fa.getChildRefs().get( fa.getChildren(gc).indexOf(pers) );
 				fa.getChildRefs().add( fa.getChildRefs().indexOf(refBimbo)-1, refBimbo );
 				fa.getChildRefs().remove( fa.getChildRefs().lastIndexOf(refBimbo) );
-				recreate();
 				break;
 			case 15: // Figlio sposta giù
 				Family f = (Family) oggetto;
 				ChildRef refBimb = f.getChildRefs().get( f.getChildren(gc).indexOf(pers) );
 				f.getChildRefs().add( f.getChildRefs().indexOf(refBimb)+2, refBimb );
 				f.getChildRefs().remove( f.getChildRefs().indexOf(refBimb) );
-				recreate();
 				break;
 			case 16: // Modifica
 				Intent i = new Intent( this, EditaIndividuo.class );
@@ -910,8 +915,8 @@ public class Dettaglio extends AppCompatActivity {
 				startActivity( i );
 				return true;
 			case 17: // Scollega
-				Famiglia.scollega( pers.getId(), (Family)oggetto );
-				box.removeView( vistaPezzo );
+				Famiglia.scollega( (SpouseFamilyRef) vistaPezzo.getTag(R.id.tag_spouse_family_ref),
+						(SpouseRef) vistaPezzo.getTag(R.id.tag_spouse_ref) );
 				U.aggiornaDate( pers );
 				trovaUnAltroRappresentanteDellaFamiglia( pers );
 				break;
@@ -927,7 +932,7 @@ public class Dettaglio extends AppCompatActivity {
 				U.copiaNegliAppunti( getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText() );
 				return true;
 			case 21:
-				U.scollegaNota( (Note)oggettoPezzo, oggetto, vistaPezzo );
+				U.scollegaNota( (Note)oggettoPezzo, oggetto, null );
 				break;
 			case 22:
 				Object[] capi = U.eliminaNota( (Note)oggettoPezzo, vistaPezzo );
@@ -935,7 +940,7 @@ public class Dettaglio extends AppCompatActivity {
 				return true;
 			case 30: // Citazione fonte
 				U.copiaNegliAppunti( getText(R.string.source_citation),
-						((TextView)vistaPezzo.findViewById( R.id.fonte_titolo )).getText() + "\n"
+						((TextView)vistaPezzo.findViewById( R.id.fonte_testo )).getText() + "\n"
 						+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText() );
 				return true;
 			case 31:
@@ -944,30 +949,28 @@ public class Dettaglio extends AppCompatActivity {
 				else
 					((SourceCitationContainer)oggetto).getSourceCitations().remove( oggettoPezzo );
 				Memoria.annullaIstanze(oggettoPezzo);
-				box.removeView( vistaPezzo );
 				break;
 			case 40: // Media
-				Galleria.scollegaMedia( ((Media)oggettoPezzo).getId(), (MediaContainer)oggetto, vistaPezzo );
+				Galleria.scollegaMedia( ((Media)oggettoPezzo).getId(), (MediaContainer)oggetto, null );
 				break;
 			case 41:
-				Object[] capiMedia = Galleria.eliminaMedia( (Media)oggettoPezzo, vistaPezzo );
+				Object[] capiMedia = Galleria.eliminaMedia( (Media)oggettoPezzo, null );
 				U.salvaJson( true, capiMedia ); // un media condiviso può dover aggiornare le date di più capi
+				ricrea();
 				return true;
 			case 51:
 				eliminaIndirizzo( oggetto );
-				box.removeView( vistaPezzo );
 				break;
 			case 56: // Evento di Famiglia
 				((Family)oggetto).getEventsFacts().remove( oggettoPezzo );
 				Memoria.annullaIstanze( oggettoPezzo );
-				box.removeView( vistaPezzo );
 				break;
 			case 61: // Estensione
-				U.eliminaEstensione( (GedcomTag)oggettoPezzo, oggetto, vistaPezzo );
+				U.eliminaEstensione( (GedcomTag)oggettoPezzo, oggetto, null );
 				break;
 			// Fonte
 			case 70: // Copia
-				U.copiaNegliAppunti( getText(R.string.source), ((TextView)vistaPezzo.findViewById(R.id.fonte_titolo)).getText() );
+				U.copiaNegliAppunti( getText(R.string.source), ((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText() );
 				return true;
 			case 71: // Scegli in Biblioteca
 				Intent inte = new Intent( this, Principe.class );
@@ -977,17 +980,16 @@ public class Dettaglio extends AppCompatActivity {
 			// Citazione archivio
 			case 80: // Copia
 				U.copiaNegliAppunti( getText(R.string.repository_citation),
-						((TextView)vistaPezzo.findViewById( R.id.fonte_titolo )).getText() + "\n"
+						((TextView)vistaPezzo.findViewById( R.id.fonte_testo )).getText() + "\n"
 						+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText() );
 				return true;
 			case 81: // Elimina
 				((Source)oggetto).setRepositoryRef( null );
 				Memoria.annullaIstanze(oggettoPezzo);
-				box.removeView( vistaPezzo );
 				break;
 			// Archivio
 			case 90: // Copia
-				U.copiaNegliAppunti( getText(R.string.repository), ((TextView)vistaPezzo.findViewById(R.id.fonte_titolo)).getText() );
+				U.copiaNegliAppunti( getText(R.string.repository), ((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText() );
 				return true;
 			case 91: // Scegli in Magazzino
 				Intent intn = new Intent( this, Principe.class );
@@ -1003,7 +1005,12 @@ public class Dettaglio extends AppCompatActivity {
 			default:
 				return false;
 		}
-		U.salvaJson( true, Memoria.oggettoCapo() );
+		// Prima ricrea la pagina e poi salva, che per alberi grossi può metterci alcuni secondi
+		//closeContextMenu(); // Inutile. La chiusura del menu aspetta la fine del salvataggio,
+		// a meno di mettere salvaJson() dentro un postDelayed() di almeno 500 ms
+		U.aggiornaDate( Memoria.oggettoCapo() );
+		ricrea();
+		U.salvaJson( true, null );
 		return true;
 	}
 
@@ -1046,6 +1053,8 @@ public class Dettaglio extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		F.risultatoPermessi( this, codice, permessi, accordi, oggetto );
+		F.risultatoPermessi( this, null, codice, permessi, accordi,
+				oggetto instanceof MediaContainer ? (MediaContainer)oggetto : null );
+				// Immagine ha 'oggetto' instance di Media, non di MediaContainer
 	}
 }

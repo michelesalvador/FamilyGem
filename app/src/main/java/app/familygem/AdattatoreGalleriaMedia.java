@@ -4,9 +4,9 @@ package app.familygem;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,19 +15,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.Person;
-import java.util.Map;
+import java.util.List;
 import app.familygem.dettaglio.Immagine;
+import app.familygem.visita.ListaMediaContenitore;
 import app.familygem.visita.TrovaPila;
 
 class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMedia.gestoreVistaMedia> {
-	private Object[] listaMedia;
-	private Object[] listaContenitori;
+
+	private List<ListaMediaContenitore.MedCont> listaMedia;
 	private boolean dettagli;
-	AdattatoreGalleriaMedia( Map<Media,Object> lista, boolean dettagli ) {
-		listaMedia = lista.keySet().toArray();
-		listaContenitori = lista.values().toArray();
+
+	AdattatoreGalleriaMedia( List<ListaMediaContenitore.MedCont> listaMedia, boolean dettagli ) {
+		this.listaMedia = listaMedia;
 		this.dettagli = dettagli;
 	}
+
 	@Override
 	public gestoreVistaMedia onCreateViewHolder( ViewGroup parent, int tipo ) {
 		View vista = LayoutInflater.from(parent.getContext()).inflate( R.layout.pezzo_media, parent, false );
@@ -35,13 +37,11 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 	}
 	@Override
 	public void onBindViewHolder( final gestoreVistaMedia gestore, int posizione ) {
-		if( gestore.media == null ) {
-			gestore.setta( posizione );
-		}
+		gestore.setta( posizione );
 	}
 	@Override
 	public int getItemCount() {
-		return listaMedia.length;
+		return listaMedia.size();
 	}
 	@Override
 	public long getItemId(int position) {
@@ -69,8 +69,8 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 			vistaNumero = vista.findViewById( R.id.media_num );
 		}
 		void setta( int posizione ) {
-			media = (Media)listaMedia[posizione];
-			contenitore = listaContenitori[posizione];
+			media = listaMedia.get( posizione ).media;
+			contenitore = listaMedia.get( posizione ).contenitore;
 			if( dettagli ) {
 				arredaMedia( media, vistaTesto, vistaNumero );
 				vista.setOnClickListener( this );
@@ -117,7 +117,7 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 					Memoria.aggiungi( media );
 				} else { // da Galleria tutti i media semplici, o da IndividuoMedia i media sotto molteplici livelli
 					new TrovaPila( Globale.gc, media );
-					if( attiva instanceof Principe )
+					if( attiva instanceof Principe ) // Solo in Galleria
 						intento.putExtra( "daSolo", true ); // così poi Immagine mostra la dispensa
 				}
 				v.getContext().startActivity( intento );
@@ -148,6 +148,7 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 		}
 		if( media.getId() != null ) {
 			vistaNumero.setText( String.valueOf(Galleria.popolarita(media)) );
+			vistaNumero.setVisibility( View.VISIBLE );
 		} else
 			vistaNumero.setVisibility( View.GONE );
 	}

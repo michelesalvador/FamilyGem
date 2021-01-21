@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Person;
-import java.util.Map;
 import app.familygem.visita.ListaMediaContenitore;
 import static app.familygem.Globale.gc;
 
@@ -62,9 +61,9 @@ public class IndividuoMedia extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
-		if( id == 0 ) {	// Principale todo oltre a setPrimary bisogna cambiare l'ordine
-			for( Map.Entry<Media,Object> entri : visitaMedia.listaMedia.entrySet() )	// Li resetta tutti poi ne contrassegna uno
-				entri.getKey().setPrimary( null );
+		if( id == 0 ) {	// Principale
+			for( ListaMediaContenitore.MedCont medCont : visitaMedia.listaMedia ) // Li resetta tutti poi ne contrassegna uno
+				medCont.media.setPrimary( null );
 			med.setPrimary( "Y" );
 			if( med.getId() != null ) // Per aggiornare la data cambiamento nel Media record piuttosto che nella Person
 				U.salvaJson( true, med );

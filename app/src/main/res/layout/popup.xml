@@ -14,12 +14,13 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintEnd_toEndOf="parent">
 		<TextView
+			android:id="@+id/popup_testo"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:background="@drawable/popup_baloon"
 			android:paddingTop="8dp"
 			android:paddingStart="15dp"
-			android:paddingEnd="10dp"
+			android:paddingEnd="12dp"
 			android:paddingBottom="10dp"
 			android:text="@string/long_press_menu"
 			android:textColor="#000000"

@@ -4,17 +4,17 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.SwitchCompat;
 
 public class DiagramSettings extends AppCompatActivity {
 
 	SeekBar ancestors;
 	SeekBar uncles;
-	TextView indicator;
+	LinearLayout indicator;
 	AnimatorSet anima;
 
 	@Override
@@ -22,17 +22,16 @@ public class DiagramSettings extends AppCompatActivity {
 		super.onCreate( bandolo );
 		setContentView( R.layout.diagram_settings );
 		indicator = findViewById( R.id.settings_indicator );
-		indicator.setBackground( AppCompatResources.getDrawable(this, R.drawable.segnalino) );
 
 		// Number of ancestors
 		ancestors = findViewById( R.id.settings_ancestors );
-		ancestors.setProgress( Globale.preferenze.diagram.ancestors );
+		ancestors.setProgress( decodifica(Globale.preferenze.diagram.ancestors) );
 		ancestors.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged( SeekBar seekBar, int i, boolean b ) {
 				if( i < uncles.getProgress() ) {
 					uncles.setProgress( i );
-					Globale.preferenze.diagram.uncles = i;
+					Globale.preferenze.diagram.uncles = converti(i);
 				}
 				indicator(seekBar);
 			}
@@ -40,20 +39,20 @@ public class DiagramSettings extends AppCompatActivity {
 			public void onStartTrackingTouch( SeekBar seekBar ) {}
 			@Override
 			public void onStopTrackingTouch( SeekBar seekBar ) {
-				Globale.preferenze.diagram.ancestors = seekBar.getProgress();
+				Globale.preferenze.diagram.ancestors = converti(seekBar.getProgress());
 				salva();
 			}
 		});
 
 		// Number of uncles, linked to ancestors
 		uncles = findViewById( R.id.settings_uncles );
-		uncles.setProgress( Globale.preferenze.diagram.uncles );
+		uncles.setProgress( decodifica(Globale.preferenze.diagram.uncles) );
 		uncles.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged( SeekBar seekBar, int i, boolean b ) {
 				if( i > ancestors.getProgress() ) {
 					ancestors.setProgress( i );
-					Globale.preferenze.diagram.ancestors = i;
+					Globale.preferenze.diagram.ancestors = converti(i);
 				}
 				indicator(seekBar);
 			}
@@ -61,13 +60,13 @@ public class DiagramSettings extends AppCompatActivity {
 			public void onStartTrackingTouch( SeekBar seekBar ) {}
 			@Override
 			public void onStopTrackingTouch( SeekBar seekBar ) {
-				Globale.preferenze.diagram.uncles = seekBar.getProgress();
+				Globale.preferenze.diagram.uncles = converti(seekBar.getProgress());
 				salva();
 			}
 		});
 
 		// Display siblings
-		Switch siblings = findViewById( R.id.settings_siblings );
+		SwitchCompat siblings = findViewById( R.id.settings_siblings );
 		siblings.setChecked( Globale.preferenze.diagram.siblings );
 		siblings.setOnCheckedChangeListener( (button, active) -> {
 			Globale.preferenze.diagram.siblings = active;
@@ -76,7 +75,7 @@ public class DiagramSettings extends AppCompatActivity {
 
 		// Number of descendants
 		SeekBar descendants = findViewById( R.id.settings_descendants );
-		descendants.setProgress( Globale.preferenze.diagram.descendants );
+		descendants.setProgress( decodifica(Globale.preferenze.diagram.descendants) );
 		descendants.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged( SeekBar seekBar, int i, boolean b ) {
@@ -86,7 +85,7 @@ public class DiagramSettings extends AppCompatActivity {
 			public void onStartTrackingTouch( SeekBar seekBar ) {}
 			@Override
 			public void onStopTrackingTouch( SeekBar seekBar ) {
-				Globale.preferenze.diagram.descendants = seekBar.getProgress();
+				Globale.preferenze.diagram.descendants = converti(seekBar.getProgress());
 				salva();
 			}
 		});
@@ -104,13 +103,31 @@ public class DiagramSettings extends AppCompatActivity {
 
 	private void indicator(SeekBar seekBar) {
 		int i = seekBar.getProgress();
-		indicator.setText( String.valueOf(i) );
+		((TextView)indicator.findViewById(R.id.settings_indicator_text)).setText( String.valueOf(converti(i)) );
 		int width = seekBar.getWidth() - seekBar.getPaddingLeft() - seekBar.getPaddingRight();
-		float x = (seekBar.getX() + seekBar.getPaddingLeft() + width / 5f * i) - indicator.getWidth() / 2f ;
+		float x = (seekBar.getX() + seekBar.getPaddingLeft() + width / 9f * i) - indicator.getWidth() / 2f;
 		indicator.setX( x );
 		indicator.setY(seekBar.getY() - indicator.getHeight());
 		anima.cancel();
 		anima.start();
+	}
+
+	// Valore dalle preferenze (1 2 3 4 5 10 20 50 100) alla scala lineare (1 2 3 4 5 6 7 8 9)
+	private int decodifica( int i ) {
+		if( i == 100 ) return 9;
+		else if( i == 50 ) return 8;
+		else if( i == 20 ) return 7;
+		else if( i == 10 ) return 6;
+		else return i;
+	}
+
+	// Valore delle scala lineare a quella esagerata
+	private int converti( int i ) {
+		if( i == 6 ) return 10;
+		else if( i == 7 ) return 20;
+		else if( i == 8 ) return 50;
+		else if( i == 9 ) return 100;
+		else return i;
 	}
 
 	private void salva() {

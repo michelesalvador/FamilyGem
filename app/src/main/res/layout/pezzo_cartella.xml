@@ -32,7 +32,8 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentEnd="true"
+		android:layout_marginTop="20dp"
 		android:background="#0FFF"
-		app:srcCompat="@drawable/elimina"/>
+		app:srcCompat="@drawable/elimina" />
 
 </RelativeLayout>

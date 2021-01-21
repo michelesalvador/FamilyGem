@@ -49,7 +49,7 @@ public class Fonte extends Dettaglio {
 			vistaRef.setBackgroundColor( getResources().getColor(R.color.archivioCitazione) );
 			final RepositoryRef refArchivio = f.getRepositoryRef();
 			if( refArchivio.getRepository(gc) != null ) {
-				( (TextView) vistaRef.findViewById( R.id.fonte_titolo ) ).setText( refArchivio.getRepository( gc ).getName() );
+				( (TextView) vistaRef.findViewById( R.id.fonte_testo ) ).setText( refArchivio.getRepository( gc ).getName() );
 				(( CardView) vistaRef.findViewById( R.id.citazione_fonte )).setCardBackgroundColor( getResources().getColor(R.color.archivio) );
 			} else vistaRef.findViewById( R.id.citazione_fonte ).setVisibility( View.GONE );
 			String t = "";

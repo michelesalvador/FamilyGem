@@ -36,7 +36,6 @@ public class InfoAlbero extends AppCompatActivity {
 
 		final int idAlbero = getIntent().getIntExtra( "idAlbero", 1 );
 		final Armadio.Cassetto questoAlbero = Globale.preferenze.getAlbero( idAlbero );
-		setTitle( questoAlbero.nome );
 		final File file = new File( getFilesDir(), idAlbero + ".json");
 		String i;
 		if( !file.exists() ) {

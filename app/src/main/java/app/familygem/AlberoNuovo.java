@@ -3,8 +3,6 @@ package app.familygem;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.app.backup.BackupManager;
-import android.app.backup.RestoreObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -116,35 +114,6 @@ public class AlberoNuovo extends AppCompatActivity {
 			intent.setType( "application/zip" );
 			startActivityForResult( intent, 219 );
 		});
-
-		recuperaBackup.setOnLongClickListener( v -> {
-			if( getFilesDir().listFiles().length == 0 ) {
-				BackupManager mBackupManager = new BackupManager(v.getContext());
-				//mBackupManager.dataChanged();
-				int successo = mBackupManager.requestRestore(
-						new RestoreObserver() {
-							@Override
-							public void restoreStarting (int numPackages) {
-								s.l("restoreStarting, numPackages:",numPackages);
-							}
-							@Override
-							public void onUpdate (int nowBeingRestored, String currentPackage) {
-								s.l("onUpdate, nowBeingRestored:",nowBeingRestored,"currentPackage:",currentPackage);
-							}
-							@Override
-							public void restoreFinished(int result) {
-								s.l("restoreFinished, result:", result);
-								if( result == 0 ) {
-									Globale.avvia( v.getContext() );
-									startActivity( new Intent( AlberoNuovo.this, Alberi.class ) );
-								}
-							}
-						}
-				);
-				s.l("successo", successo); // Zero on success, nonzero on error
-			}
-			return true;
-		});
 	}
 
 	// Elabora la risposta alle richieste di permesso
@@ -212,8 +181,7 @@ public class AlberoNuovo extends AppCompatActivity {
 	// Usato ugualmente da: esempio Simpson, file di backup e alberi condivisi
 	static void decomprimiZip( final Context contesto, String percorsoZip, Uri uriZip ) {
 		int numAlbero = Globale.preferenze.max() + 1;
-		String percorsoImmagini = contesto.getExternalFilesDir(null) + "/" + numAlbero;
-		File dirImmagini = new File( percorsoImmagini );
+		File dirImmagini = contesto.getExternalFilesDir( String.valueOf(numAlbero) );
 		if( !dirImmagini.exists() )
 			dirImmagini.mkdir();
 		try {
@@ -235,7 +203,7 @@ public class AlberoNuovo extends AppCompatActivity {
 				else if( zipEntry.getName().equals("settings.json") )
 					percorsoFile = contesto.getCacheDir() +"/settings.json";
 				else // è un file nella cartella 'media'
-					percorsoFile = percorsoImmagini +"/"+ zipEntry.getName().replace( "media/", "" );
+					percorsoFile = dirImmagini +"/"+ zipEntry.getName().replace( "media/", "" );
 				File newFile = new File( percorsoFile );
 				FileOutputStream fos = new FileOutputStream( newFile );
 				while( ( len = zis.read( buffer ) ) > 0 ) {
@@ -250,7 +218,7 @@ public class AlberoNuovo extends AppCompatActivity {
 			String json = FileUtils.readFileToString( fileImpostazioni, "UTF-8" );
 			Gson gson = new Gson();
 			Armadio.CassettoCondiviso cassa = gson.fromJson( json, Armadio.CassettoCondiviso.class );
-			Armadio.Cassetto cassetto = new Armadio.Cassetto( numAlbero, cassa.titolo, percorsoImmagini,
+			Armadio.Cassetto cassetto = new Armadio.Cassetto( numAlbero, cassa.titolo, dirImmagini.getPath(),
 					cassa.individui, cassa.generazioni, cassa.radice, cassa.condivisioni, cassa.grado, null );
 			Globale.preferenze.aggiungi( cassetto );
 			fileImpostazioni.delete();
@@ -290,48 +258,41 @@ public class AlberoNuovo extends AppCompatActivity {
 		startActivityForResult( intent,630 );
 	}
 
-	// Importa un file Gedcom scelto col file manager
-	// ToDo: aspetta un attimo, non sarebbe meglio usare Gedcom2Json ?
 	@Override
 	protected void onActivityResult( int requestCode, int resultCode, final Intent data ) {
 		super.onActivityResult( requestCode, resultCode, data );
+		// Importa un file Gedcom scelto con SAF
 		if( resultCode == RESULT_OK && requestCode == 630 ){
 			try {
+				// Legge l'input
 				Uri uri = data.getData();
-				String percorso = F.uriPercorsoFile( uri );	// in Google drive trova solo il nome del file
-				File fileGedcom;
-				String nomeAlbero;
-				String percorsoCartella = null;
-				int nuovoNum = Globale.preferenze.max() + 1;
-				if( percorso != null && percorso.lastIndexOf('/') > 0 ) { // è un percorso completo del file gedcom
-					// Apre direttamente il file ged
-					fileGedcom = new File( percorso );
-					// Percorso della cartella da cui ha caricato il gedcom
-					percorsoCartella = fileGedcom.getParent();
-					nomeAlbero = fileGedcom.getName();
-				} else { // È solo il nome del file 'famiglia.ged' oppure null
-					// Copia il contenuto del Gedcom in un file temporaneo
-					InputStream input = getContentResolver().openInputStream(uri);
-					fileGedcom = new File( getCacheDir(), "temp.ged" );
-					FileUtils.copyInputStreamToFile( input, fileGedcom );
-					if( percorso == null ) nomeAlbero = getString( R.string.tree ) + " " + nuovoNum;
-					else nomeAlbero = percorso;
-				}
-				// Crea l'oggetto Gedcom
-				ModelParser mp = new ModelParser();
-				Gedcom gc = mp.parseGedcom( fileGedcom );
+				InputStream input = getContentResolver().openInputStream(uri);
+				Gedcom gc = new ModelParser().parseGedcom( input );
 				if( gc.getHeader() == null ) {
 					Toast.makeText( this, R.string.invalid_gedcom, Toast.LENGTH_LONG ).show();
 					return;
 				}
-				gc.createIndexes();  // todo ma dai qui non è necessario
+				gc.createIndexes(); // necessario per poi calcolare le generazioni
 				// Salva il file Json
-				if( nomeAlbero.lastIndexOf('.') > 0 )
-					nomeAlbero = nomeAlbero.substring(0, nomeAlbero.lastIndexOf('.'));
+				int nuovoNum = Globale.preferenze.max() + 1;
 				PrintWriter pw = new PrintWriter( getFilesDir() + "/" + nuovoNum + ".json" );
 				JsonParser jp = new JsonParser();
 				pw.print( jp.toJson(gc) );
 				pw.close();
+				// Nome albero e percorso della cartella
+				String percorso = F.uriPercorsoFile( uri );
+				String nomeAlbero;
+				String percorsoCartella = null;
+				if( percorso != null && percorso.lastIndexOf('/') > 0 ) { // è un percorso completo del file gedcom
+					File fileGedcom = new File( percorso );
+					percorsoCartella = fileGedcom.getParent();
+					nomeAlbero = fileGedcom.getName();
+				} else if( percorso != null ) { // È solo il nome del file 'famiglia.ged'
+					nomeAlbero = percorso;
+				} else // percorso null
+					nomeAlbero = getString( R.string.tree ) + " " + nuovoNum;
+				if( nomeAlbero.lastIndexOf('.') > 0 ) // Toglie l'estensione
+					nomeAlbero = nomeAlbero.substring(0, nomeAlbero.lastIndexOf('.'));
 				// Salva le impostazioni in preferenze
 				String idRadice = U.trovaRadice(gc);
 				Globale.preferenze.aggiungi( new Armadio.Cassetto( nuovoNum, nomeAlbero, percorsoCartella,
@@ -340,11 +301,11 @@ public class AlberoNuovo extends AppCompatActivity {
 				// Se necessario propone di mostrare le funzioni avanzate
 				if( !gc.getSources().isEmpty() && !Globale.preferenze.esperto ) {
 					new AlertDialog.Builder(this).setMessage( R.string.complex_tree_advanced_tools )
-							.setPositiveButton( android.R.string.yes, (dialog, i) -> {
+							.setPositiveButton( android.R.string.ok, (dialog, i) -> {
 								Globale.preferenze.esperto = true;
 								Globale.preferenze.salva();
 								concludiImportaGedcom();
-							}).setNegativeButton( android.R.string.no, (dialog, i) -> concludiImportaGedcom() )
+							}).setNegativeButton( android.R.string.cancel, (dialog, i) -> concludiImportaGedcom() )
 							.show();
 				} else
 					concludiImportaGedcom();
@@ -421,11 +382,11 @@ public class AlberoNuovo extends AppCompatActivity {
 						Armadio.Invio invio = alb.condivisioni.get(i);
 						for( Armadio.Invio invio2 : albero2.condivisioni )
 							if( invio.data != null && invio.data.equals( invio2.data ) ) {
-								Intent intento = new Intent( contesto, Compara.class );
-								intento.putExtra( "idAlbero", alb.id );
-								intento.putExtra( "idAlbero2", albero2.id );
-								intento.putExtra( "idData", invio.data );
-								contesto.startActivity( intento );
+								contesto.startActivity( new Intent( contesto, Compara.class )
+									.putExtra( "idAlbero", alb.id )
+									.putExtra( "idAlbero2", albero2.id )
+									.putExtra( "idData", invio.data )
+								);
 								return true;
 							}
 					}

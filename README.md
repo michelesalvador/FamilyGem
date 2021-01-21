@@ -1,5 +1,5 @@
 # Family Gem
-#### _Create your own family tree_
+### _Create your own family tree_
 
 Family Gem is an app for Android designed to manage family trees.<br>
 It's completely free and open source.
@@ -26,14 +26,15 @@ The code provided in this repository should compile and build a working version 
 |App signature|You loose saved trees when you install over a signed version|
 |Server account|You can't share trees|
 |GeoNames "demo" account|Place names suggestions probably don't appear|
-|Backup key|Android Backup Service is not available|
 
 The code (classes, variables, comments...) is almost all written in Italian, because I'm Italian and I love to write in my native language. I know it's not so kind, because everyone expects an English code, but I started like this and it's hard to change at this point.
 
 ## Translation
 The translation of Family Gem user interface is managed on [Weblate](https://hosted.weblate.org/projects/family-gem/app/).<br>
-Contribution to translate in any language is really appreciated!<br>
-You need to login to Weblate to freely work there, but also without login you can make suggestions to already existing translations.
+Contribution to translation in any language is really appreciated.<br>
+You need a Weblate account to freely work there, but also without account you can make suggestions to already existing translations.
+
+[![Translation status](https://hosted.weblate.org/widgets/family-gem/-/multi-auto.svg)](https://hosted.weblate.org/engage/family-gem/)
 
 ## Resources
 Official website: www.familygem.app
@@ -48,10 +49,13 @@ The APK file is available on:
 ## Feedback
 For questions, bugs, suggestions you can:
 - [Open an issue](https://github.com/michelesalvador/FamilyGem/issues)
-- Open a topic on the [Family Gem Google group](https://groups.google.com/forum/#!forum/family-gem) (Google account required)
-- Directly email to the Google group: family-gem@googlegroups.com (no account required)
+- Start a conversation on the [Family Gem Google group](https://groups.google.com/g/family-gem) (Google account required)
+- Directly email to the Family Gem Google group: family-gem@googlegroups.com (no account required)
+
+## License
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
 
 ## About
 Family Gem is written in Java within Eclipse and Android Studio.<br>
 Project started on beginning of 2018.<br>
-Author is Michele Salvador, an italian self-taught programmer and genealogy enthusiast.
+Author is Michele Salvador, an Italian self-taught programmer and genealogy enthusiast.

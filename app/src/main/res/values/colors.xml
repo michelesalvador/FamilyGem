@@ -7,6 +7,10 @@
 	<color name="evidenziaChiaro">#FFE6AA</color>
 	<color name="maschio">#44AAff</color>
 	<color name="femmina">#ff66dd</color>
+	<color name="consorteSchermo">#cccccc</color>
+	<color name="consorteStampa">#e6e6e6</color>
+	<color name="lineeDiagrammaSchermo">#ffffff</color>
+	<color name="lineeDiagrammaStampa">#666666</color>
 	<color name="fonte">#ffcc66</color>
 	<color name="citazioneFonte">#ffeeaa</color>
 	<color name="archivio">#aa9988</color>

@@ -25,24 +25,24 @@ public class Nome extends Dettaglio {
 			String cognome = "";
 			String epiteto = n.getValue();
 			if( epiteto != null ) {
-				nome = epiteto.replaceAll( "/.*?/", "" ).trim();
+				nome = epiteto.replaceAll( "/.*?/", "" ).trim(); // Rimuove il cognome
 				if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
 					cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
 			}
-			creaPezzo( getString(R.string.name), nome, 4043, false );
+			creaPezzo( getString(R.string.given), nome, 4043, false );
 			creaPezzo( getString(R.string.surname), cognome, 6064, false );
 		}
-		metti( getString(R.string.prefix), "Prefix" );
-		metti( getString(R.string.given), "Given", Globale.preferenze.esperto, false );
 		metti( getString(R.string.nickname), "Nickname" );
-		metti( getString(R.string.surname_prefix), "SurnamePrefix" );
-		metti( getString(R.string.surname), "Surname", Globale.preferenze.esperto, false );
-		metti( getString(R.string.suffix), "Suffix" );
 		metti( getString(R.string.type), "Type", true, false );  // _TYPE in GEDCOM 5.5, TYPE in GEDCOM 5.5.1
+		metti( getString(R.string.prefix), "Prefix", Globale.preferenze.esperto, false );
+		metti( getString(R.string.given), "Given", Globale.preferenze.esperto, false );
+		metti( getString(R.string.surname_prefix), "SurnamePrefix", Globale.preferenze.esperto, false );
+		metti( getString(R.string.surname), "Surname", Globale.preferenze.esperto, false );
+		metti( getString(R.string.suffix), "Suffix", Globale.preferenze.esperto, false );
 		metti( getString(R.string.married_name), "MarriedName", false, false ); // _marrnm
 		metti( getString(R.string.aka), "Aka", false, false );	// _aka
-		metti( getString(R.string.romanized), "Romn", false, false );
-		metti( getString(R.string.phonetic), "Fone", false, false );
+		metti( getString(R.string.romanized), "Romn", Globale.preferenze.esperto, false );
+		metti( getString(R.string.phonetic), "Fone", Globale.preferenze.esperto, false );
 		mettiEstensioni( n );
 		U.mettiNote( box, n, true );
 		U.mettiMedia( box, n, true );	// Mi sembra strano che un Name abbia Media.. comunque..

@@ -2,10 +2,12 @@
 
 package app.familygem;
 
+import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 class Datatore {
 
@@ -22,6 +24,7 @@ class Datatore {
 	static String A = paterni[5];
 	static String[] mesiGedcom = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 	static String[] prefissi = { "", "ABT", "CAL", "EST", "AFT", "BEF", "BET", "FROM", "TO", "FROM", "(" }; // Todo "INT"
+	static String[] suffissi = { "B.C.", "BC", "BCE" };
 
 	Datatore( String dataGc ) {
 		data1 = new Data();
@@ -32,12 +35,12 @@ class Datatore {
 	class Data {
 		Date date;
 		SimpleDateFormat format;
+		boolean negativa;
 		boolean doppia;
 
 		Data() {
 			DateFormatSymbols simboliFormato = new DateFormatSymbols();
 			simboliFormato.setShortMonths( mesiGedcom );
-			//Locale locale = new Locale("en");
 			format = new SimpleDateFormat();
 			format.setDateFormatSymbols( simboliFormato );
 		}
@@ -45,10 +48,19 @@ class Datatore {
 		// Prende una data Gedcom esatta e ci farcisce gli attributi della classe Data
 		void scanna( String dataGc ) {
 
+			// Riconosce se la data è B.C. e rimuove il suffisso
+			negativa = false; // resetta eventuale true
+			for( String suffix : suffissi ) {
+				if( dataGc.endsWith(suffix) ) {
+					negativa = true;
+					dataGc = dataGc.substring(0, dataGc.indexOf(suffix)).trim();
+					break;
+				}
+			}
 			dataGc = dataGc.replaceAll("[\\\\_\\-|.,;:?'\"#^&*°+=~()\\[\\]{}]", " "); // tutti tranne '/'
 			
 			// Distingue una data con anno doppio 1712/1713 da una data tipo 17/12/1713
-			doppia = false; // resetta eventuale true
+			doppia = false; // reset
 			if( dataGc.indexOf('/') > 0 ) {
 				String[] tata = dataGc.split("[/ ]");
 				if( tata.length > 1 && tata[tata.length-2].length() < 3 && U.soloNumeri( tata[tata.length-2] ) <= 12 )
@@ -67,6 +79,31 @@ class Datatore {
 				format.applyPattern( G_M_A );
 			if( format.toPattern().equals(m_A) )
 				format.applyPattern( M_A );
+
+			// Rende la data effettivamente negativa (per il calcolo delle età)
+			if( negativa ) cambiaEra();
+		}
+
+		// Rende la data BC oppure AD coerentemente con il boolean 'negativa'
+		void cambiaEra() {
+			if( date != null ) {
+				// La data viene riparsata cambiandogli l'era
+				SimpleDateFormat sdf = new SimpleDateFormat(G_M_A + " G", Locale.US);
+				String data = sdf.format(date);
+				if( negativa )
+					data = data.replace("AD", "BC");
+				else
+					data = data.replace("BC", "AD");
+				try {
+					date = sdf.parse(data);
+				} catch (Exception e) {}
+			}
+		}
+
+		@Override
+		public String toString() {
+			DateFormat format = new SimpleDateFormat("d MMM yyyy G HH:mm:ss", Locale.US);
+			return format.format(date);
 		}
 	}
 	
@@ -120,10 +157,13 @@ class Datatore {
 	public String scriviAnno() {
 		String anno = "";
 		if( data1.date != null && !data1.format.toPattern().equals(G_M) ) {
-			SimpleDateFormat formatoAnno = new SimpleDateFormat("yyy");
+			DateFormat formatoAnno = new SimpleDateFormat("yyy");
+			Date dateUnoCopy = (Date) data1.date.clone(); // Clona 'date' per poter cambiare l'anno
 			if( data1.doppia )
-				data1.date.setYear( data1.date.getYear() + 1 ); // cambia definitamente l'anno, ma non è un problema
-			anno = formatoAnno.format( data1.date );
+				dateUnoCopy.setYear( data1.date.getYear() + 1 );
+			anno = formatoAnno.format( dateUnoCopy );
+			if( data1.negativa )
+				anno = "-"+anno;
 			if( tipo >= 1 && tipo <= 3 )
 				anno += "?";
 			if( tipo == 4 || tipo == 7 )
@@ -132,16 +172,17 @@ class Datatore {
 				anno = "←"+anno;
 			if( tipo == 8 )
 				anno = "→"+anno;
-			if( tipo == 6 || tipo == 9 ) {
-				if( data2.date != null && !data2.format.toPattern().equals(G_M) ) {
-					if( data2.doppia )
-						data2.date.setYear( data2.date.getYear() + 1 );
-					String anno2 = formatoAnno.format( data2.date );
-					if( !anno.equals(anno2) ) {
-						if( anno2.length() > 3 && anno2.substring(0,2).equals(anno.substring(0,2)) ) // se sono dello stesso secolo
-							anno2 = anno2.substring( anno2.length()-2 ); // prende solo gli anni
-						anno += (tipo==6 ? "~" : "→") + anno2 ;
-					}
+			if( (tipo == 6 || tipo == 9) && data2.date != null && !data2.format.toPattern().equals(G_M) ) {
+				if( data2.doppia )
+					data2.date.setYear( data2.date.getYear() + 1 );
+				String anno2 = formatoAnno.format( data2.date );
+				if( data2.negativa )
+					anno2 = "-"+anno2;
+				if( !anno.equals(anno2) ) {
+					if( !anno2.startsWith("-") && anno2.length() > 3
+							&& anno2.substring(0,2).equals(anno.substring(0,2)) ) // se sono dello stesso secolo
+						anno2 = anno2.substring( anno2.length()-2 ); // prende solo gli anni
+					anno += (tipo==6 ? "~" : "→") + anno2 ;
 				}
 			}
 		}

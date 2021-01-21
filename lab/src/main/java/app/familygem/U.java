@@ -23,7 +23,7 @@ public class U {
 				return gc.getPeople().get(0).getId();
 		return null;
 	}
-	
+
 	// riceve una Person e restituisce stringa con nome e cognome principale
 	static String epiteto( Person p ) {
 		if( !p.getNames().isEmpty() )

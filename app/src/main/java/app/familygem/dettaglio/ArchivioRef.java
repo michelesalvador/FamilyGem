@@ -45,7 +45,7 @@ public class ArchivioRef extends Dettaglio {
 		final Context contesto = scatola.getContext();
 		View cartaRepo = LayoutInflater.from(contesto).inflate( R.layout.pezzo_fonte, scatola, false );
 		scatola.addView( cartaRepo );
-		((TextView) cartaRepo.findViewById( R.id.fonte_titolo ) ).setText( repo.getName() );
+		((TextView) cartaRepo.findViewById( R.id.fonte_testo ) ).setText( repo.getName() );
 		((CardView) cartaRepo).setCardBackgroundColor( contesto.getResources().getColor(R.color.archivio) );
 		cartaRepo.setOnClickListener( v -> {
 			Memoria.setPrimo( repo );

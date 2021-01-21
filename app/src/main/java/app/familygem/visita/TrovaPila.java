@@ -56,7 +56,7 @@ public class TrovaPila extends Visitor {
 					passi.remove();
 			}
 			trovato = true;
-			//Memoria.stampa();
+			//Memoria.stampa("TrovaPila");
 		}
 		return true;
 	}

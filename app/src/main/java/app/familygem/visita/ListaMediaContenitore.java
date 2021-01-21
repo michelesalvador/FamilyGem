@@ -3,8 +3,9 @@
 
 package app.familygem.visita;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
@@ -18,7 +19,7 @@ import org.folg.gedcom.model.Visitor;
 
 public class ListaMediaContenitore extends Visitor {
 
-	public Map<Media,Object> listaMedia = new LinkedHashMap<>();
+	public List<MedCont> listaMedia = new ArrayList<>();
 	private Gedcom gc;
 	private boolean voglioTutti;	// Elencare tutti i media (anche i locali) o solo gli oggetti media condivisi
 
@@ -31,9 +32,11 @@ public class ListaMediaContenitore extends Visitor {
 		if( voglioTutti && oggetto instanceof MediaContainer ) {
 			//for( MediaRef r : p.getMediaRefs() ) listaMedia.put( r.getMedia(gc), p );	// elenca i ref a vuoto => media null
 			MediaContainer contenitore = (MediaContainer) oggetto;
-			for( Media med : contenitore.getAllMedia( gc ) )
-				listaMedia.put( med, oggetto );	// Oggetti media e media locali di tutti gli individui
-						// put non aggiunge duplicati alle chiavi già esistenti
+			for( Media med : contenitore.getAllMedia( gc ) ) { // Oggetti media e media locali di ciascun record
+				MedCont medCont = new MedCont(med, oggetto);
+				if( !listaMedia.contains(medCont) )
+					listaMedia.add( medCont );
+			}
 		}
 		return true;
 	}
@@ -41,7 +44,7 @@ public class ListaMediaContenitore extends Visitor {
 	@Override
 	public boolean visit( Gedcom gc ) {
 		for( Media med : gc.getMedia() )
-			listaMedia.put( med, gc );	// rastrella gli oggetti media
+			listaMedia.add( new MedCont(med, gc) );	// rastrella gli oggetti media
 		return true;
 	}
 	@Override
@@ -67,5 +70,23 @@ public class ListaMediaContenitore extends Visitor {
 	@Override
 	public boolean visit( Source s ) {
 		return visita( s );
+	}
+
+	// Classe che rappresenta un Media con il suo oggetto contenitore
+	static public class MedCont {
+		public Media media;
+		public Object contenitore;
+		public MedCont( Media media, Object contenitore ) {
+			this.media = media;
+			this.contenitore = contenitore;
+		}
+		@Override
+		public boolean equals( Object o ) {
+			return media.equals( ((MedCont)o).media);
+		}
+		@Override
+		public int hashCode() {
+			return Objects.hash( media );
+		}
 	}
 }

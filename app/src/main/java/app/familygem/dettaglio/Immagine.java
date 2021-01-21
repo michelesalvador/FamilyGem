@@ -8,11 +8,12 @@ import android.os.Build;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
+import androidx.core.content.FileProvider;
 import org.folg.gedcom.model.Media;
 import java.io.File;
 import java.util.List;
+import app.familygem.BuildConfig;
 import app.familygem.Dettaglio;
 import app.familygem.F;
 import app.familygem.Galleria;
@@ -68,39 +69,42 @@ public class Immagine extends Dettaglio {
 		F.dipingiMedia( m, vistaImg, vistaMedia.findViewById(R.id.immagine_circolo) );
 		vistaMedia.setOnClickListener( vista -> {
 			String percorso = (String) vistaImg.getTag( R.id.tag_percorso );
+			Uri uri = (Uri) vistaImg.getTag( R.id.tag_uri );
 			int tipoFile = (int)vistaImg.getTag(R.id.tag_tipo_file);
 			if( tipoFile == 0 ) {	// Il file è da trovare
 				F.appAcquisizioneImmagine( this, null, 5173, null );
-			} else if( tipoFile == 2 || tipoFile == 3 ) { // Apri file con altra app
-				// Non male anche se la lista di app generiche fa schifo
+			} else if( tipoFile == 2 || tipoFile == 3 ) { // Apre file con altra app
 				// todo se il tipo è 3 ma è un url (pagina web senza immagini) cerca di aprirlo come un file://
-				File file = new File( percorso );
-				MimeTypeMap mappa = MimeTypeMap.getSingleton();
-				String estensione = MimeTypeMap.getFileExtensionFromUrl( file.getName() );
-				String tipo = mappa.getMimeTypeFromExtension( estensione.toLowerCase() ); // L'estensione deve essere tutta minuscola
-					// Di parecchie estensioni come .pic restituisce null
+				if( percorso != null ) {
+					File file = new File( percorso );
+					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+							&& percorso.startsWith(getExternalFilesDir(null).getPath()) )
+							// Un'app può essere file provider solo delle SUE cartelle
+						uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file);
+					else // KitKat e tutte le altre cartelle
+						uri = Uri.fromFile(file);
+				}
+				String mimeType = getContentResolver().getType( uri );
 				Intent intento = new Intent( Intent.ACTION_VIEW );
-				Uri uri = Uri.fromFile(file);
-				intento.setDataAndType( uri, tipo );
-				//intento.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK );	inutile?
+				intento.setDataAndType( uri, mimeType );
+				intento.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // Serve per le cartelle di proprietà dell'app (provider)
 				List<ResolveInfo> resolvers = getPackageManager().queryIntentActivities( intento, 0 );
 					// per un'estensione come .tex di cui ha trovato il tipo mime, non c'è nessuna app predefinita
-				if( tipo == null || resolvers.isEmpty() ) {
-					//Toast.makeText( getApplicationContext(), "Nessuna app trovata per aprire " + file.getName(), Toast.LENGTH_LONG ).show();
-					//intento.setType( "*/*" ); poi il file non giunge alla app
-					intento.setDataAndType( uri, "*/*" );	// La lista di app fa un po' cagare ma vabè
+				if( mimeType == null || resolvers.isEmpty() ) {
+					intento.setDataAndType( uri, "*/*" );	// Brutta lista di app generiche
 				}
 				// Da android 7 (Nougat api 24) gli uri file:// sono banditi in favore di uri content:// perciò non riesce ad aprire i file
-				//intento.addFlags( Intent.FLAG_GRANT_READ_URI_PERMISSION ); // proposta com soluzione ma nell'emulatore non funziona
 				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) { // ok funziona nell'emulatore con Android 9
 					try {
 						StrictMode.class.getMethod("disableDeathOnFileUriExposure" ).invoke(null);
 					} catch( Exception e ) {}
 				}
 				startActivity( intento );
-			} else {
+			} else { // Immagine vera e propria
 				Intent intento = new Intent( Immagine.this, Lavagna.class );
 				intento.putExtra( "percorso", percorso );
+				if( uri != null )
+					intento.putExtra( "uri", uri.toString() );
 				startActivity( intento );
 			}
 		});

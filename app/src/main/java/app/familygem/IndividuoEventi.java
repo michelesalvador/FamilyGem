@@ -79,6 +79,23 @@ public class IndividuoEventi extends Fragment {
 		return vistaEventi;
 	}
 
+	// Scopre se è un nome con name pieces o un suffisso nel value
+	boolean nomeComplesso( Name n ) {
+		// Name pieces
+		boolean ricco = n.getGiven() != null || n.getSurname() != null
+				|| n.getPrefix() != null || n.getSurnamePrefix() != null || n.getSuffix() != null
+				|| n.getFone() != null || n.getRomn() != null;
+		// Qualcosa dopo il cognome
+		String nome = n.getValue();
+		boolean suffisso = false;
+		if( nome != null ) {
+			nome = nome.trim();
+			if( nome.lastIndexOf('/') < nome.length()-1 )
+				suffisso = true;
+		}
+		return ricco || suffisso;
+	}
+
 	private int sessoCapitato;
 	private void piazzaEvento( LinearLayout scatola, String titolo, String testo, Object oggetto ) {
 		View vistaFatto = LayoutInflater.from(scatola.getContext()).inflate( R.layout.individuo_eventi_pezzo, scatola, false);
@@ -103,8 +120,22 @@ public class IndividuoEventi extends Fragment {
 		if( oggetto instanceof Name ) {
 			U.mettiMedia( scatolaAltro, oggetto, false );
 			vistaFatto.setOnClickListener( v -> {
-				Memoria.aggiungi( oggetto );
-				startActivity( new Intent( getContext(), Nome.class ) );
+				// Se è un nome complesso propone la modalità esperto
+				if( !Globale.preferenze.esperto && nomeComplesso((Name)oggetto) ) {
+					new AlertDialog.Builder(getContext()).setMessage( R.string.complex_tree_advanced_tools )
+							.setPositiveButton( android.R.string.ok, (dialog, i) -> {
+								Globale.preferenze.esperto = true;
+								Globale.preferenze.salva();
+								Memoria.aggiungi( oggetto );
+								startActivity( new Intent(getContext(), Nome.class) );
+							}).setNegativeButton( android.R.string.cancel, (dialog, i) -> {
+								Memoria.aggiungi( oggetto );
+								startActivity( new Intent(getContext(), Nome.class) );
+							}).show();
+				} else {
+					Memoria.aggiungi( oggetto );
+					startActivity( new Intent(getContext(), Nome.class) );
+				}
 			});
 		} else if( oggetto instanceof EventFact ) {
 			// Evento Sesso
@@ -282,7 +313,7 @@ public class IndividuoEventi extends Fragment {
 			// Citazione fonte
 			case 230: // Copia
 				U.copiaNegliAppunti( getText(R.string.source_citation),
-						((TextView)vistaPezzo.findViewById( R.id.fonte_titolo )).getText() + "\n"
+						((TextView)vistaPezzo.findViewById( R.id.fonte_testo )).getText() + "\n"
 						+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText() );
 				return true;
 			case 231: // Elimina

@@ -76,21 +76,32 @@ public class EditoreData extends LinearLayout {
 					if( data1.date == null ) // micro settaggio del carro
 						((NumberPicker)findViewById( R.id.prima_anno )).setValue( 100 );
 					if( datatore.tipo == 6 || datatore.tipo == 9 ) {
+						findViewById( R.id.editadata_seconda_avanzate ).setVisibility( VISIBLE );
 						findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
 						if( data2.date == null )
 							((NumberPicker)findViewById( R.id.seconda_anno )).setValue( 100 );
 					} else {
+						findViewById( R.id.editadata_seconda_avanzate ).setVisibility( GONE );
 						findViewById( R.id.editadata_seconda ).setVisibility( GONE );
 					}
-					impostaCeccoDoppia( data2 );
 					elencoTipi.setText( tipiData[datatore.tipo] );
 					veroImputTesto = false;
 					genera();
 					return true;
 				});
 			});
+			findViewById( R.id.editadata_negativa1 ).setOnClickListener( vista -> {
+				data1.negativa = ((CompoundButton)vista).isChecked();
+				veroImputTesto = false;
+				genera();
+			});
 			findViewById( R.id.editadata_doppia1 ).setOnClickListener( vista -> {
 				data1.doppia = ((CompoundButton)vista).isChecked();
+				veroImputTesto = false;
+				genera();
+			});
+			findViewById( R.id.editadata_negativa2 ).setOnClickListener( vista -> {
+				data2.negativa = ((CompoundButton)vista).isChecked();
 				veroImputTesto = false;
 				genera();
 			});
@@ -216,25 +227,29 @@ public class EditoreData extends LinearLayout {
 		// Primo carro
 		impostaCarro( data1, findViewById( R.id.prima_giorno ), findViewById( R.id.prima_mese ),
 				findViewById( R.id.prima_secolo ), findViewById( R.id.prima_anno ) );
+		if( Globale.preferenze.esperto )
+			impostaCecchi( data1 );
 
 		// Secondo carro
 		if( datatore.tipo == 6 || datatore.tipo == 9 ) {
 			impostaCarro( data2, findViewById( R.id.seconda_giorno ), findViewById( R.id.seconda_mese ),
 					findViewById( R.id.seconda_secolo ), findViewById( R.id.seconda_anno ) );
+			if( Globale.preferenze.esperto ) {
+				findViewById( R.id.editadata_seconda_avanzate ).setVisibility( VISIBLE );
+				impostaCecchi( data2 );
+			}
 			findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
-		} else
+		} else {
+			findViewById( R.id.editadata_seconda_avanzate ).setVisibility( GONE );
 			findViewById( R.id.editadata_seconda ).setVisibility( GONE );
-
-		// I Checkbox della data doppia
-		impostaCeccoDoppia( data1 );
-		impostaCeccoDoppia( data2 );
+		}
 	}
 
 	// Gira le ruote di un carro in base a una data
 	void impostaCarro( Datatore.Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
 		calenda.clear();
 		if( data.date != null )
-			calenda.set( data.date.getYear()+1900, data.date.getMonth(), data.date.getDate() );
+			calenda.setTime( data.date );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
 		if( data.date != null && (data.format.toPattern().equals(G_M_A) || data.format.toPattern().equals(G_M)) )
 			ruotaGiorno.setValue( data.date.getDate() );
@@ -254,18 +269,24 @@ public class EditoreData extends LinearLayout {
 			ruotaAnno.setValue( (data.date.getYear()+1900)%100 );
 	}
 
-	void impostaCeccoDoppia( Datatore.Data data ) {
-		CheckBox cecco;
-		if( data.equals(data1) )
-			cecco = findViewById( R.id.editadata_doppia1 );
-		else
-			cecco = findViewById( R.id.editadata_doppia2 );
-		if( data.date == null || data.format.toPattern().equals("") || data.format.toPattern().equals(G_M) // date senza anno
-				|| (data.equals(data2) && !(datatore.tipo == 6 || datatore.tipo == 9) ) ) {
-			cecco.setVisibility( INVISIBLE );
+	// Imposta i Checkbox per una data che può essere negativa e doppia
+	void impostaCecchi( Datatore.Data data ) {
+		CheckBox ceccoBC, ceccoDoppia;
+		if( data.equals(data1) ) {
+			ceccoBC = findViewById( R.id.editadata_negativa1 );
+			ceccoDoppia = findViewById( R.id.editadata_doppia1 );
 		} else {
-			cecco.setChecked( data.doppia );
-			cecco.setVisibility( VISIBLE );
+			ceccoBC = findViewById( R.id.editadata_negativa2 );
+			ceccoDoppia = findViewById( R.id.editadata_doppia2 );
+		}
+		if( data.date == null || data.format.toPattern().equals("") || data.format.toPattern().equals(G_M) ) { // date senza anno
+			ceccoBC.setVisibility( INVISIBLE );
+			ceccoDoppia.setVisibility( INVISIBLE );
+		} else {
+			ceccoBC.setChecked( data.negativa );
+			ceccoBC.setVisibility( VISIBLE );
+			ceccoDoppia.setChecked( data.doppia );
+			ceccoDoppia.setVisibility( VISIBLE );
 		}
 	}
 
@@ -283,10 +304,9 @@ public class EditoreData extends LinearLayout {
 		calenda.set( secolo*100+anno, mese-1, 1 );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
 		if( data.date == null ) data.date = new Date();
-		//data.date.setDate( giorno );
 		data.date.setDate( giorno == 0 ? 1 : giorno );  // altrimenti la data M_A arretra di un mese
-		data.date.setMonth( mese - 1 );
-		data.date.setYear( secolo*100 + anno - 1900 );
+		data.date.setMonth( mese == 0 ? 0 : mese - 1 );
+		data.date.setYear( anno == 100 ? -1899 : secolo*100 + anno - 1900 );
 		if( giorno != 0 && mese != 0 && anno != 100 )
 			data.format.applyPattern( G_M_A );
 		else if( giorno != 0 && mese != 0 )
@@ -297,8 +317,7 @@ public class EditoreData extends LinearLayout {
 			data.format.applyPattern( A );
 		else
 			data.format.applyPattern( "" );
-		// Il ceckbox della data doppia
-		impostaCeccoDoppia( data );
+		impostaCecchi( data );
 		veroImputTesto = false;
 		genera();
 	}
@@ -323,11 +342,11 @@ public class EditoreData extends LinearLayout {
 	}
 
 	// Scrive la singola data in base al formato
-	String rifai ( Datatore.Data data ) {
+	String rifai( Datatore.Data data ) {
 		String fatta = "";
 		if( data.date != null ) {
 			// Date con l'anno doppio
-			if( data.doppia && !( data.format.toPattern().equals("") || data.format.toPattern().equals(G_M) ) ) {
+			if( data.doppia && !(data.format.toPattern().equals("") || data.format.toPattern().equals(G_M)) ) {
 				Date unAnnoDopo = new Date();
 				unAnnoDopo.setYear( data.date.getYear() + 1 );
 				String secondoAnno = String.format( Locale.ENGLISH, "%tY", unAnnoDopo );
@@ -335,6 +354,8 @@ public class EditoreData extends LinearLayout {
 			} else // Le altre date normali
 				fatta = data.format.format( data.date );
 		}
+		if( data.negativa )
+			fatta += " B.C.";
 		return fatta;
 	}
 

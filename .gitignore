@@ -6,4 +6,5 @@
 chiavi.properties
 local.properties
 /app/build/
+/app/libs-source-data/
 /lab/build/

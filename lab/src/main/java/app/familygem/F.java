@@ -280,7 +280,38 @@ public class F {
 					if( percorso != null ) {
 						if( split.length > 1 && !split[1].isEmpty() )
 							percorso += "/" + split[1];
-						return percorso;
+						/* TODO: in Android 11 (forse anche 10) una cartella che sembra leggibile poi i suoi file non lo sono.
+						    Occorre una Verifica che si possa leggere permanentemente per usare il percorso anzihé ricadere sull'URI
+						 */
+						// Tentativo fallito di scrivere e leggere un file per accertare accesso cartella.
+						// al momento riesce a scrivere e leggere un file ma poi l'accesso ai file di questa cartella non è permanente
+						File fileProva = new File(percorso, "File_di_prova_lettura_cartella.txt");
+						String risposta = "NO";
+						try {
+							FileUtils.write( fileProva, "Testo", "UTF-8" );
+							s.l(fileProva, fileProva.exists(), fileProva.isFile(), fileProva.canRead(), fileProva.canWrite());
+							risposta = FileUtils.readFileToString( fileProva, "UTF-8" );
+						} catch( IOException e ) {
+							e.printStackTrace();
+						}
+						if( risposta.equals("Testo") ) {
+							s.l("OK riesco a leggere fileProva"); // Su Android 11 risulta questo ma è solo illusione del momento
+							return percorso;
+						} else
+							s.l("Risposta negativa!");
+
+						/* Altro tentativo insoddisfacente di scoprire se una cartella è davvero leggibile in Android 10/11
+						File cartella = new File(percorso);
+						s.l(cartella, cartella.exists(), cartella.isDirectory(), cartella.canRead(), cartella.canWrite());
+						File[] fili = cartella.listFiles();
+						if( fili != null ) {
+						//	s.l(fili, fili.length);
+							for( File f :  fili ) {
+								//s.l(f, f.canRead() );
+							}
+							return percorso;
+						} else // directory not readable
+							s.l("File null"); */
 					}
 					break;
 				case "com.android.providers.downloads.documents": // provider Downloads e sottocartelle

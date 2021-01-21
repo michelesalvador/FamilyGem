@@ -6,11 +6,13 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
@@ -29,7 +31,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,13 +70,20 @@ import app.familygem.dettaglio.Famiglia;
 import app.familygem.dettaglio.Fonte;
 import app.familygem.dettaglio.Immagine;
 import app.familygem.dettaglio.Nota;
+import app.familygem.visita.ListaMediaContenitore;
 import app.familygem.visita.RiferimentiNota;
 import app.familygem.visita.TrovaPila;
 
 public class U {
 
-	static String s(int id) {
+	static String s( int id ) {
 		return Globale.contesto.getString(id);
+	}
+
+	// Da usare dove capita che 'Globale.gc' possa essere null per ricaricarlo
+	static void gedcomSicuro( Gedcom gc ) {
+		if( gc == null )
+			Globale.gc = Alberi.leggiJson( Globale.preferenze.idAprendo );
 	}
 
 	// restituisce l'id della Person iniziale di un Gedcom
@@ -97,16 +105,14 @@ public class U {
 
 	// riceve una Person e restituisce il titolo nobiliare
 	static String titolo( Person p ) {
-		// Gedcom standard INDI.TITL
+		// GEDCOM standard INDI.TITL
 		for( EventFact ef : p.getEventsFacts() )
-			if( ef.getTag() != null )
-				if( ef.getTag().equals( "TITL" ) )
-					return ef.getValue();
+			if( ef.getTag() != null && ef.getTag().equals("TITL") && ef.getValue() != null )
+				return ef.getValue();
 		// Così invece prende INDI.NAME._TYPE.TITL, vecchio metodo di org.folg.gedcom
 		for( Name n : p.getNames() )
-			if( n.getType() != null )
-				if( n.getType().equals( "TITL" ) )
-					return  n.getValue();
+			if( n.getType() != null && n.getType().equals("TITL") && n.getValue() != null )
+				return n.getValue();
 		return "";
 	}
 
@@ -133,10 +139,15 @@ public class U {
 			}
 			if( grezzo.length() - 1 > grezzo.lastIndexOf('/') )
 				completo += " " + grezzo.substring( grezzo.lastIndexOf('/') + 1 ).trim(); // dopo il cognome
+		} else {
 			if( n.getPrefix() != null )
-				completo = n.getPrefix().trim() + " " + completo;
+				completo = n.getPrefix();
+			if( n.getGiven() != null )
+				completo += " " + n.getGiven();
+			if( n.getSurname() != null )
+				completo += " " + n.getSurname();
 			if( n.getSuffix() != null )
-				completo += " " + n.getSuffix().trim();
+				completo += " " + n.getSuffix();
 		}
 		completo = completo.trim();
 		return completo.isEmpty() ? "[" + s(R.string.empty_name) + "]" : completo;
@@ -146,10 +157,12 @@ public class U {
 	static String cognome( Person p ) {
 		String cognome = "";
 		if( !p.getNames().isEmpty() ) {
-			String grezzo = p.getNames().get(0).getValue();
-			if( grezzo.indexOf('/') < grezzo.lastIndexOf('/') ) {
+			Name name = p.getNames().get(0);
+			String grezzo = name.getValue();
+			if( grezzo != null && grezzo.indexOf('/') < grezzo.lastIndexOf('/') )
 				cognome = grezzo.substring( grezzo.indexOf('/') + 1, grezzo.lastIndexOf('/') ).trim();
-			}
+			else if( name.getSurname() != null )
+				cognome = name.getSurname();
 		}
 		return cognome;
 	}
@@ -208,7 +221,7 @@ public class U {
 		if( conEta && inizio != null && inizio.tipo <= 3 && !inizio.data1.format.toPattern().equals(Datatore.G_M) ) {
 			LocalDate dataInizio = new LocalDate( inizio.data1.date ); // converte in joda time
 			// Se è ancora vivo la fine è adesso
-			if( fine == null && dataInizio.isBefore(LocalDate.now()) && Years.yearsBetween(dataInizio,LocalDate.now()).getYears() < 120 && !U.morto(p) ) {
+			if( fine == null && dataInizio.isBefore(LocalDate.now()) && Years.yearsBetween(dataInizio,LocalDate.now()).getYears() < 120 && !morto(p) ) {
 				fine = new Datatore( String.format(Locale.ENGLISH,"%te %<Tb %<tY",new Date()) ); // un po' assurdo dover qui passare per Datatore...
 				annoFine = fine.scriviAnno();
 			}
@@ -393,7 +406,7 @@ public class U {
 	// Compone il testo coi dettagli di un individuo e lo mette nella vista testo
 	// inoltre restituisce lo stesso testo per Confrontatore
 	static String dettagli( Person tizio, TextView vistaDettagli ) {
-		String anni = U.dueAnni( tizio, true );
+		String anni = dueAnni( tizio, true );
 		String luoghi = Anagrafe.dueLuoghi( tizio );
 		if( anni.isEmpty() && luoghi.isEmpty() && vistaDettagli != null ) {
 			vistaDettagli.setVisibility( View.GONE );
@@ -421,17 +434,17 @@ public class U {
 		if( nome.isEmpty() && ruolo != null ) vistaNome.setVisibility( View.GONE );
 		else vistaNome.setText( nome );
 		TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
-		String titolo = U.titolo( persona );
+		String titolo = titolo( persona );
 		if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
 		else vistaTitolo.setText( titolo );
 		dettagli( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
 		F.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
-		if( !U.morto(persona) )
+		if( !morto(persona) )
 			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( View.GONE );
-		if( U.sesso(persona) == 1 )
-			vistaIndi.findViewById(R.id.indi_carta).setBackgroundResource( R.drawable.casella_maschio );
-		if( U.sesso(persona) == 2 )
-			vistaIndi.findViewById(R.id.indi_carta).setBackgroundResource( R.drawable.casella_femmina );
+		if( sesso(persona) == 1 )
+			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( R.drawable.casella_bordo_maschio );
+		if( sesso(persona) == 2 )
+			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( R.drawable.casella_bordo_femmina );
 		vistaIndi.setTag( persona.getId() );
 		return vistaIndi;
 	}
@@ -484,7 +497,8 @@ public class U {
 				break;
 			}
 		((NoteContainer)contenitore).setNoteRefs( lista );
-		vista.setVisibility( View.GONE );
+		if( vista != null )
+			vista.setVisibility( View.GONE );
 	}
 
 	// Elimina una Nota inlinea o condivisa
@@ -521,9 +535,9 @@ public class U {
 		griglia.setHasFixedSize( true );
 		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( scatola.getContext(), dettagli?2:3 );
 		griglia.setLayoutManager( gestoreLayout );
-		Map<Media,Object> listaMedia = new LinkedHashMap<>();
+		List<ListaMediaContenitore.MedCont> listaMedia = new ArrayList<>();
 		for( Media med : ((MediaContainer)contenitore).getAllMedia(Globale.gc) )
-			listaMedia.put( med, contenitore );
+			listaMedia.add( new ListaMediaContenitore.MedCont(med,contenitore) );
 		AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( listaMedia, dettagli );
 		griglia.setAdapter( adattatore );
 		scatola.addView( griglia );
@@ -540,7 +554,7 @@ public class U {
 				View vistaCita = LayoutInflater.from( scatola.getContext() ).inflate( R.layout.pezzo_citazione_fonte, scatola, false );
 				scatola.addView( vistaCita );
 				if( citaz.getSource(Globale.gc) != null )	// source CITATION
-					((TextView)vistaCita.findViewById( R.id.fonte_titolo )).setText( Biblioteca.titoloFonte(citaz.getSource(Globale.gc)) );
+					((TextView)vistaCita.findViewById( R.id.fonte_testo )).setText( Biblioteca.titoloFonte(citaz.getSource(Globale.gc)) );
 				else // source NOTE, oppure Citazione di fonte che è stata eliminata
 					vistaCita.findViewById( R.id.citazione_fonte ).setVisibility( View.GONE );
 				String t = "";
@@ -572,14 +586,35 @@ public class U {
 		}
 	}
 
-	// usato da dettaglio.CitazioneFonte e dettaglio.Immagine
-	public static void linkaFonte( final LinearLayout scatola, final Source fonte ) {
+	// Inserisce nella scatola il richiamo ad una fonte, con dettagli o essenziale
+	public static void mettiFonte( final LinearLayout scatola, final Source fonte, boolean dettagli ) {
 		View vistaFonte = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_fonte, scatola, false );
 		scatola.addView( vistaFonte );
-		((TextView)vistaFonte.findViewById( R.id.fonte_titolo )).setText( Biblioteca.titoloFonte(fonte) );
-		vistaFonte.setTag( R.id.tag_oggetto, fonte );
-		if( scatola.getId() != R.id.dispensa_scatola ) // nella dispensa niente menù contestuale
+		TextView vistaTesto = vistaFonte.findViewById( R.id.fonte_testo );
+		String txt = "";
+		if( dettagli ) {
+			if( fonte.getTitle() != null )
+				txt = fonte.getTitle() + "\n";
+			else if( fonte.getAbbreviation() != null )
+				txt = fonte.getAbbreviation() + "\n";
+			if( fonte.getType() != null )
+				txt += fonte.getType().replaceAll("\n", " ") + "\n";
+			if( fonte.getPublicationFacts() != null )
+				txt += fonte.getPublicationFacts().replaceAll("\n", " ") + "\n";
+			if( fonte.getText() != null )
+				txt += fonte.getText().replaceAll("\n", " ");
+			if( txt.endsWith("\n") )
+				txt = txt.substring( 0, txt.length()-1 );
+			LinearLayout scatolaAltro = vistaFonte.findViewById( R.id.fonte_scatola );
+			mettiNote( scatolaAltro, fonte, false );
+			mettiMedia( scatolaAltro, fonte, false );
+			vistaFonte.setTag( R.id.tag_oggetto, fonte );
 			((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFonte );
+		} else {
+			vistaTesto.setMaxLines( 2 );
+			txt = Biblioteca.titoloFonte(fonte);
+		}
+		vistaTesto.setText( txt );
 		vistaFonte.setOnClickListener( v -> {
 			Memoria.setPrimo( fonte );
 			scatola.getContext().startActivity( new Intent( scatola.getContext(), Fonte.class) );
@@ -591,17 +626,17 @@ public class U {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_individuo_piccolo, scatola, false );
 		scatola.addView( vistaPersona );
 		F.unaFoto( Globale.gc, p, vistaPersona.findViewById(R.id.collega_foto) );
-		((TextView)vistaPersona.findViewById( R.id.collega_nome )).setText( U.epiteto(p) );
-		String dati = U.dueAnni(p,false);
+		((TextView)vistaPersona.findViewById( R.id.collega_nome )).setText( epiteto(p) );
+		String dati = dueAnni( p, false );
 		TextView vistaDettagli = vistaPersona.findViewById( R.id.collega_dati );
 		if( dati.isEmpty() ) vistaDettagli.setVisibility( View.GONE );
 		else vistaDettagli.setText( dati );
-		if( !U.morto( p ) )
+		if( !morto( p ) )
 			vistaPersona.findViewById( R.id.collega_lutto ).setVisibility( View.GONE );
-		if( U.sesso(p) == 1 )
-			vistaPersona.findViewById(R.id.collega_carta).setBackgroundResource( R.drawable.casella_maschio );
-		if( U.sesso(p) == 2 )
-			vistaPersona.findViewById(R.id.collega_carta).setBackgroundResource( R.drawable.casella_femmina );
+		if( sesso(p) == 1 )
+			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource( R.drawable.casella_bordo_maschio );
+		if( sesso(p) == 2 )
+			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource( R.drawable.casella_bordo_femmina );
 		vistaPersona.setOnClickListener( v -> {
 			Memoria.setPrimo( p );
 			Intent intento = new Intent( scatola.getContext(), Individuo.class );
@@ -614,11 +649,11 @@ public class U {
 	static String testoFamiglia( Context contesto, Gedcom gc, Family fam, boolean unaLinea ) {
 		String testo = "";
 		for( Person marito : fam.getHusbands(gc) )
-			testo += U.epiteto( marito ) + "\n";
+			testo += epiteto( marito ) + "\n";
 		for( Person moglie : fam.getWives(gc) )
-			testo += U.epiteto( moglie ) + "\n";
+			testo += epiteto( moglie ) + "\n";
 		if( fam.getChildren(gc).size() == 1 ) {
-			testo += U.epiteto( fam.getChildren(gc).get(0) );
+			testo += epiteto( fam.getChildren(gc).get(0) );
 		} else if( fam.getChildren(gc).size() > 1 )
 			testo += contesto.getString(R.string.num_children, fam.getChildren(gc).size());
 		if( testo.endsWith("\n") ) testo = testo.substring( 0, testo.length()-1 );
@@ -688,7 +723,7 @@ public class U {
 		if( record instanceof Person )
 			linkaPersona( scatola, (Person)record, 1 );
 		else if( record instanceof Source )
-			linkaFonte( scatola, (Source)record );
+			mettiFonte( scatola, (Source)record, false );
 		else if( record instanceof Family )
 			linkaFamiglia( scatola, (Family)record );
 		else if( record instanceof Repository )
@@ -756,7 +791,8 @@ public class U {
 
 	// Eventualmente salva il Json
 	public static void salvaJson( boolean rinfresca, Object ... oggetti ) {
-		aggiornaDate( oggetti );
+		if( oggetti != null )
+			aggiornaDate( oggetti );
 		if( rinfresca )
 			Globale.editato = true;
 
@@ -838,7 +874,7 @@ public class U {
 							Globale.gc.setHeader(testa[0]);
 						}
 						testa[0].setSubmitterRef( idAutore );
-						U.salvaJson( true );
+						salvaJson( true );
 					}).setNegativeButton( R.string.no, null ).show();
 		}
 	}
@@ -873,26 +909,40 @@ public class U {
 		return famigliePerno.toArray(new String[0]);
 	}
 
-	// Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
-	// cosaAprire: 0 diagramma (solo dal menu principale), 1 diagramma, 2 famiglia
+	/* Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
+	cosaAprire:
+		0 diagramma della famiglia precedente, senza chiedere quale famiglia (primo click su Diagram)
+		1 diagramma chiedendo eventualmente quale famiglia
+		2 famiglia chiedendo eventualmente quale famiglia
+	 */
 	public static void qualiGenitoriMostrare( Context contesto, Person perno, int cosaAprire ) {
-		List<Family> famiglie = perno.getParentFamilies(Globale.gc);
-		if( famiglie.size() > 1 && cosaAprire > 0 ) {
-			new AlertDialog.Builder( contesto ).setTitle( R.string.which_family )
-					.setItems( elencoFamiglie(famiglie), (dialog, quale) -> {
-						concludiSceltaGenitori( contesto, perno, cosaAprire, quale );
-					}).show();
-		} else
-			concludiSceltaGenitori( contesto, perno, cosaAprire, 0 );
+		if( perno == null )
+			concludiSceltaGenitori( contesto, null, 1, 0 );
+		else {
+			List<Family> famiglie = perno.getParentFamilies(Globale.gc);
+			if( famiglie.size() > 1 && cosaAprire > 0 ) {
+				new AlertDialog.Builder( contesto ).setTitle( R.string.which_family )
+						.setItems( elencoFamiglie(famiglie), (dialog, quale) -> {
+							concludiSceltaGenitori( contesto, perno, cosaAprire, quale );
+						}).show();
+			} else
+				concludiSceltaGenitori( contesto, perno, cosaAprire, 0 );
+		}
+
 	}
 	private static void concludiSceltaGenitori( Context contesto, Person perno, int cosaAprire, int qualeFamiglia ) {
-		Globale.individuo = perno.getId();
-		if( cosaAprire > 0 ) // Cliccando Diagramma per la prima volta mostra la famiglia precedente
-			Globale.numFamiglia = qualeFamiglia;
+		if( perno != null )
+			Globale.individuo = perno.getId();
+		if( cosaAprire > 0 ) // Viene impostata la famiglia da mostrare
+			Globale.numFamiglia = qualeFamiglia; // normalmente è la 0
 		if( cosaAprire < 2 ) { // Mostra il diagramma
-			if( contesto instanceof Principe ) { // Siamo in un frammento all'interno di Principe o in Principe stesso
-				((AppCompatActivity)contesto).getSupportFragmentManager().beginTransaction()
-						.replace( R.id.contenitore_fragment, new Diagram() ).addToBackStack(null).commit();
+			if( contesto instanceof Principe ) { // Diagram, Anagrafe o Principe stesso
+				FragmentManager fm = ((AppCompatActivity)contesto).getSupportFragmentManager();
+				// Nome del frammento precedente nel backstack
+				String previousName = fm.getBackStackEntryAt( fm.getBackStackEntryCount() - 1 ).getName();
+				if( previousName != null && previousName.equals("diagram") )
+					fm.popBackStack(); // Ricliccando su Diagram rimuove dalla storia il frammento di diagramma predente
+				fm.beginTransaction().replace(R.id.contenitore_fragment, new Diagram()).addToBackStack("diagram").commit();
 			} else { // Da individuo o da famiglia
 				contesto.startActivity( new Intent( contesto, Principe.class ) );
 			}
@@ -970,7 +1020,7 @@ public class U {
 			intento.putExtra( "idFamiglia", famGenitori.get(0).getId() );
 		} else if( relazione == 2 && famGenitori.size() > 1 ) {
 			new AlertDialog.Builder(contesto).setTitle( R.string.which_family_add_sibling )
-					.setItems( U.elencoFamiglie(famGenitori), (dialog, quale) -> {
+					.setItems( elencoFamiglie(famGenitori), (dialog, quale) -> {
 						intento.putExtra( "idFamiglia", famGenitori.get(quale).getId() );
 						concludiMultiMatrimoni(contesto, intento, frammento);
 					}).show();
@@ -1004,7 +1054,7 @@ public class U {
 		} // Figlio: esistono molteplici famiglie coniugali
 		else if( relazione == 4 && famSposi.size() > 1 ) {
 			new AlertDialog.Builder(contesto).setTitle( R.string.which_family_add_child )
-					.setItems( U.elencoFamiglie(famSposi), (dialog, quale) -> {
+					.setItems( elencoFamiglie(famSposi), (dialog, quale) -> {
 						intento.putExtra( "idFamiglia", famSposi.get(quale).getId() );
 						concludiMultiMatrimoni(contesto, intento, frammento);
 					}).show();
@@ -1044,7 +1094,7 @@ public class U {
 					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
 						for(Family f : vuote)
 							Chiesa.eliminaFamiglia( f.getId() ); // Così capita di salvare più volte insieme... ma vabè
-						cheFare.run();
+						if(cheFare != null) cheFare.run();
 					}).setNeutralButton(android.R.string.cancel, (dialog, i) -> {
 						if(ancheKo) cheFare.run();
 					}).setOnCancelListener( dialog -> {

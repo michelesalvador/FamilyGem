@@ -1,26 +1,34 @@
 package app.familygem;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -29,6 +37,7 @@ import androidx.fragment.app.Fragment;
 import com.otaliastudios.zoom.ZoomLayout;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import app.familygem.dettaglio.Famiglia;
@@ -49,17 +58,22 @@ public class Diagram extends Fragment {
 	private ZoomLayout zoomBox;
 	private RelativeLayout box;
 	private GraphicCard fulcrumView;
+	private FulcrumGlow glow;
 	private float zoomValue = 0.7f;
 	private float density;
 	private int STROKE;
-	private int GLOW_SPACE = 35; // space to display glow, in dp
-	private View popup;
-	private boolean forceDraw;
+	private int GLOW_SPACE = 35; // Space to display glow, in dp
+	private View popup; // Suggestion balloon
+	public boolean forceDraw;
+	private int linesColor;
+	private AnimatorSet animator;
+	private boolean printPDF; // We are exporting a PDF
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle state) {
 		density = getResources().getDisplayMetrics().density;
 		STROKE = toPx(2);
+		setStyle( false );
 
 		getActivity().findViewById(R.id.toolbar).setVisibility( View.GONE ); // Necessario in caso di backPressed dopo onActivityresult
 		final View view = inflater.inflate( R.layout.diagram, container, false );
@@ -67,14 +81,42 @@ public class Diagram extends Fragment {
 			DrawerLayout scatolissima = getActivity().findViewById(R.id.scatolissima);
 			scatolissima.openDrawer( GravityCompat.START );
 		});
-		view.findViewById( R.id.diagram_options ).setOnClickListener( v ->
-				startActivity( new Intent(getContext(), DiagramSettings.class) )
-		);
+		view.findViewById( R.id.diagram_options ).setOnClickListener( vista -> {
+			PopupMenu opzioni = new PopupMenu( getContext(), vista );
+			Menu menu = opzioni.getMenu();
+			menu.add( 0, 0, 0, R.string.settings );
+			if( gc.getPeople().size() > 0 )
+				menu.add( 0, 1, 0, "Export PDF" ); // todo traduci
+			opzioni.show();
+			opzioni.setOnMenuItemClickListener( item -> {
+				switch( item.getItemId() ) {
+					case 0: // Diagram settings
+						startActivity( new Intent( getContext(), DiagramSettings.class ) );
+						break;
+					case 1: // Export PDF
+						setStyle( true );
+						box.removeAllViews();
+						printPDF = true;
+						drawDiagram();
+						F.salvaDocumento( null, this, Globale.preferenze.idAprendo, "application/pdf", "pdf", 903 );
+						break;
+					default:
+						return false;
+				}
+				return true;
+			});
+		});
 
 		zoomBox = view.findViewById( R.id.diagram_zoom );
 		box = view.findViewById( R.id.diagram_box );
 		graph = new Graph( Globale.gc ); // Create a diagram model
 		forceDraw = true; // To be sure the diagram will be draw
+
+		// Fade in animation
+		ObjectAnimator alphaIn = ObjectAnimator.ofFloat( box, View.ALPHA, 1 );
+		alphaIn.setDuration(100);
+		animator = new AnimatorSet();
+		animator.play(alphaIn);
 
 		return view;
 	}
@@ -85,9 +127,9 @@ public class Diagram extends Fragment {
 		super.onStart();
 		// Ragioni per cui bisogna proseguire, in particolare cose che sono cambiate
 		if( forceDraw || (fulcrumView != null && !fulcrumView.card.person.getId().equals(Globale.individuo))
-				|| Globale.editato || (graph != null && graph.whichFamily != Globale.numFamiglia) ) {
+				|| (graph != null && graph.whichFamily != Globale.numFamiglia) ) {
 			forceDraw = false;
-			Globale.editato = false;
+			box.removeAllViews();
 
 			String[] ids = { Globale.individuo, Globale.preferenze.alberoAperto().radice, U.trovaRadice(gc) };
 			Person fulcrum = null;
@@ -98,14 +140,13 @@ public class Diagram extends Fragment {
 			}
 			// Empty diagram
 			if( fulcrum == null ) {
-				View button = LayoutInflater.from(getContext()).inflate(R.layout.diagram_button, box, true);
-				button.findViewById( R.id.diagram_new ).setOnClickListener( view -> {
-					Intent intento =  new Intent( getContext(), EditaIndividuo.class );
-					intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
-					startActivity( intento );
-				});
-				// se eventualmente era stato cambiato lo zoom
-				zoomBox.post( () -> zoomBox.realZoomTo(0.7f, true) );
+				View button = LayoutInflater.from(getContext()).inflate( R.layout.diagram_button, null );
+				button.findViewById( R.id.diagram_new ).setOnClickListener( v ->
+					startActivity( new Intent( getContext(), EditaIndividuo.class )
+						.putExtra( "idIndividuo", "TIZIO_NUOVO" )
+					)
+				);
+				viewUnderBalloon( button, R.string.new_person ); // todo traduci: Add the first person.
 				if( !Globale.preferenze.esperto )
 					((View)zoomBox.getParent()).findViewById( R.id.diagram_options ).setVisibility( View.GONE );
 			} else {
@@ -121,8 +162,39 @@ public class Diagram extends Fragment {
 		}
 	}
 
+	// Put a view under the suggestion balloon
+	ConstraintLayout viewUnderBalloon( View view, int suggestion ) {
+		View popupView = LayoutInflater.from(getContext()).inflate(R.layout.popup, box);
+		ConstraintLayout popupLayout = popupView.findViewById( R.id.popup_layout );
+		//popupLayout.setBackgroundColor( 0x66FF6600 );
+		ConstraintLayout.LayoutParams nodeParams = new ConstraintLayout.LayoutParams(
+				ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+		nodeParams.topToBottom = R.id.popup_fumetto;
+		nodeParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
+		nodeParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
+		popupLayout.addView(view, nodeParams);
+		popup = popupView.findViewById( R.id.popup_fumetto );
+		((TextView)popup.findViewById( R.id.popup_testo )).setText( suggestion );
+		popup.setVisibility( View.INVISIBLE );
+		popup.setOnTouchListener( (v, e) -> {
+			if( e.getAction() == MotionEvent.ACTION_DOWN ) {
+				v.setVisibility( View.INVISIBLE );
+				return true;
+			}
+			return false;
+		});
+		zoomBox.postDelayed( () -> {
+			zoomBox.panTo( (zoomBox.getWidth()/zoomBox.getRealZoom() - box.getWidth()) / 2,
+					(zoomBox.getHeight()/zoomBox.getRealZoom() - box.getHeight()) / 2, false);
+			zoomBox.realZoomTo(1.3f, true);
+			animator.start();
+		}, 100);
+		popup.postDelayed( () -> popup.setVisibility(View.VISIBLE), 1000 );
+		return popupLayout;
+	}
+
 	void drawDiagram() {
-		box.removeAllViews();
+		box.setAlpha(0);
 
 		// Place graphic nodes in the box taking them from the list of nodes
 		for(Node node : graph.getNodes()) {
@@ -135,25 +207,13 @@ public class Diagram extends Fragment {
 		}
 
 		// Only one person in the diagram
-		if( gc.getPeople().size() == 1 && gc.getFamilies().size() == 0 ) {
+		if( gc.getPeople().size() == 1 && gc.getFamilies().size() == 0 && !printPDF ) {
 
-			// Add the suggestion balloon
-			View popupView = LayoutInflater.from(getContext()).inflate(R.layout.popup, box);
-			ConstraintLayout popupLayout = popupView.findViewById( R.id.popup_layout );
+			// Put the card under the suggestion balloon
 			View singleNode = box.getChildAt(0);
 			box.removeView(singleNode);
-			ConstraintLayout.LayoutParams nodeParams = new ConstraintLayout.LayoutParams(
-					ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
-			nodeParams.topToBottom = R.id.popup_fumetto;
-			nodeParams.topMargin = toPx(6);
-			nodeParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-			nodeParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
 			singleNode.setId( R.id.tag_fulcrum );
-			popupLayout.addView(singleNode, nodeParams);
-			popup = popupView.findViewById( R.id.popup_fumetto );
-			popup.setOnClickListener( vista -> {
-				vista.setVisibility(View.INVISIBLE);
-			});
+			ConstraintLayout popupLayout = viewUnderBalloon( singleNode, R.string.long_press_menu );
 
 			// Add the glow to the fulcrum card
 			if( fulcrumView != null ) {
@@ -167,14 +227,10 @@ public class Diagram extends Fragment {
 					fulcrumView.card.width = toDp(singleNode.getWidth());
 					fulcrumView.card.height = toDp(singleNode.getHeight());
 					popupLayout.addView( new FulcrumGlow(getContext()), 0, glowParams );
-					zoomBox.realZoomTo(1, false); // only to center the box
-					zoomBox.post( () -> {
-						zoomBox.realZoomTo(1.4f, true);
-					});
 				});
 			}
 
-		} else { // Two or more persons in the diagram
+		} else { // Two or more persons in the diagram or PDF print
 
 			box.postDelayed( () -> {
 				// Get the dimensions of various nodes converting from pixel to dip
@@ -271,6 +327,7 @@ public class Diagram extends Fragment {
 						box.addView( new FulcrumGlow(getContext()), 0, glowParams );
 					});
 				}
+				animator.start();
 			}, 100);
 		}
 	}
@@ -283,9 +340,10 @@ public class Diagram extends Fragment {
 		public FulcrumGlow( Context context ) {
 			super(context);
 			//setBackgroundColor( 0x330099FF );
+			glow = this;
 		}
 		@Override
-		protected void onDraw( Canvas canvas) {
+		protected void onDraw( Canvas canvas ) {
 			paint.setColor( getResources().getColor(R.color.evidenzia) );
 			paint.setMaskFilter(bmf);
 			setLayerType(View.LAYER_TYPE_SOFTWARE, paint);
@@ -302,7 +360,7 @@ public class Diagram extends Fragment {
 			super(context);
 			this.unitNode = unitNode;
 			setClipChildren( false );
-			//setBackgroundColor( 0xff00FF00 );
+			//setBackgroundColor( 0x66FF0066 );
 			if( unitNode.husband != null )
 				addView( new GraphicCard(context, unitNode.husband, true) );
 			if( unitNode.wife != null )
@@ -310,7 +368,6 @@ public class Diagram extends Fragment {
 			if( unitNode.isCouple() ) {
 				Bond bond = new Bond(context, unitNode);
 				LayoutParams bondParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				bondParams.addRule( unitNode.hasChildren() ? ALIGN_PARENT_BOTTOM : CENTER_VERTICAL);
 				bondParams.addRule( RIGHT_OF, R.id.tag_husband );
 				if( unitNode.marriageDate != null ) {
 					bondParams.leftMargin = toPx(-Util.TIC);
@@ -342,22 +399,20 @@ public class Diagram extends Fragment {
 			} else {
 				View view = getLayoutInflater().inflate( R.layout.diagram_card, this, true );
 
-				ImageView background = view.findViewById( R.id.card_background );
-				ImageView lutto = view.findViewById(R.id.card_mourn);
-				if( person.getId().equals( Globale.individuo ) ) {
-					if( U.sesso(person) == 1 )
-						background.setBackgroundResource( R.drawable.casella_maschio_evidente );
-					else if( U.sesso(person) == 2 )
-						background.setBackgroundResource( R.drawable.casella_femmina_evidente );
-					else
-						background.setBackgroundResource( R.drawable.casella_neutro_evidente );
-					fulcrumView = this;
-				} else if( U.sesso(person) == 1 )
-					background.setBackgroundResource( R.drawable.casella_maschio );
+				View border = view.findViewById( R.id.card_border );
+				if( U.sesso(person) == 1 )
+					border.setBackgroundResource( R.drawable.casella_bordo_maschio );
 				else if( U.sesso(person) == 2 )
-					background.setBackgroundResource( R.drawable.casella_femmina );
+					border.setBackgroundResource( R.drawable.casella_bordo_femmina );
+
+				ImageView background = view.findViewById( R.id.card_background );
+				if( person.getId().equals( Globale.individuo ) ) {
+					background.setBackgroundResource( R.drawable.casella_sfondo_evidente );
+					fulcrumView = this;
+				}
 				if( card.acquired && !person.getId().equals(Globale.individuo) )
-					background.setAlpha( 0.7f );
+					if( Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT )
+						background.setBackgroundResource( R.drawable.casella_sfondo_sposo );
 
 				F.unaFoto( Globale.gc, person, view.findViewById( R.id.card_photo ) );
 				TextView vistaNome = view.findViewById(R.id.card_name);
@@ -374,15 +429,14 @@ public class Diagram extends Fragment {
 				if( dati.isEmpty() ) vistaDati.setVisibility(View.GONE);
 				else vistaDati.setText( dati );
 				if( !U.morto(person) )
-					lutto.setVisibility(View.GONE);
+					view.findViewById(R.id.card_mourn).setVisibility(View.GONE);
 				registerForContextMenu(this);
 				setOnClickListener( v -> {
-					Person person1 = card.person;
-					if( person1.getId().equals(Globale.individuo) ) {
-						Memoria.setPrimo( person1 );
+					if( person.getId().equals(Globale.individuo) ) {
+						Memoria.setPrimo( person );
 						startActivity( new Intent(getContext(), Individuo.class) );
 					} else {
-						clickCard( person1 );
+						clickCard( person );
 					}
 				});
 			}
@@ -415,7 +469,7 @@ public class Diagram extends Fragment {
 			addView( spacer, spacerParams );
 			if( unitNode.marriageDate == null ) {
 				View horizontaLine = new View( context );
-				horizontaLine.setBackgroundColor( 0xffffffff );
+				horizontaLine.setBackgroundColor( linesColor );
 				addView( horizontaLine, new LayoutParams( toPx(Util.MARGIN), STROKE ) );
 			} else {
 				TextView year = new TextView( context );
@@ -431,7 +485,7 @@ public class Diagram extends Fragment {
 			lineParams.gravity = Gravity.CENTER_HORIZONTAL;
 			addView( verticaLine, lineParams );
 			if (unitNode.hasChildren()) {
-				verticaLine.setBackgroundColor( 0xffffffff );
+				verticaLine.setBackgroundColor( linesColor );
 			}
 			setId( R.id.tag_bond );
 			setOnClickListener( view -> {
@@ -448,18 +502,19 @@ public class Diagram extends Fragment {
 			this.node = node;
 			//setBackgroundColor( 0x440000FF );
 			View view = getLayoutInflater().inflate(R.layout.diagram_ancestry,this, true);
-			TextView first = view.findViewById( R.id.ancestry_father );
-			TextView second = view.findViewById( R.id.ancestry_mother );
+			RelativeLayout first = view.findViewById( R.id.ancestry_father );
+			RelativeLayout second = view.findViewById( R.id.ancestry_mother );
 			if( node.miniFather == null ) {
 				first.setVisibility( View.GONE );
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) second.getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				first.setText( String.valueOf(node.miniFather.amount) );
+				TextView firstText = first.findViewById( R.id.ancestry_father_text );
+				firstText.setText( String.valueOf(node.miniFather.amount) );
 				if( U.sesso(node.miniFather.person) == 1 )
-					first.setBackgroundResource( R.drawable.casella_maschio );
+					firstText.setBackgroundResource( R.drawable.casella_bordo_maschio );
 				else if( U.sesso(node.miniFather.person) == 2 )
-					first.setBackgroundResource( R.drawable.casella_femmina );
+					firstText.setBackgroundResource( R.drawable.casella_bordo_femmina );
 				first.setOnClickListener( v -> clickCard(node.miniFather.person) );
 			}
 			if( node.miniMother == null ) {
@@ -467,17 +522,21 @@ public class Diagram extends Fragment {
 				RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) findViewById( R.id.ancestry_connector ).getLayoutParams();
 				param.addRule( RelativeLayout.RIGHT_OF, 0 );
 			} else {
-				second.setText( String.valueOf(node.miniMother.amount) );
+				TextView secondText = second.findViewById( R.id.ancestry_mother_text );
+				secondText.setText( String.valueOf(node.miniMother.amount) );
 				if( U.sesso(node.miniMother.person) == 1 )
-					second.setBackgroundResource( R.drawable.casella_maschio );
+					secondText.setBackgroundResource( R.drawable.casella_bordo_maschio );
 				else if( U.sesso(node.miniMother.person) == 2 )
-					second.setBackgroundResource( R.drawable.casella_femmina );
+					secondText.setBackgroundResource( R.drawable.casella_bordo_femmina );
 				second.setOnClickListener( v -> clickCard(node.miniMother.person) );
 			}
 			if( node.miniFather == null && node.miniMother == null )
 				this.setVisibility( INVISIBLE );
 			if( node.acquired ) {
-				setAlpha( 0.7f );
+				if( Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT ) {
+					first.setBackgroundResource( R.drawable.casella_sfondo_sposo );
+					second.setBackgroundResource( R.drawable.casella_sfondo_sposo );
+				}
 				View verticalLine = findViewById( R.id.ancestry_connector_vertical );
 				LinearLayout.LayoutParams lineParams = (LinearLayout.LayoutParams) verticalLine.getLayoutParams();
 				lineParams.height = toPx(25);
@@ -501,14 +560,13 @@ public class Diagram extends Fragment {
 			for( int i = 0; i < progenyNode.miniChildren.size(); i++ ) {
 				final MiniCard miniChild = progenyNode.miniChildren.get(i);
 				View graphicMiniCard = getLayoutInflater().inflate( R.layout.diagram_progeny, this, false );
-				((TextView)graphicMiniCard.findViewById( R.id.progeny_number ) ).setText( String.valueOf( miniChild.amount ) );
+				TextView miniCardText = graphicMiniCard.findViewById( R.id.progeny_number_text );
+				miniCardText.setText( String.valueOf(miniChild.amount) );
 				int sex = U.sesso( miniChild.person );
-				int background = R.drawable.casella_neutro;
 				if( sex == 1 )
-					background = R.drawable.casella_maschio;
+					miniCardText.setBackgroundResource( R.drawable.casella_bordo_maschio );
 				else if( sex == 2 )
-					background = R.drawable.casella_femmina;
-				graphicMiniCard.setBackgroundResource( background );
+					miniCardText.setBackgroundResource( R.drawable.casella_bordo_femmina );
 				if( i < progenyNode.miniChildren.size() - 1 ) {
 					LayoutParams cardParams = (LayoutParams) graphicMiniCard.getLayoutParams();
 					cardParams.rightMargin = toPx(Util.PLAY);
@@ -529,7 +587,7 @@ public class Diagram extends Fragment {
 			paths.add( new Path() );
 			paint.setStyle( Paint.Style.STROKE );
 			paint.setStrokeWidth( STROKE );
-			paint.setColor( Color.WHITE );
+			paint.setColor( linesColor );
 		}
 		@Override
 		protected void onDraw( Canvas canvas) {
@@ -557,6 +615,8 @@ public class Diagram extends Fragment {
 			for( Path path : paths ) {
 				canvas.drawPath( path, paint );
 			}
+			if( printPDF )
+				graph.getLines().clear(); // Avoid to place the lines twice
 		}
 	}
 
@@ -565,10 +625,8 @@ public class Diagram extends Fragment {
 	}
 
 	// Ask which family to display in the diagram if fulcrum has many parent families
-	private void selectParentFamily( Person fulcrum ) { //, Family excluded
+	private void selectParentFamily( Person fulcrum ) {
 		List<Family> families = fulcrum.getParentFamilies(gc);
-		//families.remove( excluded ); // No perché cambia la sequenza delle famiglie
-		// todo Si potrebbe disabilitare la famiglia 'excluded', ma occorre un adapter
 		if( families.size() > 1 ) {
 			new AlertDialog.Builder(getContext()).setTitle( R.string.which_family )
 					.setItems( U.elencoFamiglie(families), (dialog, which) -> {
@@ -585,6 +643,7 @@ public class Diagram extends Fragment {
 		Globale.numFamiglia = whichFamily;
 		graph.showFamily( Globale.numFamiglia );
 		graph.startFrom( fulcrum );
+		box.removeAllViews();
 		drawDiagram();
 	}
 
@@ -700,11 +759,23 @@ public class Diagram extends Fragment {
 			intento.putExtra( "idIndividuo", idPersona );
 			startActivity( intento );
 		} else if( id == 6 ) { // Scollega
-			Family[] famiglie = Anagrafe.scollega( idPersona );
+			/*  Todo ad esser precisi bisognerebbe usare Famiglia.scollega( sfr, sr )
+				che rimuove esattamente il singolo link anziché tutti i link se una persona è linkata + volte nella stessa famiglia
+			 */
+			List<Family> modificate = new ArrayList<>();
+			if( parentFam != null ) {
+				Famiglia.scollega( idPersona, parentFam );
+				modificate.add( parentFam );
+			}
+			if( spouseFam != null ) {
+				Famiglia.scollega( idPersona, spouseFam );
+				modificate.add( spouseFam );
+			}
 			ripristina();
+			Family[] modificateArr = modificate.toArray( new Family[0] );
+			U.controllaFamiglieVuote( getContext(), this::ripristina, false, modificateArr );
 			U.aggiornaDate( pers );
-			U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
-			U.salvaJson( false, famiglie );
+			U.salvaJson( true, modificateArr );
 		} else if( id == 7 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
@@ -721,17 +792,52 @@ public class Diagram extends Fragment {
 		onStart();
 	}
 
-	// Aggiunge il parente che è stata scelto in Anagrafe
+	private void setStyle( boolean stampa ) {
+		linesColor = getResources().getColor(
+				stampa ? R.color.lineeDiagrammaStampa : R.color.lineeDiagrammaSchermo );
+		getActivity().setTheme( stampa? R.style.diagramPrint : R.style.diagramScreen );
+	}
+
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		if( resultCode == AppCompatActivity.RESULT_OK && requestCode == 1401 ) {
-			Object[] modificati = EditaIndividuo.aggiungiParente(
-					data.getStringExtra("idIndividuo"), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione
-					data.getStringExtra("idParente"),
-					data.getStringExtra("idFamiglia"),
-					data.getIntExtra("relazione", 0),
-					data.getStringExtra("collocazione") );
-			U.salvaJson( true, modificati );
+		if( resultCode == AppCompatActivity.RESULT_OK ) {
+			// Aggiunge il parente che è stata scelto in Anagrafe
+			if( requestCode == 1401 ) {
+				Object[] modificati = EditaIndividuo.aggiungiParente(
+						data.getStringExtra("idIndividuo"), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione
+						data.getStringExtra("idParente"),
+						data.getStringExtra("idFamiglia"),
+						data.getIntExtra("relazione", 0),
+						data.getStringExtra("collocazione") );
+				U.salvaJson( true, modificati );
+			} // Export diagram to PDF
+			else if( requestCode == 903 ) {
+				// Stylize diagram for print
+				fulcrumView.findViewById( R.id.card_background ).setBackgroundResource( R.drawable.casella_sfondo_base );
+				if( glow != null )
+					glow.setVisibility( View.GONE );
+				int width = toPx(graph.width+100), // 50dp di padding
+					height = toPx(graph.height+100);
+				// Create PDF
+				PdfDocument document = new PdfDocument();
+				PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(width, height, 1).create();
+				PdfDocument.Page page = document.startPage( pageInfo );
+				box.draw( page.getCanvas() );
+				document.finishPage(page);
+				// Write PDF
+				Uri uri = data.getData();
+				try {
+					OutputStream out = getContext().getContentResolver().openOutputStream( uri );
+					document.writeTo( out );
+					out.flush();
+					out.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				printPDF = false;
+				setStyle( false ); // Reset for screen
+				Toast.makeText(getContext(), "PDF successfully exported.", Toast.LENGTH_LONG).show(); // todo traduci
+			}
 		}
 	}
 }

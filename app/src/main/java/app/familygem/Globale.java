@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class Globale extends Application {
+
 	public static Gedcom gc;
 	public static Context contesto;
 	public static Armadio preferenze;
@@ -26,6 +27,7 @@ public class Globale extends Application {
 	static int idAlbero2; // id dell'albero2 con gli aggiornamenti
 
 	// Viene chiamato all'avvio dell'applicazione, e anche quando viene riavviata
+	@Override
 	public void onCreate() {
 		super.onCreate();
 		contesto = getApplicationContext();

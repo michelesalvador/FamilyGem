@@ -2,6 +2,7 @@ package app.familygem;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -34,6 +36,7 @@ public class Condivisione extends AppCompatActivity {
 
 	Gedcom gc;
 	Armadio.Cassetto casso;
+	Esportatore esporter;
 	String nomeAutore;
 	String dataId;
 	String idAutore;
@@ -54,7 +57,9 @@ public class Condivisione extends AppCompatActivity {
 		if( casso.grado == 10 )
 			((TextView)findViewById( R.id.condividi_tit_autore )).setText( R.string.changes_submitter );
 
-		gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
+		esporter = new Esportatore( this );
+		esporter.apriAlbero( idAlbero );
+		gc = Globale.gc;
 		if( gc != null ) {
 			// Radice dell'albero
 			String idRadice;
@@ -187,7 +192,6 @@ public class Condivisione extends AppCompatActivity {
 					Globale.preferenze.salva();
 				}
 			} catch( Exception e ) {
-				//e.printStackTrace();
 				U.tosta( questo, e.getLocalizedMessage() );
 			}
 			return questo;
@@ -196,16 +200,16 @@ public class Condivisione extends AppCompatActivity {
 		@Override
 		protected void onPostExecute(Condivisione questo) {
 			if( questo.dataId != null && questo.dataId.startsWith("20") ) {
-				//Toast.makeText( questo, "Dati inseriti nel database.", Toast.LENGTH_SHORT ).show(); // ridondante
-				Alberi.zippaAlbero( questo, questo.casso.id, questo.casso.nome,
-						questo.casso.radiceCondivisione, 9, questo.getCacheDir()+"/"+questo.dataId+".zip" );
-				new InvioFTP().execute( questo );
-			} else {
-				//Toast.makeText( questo, questo.getText(R.string.something_wrong), Toast.LENGTH_LONG ).show();
-					// ok ma sostituisce il messaggio di tosta() in catch()
-				questo.findViewById( R.id.bottone_condividi ).setEnabled(true);
-				questo.findViewById( R.id.condividi_circolo ).setVisibility(View.INVISIBLE);
+				File fileTree = new File( questo.getCacheDir(), questo.dataId + ".zip" );
+				if( questo.esporter.esportaBackupZip(questo.casso.radiceCondivisione, 9, Uri.fromFile(fileTree)) ) {
+					new InvioFTP().execute( questo );
+					return;
+				} else
+					Toast.makeText( questo, questo.esporter.messaggioErrore, Toast.LENGTH_LONG ).show();
 			}
+			// Un Toast di errore qui sostituirebbe il messaggio di tosta() in catch()
+			questo.findViewById( R.id.bottone_condividi ).setEnabled(true);
+			questo.findViewById( R.id.condividi_circolo ).setVisibility(View.INVISIBLE);
 		}
 	}
 

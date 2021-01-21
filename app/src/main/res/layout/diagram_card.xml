@@ -10,11 +10,21 @@
 		android:id="@+id/card_background"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
-		android:background="@drawable/casella_neutro"
+		android:background="@drawable/casella_sfondo_base"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
+		app:layout_constraintTop_toTopOf="parent"/>
+
+	<View
+		android:id="@+id/card_border"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@drawable/casella_bordo_neutro"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"/>
 
 	<LinearLayout
 		android:id="@+id/card_layout"
