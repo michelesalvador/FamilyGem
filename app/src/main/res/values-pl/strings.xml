@@ -22,7 +22,7 @@
     <string name="media">Multimedia</string>
     <string name="sources">Źródła</string>
     <string name="notes">Notes</string>
-    <string name="families">Rodzin</string>
+    <string name="families">Rodziny</string>
     <string name="repositories">Repozytorium</string>
     <string name="submitters">Udostępniający</string>
     <string name="new_tree">Nowe drzewo</string>
@@ -135,7 +135,7 @@
     <string name="diagram_settings">Ustawienia diagramu</string>
     <string name="generations_display_diagram">Ustaw liczbę pokoleń do wyświetlenia na schemacie.</string>
     <string name="ancestors">Przodków</string>
-    <string name="uncles">Wujków/ciotek</string>
+    <string name="uncles">Wujków/Ciotek</string>
     <string name="siblings">Rodzeństwo</string>
     <string name="descendants">Potomków</string>
     <string name="order_by">Sortuj według</string>
@@ -198,7 +198,7 @@
     <string name="value">Wartość</string>
     <string name="type">Typ</string>
     <string name="prefix">Przedrostek</string>
-    <string name="given">Nadane</string>
+    <string name="given">Nadane imię</string>
     <string name="nickname">Przydomek</string>
     <string name="surname_prefix">Przedrostek nazwiska</string>
     <string name="suffix">Przyrostek</string>
@@ -230,7 +230,7 @@
     <string name="cited_by">Cytowany w</string>
     <string name="repository_citation">Cytat z repozytorium</string>
     <string name="inexistent_repository_citation">Brak cytatu z repozytorium</string>
-    <string name="repository_note">Repozytorium-notatka</string>
+    <string name="repository_note">Repozytorium notatek</string>
     <string name="repository">Repozytorium</string>
     <string name="shared_media">Udostępnione multimedia</string>
     <string name="format">Format</string>
@@ -319,4 +319,6 @@
     <string name="a_new_tree">Nowe drzewo genealogiczne</string>
     <string name="family_gem_example">Przykład Family Gem</string>
     <string name="download_shared_tree">Pobierz drzewo udostępnione</string>
+    <string name="app_storage">Magazyn aplikacji</string>
+    <string name="sure_delete">Jesteś pewien\?</string>
 </resources>
