@@ -187,7 +187,7 @@
     <string name="tree_with_news">Stablo s aktualiziranjima</string>
     <string name="half_sibling">Polubrat/Polusestra</string>
     <string name="please_title">Upiši naslov.</string>
-	<string name="suffix">Sufiks</string>
+    <string name="suffix">Sufiks</string>
     <string name="import_backup">Obnovi pomoću ZIP kopije</string>
     <string name="show_advanced_functions">Pokaži napredne alate</string>
     <string name="replace">Zamijeni</string>
@@ -327,4 +327,10 @@
     <string name="download_shared_tree">Preuzmi dijeljeno stablo</string>
     <string name="app_storage">Spremište programa</string>
     <string name="sure_delete">Sigurno\?</string>
+    <string name="pdf_exported_ok">PDF je uspješno izvezen.</string>
+    <string name="zip_exported_ok">ZIP je izvezen.</string>
+    <string name="media_searched_list">Medijske datoteke se traže u ovim mapama.</string>
+    <string name="gedcom_exported_ok">GEDCOM je izvezen.</string>
+    <string name="export_pdf">Izvezi PDF</string>
+    <string name="add_device_folder">Dodaj mapu ovog uređaja.</string>
 </resources>
