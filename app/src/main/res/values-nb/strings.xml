@@ -177,7 +177,7 @@
     <string name="line_1">Linje 1</string>
     <string name="format">Format</string>
     <string name="parentheses">Parenteser</string>
-    <string name="source_note">Kildemerknad</string>
+    <string name="source_note">Notis-kilde</string>
     <string name="phonetic">Fonetisk</string>
     <string name="aka">Kallenavn</string>
     <string name="half_sibling">Halvsøsken</string>
@@ -209,7 +209,7 @@
     <string name="crop">Beskjær</string>
     <string name="half_sister">Halvsøster</string>
     <string name="half_brother">Halvbror</string>
-    <string name="new_source_note">Ny kildemerknad</string>
+    <string name="new_source_note">Ny notiskilde</string>
     <string name="link_shared_note">Lenk delt merknad</string>
     <string name="new_shared_note">Ny delt merknad</string>
     <string name="new_note">Ny merknad</string>
@@ -238,7 +238,7 @@
     <string name="tree_without_news">Tre uten oppdateringer</string>
     <string name="tree_with_news">Tre med oppdateringer</string>
     <string name="correctly_uploaded">Treet ble lastet opp.</string>
-	<string name="refresh">Gjenoppfrisk</string>
+    <string name="refresh">Gjenoppfrisk</string>
     <string name="tree_imported_ok">Slektstre importert.</string>
     <string name="modify_later">Senere kan du redigere det.</string>
     <string name="accepted_news">Du godtok %d oppdateringer:
@@ -283,7 +283,7 @@
     <string name="primary">Primær</string>
     <string name="shared_media">Delte medier</string>
     <string name="repository">Depot</string>
-    <string name="repository_note">Depotet-note</string>
+    <string name="repository_note">Notis-kodelager</string>
     <string name="inexistent_repository_citation">Mangler depotet sitat</string>
     <string name="repository_citation">Depotet sitat</string>
     <string name="italic">Kursiv</string>
@@ -301,7 +301,7 @@
     <string name="primary_media">Primære medier</string>
     <string name="residence">Bolig</string>
     <string name="surname_prefix">Etternavn prefiks</string>
-    <string name="given">Gitt</string>
+    <string name="given">Fornavn</string>
     <string name="prefix">Oppringingsprefiks</string>
     <string name="make_main_submitter">Ønsker du denne innsenderen være den viktigste av de tre\?</string>
     <string name="choose_repository">Velg depotet</string>
@@ -327,4 +327,10 @@
     <string name="repositories">Depot</string>
     <string name="app_storage">Programlager</string>
     <string name="sure_delete">Er du sikker\?</string>
+    <string name="pdf_exported_ok">PDF eksportert.</string>
+    <string name="zip_exported_ok">ZIP eksportert.</string>
+    <string name="gedcom_exported_ok">GEDCOM eksportert.</string>
+    <string name="media_searched_list">Mediafiles søkes etter i mappene som listes opp her.</string>
+    <string name="export_pdf">Eksporter PDF</string>
+    <string name="add_device_folder">Legg til en mappe fra denne enheten.</string>
 </resources>
