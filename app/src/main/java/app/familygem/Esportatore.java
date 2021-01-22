@@ -1,6 +1,7 @@
 package app.familygem;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
@@ -63,6 +64,9 @@ public class Esportatore {
 		} catch( Exception e ) {
 			return errore( e.getLocalizedMessage() );
 		}
+		// Rende il file visibile da Windows
+		// Ma pare inefficace in KitKat in cui il file rimane invisibile
+		contesto.sendBroadcast( new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri) );
 		Globale.gc = Alberi.leggiJson( idAlbero ); // Resetta le modifiche
 		return successo( R.string.gedcom_exported_ok );
 	}
@@ -88,6 +92,7 @@ public class Esportatore {
 		raccolta.put( gedcomDocument, 0 );
 		if( !creaFileZip(raccolta) )
 			return false;
+		contesto.sendBroadcast( new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri) );
 		Globale.gc = Alberi.leggiJson( idAlbero );
 		return successo( R.string.zip_exported_ok );
 	}
@@ -111,6 +116,7 @@ public class Esportatore {
 		files.put( DocumentFile.fromFile(fileSettings), 0 );
 		if( !creaFileZip(files) )
 			return false;
+		contesto.sendBroadcast( new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri) );
 		return successo( R.string.zip_exported_ok );
 	}
 

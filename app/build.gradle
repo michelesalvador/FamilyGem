@@ -21,21 +21,18 @@ android {
 		applicationId "app.familygem"
 		minSdkVersion 19
 		targetSdkVersion 30
-		versionCode 18
-		versionName '0.7.15'
+		versionCode 19
+		versionName '0.7.16'
 		vectorDrawables.useSupportLibrary = true
 		resConfigs "en", "de", "es", "fr", "hr", "it", "nb", "nl", "pl", "pt", "ru", "sr", "uk"
-		def backupKey = ""
 		def utenteAruba = ""
 		def passwordAruba = ""
 		def utenteGeoNames = "demo"
 		if (chiave) {
-			backupKey = chiave['backupKey']
 			utenteAruba = chiave['utenteAruba']
 			passwordAruba = chiave['passwordAruba']
 			utenteGeoNames = chiave['utenteGeoNames']
 		}
-		resValue "string", "backupKey", backupKey
 		buildConfigField "String", "utenteAruba", "\""+utenteAruba+"\""
 		buildConfigField "String", "passwordAruba", "\""+passwordAruba+"\""
 		buildConfigField "String", "utenteGeoNames", "\""+utenteGeoNames+"\""
