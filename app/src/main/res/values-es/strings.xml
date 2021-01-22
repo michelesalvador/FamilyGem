@@ -62,13 +62,12 @@
     <string name="date">Fecha</string>
     <string name="submitter">Remitente</string>
     <string name="submission">Envío</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="form">Forma</string>
+	<string name="form">Forma</string>
     <string name="destination">Destino</string>
     <string name="time">Horas</string>
     <string name="please_title">Por favor escribe un título.</string>
     <string name="please_name">Por favor escribe un nombre.</string>
-    <string name="new_person">Crear nueva persona</string>
+    <string name="new_person">Crear nueva persona.</string>
     <string name="card">Perfil</string>
     <string name="family_as_child">Familia (como hijo)</string>
     <string name="family_as_spouse">Familia (como cónyuge)</string>

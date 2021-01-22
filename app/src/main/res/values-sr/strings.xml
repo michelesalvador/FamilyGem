@@ -193,7 +193,7 @@
     <string name="family_as_spouse">Porodica (kao supružnik)</string>
     <string name="family_as_child">Porodica (kao dete)</string>
     <string name="card">Profil</string>
-    <string name="new_person">Stvori novu osobu</string>
+    <string name="new_person">Stvori novu osobu.</string>
     <string name="all_imported_delete">Sve novine su uvezene.
 \nŽeliš li izbrisati uvezeno stablo\?</string>
     <string name="confirm">Potvrdi</string>
@@ -231,8 +231,7 @@
     <string name="time">Vrijeme</string>
     <string name="destination">Odredište</string>
     <string name="form">Obrazac</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="submission">Podnesak</string>
+	<string name="submission">Podnesak</string>
     <string name="submitter">Podnosilac</string>
     <string name="date">Datum</string>
     <string name="fax">Faks</string>

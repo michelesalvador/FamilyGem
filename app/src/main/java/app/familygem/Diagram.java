@@ -86,7 +86,7 @@ public class Diagram extends Fragment {
 			Menu menu = opzioni.getMenu();
 			menu.add( 0, 0, 0, R.string.settings );
 			if( gc.getPeople().size() > 0 )
-				menu.add( 0, 1, 0, "Export PDF" ); // todo traduci
+				menu.add( 0, 1, 0, R.string.export_pdf );
 			opzioni.show();
 			opzioni.setOnMenuItemClickListener( item -> {
 				switch( item.getItemId() ) {
@@ -146,7 +146,7 @@ public class Diagram extends Fragment {
 						.putExtra( "idIndividuo", "TIZIO_NUOVO" )
 					)
 				);
-				viewUnderBalloon( button, R.string.new_person ); // todo traduci: Add the first person.
+				viewUnderBalloon( button, R.string.new_person );
 				if( !Globale.preferenze.esperto )
 					((View)zoomBox.getParent()).findViewById( R.id.diagram_options ).setVisibility( View.GONE );
 			} else {
@@ -836,7 +836,7 @@ public class Diagram extends Fragment {
 				}
 				printPDF = false;
 				setStyle( false ); // Reset for screen
-				Toast.makeText(getContext(), "PDF successfully exported.", Toast.LENGTH_LONG).show(); // todo traduci
+				Toast.makeText(getContext(), R.string.pdf_exported_ok, Toast.LENGTH_LONG).show();
 			}
 		}
 	}

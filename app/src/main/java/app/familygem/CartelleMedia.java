@@ -46,7 +46,7 @@ public class CartelleMedia extends AppCompatActivity {
 				faiScegliereCartella();
 		});
 		if( Globale.preferenze.getAlbero(idAlbero).cartelle.isEmpty() && Globale.preferenze.getAlbero(idAlbero).uris.isEmpty() )
-			new Fabuloso( this, "Add a folder from this device." ).show(); // todo traduci
+			new Fabuloso( this, R.string.add_device_folder ).show();
 	}
 
 	void faiScegliereCartella() {

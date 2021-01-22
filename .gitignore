@@ -1,8 +1,5 @@
 .gradle/
 .idea/
-/gradle/
-/build/
-*.iml
 chiavi.properties
 local.properties
 /app/build/

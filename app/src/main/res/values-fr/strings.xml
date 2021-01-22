@@ -63,7 +63,7 @@
     <string name="family_as_spouse">Famille (en tant que conjoint)</string>
     <string name="family_as_child">Famille (en tant qu\'enfant)</string>
     <string name="card">Profil</string>
-    <string name="new_person">Créer une nouvelle personne</string>
+    <string name="new_person">Créer une nouvelle personne.</string>
     <string name="confirm">Confirmer</string>
     <string name="confirm_news">Confirmer les mises à jour</string>
     <string name="ignore">Ignorer</string>
@@ -83,7 +83,6 @@
     <string name="please_name">Veuillez écrire un nom.</string>
     <string name="please_title">Veuillez écrire un titre.</string>
     <string name="time">Heure</string>
-    <string name="gedcom">GEDCOM</string>
     <string name="form">Formulaire</string>
     <string name="submitter">Auteur</string>
     <string name="date">Date</string>

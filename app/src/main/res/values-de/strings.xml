@@ -16,7 +16,7 @@
 \nEinmal tippen um das Profil zu öffnen.</string>
     <string name="name">Name</string>
     <string name="create_header">Header erstellen</string>
-    <string name="new_person">Eine neue Person erstellen</string>
+    <string name="new_person">Eine neue Person erstellen.</string>
     <string name="header">Datei-Header</string>
     <string name="repositories">Archive</string>
     <string name="rename">Umbenennen</string>
@@ -246,8 +246,7 @@
     <string name="time">Uhrzeit</string>
     <string name="destination">Ziel</string>
     <string name="form">Format</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="submission">Übertragung</string>
+	<string name="submission">Übertragung</string>
     <string name="date">Datum</string>
     <string name="fax">Fax</string>
     <string name="telephone">Telefon</string>

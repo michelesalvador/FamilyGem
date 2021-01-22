@@ -1,12 +1,4 @@
-<i>Family Gem</i> is an app for Android designed to manage family trees. It’s completely free and open source.
-
-The intent is that data structure respects as much as possible the Gedcom standard, in the latest versions 5.5 and 5.5.1. It’s strongly based on the Java <a href='https://github.com/FamilySearch/gedcom5-java'>parser</a> by Family Search. Author is Michele Salvador, an italian self-taught programmer and genealogy enthusiast.
-
-With <i>Family Gem</i> you can:
-
-* Create a family tree from scratch, entering names, dates, places, various events, photos and sources.
-* Import an existing family tree through a Gedcom file and modify it as you want.
-* Export the family tree you created (via Gedcom again) to import in every other genealogy program.
-* Share a tree with your relatives, letting them improve it and receiving back the updates. Then you can choose whether accept them or not.
-
-For help, first head over to the <a href='https://github.com/michelesalvador/FamilyGem/wiki'>project wiki</a>.
+Family Gem is a tool that let you create complete genealogical trees.
+You can insert names, dates, places, events and photos into the profile of family members and foremost the relationship between them, and automagically your family tree will take shape.
+Family Gem can exchange trees with other programs through a GEDCOM file.
+Once the tree is created, you can share it with your relatives.

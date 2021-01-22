@@ -21,9 +21,8 @@
 				android:id="@+id/cartelle_spiega"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:text="Media files are searched into the folders listed here."
+				android:text="@string/media_searched_list"
 				android:layout_marginBottom="20dp"/>
-			<!-- todo traduci -->
 			<LinearLayout
 				android:id="@+id/cartelle_scatola"
 				android:layout_width="match_parent"

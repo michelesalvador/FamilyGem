@@ -187,8 +187,7 @@
     <string name="tree_with_news">Stablo s aktualiziranjima</string>
     <string name="half_sibling">Polubrat/Polusestra</string>
     <string name="please_title">Upiši naslov.</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="suffix">Sufiks</string>
+	<string name="suffix">Sufiks</string>
     <string name="import_backup">Obnovi pomoću ZIP kopije</string>
     <string name="show_advanced_functions">Pokaži napredne alate</string>
     <string name="replace">Zamijeni</string>
@@ -210,7 +209,7 @@
 \nŽeliš li vidjeti napredne alate koji olakšavaju upravljanje stablom\?</string>
     <string name="cant_understand_uri">Nerazumljena primljena URI adresa.</string>
     <string name="tree_info">Podaci</string>
-    <string name="new_person">Stvori novu osobu</string>
+    <string name="new_person">Stvori novu osobu.</string>
     <string name="name_of_tree">Naslov stabla</string>
     <string name="change_date">Promijeni datum</string>
     <string name="download_example">Preuzmi primjer</string>

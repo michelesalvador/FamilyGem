@@ -63,6 +63,8 @@
     <string name="share_tree">Share</string>
     <string name="compare">Compare</string>
     <string name="export_gedcom">Export GEDCOM</string>
+    <string name="gedcom_exported_ok">GEDCOM successfully exported.</string>
+    <string name="zip_exported_ok">ZIP successfully exported.</string>
     <string name="no_results">No results.</string>
     <string name="really_delete_tree">Really want to delete this tree?</string>
     <string name="all_ok">Everything is OK.</string>
@@ -93,12 +95,14 @@
     <string name="date">Date</string>
     <string name="submitter">Submitter</string>
     <string name="submission">Submission</string>
-    <string name="gedcom">GEDCOM</string>
+    <string name="gedcom" translatable="false">GEDCOM</string>
     <string name="form">Form</string>
     <string name="destination">Destination</string>
     <string name="time">Time</string>
     <string name="media_folders">Media folders</string>
+    <string name="media_searched_list">Media files are searched into the folders listed here.</string>
     <string name="app_storage">App storage</string>
+    <string name="add_device_folder">Add a folder from this device.</string>
     <string name="please_title">Please write a title.</string>
     <string name="please_name">Please write a name.</string>
     <string name="ideally_recipient">Ideally the recipient of the sharing.</string>
@@ -129,7 +133,7 @@
     <string name="accepted_news">You accepted %d updates:\n\t%d additions\n\t%d replacements\n\t%d deletions</string>
     <string name="confirm">Confirm</string>
     <string name="all_imported_delete">All updates have been imported.\nDo you want to delete the imported tree?</string>
-    <string name="new_person">Create new person</string>
+    <string name="new_person">Add the first person.</string>
     <string name="card">Profile</string>
     <string name="family_as_child">Family (as child)</string>
     <string name="family_as_spouse">Family (as spouse)</string>
@@ -142,6 +146,8 @@
     <string name="spouse">Spouse</string>
     <string name="child">Child</string>
     <string name="long_press_menu">Long press to display the menu.\nTap to open the profile.</string>
+    <string name="export_pdf">Export PDF</string>
+    <string name="pdf_exported_ok">PDF successfully exported.</string>
     <string name="diagram_settings">Diagram settings</string>
     <string name="generations_display_diagram">Set how many generations to show in the diagram.</string>
     <string name="ancestors">Ancestors</string>

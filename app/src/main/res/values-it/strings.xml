@@ -65,6 +65,8 @@
     <string name="share_tree">Condividi</string>
     <string name="compare">Confronta</string>
     <string name="export_gedcom">Esporta GEDCOM</string>
+    <string name="gedcom_exported_ok">GEDCOM esportato correttamente.</string>
+    <string name="zip_exported_ok">ZIP esportato correttamente.</string>
     <string name="no_results">Nessun risultato.</string>
     <string name="really_delete_tree">Vuoi davvero eliminare questo albero?</string>
     <string name="all_ok">Tutto a posto.</string>
@@ -97,13 +99,14 @@
     <string name="date">Data</string>
     <string name="submitter">Autore</string>
     <string name="submission">Invio</string>
-    <string name="gedcom">GEDCOM</string>
     <string name="form">Forma</string>
     <string name="destination">Destinazione</string>
     <string name="time">Ora</string>
     <!-- Cartelle media -->
     <string name="media_folders">Cartelle media</string>
+    <string name="media_searched_list">I file media vengono cercati nelle cartelle elencate qui.</string>
     <string name="app_storage">Archiviazione app</string>
+    <string name="add_device_folder">Aggiungi una cartella da questo dispositivo.</string>
     <!-- Condivisione -->
     <string name="please_title">Per favore scrivi un titolo.</string>
     <string name="please_name">Per favore scrivi un nome.</string>
@@ -139,7 +142,7 @@
     <string name="confirm">Conferma</string>
     <string name="all_imported_delete">Tutti gli aggiornamenti sono stati importati.\nVuoi eliminare l\'albero importato?</string>
     <!-- Diagram -->
-    <string name="new_person">Inserisci una persona</string>
+    <string name="new_person">Aggiungi la prima persona.</string>
     <string name="card">Profilo</string>
     <string name="family_as_child">Famiglia (come figlio)</string>
     <string name="family_as_spouse">Famiglia (come coniuge)</string>
@@ -153,6 +156,8 @@
     <string name="child">Figlio/a</string>
     <string name="long_press_menu">Tieni premuto per mostrare il menu.
 \nTocca per aprire il profilo.</string>
+    <string name="export_pdf">Esporta PDF</string>
+    <string name="pdf_exported_ok">PDF esportato correttamente.</string>
     <!-- Diagram settings -->
     <string name="diagram_settings">Impostazioni diagramma</string>
     <string name="generations_display_diagram">Scegli quante generazioni mostrare nel diagramma.</string>

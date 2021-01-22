@@ -86,8 +86,7 @@
     <string name="time">Tempo</string>
     <string name="destination">Destino</string>
     <string name="form">Formato</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="media">mídia</string>
+	<string name="media">mídia</string>
     <string name="diagram">Diagrama</string>
     <string name="trees">Árvores</string>
     <string name="revert">Desfazer mudanças</string>
@@ -300,7 +299,7 @@
     <string name="family_as_spouse">Família (como cônjuge)</string>
     <string name="family_as_child">Família (como criança)</string>
     <string name="card">Perfil</string>
-    <string name="new_person">Crie uma nova pessoa</string>
+    <string name="new_person">Crie uma nova pessoa.</string>
     <string name="all_imported_delete">Todas as atualizações foram importadas.
 \nVocê quer deletar a árvore importada\?</string>
     <string name="confirm">Confirmar</string>

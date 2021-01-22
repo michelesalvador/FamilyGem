@@ -64,7 +64,7 @@ public class Esportatore {
 			return errore( e.getLocalizedMessage() );
 		}
 		Globale.gc = Alberi.leggiJson( idAlbero ); // Resetta le modifiche
-		return successo( R.string.all_ok ); // todo traduci "GEDCOM exported successfully."
+		return successo( R.string.gedcom_exported_ok );
 	}
 
 	// Scrive il GEDCOM con i media in un file ZIP
@@ -89,7 +89,7 @@ public class Esportatore {
 		if( !creaFileZip(raccolta) )
 			return false;
 		Globale.gc = Alberi.leggiJson( idAlbero );
-		return successo( R.string.all_ok );  // todo traduci "ZIP successfully exported."
+		return successo( R.string.zip_exported_ok );
 	}
 
 	// Crea un file zippato con l'albero, i settaggi e i media
@@ -111,7 +111,7 @@ public class Esportatore {
 		files.put( DocumentFile.fromFile(fileSettings), 0 );
 		if( !creaFileZip(files) )
 			return false;
-		return successo( R.string.all_ok );  // todo traduci "ZIP successfully exported."
+		return successo( R.string.zip_exported_ok );
 	}
 
 	// Restituisce il numero di file media da allegare

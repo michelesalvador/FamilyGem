@@ -85,8 +85,7 @@
     <string name="date">Data</string>
     <string name="submitter">Udostępniający</string>
     <string name="submission">Podległość</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="form">Format</string>
+	<string name="form">Format</string>
     <string name="destination">Docelowy</string>
     <string name="time">Czas</string>
     <string name="please_title">Wpisz tytuł.</string>
@@ -119,7 +118,7 @@
     <string name="accepted_news">Zaakceptowałeś %d aktualizacje:\n\t%d dodatki\n\t%d zamienniki\n\t%d usuniętych</string>
     <string name="confirm">Potwierdź</string>
     <string name="all_imported_delete">Wszystkie aktualizacje zostały zaimportowane.\nCzy chcesz usunąć zaimportowane drzewo?</string>
-    <string name="new_person">Utwórz nową osobę</string>
+    <string name="new_person">Utwórz nową osobę.</string>
     <string name="card">Proﬁl</string>
     <string name="family_as_child">Rodzina (jako dziecko)</string>
     <string name="family_as_spouse">Rodzina (jako małżonek)</string>

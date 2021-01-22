@@ -223,7 +223,7 @@
     <string name="new_media">Ny media</string>
     <string name="link_person">Link eksisterende person</string>
     <string name="new_relative">Lenk ny person</string>
-    <string name="new_person">Opprett ny person</string>
+    <string name="new_person">Opprett ny person.</string>
     <string name="confirm_news">Bekreft oppdateringer</string>
     <string name="replace">Erstatt</string>
     <string name="add">Legg til</string>
@@ -238,8 +238,7 @@
     <string name="tree_without_news">Tre uten oppdateringer</string>
     <string name="tree_with_news">Tre med oppdateringer</string>
     <string name="correctly_uploaded">Treet ble lastet opp.</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="refresh">Gjenoppfrisk</string>
+	<string name="refresh">Gjenoppfrisk</string>
     <string name="tree_imported_ok">Slektstre importert.</string>
     <string name="modify_later">Senere kan du redigere det.</string>
     <string name="accepted_news">Du godtok %d oppdateringer:

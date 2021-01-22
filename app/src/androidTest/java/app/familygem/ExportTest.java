@@ -136,7 +136,7 @@ public class ExportTest {
 		assertNull( esp.messaggioErrore );
 		assertTrue( esp.esportaGedcom(Uri.fromFile(fileGedcom)) );
 		assertTrue( fileGedcom.isFile() );
-		assertEquals( esp.messaggioSuccesso, appContext.getString(R.string.all_ok) ); // todo traduci "GEDCOM exported successfully."
+		assertEquals( esp.messaggioSuccesso, appContext.getString(R.string.gedcom_exported_ok) );
 		s.l( esp.messaggioSuccesso );
 
 		File fileGedcomZip = new File( documentsDir, "ਸੰਕੁਚਿਤ.zip" );
@@ -145,7 +145,7 @@ public class ExportTest {
 		boolean result = esp2.esportaGedcomZippato(Uri.fromFile(fileGedcomZip));
 		s.l( esp2.messaggioErrore );
 		assertTrue( result );
-		assertEquals( esp2.messaggioSuccesso, appContext.getString(R.string.all_ok) ); // todo traduci "ZIP exported successfully."
+		assertEquals( esp2.messaggioSuccesso, appContext.getString(R.string.zip_exported_ok) );
 		assertTrue( fileGedcomZip.isFile() );
 		s.l( esp2.messaggioSuccesso );
 	}
@@ -161,7 +161,7 @@ public class ExportTest {
 		boolean result = esp.esportaBackupZip( null, -1, Uri.fromFile(fileBackup) );
 		s.l( esp.messaggioErrore );
 		assertTrue( result );
-		assertEquals( esp.messaggioSuccesso, appContext.getString(R.string.all_ok) ); // todo traduci "ZIP exported successfully."
+		assertEquals( esp.messaggioSuccesso, appContext.getString(R.string.zip_exported_ok) );
 		assertTrue( fileBackup.isFile() );
 		s.l( esp.messaggioSuccesso );
 	}

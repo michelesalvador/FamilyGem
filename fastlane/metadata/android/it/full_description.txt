@@ -1,0 +1,4 @@
+Family Gem è uno strumento che ti permette di creare alberi genealogici completi.
+Puoi inserire nomi, date, luoghi, eventi e foto nei profili delle persone e soprattutto stabilire le relazioni di parentela tra di loro, e automagicamente il tuo albero genealogico prenderà forma.
+Family Gem può scambiare alberi con altri programmi tramite file GEDCOM.
+Una volta creato l'albero puio condividerlo con i tuoi parenti.

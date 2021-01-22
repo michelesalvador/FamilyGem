@@ -114,7 +114,7 @@
     <string name="family_as_spouse">Familie (als echtgenoot)</string>
     <string name="family_as_child">Familie (als kind)</string>
     <string name="card">Profiel</string>
-    <string name="new_person">Creëer een nieuwe persoon</string>
+    <string name="new_person">Creëer een nieuwe persoon.</string>
     <string name="all_imported_delete">Alle updates zijn geïmporteerd.
 \nWilt u de geïmporteerde boom verwijderen\?</string>
     <string name="confirm">Bevestigen</string>
@@ -151,8 +151,7 @@
     <string name="time">Tijd</string>
     <string name="destination">Bestemming</string>
     <string name="form">Vorm</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="submission">Inzending</string>
+	<string name="submission">Inzending</string>
     <string name="submitter">Indiener</string>
     <string name="date">Datum</string>
     <string name="fax">Fax</string>

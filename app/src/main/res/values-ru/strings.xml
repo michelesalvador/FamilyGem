@@ -181,8 +181,7 @@
     <string name="this_is_root">%s это главное лицо дерева.</string>
     <string name="relatives">Родственники</string>
     <string name="events">Атрибуты</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="download_shared_tree">Скачать общее дерево</string>
+	<string name="download_shared_tree">Скачать общее дерево</string>
     <string name="submitters">Отправители</string>
     <string name="existing_family">Семья уже существует</string>
     <string name="new_family_of">Новая семья %s</string>
@@ -212,7 +211,7 @@
     <string name="family_as_spouse">Семья (как супруг(а))</string>
     <string name="family_as_child">Семья (как ребенок)</string>
     <string name="card">Профиль</string>
-    <string name="new_person">Создать нового человека</string>
+    <string name="new_person">Создать нового человека.</string>
     <string name="all_imported_delete">Все обновления были импортированы.
 \nВы хотите удалить импортированное дерево\?</string>
     <string name="confirm">Подтвердить</string>

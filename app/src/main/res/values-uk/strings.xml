@@ -67,7 +67,7 @@
     <string name="family_as_spouse">Сім\'я (як подружжя)</string>
     <string name="family_as_child">Сім\'я (як дитина)</string>
     <string name="card">\"Профіль\" - це головна сторінка людини. Він відображає ім’я та фотографії людини та містить 3 вклад</string>
-    <string name="new_person">Створити нову особу</string>
+    <string name="new_person">Створити нову особу.</string>
     <string name="all_imported_delete">Усі оновлення імпортовано.
 \nВидалити імпортоване дерево\?</string>
     <string name="confirm">Підтвердьте</string>
@@ -106,8 +106,7 @@
     <string name="time">Час</string>
     <string name="destination">Пункт призначення</string>
     <string name="form">Форма</string>
-    <string name="gedcom">GEDCOM</string>
-    <string name="submission">Подання</string>
+	<string name="submission">Подання</string>
     <string name="submitter">Відправник</string>
     <string name="date">Дата</string>
     <string name="fax">Факс</string>
