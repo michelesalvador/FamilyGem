@@ -147,7 +147,7 @@
     <string name="child">Child</string>
     <string name="long_press_menu">Long press to display the menu.\nTap to open the profile.</string>
     <string name="export_pdf">Export PDF</string>
-    <string name="pdf_exported_ok">PDF successfully exported.</string>
+    <string name="pdf_exported_ok">PDF exported.</string>
     <string name="diagram_settings">Diagram settings</string>
     <string name="generations_display_diagram">Set how many generations to show in the diagram.</string>
     <string name="ancestors">Ancestors</string>
