@@ -208,7 +208,7 @@
     <string name="value">Value</string>
     <string name="type">Type</string>
     <string name="prefix">Prefix</string>
-    <string name="given">Given</string>
+    <string name="given">Given name</string>
     <string name="nickname">Nickname</string>
     <string name="surname_prefix">Surname prefix</string>
     <string name="suffix">Suffix</string>

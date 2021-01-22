@@ -26,9 +26,9 @@
     <string name="given">Vorname</string>
     <string name="cant_understand_uri">Die empfangene URI ist nicht bekannt.</string>
     <string name="something_wrong">Es ist ein Fehler aufgetreten.</string>
-    <string name="repository_note">Anmerkungs Archiv</string>
-    <string name="source_note">Anmerkungs Quelle</string>
-    <string name="new_source_note">Neue Anmerkungs Quelle</string>
+    <string name="repository_note">Archiv-Anmerkung</string>
+    <string name="source_note">Quellen-Anmerkung</string>
+    <string name="new_source_note">Neue Quellen-Anmerkung</string>
     <string name="link_shared_note">Verbundene geteilte Anmerkung</string>
     <string name="new_shared_note">Neue geteilte Anmerkung</string>
     <string name="new_note">Neue Anmerkung</string>
@@ -326,4 +326,6 @@
     <string name="a_new_tree">Neuer Stammbaum</string>
     <string name="family_gem_example">Family Gem Beispiel</string>
     <string name="download_shared_tree">Geteilten Stammbaum herunterladen</string>
+    <string name="app_storage">Programm-Speicher</string>
+    <string name="sure_delete">Sicher\?</string>
 </resources>
