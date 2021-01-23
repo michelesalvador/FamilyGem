@@ -100,7 +100,7 @@
     <string name="destination">Destination</string>
     <string name="time">Time</string>
     <string name="media_folders">Media folders</string>
-    <string name="media_searched_list">Searching for media files is conducted from these folders.</string>
+    <string name="media_searched_list">Media files are searched inside these folders.</string>
     <string name="app_storage">App storage</string>
     <string name="add_device_folder">Add a folder from this device.</string>
     <string name="please_title">Please write a title.</string>
