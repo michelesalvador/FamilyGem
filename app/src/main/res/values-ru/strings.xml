@@ -21,7 +21,7 @@
     <string name="phonetic">Фонетический</string>
     <string name="aka">Также известен как</string>
     <string name="married_name">Замужнее имя</string>
-    <string name="given">Дано</string>
+    <string name="given">Имя</string>
     <string name="link_repository">Ссылка на репозиторий</string>
     <string name="link_source">Источник ссылки</string>
     <string name="link_shared_note">Ссылка на общую заметку</string>
@@ -181,7 +181,7 @@
     <string name="this_is_root">%s это главное лицо дерева.</string>
     <string name="relatives">Родственники</string>
     <string name="events">Атрибуты</string>
-	<string name="download_shared_tree">Скачать общее дерево</string>
+    <string name="download_shared_tree">Скачать общее дерево</string>
     <string name="submitters">Отправители</string>
     <string name="existing_family">Семья уже существует</string>
     <string name="new_family_of">Новая семья %s</string>
@@ -299,7 +299,7 @@
     <string name="tree_created">Создано новое дерево.</string>
     <string name="create">Создать</string>
     <string name="name_of_tree">Название дерева</string>
-    <string name="modify_later">Позже вы сможете его отредактировать.</string>
+    <string name="modify_later">Позже Вы сможете его отредактировать.</string>
     <string name="import_backup">Восстановить ZIP-копию</string>
     <string name="import_gedcom">Импорт GEDCOM-файла</string>
     <string name="download_example">Скачать пример</string>
@@ -325,4 +325,5 @@
     <string name="cancel">Отмена</string>
     <string name="delete">Удалить</string>
     <string name="tagline">Создайте свое генеалогическое древо</string>
+    <string name="sure_delete">Вы уверены\?</string>
 </resources>
