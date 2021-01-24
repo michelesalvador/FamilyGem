@@ -1,2 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="something_wrong">Vyskytla se chyba.</string>
+    <string name="change_date">Datum změny</string>
+    <string name="done">Hotovo</string>
+    <string name="cancel">Zrušit</string>
+    <string name="empty_family_delete">Zbývají prázdné rodiny.
+\nChcete je odstranit\?</string>
+    <string name="delete">Odstranit</string>
+    <string name="tagline">Vytvořte si vlastní rodokmen</string>
+</resources>
