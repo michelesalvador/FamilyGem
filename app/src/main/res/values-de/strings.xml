@@ -246,7 +246,7 @@
     <string name="time">Uhrzeit</string>
     <string name="destination">Ziel</string>
     <string name="form">Format</string>
-	<string name="submission">Übertragung</string>
+    <string name="submission">Übertragung</string>
     <string name="date">Datum</string>
     <string name="fax">Fax</string>
     <string name="telephone">Telefon</string>
@@ -327,4 +327,10 @@
     <string name="download_shared_tree">Geteilten Stammbaum herunterladen</string>
     <string name="app_storage">Programm-Speicher</string>
     <string name="sure_delete">Sicher\?</string>
+    <string name="pdf_exported_ok">PDF exportiert.</string>
+    <string name="export_pdf">PDF exportieren</string>
+    <string name="add_device_folder">Einen Ordner von diesem Gerät hinzufügen.</string>
+    <string name="media_searched_list">Mediendateien werden in diesen Ordnern durchsucht.</string>
+    <string name="zip_exported_ok">ZIP exportiert.</string>
+    <string name="gedcom_exported_ok">GEDCOM exportiert.</string>
 </resources>
