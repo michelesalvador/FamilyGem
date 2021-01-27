@@ -326,4 +326,11 @@
     <string name="delete">Удалить</string>
     <string name="tagline">Создайте свое генеалогическое древо</string>
     <string name="sure_delete">Вы уверены\?</string>
+    <string name="pdf_exported_ok">PDF экспортирован.</string>
+    <string name="export_pdf">Экспорт PDF</string>
+    <string name="add_device_folder">Добавьте папку из этого устройства.</string>
+    <string name="app_storage">Хранилище приложения</string>
+    <string name="media_searched_list">Мультимедийные файлы ищутся внутри этих папок.</string>
+    <string name="zip_exported_ok">ZIP экспортирован.</string>
+    <string name="gedcom_exported_ok">GEDCOM экспортирован.</string>
 </resources>
