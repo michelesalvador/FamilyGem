@@ -32,7 +32,7 @@
     <string name="sure_delete">Naozaj odstrániť\?</string>
     <string name="delete">Odstrániť</string>
     <string name="tagline">Vytvorte si svoj rodokmeň</string>
-    <string name="not_granted">%s neoverený</string>
+    <string name="not_granted">%s neoverený.</string>
     <string name="date_phrase">Slovom</string>
     <string name="which_family_add_child">Do ktorej rodiny pridať dieťa\?</string>
     <string name="which_family_add_spouse">Do ktorej rodiny pridať manžela/manželku\?</string>
@@ -222,7 +222,7 @@
     <string name="source_citation">Zdroj citácie</string>
     <string name="cause">Príčina</string>
     <string name="place">Miesto</string>
-    <string name="maiden">Slobodná/ý</string>
+    <string name="maiden">Rodená/ý</string>
     <string name="immigrant">Prisťahovaná/ý</string>
     <string name="phonetic">Foneticky</string>
     <string name="aka">Známa/y ako</string>
@@ -264,7 +264,7 @@
     <string name="delete_imported_tree">Odstrániť importovaný rodokmeň</string>
     <string name="tree_without_news">Rodokmeň bez aktualizácií</string>
     <string name="tree_with_news">Rodokmeň s aktualizáciami</string>
-    <string name="media">Médium</string>
+    <string name="media">Médiá</string>
     <string name="something_wrong">Vyskytla sa chyba.</string>
     <string name="ideally_recipient">Ideálne príjemca zdieľania.</string>
     <string name="app_storage">Úložisko aplikácie</string>
