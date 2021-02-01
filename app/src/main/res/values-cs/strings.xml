@@ -13,10 +13,10 @@
     <string name="saved">Uloženo</string>
     <string name="birth_place">Místo narození</string>
     <string name="really_delete_family">Tato rodina bude odstraněna, ale její členové nebudou odstraněni.</string>
-    <string name="repository">Pramen</string>
-    <string name="repository_note">Poznámka-pramen</string>
-    <string name="inexistent_repository_citation">Chybějící pramen citace</string>
-    <string name="repository_citation">Pramen citace</string>
+    <string name="repository">Archiv</string>
+    <string name="repository_note">Poznámka-archiv</string>
+    <string name="inexistent_repository_citation">Chybějící archiv citace</string>
+    <string name="repository_citation">Archiv citace</string>
     <string name="abbreviation">Zkrácený název</string>
     <string name="inexistent_source_citation">Chybějící pramen citace</string>
     <string name="source_citation">Pramen citace</string>
@@ -135,7 +135,7 @@
     <string name="cause">Příčina</string>
     <string name="place">Místo</string>
     <string name="married">Vdaná/Ženatý</string>
-    <string name="maiden">Svobodná/ý</string>
+    <string name="maiden">Rozená/ý</string>
     <string name="immigrant">Přistěhovaná/ý</string>
     <string name="phonetic">Foneticky</string>
     <string name="romanized">Romanizované</string>
@@ -192,10 +192,10 @@
     <string name="backup_invalid">Tato záloha je neplatná.</string>
     <string name="crop">Oříznout</string>
     <string name="choose_file">Vybrat soubor</string>
-    <string name="choose_repository">Vybrat pramen</string>
+    <string name="choose_repository">Vybrat archiv</string>
     <string name="choose_source">Vybrat pramen</string>
-    <string name="link_repository">Propojit pramen</string>
-    <string name="new_repository">Nový pramen</string>
+    <string name="link_repository">Propojit archiv</string>
+    <string name="new_repository">Nový archiv</string>
     <string name="son">Syn</string>
     <string name="daughter">Dcera</string>
     <string name="half_sister">Nevlastní sestra</string>
@@ -321,7 +321,7 @@
     <string name="families">Rodiny</string>
     <string name="notes">Poznámky</string>
     <string name="sources">Prameny</string>
-    <string name="media">Médium</string>
+    <string name="media">Média</string>
     <string name="trees">Rodokmeny</string>
     <string name="revert">Vrátit změny zpět</string>
     <string name="existing_family">Již existující rodina</string>
