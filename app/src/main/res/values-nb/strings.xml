@@ -209,7 +209,7 @@
     <string name="crop">Beskjær</string>
     <string name="half_sister">Halvsøster</string>
     <string name="half_brother">Halvbror</string>
-    <string name="new_source_note">Ny notiskilde</string>
+    <string name="new_source_note">Ny notis-kilde</string>
     <string name="link_shared_note">Lenk delt merknad</string>
     <string name="new_shared_note">Ny delt merknad</string>
     <string name="new_note">Ny merknad</string>
@@ -330,7 +330,7 @@
     <string name="pdf_exported_ok">PDF eksportert.</string>
     <string name="zip_exported_ok">ZIP eksportert.</string>
     <string name="gedcom_exported_ok">GEDCOM eksportert.</string>
-    <string name="media_searched_list">Mediafiles søkes etter i mappene som listes opp her.</string>
+    <string name="media_searched_list">Det søkes etter mediefiler i disse mappene.</string>
     <string name="export_pdf">Eksporter PDF</string>
     <string name="add_device_folder">Legg til en mappe fra denne enheten.</string>
 </resources>
