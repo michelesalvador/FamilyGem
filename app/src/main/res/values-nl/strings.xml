@@ -24,7 +24,7 @@
     <string name="suffix">Achtervoegsel</string>
     <string name="surname_prefix">Achternaam voorvoegsel</string>
     <string name="nickname">Bijnaam</string>
-    <string name="given">Gegeven</string>
+    <string name="given">Voornaam</string>
     <string name="prefix">Titel</string>
     <string name="type">Type</string>
     <string name="value">Waarde</string>
@@ -151,7 +151,7 @@
     <string name="time">Tijd</string>
     <string name="destination">Bestemming</string>
     <string name="form">Vorm</string>
-	<string name="submission">Inzending</string>
+    <string name="submission">Inzending</string>
     <string name="submitter">Indiener</string>
     <string name="date">Datum</string>
     <string name="fax">Fax</string>
@@ -325,4 +325,12 @@
     <string name="a_new_tree">Een nieuwe stamboom</string>
     <string name="family_gem_example">Family Gem voorbeeld</string>
     <string name="download_shared_tree">Download de gedeelde stamboom</string>
+    <string name="pdf_exported_ok">PDF geëxporteerd.</string>
+    <string name="export_pdf">PDF exporteren</string>
+    <string name="add_device_folder">Voeg een map toe vanaf dit apparaat.</string>
+    <string name="app_storage">Applicatie-opslag</string>
+    <string name="media_searched_list">Mediabestanden worden doorzocht in deze mappen.</string>
+    <string name="zip_exported_ok">ZIP geëxporteerd.</string>
+    <string name="gedcom_exported_ok">GEDCOM geëxporteerd.</string>
+    <string name="sure_delete">Echt verwijderen\?</string>
 </resources>
