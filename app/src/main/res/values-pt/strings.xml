@@ -86,7 +86,7 @@
     <string name="time">Tempo</string>
     <string name="destination">Destino</string>
     <string name="form">Formato</string>
-	<string name="media">mídia</string>
+    <string name="media">mídia</string>
     <string name="diagram">Diagrama</string>
     <string name="trees">Árvores</string>
     <string name="revert">Desfazer mudanças</string>
@@ -106,7 +106,7 @@
     <string name="cancel">Cancelar</string>
     <string name="delete">Apagar</string>
     <string name="tagline">Crie sua própria árvore genealógica</string>
-    <string name="given">Dado</string>
+    <string name="given">Nome dado</string>
     <string name="sibling">Irmã ou Irmão</string>
     <string name="siblings">Irmãos</string>
     <string name="parent">Pai ou Mãe</string>
@@ -327,4 +327,10 @@
     <string name="sharing_completed">Compartilhamento concluído.</string>
     <string name="app_storage">Armazenamento do aplicativo</string>
     <string name="sure_delete">Você tem certeza\?</string>
+    <string name="pdf_exported_ok">PDF exportado.</string>
+    <string name="export_pdf">Exportar PDF</string>
+    <string name="add_device_folder">Adicione uma pasta deste dispositivo.</string>
+    <string name="media_searched_list">Os arquivos de mídia são pesquisados dentro dessas pastas.</string>
+    <string name="zip_exported_ok">ZIP exportado.</string>
+    <string name="gedcom_exported_ok">GEDCOM exportado.</string>
 </resources>
