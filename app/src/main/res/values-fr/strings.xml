@@ -215,7 +215,7 @@
     <string name="divorce">Divorce</string>
     <string name="marriage">Mariage</string>
     <string name="num_children">%d enfants</string>
-    <string name="state"/>
+    <string name="state">État/Province</string>
     <string name="country">Pays</string>
     <string name="city">Ville</string>
     <string name="postal_code">Code postal</string>
@@ -233,7 +233,7 @@
     <string name="format">Format</string>
     <string name="shared_media">Média partagé</string>
     <string name="repository">Archive</string>
-    <string name="repository_note">Référence de citation en texte seulement, sans lien.</string>
+    <string name="repository_note">Référence de citation en texte seulement, sans lien</string>
     <string name="inexistent_repository_citation">Citation d\'archive manquante</string>
     <string name="cited_by">Cité dans</string>
     <string name="reference_number">Numéro de référence</string>
@@ -315,7 +315,7 @@
     <string name="changes_submitter">Validateur de ces changements</string>
     <string name="ideally_recipient">En principe, le réceptionnaire de cet échange.</string>
     <string name="add_device_folder">Ajouter un répertoire de cet appareil.</string>
-    <string name="app_storage">App storage</string>
+    <string name="app_storage">Stockage des applications</string>
     <string name="media_searched_list">Les fichier de médias sont recherchés dans ces répertoires.</string>
     <string name="destination">Destination</string>
     <string name="submission">Validation</string>
