@@ -226,14 +226,14 @@
     <string name="used_by">Utilisé par</string>
     <string name="repository_citation">Citation d\'archive</string>
     <string name="choose_repository">Choisir une archive</string>
-    <string name="link_repository">Relier la référence</string>
+    <string name="link_repository">Relier une archive</string>
     <string name="new_repository">Nouvelle archive</string>
     <string name="scrapbook">Cahier</string>
     <string name="primary">Première</string>
     <string name="format">Format</string>
     <string name="shared_media">Média partagé</string>
     <string name="repository">Archive</string>
-    <string name="repository_note">Référence de citation en texte seulement, sans lien</string>
+    <string name="repository_note">Archive-note</string>
     <string name="inexistent_repository_citation">Citation d\'archive manquante</string>
     <string name="cited_by">Cité dans</string>
     <string name="reference_number">Numéro de référence</string>
@@ -265,7 +265,7 @@
     <string name="author">Auteur</string>
     <string name="title">Titre</string>
     <string name="abbreviation">Titre court</string>
-    <string name="source_note">Source</string>
+    <string name="source_note">Source-note</string>
     <string name="inexistent_source_citation">Manque la citation d\'une source</string>
     <string name="source_citation">Citation d\'une source</string>
     <string name="user_id">ID de l\'utilisateur</string>
@@ -280,7 +280,7 @@
     <string name="move_up">Monter</string>
     <string name="primary_media">Média principal</string>
     <string name="link_source">Relier la source</string>
-    <string name="new_source_note">Nouvelle source</string>
+    <string name="new_source_note">Nouvelle source-note</string>
     <string name="link_shared_note">Relier une note partagée</string>
     <string name="new_shared_note">Nouvelle note partagée</string>
     <string name="link_shared_media">Relier un média partagé</string>
@@ -320,7 +320,7 @@
     <string name="destination">Destination</string>
     <string name="submission">Validation</string>
     <string name="characrter_set">Caractères</string>
-    <string name="update_header">mise à jour de l\'entête</string>
+    <string name="update_header">Mettre à jour l\'entête</string>
     <string name="create_header">Créer un entête</string>
     <string name="header">Entête</string>
     <string name="root">Racine</string>
