@@ -146,7 +146,7 @@
     <string name="errors_found">%d eraroj trovita.</string>
     <string name="all_ok">Ĉio estas bone.</string>
     <string name="really_delete_tree">Ĉu vi certe volas forigi ĉi tiun arbon\?</string>
-    <string name="no_results">Neniu rezulto</string>
+    <string name="no_results">Neniu rezulto.</string>
     <string name="zip_exported_ok">ZIP elportita.</string>
     <string name="gedcom_exported_ok">GEDCOM elportita.</string>
     <string name="export_gedcom">Elporti GEDCOM</string>
