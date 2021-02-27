@@ -62,7 +62,7 @@
     <string name="date">Fecha</string>
     <string name="submitter">Remitente</string>
     <string name="submission">Envío</string>
-	<string name="form">Forma</string>
+    <string name="form">Forma</string>
     <string name="destination">Destino</string>
     <string name="time">Horas</string>
     <string name="please_title">Por favor escribe un título.</string>
@@ -318,4 +318,12 @@
     <string name="a_new_tree">Un nuevo árbol genealógico</string>
     <string name="family_gem_example">Ejemplo de Family Gem</string>
     <string name="download_shared_tree">Descarga el árbol compartido</string>
+    <string name="sure_delete">Realmente eliminar\?</string>
+    <string name="pdf_exported_ok">PDF exportado.</string>
+    <string name="export_pdf">Exportar PDF</string>
+    <string name="add_device_folder">Añadir una carpeta de este aparato.</string>
+    <string name="app_storage">Almacenamiento de aplicación</string>
+    <string name="media_searched_list">Limas de medios están buscadas dentro de estas carpetas.</string>
+    <string name="zip_exported_ok">ZIP exportado.</string>
+    <string name="gedcom_exported_ok">GEDCOM exportado.</string>
 </resources>

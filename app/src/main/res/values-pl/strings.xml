@@ -85,7 +85,7 @@
     <string name="date">Data</string>
     <string name="submitter">Udostępniający</string>
     <string name="submission">Podległość</string>
-	<string name="form">Format</string>
+    <string name="form">Format</string>
     <string name="destination">Docelowy</string>
     <string name="time">Czas</string>
     <string name="please_title">Wpisz tytuł.</string>
@@ -320,4 +320,10 @@
     <string name="download_shared_tree">Pobierz drzewo udostępnione</string>
     <string name="app_storage">Magazyn aplikacji</string>
     <string name="sure_delete">Jesteś pewien\?</string>
+    <string name="pdf_exported_ok">Wyeksportowano plik PDF.</string>
+    <string name="export_pdf">Eksportuj do PDF</string>
+    <string name="add_device_folder">Dodaj folder z tego urządzenia.</string>
+    <string name="media_searched_list">Pliki multimedialne są przeszukiwane wewnątrz tych folderów.</string>
+    <string name="zip_exported_ok">Wyeksportowano ZIP.</string>
+    <string name="gedcom_exported_ok">Wyeksportowano GEDCOM.</string>
 </resources>

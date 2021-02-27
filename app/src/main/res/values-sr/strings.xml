@@ -78,7 +78,7 @@
     <string name="format">Format</string>
     <string name="shared_media">Deljeni medij</string>
     <string name="repository">Skladište</string>
-    <string name="repository_note">Napomena o spremištu</string>
+    <string name="repository_note">Napomena bez spremišta</string>
     <string name="inexistent_repository_citation">Bez citiranja skladišta</string>
     <string name="repository_citation">Citiranje skladišta</string>
     <string name="cited_by">Citirano u</string>
@@ -94,7 +94,7 @@
     <string name="certainty">Pouzdanost</string>
     <string name="text">Tekst</string>
     <string name="page">Stranica</string>
-    <string name="source_note">Napomena uz izvor</string>
+    <string name="source_note">Napomena bez izvora</string>
     <string name="inexistent_source_citation">Bez citiranja izvora</string>
     <string name="source_citation">Citiranje izvora</string>
     <string name="user_id">Korisnički ID</string>
@@ -113,7 +113,7 @@
     <string name="suffix">Sufiks</string>
     <string name="surname_prefix">Prefiks u prezimenu</string>
     <string name="nickname">Nadimak</string>
-    <string name="given">Ime</string>
+    <string name="given">Kršteno ime</string>
     <string name="prefix">Prefiks</string>
     <string name="type">Vrsta</string>
     <string name="value">Vrednost</string>
@@ -143,7 +143,7 @@
     <string name="primary_media">Primarni medij</string>
     <string name="link_source">Poveži izvor</string>
     <string name="new_source">Novi izvor</string>
-    <string name="new_source_note">Napomena uz novi izvor</string>
+    <string name="new_source_note">Nova napomena-izvor</string>
     <string name="source">Izvor</string>
     <string name="link_shared_note">Poveži deljenu napomenu</string>
     <string name="new_shared_note">Nova deljena napomena</string>
@@ -231,7 +231,7 @@
     <string name="time">Vrijeme</string>
     <string name="destination">Odredište</string>
     <string name="form">Obrazac</string>
-	<string name="submission">Podnesak</string>
+    <string name="submission">Podnesak</string>
     <string name="submitter">Podnosilac</string>
     <string name="date">Datum</string>
     <string name="fax">Faks</string>
@@ -322,8 +322,15 @@
     <string name="something_wrong">Došlo je do neke greške.</string>
     <string name="change_date">Promeni datum</string>
     <string name="done">Gotovo</string>
-    <string name="cancel">Prekini</string>
+    <string name="cancel">Ukinuti</string>
     <string name="delete">Izbriši</string>
     <string name="tagline">Stvori vlastito porodično stablo</string>
     <string name="sure_delete">Da li ste sigurni\?</string>
+    <string name="media_searched_list">U ovim mapama se pretražuju medijske datoteke.</string>
+    <string name="pdf_exported_ok">PDF izvezen.</string>
+    <string name="export_pdf">Izvoz PDF</string>
+    <string name="add_device_folder">Dodati direktoriju sa ovogo urežaja.</string>
+    <string name="app_storage">Skladište aplikacija</string>
+    <string name="gedcom_exported_ok">GEDCOM izvezen.</string>
+    <string name="zip_exported_ok">ZIP izvezen.</string>
 </resources>
