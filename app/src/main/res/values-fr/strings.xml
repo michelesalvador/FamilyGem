@@ -219,9 +219,9 @@
     <string name="country">Pays</string>
     <string name="city">Ville</string>
     <string name="postal_code">Code postal</string>
-    <string name="line_3">Ligne 3</string>
-    <string name="line_2">Ligne 2</string>
-    <string name="line_1">Ligne 1</string>
+    <string name="line_3">Rangée 3</string>
+    <string name="line_2">Rangée 2</string>
+    <string name="line_1">Rangée 1</string>
     <string name="into">Dans</string>
     <string name="used_by">Utilisé par</string>
     <string name="repository_citation">Citation d\'archive</string>
