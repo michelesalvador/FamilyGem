@@ -245,9 +245,9 @@
     <string name="state">Область/республіка</string>
     <string name="city">Місто</string>
     <string name="postal_code">Поштовий індекс</string>
-    <string name="line_3">Лінія 3</string>
-    <string name="line_2">Лінія 2</string>
-    <string name="line_1">Лінія 1</string>
+    <string name="line_3">Рядок 3</string>
+    <string name="line_2">Рядок 2</string>
+    <string name="line_1">Рядок 1</string>
     <string name="used_by">Використаний</string>
     <string name="blob">Крапля</string>
     <string name="slideshow">Слайд-шоу</string>
