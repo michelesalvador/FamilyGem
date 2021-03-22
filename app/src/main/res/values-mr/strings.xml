@@ -1,2 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="download">डाउनलोड</string>
+    <string name="you_can_download">तुमच्याशी सामायिक केलेली वंशावळ तुम्ही आता डाउनलोड करू शकता.</string>
+    <string name="a_new_tree">नवीन वंशावळ</string>
+    <string name="family_gem_example">Family Gem उदाहरण</string>
+    <string name="simpsons_tree">सिम्पन्सन्सची वंशावळ</string>
+    <string name="tree">वंशावळ</string>
+    <string name="invalid_gedcom">अवैध GEDCOM.</string>
+    <string name="backup_invalid">हा बॅकअप अवैध आहे.</string>
+    <string name="old_backup_overwrite">हा एक जुन्या प्रकारचा बॅकअप आहे.
+\nसर्व विद्यमान वंशावळी अधिलिखित केली जातील!पुढे जायचे का \?</string>
+    <string name="warning">चेतावणी</string>
+    <string name="tree_imported_ok">वंशावळ यशस्वीरित्या आयात केली.</string>
+    <string name="tree_created">नवीन वंशावळ तयार केली.</string>
+    <string name="create">तयार करा</string>
+    <string name="name_of_tree">वंशावळीचे शीर्षक</string>
+    <string name="modify_later">नंतर आपण ते संपादित करू शकता.</string>
+    <string name="import_backup">झिप बॅकअप पुनर्प्राप्त करा</string>
+    <string name="import_gedcom">GEDCOM फाईल आयात करा</string>
+    <string name="download_example">एक उदाहरण डाउनलोड करा</string>
+    <string name="empty_tree">रिक्त वंशावळ सुरू करा</string>
+    <string name="complex_tree_advanced_tools">ही वंशावळ खूपच गुंतागुंतीची दिसते.
+\nअधिक चांगल्या प्रकारे व्यवस्थापित करण्यासाठी, आपण प्रगत साधने दर्शवू इच्छिता\?</string>
+    <string name="download_shared_tree">शेअर केलेली वंशावळ डाउनलोड करा</string>
+    <string name="new_tree">नवीन वंशावळ</string>
+    <string name="submitters">प्रस्तुतक</string>
+    <string name="version_name">आवृत्ती %s</string>
+    <string name="repositories">भांडार</string>
+    <string name="families">कुटुंबे</string>
+    <string name="notes">नोंदी</string>
+    <string name="sources">स्त्रोत</string>
+    <string name="media">माध्यम</string>
+    <string name="diagram">चित्र</string>
+    <string name="trees">वंशावळी</string>
+    <string name="revert">बदल पूर्ववत करा</string>
+    <string name="drawer_close">नेव्हिगेशन ड्रॉवर बंद करा</string>
+    <string name="drawer_open">नेव्हिगेशन ड्रॉवर उघडा</string>
+    <string name="existing_family">आधीपासून विद्यमान कुटुंब</string>
+    <string name="new_family_of">नवीन %sव्यक्तींचे कुटुंब</string>
+    <string name="extension">विस्तार</string>
+    <string name="sources_number">एकूण स्त्रोत</string>
+    <string name="citations">अवतरण</string>
+    <string name="make_default">मुख्य प्रस्तुतक</string>
+    <string name="cant_understand_uri">मिळालेली URI समजली नाही.</string>
+    <string name="something_wrong">काहीतरी गडबड झाली.</string>
+    <string name="change_date">दिनांक बदला</string>
+    <string name="done">केले</string>
+    <string name="cancel">रद्द करा</string>
+    <string name="sure_delete">नक्की\?</string>
+    <string name="delete">काढून टाका</string>
+    <string name="tagline">तुमची वंशावळ बनवा</string>
+</resources>
