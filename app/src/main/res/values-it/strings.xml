@@ -65,8 +65,8 @@
     <string name="share_tree">Condividi</string>
     <string name="compare">Confronta</string>
     <string name="export_gedcom">Esporta GEDCOM</string>
-    <string name="gedcom_exported_ok">GEDCOM esportato correttamente.</string>
-    <string name="zip_exported_ok">ZIP esportato correttamente.</string>
+    <string name="gedcom_exported_ok">GEDCOM esportato.</string>
+    <string name="zip_exported_ok">ZIP esportato.</string>
     <string name="no_results">Nessun risultato.</string>
     <string name="really_delete_tree">Vuoi davvero eliminare questo albero?</string>
     <string name="all_ok">Tutto a posto.</string>
@@ -104,7 +104,7 @@
     <string name="time">Ora</string>
     <!-- Cartelle media -->
     <string name="media_folders">Cartelle media</string>
-    <string name="media_searched_list">I file media vengono cercati nelle cartelle elencate qui.</string>
+    <string name="media_searched_list">I file media vengono cercati dentro a queste cartelle.</string>
     <string name="app_storage">Archiviazione app</string>
     <string name="add_device_folder">Aggiungi una cartella da questo dispositivo.</string>
     <!-- Condivisione -->
@@ -157,7 +157,7 @@
     <string name="long_press_menu">Tieni premuto per mostrare il menu.
 \nTocca per aprire il profilo.</string>
     <string name="export_pdf">Esporta PDF</string>
-    <string name="pdf_exported_ok">PDF esportato correttamente.</string>
+    <string name="pdf_exported_ok">PDF esportato.</string>
     <!-- Diagram settings -->
     <string name="diagram_settings">Impostazioni diagramma</string>
     <string name="generations_display_diagram">Scegli quante generazioni mostrare nel diagramma.</string>
