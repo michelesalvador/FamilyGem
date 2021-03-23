@@ -24,8 +24,6 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:ellipsize="end"
-			android:textSize="16sp"
-			android:textColor="#000"
 			android:maxLines="8"/>
 	</LinearLayout>
 </androidx.cardview.widget.CardView>

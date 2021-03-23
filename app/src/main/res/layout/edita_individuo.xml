@@ -59,21 +59,21 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
-			android:text="@string/male" />
+			android:text="@string/male"/>
 
 		<RadioButton
 			android:id="@+id/sesso2"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
-			android:text="@string/female" />
+			android:text="@string/female"/>
 
 		<RadioButton
 			android:id="@+id/sesso3"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
-			android:text="@string/unknown" />
+			android:text="@string/unknown"/>
 	</RadioGroup>
 
 	<com.google.android.material.textfield.TextInputLayout

@@ -15,6 +15,7 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import java.util.Collections;
 import java.util.List;
+import app.familygem.constants.Gender;
 import app.familygem.dettaglio.Famiglia;
 import static app.familygem.Globale.gc;
 
@@ -83,35 +84,35 @@ public class IndividuoFamiliari extends Fragment {
 		return vistaFamiglia;
 	}
 
-	void creaTessera( final Person p, int relazione, Family fam ) {
+	void creaTessera(final Person p, int relation, Family fam) {
 		LinearLayout scatola = vistaFamiglia.findViewById( R.id.contenuto_scheda );
-		int ruolo = 0;
-		if( U.sesso(p) == 1 ) {
-			switch( relazione ) {
-				case 1: ruolo = R.string.father; break;
-				case 2: ruolo = R.string.husband; break;
-				case 3: ruolo = R.string.brother; break;
-				case 4: ruolo = R.string.half_brother; break;
-				case 5: ruolo = R.string.son;
+		int role = 0;
+		if( Gender.isMale(p) ) {
+			switch( relation ) {
+				case 1: role = R.string.father; break;
+				case 2: role = R.string.husband; break;
+				case 3: role = R.string.brother; break;
+				case 4: role = R.string.half_brother; break;
+				case 5: role = R.string.son;
 			}
-		} else if( U.sesso(p) == 2 ) {
-			switch( relazione ) {
-				case 1: ruolo = R.string.mother; break;
-				case 2: ruolo = R.string.wife; break;
-				case 3:	ruolo = R.string.sister; break;
-				case 4: ruolo = R.string.half_sister; break;
-				case 5: ruolo = R.string.daughter;
+		} else if( Gender.isFemale(p) ) {
+			switch( relation ) {
+				case 1: role = R.string.mother; break;
+				case 2: role = R.string.wife; break;
+				case 3:	role = R.string.sister; break;
+				case 4: role = R.string.half_sister; break;
+				case 5: role = R.string.daughter;
 			}
 		} else {
-			switch( relazione ) {
-				case 1: ruolo = R.string.parent; break;
-				case 2: ruolo = R.string.spouse; break;
-				case 3:	ruolo = R.string.sibling; break;
-				case 4: ruolo = R.string.half_sibling; break;
-				case 5: ruolo = R.string.child;
+			switch( relation ) {
+				case 1: role = R.string.parent; break;
+				case 2: role = R.string.spouse; break;
+				case 3:	role = R.string.sibling; break;
+				case 4: role = R.string.half_sibling; break;
+				case 5: role = R.string.child;
 			}
 		}
-		View vistaPersona = U.mettiIndividuo( scatola, p, getString(ruolo) );
+		View vistaPersona = U.mettiIndividuo( scatola, p, getString(role) );
 		vistaPersona.setOnClickListener( v -> {
 			getActivity().finish(); // Rimuove l'attività attale dallo stack
 			Memoria.replacePrimo( p );

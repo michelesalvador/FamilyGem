@@ -20,8 +20,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/title"
-				android:textSize="18sp"
-				android:textStyle="bold" />
+				style="@style/AppTheme.Title"/>
 
 			<EditText
 				android:id="@+id/condividi_titolo"
@@ -44,14 +43,13 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="@string/root"
-					android:textSize="18sp"
-					android:textStyle="bold" />
+					style="@style/AppTheme.Title"/>
 
 				<TextView
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="@string/ideally_recipient"
-					android:textColor="#000" />
+					style="@style/AppTheme.Suggestion"/>
 
 			</LinearLayout>
 
@@ -60,14 +58,13 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/submitter"
-				android:textSize="18sp"
-				android:textStyle="bold" />
+				style="@style/AppTheme.Title"/>
 
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/usually_your_name"
-				android:textColor="#000" />
+				style="@style/AppTheme.Suggestion"/>
 
 			<EditText
 				android:id="@+id/condividi_autore"
@@ -77,6 +74,13 @@
 				android:singleLine="true"
 				android:inputType="textCapWords"
 				android:textSize="20sp" />
+
+			<CheckBox
+				android:id="@+id/condividi_allow"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Allow the app developer to access this tree"
+				android:layout_marginBottom="30dp"/><!-- todo traduci -->
 
 			<Button
 				android:id="@+id/bottone_condividi"

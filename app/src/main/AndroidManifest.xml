@@ -4,7 +4,8 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	package="app.familygem">
 
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="22"/>
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
 
 	<application
@@ -15,6 +16,7 @@
 		android:theme="@style/AppTheme"
 		android:allowBackup="true"
 		android:usesCleartextTraffic="true"
+		android:requestLegacyExternalStorage="true"
 		android:supportsRtl="false"
 		tools:replace="android:supportsRtl">
 		<provider

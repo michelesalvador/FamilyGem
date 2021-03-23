@@ -10,22 +10,21 @@
 		android:id="@+id/fatto_titolo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textColor="#999"
-		android:textSize="20sp" />
+		style="@style/AppTheme.Title"/>
 
 	<TextView
 		android:id="@+id/fatto_testo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:textColor="#000"
-		android:textSize="16sp" />
+		android:textSize="17sp"/>
 
 	<EditText
 		android:id="@+id/fatto_edita"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:inputType="textCapSentences"
-		android:visibility="gone" />
+		android:textSize="17sp"
+		android:visibility="gone"/>
 
 	<app.familygem.EditoreData
 		android:id="@+id/fatto_data"

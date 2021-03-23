@@ -49,7 +49,7 @@ dependencies {
     implementation 'org.familysearch.gedcom:gedcom:1.11.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'com.google.android.material:material:1.3.0'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'commons-io:commons-io:2.6'
     implementation 'org.jsoup:jsoup:1.13.1'
@@ -59,6 +59,6 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'commons-net:commons-net:3.6'
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    testImplementation 'junit:junit:4.13' // local unit tests (JUnit 4 framework)
+    testImplementation 'junit:junit:4.13.2' // local unit tests (JUnit 4 framework)
     androidTestImplementation 'androidx.test:runner:1.3.0' // instrumented tests
 }

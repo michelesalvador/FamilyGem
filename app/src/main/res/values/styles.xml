@@ -4,15 +4,38 @@
 		<item name="colorPrimary">@color/primario</item>
 		<item name="colorPrimaryDark">@color/primarioScuro</item>
 		<item name="colorAccent">@color/evidenzia</item>
+		<item name="android:textAppearanceSmall">@style/AppTheme.BasicText</item> <!-- Textviews -->
+		<item name="android:textAppearance">@style/AppTheme.BasicText</item> <!-- Radio buttons, switches, checkboxes -->
+		<item name="android:itemTextAppearance">@style/AppTheme.BasicText</item> <!-- Popup, options menu items -->
+		<item name="textAppearancePopupMenuHeader">@style/AppTheme.LittleTitle</item>
+	</style>
+
+	<style name="AppTheme.BasicText">
+		<item name="android:textColor">#000</item>
+		<item name="android:textSize">16sp</item>
+	</style>
+
+	<style name="AppTheme.Title">
+		<item name="android:textColor">@color/grayText</item>
+		<item name="android:textSize">20sp</item>
+	</style>
+
+	<style name="AppTheme.LittleTitle">
+		<item name="android:textColor">@color/grayText</item>
+		<item name="android:textSize">15sp</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="AppTheme.Suggestion">
+		<item name="android:textColor">#444</item>
+		<item name="android:textSize">15sp</item>
 	</style>
 
 	<style name="AppTheme.NoActionBar">
 		<item name="windowActionBar">false</item>
 		<item name="windowNoTitle">true</item>
 	</style>
-
 	<style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
 	<style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 	<style name="TintaBianca" parent="@style/Widget.AppCompat.ActionButton.Overflow">
@@ -25,14 +48,15 @@
 		<item name="android:descendantFocusability">blocksDescendants</item>
 	</style>
 
-	<style name="AppTheme.BottoneColorato" parent="Widget.AppCompat.Button.Colored"/>
-
-	<style name="AppTheme.BottoneNormale" parent="Widget.AppCompat.Button.Colored">
+	<style name="AppTheme.BottoneColorato" parent="Widget.AppCompat.Button.Colored">
+		<item name="android:textColor">#FFF</item>
+	</style>
+	<style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
 		<item name="android:backgroundTint">@color/primarioChiaro</item>
 	</style>
 
-	<attr name="spouseColor" format="reference|color" />
-	<attr name="linesColor" format="reference|color" />
+	<attr name="spouseColor" format="reference|color"/>
+	<attr name="linesColor" format="reference|color"/>
 	<style name="diagramScreen" parent="AppTheme">
 		<item name="spouseColor">@color/consorteSchermo</item>
 		<item name="linesColor">@color/lineeDiagrammaSchermo</item>

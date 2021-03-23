@@ -53,7 +53,7 @@ public class Alberi extends AppCompatActivity {
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.alberi );
-		getSupportActionBar().setDisplayHomeAsUpEnabled( true );
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		ListView vistaLista = findViewById( R.id.lista_alberi );
 		rotella = findViewById( R.id.alberi_circolo );
 		welcome = new Fabuloso( this, R.string.tap_add_tree );
@@ -95,21 +95,21 @@ public class Alberi extends AppCompatActivity {
 					if( derivato ) {
 						vistaAlbero.setBackgroundColor( getResources().getColor( R.color.evidenzia ) );
 						vistaAlbero.setOnClickListener( v -> {
-							if( !AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
+							if( !AlberoNuovo.confronta(Alberi.this, cassetto, true) ) {
 								cassetto.grado = 10; // viene retrocesso
 								Globale.preferenze.salva();
 								aggiornaLista();
-								Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
+								Toast.makeText(Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG).show();
 							}
 						});
 					} else if ( esaurito ) {
 						vistaAlbero.setBackgroundColor( 0xffdddddd );
 						vistaAlbero.setOnClickListener( v -> {
-							if( !AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
+							if( !AlberoNuovo.confronta(Alberi.this, cassetto, true) ) {
 								cassetto.grado = 10; // viene retrocesso
 								Globale.preferenze.salva();
 								aggiornaLista();
-								Toast.makeText( Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG ).show();
+								Toast.makeText(Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG).show();
 							}
 						});
 					} else {
@@ -190,17 +190,17 @@ public class Alberi extends AppCompatActivity {
 									.putExtra( "idAlbero", idAlbero )
 								);
 							} else if( id == 4 ) { // Correggi errori
-								trovaErrori( idAlbero, false );
+								findErrors(idAlbero, false);
 							} else if( id == 5 ) { // Condividi albero
 								startActivity( new Intent( Alberi.this, Condivisione.class )
 									.putExtra( "idAlbero", idAlbero )
 								);
 							} else if( id == 6 ) { // Confronta con alberi esistenti
-								if( AlberoNuovo.confronta( Alberi.this, cassetto ) ) {
+								if( AlberoNuovo.confronta(Alberi.this, cassetto, false) ) {
 									cassetto.grado = 20;
 									aggiornaLista();
 								} else
-									Toast.makeText( Alberi.this, R.string.no_results, Toast.LENGTH_LONG ).show();
+									Toast.makeText(Alberi.this, R.string.no_results, Toast.LENGTH_LONG).show();
 							} else if( id == 7 ) { // Esporta Gedcom
 								if( esportatore.apriAlbero(idAlbero) ) {
 									String mime = "application/octet-stream";
@@ -382,20 +382,33 @@ public class Alberi extends AppCompatActivity {
 	}
 
 	// Legge il Json e restituisce un Gedcom
-	static Gedcom leggiJson( int idAlbero ) {
+	static Gedcom leggiJson(int treeId) {
 		Gedcom gc;
 		try {
-			String contenuto = FileUtils.readFileToString( new File( Globale.contesto.getFilesDir(), idAlbero + ".json" ), "UTF-8" );
-			gc = new JsonParser().fromJson( contenuto );
+			String json = FileUtils.readFileToString(new File(Globale.contesto.getFilesDir(), treeId + ".json"), "UTF-8");
+			json = update(json);
+			gc = new JsonParser().fromJson(json);
 		} catch( Exception e ) {
-			Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+			Toast.makeText(Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 			return null;
 		}
 		if( gc == null ) {
-			Toast.makeText( Globale.contesto, R.string.no_useful_data, Toast.LENGTH_LONG ).show();
+			Toast.makeText(Globale.contesto, R.string.no_useful_data, Toast.LENGTH_LONG).show();
 			return null;
 		}
 		return gc;
+	}
+
+	// Replace Italian with English in Json tree data
+	// Introduced in Family Gem 0.8
+	static String update(String json) {
+		if( json.indexOf("\"zona\":") > 0 ) {
+			json = json.replaceAll("\"zona\":", "\"zone\":");
+		}
+		if( json.indexOf("\"famili\":") > 0 ) {
+			json = json.replaceAll("\"famili\":", "\"kin\":");
+		}
+		return json;
 	}
 
 	static void eliminaAlbero( Context contesto, int idAlbero ) {
@@ -443,7 +456,7 @@ public class Alberi extends AppCompatActivity {
 		return true;
 	}
 
-	Gedcom trovaErrori( final int idAlbero, final boolean correggi ) {
+	Gedcom findErrors( final int idAlbero, final boolean correggi ) {
 		Gedcom gc = leggiJson( idAlbero );
 		if( gc == null ) {
 			// todo fai qualcosa per recuperare un file introvabile..?
@@ -497,11 +510,15 @@ public class Alberi extends AppCompatActivity {
 			}
 			if( num < 2 ) {
 				if( correggi ) {
-					gc.getFamilies().remove( f ); // così facendo lasci i ref negli individui orfani della famiglia a cui si riferiscono...
+					gc.getFamilies().remove(f); // così facendo lasci i ref negli individui orfani della famiglia a cui si riferiscono...
 					// ma c'è il resto del correttore che li risolve
 					break;
 				} else errori++;
 			}
+		}
+		// Silently delete empty list of families
+		if( gc.getFamilies().isEmpty() && correggi ) {
+			gc.setFamilies(null);
 		}
 		// Riferimenti da una persona alla famiglia dei genitori e dei figli
 		for( Person p : gc.getPeople() ) {
@@ -515,7 +532,12 @@ public class Alberi extends AppCompatActivity {
 				} else {
 					num = 0;
 					for( ChildRef cr : fam.getChildRefs() )
-						if( cr.getRef().equals( p.getId() ) ) {
+						if( cr.getRef() == null ) {
+							if( correggi ) {
+								fam.getChildRefs().remove(cr);
+								break;
+							} else errori++;
+						} else if( cr.getRef().equals(p.getId()) ) {
 							num++;
 							if( num > 1 && correggi ) {
 								fam.getChildRefs().remove( cr );
@@ -530,38 +552,57 @@ public class Alberi extends AppCompatActivity {
 					}
 				}
 			}
+			// Remove empty list of parent family refs
+			if( p.getParentFamilyRefs().isEmpty() && correggi ) {
+				p.setParentFamilyRefs(null);
+			}
 			for( SpouseFamilyRef sfr : p.getSpouseFamilyRefs() ) {
-				Family fam = gc.getFamily( sfr.getRef() );
+				Family fam = gc.getFamily(sfr.getRef());
 				if( fam == null ) {
 					if( correggi ) {
-						p.getSpouseFamilyRefs().remove( sfr );
+						p.getSpouseFamilyRefs().remove(sfr);
 						break;
 					} else errori++;
 				} else {
 					num = 0;
 					for( SpouseRef sr : fam.getHusbandRefs() )
-						if( sr.getRef().equals( p.getId() ) ) {
+						if( sr.getRef() == null ) {
+							if( correggi ) {
+								fam.getHusbandRefs().remove(sr);
+								break;
+							} else errori++;
+						} else if( sr.getRef().equals(p.getId()) ) {
 							num++;
 							if( num > 1 && correggi ) {
-								fam.getHusbandRefs().remove( sr );
+								fam.getHusbandRefs().remove(sr);
 								break;
 							}
 						}
-					for( SpouseRef sr : fam.getWifeRefs() )
-						if( sr.getRef().equals( p.getId() ) ) {
+					for( SpouseRef sr : fam.getWifeRefs() ) {
+						if( sr.getRef() == null ) {
+							if( correggi ) {
+								fam.getWifeRefs().remove(sr);
+								break;
+							} else errori++;
+						} else if( sr.getRef().equals(p.getId()) ) {
 							num++;
 							if( num > 1 && correggi ) {
-								fam.getWifeRefs().remove( sr );
+								fam.getWifeRefs().remove(sr);
 								break;
 							}
 						}
+					}
 					if( num != 1 ) {
 						if( num == 0 && correggi ) {
-							p.getSpouseFamilyRefs().remove( sfr );
+							p.getSpouseFamilyRefs().remove(sfr);
 							break;
 						} else errori++;
 					}
 				}
+			}
+			// Remove empty list of spouse family refs
+			if( p.getSpouseFamilyRefs().isEmpty() && correggi ) {
+				p.setSpouseFamilyRefs(null);
 			}
 			// Riferimenti a Media inesistenti
 			// ok ma SOLO per le persone, forse andrebbe fatto col Visitor per tutti gli altri
@@ -585,115 +626,148 @@ public class Alberi extends AppCompatActivity {
 				}
 			}
 		}
-		// Riferimenti dalle famiglie alle persone appartenenti
+		// References from each family to the persons belonging to it
 		for( Family f : gc.getFamilies() ) {
+			// Husbands refs
 			for( SpouseRef sr : f.getHusbandRefs() ) {
-				Person marito = gc.getPerson( sr.getRef() );
-				if( marito == null ) {
+				Person husband = gc.getPerson(sr.getRef());
+				if( husband == null ) {
 					if( correggi ) {
-						f.getHusbandRefs().remove( sr );
+						f.getHusbandRefs().remove(sr);
 						break;
 					} else errori++;
 				} else {
 					num = 0;
-					for( SpouseFamilyRef sfr : marito.getSpouseFamilyRefs() )
-						if( sfr.getRef().equals( f.getId() ) ) {
+					for( SpouseFamilyRef sfr : husband.getSpouseFamilyRefs() )
+						if( sfr.getRef() == null ) {
+							if( correggi ) {
+								husband.getSpouseFamilyRefs().remove(sfr);
+								break;
+							} else errori++;
+						} else if( sfr.getRef().equals(f.getId()) ) {
 							num++;
 							if( num > 1 && correggi ) {
-								marito.getSpouseFamilyRefs().remove( sfr );
+								husband.getSpouseFamilyRefs().remove(sfr);
 								break;
 							}
 						}
 					if( num != 1 ) {
 						if( num == 0 && correggi ) {
-							f.getHusbandRefs().remove( sr );
+							f.getHusbandRefs().remove(sr);
 							break;
 						} else errori++;
 					}
 
 				}
 			}
+			// Remove empty list of husband refs
+			if( f.getHusbandRefs().isEmpty() && correggi ) {
+				f.setHusbandRefs(null);
+			}
+			// Wives refs
 			for( SpouseRef sr : f.getWifeRefs() ) {
-				Person moglie = gc.getPerson( sr.getRef() );
-				if( moglie == null ) {
+				Person wife = gc.getPerson(sr.getRef());
+				if( wife == null ) {
 					if( correggi ) {
-						f.getWifeRefs().remove( sr );
+						f.getWifeRefs().remove(sr);
 						break;
 					} else errori++;
 				} else {
 					num = 0;
-					for( SpouseFamilyRef sfr : moglie.getSpouseFamilyRefs() )
-						if( sfr.getRef().equals( f.getId() ) ) {
+					for( SpouseFamilyRef sfr : wife.getSpouseFamilyRefs() )
+						if( sfr.getRef() == null ) {
+							if( correggi ) {
+								wife.getSpouseFamilyRefs().remove(sfr);
+								break;
+							} else errori++;
+						} else if( sfr.getRef().equals(f.getId()) ) {
 							num++;
 							if( num > 1 && correggi ) {
-								moglie.getSpouseFamilyRefs().remove( sfr );
+								wife.getSpouseFamilyRefs().remove(sfr);
 								break;
 							}
 						}
 					if( num != 1 ) {
 						if( num == 0 && correggi ) {
-							f.getWifeRefs().remove( sr );
+							f.getWifeRefs().remove(sr);
 							break;
 						} else errori++;
 					}
 				}
 			}
+			// Remove empty list of wife refs
+			if( f.getWifeRefs().isEmpty() && correggi ) {
+				f.setWifeRefs(null);
+			}
+			// Children refs
 			for( ChildRef cr : f.getChildRefs() ) {
-				Person figlio = gc.getPerson( cr.getRef() );
-				if( figlio == null ) {
+				Person child = gc.getPerson( cr.getRef() );
+				if( child == null ) {
 					if( correggi ) {
 						f.getChildRefs().remove( cr );
 						break;
 					} else errori++;
 				} else {
 					num = 0;
-					for( ParentFamilyRef pfr : figlio.getParentFamilyRefs() )
-						if( pfr.getRef().equals( f.getId() ) ) {
+					for( ParentFamilyRef pfr : child.getParentFamilyRefs() )
+						if( pfr.getRef() == null ) {
+							if( correggi ) {
+								child.getParentFamilyRefs().remove(pfr);
+								break;
+							} else errori++;
+						} else if( pfr.getRef().equals(f.getId()) ) {
 							num++;
 							if( num > 1 && correggi ) {
-								figlio.getParentFamilyRefs().remove( pfr );
+								child.getParentFamilyRefs().remove(pfr);
 								break;
 							}
 						}
 					if( num != 1 ) {
 						if( num == 0 && correggi ) {
-							f.getChildRefs().remove( cr );
+							f.getChildRefs().remove(cr);
 							break;
 						} else errori++;
 					}
 				}
 			}
+			// Remove empty list of child refs
+			if( f.getChildRefs().isEmpty() && correggi ) {
+				f.setChildRefs(null);
+			}
 		}
+
 		// Aggiunge un tag 'TYPE' ai name type che non l'hanno
 		for( Person person : gc.getPeople() ) {
 			for( Name name : person.getNames() ) {
 				if( name.getType() != null && name.getTypeTag() == null ) {
-					if( correggi ) name.setTypeTag( "TYPE" );
+					if( correggi ) name.setTypeTag("TYPE");
 					else errori++;
 				}
 			}
 		}
+
 		// Aggiunge un tag 'FILE' ai Media che non l'hanno
-		ListaMedia visitaMedia = new ListaMedia( gc, 0 );
-		gc.accept( visitaMedia );
+		ListaMedia visitaMedia = new ListaMedia(gc, 0);
+		gc.accept(visitaMedia);
 		for( Media med : visitaMedia.lista ) {
 			if( med.getFileTag() == null ) {
-				if( correggi ) med.setFileTag( "FILE" );
+				if( correggi ) med.setFileTag("FILE");
 				else errori++;
 			}
 		}
+
 		if( !correggi ) {
 			AlertDialog.Builder dialog = new AlertDialog.Builder( this );
 			dialog.setMessage( errori==0 ? getText(R.string.all_ok) : getString(R.string.errors_found,errori) );
 			if( errori > 0 ) {
-				dialog.setPositiveButton( R.string.correct, (dialogo, i) -> {
+				dialog.setPositiveButton(R.string.correct, (dialogo, i) -> {
 					dialogo.cancel();
-					Gedcom gcCorretto = trovaErrori( idAlbero, true );
-					U.salvaJson( gcCorretto, idAlbero );
+					Gedcom gcCorretto = findErrors(idAlbero, true);
+					U.salvaJson(gcCorretto, idAlbero);
 					Globale.gc = null; // così se era aperto poi lo ricarica corretto
-					trovaErrori( idAlbero, false );	// riapre per ammirere il risultato
+					findErrors(idAlbero, false);    // riapre per ammirere il risultato
 					aggiornaLista();
-				} );
+				});
 			}
 			dialog.setNeutralButton( android.R.string.cancel, null ).show();
 		}

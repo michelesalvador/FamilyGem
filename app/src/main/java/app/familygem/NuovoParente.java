@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import androidx.annotation.Keep;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -30,7 +31,7 @@ public class NuovoParente extends DialogFragment {
 	private List<VoceFamiglia> voci = new ArrayList<>();
 	private int relazione;
 
-	NuovoParente( Person perno, Family preferitaFiglio, Family preferitaSposo, boolean nuovo, Fragment frammento ) {
+	public NuovoParente(Person perno, Family preferitaFiglio, Family preferitaSposo, boolean nuovo, Fragment frammento) {
 		this.perno = perno;
 		famPrefFiglio = preferitaFiglio;
 		famPrefSposo = preferitaSposo;
@@ -38,7 +39,9 @@ public class NuovoParente extends DialogFragment {
 		this.frammento = frammento;
 	}
 
-	public NuovoParente() {} // Viene evocato in caso di cambio di configurazione
+	// Zero-argument constructor: nececessary to re-instantiate this fragment (e.g. rotating the device screen)
+	@Keep // Request to don't remove when minify
+	public NuovoParente() {}
 
 	@Override
 	public Dialog onCreateDialog(Bundle bandolo) {

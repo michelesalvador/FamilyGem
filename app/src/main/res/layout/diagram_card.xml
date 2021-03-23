@@ -53,24 +53,19 @@
 			android:gravity="center_horizontal"
 			android:maxWidth="200dp"
 			android:maxLines="2"
-			android:text="Sir Dott. Nominoz ''Soprannominoz''"
-			android:textColor="@android:color/black"
-			android:textSize="17sp" />
+			android:textSize="17sp"/>
 
 		<TextView
 			android:id="@+id/card_title"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Re di Danimarca"
-			android:textColor="#000"
 			android:textStyle="italic" />
 
 		<TextView
 			android:id="@+id/card_data"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="1823-1932 Georgetown Alaska"
-			android:textColor="#99000000"
+			android:textColor="#aa000000"
 			android:textSize="14sp" />
 
 	</LinearLayout>

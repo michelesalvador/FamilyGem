@@ -29,8 +29,8 @@ import java.util.TimeZone;
 
 public class Compara extends AppCompatActivity {
 
-	Date dataCondivisione;
-	SimpleDateFormat formatoDataOggetto;
+	Date sharingDate;
+	SimpleDateFormat changeDateFormat;
 
 	@Override
 	protected void onCreate( Bundle bandolo ) {
@@ -49,13 +49,13 @@ public class Compara extends AppCompatActivity {
 
 		TimeZone.setDefault( TimeZone.getTimeZone("Europe/Rome") ); // riconduce tutte le date al fuso orario di Aruba
 		try {
-			SimpleDateFormat formatoDataId = new SimpleDateFormat( "yyyyMMddHHmmss", Locale.ENGLISH );
-			dataCondivisione = formatoDataId.parse( getIntent().getStringExtra("idData") );
+			SimpleDateFormat formatoDataId = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
+			sharingDate = formatoDataId.parse(getIntent().getStringExtra("idData"));
 		} catch( ParseException e ) {
 			e.printStackTrace();
 		}
 
-		formatoDataOggetto = new SimpleDateFormat( "d MMM yyyyHH:mm:ss", Locale.ENGLISH );
+		changeDateFormat = new SimpleDateFormat( "d MMM yyyyHH:mm:ss", Locale.ENGLISH );
 		Confronto.reset(); // Necessario svuotarlo, ad esempio dopo un cambio di configurazione
 
 		// Confronta tutti i record dei due Gedcom
@@ -162,11 +162,11 @@ public class Compara extends AppCompatActivity {
 	}
 
 	// Vede se aggiungere i due oggetti alla lista di quelli da valutare
-	void confronta( Object o, Object o2, int tipo ) {
+	private void confronta( Object o, Object o2, int tipo ) {
 		Change c = getCambi(o);
 		Change c2 = getCambi(o2);
 		int modifica = 0;
-		if( o == null && recente(c2) ) // o2 è stata aggiunto nel nuovo albero --> AGGIUNGI
+		if( o == null && isRecent(c2) ) // o2 è stata aggiunto nel nuovo albero --> AGGIUNGI
 			modifica = 1;
 		else {
 			if( c == null && c2 != null )
@@ -174,9 +174,9 @@ public class Compara extends AppCompatActivity {
 			else if( c != null && c2 != null &&
 					!(c.getDateTime().getValue().equals(c2.getDateTime().getValue()) // le due date devono essere diverse
 					&& c.getDateTime().getTime().equals(c2.getDateTime().getTime())) ) {
-				if(	recente(c) && recente(c2) ) { // entrambi modificati dopo la condivisione --> AGGIUNGI/SOSTITUISCI
+				if(	isRecent(c) && isRecent(c2) ) { // entrambi modificati dopo la condivisione --> AGGIUNGI/SOSTITUISCI
 					modifica = 2;
-				} else if( recente(c2) ) // solo o2 è stato modificato --> SOSTITUISCI
+				} else if( isRecent(c2) ) // solo o2 è stato modificato --> SOSTITUISCI
 					modifica = 1;
 			}
 		}
@@ -188,30 +188,31 @@ public class Compara extends AppCompatActivity {
 	}
 
 	// Idem per i rimanenti oggetti eliminati nell'albero vecchio
-	void riconfronta( Object o, Object o2, int tipo ) {
-		if( o2 == null && !recente(getCambi(o)) )
+	private void riconfronta( Object o, Object o2, int tipo ) {
+		if( o2 == null && !isRecent(getCambi(o)) )
 			Confronto.addFronte( o, null, tipo );
 	}
 
-	// Dice se un oggetto è stato modificato dopo la data di condivisione
-	boolean recente( Change cambio ) {
-		boolean ok = false;
-		if( cambio != null && cambio.getDateTime() != null ) {
+	/** Find if a top-level record has been modified after the date of sharing
+	 * @param change Actual change date of the top-level record
+	 * @return true if the record is more recent than the date of sharing
+	 */
+	private boolean isRecent(Change change) {
+		boolean itIs = false;
+		if( change != null && change.getDateTime() != null ) {
 			try { // todo con time null
-				String idZona = U.castaJsonString( cambio.getExtension("zona") );
-				if( idZona == null )
-					idZona = "UTC";
-				TimeZone zona = TimeZone.getTimeZone( idZona );
-				formatoDataOggetto.setTimeZone( zona );
-				Date dataOggetto = formatoDataOggetto.parse( cambio.getDateTime().getValue() + cambio.getDateTime().getTime() );
-				ok = dataOggetto.after( dataCondivisione );
-				//long oreSfaso = TimeUnit.MILLISECONDS.toMinutes( zona.getOffset(dataOggetto.getTime()) );
-				//s.l( dataOggetto+"\t"+ ok +"\t"+ (oreSfaso>0?"+":"")+oreSfaso +"\t"+ zona.getID() );
-			} catch( ParseException e ) {
-				e.printStackTrace();
-			}
+				String zoneId = U.castaJsonString(change.getExtension("zone"));
+				if( zoneId == null )
+					zoneId = "UTC";
+				TimeZone timeZone = TimeZone.getTimeZone(zoneId);
+				changeDateFormat.setTimeZone(timeZone);
+				Date recordDate = changeDateFormat.parse(change.getDateTime().getValue() + change.getDateTime().getTime());
+				itIs = recordDate.after(sharingDate);
+				//long oreSfaso = TimeUnit.MILLISECONDS.toMinutes( timeZone.getOffset(dataOggetto.getTime()) );
+				//s.l( dataOggetto+"\t"+ ok +"\t"+ (oreSfaso>0?"+":"")+oreSfaso +"\t"+ timeZone.getID() );
+			} catch( ParseException e ) {}
 		}
-		return ok;
+		return itIs;
 	}
 
 	Change getCambi( Object ogg ) {

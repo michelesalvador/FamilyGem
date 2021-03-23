@@ -36,14 +36,18 @@ public class Globale extends Application {
 
 	public static void avvia( Context contesto ) {
 		Gson gson = new Gson();
-		String stringone = "{ referrer:start, alberi:[], autoSalva:true }"; // preferenze vuote
+		String jsonString = "{ referrer:start, alberi:[], autoSalva:true }"; // preferenze vuote
 							// i boolean false non hanno bisogno di essere inizializzati
 		try {
 			File filePreferenze = new File( contesto.getFilesDir(), "preferenze.json");
-			if( filePreferenze.exists() )
-				stringone = FileUtils.readFileToString( filePreferenze, "UTF-8" );
+			if( filePreferenze.exists() ) {
+				jsonString = FileUtils.readFileToString( filePreferenze, "UTF-8" );
+				// Version 0.8 adds new settings for the diagram
+				jsonString = jsonString.replace("\"siblings\":true", "siblings:2,cousins:2,spouses:true");
+				jsonString = jsonString.replace("\"siblings\":false", "siblings:0,cousins:0,spouses:true");
+			}
 		} catch( IOException e ) {}
-		preferenze = gson.fromJson( stringone, Armadio.class );
+		preferenze = gson.fromJson( jsonString, Armadio.class );
 		if( preferenze.diagram == null )
 			preferenze.defaultDiagram();
 	}

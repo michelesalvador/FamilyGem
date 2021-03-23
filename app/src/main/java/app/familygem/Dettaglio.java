@@ -760,11 +760,11 @@ public class Dettaglio extends AppCompatActivity {
 			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
 				new AlertDialog.Builder(this).setMessage( R.string.really_delete_family )
 						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
-							Chiesa.eliminaFamiglia( fam.getId() );
+							Chiesa.deleteFamily(fam);
 							onBackPressed();
 						}).setNeutralButton(android.R.string.cancel, null).show();
 			} else {
-				Chiesa.eliminaFamiglia( fam.getId() );
+				Chiesa.deleteFamily(fam);
 				onBackPressed();
 			}
 		} else if( id == 5 ) { // Tutti gli altri
@@ -1010,7 +1010,7 @@ public class Dettaglio extends AppCompatActivity {
 		// a meno di mettere salvaJson() dentro un postDelayed() di almeno 500 ms
 		U.aggiornaDate( Memoria.oggettoCapo() );
 		ricrea();
-		U.salvaJson( true, null );
+		U.salvaJson(true, (Object[])null);
 		return true;
 	}
 

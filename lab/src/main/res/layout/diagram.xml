@@ -14,76 +14,75 @@
 
     <RelativeLayout
         android:id="@+id/diagram_box"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="700dp"
+        android:layout_height="500dp"
         android:background="#8833ff33"
         android:clipChildren="false"
-        android:padding="20dp">
+        android:padding="50dp">
 
-        <RelativeLayout
-            android:layout_width="230dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/casella_maschio"
+            android:orientation="vertical"
+            android:padding="6dp"
             android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
-            android:background="#66FF6600"
-            android:clipChildren="false">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:background="@drawable/casella_maschio"
-                android:orientation="vertical"
-                android:padding="6dp">
-
-                <ImageView
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_gravity="center_horizontal"
-                    app:srcCompat="@drawable/anna_salvador" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:text="Marito" />
-            </LinearLayout>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:background="#88FF6600"
-                android:clipChildren="false">
-
-                <include
-                    layout="@layout/diagramma_avi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_above="@id/wife"
-                    android:layout_centerHorizontal="true" />
-
-                <TextView
-                    android:id="@+id/wife"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/casella_femmina"
-                    android:gravity="center_horizontal"
-                    android:padding="6dp"
-                    android:text="Moglie Genitorozzo\n1234-2345\nLisbona" />
-            </RelativeLayout>
-
+            android:layout_marginTop="20dp">
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center_horizontal"
+                app:srcCompat="@drawable/anna_salvador" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="70dp"
-                android:background="@drawable/diagramma_cerchio_anno"
-                android:padding="5dp"
-                android:text="1825"
-                android:textSize="12sp" />
+                android:layout_gravity="center_horizontal"
+                android:text="Marito" />
+        </LinearLayout>
 
+        <include
+            layout="@layout/diagramma_avi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/wife"
+            android:layout_marginLeft="160dp"
+            android:layout_marginTop="0dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#88FF6600"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="40dp">
+            <TextView
+                android:id="@+id/wife"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/casella_femmina"
+                android:gravity="center_horizontal"
+                android:padding="6dp"
+                android:text="Moglie Genitorozzo\n1234-2345\nLisbona" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="35dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="85dp"
+            android:layout_marginTop="50dp"
+            android:background="#66FF6600">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:background="@drawable/diagramma_cerchio_anno"
+                android:text="1825"
+                android:textSize="12sp"
+                android:gravity="center"/>
+            <View
+                android:layout_width="2dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_centerHorizontal="true"
+                android:background="#ffffffff" />
         </RelativeLayout>
 
 

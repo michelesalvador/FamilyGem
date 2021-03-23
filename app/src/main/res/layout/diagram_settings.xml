@@ -14,16 +14,14 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/generations_display_diagram"/>
+			android:text="@string/generations_display_diagram"
+			style="@style/AppTheme.Suggestion"/>
 
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/ancestors"
-			android:textColor="#000"
-			android:textSize="16sp"
 			android:layout_marginTop="20dp"/>
-
 		<SeekBar
 			android:id="@+id/settings_ancestors"
 			android:layout_width="match_parent"
@@ -35,13 +33,10 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/uncles"
-			android:textColor="#000"
-			android:textSize="16sp"
-			android:layout_marginTop="40dp"/>
-
+			android:text="Uncles and great-uncles"
+			android:layout_marginTop="40dp"/><!-- todo traduci -->
 		<SeekBar
-			android:id="@+id/settings_uncles"
+			android:id="@+id/settings_great_uncles"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:max="9"
@@ -49,23 +44,45 @@
 			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
 
 		<androidx.appcompat.widget.SwitchCompat
-			android:id="@+id/settings_siblings"
+			android:id="@+id/settings_spouses"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="@string/siblings"
-			android:textSize="16sp"
-			android:layout_marginTop="40dp"/>
+			android:text="Spouses"
+			android:layout_marginTop="40dp"/><!-- todo traduci -->
 
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/descendants"
-			android:textColor="#000"
-			android:textSize="16sp"
 			android:layout_marginTop="40dp"/>
-
 		<SeekBar
 			android:id="@+id/settings_descendants"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:max="9"
+			android:layout_marginTop="15dp"
+			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Siblings and nephews"
+			android:layout_marginTop="40dp"/><!-- todo traduci -->
+		<SeekBar
+			android:id="@+id/settings_siblings_nephews"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:max="9"
+			android:layout_marginTop="15dp"
+			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Uncles and cousins"
+			android:layout_marginTop="40dp"/><!-- todo traduci -->
+		<SeekBar
+			android:id="@+id/settings_uncles_cousins"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:max="9"

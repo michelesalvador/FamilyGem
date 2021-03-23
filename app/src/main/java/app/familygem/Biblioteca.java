@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
@@ -290,15 +291,15 @@ public class Biblioteca extends Fragment {
 	// menu opzioni nella toolbar
 	@Override
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
-		menu.add( R.string.order_by ).setEnabled( false );
-		menu.add( 0, 1, 0, R.string.id );
-		menu.add( 0, 2, 0, R.string.title );
-		menu.add( 0, 3, 0, R.string.citations );
+		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
+		subMenu.add(0, 1, 0, R.string.id);
+		subMenu.add(0, 2, 0, R.string.title);
+		subMenu.add(0, 3, 0, R.string.citations);
 
 		// Ricerca nella Biblioteca
-		inflater.inflate( R.menu.cerca, menu );
-		final SearchView vistaCerca = (SearchView) menu.findItem(R.id.ricerca).getActionView();
-		vistaCerca.setOnQueryTextListener( new SearchView.OnQueryTextListener() {
+		inflater.inflate(R.menu.cerca, menu);
+		final SearchView vistaCerca = (SearchView)menu.findItem(R.id.ricerca).getActionView();
+		vistaCerca.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextChange(String query) {
 				adattatore.getFilter().filter(query);

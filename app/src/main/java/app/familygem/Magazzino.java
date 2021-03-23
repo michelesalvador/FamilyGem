@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -129,13 +130,13 @@ public class Magazzino extends Fragment {
 		return fonti.toArray( new Source[0] );
 	}
 
-	// menu opzioni nella toolbar
+	// overflow menu in toolbar
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater ) {
-		menu.add( R.string.order_by ).setEnabled( false );
-		menu.add( 0,1,0, R.string.id );
-		menu.add( 0,2,0, R.string.name );
-		menu.add( 0,3,0, R.string.sources_number );
+		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
+		subMenu.add(0, 1, 0, R.string.id);
+		subMenu.add(0, 2, 0, R.string.name);
+		subMenu.add(0, 3, 0, R.string.sources_number);
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {

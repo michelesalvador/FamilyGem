@@ -11,7 +11,6 @@
 		android:layout_height="wrap_content"
 		android:layout_marginTop="8dp"
 		android:layout_toStartOf="@id/albero_menu"
-		android:textAppearance="?attr/textAppearanceListItem"
 		android:textSize="20sp" />
 
 	<TextView
@@ -20,7 +19,9 @@
 		android:layout_height="wrap_content"
 		android:layout_below="@id/albero_titolo"
 		android:layout_marginBottom="8dp"
-		android:layout_toStartOf="@id/albero_menu" />
+		android:layout_toStartOf="@id/albero_menu"
+		android:textSize="14sp"
+		android:textColor="@color/grayText"/>
 
 	<ImageButton
 		android:id="@+id/albero_menu"

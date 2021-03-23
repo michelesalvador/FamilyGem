@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
@@ -28,14 +29,25 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import app.familygem.constants.Gender;
 import static app.familygem.Globale.gc;
 
 public class Anagrafe extends Fragment {
 
 	private List<Person> listaIndividui;
 	public AdattatoreAnagrafe adattatore;
-	private int ordine;
+	private Order order;
 	private boolean gliIdsonoNumerici;
+
+	private enum Order {
+		NONE, ID_ASC, ID_DESC, SURNAME_ASC, SURNAME_DESC, YEAR_ASC, YEAR_DESC, KIN_ASC, KIN_DESC;
+		public Order next() {
+			return values()[ordinal() + 1];
+		}
+		public Order prev() {
+			return values()[ordinal() - 1];
+		}
+	};
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
@@ -76,12 +88,12 @@ public class Anagrafe extends Fragment {
 		}
 		@Override
 		public void onBindViewHolder( GestoreIndividuo gestore, int posizione ) {
-			Person persona = listaIndividui.get(posizione);
+			Person person = listaIndividui.get(posizione);
 			View vistaIndi = gestore.vista;
 
 			String ruolo = null;
-			if( ordine == 1 || ordine == 2 ) ruolo = persona.getId();
-			else if( ordine == 7 || ordine == 8 ) ruolo = String.valueOf(persona.getExtension("famili"));
+			if( order == Order.ID_ASC || order == Order.ID_DESC ) ruolo = person.getId();
+			else if( order == Order.KIN_ASC || order == Order.KIN_DESC ) ruolo = String.valueOf(person.getExtension("kin"));
 			TextView vistaRuolo = vistaIndi.findViewById( R.id.indi_ruolo );
 			if( ruolo == null )
 				vistaRuolo.setVisibility( View.GONE );
@@ -91,31 +103,31 @@ public class Anagrafe extends Fragment {
 			}
 
 			TextView vistaNome = vistaIndi.findViewById( R.id.indi_nome );
-			String nome = U.epiteto(persona);
+			String nome = U.epiteto(person);
 			vistaNome.setText( nome );
 			vistaNome.setVisibility( ( nome.isEmpty() && ruolo != null ) ? View.GONE : View.VISIBLE );
 
 			TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
-			String titolo = U.titolo( persona );
+			String titolo = U.titolo(person);
 			if( titolo.isEmpty() )
-				vistaTitolo.setVisibility( View.GONE );
+				vistaTitolo.setVisibility(View.GONE);
 			else {
-				vistaTitolo.setText( titolo );
-				vistaTitolo.setVisibility( View.VISIBLE );
+				vistaTitolo.setText(titolo);
+				vistaTitolo.setVisibility(View.VISIBLE);
 			}
 
 			int bordo;
-			switch( U.sesso(persona) ) {
-				case 1: bordo = R.drawable.casella_bordo_maschio; break;
-				case 2: bordo = R.drawable.casella_bordo_femmina; break;
+			switch( Gender.getGender(person) ) {
+				case MALE: bordo = R.drawable.casella_bordo_maschio; break;
+				case FEMALE: bordo = R.drawable.casella_bordo_femmina; break;
 				default: bordo = R.drawable.casella_bordo_neutro;
 			}
-			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( bordo );
+			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource(bordo);
 
-			U.dettagli( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
-			F.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
-			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( U.morto(persona) ? View.VISIBLE : View.GONE );
-			vistaIndi.setTag( persona.getId() );
+			U.details(person, vistaIndi.findViewById(R.id.indi_dettagli));
+			F.unaFoto(Globale.gc, person, vistaIndi.findViewById(R.id.indi_foto));
+			vistaIndi.findViewById(R.id.indi_lutto).setVisibility(U.morto(person) ? View.VISIBLE : View.GONE);
+			vistaIndi.setTag(person.getId());
 		}
 		@Override
 		public Filter getFilter() {
@@ -134,7 +146,7 @@ public class Anagrafe extends Fragment {
 						}
 						listaIndividui = filteredList;
 					}
-					ordinaIndividui();
+					sortPeople();
 					FilterResults filterResults = new FilterResults();
 					filterResults.values = listaIndividui;
 					return filterResults;
@@ -232,61 +244,59 @@ public class Anagrafe extends Fragment {
 		return true;
 	}
 
-	void ordinaIndividui() {
-		if( ordine > 0 ) {  // 0 ovvero rimane l'ordinamento già esistente
-			Collections.sort(listaIndividui, ( p1, p2 ) -> {
-				switch( ordine ) {
-					case 1: // Ordina per ID Gedcom
-						if( gliIdsonoNumerici )
-							return U.soloNumeri(p1.getId()) - U.soloNumeri(p2.getId());
-						else
-							return p1.getId().compareToIgnoreCase(p2.getId());
-					case 2:
-						if( gliIdsonoNumerici )
-							return U.soloNumeri(p2.getId()) - U.soloNumeri(p1.getId());
-						else
-							return p2.getId().compareToIgnoreCase(p1.getId());
-					case 3: // Ordina per cognome
-						if (p1.getNames().size() == 0) // i nomi null vanno in fondo
-							return (p2.getNames().size() == 0) ? 0 : 1;
-						if (p2.getNames().size() == 0)
-							return -1;
-						Name n1 = p1.getNames().get(0);
-						Name n2 = p2.getNames().get(0);
-						// anche i nomi con value, given e surname null vanno in fondo
-						if (n1.getValue() == null && n1.getGiven() == null && n1.getSurname() == null)
-							return (n2.getValue() == null) ? 0 : 1;
-						if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
-							return -1;
-						return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
-					case 4:
-						if (p1.getNames().size() == 0)
-							return p2.getNames().size() == 0 ? 0 : 1;
-						if (p2.getNames().size() == 0)
-							return -1;
-						n1 = p1.getNames().get(0);
-						n2 = p2.getNames().get(0);
-						if (n1.getValue() == null && n1.getGiven() == null && n1.getSurname() == null)
-							return (n2.getValue() == null) ? 0 : 1;
-						if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
-							return -1;
-						return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
-					case 5: // Ordina per anno
-						return annoBase(p1) - annoBase(p2);
-					case 6:
-						if( annoBase(p2) == 9999 ) // Quelli senza anno vanno in fondo
-							return -1;
-						if( annoBase(p1) == 9999 )
-							return annoBase(p2) == 9999 ? 0 : 1;
-						return annoBase(p2) - annoBase(p1);
-					case 7:	// Ordina per numero di familiari
-						return quantiFamiliari(p1) - quantiFamiliari(p2);
-					case 8:
-						return quantiFamiliari(p2) - quantiFamiliari(p1);
-				}
-				return 0;
-			});
-		}
+	private void sortPeople() {
+		Collections.sort(listaIndividui, (p1, p2) -> {
+			switch( order ) {
+				case ID_ASC: // Sort for GEDCOM ID
+					if( gliIdsonoNumerici )
+						return U.soloNumeri(p1.getId()) - U.soloNumeri(p2.getId());
+					else
+						return p1.getId().compareToIgnoreCase(p2.getId());
+				case ID_DESC:
+					if( gliIdsonoNumerici )
+						return U.soloNumeri(p2.getId()) - U.soloNumeri(p1.getId());
+					else
+						return p2.getId().compareToIgnoreCase(p1.getId());
+				case SURNAME_ASC: // Sort for surname
+					if (p1.getNames().size() == 0) // i nomi null vanno in fondo
+						return (p2.getNames().size() == 0) ? 0 : 1;
+					if (p2.getNames().size() == 0)
+						return -1;
+					Name n1 = p1.getNames().get(0);
+					Name n2 = p2.getNames().get(0);
+					// anche i nomi con value, given e surname null vanno in fondo
+					if (n1.getValue() == null && n1.getGiven() == null && n1.getSurname() == null)
+						return (n2.getValue() == null) ? 0 : 1;
+					if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
+						return -1;
+					return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
+				case SURNAME_DESC:
+					if (p1.getNames().size() == 0)
+						return p2.getNames().size() == 0 ? 0 : 1;
+					if (p2.getNames().size() == 0)
+						return -1;
+					n1 = p1.getNames().get(0);
+					n2 = p2.getNames().get(0);
+					if (n1.getValue() == null && n1.getGiven() == null && n1.getSurname() == null)
+						return (n2.getValue() == null) ? 0 : 1;
+					if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
+						return -1;
+					return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
+				case YEAR_ASC: // Sort for main person's year
+					return annoBase(p1) - annoBase(p2);
+				case YEAR_DESC:
+					if( annoBase(p2) == 9999 ) // Quelli senza anno vanno in fondo
+						return -1;
+					if( annoBase(p1) == 9999 )
+						return annoBase(p2) == 9999 ? 0 : 1;
+					return annoBase(p2) - annoBase(p1);
+				case KIN_ASC: // Sort for number of relatives
+					return countRelatives(p1) - countRelatives(p2);
+				case KIN_DESC:
+					return countRelatives(p2) - countRelatives(p1);
+			}
+			return 0;
+		});
 	}
 
 	// Restituisce una stringa con cognome e nome attaccati:
@@ -366,54 +376,60 @@ public class Anagrafe extends Fragment {
 		return luogo;
 	}
 
-	static int quantiFamiliari( Person uno ) {
-		int quanti = 0;
-		if( uno != null ) {
+	/** Count how many near relatives a person has: parents, siblings, step-siblings, spouses and children.
+	 * Save also the result in the 'kin' extension.
+	 * @param person The person to start from
+	 * @return Number of near relatives (person excluded)
+	 */
+	static int countRelatives(Person person) {
+		int count = 0;
+		if( person != null ) {
 			// Famiglie di origine: genitori e fratelli
-			List<Family> listaFamiglie = uno.getParentFamilies(gc);
-			for( Family famiglia : listaFamiglie  ) {
-				quanti += famiglia.getHusbands(gc).size();
-				quanti += famiglia.getWives(gc).size();
-				for( Person fratello : famiglia.getChildren(gc) )	// solo i figli degli stessi due genitori, non i fratellastri
-					if( !fratello.equals(uno) )
-						quanti++;
+			List<Family> listaFamiglie = person.getParentFamilies(gc);
+			for( Family famiglia : listaFamiglie ) {
+				count += famiglia.getHusbands(gc).size();
+				count += famiglia.getWives(gc).size();
+				for( Person fratello : famiglia.getChildren(gc) ) // solo i figli degli stessi due genitori, non i fratellastri
+					if( !fratello.equals(person) )
+						count++;
 			}
 			// Fratellastri e sorellastre
-			for( Family famiglia : uno.getParentFamilies(gc) ) {
+			for( Family famiglia : person.getParentFamilies(gc) ) {
 				for( Person padre : famiglia.getHusbands(gc) ) {
 					List<Family> famigliePadre = padre.getSpouseFamilies(gc);
-					famigliePadre.removeAll( listaFamiglie );
+					famigliePadre.removeAll(listaFamiglie);
 					for( Family fam : famigliePadre )
-						quanti += fam.getChildren(gc).size();
+						count += fam.getChildren(gc).size();
 				}
 				for( Person madre : famiglia.getWives(gc) ) {
 					List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
-					famiglieMadre.removeAll( listaFamiglie );
+					famiglieMadre.removeAll(listaFamiglie);
 					for( Family fam : famiglieMadre )
-						quanti += fam.getChildren(gc).size();
+						count += fam.getChildren(gc).size();
 				}
 			}
 			// Coniugi e figli
-			for( Family famiglia : uno.getSpouseFamilies(gc) ) {
-				if( U.sesso(uno) == 1 )
-					quanti += famiglia.getWives(gc).size();
+			for( Family famiglia : person.getSpouseFamilies(gc) ) {
+				if( Gender.isMale(person) )
+					count += famiglia.getWives(gc).size();
 				else
-					quanti += famiglia.getHusbands(gc).size();
-				quanti += famiglia.getChildren(gc).size();
+					count += famiglia.getHusbands(gc).size();
+				count += famiglia.getChildren(gc).size();
 			}
-			uno.putExtension( "famili", quanti );
+			person.putExtension("kin", count);
 		}
-		return quanti;
+		return count;
 	}
 
 	// menu opzioni nella toolbar
 	@Override
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
-		menu.add( R.string.order_by ).setEnabled(false); // todo forse si otterrebbe un vero titolo con un menu xml
-		menu.add( 0,1,0, R.string.id );
-		menu.add( 0,2,0, R.string.surname );
-		menu.add( 0,3,0, R.string.year );
-		menu.add( 0,4,0, R.string.number_relatives );
+
+		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
+		subMenu.add(0, 1, 0, R.string.id);
+		subMenu.add(0, 2, 0, R.string.surname);
+		subMenu.add(0, 3, 0, R.string.year);
+		subMenu.add(0, 4, 0, R.string.number_relatives);
 
 		// Ricerca nell'Anagrafe
 		inflater.inflate( R.menu.cerca, menu );	// già questo basta a far comparire la lente con il campo di ricerca
@@ -429,20 +445,20 @@ public class Anagrafe extends Fragment {
 				vistaCerca.clearFocus();
 				return false;
 			}
-
 		});
 	}
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id > 0 && id <= 4 ) {
-			if( ordine == id*2-1 )
-				ordine++;
-			else if( ordine == id*2 )
-				ordine--;
+			// Clicking twice the same menu item switchs sorting ASC and DESC
+			if( order == Order.values()[id * 2 - 1] )
+				order = order.next();
+			else if( order == Order.values()[id * 2] )
+				order = order.prev();
 			else
-				ordine = id*2-1;
-			ordinaIndividui();
+				order = Order.values()[id * 2 - 1];
+			sortPeople();
 			adattatore.notifyDataSetChanged();
 			//U.salvaJson( false ); // dubbio se metterlo per salvare subito il riordino delle persone...
 			return true;
@@ -492,7 +508,6 @@ public class Anagrafe extends Fragment {
 
 	// Cancella tutti i ref nelle famiglie della tal persona
 	// Restituisce l'elenco delle famiglie affette
-	//
 	static Family[] scollega( String idScollegando ) {
 		Person egli = gc.getPerson( idScollegando );
 		Set<Family> famiglie = new HashSet<>();
@@ -501,11 +516,11 @@ public class Anagrafe extends Fragment {
 			famiglie.add( f );
 		}
 		for( Family f : egli.getSpouseFamilies(gc) ) {
-			if( f.getHusbands(gc).indexOf(egli) >= 0 ) {
+			if( f.getHusbands(gc).contains(egli) ) {
 				f.getHusbandRefs().remove( f.getHusbands(gc).indexOf(egli) );
 				famiglie.add( f );
 			}
-			if( f.getWives(gc).indexOf(egli) >= 0 ) {
+			if( f.getWives(gc).contains(egli) ) {
 				f.getWifeRefs().remove( f.getWives(gc).indexOf(egli) );
 				famiglie.add( f );
 			}

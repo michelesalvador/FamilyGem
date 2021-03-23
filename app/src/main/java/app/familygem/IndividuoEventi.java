@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import app.familygem.constants.Gender;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Nome;
 import static app.familygem.Globale.gc;
@@ -179,34 +180,36 @@ public class IndividuoEventi extends Fragment {
 
 	// In tutte le famiglie coniugali rimuove gli spouse ref di tizio e ne aggiunge uno corrispondente al sesso
 	// Serve soprattutto in caso di esportazione del Gedcom per avere allineati gli HUSB e WIFE con il sesso
-	static void aggiornaRuoliConiugali(Person tizio) {
+	static void aggiornaRuoliConiugali(Person person) {
 		SpouseRef spouseRef = new SpouseRef();
-		spouseRef.setRef(tizio.getId());
-		boolean rimosso = false;
-		for( Family fam : tizio.getSpouseFamilies(gc) ) {
-			if( U.sesso(tizio) == 2 ) { // La fa diventare wife
-				Iterator<SpouseRef> refiSposo = fam.getHusbandRefs().iterator();
-				while( refiSposo.hasNext() ) {
-					if( refiSposo.next().getRef().equals(tizio.getId()) ) {
-						refiSposo.remove();
-						rimosso = true;
+		spouseRef.setRef(person.getId());
+		boolean removed = false;
+		for( Family fam : person.getSpouseFamilies(gc) ) {
+			if( Gender.isFemale(person) ) { // Female 'person' will become a wife
+				Iterator<SpouseRef> husbandRefs = fam.getHusbandRefs().iterator();
+				while( husbandRefs.hasNext() ) {
+					String hr = husbandRefs.next().getRef();
+					if( hr != null && hr.equals(person.getId()) ) {
+						husbandRefs.remove();
+						removed = true;
 					}
 				}
-				if (rimosso) {
+				if( removed ) {
 					fam.addWife(spouseRef);
-					rimosso = false;
+					removed = false;
 				}
-			} else { // Per tutti gli altri sessi diventa husband
-				Iterator<SpouseRef> refiSposo = fam.getWifeRefs().iterator();
-				while( refiSposo.hasNext() ) {
-					if( refiSposo.next().getRef().equals(tizio.getId()) ) {
-						refiSposo.remove();
-						rimosso = true;
+			} else { // For all other sexs 'person' will become husband
+				Iterator<SpouseRef> wifeRefs = fam.getWifeRefs().iterator();
+				while( wifeRefs.hasNext() ) {
+					String wr = wifeRefs.next().getRef();
+					if( wr != null && wr.equals(person.getId()) ) {
+						wifeRefs.remove();
+						removed = true;
 					}
 				}
-				if (rimosso) {
+				if( removed ) {
 					fam.addHusband(spouseRef);
-					rimosso = false;
+					removed = false;
 				}
 			}
 		}

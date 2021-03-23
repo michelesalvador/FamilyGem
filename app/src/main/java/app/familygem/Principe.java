@@ -12,6 +12,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import app.familygem.visita.ListaMedia;
+import app.familygem.visita.ListaNote;
 import static app.familygem.Globale.gc;
 
 public class Principe extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -129,11 +131,12 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 
 	// Titolo, immagine a caso, bottone Salva nella testata del menu
 	void arredaTestataMenu() {
-		NavigationView menu = scatolissima.findViewById(R.id.menu);
-		ImageView immagine = menu.getHeaderView(0).findViewById( R.id.menu_immagine );
-		TextView testo = menu.getHeaderView(0).findViewById( R.id.menu_titolo );
-		immagine.setVisibility( ImageView.GONE );
-		testo.setText( "" );
+		NavigationView navigation = scatolissima.findViewById(R.id.menu);
+		View menuHeader = navigation.getHeaderView(0);
+		ImageView imageView = menuHeader.findViewById( R.id.menu_immagine );
+		TextView mainTitle = menuHeader.findViewById( R.id.menu_titolo );
+		imageView.setVisibility( ImageView.GONE );
+		mainTitle.setText( "" );
 		if( Globale.gc != null ) {
 			ListaMedia cercaMedia = new ListaMedia( Globale.gc, 3 );
 			Globale.gc.accept( cercaMedia );
@@ -141,31 +144,60 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				int caso = new Random().nextInt( cercaMedia.lista.size() );
 				for( Media med : cercaMedia.lista )
 					if( --caso < 0 ) { // arriva a -1
-						F.dipingiMedia( med, immagine, null );
-						immagine.setVisibility( ImageView.VISIBLE );
+						F.dipingiMedia( med, imageView, null );
+						imageView.setVisibility( ImageView.VISIBLE );
 						break;
 					}
 			}
-			testo.setText( Globale.preferenze.alberoAperto().nome );
+			mainTitle.setText( Globale.preferenze.alberoAperto().nome );
+
+			// Put count of existing records in menu items
+			Menu menu = navigation.getMenu();
+			for( int i = 1; i <= 7; i++ ) {
+				int count = 0;
+				switch( i ) {
+					case 1: count = gc.getPeople().size(); break;
+					case 2: count = gc.getFamilies().size(); break;
+					case 3:
+						ListaMedia mediaList = new ListaMedia(gc, 0);
+						gc.accept(mediaList);
+						count = mediaList.lista.size();
+						break;
+					case 4:
+						ListaNote notesList = new ListaNote();
+						gc.accept(notesList);
+						count = notesList.listaNote.size() + gc.getNotes().size();
+						break;
+					case 5: count = gc.getSources().size(); break;
+					case 6: count = gc.getRepositories().size(); break;
+					case 7: count = gc.getSubmitters().size();
+				}
+				TextView countView = menu.getItem(i).getActionView().findViewById(R.id.menu_item_text);
+				if( count > 0 )
+					countView.setText(String.valueOf(count));
+				else
+					countView.setVisibility(View.GONE);
+			}
 		}
-		Button bottoneSalva = menu.getHeaderView(0).findViewById( R.id.menu_salva );
-		bottoneSalva.setOnClickListener( vista -> {
-			vista.setVisibility( View.GONE );
+		// Save button
+		Button saveButton = menuHeader.findViewById( R.id.menu_salva );
+		saveButton.setOnClickListener( view -> {
+			view.setVisibility( View.GONE );
 			U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
 			scatolissima.closeDrawer(GravityCompat.START);
 			Globale.daSalvare = false;
 			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
 		});
-		bottoneSalva.setOnLongClickListener( vista -> {
+		saveButton.setOnLongClickListener( vista -> {
 			PopupMenu popup = new PopupMenu(this, vista);
 			popup.getMenu().add(0, 0, 0, R.string.revert);
 			popup.show();
 			popup.setOnMenuItemClickListener( item -> {
 				if( item.getItemId() == 0 ) {
-					Alberi.apriGedcom( Globale.preferenze.idAprendo, false );
-					U.qualiGenitoriMostrare( this, null, 0 ); // Semplicemente ricarica il diagramma
-					scatolissima.closeDrawer( GravityCompat.START );
-					bottoneSalva.setVisibility( View.GONE );
+					Alberi.apriGedcom(Globale.preferenze.idAprendo, false);
+					U.qualiGenitoriMostrare(this, null, 0); // Semplicemente ricarica il diagramma
+					scatolissima.closeDrawer(GravityCompat.START);
+					saveButton.setVisibility(View.GONE);
 					Globale.daSalvare = false;
 				}
 				return true;
@@ -173,7 +205,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			return true;
 		});
 		if( Globale.daSalvare )
-			bottoneSalva.setVisibility( View.VISIBLE );
+			saveButton.setVisibility( View.VISIBLE );
 	}
 
 	// Evidenzia voce del menu e mostra/nasconde toolbar
@@ -229,5 +261,19 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		}
 		scatolissima.closeDrawer(GravityCompat.START);
 		return true;
+	}
+
+	// Automatically open the 'Sort by' sub-menu
+	@Override
+	public boolean onMenuOpened(int featureId, Menu menu) {
+		MenuItem item0 = menu.getItem(0);
+		if( item0.getTitle().equals(getString(R.string.order_by)) ) {
+			item0.setVisible(false); // a little hack to prevent options menu to appear
+			new Handler().post(() -> {
+				item0.setVisible(true);
+				menu.performIdentifierAction(item0.getItemId(), 0);
+			});
+		}
+		return super.onMenuOpened(featureId, menu);
 	}
 }

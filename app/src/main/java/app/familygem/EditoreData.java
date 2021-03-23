@@ -21,7 +21,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import static app.familygem.Datatore.*;
+import app.familygem.constants.Format;
+
+//import static app.familygem.Datatore.*;
 
 public class EditoreData extends LinearLayout {
 
@@ -52,8 +54,8 @@ public class EditoreData extends LinearLayout {
 		addView( inflate( getContext(), R.layout.editore_data, null ), this.getLayoutParams() );
 		this.editaTesto = editaTesto;
 
-		for( int i = 0; i < anniRuota.length-1; i++ )
-			anniRuota[i] = i<10 ? "0"+i : ""+i;
+		for( int i = 0; i < anniRuota.length - 1; i++ )
+			anniRuota[i] = i < 10 ? "0" + i : "" + i;
 		anniRuota[100] = "-";
 
 		datatore = new Datatore( editaTesto.getText().toString() );
@@ -251,19 +253,19 @@ public class EditoreData extends LinearLayout {
 		if( data.date != null )
 			calenda.setTime( data.date );
 		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
-		if( data.date != null && (data.format.toPattern().equals(G_M_A) || data.format.toPattern().equals(G_M)) )
+		if( data.date != null && (data.format.toPattern().equals(Format.D_M_Y) || data.format.toPattern().equals(Format.D_M)) )
 			ruotaGiorno.setValue( data.date.getDate() );
 		else
 			ruotaGiorno.setValue( 0 );
-		if( data.date == null || data.format.toPattern().equals(A) )
+		if( data.date == null || data.format.toPattern().equals(Format.Y) )
 			ruotaMese.setValue( 0 );
 		else
 			ruotaMese.setValue( data.date.getMonth() + 1 );
-		if( data.date == null || data.format.toPattern().equals(G_M) )
+		if( data.date == null || data.format.toPattern().equals(Format.D_M) )
 			ruotaSecolo.setValue( 0 );
 		else
 			ruotaSecolo.setValue( (data.date.getYear()+1900)/100 );
-		if( data.date == null || data.format.toPattern().equals(G_M) )
+		if( data.date == null || data.format.toPattern().equals(Format.D_M) )
 			ruotaAnno.setValue( 100 );
 		else
 			ruotaAnno.setValue( (data.date.getYear()+1900)%100 );
@@ -279,7 +281,7 @@ public class EditoreData extends LinearLayout {
 			ceccoBC = findViewById( R.id.editadata_negativa2 );
 			ceccoDoppia = findViewById( R.id.editadata_doppia2 );
 		}
-		if( data.date == null || data.format.toPattern().equals("") || data.format.toPattern().equals(G_M) ) { // date senza anno
+		if( data.date == null || data.format.toPattern().equals(Format.EMPTY) || data.format.toPattern().equals(Format.D_M) ) { // date senza anno
 			ceccoBC.setVisibility( INVISIBLE );
 			ceccoDoppia.setVisibility( INVISIBLE );
 		} else {
@@ -308,15 +310,15 @@ public class EditoreData extends LinearLayout {
 		data.date.setMonth( mese == 0 ? 0 : mese - 1 );
 		data.date.setYear( anno == 100 ? -1899 : secolo*100 + anno - 1900 );
 		if( giorno != 0 && mese != 0 && anno != 100 )
-			data.format.applyPattern( G_M_A );
+			data.format.applyPattern(Format.D_M_Y);
 		else if( giorno != 0 && mese != 0 )
-			data.format.applyPattern( G_M );
+			data.format.applyPattern(Format.D_M);
 		else if( mese != 0 && anno != 100 )
-			data.format.applyPattern( M_A );
+			data.format.applyPattern(Format.M_Y);
 		else if( anno != 100 )
-			data.format.applyPattern( A );
+			data.format.applyPattern(Format.Y);
 		else
-			data.format.applyPattern( "" );
+			data.format.applyPattern(Format.EMPTY);
 		impostaCecchi( data );
 		veroImputTesto = false;
 		genera();
@@ -337,7 +339,7 @@ public class EditoreData extends LinearLayout {
 			((TextView)findViewById( R.id.editadata_tipi )).setText( tipiData[0] );
 			rifatta = rifai( data1 );
 		} else
-			rifatta = prefissi[datatore.tipo] + " " + rifai( data1 );
+			rifatta = Datatore.prefissi[datatore.tipo] + " " + rifai( data1 );
 		editaTesto.setText( rifatta );
 	}
 
@@ -346,7 +348,7 @@ public class EditoreData extends LinearLayout {
 		String fatta = "";
 		if( data.date != null ) {
 			// Date con l'anno doppio
-			if( data.doppia && !(data.format.toPattern().equals("") || data.format.toPattern().equals(G_M)) ) {
+			if( data.doppia && !(data.format.toPattern().equals(Format.EMPTY) || data.format.toPattern().equals(Format.D_M)) ) {
 				Date unAnnoDopo = new Date();
 				unAnnoDopo.setYear( data.date.getYear() + 1 );
 				String secondoAnno = String.format( Locale.ENGLISH, "%tY", unAnnoDopo );

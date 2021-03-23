@@ -27,7 +27,8 @@ The code provided in this repository should compile and build a working version 
 |Server account|You can't share trees|
 |GeoNames "demo" account|Place names suggestions probably don't appear|
 
-The code (classes, variables, comments...) is almost all written in Italian, because I'm Italian and I love to write in my native language. I know it's not so kind, because everyone expects an English code, but I started like this and it's hard to change at this point.
+The code (classes, variables, comments...) is almost all written in Italian (my native language), because I started just as a personal hobby project.<br>
+Obviously everyone expects an English code: it's hard to change at this point but I'm trying to translate all to English.
 
 ## Translation
 The translation of Family Gem user interface is managed on [Weblate](https://hosted.weblate.org/projects/family-gem/app/).<br>

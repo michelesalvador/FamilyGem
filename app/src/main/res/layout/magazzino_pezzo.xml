@@ -11,14 +11,13 @@
 		android:id="@+id/magazzino_nome"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:text="Archivio di famiglia"
-		android:textAppearance="?attr/textAppearanceListItem" />
+		android:layout_weight="1"/>
 
 	<TextView
 		android:id="@+id/magazzino_archivi"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginLeft="8dp"
-		android:text="123" />
+		android:textSize="15sp"
+		android:textColor="@color/grayText"/>
 </LinearLayout>

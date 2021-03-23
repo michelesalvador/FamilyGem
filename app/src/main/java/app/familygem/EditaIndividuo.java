@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import app.familygem.constants.Gender;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Famiglia;
 import static app.familygem.Globale.gc;
@@ -68,10 +69,10 @@ public class EditaIndividuo extends AppCompatActivity {
 			String cogno = "";
 			// Cognome del fratello
 			if( relazione == 2 ) { // = fratello
-				cogno = U.cognome( perno );
+				cogno = U.cognome(perno);
 			// Cognome del padre
 			} else if( relazione == 4 ) { // = figlio da Diagramma o Individuo
-				if( U.sesso(perno) == 1 )
+				if( Gender.isMale(perno) )
 					cogno = U.cognome( perno );
 				else if( idFamiglia != null ) {
 					Family fam = gc.getFamily(idFamiglia);
@@ -115,15 +116,15 @@ public class EditaIndividuo extends AppCompatActivity {
 				((EditText)findViewById( R.id.nome )).setText( nome );
 				((EditText)findViewById( R.id.cognome )).setText( cognome );
 			}
-			// Sesso
-			switch( U.sesso(p) ) {
-				case 1:
+			// Sex
+			switch( Gender.getGender(p) ) {
+				case MALE:
 					((RadioButton)findViewById( R.id.sesso1 )).setChecked(true);
 					break;
-				case 2:
+				case FEMALE:
 					((RadioButton)findViewById( R.id.sesso2 )).setChecked(true);
 					break;
-				case 3:
+				case UNDEFINED:
 					((RadioButton)findViewById( R.id.sesso3 )).setChecked(true);
 			}
 			// Nascita e morte
@@ -389,9 +390,9 @@ public class EditaIndividuo extends AppCompatActivity {
 	}
 
 	// Aggiunge il coniuge in una famiglia: sempre e solo in base al sesso
-	public static void aggiungiConiuge(Family fam, SpouseRef sr) {
-		Person tizio = Globale.gc.getPerson( sr.getRef() );
-		if( U.sesso(tizio) == 2 ) fam.addWife( sr );
-		else fam.addHusband( sr );
+	public static void aggiungiConiuge(Family family, SpouseRef sr) {
+		Person person = Globale.gc.getPerson(sr.getRef());
+		if( Gender.isFemale(person) ) family.addWife(sr);
+		else family.addHusband(sr);
 	}
 }

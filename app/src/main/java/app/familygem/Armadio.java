@@ -1,4 +1,5 @@
-// Classe per gestire le preferenze salvate in preferenze.json
+// Class that represents the preferences saved in 'preferenze.json'
+
 package app.familygem;
 
 import com.google.gson.Gson;
@@ -19,6 +20,7 @@ public class Armadio {
 	boolean autoSalva;
 	boolean caricaAlbero;
 	public boolean esperto;
+	boolean shareAgreement;
 	CassettoDiagram diagram;
 
 	void traghetta() { // todo questo traghettatore poi se ne può andare
@@ -109,15 +111,19 @@ public class Armadio {
 		int ancestors;
 		int uncles;
 		int descendants;
-		boolean siblings;
+		int siblings;
+		int cousins;
+		boolean spouses;
 	}
 
 	void defaultDiagram() {
 		diagram = new CassettoDiagram();
-		diagram.ancestors = 2;
-		diagram.uncles = 1;
-		diagram.descendants = 2;
-		diagram.siblings = true;
+		diagram.ancestors = 3;
+		diagram.uncles = 2;
+		diagram.descendants = 3;
+		diagram.siblings = 2;
+		diagram.cousins = 1;
+		diagram.spouses = true;
 	}
 /*
 "grado":

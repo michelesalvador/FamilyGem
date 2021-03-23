@@ -162,7 +162,7 @@ public class Confrontatore extends AppCompatActivity {
 			tipoRecord( R.string.person );
 			Person p = (Person) o;
 			tit = U.epiteto( p );
-			txt = U.dettagli( p, null );
+			txt = U.details( p, null );
 			data = dataOra( p.getChange() );
 			vistaFoto.setVisibility( View.VISIBLE );
 			F.unaFoto( gc, p, vistaFoto );

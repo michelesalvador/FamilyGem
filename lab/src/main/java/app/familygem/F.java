@@ -758,9 +758,9 @@ public class F {
 	// Propone una bella lista di app per acquisire immagini
 	public static void appAcquisizioneImmagine( Context contesto ) {
 		// Richiesta permesso accesso file in memoria
-		int perm = ContextCompat.checkSelfPermission( contesto, Manifest.permission.WRITE_EXTERNAL_STORAGE );
+		int perm = ContextCompat.checkSelfPermission( contesto, Manifest.permission.READ_EXTERNAL_STORAGE );
 		if( perm == PackageManager.PERMISSION_DENIED ) {
-			ActivityCompat.requestPermissions( (AppCompatActivity) contesto, new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE }, 5641 );
+			ActivityCompat.requestPermissions( (AppCompatActivity) contesto, new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, 5641 );
 			return;
 		} //else if( perm == PackageManager.PERMISSION_GRANTED )...
 		// Colleziona gli intenti utili per acquisire immagini
@@ -945,9 +945,8 @@ public class F {
 		if( resultCode == Activity.RESULT_OK ) {
 			Uri uri = risultato.getUri();
 			Globale.mediaCroppato.setFile( uriPercorsoFile( uri ) );
-			s.l(uri +"  >  "+ Globale.mediaCroppato.getFile() );
 		} else if( resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-			s.l( "RRRRRRRRRIIIIIIIIIIIISULTAO  " + risultato.getError() );
+			Toast.makeText(Globale.contesto, risultato.getError().toString(), Toast.LENGTH_LONG ).show();
 		}
 	}
 
@@ -959,6 +958,5 @@ public class F {
 			}
 		} else
 			Toast.makeText( contesto, permessi[0] + " not granted", Toast.LENGTH_SHORT ).show();
-		//for( String perm : permessi ) s.l(perm); c'è solo android.permission.WRITE_EXTERNAL_STORAGE
 	}
 }

@@ -20,7 +20,6 @@
 		android:layout_below="@+id/zero"
 		android:layout_centerHorizontal="true"
 		android:text="@string/app_name"
-		android:textColor="#000"
 		android:textSize="20sp" />
 
 	<TextView
@@ -30,8 +29,6 @@
 		android:layout_below="@+id/uno"
 		android:layout_centerHorizontal="true"
 		android:text="@string/tagline"
-		android:textColor="#000"
-		android:textSize="16sp"
 		android:textStyle="italic" />
 
 	<TextView
@@ -40,10 +37,7 @@
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/due"
 		android:layout_centerHorizontal="true"
-		android:layout_marginTop="10dp"
-		android:text="Version 0.6.3"
-		android:textColor="#000"
-		android:textSize="16sp" />
+		android:layout_marginTop="10dp"/>
 
 	<TextView
 		android:id="@+id/lapide_link"
@@ -55,7 +49,6 @@
 		android:layout_marginTop="20dp"
 		android:padding="4dp"
 		android:text="www.familygem.app"
-		android:textColor="@color/primarioScuro"
-		android:textSize="16sp" />
+		android:textColor="@color/primarioScuro"/>
 
 </RelativeLayout>

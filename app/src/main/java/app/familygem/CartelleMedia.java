@@ -39,9 +39,9 @@ public class CartelleMedia extends AppCompatActivity {
 		aggiornaLista();
 		getSupportActionBar().setDisplayHomeAsUpEnabled( true );
 		findViewById( R.id.fab ).setOnClickListener( v -> {
-			int perm = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+			int perm = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
 			if( perm == PackageManager.PERMISSION_DENIED )
-				ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE }, 3517);
+				ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, 3517);
 			else if( perm == PackageManager.PERMISSION_GRANTED )
 				faiScegliereCartella();
 		});

@@ -101,9 +101,9 @@ public class AlberoNuovo extends AppCompatActivity {
 
 		Button importaGedcom = findViewById(R.id.bottone_importa_gedcom);
 		importaGedcom.setOnClickListener( v -> {
-			int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+			int perm = ContextCompat.checkSelfPermission(v.getContext(),Manifest.permission.READ_EXTERNAL_STORAGE);
 			if( perm == PackageManager.PERMISSION_DENIED )
-				ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1390 );
+				ActivityCompat.requestPermissions( (AppCompatActivity)v.getContext(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1390 );
 			else if( perm == PackageManager.PERMISSION_GRANTED )
 				importaGedcom();
 		});
@@ -159,6 +159,9 @@ public class AlberoNuovo extends AppCompatActivity {
 		}
 		String url = "https://drive.google.com/uc?export=download&id=1FT-60avkxrHv6G62pxXs9S6Liv5WkkKf";
 		String percorsoZip = getExternalCacheDir() + "/the_Simpsons.zip";
+		File fileZip = new File(percorsoZip);
+		if( fileZip.exists() )
+			fileZip.delete();
 		DownloadManager.Request richiesta = new DownloadManager.Request( Uri.parse( url ) )
 				.setTitle( getString(R.string.simpsons_tree) )
 				.setDescription( getString(R.string.family_gem_example) )
@@ -179,7 +182,7 @@ public class AlberoNuovo extends AppCompatActivity {
 
 	// Decomprime il file zip nella memoria esterna e cartella col numero dell'albero
 	// Usato ugualmente da: esempio Simpson, file di backup e alberi condivisi
-	static void decomprimiZip( final Context contesto, String percorsoZip, Uri uriZip ) {
+	static boolean decomprimiZip( final Context contesto, String percorsoZip, Uri uriZip ) {
 		int numAlbero = Globale.preferenze.max() + 1;
 		File dirImmagini = contesto.getExternalFilesDir( String.valueOf(numAlbero) );
 		if( !dirImmagini.exists() )
@@ -224,27 +227,25 @@ public class AlberoNuovo extends AppCompatActivity {
 			fileImpostazioni.delete();
 			//fileZip.delete();
 			// Albero proveniente da condivisione destinato al confronto
-			if( cassa.grado == 9 && confronta(contesto,cassetto) ) {
+			if( cassa.grado == 9 && confronta(contesto,cassetto,false) ) {
 				cassetto.grado = 20; // lo marchia come derivato
-			} // Albero condiviso scaricato automaticamente dopo la prima installazione
-			else if( Globale.preferenze.referrer != null ) {
-				Globale.preferenze.referrer = null;
-				if( contesto instanceof Alberi ) { // Download dal dialogo in Alberi
-					Alberi alberi = (Alberi) contesto;
-					alberi.runOnUiThread( () -> {
-						alberi.rotella.setVisibility( View.GONE );
-						alberi.aggiornaLista();
-					});
-				} else // Downolad da AlberoNuovo
-					contesto.startActivity( new Intent( contesto, Alberi.class ) );
-			} else { // Albero di esempio, di backup, o di condivisione
-				contesto.startActivity( new Intent( contesto, Alberi.class ) );
 			}
+			// Il download è avvenuto dal dialogo del referrer in Alberi
+			if( contesto instanceof Alberi ) {
+				Alberi alberi = (Alberi) contesto;
+				alberi.runOnUiThread( () -> {
+					alberi.rotella.setVisibility( View.GONE );
+					alberi.aggiornaLista();
+				});
+			} else // Albero di esempio (Simpson) o di backup (da Facciata o da AlberoNuovo)
+				contesto.startActivity( new Intent( contesto, Alberi.class ) );
 			Globale.preferenze.salva();
 			U.tosta( (Activity)contesto, R.string.tree_imported_ok );
+			return true;
 		} catch( Exception e ) {
 			U.tosta( (Activity)contesto, e.getLocalizedMessage() );
 		}
+		return false;
 	}
 
 	// Fa scegliere un file Gedcom da importare
@@ -319,9 +320,10 @@ public class AlberoNuovo extends AppCompatActivity {
 		// - un backup nuovo AGGIUNGE un singolo albero
 		if( resultCode == RESULT_OK && requestCode == 219 ){
 			try {
+				Uri uri = data.getData();
 				boolean ceFileSettings = false;
 				boolean ceFilePreferenze = false;
-				final ZipInputStream zis = new ZipInputStream( getContentResolver().openInputStream( data.getData() ) );
+				final ZipInputStream zis = new ZipInputStream( getContentResolver().openInputStream(uri) );
 				ZipEntry zipEntry;
 				while( (zipEntry = zis.getNextEntry()) != null ) {
 					if(zipEntry.getName().equals( "settings.json" ))
@@ -332,14 +334,23 @@ public class AlberoNuovo extends AppCompatActivity {
 				zis.closeEntry();
 				zis.close();
 				if( ceFileSettings ) {
-					decomprimiZip( this, null, data.getData() );
+					decomprimiZip( this, null, uri );
+					/* todo nello strano caso che viene importato col backup ZIP lo stesso albero suggerito dal referrer
+					    bisognerebbe annullare il referrer:
+						if( decomprimiZip( this, null, uri ) ){
+						String idData = Esportatore.estraiNome(uri); // che però non è statico
+						if( Globale.preferenze.referrer.equals(idData) ) {
+							Globale.preferenze.referrer = null;
+							Globale.preferenze.salva();
+						}}
+					 */
 				} else if(ceFilePreferenze){
 					AlertDialog.Builder builder = new AlertDialog.Builder( AlberoNuovo.this );
 					builder.setTitle( R.string.warning );
 					builder.setMessage( R.string.old_backup_overwrite );
 					builder.setPositiveButton( android.R.string.yes, (dialog, id) -> {
 						try {
-							ZipInputStream zis2 = new ZipInputStream( getContentResolver().openInputStream( data.getData() ) );
+							ZipInputStream zis2 = new ZipInputStream( getContentResolver().openInputStream(uri) );
 							ZipEntry zipEntry2;
 							int len;
 							byte[] buffer = new byte[1024];
@@ -373,8 +384,9 @@ public class AlberoNuovo extends AppCompatActivity {
 	}
 
 	// Confronta le date di invio degli alberi esistenti
-	// Se trova almeno un albero originario tra quelli esistenti apre il confronto e restituisce true
-	static boolean confronta( Context contesto, Armadio.Cassetto albero2 ) {
+	// Se trova almeno un albero originario tra quelli esistenti restituisce true
+	// ed eventualmente apre il comparatore
+	static boolean confronta( Context contesto, Armadio.Cassetto albero2, boolean apriCompara ) {
 		if( albero2.condivisioni != null )
 			for( Armadio.Cassetto alb : Globale.preferenze.alberi )
 				if( alb.id != albero2.id && alb.condivisioni != null && alb.grado != 20  && alb.grado != 30 )
@@ -382,11 +394,12 @@ public class AlberoNuovo extends AppCompatActivity {
 						Armadio.Invio invio = alb.condivisioni.get(i);
 						for( Armadio.Invio invio2 : albero2.condivisioni )
 							if( invio.data != null && invio.data.equals( invio2.data ) ) {
-								contesto.startActivity( new Intent( contesto, Compara.class )
-									.putExtra( "idAlbero", alb.id )
-									.putExtra( "idAlbero2", albero2.id )
-									.putExtra( "idData", invio.data )
-								);
+								if( apriCompara )
+									contesto.startActivity( new Intent( contesto, Compara.class )
+										.putExtra( "idAlbero", alb.id )
+										.putExtra( "idAlbero2", albero2.id )
+										.putExtra( "idData", invio.data )
+									);
 								return true;
 							}
 					}

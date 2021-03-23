@@ -214,22 +214,24 @@ public class InfoAlbero extends AppCompatActivity {
 	}
 
 	boolean testoMesso;  // impedisce di mettere più di uno spazio() consecutivo
-	void poni( CharSequence titolo, String testo ) {
+	void poni(CharSequence titolo, String testo) {
 		if( testo != null ) {
-			TableRow riga = new TableRow( getApplicationContext() );
-			TextView cella1 = new TextView( getApplicationContext() );
-			cella1.setTextColor( Color.BLACK );
-			cella1.setTypeface( null, Typeface.BOLD );
-			cella1.setPadding( 0, 0, 10, 0 );
-			cella1.setGravity( Gravity.END );
-			cella1.setText( titolo );
-			riga.addView( cella1 );
-			TextView cella2 = new TextView( getApplicationContext() );
-			cella2.setTextColor( 0xFF000000 );
-			cella2.setPadding( 0, 0, 0, 0 );
-			cella2.setText( testo );
-			riga.addView( cella2 );
-			( (TableLayout) findViewById( R.id.info_tabella ) ).addView( riga );
+			TableRow riga = new TableRow(getApplicationContext());
+			TextView cella1 = new TextView(getApplicationContext());
+			cella1.setTextSize(14);
+			cella1.setTextColor(Color.BLACK);
+			cella1.setTypeface(null, Typeface.BOLD);
+			cella1.setPadding(0, 0, 10, 0);
+			cella1.setGravity(Gravity.END);
+			cella1.setText(titolo);
+			riga.addView(cella1);
+			TextView cella2 = new TextView(getApplicationContext());
+			cella2.setTextSize(14);
+			cella2.setTextColor(Color.BLACK);
+			cella2.setPadding(0, 0, 0, 0);
+			cella2.setText(testo);
+			riga.addView(cella2);
+			((TableLayout)findViewById(R.id.info_tabella)).addView(riga);
 			testoMesso = true;
 		}
 	}

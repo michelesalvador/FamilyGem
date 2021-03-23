@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
@@ -62,6 +61,8 @@ import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.parser.JsonParser;
 import org.joda.time.Months;
 import org.joda.time.Years;
+import app.familygem.constants.Format;
+import app.familygem.constants.Gender;
 import app.familygem.dettaglio.ArchivioRef;
 import app.familygem.dettaglio.Autore;
 import app.familygem.dettaglio.Cambiamenti;
@@ -76,35 +77,35 @@ import app.familygem.visita.TrovaPila;
 
 public class U {
 
-	static String s( int id ) {
+	static String s(int id) {
 		return Globale.contesto.getString(id);
 	}
 
 	// Da usare dove capita che 'Globale.gc' possa essere null per ricaricarlo
-	static void gedcomSicuro( Gedcom gc ) {
+	static void gedcomSicuro(Gedcom gc) {
 		if( gc == null )
-			Globale.gc = Alberi.leggiJson( Globale.preferenze.idAprendo );
+			Globale.gc = Alberi.leggiJson(Globale.preferenze.idAprendo);
 	}
 
 	// restituisce l'id della Person iniziale di un Gedcom
-	static String trovaRadice( Gedcom gc ) {
-		if( gc.getHeader() != null)
-			if( valoreTag( gc.getHeader().getExtensions(), "_ROOT" ) != null )
-				return valoreTag( gc.getHeader().getExtensions(), "_ROOT" );
+	static String trovaRadice(Gedcom gc) {
+		if( gc.getHeader() != null )
+			if( valoreTag(gc.getHeader().getExtensions(), "_ROOT") != null )
+				return valoreTag(gc.getHeader().getExtensions(), "_ROOT");
 		if( !gc.getPeople().isEmpty() )
-				return gc.getPeople().get(0).getId();
+			return gc.getPeople().get(0).getId();
 		return null;
 	}
 	
 	// riceve una Person e restituisce stringa con nome e cognome principale
-	static String epiteto( Person p ) {
+	static String epiteto(Person p) {
 		if( p != null && !p.getNames().isEmpty() )
-			return nomeCognome( p.getNames().get(0) );
+			return nomeCognome(p.getNames().get(0));
 		return "[" + s(R.string.no_name) + "]";
 	}
 
 	// riceve una Person e restituisce il titolo nobiliare
-	static String titolo( Person p ) {
+	static String titolo(Person p) {
 		// GEDCOM standard INDI.TITL
 		for( EventFact ef : p.getEventsFacts() )
 			if( ef.getTag() != null && ef.getTag().equals("TITL") && ef.getValue() != null )
@@ -130,20 +131,25 @@ public class U {
 		String completo = "";
 		if( n.getValue() != null ) {
 			String grezzo = n.getValue().trim();
-			if( grezzo.indexOf('/') > -1 ) // Se c'è un cognome tra '/'
-				completo = grezzo.substring( 0, grezzo.indexOf('/') ).trim(); // nome
-			if (n.getNickname() != null)
+			int slashPos = grezzo.indexOf('/');
+			int lastSlashPos = grezzo.lastIndexOf('/');
+			if( slashPos > -1 ) // Se c'è un cognome tra '/'
+				completo = grezzo.substring( 0, slashPos ).trim(); // nome
+			else // Oppure è solo nome senza cognome
+				completo = grezzo;
+			if( n.getNickname() != null )
 				completo += " \"" + n.getNickname() + "\"";
-			if( grezzo.indexOf('/') < grezzo.lastIndexOf('/') ) {
-				completo += " " + grezzo.substring( grezzo.indexOf('/') + 1, grezzo.lastIndexOf('/') ).trim(); // cognome
-			}
-			if( grezzo.length() - 1 > grezzo.lastIndexOf('/') )
-				completo += " " + grezzo.substring( grezzo.lastIndexOf('/') + 1 ).trim(); // dopo il cognome
+			if( slashPos < lastSlashPos )
+				completo += " " + grezzo.substring( slashPos + 1, lastSlashPos ).trim(); // cognome
+			if( lastSlashPos > -1 && grezzo.length() - 1 > lastSlashPos )
+				completo += " " + grezzo.substring( lastSlashPos + 1 ).trim(); // dopo il cognome
 		} else {
 			if( n.getPrefix() != null )
 				completo = n.getPrefix();
 			if( n.getGiven() != null )
 				completo += " " + n.getGiven();
+			if( n.getNickname() != null )
+				completo += " \"" + n.getNickname() + "\"";
 			if( n.getSurname() != null )
 				completo += " " + n.getSurname();
 			if( n.getSuffix() != null )
@@ -167,25 +173,6 @@ public class U {
 		return cognome;
 	}
 
-	// Riceve una Person e restituisce il sesso: 0 senza SEX, 1 Maschio, 2 Femmina, 3 Undefinito, 4 altro
-	public static int sesso( Person p ) {
-		for( EventFact fatto : p.getEventsFacts() ) {
-			if( fatto.getTag()!=null && fatto.getTag().equals("SEX") ) {
-				if( fatto.getValue() == null )
-					return 4;  // c'è 'SEX' ma il valore è vuoto
-				else {
-					switch( fatto.getValue() ) {
-						case "M": return 1;
-						case "F": return 2;
-						case "U": return 3;
-						default: return 4; // altro valore
-					}
-				}
-			}
-		}
-		return 0; // SEX non c'è
-	}
-
 	// Riceve una person e trova se è morto o seppellito
 	static boolean morto( Person p ) {
 		for( EventFact fatto : p.getEventsFacts() ) {
@@ -195,53 +182,61 @@ public class U {
 		return false;
 	}
 
-	// Riceve una Person e restituisce una stringa con gli anni di nascita e morte e l'età eventualmente
-	static String dueAnni( Person p, boolean conEta ) {
-		String anni = "";
-		String annoFine = "";
-		Datatore inizio = null, fine = null;
-		for( EventFact unFatto : p.getEventsFacts() ) {
-			if( unFatto.getTag() != null && unFatto.getTag().equals("BIRT") && unFatto.getDate() != null ) {
-				inizio = new Datatore( unFatto.getDate() );
-				anni = inizio.scriviAnno();
+	/** Write the basic dates of a person's life, optionally with the age
+	 * @param person The dude to investigate
+	 * @param simple Dates with year only and no age between parentheses
+	 * @return A string with date of birth an death
+	 */
+	static String twoDates(Person person, boolean simple) {
+		String text = "";
+		String endYear = "";
+		Datatore start = null, end = null;
+		for( EventFact fact : person.getEventsFacts() ) {
+			if( fact.getTag() != null && fact.getTag().equals("BIRT") && fact.getDate() != null ) {
+				start = new Datatore(fact.getDate());
+				text = start.writeDate(simple);
 				break;
 			}
 		}
-		for( EventFact unFatto : p.getEventsFacts() ) {
-			if( unFatto.getTag() != null && unFatto.getTag().equals("DEAT") && unFatto.getDate() != null ) {
-				fine = new Datatore( unFatto.getDate() );
-				annoFine = fine.scriviAnno();
-				if( !anni.isEmpty() && !annoFine.isEmpty() )
-					anni += " – ";
-				anni += annoFine;
+		for( EventFact fact : person.getEventsFacts() ) {
+			if( fact.getTag() != null && fact.getTag().equals("DEAT") && fact.getDate() != null ) {
+				end = new Datatore(fact.getDate());
+				endYear = end.writeDate(simple);
+				if( !text.isEmpty() && !endYear.isEmpty() )
+					text += " – ";
+				text += endYear;
 				break;
 			}
 		}
-		// Aggiunge l'età tra parentesi
-		if( conEta && inizio != null && inizio.tipo <= 3 && !inizio.data1.format.toPattern().equals(Datatore.G_M) ) {
-			LocalDate dataInizio = new LocalDate( inizio.data1.date ); // converte in joda time
-			// Se è ancora vivo la fine è adesso
-			if( fine == null && dataInizio.isBefore(LocalDate.now()) && Years.yearsBetween(dataInizio,LocalDate.now()).getYears() < 120 && !morto(p) ) {
-				fine = new Datatore( String.format(Locale.ENGLISH,"%te %<Tb %<tY",new Date()) ); // un po' assurdo dover qui passare per Datatore...
-				annoFine = fine.scriviAnno();
+		// Add the age between parentheses
+		if( !simple && start != null && start.tipo <= 3 && !start.data1.format.toPattern().equals(Format.D_M) ) {
+			LocalDate startDate = new LocalDate( start.data1.date ); // Converted to joda time
+			// If person is still alive the end is now
+			if( end == null && startDate.isBefore(LocalDate.now())
+					&& Years.yearsBetween(startDate, LocalDate.now()).getYears() < 120 && !morto(person) ) {
+				end = new Datatore(String.format(Locale.ENGLISH, "%te %<Tb %<tY", new Date()));
+				endYear = end.writeDate(false);
 			}
-			if( fine != null && fine.tipo <= 3 && !annoFine.equals("") ) { // date plausibili
-				LocalDate dataFine = new LocalDate( fine.data1.date );
-				String misura = "";
-				int eta = Years.yearsBetween( dataInizio, dataFine ).getYears();
-				if( eta < 2 ) {
-					eta = Months.monthsBetween( dataInizio, dataFine ).getMonths(); // todo e se nella data non c'è il mese / giorno?
-					misura = " " + Globale.contesto.getText( R.string.months );
-					if( eta < 2 ) {
-						eta = Days.daysBetween( dataInizio, dataFine ).getDays();
-						misura = " " + Globale.contesto.getText( R.string.days );;
+			if( end != null && end.tipo <= 3 && !endYear.equals("") ) { // Plausible dates
+				LocalDate endDate = new LocalDate(end.data1.date);
+				if( startDate.isBefore(endDate) || startDate.isEqual(endDate) ) {
+					String units = "";
+					int age = Years.yearsBetween(startDate, endDate).getYears();
+					if( age < 2 ) {
+						// Without day and/or month the years start at 1 January
+						age = Months.monthsBetween(startDate, endDate).getMonths();
+						units = " " + Globale.contesto.getText(R.string.months);
+						if( age < 2 ) {
+							age = Days.daysBetween(startDate, endDate).getDays();
+							units = " " + Globale.contesto.getText(R.string.days);
+							;
+						}
 					}
+					text += "  (" + age + units + ")";
 				}
-				if( eta >= 0 )
-					anni += "  (" + eta + misura + ")";
 			}
 		}
-		return anni;
+		return text;
 	}
 
 	// Estrae i soli numeri da una stringa che può contenere anche lettere
@@ -405,19 +400,19 @@ public class U {
 
 	// Compone il testo coi dettagli di un individuo e lo mette nella vista testo
 	// inoltre restituisce lo stesso testo per Confrontatore
-	static String dettagli( Person tizio, TextView vistaDettagli ) {
-		String anni = dueAnni( tizio, true );
-		String luoghi = Anagrafe.dueLuoghi( tizio );
-		if( anni.isEmpty() && luoghi.isEmpty() && vistaDettagli != null ) {
-			vistaDettagli.setVisibility( View.GONE );
+	static String details(Person person, TextView detailsView ) {
+		String anni = twoDates(person, false);
+		String luoghi = Anagrafe.dueLuoghi(person);
+		if( anni.isEmpty() && luoghi.isEmpty() && detailsView != null ) {
+			detailsView.setVisibility(View.GONE);
 		} else {
-			if( ( anni.length() > 10 || luoghi.length() > 20 ) && ( !anni.isEmpty() && !luoghi.isEmpty() ) )
+			if( (anni.length() >= 10 || luoghi.length() >= 20) && (!anni.isEmpty() && !luoghi.isEmpty()) )
 				anni += "\n" + luoghi;
 			else
 				anni += "   " + luoghi;
-			if( vistaDettagli != null ) {
-				vistaDettagli.setText( anni.trim() );
-				vistaDettagli.setVisibility( View.VISIBLE );
+			if( detailsView != null ) {
+				detailsView.setText(anni.trim());
+				detailsView.setVisibility(View.VISIBLE);
 			}
 		}
 		return anni.trim();
@@ -437,13 +432,13 @@ public class U {
 		String titolo = titolo( persona );
 		if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
 		else vistaTitolo.setText( titolo );
-		dettagli( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
+		details( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
 		F.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
 		if( !morto(persona) )
 			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( View.GONE );
-		if( sesso(persona) == 1 )
+		if( Gender.isMale(persona) )
 			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( R.drawable.casella_bordo_maschio );
-		if( sesso(persona) == 2 )
+		else if( Gender.isFemale(persona) )
 			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( R.drawable.casella_bordo_femmina );
 		vistaIndi.setTag( persona.getId() );
 		return vistaIndi;
@@ -622,27 +617,27 @@ public class U {
 	}
 
 	// La view ritornata è usata da Condivisione
-	public static View linkaPersona( LinearLayout scatola, Person p, int scheda ) {
-		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_individuo_piccolo, scatola, false );
-		scatola.addView( vistaPersona );
-		F.unaFoto( Globale.gc, p, vistaPersona.findViewById(R.id.collega_foto) );
-		((TextView)vistaPersona.findViewById( R.id.collega_nome )).setText( epiteto(p) );
-		String dati = dueAnni( p, false );
-		TextView vistaDettagli = vistaPersona.findViewById( R.id.collega_dati );
-		if( dati.isEmpty() ) vistaDettagli.setVisibility( View.GONE );
+	public static View linkaPersona(LinearLayout scatola, Person p, int scheda) {
+		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo_piccolo, scatola, false);
+		scatola.addView(vistaPersona);
+		F.unaFoto(Globale.gc, p, vistaPersona.findViewById(R.id.collega_foto));
+		((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(epiteto(p));
+		String dati = twoDates(p, true);
+		TextView vistaDettagli = vistaPersona.findViewById(R.id.collega_dati);
+		if( dati.isEmpty() ) vistaDettagli.setVisibility(View.GONE);
 		else vistaDettagli.setText( dati );
-		if( !morto( p ) )
-			vistaPersona.findViewById( R.id.collega_lutto ).setVisibility( View.GONE );
-		if( sesso(p) == 1 )
-			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource( R.drawable.casella_bordo_maschio );
-		if( sesso(p) == 2 )
-			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource( R.drawable.casella_bordo_femmina );
-		vistaPersona.setOnClickListener( v -> {
-			Memoria.setPrimo( p );
-			Intent intento = new Intent( scatola.getContext(), Individuo.class );
-			intento.putExtra( "scheda", scheda );
-			scatola.getContext().startActivity( intento );
-		} );
+		if( !morto(p) )
+			vistaPersona.findViewById( R.id.collega_lutto ).setVisibility(View.GONE);
+		if( Gender.isMale(p) )
+			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_maschio);
+		else if( Gender.isFemale(p) )
+			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_femmina);
+		vistaPersona.setOnClickListener(v -> {
+			Memoria.setPrimo(p);
+			Intent intento = new Intent(scatola.getContext(), Individuo.class);
+			intento.putExtra("scheda", scheda);
+			scatola.getContext().startActivity(intento);
+		});
 		return vistaPersona;
 	}
 
@@ -784,33 +779,33 @@ public class U {
 				chan.setDateTime( dataTempoAdesso() );
 				aggiornando.getClass().getMethod( "setChange", Change.class ).invoke( aggiornando, chan );
 				// Estensione con l'id della zona, una stringa tipo 'America/Sao_Paulo'
-				chan.putExtension( "zona", TimeZone.getDefault().getID() );
+				chan.putExtension( "zone", TimeZone.getDefault().getID() );
 			} catch( Exception e ) {}
 		}
 	}
 
 	// Eventualmente salva il Json
-	public static void salvaJson( boolean rinfresca, Object ... oggetti ) {
-		if( oggetti != null )
-			aggiornaDate( oggetti );
-		if( rinfresca )
+	public static void salvaJson(boolean refresh, Object... objects) {
+		if( objects != null )
+			aggiornaDate( objects );
+		if( refresh )
 			Globale.editato = true;
 
 		// al primo salvataggio marchia gli autori
 		if( Globale.preferenze.alberoAperto().grado == 9 ) {
 			for( Submitter autore : Globale.gc.getSubmitters() )
-				autore.putExtension( "passato", true );
+				autore.putExtension("passato", true);
 			Globale.preferenze.alberoAperto().grado = 10;
 			Globale.preferenze.salva();
 		}
 
 		if( Globale.preferenze.autoSalva )
-			salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+			salvaJson(Globale.gc, Globale.preferenze.idAprendo);
 		else { // mostra il tasto Salva
 			Globale.daSalvare = true;
 			if( Globale.vistaPrincipe != null ) {
 				NavigationView menu = Globale.vistaPrincipe.findViewById(R.id.menu);
-				menu.getHeaderView(0).findViewById( R.id.menu_salva ).setVisibility( View.VISIBLE );
+				menu.getHeaderView(0).findViewById(R.id.menu_salva).setVisibility(View.VISIBLE);
 			}
 		}
 	}
@@ -854,13 +849,13 @@ public class U {
 
 	// Valuta se ci sono individui collegabili rispetto a un individuo.
 	// Usato per decidere se far comparire 'Collega persona esistente' nel menu
-	static boolean ciSonoIndividuiCollegabili( Person piolo ) {
-		int numTotali = Globale.gc.getPeople().size();
-		if( numTotali > 0 && ( Globale.preferenze.esperto // gli esperti possono sempre
-				|| piolo == null ) ) // in una famiglia vuota unRappresentanteDellaFamiglia è null
+	static boolean ciSonoIndividuiCollegabili(Person person) {
+		int total = Globale.gc.getPeople().size();
+		if( total > 0 && (Globale.preferenze.esperto // gli esperti possono sempre
+				|| person == null) ) // in una famiglia vuota unRappresentanteDellaFamiglia è null
 			return true;
-		int numFamili = Anagrafe.quantiFamiliari( piolo );
-		return numTotali > numFamili+1;
+		int kin = Anagrafe.countRelatives(person);
+		return total > kin + 1;
 	}
 
 	// Chiede se referenziare un autore nell'header
@@ -1090,15 +1085,15 @@ public class U {
 			}
 		}
 		if( vuote.size() > 0 ) {
-			new AlertDialog.Builder(contesto).setMessage( R.string.empty_family_delete )
+			new AlertDialog.Builder(contesto).setMessage(R.string.empty_family_delete)
 					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
-						for(Family f : vuote)
-							Chiesa.eliminaFamiglia( f.getId() ); // Così capita di salvare più volte insieme... ma vabè
-						if(cheFare != null) cheFare.run();
+						for( Family fam : vuote )
+							Chiesa.deleteFamily(fam); // Così capita di salvare più volte insieme... ma vabè
+						if( cheFare != null ) cheFare.run();
 					}).setNeutralButton(android.R.string.cancel, (dialog, i) -> {
-						if(ancheKo) cheFare.run();
-					}).setOnCancelListener( dialog -> {
-						if(ancheKo) cheFare.run();
+						if( ancheKo ) cheFare.run();
+					}).setOnCancelListener(dialog -> {
+						if( ancheKo ) cheFare.run();
 					}).show();
 			return true;
 		}

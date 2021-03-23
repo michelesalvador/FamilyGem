@@ -10,15 +10,14 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="8dp"
-		android:textStyle="bold" />
+		style="@style/AppTheme.LittleTitle"/>
 
 	<TextView
 		android:id="@+id/evento_testo"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_below="@+id/evento_titolo"
-		android:textColor="#000"
-		android:textSize="18sp" />
+		android:textSize="17sp" />
 
 	<LinearLayout
 		android:id="@+id/evento_altro"

@@ -3,7 +3,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="app.familygem">
 
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	<!--<uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER"/>
 	<uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS"/>-->
 	<uses-permission android:name="android.permission.INTERNET"/>

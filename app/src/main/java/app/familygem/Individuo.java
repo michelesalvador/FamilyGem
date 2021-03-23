@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import app.familygem.constants.Gender;
 import app.familygem.dettaglio.CitazioneFonte;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Nome;
@@ -163,7 +164,7 @@ public class Individuo extends AppCompatActivity {
 				case 1: // Individuo Eventi
 					menu.add( 0, 20, 0, R.string.name );
 					// Sesso
-					if( U.sesso(uno) == 0 )
+					if( Gender.getGender(uno) == Gender.NONE )
 						menu.add( 0, 21, 0, R.string.sex );
 					// Eventi principali
 					SubMenu subEvento = menu.addSubMenu( 0, 0, 0, R.string.event );

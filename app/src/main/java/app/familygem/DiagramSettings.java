@@ -14,6 +14,7 @@ public class DiagramSettings extends AppCompatActivity {
 
 	SeekBar ancestors;
 	SeekBar uncles;
+	SeekBar cousins;
 	LinearLayout indicator;
 	AnimatorSet anima;
 
@@ -33,6 +34,10 @@ public class DiagramSettings extends AppCompatActivity {
 					uncles.setProgress( i );
 					Globale.preferenze.diagram.uncles = converti(i);
 				}
+				if( i == 0 && cousins.getProgress() > 0 ) {
+					cousins.setProgress( 0 );
+					Globale.preferenze.diagram.cousins = 0;
+				}
 				indicator(seekBar);
 			}
 			@Override
@@ -45,7 +50,7 @@ public class DiagramSettings extends AppCompatActivity {
 		});
 
 		// Number of uncles, linked to ancestors
-		uncles = findViewById( R.id.settings_uncles );
+		uncles = findViewById( R.id.settings_great_uncles );
 		uncles.setProgress( decodifica(Globale.preferenze.diagram.uncles) );
 		uncles.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
 			@Override
@@ -66,10 +71,10 @@ public class DiagramSettings extends AppCompatActivity {
 		});
 
 		// Display siblings
-		SwitchCompat siblings = findViewById( R.id.settings_siblings );
-		siblings.setChecked( Globale.preferenze.diagram.siblings );
-		siblings.setOnCheckedChangeListener( (button, active) -> {
-			Globale.preferenze.diagram.siblings = active;
+		SwitchCompat spouses = findViewById( R.id.settings_spouses );
+		spouses.setChecked( Globale.preferenze.diagram.spouses );
+		spouses.setOnCheckedChangeListener( (button, active) -> {
+			Globale.preferenze.diagram.spouses = active;
 			salva();
 		});
 
@@ -86,6 +91,44 @@ public class DiagramSettings extends AppCompatActivity {
 			@Override
 			public void onStopTrackingTouch( SeekBar seekBar ) {
 				Globale.preferenze.diagram.descendants = converti(seekBar.getProgress());
+				salva();
+			}
+		});
+
+		// Number of siblings and nephews
+		SeekBar siblings = findViewById( R.id.settings_siblings_nephews );
+		siblings.setProgress( decodifica(Globale.preferenze.diagram.siblings) );
+		siblings.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
+			@Override
+			public void onProgressChanged( SeekBar seekBar, int i, boolean b ) {
+				indicator(seekBar);
+			}
+			@Override
+			public void onStartTrackingTouch( SeekBar seekBar ) {}
+			@Override
+			public void onStopTrackingTouch( SeekBar seekBar ) {
+				Globale.preferenze.diagram.siblings = converti(seekBar.getProgress());
+				salva();
+			}
+		});
+
+		// Number of uncles and cousins, linked to ancestors
+		cousins = findViewById( R.id.settings_uncles_cousins );
+		cousins.setProgress( decodifica(Globale.preferenze.diagram.cousins) );
+		cousins.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
+			@Override
+			public void onProgressChanged( SeekBar seekBar, int i, boolean b ) {
+				if( i > 0 && ancestors.getProgress() == 0 ) {
+					ancestors.setProgress( 1 );
+					Globale.preferenze.diagram.ancestors = 1;
+				}
+				indicator(seekBar);
+			}
+			@Override
+			public void onStartTrackingTouch( SeekBar seekBar ) {}
+			@Override
+			public void onStopTrackingTouch( SeekBar seekBar ) {
+				Globale.preferenze.diagram.cousins = converti(seekBar.getProgress());
 				salva();
 			}
 		});

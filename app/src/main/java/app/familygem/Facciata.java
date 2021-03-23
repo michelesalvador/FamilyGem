@@ -21,10 +21,11 @@ public class Facciata extends AppCompatActivity {
 		/* Apertura in seguito al click su vari tipi di link:
 		https://www.familygem.app/share.php?tree=20190802224208
 			Messaggio breve
-			funziona in Gmail, in SMS ma non in Chrome. (Whatsapp da provare)
+			Cliccato in Chrome nei vecchi Android apre la scelta dell'app tra cui Family Gem per importare direttamente l'albero
+			Normalmente apre la pagina di condivisione del sito
 		intent://www.familygem.app/condivisi/20200218134922.zip#Intent;scheme=https;end
 			Link ufficiale nella pagina di condivisione del sito
-			è l'unico che sembra avere certezza di funzionare, almeno in Chrome
+			è l'unico che sembra avere certezza di funzionare, in Chrome, nel browser interno a Libero, nel Browser L90
 		https://www.familygem.app/condivisi/20190802224208.zip
 			URL diretto allo zip
 			Funziona nei vecchi android, nei nuovi semplicemente il file viene scaricato
@@ -80,8 +81,12 @@ public class Facciata extends AppCompatActivity {
 						fos.write(data, 0, count);
 					}
 					fos.close();
-					if( client.completePendingCommand() ) {
-						AlberoNuovo.decomprimiZip( contesto, percorsoZip, null );
+					if( client.completePendingCommand()
+							&& AlberoNuovo.decomprimiZip( contesto, percorsoZip, null )
+							// Se l'albero è stato scaricato con l'install referrer
+							&& Globale.preferenze.referrer != null && Globale.preferenze.referrer.equals(idData) ) {
+						Globale.preferenze.referrer = null;
+						Globale.preferenze.salva();
 					}
 				} else // Non ha trovato il file sul server
 					scaricamentoFallito( contesto, contesto.getString(R.string.something_wrong), rotella );

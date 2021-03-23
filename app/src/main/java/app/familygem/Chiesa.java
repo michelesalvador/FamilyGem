@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -88,45 +89,45 @@ public class Chiesa extends Fragment {
 		vistaFamiglia.setTag( fam.getId() );	// solo per il menu contestuale Elimina qui in Chiesa
 	}
 
-	// Elimina una famiglia, rimuove i ref dai membri
-	static void eliminaFamiglia( String idFamiglia ) {
-		Family f = gc.getFamily( idFamiglia );
+	// Delete a family, removing the refs from members
+	static void deleteFamily(Family family) {
+		if( family == null ) return;
 		Set<Person> membri = new HashSet<>();
-		// Prima rimuove i ref alla famiglia negli indi membri
-		for( Person marito : f.getHusbands(gc) ) {
+		// Remove references to the family from family members
+		for( Person marito : family.getHusbands(gc) ) {
 			Iterator<SpouseFamilyRef> refi = marito.getSpouseFamilyRefs().iterator();
 			while( refi.hasNext() ) {
 				SpouseFamilyRef sfr = refi.next();
-				if( sfr.getRef().equals(f.getId()) ) {
+				if( sfr.getRef().equals(family.getId()) ) {
 					refi.remove();
 					membri.add( marito );
 				}
 			}
 		}
-		for( Person moglie : f.getWives(gc) ) {
+		for( Person moglie : family.getWives(gc) ) {
 			Iterator<SpouseFamilyRef> refi = moglie.getSpouseFamilyRefs().iterator();
 			while( refi.hasNext() ) {
 				SpouseFamilyRef sfr = refi.next();
-				if( sfr.getRef().equals(f.getId()) ) {
+				if( sfr.getRef().equals(family.getId()) ) {
 					refi.remove();
 					membri.add( moglie );
 				}
 			}
 		}
-		for( Person figlio : f.getChildren(gc) ) {
+		for( Person figlio : family.getChildren(gc) ) {
 			Iterator<ParentFamilyRef> refi = figlio.getParentFamilyRefs().iterator();
 			while( refi.hasNext() ) {
 				ParentFamilyRef pfr = refi.next();
-				if( pfr.getRef().equals(f.getId()) ) {
+				if( pfr.getRef().equals(family.getId()) ) {
 					refi.remove();
 					membri.add( figlio );
 				}
 			}
 		}
-		// Poi può rimuovere la famiglia
-		gc.getFamilies().remove(f);
+		// The family is deleted
+		gc.getFamilies().remove(family);
 		gc.createIndexes();	// necessario per aggiornare gli individui
-		Memoria.annullaIstanze(f);
+		Memoria.annullaIstanze(family);
 		Globale.numFamiglia = 0; // Nel caso fortuito che sia stata eliminata proprio questa famiglia
 		U.salvaJson( true, membri.toArray(new Object[0]) );
 	}
@@ -152,11 +153,11 @@ public class Chiesa extends Fragment {
 			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
 				new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_family )
 						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
-							eliminaFamiglia( fam.getId() );
+							deleteFamily(fam);
 							getActivity().recreate();
 						}).setNeutralButton(android.R.string.cancel, null).show();
 			} else {
-				eliminaFamiglia( fam.getId() );
+				deleteFamily(fam);
 				getActivity().recreate();
 			}
 		} else {
@@ -252,25 +253,25 @@ public class Chiesa extends Fragment {
 
 	@Override
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
-		menu.add( R.string.order_by ).setEnabled(false);
-		menu.add( 0,1,0, R.string.id );
-		menu.add( 0,2,0, R.string.surname );
-		menu.add( 0,3,0, R.string.number_members );
+		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
+		subMenu.add(0, 1, 0, R.string.id);
+		subMenu.add(0, 2, 0, R.string.surname);
+		subMenu.add(0, 3, 0, R.string.number_members);
 	}
 	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if( id > 0 && id <= 3 ) {
-			if( ordine == id*2-1 )
+			if( ordine == id * 2 - 1 )
 				ordine++;
-			else if( ordine == id*2 )
+			else if( ordine == id * 2 )
 				ordine--;
 			else
-				ordine = id*2-1;
+				ordine = id * 2 - 1;
 			ordinaFamiglie();
 			scatola.removeAllViews();
 			for( Family fam : listaFamiglie )
-				mettiFamiglia( scatola, fam );
+				mettiFamiglia(scatola, fam);
 			//U.salvaJson( false ); // dubbio se metterlo per salvare subito il riordino delle famiglie
 			return true;
 		}

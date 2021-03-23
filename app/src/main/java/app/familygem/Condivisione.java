@@ -8,10 +8,12 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -38,6 +40,7 @@ public class Condivisione extends AppCompatActivity {
 	Armadio.Cassetto casso;
 	Esportatore esporter;
 	String nomeAutore;
+	int accessible; // 0 = false, 1 = true
 	String dataId;
 	String idAutore;
 	boolean uploadSuccesso;
@@ -98,6 +101,16 @@ public class Condivisione extends AppCompatActivity {
 			nomeAutore = autore[0] == null ? "" : autore[0].getName();
 			editaAutore.setText( nomeAutore );
 
+			// Display an alert for the acknowledgment of sharing
+			if( !Globale.preferenze.shareAgreement ) {
+				new AlertDialog.Builder(this).setTitle("Share sensitive data") // todo traduci
+						.setMessage("Please be aware that you are going to upload the whole tree to an online server.")
+						.setPositiveButton(android.R.string.ok, (dialog, id) -> {
+							Globale.preferenze.shareAgreement = true;
+							Globale.preferenze.salva();
+						}).setNeutralButton("Remind me later", null).show(); // todo traduci
+			}
+
 			// Raccoglie i dati della condivisione e posta al database
 			findViewById( R.id.bottone_condividi ).setOnClickListener( v -> {
 				if( uploadSuccesso )
@@ -117,17 +130,17 @@ public class Condivisione extends AppCompatActivity {
 					}
 
 					// Aggiornamento del submitter
-					Header testata = gc.getHeader();
-					if( testata == null ) {
-						testata = AlberoNuovo.creaTestata( casso.id + ".json" );
-						gc.setHeader( testata );
+					Header header = gc.getHeader();
+					if( header == null ) {
+						header = AlberoNuovo.creaTestata( casso.id + ".json" );
+						gc.setHeader( header );
 					} else
-						testata.setDateTime( U.dataTempoAdesso() );
+						header.setDateTime( U.dataTempoAdesso() );
 					if( autore[0] == null ) {
 						autore[0] = Podio.nuovoAutore( null );
 					}
-					if( testata.getSubmitterRef() == null ) {
-						testata.setSubmitterRef( autore[0].getId() );
+					if( header.getSubmitterRef() == null ) {
+						header.setSubmitterRef( autore[0].getId() );
 					}
 					String nomeAutoreEditato = editaAutore.getText().toString();
 					if( !nomeAutoreEditato.equals(nomeAutore) ) {
@@ -137,6 +150,10 @@ public class Condivisione extends AppCompatActivity {
 					}
 					idAutore = autore[0].getId();
 					U.salvaJson( gc, idAlbero ); // baypassando la preferenza di non salvare in atomatico
+
+					// Tree accessibility for app developer
+					CheckBox accessibleTree = findViewById(R.id.condividi_allow);
+					accessible = accessibleTree.isChecked() ? 1 : 0;
 
 					// Invia i dati
 					if( !BuildConfig.utenteAruba.isEmpty() )
@@ -174,7 +191,8 @@ public class Condivisione extends AppCompatActivity {
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
 				String dati = "password=" + URLEncoder.encode( BuildConfig.passwordAruba, "UTF-8") +
 						"&titoloAlbero=" + URLEncoder.encode( questo.casso.nome, "UTF-8") +
-						"&nomeAutore=" + URLEncoder.encode( questo.nomeAutore, "UTF-8");
+						"&nomeAutore=" + URLEncoder.encode( questo.nomeAutore, "UTF-8") +
+						"&accessibile=" + questo.accessible;
 				writer.write( dati );
 				writer.flush();
 				writer.close();

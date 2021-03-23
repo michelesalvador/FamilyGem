@@ -23,27 +23,30 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textAllCaps="true"
-			android:textSize="15sp" />
+			android:textSize="15sp"
+			android:textColor="@color/grayText"/>
 		<TextView
 			android:id="@+id/indi_nome"
-			style="@android:style/Widget.TextView.SpinnerItem"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_ruolo"
-			android:layout_toLeftOf="@+id/indi_foto"/>
+			android:layout_toLeftOf="@+id/indi_foto"
+			android:textSize="17sp"/>
 		<TextView
 			android:id="@+id/indi_titolo"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_nome"
-			android:textColor="#000"
+			android:textSize="15sp"
 			android:textStyle="italic" />
 		<TextView
 			android:id="@+id/indi_dettagli"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_titolo"
-			android:layout_toLeftOf="@+id/indi_foto"/>
+			android:layout_toLeftOf="@+id/indi_foto"
+			android:textSize="14sp"
+			android:textColor="@color/grayText"/>
 		<ImageView
 			android:id="@+id/indi_foto"
 			android:layout_width="65dp"

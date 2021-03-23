@@ -14,9 +14,7 @@
 		<TextView
 			android:id="@+id/info_statistiche"
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textColor="#000"
-			android:textSize="16sp" />
+			android:layout_height="wrap_content"/>
 
 		<Button
 			android:id="@+id/info_aggiorna"
@@ -25,6 +23,7 @@
 			android:layout_gravity="center_horizontal"
 			android:text="@string/refresh"
 			android:layout_marginTop="10dp"
+			style="@style/AppTheme.BottoneNormale"
 			android:visibility="gone"/>
 
 		<LinearLayout
@@ -43,8 +42,7 @@
 				android:paddingLeft="8dp"
 				android:paddingTop="3dp"
 				android:text="@string/header"
-				android:textColor="#fff"
-				android:textSize="16sp" />
+				android:textColor="#fff"/>
 
 			<TableLayout
 				android:id="@+id/info_tabella"
@@ -61,7 +59,8 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
 			android:layout_marginTop="20dp"
-			android:text="@string/update_header"/>
+			android:text="@string/update_header"
+			style="@style/AppTheme.BottoneNormale"/>
 
 	</LinearLayout>
 </ScrollView>

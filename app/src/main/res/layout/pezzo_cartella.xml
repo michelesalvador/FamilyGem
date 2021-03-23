@@ -14,8 +14,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_toStartOf="@id/cartella_elimina"
-		android:textSize="20sp"
-		android:textColor="#000"/>
+		android:textSize="20sp"/>
 
 	<TextView
 		android:id="@+id/cartella_url"
@@ -25,7 +24,8 @@
 		android:singleLine="true"
 		android:ellipsize="middle"
 		android:layout_toStartOf="@id/cartella_elimina"
-		android:textColor="#333"/>
+		android:textSize="14sp"
+		android:textColor="@color/grayText"/>
 
 	<ImageButton
 		android:id="@+id/cartella_elimina"

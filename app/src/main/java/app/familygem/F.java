@@ -554,15 +554,15 @@ public class F {
 	// Metodi per acquisizione immagini:
 
 	// Propone una bella lista di app per acquisire immagini
-	public static void appAcquisizioneImmagine( Context contesto, Fragment frammento, int codice, MediaContainer contenitore ) {
+	public static void appAcquisizioneImmagine(Context contesto, Fragment frammento, int codice, MediaContainer contenitore) {
 		// Richiesta permesso accesso memoria device
-		int perm = ContextCompat.checkSelfPermission( contesto, Manifest.permission.WRITE_EXTERNAL_STORAGE );
+		int perm = ContextCompat.checkSelfPermission(contesto, Manifest.permission.READ_EXTERNAL_STORAGE);
 		if( perm == PackageManager.PERMISSION_DENIED ) {
 			if( frammento != null ) { // Galleria
-				frammento.requestPermissions( new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE }, codice );
+				frammento.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, codice);
 			} else
-				ActivityCompat.requestPermissions( (AppCompatActivity) contesto,
-						new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE }, codice );
+				ActivityCompat.requestPermissions((AppCompatActivity)contesto,
+						new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, codice);
 			return;
 		}
 		// Colleziona gli intenti utili per acquisire immagini
@@ -802,7 +802,7 @@ public class F {
 		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
 			appAcquisizioneImmagine( contesto, frammento, codice, contenitore );
 		} else {
-			String permesso = permessi[0].substring( permessi[0].lastIndexOf('.')+1 );
+			String permesso = permessi[0].substring(permessi[0].lastIndexOf('.') + 1);
 			Toast.makeText( contesto, contesto.getString(R.string.not_granted,permesso), Toast.LENGTH_LONG ).show();
 		}
 	}

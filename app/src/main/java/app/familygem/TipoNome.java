@@ -10,6 +10,7 @@ import android.widget.Filter;
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TipoNome extends AppCompatAutoCompleteTextView {
 
@@ -18,7 +19,10 @@ public class TipoNome extends AppCompatAutoCompleteTextView {
 	public TipoNome( Context contesto, AttributeSet as ) {
 		super( contesto, as );
 		for( int i = 0; i < 5; i++ ) {
-			tipiCompleti.add( U.NAME_TYPES[i] + " - " + U.TIPI_NOME[i] );
+			String tipo = U.NAME_TYPES[i];
+			if( !Locale.getDefault().getLanguage().equals("en") )
+				tipo += " - " + U.TIPI_NOME[i]; // Traduzione in tutte le lingue diverse dall'inglese
+			tipiCompleti.add( tipo );
 		}
 		AdattatoreLista adattatoreLista = new AdattatoreLista( contesto, android.R.layout.simple_spinner_dropdown_item, tipiCompleti );
 		setAdapter( adattatoreLista );

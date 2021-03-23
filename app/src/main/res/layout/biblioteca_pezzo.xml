@@ -12,20 +12,20 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginRight="8dp"
-		android:text="S123" />
+		android:textSize="15sp"
+		android:textColor="@color/grayText"/>
 
 	<TextView
 		android:id="@+id/biblioteca_titolo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:text="Atto di nascita Gigio Picio"
-		android:textAppearance="?attr/textAppearanceListItem" />
+		android:layout_weight="1"/>
 
 	<TextView
 		android:id="@+id/biblioteca_volte"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginLeft="8dp"
-		android:text="12" />
+		android:textSize="15sp"
+		android:textColor="@color/grayText"/>
 </LinearLayout>

@@ -13,9 +13,7 @@
 		android:paddingLeft="10dp"
 		android:paddingTop="6dp"
 		android:paddingRight="10dp"
-		android:paddingBottom="8dp"
-		android:textColor="#444"
-		android:textSize="16sp"/>
+		android:paddingBottom="8dp"/>
 
 	<TextView
 		android:id="@+id/nota_fonti"
