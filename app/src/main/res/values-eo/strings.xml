@@ -301,4 +301,14 @@
     <string name="cant_understand_uri">Malsukcesis kompreni la ricevitan URI.</string>
     <string name="sources_number">Nombro de fontoj</string>
     <string name="citations">Referencoj</string>
+    <string name="drawer_close">Fermi navigilon</string>
+    <string name="drawer_open">Malfermi navigilon</string>
+    <string name="slideshow">Bildoprezento</string>
+    <string name="accepted_news">Vi akceptis %d ĝisdatigojn:
+\n\t%d aldonojn
+\n\t%d anstataŭigojn
+\n\t%d forigojn</string>
+    <string name="view_updates">Revizii unuope</string>
+    <string name="many_updates_choice">%d ĝisdatigoj bezonas elekton</string>
+    <string name="one_update_choice">Unu ĝisdatigo bezonas elekton</string>
 </resources>
