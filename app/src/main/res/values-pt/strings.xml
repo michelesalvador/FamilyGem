@@ -20,7 +20,7 @@
     <string name="shares">Ações</string>
     <string name="media_folders">Pastas de mídia</string>
     <string name="root">Raiz</string>
-    <string name="item_exists_but_file">A entrada da árvore está no índice, mas por algum motivo o arquivo relacionado está ausente:</string>
+    <string name="item_exists_but_file">A entrada da árvore está no índice, mas por algum motivo o ficheiro relacionado está ausente:</string>
     <string name="about">Sobre</string>
     <string name="show_advanced_functions">Mostrar ferramentas avançadas</string>
     <string name="load_tree_startup">Carregar a última árvore aberta na inicialização</string>
@@ -29,7 +29,7 @@
     <string name="correct">Corrigir</string>
     <string name="errors_found">%d erros encontrados.</string>
     <string name="all_ok">Está tudo bem.</string>
-    <string name="really_delete_tree">Deseja realmente excluir esta árvore\?</string>
+    <string name="really_delete_tree">Deseja realmente apagar esta árvore\?</string>
     <string name="no_results">Sem resultados.</string>
     <string name="export_gedcom">Exportar GEDCOM</string>
     <string name="compare">Comparar</string>
@@ -64,7 +64,7 @@
     <string name="name_of_tree">Título da árvore</string>
     <string name="modify_later">Mais tarde você pode editá-lo.</string>
     <string name="import_backup">Recuperar um backup ZIP</string>
-    <string name="import_gedcom">Importar um arquivo GEDCOM</string>
+    <string name="import_gedcom">Importar um ficheiro GEDCOM</string>
     <string name="download_example">Baixe um exemplo</string>
     <string name="empty_tree">Comece uma árvore vazia</string>
     <string name="download_shared_tree">Baixe a árvore compartilhada</string>
@@ -111,7 +111,7 @@
     <string name="siblings">Irmãos</string>
     <string name="parent">Pai ou Mãe</string>
     <string name="empty_family_delete">Restaram algumas famílias vazias.
-\nVocê quer excluí-los\?</string>
+\nQuer apagá-los\?</string>
     <string name="which_family">Qual família\?</string>
     <string name="empty_family">Familia vazia</string>
     <string name="empty_media">Mídia vazia</string>
@@ -166,7 +166,7 @@
     <string name="simple_notes">Notas simples</string>
     <string name="simple_note">Nota simples</string>
     <string name="shared_notes">Notas compartilhadas</string>
-    <string name="really_delete_family">Esta família será excluída, mas os membros da família não serão excluídos.</string>
+    <string name="really_delete_family">Esta família será apagada, mas os membros da família não serão apagados.</string>
     <string name="divorce">Divórcio</string>
     <string name="marriage">Casamento</string>
     <string name="family">Família</string>
@@ -228,7 +228,7 @@
     <string name="value">Valor</string>
     <string name="make_main_submitter">Você quer que este apresentador seja o principal da árvore\?</string>
     <string name="crop">Cortar</string>
-    <string name="choose_file">Escolher arquivo</string>
+    <string name="choose_file">Escolher ficheiro</string>
     <string name="choose_repository">Escolha o repositório</string>
     <string name="copy">Cópia</string>
     <string name="choose_source">Escolha a fonte</string>
@@ -276,8 +276,8 @@
     <string name="make_root">Definir como raiz</string>
     <string name="relatives">Parentes</string>
     <string name="events">Fatos</string>
-    <string name="person_deleted">Pessoa excluída.</string>
-    <string name="really_delete_person">Deseja realmente excluir esta pessoa\?</string>
+    <string name="person_deleted">Pessoa apagada.</string>
+    <string name="really_delete_person">Deseja realmente apagar esta pessoa\?</string>
     <string name="number_relatives">Número de parentes</string>
     <string name="year">Ano</string>
     <string name="surname">Sobrenome</string>
@@ -316,7 +316,7 @@
     <string name="updates_replace_add">Você deve escolher se as atualizações devem substituir itens existentes ou ser adicionadas como novos itens.</string>
     <string name="many_updates_choice">%d atualizações precisam de escolha</string>
     <string name="one_update_choice">Uma atualização precisa de uma escolha</string>
-    <string name="delete_imported_tree">Excluir árvore importada</string>
+    <string name="delete_imported_tree">Apagar árvore importada</string>
     <string name="accept_all">Aceitar tudo</string>
     <string name="view_updates">Comente individualmente</string>
     <string name="shared_medias">Mídia compartilhada</string>
@@ -329,8 +329,8 @@
     <string name="sure_delete">Você tem certeza\?</string>
     <string name="pdf_exported_ok">PDF exportado.</string>
     <string name="export_pdf">Exportar PDF</string>
-    <string name="add_device_folder">Adicione uma pasta deste dispositivo.</string>
-    <string name="media_searched_list">Os arquivos de mídia são pesquisados dentro dessas pastas.</string>
+    <string name="add_device_folder">Adicione uma pasta deste aparelho.</string>
+    <string name="media_searched_list">Os ficheiros de mídia são pesquisados dentro destas pastas.</string>
     <string name="zip_exported_ok">ZIP exportado.</string>
     <string name="gedcom_exported_ok">GEDCOM exportado.</string>
 </resources>
