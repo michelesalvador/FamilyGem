@@ -1,2 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="create">ರಚಿಸಿ</string>
+    <string name="name_of_tree">ಮರದ ಶೀರ್ಷಿಕೆ</string>
+    <string name="modify_later">ನಂತರ ನೀವು ಅದನ್ನು ಸಂಪಾದಿಸಬಹುದು.</string>
+    <string name="import_backup">ZIP ಬ್ಯಾಕಪ್ ಅನ್ನು ಮರುಪಡೆಯಿರಿ</string>
+    <string name="import_gedcom">GEDCOM ಫೈಲ್ ಅನ್ನು ಆಮದು ಮಾಡಿ</string>
+    <string name="download_example">ಉದಾಹರಣೆಯನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
+    <string name="empty_tree">ಖಾಲಿ ಮರವನ್ನು ಪ್ರಾರಂಭಿಸಿ</string>
+    <string name="download_shared_tree">ಹಂಚಿದ ಮರವನ್ನು ಡೌನ್ಲೋಡ್ ಮಾಡಿ</string>
+    <string name="new_tree">ಹೊಸ ಮರ</string>
+    <string name="submitters">ಸಲ್ಲಿಸುವವರು</string>
+    <string name="repositories">ಭಂಡಾರಗಳು</string>
+    <string name="families">ಕುಟುಂಬಗಳು</string>
+    <string name="notes">ಟಿಪ್ಪಣಿಗಳು</string>
+    <string name="sources">ಮೂಲಗಳು</string>
+    <string name="media">ಮಾಧ್ಯಮ</string>
+    <string name="diagram">ರೇಖಾಚಿತ್ರ</string>
+    <string name="trees">ವೃಕ್ಷ</string>
+    <string name="revert">ಬದಲಾವಣೆಗಳನ್ನು ರದ್ದುಗೊಳಿಸಿ</string>
+    <string name="drawer_close">ನ್ಯಾವಿಗೇಷನ್ ಡ್ರಾಯರ್ ಅನ್ನು ಮುಚ್ಚಿ</string>
+    <string name="drawer_open">ನ್ಯಾವಿಗೇಷನ್ ಡ್ರಾಯರ್ ತೆರೆಯಿರಿ</string>
+    <string name="existing_family">ಈಗಾಗಲೇ ಇರುವ ಕುಟುಂಬ</string>
+    <string name="new_family_of">%S ಹೊಸ ಕುಟುಂಬ</string>
+    <string name="extension">ವಿಸ್ತರಣೆ</string>
+    <string name="sources_number">ಮೂಲಗಳ ಸಂಖ್ಯೆ</string>
+    <string name="citations">ಉಲ್ಲೇಖಗಳು</string>
+    <string name="make_default">ಮುಖ್ಯ ಸಲ್ಲಿಸುವವರು</string>
+    <string name="version_name">ಆವೃತ್ತಿ %s</string>
+    <string name="cant_understand_uri">ಸ್ವೀಕರಿಸಿದ URI ಅನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="something_wrong">ಏನೋ ತಪ್ಪಾಗಿದೆ.</string>
+    <string name="change_date">ದಿನಾಂಕ ಬದಲಿಸಿ</string>
+    <string name="done">ಮುಗಿದಿದೆ</string>
+    <string name="cancel">ರದ್ದುಗೊಳಿಸಿ</string>
+    <string name="sure_delete">ನೀವು ಖಚಿತವಾಗಿರುವಿರಾ\?</string>
+    <string name="delete">ಅಳಿಸು</string>
+</resources>
