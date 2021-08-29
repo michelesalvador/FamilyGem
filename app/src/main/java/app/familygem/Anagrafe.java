@@ -24,13 +24,17 @@ import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.Years;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import app.familygem.constants.Format;
 import app.familygem.constants.Gender;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Anagrafe extends Fragment {
 
@@ -40,7 +44,12 @@ public class Anagrafe extends Fragment {
 	private boolean gliIdsonoNumerici;
 
 	private enum Order {
-		NONE, ID_ASC, ID_DESC, SURNAME_ASC, SURNAME_DESC, YEAR_ASC, YEAR_DESC, KIN_ASC, KIN_DESC;
+		NONE,
+		ID_ASC, ID_DESC,
+		SURNAME_ASC, SURNAME_DESC,
+		YEAR_ASC, YEAR_DESC,
+		AGE_ASC, AGE_DESC,
+		KIN_ASC, KIN_DESC;
 		public Order next() {
 			return values()[ordinal() + 1];
 		}
@@ -87,25 +96,27 @@ public class Anagrafe extends Fragment {
 			return new GestoreIndividuo( vistaIndividuo );
 		}
 		@Override
-		public void onBindViewHolder( GestoreIndividuo gestore, int posizione ) {
+		public void onBindViewHolder(GestoreIndividuo gestore, int posizione) {
 			Person person = listaIndividui.get(posizione);
 			View vistaIndi = gestore.vista;
 
-			String ruolo = null;
-			if( order == Order.ID_ASC || order == Order.ID_DESC ) ruolo = person.getId();
-			else if( order == Order.KIN_ASC || order == Order.KIN_DESC ) ruolo = String.valueOf(person.getExtension("kin"));
-			TextView vistaRuolo = vistaIndi.findViewById( R.id.indi_ruolo );
-			if( ruolo == null )
-				vistaRuolo.setVisibility( View.GONE );
+			String label = null;
+			if( order == Order.ID_ASC || order == Order.ID_DESC )
+				label = person.getId();
+			else if( order == Order.KIN_ASC || order == Order.KIN_DESC )
+				label = String.valueOf(person.getExtension("kin"));
+			TextView vistaRuolo = vistaIndi.findViewById(R.id.indi_ruolo);
+			if( label == null )
+				vistaRuolo.setVisibility(View.GONE);
 			else {
-				vistaRuolo.setText( ruolo );
-				vistaRuolo.setVisibility( View.VISIBLE );
+				vistaRuolo.setText(label);
+				vistaRuolo.setVisibility(View.VISIBLE);
 			}
 
-			TextView vistaNome = vistaIndi.findViewById( R.id.indi_nome );
+			TextView vistaNome = vistaIndi.findViewById(R.id.indi_nome);
 			String nome = U.epiteto(person);
-			vistaNome.setText( nome );
-			vistaNome.setVisibility( ( nome.isEmpty() && ruolo != null ) ? View.GONE : View.VISIBLE );
+			vistaNome.setText(nome);
+			vistaNome.setVisibility((nome.isEmpty() && label != null) ? View.GONE : View.VISIBLE);
 
 			TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
 			String titolo = U.titolo(person);
@@ -125,8 +136,8 @@ public class Anagrafe extends Fragment {
 			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource(bordo);
 
 			U.details(person, vistaIndi.findViewById(R.id.indi_dettagli));
-			F.unaFoto(Globale.gc, person, vistaIndi.findViewById(R.id.indi_foto));
-			vistaIndi.findViewById(R.id.indi_lutto).setVisibility(U.morto(person) ? View.VISIBLE : View.GONE);
+			F.unaFoto(Global.gc, person, vistaIndi.findViewById(R.id.indi_foto));
+			vistaIndi.findViewById(R.id.indi_lutto).setVisibility(U.isDead(person) ? View.VISIBLE : View.GONE);
 			vistaIndi.setTag(person.getId());
 		}
 		@Override
@@ -282,14 +293,22 @@ public class Anagrafe extends Fragment {
 					if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
 						return -1;
 					return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
-				case YEAR_ASC: // Sort for main person's year
+				case YEAR_ASC: // Sort for person's main year
 					return annoBase(p1) - annoBase(p2);
 				case YEAR_DESC:
-					if( annoBase(p2) == 9999 ) // Quelli senza anno vanno in fondo
+					if( annoBase(p2) == 9999 ) // Those without year go to the bottom
 						return -1;
 					if( annoBase(p1) == 9999 )
 						return annoBase(p2) == 9999 ? 0 : 1;
 					return annoBase(p2) - annoBase(p1);
+				case AGE_ASC: // Sort for main person's year
+					return calcAge(p1) - calcAge(p2);
+				case AGE_DESC:
+					if( calcAge(p2) == Integer.MAX_VALUE ) // Those without age go to the bottom
+						return -1;
+					if( calcAge(p1) == Integer.MAX_VALUE )
+						return calcAge(p2) == Integer.MAX_VALUE ? 0 : 1;
+					return calcAge(p2) - calcAge(p1);
 				case KIN_ASC: // Sort for number of relatives
 					return countRelatives(p1) - countRelatives(p2);
 				case KIN_DESC:
@@ -337,6 +356,40 @@ public class Anagrafe extends Fragment {
 			}
 		}
 		return min;
+	}
+
+	// Calculate the age of a person in days or MAX_VALUE
+	private int calcAge(Person person) {
+		int days = Integer.MAX_VALUE;
+		Datatore start = null, end = null;
+		for( EventFact event : person.getEventsFacts() ) {
+			if( event.getTag() != null && event.getTag().equals("BIRT") && event.getDate() != null ) {
+				start = new Datatore(event.getDate());
+				break;
+			}
+		}
+		for( EventFact event : person.getEventsFacts() ) {
+			if( event.getTag() != null && event.getTag().equals("DEAT") && event.getDate() != null ) {
+				end = new Datatore(event.getDate());
+				break;
+			}
+		}
+		if( start != null && start.isSingleKind() && !start.data1.isFormat(Format.D_M) ) {
+			LocalDate startDate = new LocalDate(start.data1.date);
+			// If the person is still alive the end is now
+			LocalDate now = LocalDate.now();
+			if( end == null && startDate.isBefore(now)
+					&& Years.yearsBetween(startDate, now).getYears() < 120 && !U.isDead(person) ) {
+				end = new Datatore(now.toDate());
+			}
+			if( end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M) ) {
+				LocalDate endDate = new LocalDate(end.data1.date);
+				if( startDate.isBefore(endDate) || startDate.isEqual(endDate) ) {
+					days = Days.daysBetween(startDate, endDate).getDays();
+				}
+			}
+		}
+		return days;
 	}
 
 	// riceve una persona e restitusce i due luoghi: iniziale – finale
@@ -429,7 +482,8 @@ public class Anagrafe extends Fragment {
 		subMenu.add(0, 1, 0, R.string.id);
 		subMenu.add(0, 2, 0, R.string.surname);
 		subMenu.add(0, 3, 0, R.string.year);
-		subMenu.add(0, 4, 0, R.string.number_relatives);
+		subMenu.add(0, 4, 0, R.string.age);
+		subMenu.add(0, 5, 0, R.string.number_relatives);
 
 		// Ricerca nell'Anagrafe
 		inflater.inflate( R.menu.cerca, menu );	// già questo basta a far comparire la lente con il campo di ricerca
@@ -450,7 +504,7 @@ public class Anagrafe extends Fragment {
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		int id = item.getItemId();
-		if( id > 0 && id <= 4 ) {
+		if( id > 0 && id <= 5 ) {
 			// Clicking twice the same menu item switchs sorting ASC and DESC
 			if( order == Order.values()[id * 2 - 1] )
 				order = order.next();
@@ -470,29 +524,30 @@ public class Anagrafe extends Fragment {
 	private String idIndi;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
-		idIndi = (String) vista.getTag();
-		menu.add(0, 0, 0, R.string.diagram );
-		if( !gc.getPerson(idIndi).getParentFamilies(gc).isEmpty() )
-			menu.add(0, 1, 0, gc.getPerson(idIndi).getSpouseFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_child );
-		if( !gc.getPerson(idIndi).getSpouseFamilies(gc).isEmpty() )
-			menu.add(0, 2, 0, gc.getPerson(idIndi).getParentFamilies(gc).isEmpty() ? R.string.family : R.string.family_as_spouse );
-		menu.add(0, 3, 0, R.string.modify );
-		menu.add(0, 4, 0, R.string.delete );
+		idIndi = (String)vista.getTag();
+		menu.add(0, 0, 0, R.string.diagram);
+		String[] familyLabels = Diagram.getFamilyLabels(getContext(), gc.getPerson(idIndi), null);
+		if( familyLabels[0] != null )
+			menu.add(0, 1, 0, familyLabels[0]);
+		if( familyLabels[1] != null )
+			menu.add(0, 2, 0, familyLabels[1]);
+		menu.add(0, 3, 0, R.string.modify);
+		menu.add(0, 4, 0, R.string.delete);
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id == 0 ) {	// Apri Diagramma
-			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), 1 );
-		} else if( id == 1) {	// Famiglia come figlio
-			U.qualiGenitoriMostrare( getContext(), gc.getPerson(idIndi), 2 );
-		} else if( id == 2 ) {	// Famiglia come coniuge
-			U.qualiConiugiMostrare( getContext(), gc.getPerson(idIndi), null );
-		} else if( id == 3 ) {	// Modifica
-			Intent intento = new Intent( getContext(), EditaIndividuo.class );
-			intento.putExtra( "idIndividuo", idIndi );
-			startActivity( intento );
-		} else if( id == 4 ) {	// Elimina
+			U.qualiGenitoriMostrare(getContext(), gc.getPerson(idIndi), 1);
+		} else if( id == 1 ) { // Famiglia come figlio
+			U.qualiGenitoriMostrare(getContext(), gc.getPerson(idIndi), 2);
+		} else if( id == 2 ) { // Famiglia come coniuge
+			U.qualiConiugiMostrare(getContext(), gc.getPerson(idIndi), null);
+		} else if( id == 3 ) { // Modifica
+			Intent intento = new Intent(getContext(), EditaIndividuo.class);
+			intento.putExtra("idIndividuo", idIndi);
+			startActivity(intento);
+		} else if( id == 4 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_person )
 					.setPositiveButton( R.string.delete, (dialog, i) -> {
 						Family[] famiglie = eliminaPersona(getContext(), idIndi);
@@ -538,12 +593,12 @@ public class Anagrafe extends Fragment {
 		gc.getPeople().remove( eliminando );
 		gc.createIndexes();	// necessario
 		String idNuovaRadice = U.trovaRadice(gc);	// Todo dovrebbe essere: trovaParentePiuProssimo
-		if( Globale.preferenze.alberoAperto().radice!=null && Globale.preferenze.alberoAperto().radice.equals(idEliminando) ) {
-			Globale.preferenze.alberoAperto().radice = idNuovaRadice;
+		if( Global.settings.getCurrentTree().root !=null && Global.settings.getCurrentTree().root.equals(idEliminando) ) {
+			Global.settings.getCurrentTree().root = idNuovaRadice;
 		}
-		Globale.preferenze.salva();
-		if( Globale.individuo != null && Globale.individuo.equals(idEliminando) )
-			Globale.individuo = idNuovaRadice;
+		Global.settings.save();
+		if( Global.indi != null && Global.indi.equals(idEliminando) )
+			Global.indi = idNuovaRadice;
 		Toast.makeText( contesto, R.string.person_deleted, Toast.LENGTH_SHORT ).show();
 		U.salvaJson( true, (Object[])famiglie );
 		return famiglie;

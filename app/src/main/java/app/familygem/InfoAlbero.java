@@ -29,49 +29,49 @@ public class InfoAlbero extends AppCompatActivity {
 	Gedcom gc;
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		setContentView(R.layout.info_albero );
-		LinearLayout scatola = findViewById( R.id.info_scatola );
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		setContentView(R.layout.info_albero);
+		LinearLayout scatola = findViewById(R.id.info_scatola);
 
-		final int idAlbero = getIntent().getIntExtra( "idAlbero", 1 );
-		final Armadio.Cassetto questoAlbero = Globale.preferenze.getAlbero( idAlbero );
-		final File file = new File( getFilesDir(), idAlbero + ".json");
-		String i;
+		final int treeId = getIntent().getIntExtra("idAlbero", 1);
+		final Settings.Tree questoAlbero = Global.settings.getTree(treeId);
+		final File file = new File(getFilesDir(), treeId + ".json");
+		String i = getText(R.string.title) + ": " + questoAlbero.title;
 		if( !file.exists() ) {
-			i = getText(R.string.item_exists_but_file) + "\n" + file.getAbsolutePath();
+			i += "\n\n" + getText(R.string.item_exists_but_file) + "\n" + file.getAbsolutePath();
 		} else  {
-			i = getText(R.string.file) + ": " + file.getAbsolutePath();
-			gc = Alberi.apriGedcomTemporaneo( idAlbero, false );
+			i += "\n" + getText(R.string.file) + ": " + file.getAbsolutePath();
+			gc = Alberi.apriGedcomTemporaneo(treeId, false);
 			if( gc == null )
 				i += "\n\n" + getString(R.string.no_useful_data);
 			else {
 				// Aggiornamento dei dati automatico o su richiesta
-				if( questoAlbero.individui < 100 ) {
-					aggiornaDati( gc, questoAlbero );
+				if( questoAlbero.persons < 100 ) {
+					refreshData(gc, questoAlbero);
 				} else {
-					Button bottoneAggiorna = findViewById( R.id.info_aggiorna );
-					bottoneAggiorna.setVisibility( View.VISIBLE );
-					bottoneAggiorna.setOnClickListener( v -> {
-						aggiornaDati( gc, questoAlbero);
+					Button bottoneAggiorna = findViewById(R.id.info_aggiorna);
+					bottoneAggiorna.setVisibility(View.VISIBLE);
+					bottoneAggiorna.setOnClickListener(v -> {
+						refreshData(gc, questoAlbero);
 						recreate();
 					});
 				}
-				i += "\n\n" + getText(R.string.persons) + ": "+ questoAlbero.individui
+				i += "\n\n" + getText(R.string.persons) + ": "+ questoAlbero.persons
 					+ "\n" + getText(R.string.families) + ": "+ gc.getFamilies().size()
-					+ "\n" + getText(R.string.generations) + ": "+ questoAlbero.generazioni
+					+ "\n" + getText(R.string.generations) + ": "+ questoAlbero.generations
 					+ "\n" + getText(R.string.media) + ": "+ questoAlbero.media
 					+ "\n" + getText(R.string.sources) + ": "+ gc.getSources().size()
 					+ "\n" + getText(R.string.repositories) + ": "+ gc.getRepositories().size();
-				if( questoAlbero.radice != null ) {
-					i += "\n" + getText(R.string.root) + ": " + U.epiteto( gc.getPerson(questoAlbero.radice) );
+				if( questoAlbero.root != null ) {
+					i += "\n" + getText(R.string.root) + ": " + U.epiteto(gc.getPerson(questoAlbero.root));
 				}
-				if( questoAlbero.condivisioni != null && !questoAlbero.condivisioni.isEmpty() ) {
+				if( questoAlbero.shares != null && !questoAlbero.shares.isEmpty() ) {
 					i += "\n\n" + getText(R.string.shares) + ":";
-					for( Armadio.Invio invio : questoAlbero.condivisioni ) {
-						i += "\n" + dataIdVersoData(invio.data);
-						if( gc.getSubmitter(invio.submitter) != null )
-							i += " - " + nomeAutore( gc.getSubmitter(invio.submitter) );
+					for( Settings.Share share : questoAlbero.shares ) {
+						i += "\n" + dataIdVersoData(share.dateId);
+						if( gc.getSubmitter(share.submitter) != null )
+							i += " - " + nomeAutore( gc.getSubmitter(share.submitter) );
 					}
 				}
 			}
@@ -85,7 +85,7 @@ public class InfoAlbero extends AppCompatActivity {
 				bottoneHeader.setText( R.string.create_header );
 				bottoneHeader.setOnClickListener( view -> {
 					gc.setHeader( AlberoNuovo.creaTestata( file.getName() ) );
-					U.salvaJson( gc, idAlbero );
+					U.salvaJson(gc, treeId);
 					recreate();
 				});
 			} else {
@@ -144,7 +144,7 @@ public class InfoAlbero extends AppCompatActivity {
 
 				// Bottone per aggiorna l'header GEDCOM coi parametri di Family Gem
 				bottoneHeader.setOnClickListener( view -> {
-					h.setFile( idAlbero + ".json" );
+					h.setFile(treeId + ".json");
 					CharacterSet caratteri = h.getCharacterSet();
 					if( caratteri == null ) {
 						caratteri = new CharacterSet();
@@ -175,42 +175,43 @@ public class InfoAlbero extends AppCompatActivity {
 					versioneGc.setForm( "LINEAGE-LINKED" );
 					h.setDestination( null );
 
-					U.salvaJson( gc, idAlbero );
+					U.salvaJson(gc, treeId);
 					recreate();
 				});
 
-				U.mettiNote( scatola, h, true );
+				U.mettiNote(scatola, h, true);
 			}
 			// Estensioni del Gedcom, ovvero tag non standard di livello 0 zero
 			for( Estensione est : U.trovaEstensioni(gc) ) {
 				U.metti( scatola, est.nome, est.testo );
 			}
 		} else
-			bottoneHeader.setVisibility( View.GONE );
+			bottoneHeader.setVisibility(View.GONE);
 	}
 
-	String dataIdVersoData( String id ) {
+	String dataIdVersoData(String id) {
 		if( id == null ) return "";
-		return id.substring(0,4) +"-"+ id.substring(4,6) +"-"+ id.substring(6,8) +" "+
-				id.substring(8,10) +":"+ id.substring(10,12) +":"+ id.substring(12);
+		return id.substring(0, 4) + "-" + id.substring(4, 6) + "-" + id.substring(6, 8) + " "
+				+ id.substring(8, 10) + ":" + id.substring(10, 12) + ":" + id.substring(12);
 	}
 
 	static String nomeAutore( Submitter autor ) {
 		String nome = autor.getName();
 		if( nome == null )
-			nome = "[" + Globale.contesto.getString(R.string.no_name) + "]";
+			nome = "[" + Global.context.getString(R.string.no_name) + "]";
 		else if( nome.isEmpty() )
-			nome = "[" + Globale.contesto.getString(R.string.empty_name) + "]";
+			nome = "[" + Global.context.getString(R.string.empty_name) + "]";
 		return nome;
 	}
 
-	static void aggiornaDati( Gedcom gc, Armadio.Cassetto albero ) {
-		albero.individui = gc.getPeople().size();
-		albero.generazioni = quanteGenerazioni( gc, albero.radice!=null ? albero.radice : U.trovaRadice(gc) );
-		ListaMedia visitaMedia = new ListaMedia( gc, 0 );
-		gc.accept( visitaMedia );
-		albero.media = visitaMedia.lista.size();
-		Globale.preferenze.salva();
+	// Refresh the data displayed below the tree title in Alberi list
+	static void refreshData(Gedcom gedcom, Settings.Tree treeItem) {
+		treeItem.persons = gedcom.getPeople().size();
+		treeItem.generations = quanteGenerazioni(gedcom, U.getRootId(gedcom, treeItem));
+		ListaMedia visitaMedia = new ListaMedia(gedcom, 0);
+		gedcom.accept(visitaMedia);
+		treeItem.media = visitaMedia.lista.size();
+		Global.settings.save();
 	}
 
 	boolean testoMesso;  // impedisce di mettere più di uno spazio() consecutivo
@@ -237,35 +238,35 @@ public class InfoAlbero extends AppCompatActivity {
 	}
 
 	TableRow righetta;
-	void spazio(){
+	void spazio() {
 		if( testoMesso ) {
-			righetta = new TableRow( getApplicationContext() );
-			View cella = new View( getApplicationContext() );
-			cella.setBackgroundResource( R.color.primario );
-			righetta.addView( cella );
-			TableRow.LayoutParams param = (TableRow.LayoutParams) cella.getLayoutParams();
+			righetta = new TableRow(getApplicationContext());
+			View cella = new View(getApplicationContext());
+			cella.setBackgroundResource(R.color.primario);
+			righetta.addView(cella);
+			TableRow.LayoutParams param = (TableRow.LayoutParams)cella.getLayoutParams();
 			param.weight = 1;
 			param.span = 2;
 			param.height = 1;
 			param.topMargin = 5;
 			param.bottomMargin = 5;
-			cella.setLayoutParams( param );
-			( (TableLayout) findViewById( R.id.info_tabella ) ).addView( righetta );
+			cella.setLayoutParams(param);
+			((TableLayout)findViewById(R.id.info_tabella)).addView(righetta);
 			testoMesso = false;
 		}
 	}
 
-	public static int quanteGenerazioni( Gedcom gc, String radice ) {
+	public static int quanteGenerazioni(Gedcom gc, String radice) {
 		if( gc.getPeople().isEmpty() )
 			return 0;
 		genMin = 0;
 		genMax = 0;
-		risaliGenerazioni( gc.getPerson(radice), gc, 0 );
+		risaliGenerazioni(gc.getPerson(radice), gc, 0);
 		// Rimuove dalle persone l'estensione 'gen' per permettere successivi conteggi
 		for( Person p : gc.getPeople() ) {
 			p.getExtensions().remove("gen");
 			if( p.getExtensions().isEmpty() )
-				p.setExtensions( null );
+				p.setExtensions(null);
 		}
 		return 1 - genMin + genMax;
 	}
@@ -274,51 +275,51 @@ public class InfoAlbero extends AppCompatActivity {
 	static int genMax;
 
 	// riceve una Person e trova il numero della generazione di antenati più remota
-	static void risaliGenerazioni( Person p, Gedcom gc, int gen ) {
+	static void risaliGenerazioni(Person p, Gedcom gc, int gen) {
 		if( gen < genMin )
 			genMin = gen;
 		// aggiunge l'estensione per indicare che è passato da questa Persona
-		p.putExtension( "gen", gen );
+		p.putExtension("gen", gen);
 		// se è un capostipite va a contare le generazioni di discendenti
 		if( p.getParentFamilies(gc).isEmpty() )
-			discendiGenerazioni( p, gc, gen );
+			discendiGenerazioni(p, gc, gen);
 		for( Family f : p.getParentFamilies(gc) ) {
 			// intercetta eventuali fratelli del capostipite
 			if( f.getHusbands(gc).isEmpty() && f.getWives(gc).isEmpty() ) {
 				for( Person frate : f.getChildren(gc) )
 					if( frate.getExtension("gen") == null )
-						discendiGenerazioni( frate, gc, gen );
+						discendiGenerazioni(frate, gc, gen);
 			}
 			for( Person padre : f.getHusbands(gc) )
 				if( padre.getExtension("gen") == null )
-					risaliGenerazioni( padre, gc, gen-1 );
+					risaliGenerazioni(padre, gc, gen - 1);
 			for( Person madre : f.getWives(gc) )
 				if( madre.getExtension("gen") == null )
-					risaliGenerazioni( madre, gc, gen-1 );
+					risaliGenerazioni(madre, gc, gen - 1);
 		}
 	}
 
 	// riceve una Person e trova il numero della generazione più remota di discendenti
-	static void discendiGenerazioni( Person p, Gedcom gc, int gen ) {
+	static void discendiGenerazioni(Person p, Gedcom gc, int gen) {
 		if( gen > genMax )
 			genMax = gen;
-		p.putExtension( "gen", gen );
+		p.putExtension("gen", gen);
 		for( Family fam : p.getSpouseFamilies(gc) ) {
 			// individua anche la famiglia dei coniugi
 			for( Person moglie : fam.getWives(gc) )
 				if( moglie.getExtension("gen") == null )
-					risaliGenerazioni( moglie, gc, gen );
+					risaliGenerazioni(moglie, gc, gen);
 			for( Person marito : fam.getHusbands(gc) )
 				if( marito.getExtension("gen") == null )
-					risaliGenerazioni( marito, gc, gen );
+					risaliGenerazioni(marito, gc, gen);
 			for( Person figlio : fam.getChildren(gc) )
-				discendiGenerazioni( figlio, gc, gen+1 );
+				discendiGenerazioni(figlio, gc, gen + 1);
 		}
 	}
 
 	// freccia indietro nella toolbar come quella hardware
 	@Override
-	public boolean onOptionsItemSelected( MenuItem i ) {
+	public boolean onOptionsItemSelected(MenuItem i) {
 		onBackPressed();
 		return true;
 	}

@@ -26,7 +26,7 @@ import java.util.Set;
 import app.familygem.visita.ListaMediaContenitore;
 import app.familygem.visita.RiferimentiMedia;
 import app.familygem.visita.TrovaPila;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Galleria extends Fragment {
 
@@ -95,43 +95,41 @@ public class Galleria extends Fragment {
 	}
 
 	// Scollega da un contenitore un media condiviso
-	static void scollegaMedia( String idMedia, MediaContainer contenitore, View vista ) {
-		Iterator<MediaRef> refi = contenitore.getMediaRefs().iterator();
-		while( refi.hasNext() ) {
-			MediaRef ref = refi.next();
-			if( ref.getMedia( Globale.gc ) == null // Eventuale ref a un media inesistente
-					|| ref.getRef().equals(idMedia) )
-				refi.remove();
+	static void scollegaMedia(String mediaId, MediaContainer container) {
+		Iterator<MediaRef> refs = container.getMediaRefs().iterator();
+		while( refs.hasNext() ) {
+			MediaRef ref = refs.next();
+			if( ref.getMedia( Global.gc ) == null // Eventuale ref a un media inesistente
+					|| ref.getRef().equals(mediaId) )
+				refs.remove();
 		}
-		if( contenitore.getMediaRefs().isEmpty() )
-			contenitore.setMediaRefs( null );
-		if( vista != null )
-			vista.setVisibility( View.GONE );
+		if( container.getMediaRefs().isEmpty() )
+			container.setMediaRefs( null );
 	}
 
 	// Elimina un media condiviso o locale e rimuove i riferimenti nei contenitori
 	// Restituisce un array con i capostipiti modificati
-	public static Object[] eliminaMedia( Media media, View vista ) {
+	public static Object[] eliminaMedia(Media media, View vista) {
 		Set<Object> capi;
-		if( media.getId() != null ) {	// media OBJECT
-			gc.getMedia().remove( media );	// ok
+		if( media.getId() != null ) { // media OBJECT
+			gc.getMedia().remove(media);
 			// Elimina i riferimenti in tutti i contenitori
-			RiferimentiMedia eliminaMedia = new RiferimentiMedia( gc, media, true );
+			RiferimentiMedia eliminaMedia = new RiferimentiMedia(gc, media, true);
 			capi = eliminaMedia.capostipiti;
-		} else {	// media LOCALE
-			new TrovaPila( gc, media ); // trova temporaneamente la pila del media per individuare il contenitore
-			MediaContainer contenitore = (MediaContainer)Memoria.oggettoContenitore();
-			contenitore.getMedia().remove( media );
-			if( contenitore.getMedia().isEmpty() )
-				contenitore.setMedia( null );
+		} else { // media LOCALE
+			new TrovaPila(gc, media); // trova temporaneamente la pila del media per individuare il container
+			MediaContainer container = (MediaContainer)Memoria.oggettoContenitore();
+			container.getMedia().remove(media);
+			if( container.getMedia().isEmpty() )
+				container.setMedia(null);
 			capi = new HashSet<>(); // set con un solo Object capostipite
 			capi.add( Memoria.oggettoCapo() );
 			Memoria.arretra(); // elimina la pila appena creata
 		}
-		Memoria.annullaIstanze( media );
+		Memoria.annullaIstanze(media);
 		if( vista != null )
-			vista.setVisibility( View.GONE );
-		return capi.toArray( new Object[0] );
+			vista.setVisibility(View.GONE);
+		return capi.toArray(new Object[0]);
 	}
 
 	// Il file pescato dal file manager diventa media condiviso
@@ -139,18 +137,18 @@ public class Galleria extends Fragment {
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		if( resultCode == Activity.RESULT_OK ) {
 			if( requestCode == 4546 ) { // File preso da app fornitrice viene salvato in Media ed eventualmente ritagliato
-				Media media = nuovoMedia( null );
-				if( F.proponiRitaglio( getContext(), this, data, media ) ) { // se è un'immagine (quindi ritagliabile)
-					U.salvaJson( false, media );
+				Media media = nuovoMedia(null);
+				if( F.proponiRitaglio(getContext(), this, data, media) ) { // se è un'immagine (quindi ritagliabile)
+					U.salvaJson(false, media);
 							// Non deve scattare onRestart() + recreate() perché poi il fragment di arrivo non è più lo stesso
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-				F.fineRitaglioImmagine( data );
+				F.fineRitaglioImmagine(data);
 			}
-			U.salvaJson( true, Globale.mediaCroppato );
+			U.salvaJson(true, Global.mediaCroppato);
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
-			Globale.editato = true;
+			Global.edited = true;
 	}
 
 	// Menu contestuale
@@ -161,25 +159,25 @@ public class Galleria extends Fragment {
 		menu.add(0, 0, 0, R.string.delete );
 	}
 	@Override
-	public boolean onContextItemSelected( MenuItem item ) {
+	public boolean onContextItemSelected(MenuItem item) {
 		if( item.getItemId() == 0 ) {
-			Object[] modificati = eliminaMedia( media, null );
+			Object[] modificati = eliminaMedia(media, null);
 			ricrea();
-			U.salvaJson( false, modificati );
+			U.salvaJson(false, modificati);
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
-		menu.add( 0,0,0, R.string.media_folders );
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		menu.add(0, 0, 0, R.string.media_folders);
 	}
 	@Override
-	public boolean onOptionsItemSelected( MenuItem item ) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		if( item.getItemId() == 0 ) {
-			startActivity( new Intent( getContext(), CartelleMedia.class )
-					.putExtra( "idAlbero", Globale.preferenze.idAprendo )
+			startActivity(new Intent(getContext(), CartelleMedia.class)
+					.putExtra("idAlbero", Global.settings.openTree)
 			);
 			return true;
 		}
@@ -187,7 +185,7 @@ public class Galleria extends Fragment {
 	}
 
 	@Override
-	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		F.risultatoPermessi( getContext(), this, codice, permessi, accordi, null );
+	public void onRequestPermissionsResult(int codice, String[] permessi, int[] accordi) {
+		F.risultatoPermessi(getContext(), this, codice, permessi, accordi, null);
 	}
 }

@@ -1,5 +1,5 @@
--keep class app.familygem.Armadio, app.familygem.Chiesa, app.familygem.Podio # per R8.fullMode
--keepclassmembernames class app.familygem.Armadio, app.familygem.Armadio$Cassetto, app.familygem.Armadio$CassettoDiagram, app.familygem.Armadio$CassettoCondiviso, app.familygem.Armadio$Invio { *; }
+-keep class app.familygem.Settings, app.familygem.Chiesa, app.familygem.Podio # for R8.fullMode
+-keepclassmembernames class app.familygem.Settings, app.familygem.Settings$Tree, app.familygem.Settings$Diagram, app.familygem.Settings$ZippedTree, app.familygem.Settings$Share { *; }
 -keepclassmembers class org.folg.gedcom.model.* { *; }
 #-keeppackagenames org.folg.gedcom.model # Gedcom parser lo chiama come stringa eppure funziona anche senza
 -keepnames class org.slf4j.LoggerFactory

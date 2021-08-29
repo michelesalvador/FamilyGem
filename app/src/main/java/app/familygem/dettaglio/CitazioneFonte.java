@@ -7,7 +7,7 @@ import app.familygem.Dettaglio;
 import app.familygem.Memoria;
 import app.familygem.R;
 import app.familygem.U;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class CitazioneFonte extends Dettaglio {
 

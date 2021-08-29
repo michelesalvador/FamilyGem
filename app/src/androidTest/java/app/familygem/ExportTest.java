@@ -44,16 +44,16 @@ public class ExportTest {
 		FileUtils.copyInputStreamToFile( inputStream, gedcomFile );
 		assertTrue( gedcomFile.isFile() );
 
-		for( Armadio.Cassetto alb : Globale.preferenze.alberi ) {
-			if( alb.nome.equals("media") )
-				Globale.preferenze.elimina( alb.id );
+		for( Settings.Tree alb : Global.settings.trees ) {
+			if( alb.title.equals("media") )
+				Global.settings.deleteTree( alb.id );
 		}
 	}
 
 	// Mette alcuni file in varie cartelle di Android
 	// Aggiunge il path ai percorsi dell'albero
 	void mettiFileMedia() throws Exception {
-		Armadio.Cassetto ultimoAlb = Globale.preferenze.alberi.get(Globale.preferenze.alberi.size()-1);
+		Settings.Tree ultimoAlb = Global.settings.trees.get(Global.settings.trees.size() - 1);
 
 		// PDF in external storage
 		String percorso0 = appContext.getExternalFilesDir( String.valueOf(ultimoAlb.id) ).getPath();
@@ -87,16 +87,16 @@ public class ExportTest {
 
 
 		// Percorsi nelle preferenze
-		assertEquals( ultimoAlb.nome, "media" );
+		assertEquals( ultimoAlb.title, "media" );
 		//if( !ultimoAlb.cartelle.contains(percorso1) )
-		ultimoAlb.cartelle.add( percorso0 );
-		assertTrue( ultimoAlb.cartelle.contains(percorso0) );
-		ultimoAlb.cartelle.add( percorso1 );
-		assertTrue( ultimoAlb.cartelle.contains(percorso1) );
-		ultimoAlb.cartelle.add( percorso2 );
-		assertTrue( ultimoAlb.cartelle.contains(percorso2) );
-		Globale.preferenze.idAprendo = ultimoAlb.id;
-		Globale.preferenze.salva();
+		ultimoAlb.dirs.add( percorso0 );
+		assertTrue( ultimoAlb.dirs.contains(percorso0) );
+		ultimoAlb.dirs.add( percorso1 );
+		assertTrue( ultimoAlb.dirs.contains(percorso1) );
+		ultimoAlb.dirs.add( percorso2 );
+		assertTrue( ultimoAlb.dirs.contains(percorso2) );
+		Global.settings.openTree = ultimoAlb.id;
+		Global.settings.save();
 
 		// File txt da prendere come Uri
 		String percorso3 = Environment.getExternalStorageDirectory().getPath() + "/Uri";
@@ -122,7 +122,7 @@ public class ExportTest {
 
 	// Esporta in /Documents l'ultimo albero in 2 file: GEDCOM e ZIP coi media
 	void esportaGedcom() {
-		Armadio.Cassetto ultimoAlb = Globale.preferenze.alberi.get(Globale.preferenze.alberi.size()-1);
+		Settings.Tree ultimoAlb = Global.settings.trees.get(Global.settings.trees.size() - 1);
 		//assertEquals( ultimoAlb.nome, "media" );
 		int idAlbero = ultimoAlb.id;
 
@@ -156,7 +156,7 @@ public class ExportTest {
 		if( !documentsDir.exists() ) documentsDir.mkdir();
 		File fileBackup = new File( documentsDir, "Becàp olè.zip" );
 		Esportatore esp = new Esportatore( appContext );
-		Armadio.Cassetto ultimoAlb = Globale.preferenze.alberi.get(Globale.preferenze.alberi.size()-1);
+		Settings.Tree ultimoAlb = Global.settings.trees.get(Global.settings.trees.size()-1);
 		assertTrue( esp.apriAlbero( ultimoAlb.id ) );
 		boolean result = esp.esportaBackupZip( null, -1, Uri.fromFile(fileBackup) );
 		s.l( esp.messaggioErrore );

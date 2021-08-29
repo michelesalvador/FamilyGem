@@ -8,36 +8,36 @@ import android.widget.Switch;
 public class Opzioni extends AppCompatActivity {
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		setContentView( R.layout.opzioni );
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		setContentView(R.layout.opzioni);
 
 		// Salvataggio automatico
-		Switch salva = findViewById( R.id.opzioni_salva );
-		salva.setChecked( Globale.preferenze.autoSalva );
-		salva.setOnCheckedChangeListener( (coso, attivo) -> {
-			Globale.preferenze.autoSalva = attivo;
-			Globale.preferenze.salva();
+		Switch salva = findViewById(R.id.opzioni_salva);
+		salva.setChecked(Global.settings.autoSave);
+		salva.setOnCheckedChangeListener((coso, attivo) -> {
+			Global.settings.autoSave = attivo;
+			Global.settings.save();
 		});
 
 		// Carica albero all'avvio
-		Switch carica = findViewById( R.id.opzioni_carica );
-		carica.setChecked( Globale.preferenze.caricaAlbero );
-		carica.setOnCheckedChangeListener( (coso, attivo) -> {
-			Globale.preferenze.caricaAlbero = attivo;
-			Globale.preferenze.salva();
+		Switch carica = findViewById(R.id.opzioni_carica);
+		carica.setChecked(Global.settings.loadTree);
+		carica.setOnCheckedChangeListener((coso, attivo) -> {
+			Global.settings.loadTree = attivo;
+			Global.settings.save();
 		});
 
 		// Modalità esperto
-		Switch esperto = findViewById( R.id.opzioni_esperto );
-		esperto.setChecked( Globale.preferenze.esperto );
-		esperto.setOnCheckedChangeListener( (coso, attivo) -> {
-			Globale.preferenze.esperto = attivo;
-			Globale.preferenze.salva();
+		Switch esperto = findViewById(R.id.opzioni_esperto);
+		esperto.setChecked(Global.settings.expert);
+		esperto.setOnCheckedChangeListener((coso, attivo) -> {
+			Global.settings.expert = attivo;
+			Global.settings.save();
 		});
 
-		findViewById( R.id.opzioni_lapide ).setOnClickListener( view -> startActivity(
-				new Intent( Opzioni.this, Lapide.class)
+		findViewById(R.id.opzioni_lapide).setOnClickListener(view -> startActivity(
+				new Intent(Opzioni.this, Lapide.class)
 		));
 	}
 }

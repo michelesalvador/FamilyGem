@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import app.familygem.dettaglio.Famiglia;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Chiesa extends Fragment {
 
@@ -128,8 +128,8 @@ public class Chiesa extends Fragment {
 		gc.getFamilies().remove(family);
 		gc.createIndexes();	// necessario per aggiornare gli individui
 		Memoria.annullaIstanze(family);
-		Globale.numFamiglia = 0; // Nel caso fortuito che sia stata eliminata proprio questa famiglia
-		U.salvaJson( true, membri.toArray(new Object[0]) );
+		Global.familyNum = 0; // Nel caso fortuito che sia stata eliminata proprio questa famiglia
+		U.salvaJson(true, membri.toArray(new Object[0]));
 	}
 
 	static Family nuovaFamiglia( boolean aggiungi ) {

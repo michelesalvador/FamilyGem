@@ -25,7 +25,7 @@ import java.util.Set;
 import app.familygem.constants.Gender;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Famiglia;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class EditaIndividuo extends AppCompatActivity {
 
@@ -293,27 +293,26 @@ public class EditaIndividuo extends AppCompatActivity {
 			String nuovoId = U.nuovoId( gc, Person.class );
 			p.setId( nuovoId );
 			gc.addPerson( p );
-			if( Globale.preferenze.alberoAperto().radice == null )
-				Globale.preferenze.alberoAperto().radice = nuovoId;
-			Globale.preferenze.salva();
+			if( Global.settings.getCurrentTree().root == null )
+				Global.settings.getCurrentTree().root = nuovoId;
+			Global.settings.save();
 			if( relazione >= 5 ) { // viene da Famiglia
 				Famiglia.aggrega( p, gc.getFamily(idFamiglia), relazione );
 				modificati[1] = gc.getFamily(idFamiglia);
 			} else if( relazione > 0 ) // viene da Diagramma o IndividuoFamiliari
 				modificati = aggiungiParente( idIndi, nuovoId, idFamiglia, relazione, getIntent().getStringExtra("collocazione") );
 		} else
-			Globale.individuo = p.getId(); // per mostrarlo orgogliosi in Diagramma
-		U.salvaJson( true, modificati );
+			Global.indi = p.getId(); // per mostrarlo orgogliosi in Diagramma
+		U.salvaJson(true, modificati);
 		onBackPressed();
 	}
 
-	/**
-	 * Aggiunge un nuovo individuo in relazione di parentela con 'perno', eventualmente all'interno della famiglia fornita.
+	/** Aggiunge un nuovo individuo in relazione di parentela con 'perno', eventualmente all'interno della famiglia fornita.
 	 * @param idFamiglia Id della famiglia di destinazione. Se è null si crea una nuova famiglia
 	 * @param collocazione Sintetizza come è stata individuata la famiglia e quindi cosa fare delle persone coinvolte
  	 */
-	static Object[] aggiungiParente( String idPerno, String nuovoId, String idFamiglia, int relazione, String collocazione ) {
-		Globale.individuo = idPerno;
+	static Object[] aggiungiParente(String idPerno, String nuovoId, String idFamiglia, int relazione, String collocazione) {
+		Global.indi = idPerno;
 		Person nuovo = gc.getPerson( nuovoId );
 		// Si crea una nuova famiglia in cui finiscono sia Perno che Nuovo
 		if( collocazione != null && collocazione.startsWith("NUOVA_FAMIGLIA_DI") ) { // Contiene l'id del genitore di cui creare una nuova famiglia
@@ -352,7 +351,7 @@ public class EditaIndividuo extends AppCompatActivity {
 				if (perno != null) perno.addParentFamilyRef( refFamGenitori );
 				if (nuovo != null) nuovo.addParentFamilyRef( refFamGenitori );
 				break;
-			case 3: // Coniuge
+			case 3: // Compagno
 				refSposo1.setRef(idPerno);
 				refSposo2.setRef(nuovoId);
 				if (perno != null) perno.addSpouseFamilyRef( refFamSposi );
@@ -366,32 +365,32 @@ public class EditaIndividuo extends AppCompatActivity {
 		}
 
 		if( refSposo1.getRef() != null )
-			aggiungiConiuge( famiglia, refSposo1 );
+			aggiungiConiuge(famiglia, refSposo1);
 		if( refSposo2.getRef() != null )
-			aggiungiConiuge( famiglia, refSposo2 );
+			aggiungiConiuge(famiglia, refSposo2);
 		if( refFiglio1.getRef() != null )
-			famiglia.addChild( refFiglio1 );
+			famiglia.addChild(refFiglio1);
 		if( refFiglio2.getRef() != null )
-			famiglia.addChild( refFiglio2 );
+			famiglia.addChild(refFiglio2);
 
 		if( (relazione == 1 || relazione == 2) ) // Farà comparire la famiglia selezionata
-			Globale.numFamiglia = gc.getPerson(Globale.individuo).getParentFamilies(gc).indexOf(famiglia);
+			Global.familyNum = gc.getPerson(Global.indi).getParentFamilies(gc).indexOf(famiglia);
 		else
-			Globale.numFamiglia = 0; // eventuale reset
+			Global.familyNum = 0; // eventuale reset
 
 		Set<Object> cambiati = new HashSet<>();
-		if (perno != null && nuovo != null)
-			Collections.addAll( cambiati, famiglia, perno, nuovo);
-		else if (perno != null)
-			Collections.addAll( cambiati, famiglia, perno);
-		else if (nuovo != null)
-			Collections.addAll( cambiati, famiglia, nuovo);
+		if( perno != null && nuovo != null )
+			Collections.addAll(cambiati, famiglia, perno, nuovo);
+		else if( perno != null )
+			Collections.addAll(cambiati, famiglia, perno);
+		else if( nuovo != null )
+			Collections.addAll(cambiati, famiglia, nuovo);
 		return cambiati.toArray();
 	}
 
 	// Aggiunge il coniuge in una famiglia: sempre e solo in base al sesso
 	public static void aggiungiConiuge(Family family, SpouseRef sr) {
-		Person person = Globale.gc.getPerson(sr.getRef());
+		Person person = Global.gc.getPerson(sr.getRef());
 		if( Gender.isFemale(person) ) family.addWife(sr);
 		else family.addHusband(sr);
 	}

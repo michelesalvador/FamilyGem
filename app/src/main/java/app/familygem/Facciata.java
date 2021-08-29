@@ -30,10 +30,10 @@ public class Facciata extends AppCompatActivity {
 			URL diretto allo zip
 			Funziona nei vecchi android, nei nuovi semplicemente il file viene scaricato
 		*/
-		Intent intento = getIntent();
-		Uri uri = intento.getData();
+		Intent intent = getIntent();
+		Uri uri = intent.getData();
 		// Aprendo l'app da Task Manager, evita di re-importare un albero condiviso appena importato
-		boolean fromHistory = (getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY;
+		boolean fromHistory = (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY;
 		if( uri != null && !fromHistory ) {
 			String dataId;
 			if( uri.getPath().equals( "/share.php" ) ) // click sul primo messaggio ricevuto
@@ -49,12 +49,13 @@ public class Facciata extends AppCompatActivity {
 				scaricaCondiviso( this, dataId, null );
 			}
 		} else {
-			Intent intent = new Intent( this, Alberi.class );
-			if( Globale.preferenze.caricaAlbero ) {
-				intent.putExtra( "apriAlberoAutomaticamente", true );
-				intent.setFlags( Intent.FLAG_ACTIVITY_NO_ANIMATION ); // forse inefficace ma tantè
+			Intent treesIntent = new Intent(this, Alberi.class);
+			// Open last tree at startup
+			if( Global.settings.loadTree ) {
+				treesIntent.putExtra("apriAlberoAutomaticamente", true);
+				treesIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION); // forse inefficace ma tantè
 			}
-			startActivity( intent );
+			startActivity(treesIntent);
 		}
 	}
 
@@ -84,9 +85,9 @@ public class Facciata extends AppCompatActivity {
 					if( client.completePendingCommand()
 							&& AlberoNuovo.decomprimiZip( contesto, percorsoZip, null )
 							// Se l'albero è stato scaricato con l'install referrer
-							&& Globale.preferenze.referrer != null && Globale.preferenze.referrer.equals(idData) ) {
-						Globale.preferenze.referrer = null;
-						Globale.preferenze.salva();
+							&& Global.settings.referrer != null && Global.settings.referrer.equals(idData) ) {
+						Global.settings.referrer = null;
+						Global.settings.save();
 					}
 				} else // Non ha trovato il file sul server
 					scaricamentoFallito( contesto, contesto.getString(R.string.something_wrong), rotella );

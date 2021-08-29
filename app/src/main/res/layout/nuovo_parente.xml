@@ -8,28 +8,24 @@
 	<RadioGroup
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content">
-
 		<RadioButton
 			android:id="@+id/nuovoparente_1"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/parent"
 			android:textSize="16sp"/>
-
 		<RadioButton
 			android:id="@+id/nuovoparente_2"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/sibling"
 			android:textSize="16sp"/>
-
 		<RadioButton
 			android:id="@+id/nuovoparente_3"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="@string/spouse"
+			android:text="@string/partner"
 			android:textSize="16sp"/>
-
 		<RadioButton
 			android:id="@+id/nuovoparente_4"
 			android:layout_width="match_parent"
@@ -43,13 +39,11 @@
 		android:layout_height="wrap_content"
 		android:layout_marginTop="8dp"
 		android:orientation="vertical">
-
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/into"
 			android:textSize="16sp"/>
-
 		<Spinner
 			android:id="@+id/nuovoparente_famiglie"
 			android:layout_width="match_parent"

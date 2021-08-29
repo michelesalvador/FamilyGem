@@ -5,17 +5,11 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
-	<com.otaliastudios.zoom.ZoomLayout
-		android:id="@+id/diagram_zoom"
+	<app.familygem.MoveLayout
+		android:id="@+id/diagram_frame"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@drawable/diagramma_sfondo"
-		android:scrollbars="vertical|horizontal"
-		app:hasClickableChildren="true"
-		app:minZoom="0.9"
-		app:maxZoom="2"
-		app:maxZoomType="realZoom">
-
+		android:background="@drawable/diagramma_sfondo">
 		<RelativeLayout
 			android:id="@+id/diagram_box"
 			android:layout_width="wrap_content"
@@ -23,8 +17,7 @@
 			android:clipChildren="false"
 			android:clipToPadding="false"
 			android:padding="50dp"/>
-
-	</com.otaliastudios.zoom.ZoomLayout>
+	</app.familygem.MoveLayout>
 
 	<ImageButton
 		android:id="@+id/diagram_hamburger"

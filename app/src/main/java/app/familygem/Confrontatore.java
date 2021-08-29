@@ -56,8 +56,8 @@ public class Confrontatore extends AppCompatActivity {
 			final Object o2 = Confronto.getFronte(this).oggetto2;
 			if( o != null ) classe = o.getClass();
 			else classe = o2.getClass();
-			arredaScheda( Globale.gc, R.id.confronto_vecchio, o );
-			arredaScheda( Globale.gc2, R.id.confronto_nuovo, o2 );
+			arredaScheda( Global.gc, R.id.confronto_vecchio, o );
+			arredaScheda( Global.gc2, R.id.confronto_nuovo, o2 );
 			((CardView)findViewById( R.id.confronto_nuovo )).setCardBackgroundColor( getResources().getColor(R.color.evidenzia) );
 
 			destino = 2;
@@ -127,17 +127,17 @@ public class Confrontatore extends AppCompatActivity {
 			tipoRecord( R.string.submitter );
 			Submitter s = (Submitter) o;
 			tit = s.getName();
-			if(s.getEmail()!=null) txt += s.getEmail() + "\n";
-			if(s.getAddress()!=null) txt += Dettaglio.indirizzo( s.getAddress() );
-			data = dataOra( s.getChange() );
+			if( s.getEmail() != null ) txt += s.getEmail() + "\n";
+			if( s.getAddress() != null ) txt += Dettaglio.writeAddress(s.getAddress(), true);
+			data = dataOra(s.getChange());
 		}
 		else if( o instanceof Repository ) {
 			tipoRecord( R.string.repository );
 			Repository r = (Repository) o;
 			tit = r.getName();
-			if(r.getAddress()!=null) txt += Dettaglio.indirizzo( r.getAddress() ) + "\n";
-			if(r.getEmail()!=null) txt += r.getEmail();
-			data = dataOra( r.getChange() );
+			if( r.getAddress() != null ) txt += Dettaglio.writeAddress(r.getAddress(), true) + "\n";
+			if( r.getEmail() != null ) txt += r.getEmail();
+			data = dataOra(r.getChange());
 		}
 		else if( o instanceof Media ) {
 			tipoRecord( R.string.shared_media );

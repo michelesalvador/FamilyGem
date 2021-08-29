@@ -37,37 +37,33 @@
 		android:paddingLeft="6dp"
 		android:paddingRight="6dp"
 		android:paddingTop="4dp">
-
 		<ImageView
 			android:id="@+id/card_photo"
 			android:layout_width="wrap_content"
 			android:layout_height="80dp"
 			android:adjustViewBounds="true"
-			app:srcCompat="@drawable/manichino" />
-
+			app:srcCompat="@drawable/manichino"/>
 		<app.familygem.VistaTesto
 			android:id="@+id/card_name"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:ellipsize="end"
 			android:gravity="center_horizontal"
-			android:maxWidth="200dp"
-			android:maxLines="2"
+			android:maxWidth="220dp"
 			android:textSize="17sp"/>
-
-		<TextView
+		<app.familygem.VistaTesto
 			android:id="@+id/card_title"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:textStyle="italic" />
-
+			android:gravity="center_horizontal"
+			android:maxWidth="220dp"
+			android:textStyle="italic"/>
 		<TextView
 			android:id="@+id/card_data"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
 			android:textColor="#aa000000"
-			android:textSize="14sp" />
-
+			android:textSize="14sp"/>
 	</LinearLayout>
 
 	<ImageView
@@ -76,6 +72,5 @@
 		android:layout_height="16dp"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
-		app:srcCompat="@drawable/defunto" />
-
+		app:srcCompat="@drawable/defunto"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

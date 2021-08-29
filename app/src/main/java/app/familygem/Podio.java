@@ -18,61 +18,61 @@ import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Submitter;
 import java.util.List;
 import app.familygem.dettaglio.Autore;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Podio extends Fragment {
 
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle stato) {
 		List<Submitter> listAutori = gc.getSubmitters();
-		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listAutori.size() + " " +
-				getString(listAutori.size()==1 ? R.string.submitter : R.string.submitters).toLowerCase() );
+		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(listAutori.size() + " " +
+				getString(listAutori.size() == 1 ? R.string.submitter : R.string.submitters).toLowerCase());
 		setHasOptionsMenu(true);
-		View vista = inflater.inflate( R.layout.magazzino, container, false);
-		LinearLayout scatola = vista.findViewById( R.id.magazzino_scatola );
+		View vista = inflater.inflate(R.layout.magazzino, container, false);
+		LinearLayout scatola = vista.findViewById(R.id.magazzino_scatola);
 		for( final Submitter autor : listAutori ) {
-			View vistaPezzo = inflater.inflate( R.layout.magazzino_pezzo, scatola, false );
-			scatola.addView( vistaPezzo );
-			((TextView)vistaPezzo.findViewById( R.id.magazzino_nome )).setText( InfoAlbero.nomeAutore(autor) );
-			vistaPezzo.findViewById( R.id.magazzino_archivi ).setVisibility( View.GONE );
-			vistaPezzo.setOnClickListener( v -> {
-				Memoria.setPrimo( autor );
-				startActivity( new Intent( getContext(), Autore.class ) );
+			View vistaPezzo = inflater.inflate(R.layout.magazzino_pezzo, scatola, false);
+			scatola.addView(vistaPezzo);
+			((TextView)vistaPezzo.findViewById(R.id.magazzino_nome)).setText(InfoAlbero.nomeAutore(autor));
+			vistaPezzo.findViewById(R.id.magazzino_archivi).setVisibility(View.GONE);
+			vistaPezzo.setOnClickListener(v -> {
+				Memoria.setPrimo(autor);
+				startActivity(new Intent(getContext(), Autore.class));
 			});
-			registerForContextMenu( vistaPezzo );
-			vistaPezzo.setTag( autor );
+			registerForContextMenu(vistaPezzo);
+			vistaPezzo.setTag(autor);
 		}
-		vista.findViewById( R.id.fab ).setOnClickListener( v -> {
-			nuovoAutore( getContext() );
-			U.salvaJson( true );
+		vista.findViewById(R.id.fab).setOnClickListener(v -> {
+			nuovoAutore(getContext());
+			U.salvaJson(true);
 		});
 		return vista;
 	}
 
 	// Elimina un autore
 	// Todo mi sa che andrebbe cercato eventuale SubmitterRef in tutti i record
-	public static void eliminaAutore( Submitter aut ) {
+	public static void eliminaAutore(Submitter aut) {
 		Header testa = gc.getHeader();
 		if( testa != null && testa.getSubmitterRef() != null
 				&& testa.getSubmitterRef().equals(aut.getId()) ) {
-			testa.setSubmitterRef( null );
+			testa.setSubmitterRef(null);
 		}
-		gc.getSubmitters().remove( aut );
+		gc.getSubmitters().remove(aut);
 		if( gc.getSubmitters().isEmpty() )
-			gc.setSubmitters( null );
+			gc.setSubmitters(null);
 		Memoria.annullaIstanze(aut);
 	}
 
 	// Crea un Autore nuovo, se riceve un contesto lo apre in modalità editore
-	static Submitter nuovoAutore( Context contesto ) {
+	static Submitter nuovoAutore(Context contesto) {
 		Submitter subm = new Submitter();
-		subm.setId( U.nuovoId(gc,Submitter.class) );
-		subm.setName( "" );
-		U.aggiornaDate( subm );
-		gc.addSubmitter( subm );
+		subm.setId(U.nuovoId(gc, Submitter.class));
+		subm.setName("");
+		U.aggiornaDate(subm);
+		gc.addSubmitter(subm);
 		if( contesto != null ) {
-			Memoria.setPrimo( subm );
-			contesto.startActivity( new Intent( contesto, Autore.class ) );
+			Memoria.setPrimo(subm);
+			contesto.startActivity(new Intent(contesto, Autore.class));
 		}
 		return subm;
 	}
@@ -80,22 +80,22 @@ public class Podio extends Fragment {
 	static void autorePrincipale(Submitter subm) {
 		Header testa = gc.getHeader();
 		if( testa == null ) {
-			testa = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo + ".json" );
-			gc.setHeader( testa );
+			testa = AlberoNuovo.creaTestata(Global.settings.openTree + ".json");
+			gc.setHeader(testa);
 		}
-		testa.setSubmitterRef( subm.getId() );
-		U.salvaJson( false, subm );
+		testa.setSubmitterRef(subm.getId());
+		U.salvaJson(false, subm);
 	}
 
 	// Menu contestuale
 	Submitter subm;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		subm = (Submitter) vista.getTag();
+		subm = (Submitter)vista.getTag();
 		if( gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(subm) )
-			menu.add( 0, 0, 0, R.string.make_default );
+			menu.add(0, 0, 0, R.string.make_default);
 		if( !U.autoreHaCondiviso(subm) ) // può essere eliminato solo se non ha mai condiviso
-			menu.add( 0, 1, 0, R.string.delete );
+			menu.add(0, 1, 0, R.string.delete);
 		// todo spiegare perché non può essere eliminato?
 	}
 	@Override
@@ -106,7 +106,7 @@ public class Podio extends Fragment {
 				return true;
 			case 1:
 				// Todo conferma elimina
-				eliminaAutore( subm );
+				eliminaAutore(subm);
 				U.salvaJson(false);
 				getActivity().recreate();
 				return true;

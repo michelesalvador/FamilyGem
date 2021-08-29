@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Alberi -->
+    <string name="not_memory_tree">Not enough memory for this tree.</string>
+    <!-- Diagram -->
+    <string name="family_as">Family (as %s)</string>
+    <!-- Diagram settings -->
+    <string name="uncles_great_uncles">Uncles and great-uncles</string>
+    <string name="partners">Partners</string>
+    <string name="siblings_nephews">Siblings and nephews</string>
+    <string name="uncles_cousins">Uncles and cousins</string>
+    <!-- Anagrafe -->
+    <string name="age">Age</string>
+    <!-- Condivisione -->
+    <string name="share_sensitive">Sharing sensitive data</string>
+    <string name="aware_upload_server">Please be aware that you are going to upload the whole tree to a server online.</string>
+    <string name="remind_later">Remind me later</string>
+    <string name="allow_developer_access">Allow the app developer to access the shared tree</string>
+    <!-- Notifier -->
+    <string name="birthdays">Birthdays</string>
+    <string name="birthday_notified_midday">The birthday of each person will be notified at midday.</string>
+    <string name="turns_years_old">%s turns %d years old today.</string>
+    <!-- Famiglia -->
+    <string name="relationship">Relationship</string>
+    <string name="separation">Separation</string>
+    <string name="unknown_relationship">Unknown</string>
+    <string name="not_married">Not married</string>
+    <string name="civil_marriage">Civil</string>
+    <string name="religious_marriage">Religious</string>
+    <string name="common_law_marriage">Common law</string>
+    <string name="partnership">Partnership</string>
+    <string name="registered_partnership">Registered partnership</string>
+    <string name="living_together">Living together</string>
+    <string name="living_apart_together">Living apart together</string>
+    <!-- Individuo -->
+    <string name="partner">Partner</string>
+    <string name="male_partner">Partner</string>
+    <string name="female_partner">Partner</string>
+    <string name="ex_partner">Former partner</string>
+    <string name="ex_male_partner">Former partner</string>
+    <string name="ex_female_partner">Former partner</string>
+    <string name="ex_spouse">Ex-spouse</string>
+    <string name="ex_husband">Ex-husband</string>
+    <string name="ex_wife">Ex-wife</string>
+    <!-- EditoreData -->
+    <string name="between_and">Between… and</string>
+    <!--<string name="between">Between</string>-->
+    <string name="and">And</string>
+</resources>

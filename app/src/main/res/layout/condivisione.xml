@@ -79,8 +79,8 @@
 				android:id="@+id/condividi_allow"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:text="Allow the app developer to access this tree"
-				android:layout_marginBottom="30dp"/><!-- todo traduci -->
+				android:text="@string/allow_developer_access"
+				android:layout_marginBottom="30dp"/>
 
 			<Button
 				android:id="@+id/bottone_condividi"

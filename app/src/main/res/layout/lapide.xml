@@ -11,7 +11,7 @@
 		android:layout_height="wrap_content"
 		android:layout_centerHorizontal="true"
 		android:layout_marginTop="-20dp"
-		app:srcCompat="@mipmap/vetrina" />
+		app:srcCompat="@mipmap/icon" />
 
 	<TextView
 		android:id="@+id/uno"

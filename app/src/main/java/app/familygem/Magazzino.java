@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import app.familygem.dettaglio.Archivio;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Magazzino extends Fragment {
 
@@ -46,7 +46,7 @@ public class Magazzino extends Fragment {
 					rep.putExtension( "fonti", quanteFonti(rep,gc) );
 			}
 			Collections.sort( listArchivi, ( r1, r2 ) -> {
-				switch( Globale.ordineMagazzino ) {
+				switch( Global.ordineMagazzino ) {
 					case 1:	// Ordina per id
 						return Integer.parseInt(r1.getId().substring(1)) - Integer.parseInt(r2.getId().substring(1));
 					case 2:	// Ordine alfabeto
@@ -142,13 +142,13 @@ public class Magazzino extends Fragment {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			case 1:
-				Globale.ordineMagazzino = 1;
+				Global.ordineMagazzino = 1;
 				break;
 			case 2:
-				Globale.ordineMagazzino = 2;
+				Global.ordineMagazzino = 2;
 				break;
 			case 3:
-				Globale.ordineMagazzino = 3;
+				Global.ordineMagazzino = 3;
 				break;
 			default:
 				return false;

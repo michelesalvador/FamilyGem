@@ -48,7 +48,7 @@ public class Globale extends Application {
 		String stringone = "{\"alberi\":[],\"idAprendo\":0,\"autoSalva\":true,\"caricaAlbero\":true}";	// preferenze vuote
 							// i boolean false non hanno bisogno di essere inizializzati
 		try {
-			File filePreferenze = new File( contesto.getFilesDir(), "preferenze.json");
+			File filePreferenze = new File( contesto.getFilesDir(), "settings.json");
 			if( filePreferenze.exists() )
 				stringone = FileUtils.readFileToString( filePreferenze );
 		} catch( IOException e ) {

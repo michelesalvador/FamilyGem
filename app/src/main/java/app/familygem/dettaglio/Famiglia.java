@@ -14,18 +14,18 @@ import java.util.Iterator;
 import java.util.List;
 import app.familygem.Dettaglio;
 import app.familygem.EditaIndividuo;
-import app.familygem.Globale;
+import app.familygem.Global;
 import app.familygem.Individuo;
 import app.familygem.Memoria;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constants.Gender;
-import static app.familygem.Globale.gc;
+import app.familygem.constants.Relation;
+import static app.familygem.Global.gc;
 
 public class Famiglia extends Dettaglio {
 
 	Family f;
-	private enum Relation {PARENT, SPOUSE, CHILD}
 
 	@Override
 	public void impagina() {
@@ -33,18 +33,13 @@ public class Famiglia extends Dettaglio {
 		f = (Family)casta(Family.class);
 		mettiBava("FAM", f.getId());
 		for( SpouseRef refMarito : f.getHusbandRefs() )
-			member(refMarito, !f.getChildRefs().isEmpty() ? Relation.PARENT : Relation.SPOUSE);
+			member(refMarito, Relation.PARTNER);
 		for( SpouseRef refMoglie : f.getWifeRefs() )
-			member(refMoglie, !f.getChildRefs().isEmpty() ? Relation.PARENT : Relation.SPOUSE);
-		for( EventFact ef : f.getEventsFacts() ) {
-			if( ef.getTag().equals("MARR") )
-				metti(getString(R.string.marriage), ef);
-		}
+			member(refMoglie, Relation.PARTNER);
 		for( ChildRef refFiglio : f.getChildRefs() )
 			member(refFiglio, Relation.CHILD);
 		for( EventFact ef : f.getEventsFacts() ) {
-			if( !ef.getTag().equals("MARR") )
-				metti(ef.getDisplayType(), ef);
+			metti(writeEventTitle(f, ef), ef);
 		}
 		mettiEstensioni(f);
 		U.mettiNote(box, f, true);
@@ -57,27 +52,7 @@ public class Famiglia extends Dettaglio {
 	void member(SpouseRef sr, Relation relation) {
 		Person p = sr.getPerson(gc);
 		if( p == null ) return;
-		int role = 0;
-		if( Gender.isMale(p) ) {
-			switch( relation ) {
-				case PARENT: role = R.string.father; break;
-				case SPOUSE: role = R.string.husband; break;
-				case CHILD: role = R.string.son;
-			}
-		} else if( Gender.isFemale(p) ) {
-			switch( relation ) {
-				case PARENT: role = R.string.mother; break;
-				case SPOUSE: role = R.string.wife; break;
-				case CHILD: role = R.string.daughter;
-			}
-		} else {
-			switch( relation ) {
-				case PARENT: role = R.string.parent; break;
-				case SPOUSE: role = R.string.spouse; break;
-				case CHILD: role = R.string.child;
-			}
-		}
-		View vistaPersona = U.mettiIndividuo(box, p, getString(role));
+		View vistaPersona = U.mettiIndividuo(box, p, getRole(p, f, relation, true));
 		vistaPersona.setTag(R.id.tag_oggetto, p); // per il menu contestuale in Dettaglio
 		/*  Ref nell'individuo verso la famiglia
 			Se la stessa persona è presente più volte con lo stesso ruolo (parent/child) nella stessa famiglia
@@ -85,7 +60,7 @@ public class Famiglia extends Dettaglio {
 			Non prendono quello con lo stesso indice del corrispondente Ref nella famiglia  (FAM.HUSB / FAM.WIFE)
 			Poteva essere un problema in caso di 'Scollega', ma non più perché tutto il contenuto di Famiglia viene ricaricato
 		 */
-		if( relation == Relation.PARENT || relation == Relation.SPOUSE ) {
+		if( relation == Relation.PARTNER ) {
 			for( SpouseFamilyRef sfr : p.getSpouseFamilyRefs() )
 				if( sfr.getRef().equals(f.getId()) ) {
 					vistaPersona.setTag(R.id.tag_spouse_family_ref, sfr);
@@ -104,7 +79,7 @@ public class Famiglia extends Dettaglio {
 			List<Family> parentFam = p.getParentFamilies(gc);
 			List<Family> spouseFam = p.getSpouseFamilies(gc);
 			// un coniuge con una o più famiglie in cui è figlio
-			if( (relation == Relation.PARENT || relation == Relation.SPOUSE) && !parentFam.isEmpty() ) {
+			if( relation == Relation.PARTNER && !parentFam.isEmpty() ) {
 				U.qualiGenitoriMostrare(this, p, 2);
 			} // un figlio con una o più famiglie in cui è coniuge
 			else if( relation == Relation.CHILD && !p.getSpouseFamilies(gc).isEmpty() ) {
@@ -112,16 +87,16 @@ public class Famiglia extends Dettaglio {
 			} // un figlio non sposato che ha più famiglie genitoriali
 			else if( parentFam.size() > 1 ) {
 				if( parentFam.size() == 2 ) { // Swappa tra le 2 famiglie genitoriali
-					Globale.individuo = p.getId();
-					Globale.numFamiglia = parentFam.indexOf(f) == 0 ? 1 : 0;
-					Memoria.replacePrimo(parentFam.get(Globale.numFamiglia));
+					Global.indi = p.getId();
+					Global.familyNum = parentFam.indexOf(f) == 0 ? 1 : 0;
+					Memoria.replacePrimo(parentFam.get(Global.familyNum));
 					recreate();
 				} else // Più di due famiglie
 					U.qualiGenitoriMostrare( this, p, 2 );
 			} // un coniuge senza genitori ma con più famiglie coniugali
 			else if( spouseFam.size() > 1 ) {
 				if( spouseFam.size() == 2 ) { // Swappa tra le 2 famiglie coniugali
-					Globale.individuo = p.getId();
+					Global.indi = p.getId();
 					Family altraFamiglia = spouseFam.get(spouseFam.indexOf(f) == 0 ? 1 : 0);
 					Memoria.replacePrimo(altraFamiglia);
 					recreate();
@@ -134,6 +109,50 @@ public class Famiglia extends Dettaglio {
 		});
 		if( unRappresentanteDellaFamiglia == null )
 			unRappresentanteDellaFamiglia = p;
+	}
+
+	/** Find the role of a person from their relation with a family
+	 * @param person
+	 * @param family
+	 * @param relation
+	 * @param respectFamily The role to find is relative to the family (it becomes 'parent' with children)
+	 * @return A descriptor text of the person's role
+	 */
+	public static String getRole(Person person, Family family, Relation relation, boolean respectFamily) {
+		int role = 0;
+		if( respectFamily && relation == Relation.PARTNER && family != null && !family.getChildRefs().isEmpty() )
+			relation = Relation.PARENT;
+		boolean married = U.areMarried(family);
+		boolean divorced = U.areDivorced(family);
+		if( Gender.isMale(person) ) {
+			switch( relation ) {
+				case PARENT: role = R.string.father; break;
+				case SIBLING: role = R.string.brother; break;
+				case HALF_SIBLING: role = R.string.half_brother; break;
+				case PARTNER: role = married ? (divorced ? R.string.ex_husband : R.string.husband)
+						: (divorced ? R.string.ex_male_partner : R.string.male_partner); break;
+				case CHILD: role = R.string.son;
+			}
+		} else if( Gender.isFemale(person) ) {
+			switch( relation ) {
+				case PARENT: role = R.string.mother; break;
+				case SIBLING: role = R.string.sister; break;
+				case HALF_SIBLING: role = R.string.half_sister; break;
+				case PARTNER: role = married ? (divorced ? R.string.ex_wife : R.string.wife)
+						: (divorced ? R.string.ex_female_partner : R.string.female_partner); break;
+				case CHILD: role = R.string.daughter;
+			}
+		} else {
+			switch( relation ) {
+				case PARENT: role = R.string.parent; break;
+				case SIBLING: role = R.string.sibling; break;
+				case HALF_SIBLING: role = R.string.half_sibling; break;
+				case PARTNER: role = married ? (divorced ? R.string.ex_spouse : R.string.spouse)
+						: (divorced ? R.string.ex_partner : R.string.partner); break;
+				case CHILD: role = R.string.child;
+			}
+		}
+		return Global.context.getString(role);
 	}
 
 	// Collega una persona ad una famiglia come genitore o figlio

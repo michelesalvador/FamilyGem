@@ -83,7 +83,7 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 					attiva.getSupportFragmentManager()
 							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" )	// non garantito in futuro
 							.registerForContextMenu( vista );
-				} else if( vista.getContext() instanceof Principe ) // Fragment Galleria
+				} else if( vista.getContext() instanceof Principal ) // Fragment Galleria
 					attiva.getSupportFragmentManager().findFragmentById( R.id.contenitore_fragment ).registerForContextMenu( vista );
 				else	// nelle AppCompatActivity
 					attiva.registerForContextMenu( vista );
@@ -116,8 +116,8 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 						|| attiva instanceof Dettaglio ) { // normale apertura nei Dettagli
 					Memoria.aggiungi( media );
 				} else { // da Galleria tutti i media semplici, o da IndividuoMedia i media sotto molteplici livelli
-					new TrovaPila( Globale.gc, media );
-					if( attiva instanceof Principe ) // Solo in Galleria
+					new TrovaPila( Global.gc, media );
+					if( attiva instanceof Principal ) // Solo in Galleria
 						intento.putExtra( "daSolo", true ); // così poi Immagine mostra la dispensa
 				}
 				v.getContext().startActivity( intento );
@@ -129,7 +129,7 @@ class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMed
 		String testo = "";
 		if( media.getTitle() != null )
 			testo = media.getTitle() + "\n";
-		if( Globale.preferenze.esperto && media.getFile() != null ) {
+		if( Global.settings.expert && media.getFile() != null ) {
 			String file = media.getFile();
 			file = file.replace( '\\', '/' );
 			if( file.lastIndexOf('/') > -1 ) {

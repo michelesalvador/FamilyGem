@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import app.familygem.dettaglio.Fonte;
 import app.familygem.visita.ListaCitazioniFonte;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Biblioteca extends Fragment {
 
@@ -201,19 +201,19 @@ public class Biblioteca extends Fragment {
 	private int quante;
 	private int quanteCitazioni( Source fon ) {
 		quante = 0;
-		for( Person p : Globale.gc.getPeople() ) {
+		for( Person p : Global.gc.getPeople() ) {
 			cita( p, fon );
 			for( Name n : p.getNames() )
 				cita( n, fon );
 			for( EventFact ef : p.getEventsFacts() )
 				cita( ef, fon );
 		}
-		for( Family f : Globale.gc.getFamilies() ) {
+		for( Family f : Global.gc.getFamilies() ) {
 			cita( f, fon );
 			for( EventFact ef : f.getEventsFacts() )
 				cita( ef, fon );
 		}
-		for( Note n : Globale.gc.getNotes() )
+		for( Note n : Global.gc.getNotes() )
 			cita( n, fon );
 		return quante;
 	}

@@ -40,9 +40,9 @@ public class Conferma extends AppCompatActivity {
 
 			// Albero vecchio
 			CardView carta = findViewById( R.id.conferma_vecchio );
-			Armadio.Cassetto cassetto = Globale.preferenze.getAlbero( Globale.preferenze.idAprendo );
-			((TextView)carta.findViewById(R.id.confronto_titolo )).setText( cassetto.nome );
-			String txt = Alberi.scriviDati( this, cassetto );
+			Settings.Tree tree = Global.settings.getTree( Global.settings.openTree);
+			((TextView)carta.findViewById(R.id.confronto_titolo )).setText( tree.title);
+			String txt = Alberi.scriviDati( this, tree);
 			((TextView)carta.findViewById(R.id.confronto_testo )).setText( txt );
 			carta.findViewById( R.id.confronto_data ).setVisibility( View.GONE );
 
@@ -77,7 +77,7 @@ public class Conferma extends AppCompatActivity {
 							case 1: // Note
 								idNuovo = idMassimo( Note.class );
 								Note n2 = (Note) fronte.oggetto2;
-								new ContenitoriNota( Globale.gc2, n2, idNuovo ); // aggiorna tutti i ref alla nota
+								new ContenitoriNota( Global.gc2, n2, idNuovo ); // aggiorna tutti i ref alla nota
 								n2.setId( idNuovo ); // poi aggiorna l'id della nota
 								break;
 							case 2: // Submitter
@@ -87,7 +87,7 @@ public class Conferma extends AppCompatActivity {
 							case 3: // Repository
 								idNuovo = idMassimo( Repository.class );
 								Repository repo2 = (Repository)fronte.oggetto2;
-								for( Source fon : Globale.gc2.getSources() )
+								for( Source fon : Global.gc2.getSources() )
 									if( fon.getRepositoryRef() != null && fon.getRepositoryRef().getRef().equals(repo2.getId()) )
 										fon.getRepositoryRef().setRef( idNuovo );
 								repo2.setId( idNuovo );
@@ -95,13 +95,13 @@ public class Conferma extends AppCompatActivity {
 							case 4: // Media
 								idNuovo = idMassimo( Media.class );
 								Media m2 = (Media) fronte.oggetto2;
-								new ContenitoriMedia( Globale.gc2, m2, idNuovo );
+								new ContenitoriMedia( Global.gc2, m2, idNuovo );
 								m2.setId( idNuovo );
 								break;
 							case 5: // Source
 								idNuovo = idMassimo( Source.class );
 								Source s2 = (Source) fronte.oggetto2;
-								ListaCitazioniFonte citaFonte = new ListaCitazioniFonte( Globale.gc2, s2.getId() );
+								ListaCitazioniFonte citaFonte = new ListaCitazioniFonte( Global.gc2, s2.getId() );
 								for( ListaCitazioniFonte.Tripletta tri : citaFonte.lista )
 									tri.citazione.setRef( idNuovo );
 								s2.setId( idNuovo );
@@ -109,7 +109,7 @@ public class Conferma extends AppCompatActivity {
 							case 6: // Person
 								idNuovo = idMassimo( Person.class );
 								Person p2 = (Person) fronte.oggetto2;
-								for( Family fam : Globale.gc2.getFamilies() ) {
+								for( Family fam : Global.gc2.getFamilies() ) {
 									for( SpouseRef sr : fam.getHusbandRefs() )
 										if( sr.getRef().equals(p2.getId()) )
 											sr.setRef( idNuovo );
@@ -125,7 +125,7 @@ public class Conferma extends AppCompatActivity {
 							case 7: // Family
 								idNuovo = idMassimo( Family.class );
 								Family f2 = (Family) fronte.oggetto2;
-								for( Person per : Globale.gc2.getPeople() ) {
+								for( Person per : Global.gc2.getPeople() ) {
 									for( ParentFamilyRef pfr : per.getParentFamilyRefs() )
 										if( pfr.getRef().equals(f2.getId()) )
 											pfr.setRef( idNuovo );
@@ -138,67 +138,67 @@ public class Conferma extends AppCompatActivity {
 					}
 				}
 				if( fattoQualcosa )
-					U.salvaJson( Globale.gc2, Globale.idAlbero2 );
+					U.salvaJson( Global.gc2, Global.treeId2);
 
 				// La regolare aggiunta/sostituzione/eliminazione dei record da albero2 ad albero
 				for( Confronto.Fronte fronte : Confronto.getLista() ) {
 					switch( fronte.tipo ) {
 						case 1: // Nota
 							if( fronte.destino > 1 )
-								Globale.gc.getNotes().remove( fronte.oggetto );
+								Global.gc.getNotes().remove( fronte.oggetto );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Globale.gc.addNote( (Note) fronte.oggetto2 );
+								Global.gc.addNote( (Note) fronte.oggetto2 );
 								copiaTuttiFile( fronte.oggetto2 );
 							}
 							break;
 						case 2: // Submitter
 							if( fronte.destino > 1 )
-								Globale.gc.getSubmitters().remove( fronte.oggetto );
+								Global.gc.getSubmitters().remove( fronte.oggetto );
 							if( fronte.destino > 0 && fronte.destino < 3 )
-								Globale.gc.addSubmitter( (Submitter) fronte.oggetto2 );
+								Global.gc.addSubmitter( (Submitter) fronte.oggetto2 );
 							break;
 						case 3: // Repository
 							if( fronte.destino > 1 )
-								Globale.gc.getRepositories().remove( fronte.oggetto );
+								Global.gc.getRepositories().remove( fronte.oggetto );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Globale.gc.addRepository( (Repository) fronte.oggetto2 );
+								Global.gc.addRepository( (Repository) fronte.oggetto2 );
 								copiaTuttiFile( fronte.oggetto2 );
 							}
 							break;
 						case 4: // Media
 							if( fronte.destino > 1 )
-								Globale.gc.getMedia().remove( fronte.oggetto );
+								Global.gc.getMedia().remove( fronte.oggetto );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Globale.gc.addMedia( (Media) fronte.oggetto2 );
+								Global.gc.addMedia( (Media) fronte.oggetto2 );
 								vediSeCopiareFile( (Media)fronte.oggetto2 );
 							}
 							break;
 						case 5: // Source
 							if( fronte.destino > 1 )
-								Globale.gc.getSources().remove( fronte.oggetto );
+								Global.gc.getSources().remove( fronte.oggetto );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Globale.gc.addSource( (Source) fronte.oggetto2 );
+								Global.gc.addSource( (Source) fronte.oggetto2 );
 								copiaTuttiFile( fronte.oggetto2 );
 							}
 							break;
 						case 6: // Person
 							if( fronte.destino > 1 )
-								Globale.gc.getPeople().remove( fronte.oggetto );
+								Global.gc.getPeople().remove( fronte.oggetto );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Globale.gc.addPerson( (Person) fronte.oggetto2 );
+								Global.gc.addPerson( (Person) fronte.oggetto2 );
 								copiaTuttiFile( fronte.oggetto2 );
 							}
 							break;
 						case 7: // Family
 							if( fronte.destino > 1 )
-								Globale.gc.getFamilies().remove( fronte.oggetto );
+								Global.gc.getFamilies().remove( fronte.oggetto );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Globale.gc.addFamily( (Family) fronte.oggetto2 );
+								Global.gc.addFamily( (Family) fronte.oggetto2 );
 								copiaTuttiFile( fronte.oggetto2 );
 							}
 					}
 				}
-				U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+				U.salvaJson( Global.gc, Global.settings.openTree);
 
 				// Se ha fatto tutto propone di eliminare l'albero importato
 				boolean tuttiOk = true;
@@ -208,12 +208,12 @@ public class Conferma extends AppCompatActivity {
 						break;
 					}
 				if( tuttiOk ) {
-					Globale.preferenze.getAlbero( Globale.idAlbero2 ).grado = 30;
-					Globale.preferenze.salva();
+					Global.settings.getTree( Global.treeId2).grade = 30;
+					Global.settings.save();
 					new AlertDialog.Builder( Conferma.this )
 							.setMessage( R.string.all_imported_delete )
 							.setPositiveButton( android.R.string.ok, (d, i) -> {
-								Alberi.eliminaAlbero( this, Globale.idAlbero2 );
+								Alberi.deleteTree( this, Global.treeId2);
 								concludi();
 							}).setNegativeButton( R.string.no, (d, i) -> concludi() )
 							.setOnCancelListener( dialog -> concludi() ).show();
@@ -231,8 +231,8 @@ public class Conferma extends AppCompatActivity {
 
 	// Calcola l'id più alto per una certa classe confrontando albero nuovo e vecchio
 	String idMassimo( Class classe ) {
-		String id = U.nuovoId( Globale.gc, classe ); // id nuovo rispetto ai record dell'albero vecchio
-		String id2 = U.nuovoId( Globale.gc2, classe ); // e dell'albero nuovo
+		String id = U.nuovoId( Global.gc, classe ); // id nuovo rispetto ai record dell'albero vecchio
+		String id2 = U.nuovoId( Global.gc2, classe ); // e dell'albero nuovo
 		if( Integer.valueOf( id.substring(1) ) > Integer.valueOf( id2.substring(1) ) ) // toglie la lettera iniziale
 			return id;
 		else
@@ -242,17 +242,17 @@ public class Conferma extends AppCompatActivity {
 	// Se un oggetto nuovo ha dei media, valuta se copiare i file nella cartella immagini dell'albero vecchio
 	// comunque  aggiorna il collegamento nel Media
 	void copiaTuttiFile( Object oggetto ) {
-		ListaMedia cercaMedia = new ListaMedia( Globale.gc2, 2 );
+		ListaMedia cercaMedia = new ListaMedia( Global.gc2, 2 );
 		((Visitable)oggetto).accept( cercaMedia );
 		for( Media media : cercaMedia.lista ) {
 			vediSeCopiareFile( media );
 		}
 	}
 	void vediSeCopiareFile( Media media ) {
-		String origine = F.percorsoMedia( Globale.idAlbero2, media );
+		String origine = F.percorsoMedia( Global.treeId2, media );
 		if( origine != null ) {
 			File fileOrigine = new File( origine );
-			File dirMemoria = getExternalFilesDir( String.valueOf(Globale.preferenze.idAprendo) ); // dovrebbe stare fuori dal loop ma vabè
+			File dirMemoria = getExternalFilesDir( String.valueOf(Global.settings.openTree) ); // dovrebbe stare fuori dal loop ma vabè
 			String nomeFile = origine.substring( origine.lastIndexOf('/') + 1 );
 			File fileGemello = new File( dirMemoria.getAbsolutePath(), nomeFile );
 			if( fileGemello.isFile()	// se il file corrispondente esiste già

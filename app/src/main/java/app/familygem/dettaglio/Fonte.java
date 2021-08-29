@@ -14,7 +14,7 @@ import app.familygem.Memoria;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.visita.ListaCitazioniFonte;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Fonte extends Dettaglio {
 

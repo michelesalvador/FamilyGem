@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Random;
 import app.familygem.visita.ListaMedia;
 import app.familygem.visita.ListaNote;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
-public class Principe extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class Principal extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	DrawerLayout scatolissima;
 	Toolbar toolbar;
@@ -39,7 +39,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			Galleria.class, Quaderno.class, Biblioteca.class, Magazzino.class, Podio.class );
 
 	@Override
-	protected void onCreate( Bundle savedInstanceState ) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.principe);
 
@@ -54,9 +54,9 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 
 		menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
-		Globale.vistaPrincipe = scatolissima;
+		Global.principalView = scatolissima;
 		U.gedcomSicuro( gc );
-		arredaTestataMenu();
+		furnishMenu();
 
 		if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
 			Fragment fragment;
@@ -79,24 +79,24 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 					.addToBackStack(backName).commit();
 		}
 
-		menuPrincipe.getHeaderView(0).findViewById( R.id.menu_alberi ).setOnClickListener( v -> {
+		menuPrincipe.getHeaderView(0).findViewById(R.id.menu_alberi).setOnClickListener(v -> {
 			scatolissima.closeDrawer(GravityCompat.START);
-			startActivity( new Intent( Principe.this, Alberi.class ) );
+			startActivity(new Intent(Principal.this, Alberi.class));
 		});
 
 		// Nasconde le voci del menu più ostiche
-		if( !Globale.preferenze.esperto ) {
+		if( !Global.settings.expert ) {
 			Menu menu = menuPrincipe.getMenu();
 			menu.findItem(R.id.nav_fonti).setVisible(false);
-			menu.findItem( R.id.nav_archivi ).setVisible(false);
-			menu.findItem( R.id.nav_autore ).setVisible(false);
+			menu.findItem(R.id.nav_archivi).setVisible(false);
+			menu.findItem(R.id.nav_autore).setVisible(false);
 		}
 	}
 
 	// Chiamato praticamente sempre tranne che onBackPressed
 	@Override
-	public void onAttachFragment( @NonNull Fragment fragment ) {
-		super.onAttachFragment( fragment );
+	public void onAttachFragment(@NonNull Fragment fragment) {
+		super.onAttachFragment(fragment);
 		if( !(fragment instanceof NuovoParente) )
 			aggiornaInterfaccia(fragment);
 	}
@@ -105,7 +105,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 	@Override
 	public void onRestart() {
 		super.onRestart();
-		if( Globale.editato ) {
+		if( Global.edited ) {
 			Fragment attuale = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
 			if( attuale instanceof Diagram ) {
 				((Diagram)attuale).forceDraw = true; // Così ridisegna il diagramma
@@ -118,28 +118,28 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			} else {
 				recreate(); // questo dovrebbe andare a scomparire man mano
 			}
-			Globale.editato = false;
-			arredaTestataMenu(); // praticamente solo per mostrare il bottone Salva
+			Global.edited = false;
+			furnishMenu(); // praticamente solo per mostrare il bottone Salva
 		}
 	}
 
 	// Riceve una classe tipo 'Diagram.class' e dice se è il fragment attualmente visibile sulla scena
 	private boolean frammentoAttuale(Class classe) {
 		Fragment attuale = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
-		return classe.isInstance( attuale );
+		return classe.isInstance(attuale);
 	}
 
-	// Titolo, immagine a caso, bottone Salva nella testata del menu
-	void arredaTestataMenu() {
+	// Update title, random image, 'Save' button in menu header, and menu items count
+	void furnishMenu() {
 		NavigationView navigation = scatolissima.findViewById(R.id.menu);
 		View menuHeader = navigation.getHeaderView(0);
 		ImageView imageView = menuHeader.findViewById( R.id.menu_immagine );
 		TextView mainTitle = menuHeader.findViewById( R.id.menu_titolo );
 		imageView.setVisibility( ImageView.GONE );
 		mainTitle.setText( "" );
-		if( Globale.gc != null ) {
-			ListaMedia cercaMedia = new ListaMedia( Globale.gc, 3 );
-			Globale.gc.accept( cercaMedia );
+		if( Global.gc != null ) {
+			ListaMedia cercaMedia = new ListaMedia( Global.gc, 3 );
+			Global.gc.accept( cercaMedia );
 			if( cercaMedia.lista.size() > 0 ) {
 				int caso = new Random().nextInt( cercaMedia.lista.size() );
 				for( Media med : cercaMedia.lista )
@@ -149,8 +149,12 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 						break;
 					}
 			}
-			mainTitle.setText( Globale.preferenze.alberoAperto().nome );
-
+			mainTitle.setText( Global.settings.getCurrentTree().title);
+			if( Global.settings.expert ) {
+				TextView treeNumView = menuHeader.findViewById(R.id.menu_number);
+				treeNumView.setText(String.valueOf(Global.settings.openTree));
+				treeNumView.setVisibility(ImageView.VISIBLE);
+			}
 			// Put count of existing records in menu items
 			Menu menu = navigation.getMenu();
 			for( int i = 1; i <= 7; i++ ) {
@@ -183,9 +187,9 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 		Button saveButton = menuHeader.findViewById( R.id.menu_salva );
 		saveButton.setOnClickListener( view -> {
 			view.setVisibility( View.GONE );
-			U.salvaJson( Globale.gc, Globale.preferenze.idAprendo );
+			U.salvaJson( Global.gc, Global.settings.openTree);
 			scatolissima.closeDrawer(GravityCompat.START);
-			Globale.daSalvare = false;
+			Global.daSalvare = false;
 			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
 		});
 		saveButton.setOnLongClickListener( vista -> {
@@ -194,22 +198,22 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			popup.show();
 			popup.setOnMenuItemClickListener( item -> {
 				if( item.getItemId() == 0 ) {
-					Alberi.apriGedcom(Globale.preferenze.idAprendo, false);
+					Alberi.apriGedcom(Global.settings.openTree, false);
 					U.qualiGenitoriMostrare(this, null, 0); // Semplicemente ricarica il diagramma
 					scatolissima.closeDrawer(GravityCompat.START);
 					saveButton.setVisibility(View.GONE);
-					Globale.daSalvare = false;
+					Global.daSalvare = false;
 				}
 				return true;
 			});
 			return true;
 		});
-		if( Globale.daSalvare )
+		if( Global.daSalvare )
 			saveButton.setVisibility( View.VISIBLE );
 	}
 
 	// Evidenzia voce del menu e mostra/nasconde toolbar
-	void aggiornaInterfaccia( Fragment fragment ) {
+	void aggiornaInterfaccia(Fragment fragment) {
 		if( fragment == null )
 			fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
 		if( fragment != null ) {
@@ -219,7 +223,7 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 			if( toolbar == null )
 				toolbar = findViewById(R.id.toolbar);
 			if( toolbar != null )
-				toolbar.setVisibility( numFram == 0 ? View.GONE : View.VISIBLE );
+				toolbar.setVisibility(numFram == 0 ? View.GONE : View.VISIBLE);
 		}
 	}
 
@@ -248,10 +252,10 @@ public class Principe extends AppCompatActivity implements NavigationView.OnNavi
 				int cosaAprire = 0; // Mostra il diagramma senza chiedere dei molteplici genitori
 				// Se sono già in diagramma e clicco Diagramma, mostra la persona radice
 				if( frammentoAttuale(Diagram.class) ) {
-					Globale.individuo = Globale.preferenze.alberoAperto().radice;
+					Global.indi = Global.settings.getCurrentTree().root;
 					cosaAprire = 1; // Eventualmente chiede dei molteplici genitori
 				}
-				U.qualiGenitoriMostrare( this, Globale.gc.getPerson(Globale.individuo), cosaAprire );
+				U.qualiGenitoriMostrare( this, Global.gc.getPerson(Global.indi), cosaAprire );
 			} else {
 				FragmentManager fm = getSupportFragmentManager();
 				// Rimuove frammento precedente dalla storia se è lo stesso che stiamo per vedere

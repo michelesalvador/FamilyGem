@@ -20,7 +20,7 @@ import app.familygem.dettaglio.Nota;
 import app.familygem.visita.ListaNote;
 import app.familygem.visita.RiferimentiNota;
 import app.familygem.visita.TrovaPila;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class Quaderno extends Fragment {
 	

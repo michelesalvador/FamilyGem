@@ -54,7 +54,7 @@ public class AlberoNuovo extends AppCompatActivity {
 		super.onCreate( bandolo );
 		setContentView(R.layout.albero_nuovo);
 		rotella = findViewById( R.id.nuovo_circolo );
-		String referrer = Globale.preferenze.referrer; // Dataid proveniente da una condivisione
+		String referrer = Global.settings.referrer; // Dataid proveniente da una condivisione
 		boolean esisteDataId = referrer != null && referrer.matches("[0-9]{14}");
 
 		// Scarica l'albero condiviso
@@ -79,11 +79,11 @@ public class AlberoNuovo extends AppCompatActivity {
 			vistaTesto.setText( R.string.modify_later );
 			vistaTesto.setVisibility( View.VISIBLE );
 			EditText nuovoNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
-			builder.setPositiveButton( R.string.create, (dialog, id) -> salva(nuovoNome.getText().toString()) )
+			builder.setPositiveButton( R.string.create, (dialog, id) -> newTree(nuovoNome.getText().toString()) )
 					.setNeutralButton( R.string.cancel, null ).create().show();
 			nuovoNome.setOnEditorActionListener( (view, action, event) -> {
 				if( action == EditorInfo.IME_ACTION_DONE ) {
-					salva( nuovoNome.getText().toString() );
+					newTree( nuovoNome.getText().toString() );
 					return true; // completa le azioni di salva()
 				}
 				return false; // Eventuali altri action che non esistono
@@ -119,6 +119,7 @@ public class AlberoNuovo extends AppCompatActivity {
 	// Elabora la risposta alle richieste di permesso
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) { // If request is cancelled, the result arrays are empty
+		super.onRequestPermissionsResult(codice, permessi, accordi);
 		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
 			if( codice == 1390 ) {
 				importaGedcom();
@@ -126,24 +127,25 @@ public class AlberoNuovo extends AppCompatActivity {
 		}
 	}
 
-	// Salva un nuovo albero
-	void salva( String titolo ) {
-		int num = Globale.preferenze.max() + 1;
-		File fileJson = new File( getFilesDir(), num + ".json" );
-		Globale.gc = new Gedcom();
-		Globale.gc.setHeader( creaTestata( fileJson.getName() ) );
-		Globale.gc.createIndexes();
+	// Create a brand new tree
+	void newTree(String title) {
+		int num = Global.settings.max() + 1;
+		File jsonFile = new File(getFilesDir(), num + ".json");
+		Global.gc = new Gedcom();
+		Global.gc.setHeader(creaTestata(jsonFile.getName()));
+		Global.gc.createIndexes();
 		JsonParser jp = new JsonParser();
 		try {
-			FileUtils.writeStringToFile( fileJson, jp.toJson(Globale.gc), "UTF-8" );
-		} catch (Exception e) {
-			Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+			FileUtils.writeStringToFile(jsonFile, jp.toJson(Global.gc), "UTF-8");
+		} catch( Exception e ) {
+			Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 			return;
 		}
-		Globale.preferenze.aggiungi( new Armadio.Cassetto(num, titolo, null, 0, 0, null, null, 0, null) );
-		Globale.preferenze.salva();
+		Global.settings.aggiungi(new Settings.Tree(num, title, null, 0, 0, null, null, 0));
+		Global.settings.openTree = num;
+		Global.settings.save();
 		onBackPressed();
-		Toast.makeText( this, R.string.tree_created, Toast.LENGTH_SHORT ).show();
+		Toast.makeText(this, R.string.tree_created, Toast.LENGTH_SHORT).show();
 	}
 
 	// Scarica da Google Drive il file zip dei Simpson nella cache esterna dell'app, quindi senza bisogno di permessi
@@ -182,70 +184,86 @@ public class AlberoNuovo extends AppCompatActivity {
 
 	// Decomprime il file zip nella memoria esterna e cartella col numero dell'albero
 	// Usato ugualmente da: esempio Simpson, file di backup e alberi condivisi
-	static boolean decomprimiZip( final Context contesto, String percorsoZip, Uri uriZip ) {
-		int numAlbero = Globale.preferenze.max() + 1;
-		File dirImmagini = contesto.getExternalFilesDir( String.valueOf(numAlbero) );
-		if( !dirImmagini.exists() )
-			dirImmagini.mkdir();
+	static boolean decomprimiZip(Context context, String percorsoZip, Uri uriZip) {
+		int treeNumber = Global.settings.max() + 1;
+		File mediaDir = context.getExternalFilesDir(String.valueOf(treeNumber));
+		String sourceDir = context.getApplicationInfo().sourceDir;
+		if( !sourceDir.startsWith("/data/") ) { // App installed not in internal memory (hopefully moved to SD-card)
+			File[] externalFilesDirs = context.getExternalFilesDirs(String.valueOf(treeNumber));
+			if( externalFilesDirs.length > 1 ) {
+				mediaDir = externalFilesDirs[1];
+			}
+		}
 		try {
 			InputStream is;
 			if( percorsoZip != null )
-				is = new FileInputStream( percorsoZip );
-			// toDO da android 10 necessario rivedere il metodo di accesso a file nelle cartelle esterne
-				// temporaneamente risolto nel manifest con 'requestLegacyExternalStorage'
+				is = new FileInputStream(percorsoZip);
 			else
-				is = contesto.getContentResolver().openInputStream( uriZip );
-			ZipInputStream zis = new ZipInputStream( is );
+				is = context.getContentResolver().openInputStream(uriZip);
+			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry zipEntry;
 			int len;
 			byte[] buffer = new byte[1024];
+			File newFile;
 			while( (zipEntry = zis.getNextEntry()) != null ) {
-				String percorsoFile;
 				if( zipEntry.getName().equals("tree.json") )
-					percorsoFile = contesto.getFilesDir() +"/"+ numAlbero + ".json";
+					newFile = new File(context.getFilesDir(), treeNumber + ".json");
 				else if( zipEntry.getName().equals("settings.json") )
-					percorsoFile = contesto.getCacheDir() +"/settings.json";
-				else // è un file nella cartella 'media'
-					percorsoFile = dirImmagini +"/"+ zipEntry.getName().replace( "media/", "" );
-				File newFile = new File( percorsoFile );
-				FileOutputStream fos = new FileOutputStream( newFile );
-				while( ( len = zis.read( buffer ) ) > 0 ) {
-					fos.write( buffer, 0, len );
+					newFile = new File(context.getCacheDir(), "settings.json");
+				else // It's a file from the 'media' folder
+					newFile = new File(mediaDir, zipEntry.getName().replace("media/", ""));
+				FileOutputStream fos = new FileOutputStream(newFile);
+				while( (len = zis.read(buffer)) > 0 ) {
+					fos.write(buffer, 0, len);
 				}
 				fos.close();
 			}
 			zis.closeEntry();
 			zis.close();
 			// Legge le impostazioni e le salva nelle preferenze
-			File fileImpostazioni = new File( contesto.getCacheDir(),"settings.json" );
-			String json = FileUtils.readFileToString( fileImpostazioni, "UTF-8" );
+			File settingsFile = new File(context.getCacheDir(), "settings.json");
+			String json = FileUtils.readFileToString(settingsFile, "UTF-8");
+			json = updateLanguage(json);
 			Gson gson = new Gson();
-			Armadio.CassettoCondiviso cassa = gson.fromJson( json, Armadio.CassettoCondiviso.class );
-			Armadio.Cassetto cassetto = new Armadio.Cassetto( numAlbero, cassa.titolo, dirImmagini.getPath(),
-					cassa.individui, cassa.generazioni, cassa.radice, cassa.condivisioni, cassa.grado, null );
-			Globale.preferenze.aggiungi( cassetto );
-			fileImpostazioni.delete();
+			Settings.ZippedTree cassa = gson.fromJson(json, Settings.ZippedTree.class);
+			Settings.Tree tree = new Settings.Tree(treeNumber, cassa.title, mediaDir.getPath(),
+					cassa.persons, cassa.generations, cassa.root, cassa.shares, cassa.grade);
+			Global.settings.aggiungi(tree);
+			settingsFile.delete();
 			//fileZip.delete();
 			// Albero proveniente da condivisione destinato al confronto
-			if( cassa.grado == 9 && confronta(contesto,cassetto,false) ) {
-				cassetto.grado = 20; // lo marchia come derivato
+			if( cassa.grade == 9 && confronta(context, tree,false) ) {
+				tree.grade = 20; // lo marchia come derivato
 			}
 			// Il download è avvenuto dal dialogo del referrer in Alberi
-			if( contesto instanceof Alberi ) {
-				Alberi alberi = (Alberi) contesto;
+			if( context instanceof Alberi ) {
+				Alberi alberi = (Alberi)context;
 				alberi.runOnUiThread( () -> {
-					alberi.rotella.setVisibility( View.GONE );
+					alberi.rotella.setVisibility(View.GONE);
 					alberi.aggiornaLista();
 				});
 			} else // Albero di esempio (Simpson) o di backup (da Facciata o da AlberoNuovo)
-				contesto.startActivity( new Intent( contesto, Alberi.class ) );
-			Globale.preferenze.salva();
-			U.tosta( (Activity)contesto, R.string.tree_imported_ok );
+				context.startActivity(new Intent(context, Alberi.class));
+			Global.settings.save();
+			U.tosta((Activity)context, R.string.tree_imported_ok);
 			return true;
 		} catch( Exception e ) {
-			U.tosta( (Activity)contesto, e.getLocalizedMessage() );
+			U.tosta((Activity)context, e.getLocalizedMessage());
 		}
 		return false;
+	}
+
+	// Replace Italian with English in the Json settings of ZIP backup
+	// Added in Family Gem 0.8
+	static String updateLanguage(String json) {
+		json = json.replace("\"generazioni\":", "\"generations\":");
+		json = json.replace("\"grado\":", "\"grade\":");
+		json = json.replace("\"individui\":", "\"persons\":");
+		json = json.replace("\"radice\":", "\"root\":");
+		json = json.replace("\"titolo\":", "\"title\":");
+		json = json.replace("\"condivisioni\":", "\"shares\":");
+		json = json.replace("\"data\":", "\"dateId\":");
+		return json;
 	}
 
 	// Fa scegliere un file Gedcom da importare
@@ -275,7 +293,7 @@ public class AlberoNuovo extends AppCompatActivity {
 				}
 				gc.createIndexes(); // necessario per poi calcolare le generazioni
 				// Salva il file Json
-				int nuovoNum = Globale.preferenze.max() + 1;
+				int nuovoNum = Global.settings.max() + 1;
 				PrintWriter pw = new PrintWriter( getFilesDir() + "/" + nuovoNum + ".json" );
 				JsonParser jp = new JsonParser();
 				pw.print( jp.toJson(gc) );
@@ -296,15 +314,15 @@ public class AlberoNuovo extends AppCompatActivity {
 					nomeAlbero = nomeAlbero.substring(0, nomeAlbero.lastIndexOf('.'));
 				// Salva le impostazioni in preferenze
 				String idRadice = U.trovaRadice(gc);
-				Globale.preferenze.aggiungi( new Armadio.Cassetto( nuovoNum, nomeAlbero, percorsoCartella,
-						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc,idRadice), idRadice, null, 0, null ) );
-				Globale.preferenze.salva();
+				Global.settings.aggiungi(new Settings.Tree(nuovoNum, nomeAlbero, percorsoCartella,
+						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc,idRadice), idRadice, null, 0));
+				Global.settings.save();
 				// Se necessario propone di mostrare le funzioni avanzate
-				if( !gc.getSources().isEmpty() && !Globale.preferenze.esperto ) {
+				if( !gc.getSources().isEmpty() && !Global.settings.expert ) {
 					new AlertDialog.Builder(this).setMessage( R.string.complex_tree_advanced_tools )
 							.setPositiveButton( android.R.string.ok, (dialog, i) -> {
-								Globale.preferenze.esperto = true;
-								Globale.preferenze.salva();
+								Global.settings.expert = true;
+								Global.settings.save();
 								concludiImportaGedcom();
 							}).setNegativeButton( android.R.string.cancel, (dialog, i) -> concludiImportaGedcom() )
 							.show();
@@ -339,9 +357,9 @@ public class AlberoNuovo extends AppCompatActivity {
 					    bisognerebbe annullare il referrer:
 						if( decomprimiZip( this, null, uri ) ){
 						String idData = Esportatore.estraiNome(uri); // che però non è statico
-						if( Globale.preferenze.referrer.equals(idData) ) {
-							Globale.preferenze.referrer = null;
-							Globale.preferenze.salva();
+						if( Global.preferenze.referrer.equals(idData) ) {
+							Global.preferenze.referrer = null;
+							Global.preferenze.salva();
 						}}
 					 */
 				} else if(ceFilePreferenze){
@@ -364,7 +382,7 @@ public class AlberoNuovo extends AppCompatActivity {
 							}
 							zis2.closeEntry();
 							zis2.close();
-							Globale.avvia( getApplicationContext() );
+							Global.start( getApplicationContext() );
 							startActivity( new Intent( AlberoNuovo.this, Alberi.class ));
 						} catch( IOException e ) {
 							e.printStackTrace();
@@ -386,19 +404,19 @@ public class AlberoNuovo extends AppCompatActivity {
 	// Confronta le date di invio degli alberi esistenti
 	// Se trova almeno un albero originario tra quelli esistenti restituisce true
 	// ed eventualmente apre il comparatore
-	static boolean confronta( Context contesto, Armadio.Cassetto albero2, boolean apriCompara ) {
-		if( albero2.condivisioni != null )
-			for( Armadio.Cassetto alb : Globale.preferenze.alberi )
-				if( alb.id != albero2.id && alb.condivisioni != null && alb.grado != 20  && alb.grado != 30 )
-					for( int i = alb.condivisioni.size()-1; i >= 0; i-- ) { // Le condivisioni dall'ultima alla prima
-						Armadio.Invio invio = alb.condivisioni.get(i);
-						for( Armadio.Invio invio2 : albero2.condivisioni )
-							if( invio.data != null && invio.data.equals( invio2.data ) ) {
+	static boolean confronta(Context contesto, Settings.Tree albero2, boolean apriCompara) {
+		if( albero2.shares != null )
+			for( Settings.Tree alb : Global.settings.trees )
+				if( alb.id != albero2.id && alb.shares != null && alb.grade != 20 && alb.grade != 30 )
+					for( int i = alb.shares.size() - 1; i >= 0; i-- ) { // Le condivisioni dall'ultima alla prima
+						Settings.Share share = alb.shares.get(i);
+						for( Settings.Share share2 : albero2.shares )
+							if( share.dateId != null && share.dateId.equals(share2.dateId) ) {
 								if( apriCompara )
-									contesto.startActivity( new Intent( contesto, Compara.class )
-										.putExtra( "idAlbero", alb.id )
-										.putExtra( "idAlbero2", albero2.id )
-										.putExtra( "idData", invio.data )
+									contesto.startActivity(new Intent(contesto, Compara.class)
+											.putExtra("idAlbero", alb.id)
+											.putExtra("idAlbero2", albero2.id)
+											.putExtra("idData", share.dateId)
 									);
 								return true;
 							}
@@ -407,26 +425,26 @@ public class AlberoNuovo extends AppCompatActivity {
 	}
 
 	// Crea l'intestazione standard per questa app
-	public static Header creaTestata( String nomeFile ) {
+	public static Header creaTestata(String nomeFile) {
 		Header testa = new Header();
 		Generator app = new Generator();
-		app.setValue( "FAMILY_GEM" );
-		app.setName( "Family Gem" );
-		app.setVersion( BuildConfig.VERSION_NAME );
-		testa.setGenerator( app );
-		testa.setFile( nomeFile );
+		app.setValue("FAMILY_GEM");
+		app.setName("Family Gem");
+		app.setVersion(BuildConfig.VERSION_NAME);
+		testa.setGenerator(app);
+		testa.setFile(nomeFile);
 		GedcomVersion versione = new GedcomVersion();
-		versione.setForm( "LINEAGE-LINKED" );
-		versione.setVersion( "5.5.1" );
-		testa.setGedcomVersion( versione );
+		versione.setForm("LINEAGE-LINKED");
+		versione.setVersion("5.5.1");
+		testa.setGedcomVersion(versione);
 		CharacterSet codifica = new CharacterSet();
-		codifica.setValue( "UTF-8" );
-		testa.setCharacterSet( codifica );
-		Locale loc = new Locale( Locale.getDefault().getLanguage() );
+		codifica.setValue("UTF-8");
+		testa.setCharacterSet(codifica);
+		Locale loc = new Locale(Locale.getDefault().getLanguage());
 		// C'è anche   Resources.getSystem().getConfiguration().locale.getLanguage() che ritorna lo stesso 'it'
-		testa.setLanguage( loc.getDisplayLanguage( Locale.ENGLISH ) );	// ok prende la lingua di sistema in inglese, non nella lingua locale
+		testa.setLanguage(loc.getDisplayLanguage(Locale.ENGLISH));    // ok prende la lingua di sistema in inglese, non nella lingua locale
 		// in header ci sono due campi data: TRANSMISSION_DATE un po' forzatamente può contenere la data di ultima modifica
-		testa.setDateTime( U.dataTempoAdesso() );
+		testa.setDateTime(U.dataTempoAdesso());
 		return testa;
 	}
 

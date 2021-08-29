@@ -5,10 +5,13 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.WorkManager;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +25,6 @@ import android.widget.Toast;
 import com.android.installreferrer.api.InstallReferrerClient;
 import com.android.installreferrer.api.InstallReferrerStateListener;
 import com.android.installreferrer.api.ReferrerDetails;
-import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
@@ -34,7 +36,9 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.parser.JsonParser;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,33 +52,41 @@ public class Alberi extends AppCompatActivity {
 	View rotella;
 	Fabuloso welcome;
 	Esportatore esportatore;
+	private boolean autoOpenedTree; // To open automatically the tree at startup only once
+	// The birthday notification IDs are stored to display the relative person only once
+	private ArrayList<Integer> consumedNotifications = new ArrayList<>();
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		setContentView( R.layout.alberi );
+	protected void onCreate(Bundle savedState) {
+		super.onCreate(savedState);
+		setContentView(R.layout.alberi);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		ListView vistaLista = findViewById( R.id.lista_alberi );
-		rotella = findViewById( R.id.alberi_circolo );
-		welcome = new Fabuloso( this, R.string.tap_add_tree );
-		esportatore = new Esportatore( Alberi.this );
+		ListView vistaLista = findViewById(R.id.lista_alberi);
+		rotella = findViewById(R.id.alberi_circolo);
+		welcome = new Fabuloso(this, R.string.tap_add_tree);
+		esportatore = new Esportatore(Alberi.this);
 
 		// Al primissimo avvio
-		String referrer = Globale.preferenze.referrer;
+		String referrer = Global.settings.referrer;
 		if( referrer != null && referrer.equals("start") )
 			recuperaReferrer();
 		// Se è stato memorizzato un dataid (che appena usato sarà cancellato)
 		else if( referrer != null && referrer.matches("[0-9]{14}") ) {
-			new AlertDialog.Builder(this).setTitle( R.string.a_new_tree )
-					.setMessage( R.string.you_can_download )
-					.setPositiveButton( R.string.download, (dialog, id) -> {
-						Facciata.scaricaCondiviso( this, referrer, rotella );
-					}).setNeutralButton( R.string.cancel, null ).show();
+			new AlertDialog.Builder(this).setTitle(R.string.a_new_tree)
+					.setMessage(R.string.you_can_download)
+					.setPositiveButton(R.string.download, (dialog, id) -> {
+						Facciata.scaricaCondiviso(this, referrer, rotella);
+					}).setNeutralButton(R.string.cancel, null).show();
 		} // Se non c'è nessun albero
-		else if( Globale.preferenze.alberi.isEmpty() )
+		else if( Global.settings.trees.isEmpty() )
 			welcome.show();
 
-		if( Globale.preferenze.alberi != null ) {
+		if( savedState != null ) {
+			autoOpenedTree = savedState.getBoolean("autoOpenedTree");
+			consumedNotifications = savedState.getIntegerArrayList("consumedNotifications");
+		}
+
+		if( Global.settings.trees != null ) {
 
 			// Lista degli alberi genealogici
 			elencoAlberi = new ArrayList<>();
@@ -88,92 +100,93 @@ public class Alberi extends AppCompatActivity {
 				@Override
 				public View getView( final int posiz, View convertView, ViewGroup parent ) {
 					View vistaAlbero = super.getView( posiz, convertView, parent );
-					int idAlbero = Integer.parseInt( elencoAlberi.get(posiz).get("id") );
-					Armadio.Cassetto cassetto = Globale.preferenze.getAlbero(idAlbero);
-					boolean derivato = cassetto.grado == 20;
-					boolean esaurito = cassetto.grado == 30;
+					int treeId = Integer.parseInt(elencoAlberi.get(posiz).get("id"));
+					Settings.Tree tree = Global.settings.getTree(treeId);
+					boolean derivato = tree.grade == 20;
+					boolean esaurito = tree.grade == 30;
 					if( derivato ) {
-						vistaAlbero.setBackgroundColor( getResources().getColor( R.color.evidenzia ) );
-						vistaAlbero.setOnClickListener( v -> {
-							if( !AlberoNuovo.confronta(Alberi.this, cassetto, true) ) {
-								cassetto.grado = 10; // viene retrocesso
-								Globale.preferenze.salva();
+						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.evidenzia));
+						vistaAlbero.setOnClickListener(v -> {
+							if( !AlberoNuovo.confronta(Alberi.this, tree, true) ) {
+								tree.grade = 10; // viene retrocesso
+								Global.settings.save();
 								aggiornaLista();
 								Toast.makeText(Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG).show();
 							}
 						});
 					} else if ( esaurito ) {
-						vistaAlbero.setBackgroundColor( 0xffdddddd );
-						vistaAlbero.setOnClickListener( v -> {
-							if( !AlberoNuovo.confronta(Alberi.this, cassetto, true) ) {
-								cassetto.grado = 10; // viene retrocesso
-								Globale.preferenze.salva();
+						vistaAlbero.setBackgroundColor(0xffdddddd);
+						vistaAlbero.setOnClickListener(v -> {
+							if( !AlberoNuovo.confronta(Alberi.this, tree, true) ) {
+								tree.grade = 10; // viene retrocesso
+								Global.settings.save();
 								aggiornaLista();
 								Toast.makeText(Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG).show();
 							}
 						});
 					} else {
-						vistaAlbero.setBackgroundColor( Color.TRANSPARENT ); // bisogna dirglielo esplicitamente altrimenti colora a caso
-						vistaAlbero.setOnClickListener( v -> {
+						vistaAlbero.setBackgroundColor(Color.WHITE); // bisogna dirglielo esplicitamente altrimenti colora a caso
+						vistaAlbero.setOnClickListener(v -> {
 							rotella.setVisibility(View.VISIBLE);
-							if( !( Globale.gc != null && idAlbero == Globale.preferenze.idAprendo ) ) // se non è già aperto
-								if( !apriGedcom( idAlbero, true ) ) {
+							if( !(Global.gc != null && treeId == Global.settings.openTree) ) { // se non è già aperto
+								if( !apriGedcom(treeId, true) ) {
 									rotella.setVisibility(View.GONE);
 									return;
 								}
-							startActivity( new Intent( Alberi.this, Principe.class ) );
+							}
+							startActivity(new Intent(Alberi.this, Principal.class));
 						});
 					}
 					vistaAlbero.findViewById(R.id.albero_menu).setOnClickListener( vista -> {
-						boolean esiste = new File( getFilesDir(), idAlbero + ".json" ).exists();
+						boolean esiste = new File( getFilesDir(), treeId + ".json" ).exists();
 						PopupMenu popup = new PopupMenu( Alberi.this, vista );
 						Menu menu = popup.getMenu();
-						if( idAlbero == Globale.preferenze.idAprendo && Globale.daSalvare )
-							menu.add(0, -1, 0, R.string.save );
-						if( (Globale.preferenze.esperto && derivato) || (Globale.preferenze.esperto && esaurito) )
-							menu.add(0, 0, 0, R.string.open );
-						if( !esaurito || Globale.preferenze.esperto )
-							menu.add(0, 1, 0, R.string.tree_info );
-						if( (!derivato && !esaurito) || Globale.preferenze.esperto )
-							menu.add(0, 2, 0, R.string.rename );
-						if( esiste && (!derivato || Globale.preferenze.esperto) && !esaurito )
-							menu.add(0, 3, 0, R.string.media_folders );
+						if( treeId == Global.settings.openTree && Global.daSalvare )
+							menu.add(0, -1, 0, R.string.save);
+						if( (Global.settings.expert && derivato) || (Global.settings.expert && esaurito) )
+							menu.add(0, 0, 0, R.string.open);
+						if( !esaurito || Global.settings.expert )
+							menu.add(0, 1, 0, R.string.tree_info);
+						if( (!derivato && !esaurito) || Global.settings.expert )
+							menu.add(0, 2, 0, R.string.rename);
+						if( esiste && (!derivato || Global.settings.expert) && !esaurito )
+							menu.add(0, 3, 0, R.string.media_folders);
 						if( !esaurito )
-							menu.add(0, 4, 0, R.string.find_errors );
+							menu.add(0, 4, 0, R.string.find_errors);
 						if( esiste && !derivato && !esaurito ) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
-							menu.add(0, 5, 0, R.string.share_tree );
-						if( esiste && !derivato && !esaurito && Globale.preferenze.esperto && Globale.preferenze.alberi.size() > 1
-								&& cassetto.condivisioni != null && cassetto.grado != 0 ) // cioè dev'essere 9 o 10
-							menu.add(0, 6, 0, R.string.compare );
-						if( esiste && Globale.preferenze.esperto && !esaurito )
-							menu.add(0, 7, 0, R.string.export_gedcom );
-						if( esiste && Globale.preferenze.esperto )
-							menu.add(0, 8, 0, R.string.make_backup );
-						menu.add(0, 9, 0, R.string.delete );
+							menu.add(0, 5, 0, R.string.share_tree);
+						if( esiste && !derivato && !esaurito && Global.settings.expert && Global.settings.trees.size() > 1
+								&& tree.shares != null && tree.grade != 0 ) // cioè dev'essere 9 o 10
+							menu.add(0, 6, 0, R.string.compare);
+						if( esiste && Global.settings.expert && !esaurito )
+							menu.add(0, 7, 0, R.string.export_gedcom);
+						if( esiste && Global.settings.expert )
+							menu.add(0, 8, 0, R.string.make_backup);
+						menu.add(0, 9, 0, R.string.delete);
 						popup.show();
-						popup.setOnMenuItemClickListener( item -> {
+						popup.setOnMenuItemClickListener(item -> {
 							int id = item.getItemId();
 							if( id == -1 ) { // Salva
-								U.salvaJson( Globale.gc, idAlbero );
-								Globale.daSalvare = false;
+								U.salvaJson(Global.gc, treeId);
+								Global.daSalvare = false;
 							} else if( id == 0 ) { // Apre un albero derivato
-								apriGedcom( idAlbero, true );
-								startActivity( new Intent( Alberi.this, Principe.class ) );
+								apriGedcom(treeId, true);
+								startActivity(new Intent(Alberi.this, Principal.class));
 							} else if( id == 1 ) { // Info Gedcom
-								Intent intento = new Intent( Alberi.this, InfoAlbero.class );
-								intento.putExtra( "idAlbero", idAlbero );
+								Intent intento = new Intent(Alberi.this, InfoAlbero.class);
+								intento.putExtra("idAlbero", treeId);
 								startActivity(intento);
 							} else if( id == 2 ) { // Rinomina albero
-								AlertDialog.Builder builder = new AlertDialog.Builder( Alberi.this );
-								View vistaMessaggio = getLayoutInflater().inflate(R.layout.albero_nomina, vistaLista, false );
-								builder.setView( vistaMessaggio ).setTitle( R.string.title );
-								EditText editaNome = vistaMessaggio.findViewById( R.id.nuovo_nome_albero );
-								editaNome.setText( elencoAlberi.get(posiz).get("titolo") );
-								AlertDialog dialogo = builder.setPositiveButton( R.string.rename, ( dialog, i1 ) -> {
-									Globale.preferenze.rinomina( idAlbero, editaNome.getText().toString() );
+								AlertDialog.Builder builder = new AlertDialog.Builder(Alberi.this);
+								View vistaMessaggio = getLayoutInflater().inflate(R.layout.albero_nomina, vistaLista, false);
+								builder.setView(vistaMessaggio).setTitle(R.string.title);
+								EditText editaNome = vistaMessaggio.findViewById(R.id.nuovo_nome_albero);
+								editaNome.setText(elencoAlberi.get(posiz).get("titolo"));
+								AlertDialog dialogo = builder.setPositiveButton(R.string.rename, (dialog, i1) -> {
+									Global.settings.rinomina(treeId, editaNome.getText().toString());
 									aggiornaLista();
-								}).setNeutralButton( R.string.cancel, null ).create();
-								editaNome.setOnEditorActionListener( (view, action, event) -> {
+								}).setNeutralButton(R.string.cancel, null).create();
+								editaNome.setOnEditorActionListener((view, action, event) -> {
 									if( action == EditorInfo.IME_ACTION_DONE )
 										dialogo.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
 									return false;
@@ -186,23 +199,23 @@ public class Alberi extends AppCompatActivity {
 									inputMethodManager.showSoftInput(editaNome, InputMethodManager.SHOW_IMPLICIT);
 								});
 							} else if( id == 3 ) { // Media folders
-								startActivity( new Intent( Alberi.this, CartelleMedia.class )
-									.putExtra( "idAlbero", idAlbero )
+								startActivity(new Intent(Alberi.this, CartelleMedia.class)
+										.putExtra("idAlbero", treeId)
 								);
 							} else if( id == 4 ) { // Correggi errori
-								findErrors(idAlbero, false);
+								findErrors(treeId, false);
 							} else if( id == 5 ) { // Condividi albero
-								startActivity( new Intent( Alberi.this, Condivisione.class )
-									.putExtra( "idAlbero", idAlbero )
+								startActivity(new Intent(Alberi.this, Condivisione.class)
+										.putExtra("idAlbero", treeId)
 								);
 							} else if( id == 6 ) { // Confronta con alberi esistenti
-								if( AlberoNuovo.confronta(Alberi.this, cassetto, false) ) {
-									cassetto.grado = 20;
+								if( AlberoNuovo.confronta(Alberi.this, tree, false) ) {
+									tree.grade = 20;
 									aggiornaLista();
 								} else
 									Toast.makeText(Alberi.this, R.string.no_results, Toast.LENGTH_LONG).show();
 							} else if( id == 7 ) { // Esporta Gedcom
-								if( esportatore.apriAlbero(idAlbero) ) {
+								if( esportatore.apriAlbero(treeId) ) {
 									String mime = "application/octet-stream";
 									String ext = "ged";
 									int code = 636;
@@ -211,17 +224,17 @@ public class Alberi extends AppCompatActivity {
 										ext = "zip";
 										code = 6219;
 									}
-									F.salvaDocumento(Alberi.this, null, idAlbero, mime, ext, code);
+									F.salvaDocumento(Alberi.this, null, treeId, mime, ext, code);
 								}
 							} else if( id == 8 ) { // Fai backup
-								if( esportatore.apriAlbero(idAlbero) )
-									F.salvaDocumento(Alberi.this, null, idAlbero, "application/zip", "zip", 327);
+								if( esportatore.apriAlbero(treeId) )
+									F.salvaDocumento(Alberi.this, null, treeId, "application/zip", "zip", 327);
 							} else if( id == 9 ) {	// Elimina albero
-								new AlertDialog.Builder( Alberi.this ).setMessage( R.string.really_delete_tree )
-										.setPositiveButton( R.string.delete, ( dialog, id1 ) -> {
-											eliminaAlbero( Alberi.this, idAlbero );
+								new AlertDialog.Builder(Alberi.this).setMessage(R.string.really_delete_tree)
+										.setPositiveButton(R.string.delete, (dialog, id1) -> {
+											deleteTree(Alberi.this, treeId);
 											aggiornaLista();
-										}).setNeutralButton( R.string.cancel, null ).show();
+										}).setNeutralButton(R.string.cancel, null).show();
 							} else {
 								return false;
 							}
@@ -237,27 +250,29 @@ public class Alberi extends AppCompatActivity {
 
 		// Barra personalizzata
 		ActionBar barra = getSupportActionBar();
-		View barraAlberi = getLayoutInflater().inflate( R.layout.alberi_barra, null );
-		barraAlberi.findViewById( R.id.alberi_opzioni ).setOnClickListener( v -> startActivity(
-				new Intent( Alberi.this, Opzioni.class) )
+		View barraAlberi = getLayoutInflater().inflate(R.layout.alberi_barra, null);
+		barraAlberi.findViewById(R.id.alberi_opzioni).setOnClickListener(v -> startActivity(
+				new Intent(Alberi.this, Opzioni.class))
 		);
-		barra.setCustomView( barraAlberi );
-		barra.setDisplayShowCustomEnabled( true );
+		barra.setCustomView(barraAlberi);
+		barra.setDisplayShowCustomEnabled(true);
 
 		// FAB
-		findViewById(R.id.fab).setOnClickListener( v -> {
+		findViewById(R.id.fab).setOnClickListener(v -> {
 			welcome.hide();
-			startActivity( new Intent(Alberi.this, AlberoNuovo.class) );
+			startActivity(new Intent(Alberi.this, AlberoNuovo.class));
 		});
 
-		// Apertura automatica dell'albero
-		if( getIntent().getBooleanExtra("apriAlberoAutomaticamente",false) && Globale.preferenze.idAprendo > 0 ) {
-			vistaLista.postDelayed(() -> {
-				if( Alberi.apriGedcom( Globale.preferenze.idAprendo, false ) ) {
-					rotella.setVisibility( View.VISIBLE );
-					startActivity( new Intent( Alberi.this, Principe.class ) );
+		// Automatic load of last opened tree of previous session
+		if( !birthdayNotifyTapped(getIntent()) && !autoOpenedTree
+				&& getIntent().getBooleanExtra("apriAlberoAutomaticamente", false) && Global.settings.openTree > 0 ) {
+			vistaLista.post(() -> {
+				if( Alberi.apriGedcom(Global.settings.openTree, false) ) {
+					rotella.setVisibility(View.VISIBLE);
+					autoOpenedTree = true;
+					startActivity(new Intent(this, Principal.class));
 				}
-			},100);
+			});
 		}
 	}
 
@@ -265,7 +280,7 @@ public class Alberi extends AppCompatActivity {
 	protected void onResume() {
 		super.onResume();
 		// Nasconde la rotella, in particolare quando si ritorna indietro a questa activity
-		rotella.setVisibility( View.GONE );
+		rotella.setVisibility(View.GONE);
 	}
 
 	// Essendo Alberi launchMode=singleTask, onRestart viene chiamato anche con startActivity (tranne il primo)
@@ -274,6 +289,38 @@ public class Alberi extends AppCompatActivity {
 	protected void onRestart() {
 		super.onRestart();
 		aggiornaLista();
+	}
+
+	// New intent coming from a tapped notification
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		birthdayNotifyTapped(intent);
+	}
+
+	@Override
+	protected void onSaveInstanceState(@NonNull Bundle outState) {
+		outState.putBoolean("autoOpenedTree", autoOpenedTree);
+		outState.putIntegerArrayList("consumedNotifications", consumedNotifications);
+		super.onSaveInstanceState(outState);
+	}
+
+	// If a birthday notification was tapped loads the relative tree and returns true
+	private boolean birthdayNotifyTapped(Intent intent) {
+		int treeId = intent.getIntExtra(Notifier.TREE_ID_KEY, 0);
+		int notifyId = intent.getIntExtra(Notifier.NOTIFY_ID_KEY, 0);
+		if( treeId > 0 && !consumedNotifications.contains(notifyId)) {
+			new Handler().post(() -> {
+				if( Alberi.apriGedcom(treeId, true) ) {
+					rotella.setVisibility(View.VISIBLE);
+					Global.indi = intent.getStringExtra(Notifier.INDI_ID_KEY);
+					consumedNotifications.add(notifyId);
+					startActivity(new Intent(this, Principal.class));
+				}
+			});
+			return true;
+		}
+		return false;
 	}
 
 	// Cerca di recuperare dal Play Store il dataID casomai l'app sia stata installata in seguito ad una condivisione
@@ -290,8 +337,8 @@ public class Alberi extends AppCompatActivity {
 							// Normalmente 'referrer' è una stringa tipo 'utm_source=google-play&utm_medium=organic'
 							// Ma se l'app è stata installata dal link nella pagina di condivisione sarà un data-id come '20191003215337'
 							String referrer = dettagli.getInstallReferrer();
-							if( referrer != null && referrer.matches("[0-9]{14}") ) { // È un data-id
-								Globale.preferenze.referrer = referrer;
+							if( referrer != null && referrer.matches("[0-9]{14}") ) { // It's a dateId
+								Global.settings.referrer = referrer;
 								new AlertDialog.Builder( Alberi.this ).setTitle( R.string.a_new_tree )
 										.setMessage( R.string.you_can_download )
 										.setPositiveButton( R.string.download, (dialog, id) -> {
@@ -299,10 +346,10 @@ public class Alberi extends AppCompatActivity {
 										}).setNeutralButton( R.string.cancel, (di, id) -> welcome.show() )
 										.setOnCancelListener( d -> welcome.show() ).show();
 							} else { // È qualunque altra cosa
-								Globale.preferenze.referrer = null; // lo annulla così non lo cercherà più
+								Global.settings.referrer = null; // lo annulla così non lo cercherà più
 								welcome.show();
 							}
-							Globale.preferenze.salva();
+							Global.settings.save();
 							irc.endConnection();
 						} catch( Exception e ) {
 							U.tosta( Alberi.this, e.getLocalizedMessage() );
@@ -312,8 +359,8 @@ public class Alberi extends AppCompatActivity {
 					case InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED:
 					// Questo non l'ho mai visto comparire
 					case InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE:
-						Globale.preferenze.referrer = null; // così non torniamo più qui
-						Globale.preferenze.salva();
+						Global.settings.referrer = null; // così non torniamo più qui
+						Global.settings.save();
 						welcome.show();
 				}
 			}
@@ -327,105 +374,114 @@ public class Alberi extends AppCompatActivity {
 
 	void aggiornaLista() {
 		elencoAlberi.clear();
-		for( Armadio.Cassetto alb : Globale.preferenze.alberi ) {
-			Map<String,String> dato = new HashMap<>(3);
-			dato.put( "id", String.valueOf( alb.id ) );
-			dato.put( "titolo", alb.nome );
+		for( Settings.Tree alb : Global.settings.trees ) {
+			Map<String, String> dato = new HashMap<>(3);
+			dato.put("id", String.valueOf(alb.id));
+			dato.put("titolo", alb.title);
 			// Se Gedcom già aperto aggiorna i dati
-			if( Globale.gc != null && Globale.preferenze.idAprendo == alb.id && alb.individui < 100 )
-				InfoAlbero.aggiornaDati( Globale.gc, alb );
-			dato.put( "dati", scriviDati( this, alb ) );
-			elencoAlberi.add( dato );
+			if( Global.gc != null && Global.settings.openTree == alb.id && alb.persons < 100 )
+				InfoAlbero.refreshData(Global.gc, alb);
+			dato.put("dati", scriviDati(this, alb));
+			elencoAlberi.add(dato);
 		}
 		adapter.notifyDataSetChanged();
 	}
 
-	static String scriviDati( Context contesto, Armadio.Cassetto alb ) {
-		String dati = alb.individui + " " +
-				contesto.getString(alb.individui == 1 ? R.string.person : R.string.persons).toLowerCase();
-		if( alb.individui > 1 && alb.generazioni > 0 )
-			dati += " - " + alb.generazioni + " " +
-					contesto.getString(alb.generazioni == 1 ? R.string.generation : R.string.generations).toLowerCase();
+	static String scriviDati(Context contesto, Settings.Tree alb) {
+		String dati = alb.persons + " " +
+				contesto.getString(alb.persons == 1 ? R.string.person : R.string.persons).toLowerCase();
+		if( alb.persons > 1 && alb.generations > 0 )
+			dati += " - " + alb.generations + " " +
+					contesto.getString(alb.generations == 1 ? R.string.generation : R.string.generations).toLowerCase();
 		if( alb.media > 0 )
 			dati += " - " + alb.media + " " + contesto.getString(R.string.media).toLowerCase();
 		return dati;
 	}
 
 	// Apertura del Gedcom temporaneo per estrarne info in Alberi
-	static Gedcom apriGedcomTemporaneo( int idAlbero, boolean mettiInGlobale ) {
+	static Gedcom apriGedcomTemporaneo(int idAlbero, boolean mettiInGlobale) {
 		Gedcom gc;
-		if( Globale.gc != null && Globale.preferenze.idAprendo == idAlbero )
-			gc = Globale.gc;
+		if( Global.gc != null && Global.settings.openTree == idAlbero )
+			gc = Global.gc;
 		else {
-			gc = leggiJson( idAlbero );
+			gc = leggiJson(idAlbero);
 			if( mettiInGlobale ) {
-				Globale.gc = gc; // per poter usare ad esempio U.unaFoto()
-				Globale.preferenze.idAprendo = idAlbero; // così Globale.gc e Globale.preferenze.idAprendo sono sincronizzati
+				Global.gc = gc; // per poter usare ad esempio U.unaFoto()
+				Global.settings.openTree = idAlbero; // così Global.gc e Global.preferenze.idAprendo sono sincronizzati
 			}
 		}
 		return gc;
 	}
 
 	// Apertura del Gedcom per editare tutto in Family Gem
-	static boolean apriGedcom( int idAlbero, boolean salvaPreferenze ) {
-		Globale.gc = leggiJson(idAlbero);
-		if( Globale.gc == null )
+	static boolean apriGedcom(int idAlbero, boolean salvaPreferenze) {
+		Global.gc = leggiJson(idAlbero);
+		if( Global.gc == null )
 			return false;
 		if( salvaPreferenze ) {
-			Globale.preferenze.idAprendo = idAlbero;
-			Globale.preferenze.salva();
+			Global.settings.openTree = idAlbero;
+			Global.settings.save();
 		}
-		Globale.individuo = Globale.preferenze.alberoAperto().radice;
-		Globale.numFamiglia = 0; // eventualmente lo resetta se era > 0
-		Globale.daSalvare = false; // eventualmente lo resetta se era true
+		Global.indi = Global.settings.getCurrentTree().root;
+		Global.familyNum = 0; // eventualmente lo resetta se era > 0
+		Global.daSalvare = false; // eventualmente lo resetta se era true
 		return true;
 	}
 
 	// Legge il Json e restituisce un Gedcom
 	static Gedcom leggiJson(int treeId) {
-		Gedcom gc;
+		Gedcom gedcom;
+		File file = new File(Global.context.getFilesDir(), treeId + ".json");
+		StringBuilder text = new StringBuilder();
 		try {
-			String json = FileUtils.readFileToString(new File(Globale.contesto.getFilesDir(), treeId + ".json"), "UTF-8");
-			json = update(json);
-			gc = new JsonParser().fromJson(json);
-		} catch( Exception e ) {
-			Toast.makeText(Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line;
+			while( (line = br.readLine()) != null ) {
+				text.append(line);
+				text.append('\n');
+			}
+			br.close();
+		} catch( Exception | Error e ) {
+			String message = e instanceof OutOfMemoryError ? Global.context.getString(R.string.not_memory_tree) : e.getLocalizedMessage();
+			Toast.makeText(Global.context, message, Toast.LENGTH_LONG).show();
 			return null;
 		}
-		if( gc == null ) {
-			Toast.makeText(Globale.contesto, R.string.no_useful_data, Toast.LENGTH_LONG).show();
+		String json = text.toString();
+		json = updateLanguage(json);
+		gedcom = new JsonParser().fromJson(json);
+		if( gedcom == null ) {
+			Toast.makeText(Global.context, R.string.no_useful_data, Toast.LENGTH_LONG).show();
 			return null;
 		}
-		return gc;
+		return gedcom;
 	}
 
 	// Replace Italian with English in Json tree data
 	// Introduced in Family Gem 0.8
-	static String update(String json) {
-		if( json.indexOf("\"zona\":") > 0 ) {
-			json = json.replaceAll("\"zona\":", "\"zone\":");
-		}
-		if( json.indexOf("\"famili\":") > 0 ) {
-			json = json.replaceAll("\"famili\":", "\"kin\":");
-		}
+	static String updateLanguage(String json) {
+		json = json.replace("\"zona\":", "\"zone\":");
+		json = json.replace("\"famili\":", "\"kin\":");
+		json = json.replace("\"passato\":", "\"passed\":");
 		return json;
 	}
 
-	static void eliminaAlbero( Context contesto, int idAlbero ) {
-		File file = new File( contesto.getFilesDir(), idAlbero + ".json");
-		file.delete();
-		File cartella = contesto.getExternalFilesDir( String.valueOf(idAlbero) );
-		eliminaFileCartelle( cartella );
-		if( Globale.preferenze.idAprendo == idAlbero ) {
-			Globale.gc = null;
+	static void deleteTree(Context context, int treeId) {
+		File treeFile = new File(context.getFilesDir(), treeId + ".json");
+		treeFile.delete();
+		File mediaDir = context.getExternalFilesDir(String.valueOf(treeId));
+		deleteFilesAndDirs(mediaDir);
+		if( Global.settings.openTree == treeId ) {
+			Global.gc = null;
 		}
-		Globale.preferenze.elimina( idAlbero );
+		Global.settings.deleteTree(treeId);
+		WorkManager.getInstance(context).cancelAllWorkByTag(Notifier.WORK_TAG + treeId);
 	}
 
-	static void eliminaFileCartelle( File fileOrDirectory ) {
-		if( fileOrDirectory.isDirectory() )
+	static void deleteFilesAndDirs(File fileOrDirectory) {
+		if( fileOrDirectory.isDirectory() ) {
 			for( File child : fileOrDirectory.listFiles() )
-				eliminaFileCartelle( child );
+				deleteFilesAndDirs(child);
+		}
 		fileOrDirectory.delete();
 	}
 
@@ -456,68 +512,58 @@ public class Alberi extends AppCompatActivity {
 		return true;
 	}
 
-	Gedcom findErrors( final int idAlbero, final boolean correggi ) {
-		Gedcom gc = leggiJson( idAlbero );
+	Gedcom findErrors(final int treeId, final boolean correct) {
+		Gedcom gc = leggiJson(treeId);
 		if( gc == null ) {
 			// todo fai qualcosa per recuperare un file introvabile..?
 			return null;
 		}
-		int errori = 0;
+		int errors = 0;
 		int num;
 		// Radice in preferenze
-		Armadio.Cassetto albero = Globale.preferenze.getAlbero( idAlbero );
-		Person radica = gc.getPerson( albero.radice );
+		Settings.Tree albero = Global.settings.getTree(treeId);
+		Person radica = gc.getPerson(albero.root);
 		// Radice punta ad una persona inesistente
-		if( albero.radice != null && radica == null ) {
+		if( albero.root != null && radica == null ) {
 			if( !gc.getPeople().isEmpty() ) {
-				if( correggi ) {
-					albero.radice = U.trovaRadice( gc );
-					Globale.preferenze.salva();
-				} else errori++;
+				if( correct ) {
+					albero.root = U.trovaRadice(gc);
+					Global.settings.save();
+				} else errors++;
 			} else { // albero senza persone
-				if( correggi ) {
-					albero.radice = null;
-					Globale.preferenze.salva();
-				} else errori++;
+				if( correct ) {
+					albero.root = null;
+					Global.settings.save();
+				} else errors++;
 			}
 		}
 		// Oppure non è indicata una radice in preferenze pur essendoci persone nell'albero
 		if( radica == null && !gc.getPeople().isEmpty() ) {
-			if( correggi ) {
-				albero.radice = U.trovaRadice( gc );
-				Globale.preferenze.salva();
-			} else errori++;
+			if( correct ) {
+				albero.root = U.trovaRadice(gc);
+				Global.settings.save();
+			} else errors++;
 		}
 		// O in preferenze è indicata una radiceCondivisione che non esiste
-		Person radicaCondivisa = gc.getPerson( albero.radiceCondivisione );
-		if( albero.radiceCondivisione != null && radicaCondivisa == null ) {
-			if( correggi ) {
-				albero.radiceCondivisione = null; // la elimina e basta
-				Globale.preferenze.salva();
-			} else errori++;
+		Person radicaCondivisa = gc.getPerson(albero.shareRoot);
+		if( albero.shareRoot != null && radicaCondivisa == null ) {
+			if( correct ) {
+				albero.shareRoot = null; // la elimina e basta
+				Global.settings.save();
+			} else errors++;
 		}
 		// Cerca famiglie vuote o con un solo membro per eliminarle
 		for( Family f : gc.getFamilies() ) {
-			num = 0;
-			for( SpouseRef sr : f.getHusbandRefs() ) {
-				num++;
-			}
-			for( SpouseRef sr : f.getWifeRefs() ) {
-				num++;
-			}
-			for( ChildRef cr : f.getChildRefs() ) {
-				num++;
-			}
-			if( num < 2 ) {
-				if( correggi ) {
+			if( f.getHusbandRefs().size() + f.getWifeRefs().size() + f.getChildRefs().size() <= 1 ) {
+				if( correct ) {
 					gc.getFamilies().remove(f); // così facendo lasci i ref negli individui orfani della famiglia a cui si riferiscono...
 					// ma c'è il resto del correttore che li risolve
 					break;
-				} else errori++;
+				} else errors++;
 			}
 		}
 		// Silently delete empty list of families
-		if( gc.getFamilies().isEmpty() && correggi ) {
+		if( gc.getFamilies().isEmpty() && correct ) {
 			gc.setFamilies(null);
 		}
 		// Riferimenti da una persona alla famiglia dei genitori e dei figli
@@ -525,83 +571,83 @@ public class Alberi extends AppCompatActivity {
 			for( ParentFamilyRef pfr : p.getParentFamilyRefs() ) {
 				Family fam = gc.getFamily( pfr.getRef() );
 				if( fam == null ) {
-					if( correggi ) {
+					if( correct ) {
 						p.getParentFamilyRefs().remove( pfr );
 						break;
-					} else errori++;
+					} else errors++;
 				} else {
 					num = 0;
 					for( ChildRef cr : fam.getChildRefs() )
 						if( cr.getRef() == null ) {
-							if( correggi ) {
+							if( correct ) {
 								fam.getChildRefs().remove(cr);
 								break;
-							} else errori++;
+							} else errors++;
 						} else if( cr.getRef().equals(p.getId()) ) {
 							num++;
-							if( num > 1 && correggi ) {
+							if( num > 1 && correct ) {
 								fam.getChildRefs().remove( cr );
 								break;
 							}
 						}
 					if( num != 1 ) {
-						if( correggi && num == 0 ) {
+						if( correct && num == 0 ) {
 							p.getParentFamilyRefs().remove( pfr );
 							break;
-						} else errori++;
+						} else errors++;
 					}
 				}
 			}
 			// Remove empty list of parent family refs
-			if( p.getParentFamilyRefs().isEmpty() && correggi ) {
+			if( p.getParentFamilyRefs().isEmpty() && correct ) {
 				p.setParentFamilyRefs(null);
 			}
 			for( SpouseFamilyRef sfr : p.getSpouseFamilyRefs() ) {
 				Family fam = gc.getFamily(sfr.getRef());
 				if( fam == null ) {
-					if( correggi ) {
+					if( correct ) {
 						p.getSpouseFamilyRefs().remove(sfr);
 						break;
-					} else errori++;
+					} else errors++;
 				} else {
 					num = 0;
 					for( SpouseRef sr : fam.getHusbandRefs() )
 						if( sr.getRef() == null ) {
-							if( correggi ) {
+							if( correct ) {
 								fam.getHusbandRefs().remove(sr);
 								break;
-							} else errori++;
+							} else errors++;
 						} else if( sr.getRef().equals(p.getId()) ) {
 							num++;
-							if( num > 1 && correggi ) {
+							if( num > 1 && correct ) {
 								fam.getHusbandRefs().remove(sr);
 								break;
 							}
 						}
 					for( SpouseRef sr : fam.getWifeRefs() ) {
 						if( sr.getRef() == null ) {
-							if( correggi ) {
+							if( correct ) {
 								fam.getWifeRefs().remove(sr);
 								break;
-							} else errori++;
+							} else errors++;
 						} else if( sr.getRef().equals(p.getId()) ) {
 							num++;
-							if( num > 1 && correggi ) {
+							if( num > 1 && correct ) {
 								fam.getWifeRefs().remove(sr);
 								break;
 							}
 						}
 					}
 					if( num != 1 ) {
-						if( num == 0 && correggi ) {
+						if( num == 0 && correct ) {
 							p.getSpouseFamilyRefs().remove(sfr);
 							break;
-						} else errori++;
+						} else errors++;
 					}
 				}
 			}
 			// Remove empty list of spouse family refs
-			if( p.getSpouseFamilyRefs().isEmpty() && correggi ) {
+			if( p.getSpouseFamilyRefs().isEmpty() && correct ) {
 				p.setSpouseFamilyRefs(null);
 			}
 			// Riferimenti a Media inesistenti
@@ -610,18 +656,18 @@ public class Alberi extends AppCompatActivity {
 			for( MediaRef mr : p.getMediaRefs() ) {
 				Media med = gc.getMedia( mr.getRef() );
 				if( med == null ) {
-					if( correggi ) {
+					if( correct ) {
 						p.getMediaRefs().remove( mr );
 						break;
-					} else errori++;
+					} else errors++;
 				} else {
 					if( mr.getRef().equals( med.getId() ) ) {
 						num++;
 						if( num > 1 )
-							if( correggi ) {
+							if( correct ) {
 								p.getMediaRefs().remove( mr );
 								break;
-							} else errori++;
+							} else errors++;
 					}
 				}
 			}
@@ -632,106 +678,106 @@ public class Alberi extends AppCompatActivity {
 			for( SpouseRef sr : f.getHusbandRefs() ) {
 				Person husband = gc.getPerson(sr.getRef());
 				if( husband == null ) {
-					if( correggi ) {
+					if( correct ) {
 						f.getHusbandRefs().remove(sr);
 						break;
-					} else errori++;
+					} else errors++;
 				} else {
 					num = 0;
 					for( SpouseFamilyRef sfr : husband.getSpouseFamilyRefs() )
 						if( sfr.getRef() == null ) {
-							if( correggi ) {
+							if( correct ) {
 								husband.getSpouseFamilyRefs().remove(sfr);
 								break;
-							} else errori++;
+							} else errors++;
 						} else if( sfr.getRef().equals(f.getId()) ) {
 							num++;
-							if( num > 1 && correggi ) {
+							if( num > 1 && correct ) {
 								husband.getSpouseFamilyRefs().remove(sfr);
 								break;
 							}
 						}
 					if( num != 1 ) {
-						if( num == 0 && correggi ) {
+						if( num == 0 && correct ) {
 							f.getHusbandRefs().remove(sr);
 							break;
-						} else errori++;
+						} else errors++;
 					}
 
 				}
 			}
 			// Remove empty list of husband refs
-			if( f.getHusbandRefs().isEmpty() && correggi ) {
+			if( f.getHusbandRefs().isEmpty() && correct ) {
 				f.setHusbandRefs(null);
 			}
 			// Wives refs
 			for( SpouseRef sr : f.getWifeRefs() ) {
 				Person wife = gc.getPerson(sr.getRef());
 				if( wife == null ) {
-					if( correggi ) {
+					if( correct ) {
 						f.getWifeRefs().remove(sr);
 						break;
-					} else errori++;
+					} else errors++;
 				} else {
 					num = 0;
 					for( SpouseFamilyRef sfr : wife.getSpouseFamilyRefs() )
 						if( sfr.getRef() == null ) {
-							if( correggi ) {
+							if( correct ) {
 								wife.getSpouseFamilyRefs().remove(sfr);
 								break;
-							} else errori++;
+							} else errors++;
 						} else if( sfr.getRef().equals(f.getId()) ) {
 							num++;
-							if( num > 1 && correggi ) {
+							if( num > 1 && correct ) {
 								wife.getSpouseFamilyRefs().remove(sfr);
 								break;
 							}
 						}
 					if( num != 1 ) {
-						if( num == 0 && correggi ) {
+						if( num == 0 && correct ) {
 							f.getWifeRefs().remove(sr);
 							break;
-						} else errori++;
+						} else errors++;
 					}
 				}
 			}
 			// Remove empty list of wife refs
-			if( f.getWifeRefs().isEmpty() && correggi ) {
+			if( f.getWifeRefs().isEmpty() && correct ) {
 				f.setWifeRefs(null);
 			}
 			// Children refs
 			for( ChildRef cr : f.getChildRefs() ) {
 				Person child = gc.getPerson( cr.getRef() );
 				if( child == null ) {
-					if( correggi ) {
+					if( correct ) {
 						f.getChildRefs().remove( cr );
 						break;
-					} else errori++;
+					} else errors++;
 				} else {
 					num = 0;
 					for( ParentFamilyRef pfr : child.getParentFamilyRefs() )
 						if( pfr.getRef() == null ) {
-							if( correggi ) {
+							if( correct ) {
 								child.getParentFamilyRefs().remove(pfr);
 								break;
-							} else errori++;
+							} else errors++;
 						} else if( pfr.getRef().equals(f.getId()) ) {
 							num++;
-							if( num > 1 && correggi ) {
+							if( num > 1 && correct ) {
 								child.getParentFamilyRefs().remove(pfr);
 								break;
 							}
 						}
 					if( num != 1 ) {
-						if( num == 0 && correggi ) {
+						if( num == 0 && correct ) {
 							f.getChildRefs().remove(cr);
 							break;
-						} else errori++;
+						} else errors++;
 					}
 				}
 			}
 			// Remove empty list of child refs
-			if( f.getChildRefs().isEmpty() && correggi ) {
+			if( f.getChildRefs().isEmpty() && correct ) {
 				f.setChildRefs(null);
 			}
 		}
@@ -740,8 +786,8 @@ public class Alberi extends AppCompatActivity {
 		for( Person person : gc.getPeople() ) {
 			for( Name name : person.getNames() ) {
 				if( name.getType() != null && name.getTypeTag() == null ) {
-					if( correggi ) name.setTypeTag("TYPE");
-					else errori++;
+					if( correct ) name.setTypeTag("TYPE");
+					else errors++;
 				}
 			}
 		}
@@ -751,25 +797,25 @@ public class Alberi extends AppCompatActivity {
 		gc.accept(visitaMedia);
 		for( Media med : visitaMedia.lista ) {
 			if( med.getFileTag() == null ) {
-				if( correggi ) med.setFileTag("FILE");
-				else errori++;
+				if( correct ) med.setFileTag("FILE");
+				else errors++;
 			}
 		}
 
-		if( !correggi ) {
-			AlertDialog.Builder dialog = new AlertDialog.Builder( this );
-			dialog.setMessage( errori==0 ? getText(R.string.all_ok) : getString(R.string.errors_found,errori) );
-			if( errori > 0 ) {
+		if( !correct ) {
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+			dialog.setMessage(errors == 0 ? getText(R.string.all_ok) : getString(R.string.errors_found, errors));
+			if( errors > 0 ) {
 				dialog.setPositiveButton(R.string.correct, (dialogo, i) -> {
 					dialogo.cancel();
-					Gedcom gcCorretto = findErrors(idAlbero, true);
-					U.salvaJson(gcCorretto, idAlbero);
-					Globale.gc = null; // così se era aperto poi lo ricarica corretto
-					findErrors(idAlbero, false);    // riapre per ammirere il risultato
+					Gedcom gcCorretto = findErrors(treeId, true);
+					U.salvaJson(gcCorretto, treeId);
+					Global.gc = null; // così se era aperto poi lo ricarica corretto
+					findErrors(treeId, false);    // riapre per ammirere il risultato
 					aggiornaLista();
 				});
 			}
-			dialog.setNeutralButton( android.R.string.cancel, null ).show();
+			dialog.setNeutralButton(android.R.string.cancel, null).show();
 		}
 		return gc;
 	}

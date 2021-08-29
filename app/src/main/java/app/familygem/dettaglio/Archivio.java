@@ -5,7 +5,7 @@ import org.folg.gedcom.model.Source;
 import java.util.ArrayList;
 import java.util.List;
 import app.familygem.Dettaglio;
-import app.familygem.Globale;
+import app.familygem.Global;
 import app.familygem.Magazzino;
 import app.familygem.R;
 import app.familygem.U;
@@ -33,7 +33,7 @@ public class Archivio extends Dettaglio {
 
 		// Raccoglie e mostra le fonti che citano questo Repository
 		List<Source> fontiCitanti = new ArrayList<>();
-		for( Source fonte : Globale.gc.getSources() )
+		for( Source fonte : Global.gc.getSources() )
 			if( fonte.getRepositoryRef() != null && fonte.getRepositoryRef().getRef() != null
 					&& fonte.getRepositoryRef().getRef().equals(a.getId()) )
 				fontiCitanti.add( fonte );

@@ -16,7 +16,7 @@ import org.folg.gedcom.model.Visitor;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import app.familygem.F;
-import app.familygem.Globale;
+import app.familygem.Global;
 
 public class ListaMedia extends Visitor {
 
@@ -28,30 +28,30 @@ public class ListaMedia extends Visitor {
 		3 condivisi e locali ma solo immagini e video anteprimabili	(per il menu principale) */
 	private int cosaVuoi;
 
-	public ListaMedia( Gedcom gc, int cosaVuoi ) {
+	public ListaMedia(Gedcom gc, int cosaVuoi) {
 		this.gc = gc;
 		this.cosaVuoi = cosaVuoi;
 	}
 
-	private boolean visita( Object oggetto ) {
+	private boolean visita(Object oggetto) {
 		if( oggetto instanceof MediaContainer ) {
-			MediaContainer contenitore = (MediaContainer) oggetto;
+			MediaContainer contenitore = (MediaContainer)oggetto;
 			if( cosaVuoi == 0 )
-				lista.addAll( contenitore.getAllMedia(gc) ); // aggiunge media condivisi e locali
+				lista.addAll(contenitore.getAllMedia(gc)); // aggiunge media condivisi e locali
 			else if( cosaVuoi == 2 )
-				lista.addAll( contenitore.getMedia() ); // solo i media locali
+				lista.addAll(contenitore.getMedia()); // solo i media locali
 			else if( cosaVuoi == 3 )
 				for( Media med : contenitore.getAllMedia(gc) )
-					filtra( med );
+					filtra(med);
 		}
 		return true;
 	}
 
 	// Aggiunge solo quelli presunti bellini con anteprima
-	private void filtra( Media media ) {
-		String file = F.percorsoMedia( Globale.preferenze.idAprendo, media); // todo e le immagini dagli URI?
+	private void filtra(Media media) {
+		String file = F.percorsoMedia(Global.settings.openTree, media); // todo e le immagini dagli URI?
 		if( file != null && file.lastIndexOf('.') > 0 ) {
-			String estensione = file.substring( file.lastIndexOf('.')+1 );
+			String estensione = file.substring(file.lastIndexOf('.') + 1);
 			switch( estensione ) {
 				case "jpg":
 				case "jpeg":
@@ -65,43 +65,42 @@ public class ListaMedia extends Visitor {
 				case "3gp": // ok
 				case "webm": // ok
 				case "mkv": // ok
-					lista.add( media );
+					lista.add(media);
 			}
 		}
-
 	}
 
 	@Override
-	public boolean visit( Gedcom gc ) {
+	public boolean visit(Gedcom gc) {
 		if( cosaVuoi < 2 )
-			lista.addAll( gc.getMedia() ); // rastrella tutti gli oggetti media condivisi del Gedcom
+			lista.addAll(gc.getMedia()); // rastrella tutti gli oggetti media condivisi del Gedcom
 		else if( cosaVuoi == 3 )
 			for( Media med : gc.getMedia() )
 				filtra(med);
 		return true;
 	}
 	@Override
-	public boolean visit( Person p ) {
-		return visita( p );
+	public boolean visit(Person p) {
+		return visita(p);
 	}
 	@Override
-	public boolean visit( Family f ) {
-		return visita( f );
+	public boolean visit(Family f) {
+		return visita(f);
 	}
 	@Override
-	public boolean visit( EventFact e ) {
-		return visita( e );
+	public boolean visit(EventFact e) {
+		return visita(e);
 	}
 	@Override
-	public boolean visit( Name n ) {
-		return visita( n );
+	public boolean visit(Name n) {
+		return visita(n);
 	}
 	@Override
-	public boolean visit( SourceCitation c ) {
-		return visita( c );
+	public boolean visit(SourceCitation c) {
+		return visita(c);
 	}
 	@Override
-	public boolean visit( Source s ) {
-		return visita( s );
+	public boolean visit(Source s) {
+		return visita(s);
 	}
 }

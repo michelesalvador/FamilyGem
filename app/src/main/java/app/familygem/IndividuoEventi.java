@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.FragmentManager;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -31,7 +32,7 @@ import java.util.Map;
 import app.familygem.constants.Gender;
 import app.familygem.dettaglio.Evento;
 import app.familygem.dettaglio.Nome;
-import static app.familygem.Globale.gc;
+import static app.familygem.Global.gc;
 
 public class IndividuoEventi extends Fragment {
 
@@ -39,35 +40,36 @@ public class IndividuoEventi extends Fragment {
 	private View vistaCambi;
 
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View vistaEventi = inflater.inflate( R.layout.individuo_scheda, container, false);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View vistaEventi = inflater.inflate(R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
-			LinearLayout scatola = vistaEventi.findViewById( R.id.contenuto_scheda );
-			uno = gc.getPerson( Globale.individuo );
+			LinearLayout scatola = vistaEventi.findViewById(R.id.contenuto_scheda);
+			uno = gc.getPerson(Global.indi);
 			if( uno != null ) {
 				for( Name nome : uno.getNames()) {
 					String tit = getString(R.string.name);
-					if( nome.getType() != null && !nome.getType().isEmpty() )
-						tit += " (" + U.tipoNomeTradotto(nome.getType()).toLowerCase() + ")";
-					piazzaEvento( scatola, tit, U.nomeCognome(nome), nome );
+					if( nome.getType() != null && !nome.getType().isEmpty() ) {
+						tit += " (" + TypeView.getTranslatedType(nome.getType(), TypeView.Combo.NAME) + ")";
+					}
+					piazzaEvento(scatola, tit, U.nomeCognome(nome), nome);
 				}
 				for (EventFact fatto : uno.getEventsFacts() ) {
-					String tst = "";
+					String txt = "";
 					if( fatto.getValue() != null ) {
 						if( fatto.getValue().equals("Y") && fatto.getTag()!=null &&
 								( fatto.getTag().equals("BIRT") || fatto.getTag().equals("CHR") || fatto.getTag().equals("DEAT") ) )
-							tst = getString(R.string.yes);
-						else tst = fatto.getValue();
-						tst += "\n";
+							txt = getString(R.string.yes);
+						else txt = fatto.getValue();
+						txt += "\n";
 					}
-					if( fatto.getType() != null )	tst += fatto.getType() + "\n";
-					if( fatto.getDate() != null ) 	tst += fatto.getDate() + "\n";
-					if( fatto.getPlace() != null )	tst += fatto.getPlace() + "\n";
+					//if( fatto.getType() != null ) txt += fatto.getType() + "\n"; // Included in event title
+					if( fatto.getDate() != null ) txt += new Datatore(fatto.getDate()).writeDateLong() + "\n";
+					if( fatto.getPlace() != null ) txt += fatto.getPlace() + "\n";
 					Address indirizzo = fatto.getAddress();
-					if( indirizzo != null )	tst += Dettaglio.indirizzo(indirizzo) + "\n";
-					if( fatto.getCause() != null )	tst += fatto.getCause() + "\n";
-					if( tst.endsWith("\n") )	tst = tst.substring( 0, tst.length()-1 );	// Rimuove l'ultimo acapo
-					piazzaEvento( scatola, fatto.getDisplayType(), tst, fatto );
+					if( indirizzo != null ) txt += Dettaglio.writeAddress(indirizzo, true) + "\n";
+					if( fatto.getCause() != null )	txt += fatto.getCause();
+					if( txt.endsWith("\n") ) txt = txt.substring(0, txt.length() - 1); // Rimuove l'ultimo acapo
+					piazzaEvento( scatola, writeEventTitle(fatto), txt, fatto );
 				}
 				for( Estensione est : U.trovaEstensioni( uno ) ) {
 					piazzaEvento( scatola, est.nome, est.testo, est.gedcomTag );
@@ -97,8 +99,31 @@ public class IndividuoEventi extends Fragment {
 		return ricco || suffisso;
 	}
 
+	// Compose the title of an event of the person
+	public static String writeEventTitle(EventFact event) {
+		int str = 0;
+		switch( event.getTag() ) {
+			case "SEX": str = R.string.sex; break;
+			case "BIRT": str = R.string.birth; break;
+			case "BAPM": str = R.string.baptism; break;
+			case "BURI": str = R.string.burial; break;
+			case "DEAT": str = R.string.death; break;
+			case "EVEN": str = R.string.event; break;
+			case "OCCU": str = R.string.occupation; break;
+			case "RESI": str = R.string.residence;
+		}
+		String txt;
+		if( str != 0 )
+			txt = Global.context.getString(str);
+		else
+			txt = event.getDisplayType();
+		if( event.getType() != null )
+			txt += " (" + event.getType() + ")";
+		return txt;
+	}
+
 	private int sessoCapitato;
-	private void piazzaEvento( LinearLayout scatola, String titolo, String testo, Object oggetto ) {
+	private void piazzaEvento(LinearLayout scatola, String titolo, String testo, Object oggetto) {
 		View vistaFatto = LayoutInflater.from(scatola.getContext()).inflate( R.layout.individuo_eventi_pezzo, scatola, false);
 		scatola.addView( vistaFatto );
 		((TextView)vistaFatto.findViewById( R.id.evento_titolo )).setText( titolo );
@@ -122,11 +147,11 @@ public class IndividuoEventi extends Fragment {
 			U.mettiMedia( scatolaAltro, oggetto, false );
 			vistaFatto.setOnClickListener( v -> {
 				// Se è un nome complesso propone la modalità esperto
-				if( !Globale.preferenze.esperto && nomeComplesso((Name)oggetto) ) {
+				if( !Global.settings.expert && nomeComplesso((Name)oggetto) ) {
 					new AlertDialog.Builder(getContext()).setMessage( R.string.complex_tree_advanced_tools )
 							.setPositiveButton( android.R.string.ok, (dialog, i) -> {
-								Globale.preferenze.esperto = true;
-								Globale.preferenze.salva();
+								Global.settings.expert = true;
+								Global.settings.save();
 								Memoria.aggiungi( oggetto );
 								startActivity( new Intent(getContext(), Nome.class) );
 							}).setNegativeButton( android.R.string.cancel, (dialog, i) -> {
@@ -140,7 +165,7 @@ public class IndividuoEventi extends Fragment {
 			});
 		} else if( oggetto instanceof EventFact ) {
 			// Evento Sesso
-			if( ((EventFact)oggetto).getTag()!=null && ((EventFact)oggetto).getTag().equals("SEX") ) {
+			if( ((EventFact)oggetto).getTag() != null && ((EventFact)oggetto).getTag().equals("SEX") ) {
 				Map<String,String> sessi = new LinkedHashMap<>();
 				sessi.put( "M", getString(R.string.male) );
 				sessi.put( "F", getString(R.string.female) );
@@ -160,14 +185,14 @@ public class IndividuoEventi extends Fragment {
 						((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
 						aggiornaRuoliConiugali(uno);
 						dialog.dismiss();
-						aggiorna( 1 );
+						refresh(1);
 						U.salvaJson( true, uno );
 					}).show() );
 			} else { // Tutti gli altri eventi
-				U.mettiMedia( scatolaAltro, oggetto, false );
+				U.mettiMedia(scatolaAltro, oggetto, false);
 				vistaFatto.setOnClickListener( v -> {
-					Memoria.aggiungi( oggetto );
-					startActivity( new Intent( getContext(), Evento.class ) );
+					Memoria.aggiungi(oggetto);
+					startActivity(new Intent(getContext(), Evento.class));
 				});
 			}
 		} else if( oggetto instanceof GedcomTag ) {
@@ -178,7 +203,7 @@ public class IndividuoEventi extends Fragment {
 		}
 	}
 
-	// In tutte le famiglie coniugali rimuove gli spouse ref di tizio e ne aggiunge uno corrispondente al sesso
+	// In tutte le famiglie coniugali rimuove gli spouse ref di 'person' e ne aggiunge uno corrispondente al sesso
 	// Serve soprattutto in caso di esportazione del Gedcom per avere allineati gli HUSB e WIFE con il sesso
 	static void aggiornaRuoliConiugali(Person person) {
 		SpouseRef spouseRef = new SpouseRef();
@@ -260,91 +285,93 @@ public class IndividuoEventi extends Fragment {
 			case 200: // Copia nome
 			case 210: // Copia evento
 			case 220: // Copia estensione
-				U.copiaNegliAppunti( ((TextView)vistaPezzo.findViewById( R.id.evento_titolo )).getText(),
-					((TextView)vistaPezzo.findViewById(R.id.evento_testo)).getText() );
+				U.copiaNegliAppunti(((TextView)vistaPezzo.findViewById(R.id.evento_titolo)).getText(),
+						((TextView)vistaPezzo.findViewById(R.id.evento_testo)).getText());
 				return true;
 			case 201: // Sposta su
-				nomi.add( nomi.indexOf(oggettoPezzo)-1, (Name)oggettoPezzo );
-				nomi.remove( nomi.lastIndexOf(oggettoPezzo) );
+				nomi.add(nomi.indexOf(oggettoPezzo) - 1, (Name)oggettoPezzo);
+				nomi.remove(nomi.lastIndexOf(oggettoPezzo));
 				cosa = 2;
 				break;
 			case 202: // Sposta giù
-				nomi.add( nomi.indexOf(oggettoPezzo)+2, (Name)oggettoPezzo );
-				nomi.remove( nomi.indexOf(oggettoPezzo) );
+				nomi.add(nomi.indexOf(oggettoPezzo) + 2, (Name)oggettoPezzo);
+				nomi.remove(nomi.indexOf(oggettoPezzo));
 				cosa = 2;
 				break;
 			case 203: // Elimina
 				if( U.preserva(oggettoPezzo) ) return false;
-				uno.getNames().remove( oggettoPezzo );
-				Memoria.annullaIstanze( oggettoPezzo );
-				vistaPezzo.setVisibility( View.GONE );
+				uno.getNames().remove(oggettoPezzo);
+				Memoria.annullaIstanze(oggettoPezzo);
+				vistaPezzo.setVisibility(View.GONE);
 				cosa = 2;
 				break;
 			// Evento generico
 			case 211: // Sposta su
-				fatti.add( fatti.indexOf(oggettoPezzo)-1, (EventFact)oggettoPezzo );
-				fatti.remove( fatti.lastIndexOf(oggettoPezzo) );
+				fatti.add(fatti.indexOf(oggettoPezzo) - 1, (EventFact)oggettoPezzo);
+				fatti.remove(fatti.lastIndexOf(oggettoPezzo));
 				cosa = 1;
 				break;
 			case 212: // Sposta giu
-				fatti.add( fatti.indexOf(oggettoPezzo)+2, (EventFact)oggettoPezzo );
-				fatti.remove( fatti.indexOf(oggettoPezzo) );
+				fatti.add(fatti.indexOf(oggettoPezzo) + 2, (EventFact)oggettoPezzo);
+				fatti.remove(fatti.indexOf(oggettoPezzo));
 				cosa = 1;
 				break;
 			case 213:
 				// todo Conferma elimina
-				uno.getEventsFacts().remove( oggettoPezzo );
-				Memoria.annullaIstanze( oggettoPezzo );
-				vistaPezzo.setVisibility( View.GONE );
+				uno.getEventsFacts().remove(oggettoPezzo);
+				Memoria.annullaIstanze(oggettoPezzo);
+				vistaPezzo.setVisibility(View.GONE);
 				break;
 			// Estensione
 			case 221: // Elimina
-				U.eliminaEstensione( (GedcomTag)oggettoPezzo, uno, vistaPezzo );
+				U.eliminaEstensione((GedcomTag)oggettoPezzo, uno, vistaPezzo);
 				break;
 			// Nota
 			case 225: // Copia
-				U.copiaNegliAppunti( getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText() );
+				U.copiaNegliAppunti(getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText());
 				return true;
 			case 226: // Scollega
-				U.scollegaNota( (Note)oggettoPezzo, uno, vistaPezzo );
+				U.scollegaNota((Note)oggettoPezzo, uno, vistaPezzo);
 				break;
 			case 227:
-				Object[] capi = U.eliminaNota( (Note)oggettoPezzo, vistaPezzo );
-				U.salvaJson( true, capi );
-				aggiorna( 0 );
+				Object[] capi = U.eliminaNota((Note)oggettoPezzo, vistaPezzo);
+				U.salvaJson(true, capi);
+				refresh(0);
 				return true;
 			// Citazione fonte
 			case 230: // Copia
-				U.copiaNegliAppunti( getText(R.string.source_citation),
-						((TextView)vistaPezzo.findViewById( R.id.fonte_testo )).getText() + "\n"
-						+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText() );
+				U.copiaNegliAppunti(getText(R.string.source_citation),
+						((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText() + "\n"
+								+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText());
 				return true;
 			case 231: // Elimina
 				// todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
-				uno.getSourceCitations().remove( oggettoPezzo );
+				uno.getSourceCitations().remove(oggettoPezzo);
 				Memoria.annullaIstanze(oggettoPezzo);
-				vistaPezzo.setVisibility( View.GONE );
+				vistaPezzo.setVisibility(View.GONE);
 				break;
 			default:
 				return false;
 		}
-		U.salvaJson( true, uno );
-		aggiorna( cosa );
+		U.salvaJson(true, uno);
+		refresh(cosa);
 		return true;
 	}
 
 	// Rinfresca il contenuto del frammento Eventi
-	void aggiorna( int cheCosa ) {
-		if( cheCosa == 0 ) { // sostituisce solo la data di cambiamento
-			LinearLayout scatola = getActivity().findViewById( R.id.contenuto_scheda );
+	void refresh(int what) {
+		if( what == 0 ) { // sostituisce solo la data di cambiamento
+			LinearLayout scatola = getActivity().findViewById(R.id.contenuto_scheda);
 			if( vistaCambi != null )
-				scatola.removeView( vistaCambi );
-			vistaCambi = U.cambiamenti( scatola, uno.getChange() );
+				scatola.removeView(vistaCambi);
+			vistaCambi = U.cambiamenti(scatola, uno.getChange());
 		} else { // ricarica il fragment
-			getActivity().getSupportFragmentManager().beginTransaction().detach( this ).attach( this ).commit();
-			if( cheCosa == 2 ) { // aggiorna anche il titolo dell'activity
-				CollapsingToolbarLayout barraCollasso = getActivity().findViewById( R.id.toolbar_layout );
-				barraCollasso.setTitle( U.epiteto( uno ) );
+			FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+			fragmentManager.beginTransaction().detach(this).commit();
+			fragmentManager.beginTransaction().attach(this).commit();
+			if( what == 2 ) { // aggiorna anche il titolo dell'activity
+				CollapsingToolbarLayout barraCollasso = requireActivity().findViewById(R.id.toolbar_layout);
+				barraCollasso.setTitle(U.epiteto(uno));
 			}
 		}
 	}

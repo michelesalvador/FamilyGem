@@ -2,6 +2,7 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
+	android:installLocation="auto"
 	package="app.familygem">
 
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="22"/>
@@ -10,9 +11,8 @@
 
 	<application
 		android:label="@string/app_name"
-		android:name=".Globale"
-		android:icon="@mipmap/vetrina"
-		android:roundIcon="@mipmap/vetrina_round"
+		android:name=".Global"
+		android:icon="@mipmap/icon"
 		android:theme="@style/AppTheme"
 		android:allowBackup="true"
 		android:usesCleartextTraffic="true"
@@ -62,8 +62,8 @@
 			android:label="@string/new_tree"
 			android:parentActivityName=".Alberi" />
 		<activity
-			android:name=".Principe"
-			android:theme="@style/AppTheme.NoActionBar" />
+			android:name=".Principal"
+			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
 			android:name=".Opzioni"
 			android:label="@string/settings"
@@ -98,7 +98,7 @@
 		<activity
 			android:name=".DiagramSettings"
 			android:label="@string/diagram_settings"
-			android:parentActivityName=".Principe" />
+			android:parentActivityName=".Principal" />
 		<activity
 			android:name=".Individuo"
 			android:theme="@style/AppTheme.NoActionBar" />

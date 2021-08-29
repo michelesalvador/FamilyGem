@@ -34,90 +34,90 @@ public class Esportatore {
 	public String messaggioErrore;  // Messaggio di eventuale errore
 	public String messaggioSuccesso; // Messaggio del risultato ottenuto
 
-	Esportatore( Context contesto ) {
-		this.contesto = contesto;
+	Esportatore(Context context) {
+		this.contesto = context;
 	}
 
 	// Apre l'albero Json e restituisce true se c'è riuscito
-	public boolean apriAlbero( int idAlbero ) {
+	public boolean apriAlbero(int idAlbero) {
 		this.idAlbero = idAlbero;
-		gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
+		gc = Alberi.apriGedcomTemporaneo(idAlbero, true);
 		if( gc == null ) {
-			return errore( R.string.no_useful_data );
+			return errore(R.string.no_useful_data);
 		}
 		return true;
 	}
 
 	// Scrive il solo GEDCOM nell'URI
-	public boolean esportaGedcom( Uri targetUri ) {
+	public boolean esportaGedcom(Uri targetUri) {
 		this.targetUri = targetUri;
-		aggiornaTestata( estraiNome(targetUri) );
+		aggiornaTestata(estraiNome(targetUri));
 		ottimizzaGedcom();
 		GedcomWriter scrittore = new GedcomWriter();
-		File fileGc = new File( contesto.getCacheDir(), "temp.ged" );
+		File fileGc = new File(contesto.getCacheDir(), "temp.ged");
 		try {
-			scrittore.write( gc, fileGc );
-			OutputStream out = contesto.getContentResolver().openOutputStream( targetUri );
-			FileUtils.copyFile( fileGc, out );
+			scrittore.write(gc, fileGc);
+			OutputStream out = contesto.getContentResolver().openOutputStream(targetUri);
+			FileUtils.copyFile(fileGc, out);
 			out.flush();
 			out.close();
 		} catch( Exception e ) {
-			return errore( e.getLocalizedMessage() );
+			return errore(e.getLocalizedMessage());
 		}
 		// Rende il file visibile da Windows
 		// Ma pare inefficace in KitKat in cui il file rimane invisibile
-		contesto.sendBroadcast( new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri) );
-		Globale.gc = Alberi.leggiJson( idAlbero ); // Resetta le modifiche
-		return successo( R.string.gedcom_exported_ok );
+		contesto.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
+		Global.gc = Alberi.leggiJson(idAlbero); // Resetta le modifiche
+		return successo(R.string.gedcom_exported_ok);
 	}
 
 	// Scrive il GEDCOM con i media in un file ZIP
-	public boolean esportaGedcomZippato( Uri targetUri ) {
+	public boolean esportaGedcomZippato(Uri targetUri) {
 		this.targetUri = targetUri;
 		// Crea il file GEDCOM
-		String titolo = Globale.preferenze.getAlbero(idAlbero).nome;
+		String titolo = Global.settings.getTree(idAlbero).title;
 		String nomeFileGedcom = titolo.replaceAll("[\\\\/:*?\"<>|'$]", "_") + ".ged";
-		aggiornaTestata( nomeFileGedcom );
+		aggiornaTestata(nomeFileGedcom);
 		ottimizzaGedcom();
 		GedcomWriter scrittore = new GedcomWriter();
-		File fileGc = new File( contesto.getCacheDir(), nomeFileGedcom );
+		File fileGc = new File(contesto.getCacheDir(), nomeFileGedcom);
 		try {
-			scrittore.write( gc, fileGc );
+			scrittore.write(gc, fileGc);
 		} catch( Exception e ) {
-			return errore( e.getLocalizedMessage() );
+			return errore(e.getLocalizedMessage());
 		}
-		DocumentFile gedcomDocument = DocumentFile.fromFile( fileGc );
+		DocumentFile gedcomDocument = DocumentFile.fromFile(fileGc);
 		// Aggiunge il GEDCOM alla raccolta di file media
-		Map<DocumentFile,Integer> raccolta = raccogliMedia();
-		raccolta.put( gedcomDocument, 0 );
+		Map<DocumentFile, Integer> raccolta = raccogliMedia();
+		raccolta.put(gedcomDocument, 0);
 		if( !creaFileZip(raccolta) )
 			return false;
-		contesto.sendBroadcast( new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri) );
-		Globale.gc = Alberi.leggiJson( idAlbero );
-		return successo( R.string.zip_exported_ok );
+		contesto.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
+		Global.gc = Alberi.leggiJson(idAlbero);
+		return successo(R.string.zip_exported_ok);
 	}
 
 	// Crea un file zippato con l'albero, i settaggi e i media
-	public boolean esportaBackupZip( String radice, int grado, Uri targetUri ) {
+	public boolean esportaBackupZip(String radice, int grado, Uri targetUri) {
 		this.targetUri = targetUri;
 		// Media
-		Map<DocumentFile,Integer> files = raccogliMedia();
+		Map<DocumentFile, Integer> files = raccogliMedia();
 		// Json dell'albero
-		File fileTree = new File( contesto.getFilesDir(), idAlbero + ".json" );
-		files.put( DocumentFile.fromFile(fileTree), 1 );
+		File fileTree = new File(contesto.getFilesDir(), idAlbero + ".json");
+		files.put(DocumentFile.fromFile(fileTree), 1);
 		// Json delle preferenze
-		Armadio.Cassetto cassetto = Globale.preferenze.getAlbero( idAlbero );
-		if( radice == null ) radice = cassetto.radice;
-		if( grado < 0 ) grado = cassetto.grado;
+		Settings.Tree tree = Global.settings.getTree(idAlbero);
+		if( radice == null ) radice = tree.root;
+		if( grado < 0 ) grado = tree.grade;
 		// String titoloAlbero, String radice, int grado possono arrivare diversi da Condividi
-		Armadio.CassettoCondiviso settaggi = new Armadio.CassettoCondiviso(
-				cassetto.nome, cassetto.individui, cassetto.generazioni, radice, cassetto.condivisioni, grado );
+		Settings.ZippedTree settaggi = new Settings.ZippedTree(
+				tree.title, tree.persons, tree.generations, radice, tree.shares, grado);
 		File fileSettings = settaggi.salva();
-		files.put( DocumentFile.fromFile(fileSettings), 0 );
+		files.put(DocumentFile.fromFile(fileSettings), 0);
 		if( !creaFileZip(files) )
 			return false;
-		contesto.sendBroadcast( new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri) );
-		return successo( R.string.zip_exported_ok );
+		contesto.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
+		return successo(R.string.zip_exported_ok);
 	}
 
 	// Restituisce il numero di file media da allegare
@@ -145,39 +145,39 @@ public class Esportatore {
 		Set<String> onlyFileNames = new HashSet<>(); // Nomi file di controllo
 		for( Media med : visitaMedia.lista ) {
 			String path = med.getFile();
-				if( path != null && !path.isEmpty() ) {
-				String fileName = path.replace( '\\', '/' );;
-			if( fileName.lastIndexOf('/') > -1 )
-					fileName = fileName.substring( fileName.lastIndexOf('/')+1 );
+			if( path != null && !path.isEmpty() ) {
+				String fileName = path.replace('\\', '/');
+				if( fileName.lastIndexOf('/') > -1 )
+					fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
 				if( !onlyFileNames.contains(fileName) )
-					paths.add( path );
-				onlyFileNames.add( fileName );
+					paths.add(path);
+				onlyFileNames.add(fileName);
 			}
 		}
-		Map<DocumentFile,Integer> collezione = new HashMap<>();
+		Map<DocumentFile, Integer> collezione = new HashMap<>();
 		for( String path : paths ) {
 			Media med = new Media();
-			med.setFile( path );
+			med.setFile(path);
 			// Paths
-			String percorsoMedia = F.percorsoMedia( idAlbero, med );
+			String percorsoMedia = F.percorsoMedia(idAlbero, med);
 			if( percorsoMedia != null )
-				collezione.put( DocumentFile.fromFile(new File(percorsoMedia)), 2 ); // todo canRead() ?
+				collezione.put(DocumentFile.fromFile(new File(percorsoMedia)), 2); // todo canRead() ?
 			else { // URIs
-				Uri uriMedia = F.uriMedia( idAlbero, med );
+				Uri uriMedia = F.uriMedia(idAlbero, med);
 				if( uriMedia != null )
-					collezione.put( DocumentFile.fromSingleUri(contesto, uriMedia), 2 );
+					collezione.put(DocumentFile.fromSingleUri(contesto, uriMedia), 2);
 			}
 		}
 		return collezione;
 	}
 
-	private void aggiornaTestata( String nomeFileGedcom ) {
+	private void aggiornaTestata(String nomeFileGedcom) {
 		Header testa = gc.getHeader();
 		if( testa == null )
-			gc.setHeader( AlberoNuovo.creaTestata( nomeFileGedcom ) );
+			gc.setHeader(AlberoNuovo.creaTestata(nomeFileGedcom));
 		else {
-			testa.setFile( nomeFileGedcom );
-			testa.setDateTime( U.dataTempoAdesso() );
+			testa.setFile(nomeFileGedcom);
+			testa.setDateTime(U.dataTempoAdesso());
 		}
 	}
 
@@ -226,29 +226,29 @@ public class Esportatore {
 
 	// Riceve la lista di DocumentFile e li mette in un file ZIP scritto nel targetUri
 	// Restiuisce messaggio di errore o null se tutto a posto
-	boolean creaFileZip( Map<DocumentFile,Integer> files ) {
+	boolean creaFileZip(Map<DocumentFile, Integer> files) {
 		byte[] buffer = new byte[128];
 		try {
-			ZipOutputStream zos = new ZipOutputStream( contesto.getContentResolver().openOutputStream(targetUri) );
+			ZipOutputStream zos = new ZipOutputStream(contesto.getContentResolver().openOutputStream(targetUri));
 			for( Map.Entry<DocumentFile, Integer> fileTipo : files.entrySet() ) {
 				DocumentFile file = fileTipo.getKey();
-				InputStream input = contesto.getContentResolver().openInputStream( file.getUri() );
+				InputStream input = contesto.getContentResolver().openInputStream(file.getUri());
 				String nomeFile = file.getName();   // File che non vengono rinominati ('settings.json', 'famiglia.ged')
 				if( fileTipo.getValue() == 1 )
 					nomeFile = "tree.json";
 				else if( fileTipo.getValue() == 2 )
 					nomeFile = "media/" + file.getName();
-				zos.putNextEntry( new ZipEntry( nomeFile ) );
+				zos.putNextEntry(new ZipEntry(nomeFile));
 				int read;
-				while( ( read = input.read( buffer ) ) != -1 ) {
-					zos.write( buffer, 0, read );
+				while( (read = input.read(buffer)) != -1 ) {
+					zos.write(buffer, 0, read);
 				}
 				zos.closeEntry();
 				input.close();
 			}
 			zos.close();
 		} catch( IOException e ) {
-			return errore( e.getLocalizedMessage() );
+			return errore(e.getLocalizedMessage());
 		}
 		return true;
 	}
@@ -258,11 +258,11 @@ public class Esportatore {
 		return true;
 	}
 
-	public boolean errore( int errore ) {
-		return errore( contesto.getString(errore) );
+	public boolean errore(int error) {
+		return errore(contesto.getString(error));
 	}
-	public boolean errore( String errore ) {
-		messaggioErrore = errore;
+	public boolean errore(String error) {
+		messaggioErrore = error;
 		return false;
 	}
 }

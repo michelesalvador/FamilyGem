@@ -34,8 +34,8 @@ public class CartelleMedia extends AppCompatActivity {
 		super.onCreate( bandolo );
 		setContentView( R.layout.cartelle_media );
 		idAlbero = getIntent().getIntExtra( "idAlbero", 0 );
-		cartelle = new ArrayList<>( Globale.preferenze.getAlbero(idAlbero).cartelle );
-		uris = new ArrayList<>( Globale.preferenze.getAlbero(idAlbero).uris );
+		cartelle = new ArrayList<>( Global.settings.getTree(idAlbero).dirs);
+		uris = new ArrayList<>( Global.settings.getTree(idAlbero).uris );
 		aggiornaLista();
 		getSupportActionBar().setDisplayHomeAsUpEnabled( true );
 		findViewById( R.id.fab ).setOnClickListener( v -> {
@@ -45,7 +45,7 @@ public class CartelleMedia extends AppCompatActivity {
 			else if( perm == PackageManager.PERMISSION_GRANTED )
 				faiScegliereCartella();
 		});
-		if( Globale.preferenze.getAlbero(idAlbero).cartelle.isEmpty() && Globale.preferenze.getAlbero(idAlbero).uris.isEmpty() )
+		if( Global.settings.getTree(idAlbero).dirs.isEmpty() && Global.settings.getTree(idAlbero).uris.isEmpty() )
 			new Fabuloso( this, R.string.add_device_folder ).show();
 	}
 
@@ -72,7 +72,7 @@ public class CartelleMedia extends AppCompatActivity {
 			TextView vistaNome = vistaCartella.findViewById( R.id.cartella_nome );
 			TextView vistaUrl = vistaCartella.findViewById( R.id.cartella_url );
 			vistaUrl.setText( cart );
-			if( Globale.preferenze.esperto )
+			if( Global.settings.expert )
 				vistaUrl.setSingleLine( false );
 			View bottoneElimina = vistaCartella.findViewById( R.id.cartella_elimina );
 			// La cartella '/storage/.../Android/data/app.familygem/files/X' va preservata inquanto è quella di default dei media copiati
@@ -101,7 +101,7 @@ public class CartelleMedia extends AppCompatActivity {
 				nome = documentDir.getName();
 			((TextView)vistaUri.findViewById(R.id.cartella_nome)).setText( nome );
 			TextView vistaUrl = vistaUri.findViewById( R.id.cartella_url );
-			if( Globale.preferenze.esperto ) {
+			if( Global.settings.expert ) {
 				vistaUrl.setSingleLine( false );
 				vistaUrl.setText( stringUri );
 			} else
@@ -111,7 +111,7 @@ public class CartelleMedia extends AppCompatActivity {
 						.setPositiveButton( R.string.yes, (di,id) -> {
 							// Revoca il permesso per questo uri, se l'uri non è usato in nessun altro albero
 							boolean uriEsisteAltrove = false;
-							for( Armadio.Cassetto albero : Globale.preferenze.alberi ) {
+							for( Settings.Tree albero : Global.settings.trees ) {
 								for( String uri : albero.uris )
 									if( uri.equals(stringUri) && albero.id != idAlbero ) {
 										uriEsisteAltrove = true;
@@ -135,13 +135,13 @@ public class CartelleMedia extends AppCompatActivity {
 	}
 
 	void salva() {
-		Globale.preferenze.getAlbero(idAlbero).cartelle.clear();
+		Global.settings.getTree(idAlbero).dirs.clear();
 		for( String path : cartelle )
-			Globale.preferenze.getAlbero(idAlbero).cartelle.add( path );
-		Globale.preferenze.getAlbero(idAlbero).uris.clear();
+			Global.settings.getTree(idAlbero).dirs.add( path );
+		Global.settings.getTree(idAlbero).uris.clear();
 		for( String uri : uris )
-			Globale.preferenze.getAlbero(idAlbero).uris.add( uri );
-		Globale.preferenze.salva();
+			Global.settings.getTree(idAlbero).uris.add( uri );
+		Global.settings.save();
 		aggiornaLista();
 	}
 
@@ -176,7 +176,7 @@ public class CartelleMedia extends AppCompatActivity {
 							uris.add( uri.toString() );
 							salva();
 						} else
-							Toast.makeText( this, "Could not read this position.", Toast.LENGTH_SHORT ).show(); // todo traduci?
+							Toast.makeText( this, "Could not read this position.", Toast.LENGTH_SHORT ).show();
 					}
 				}
 			} else

@@ -37,7 +37,7 @@ import java.net.URLEncoder;
 public class Condivisione extends AppCompatActivity {
 
 	Gedcom gc;
-	Armadio.Cassetto casso;
+	Settings.Tree tree;
 	Esportatore esporter;
 	String nomeAutore;
 	int accessible; // 0 = false, 1 = true
@@ -46,42 +46,42 @@ public class Condivisione extends AppCompatActivity {
 	boolean uploadSuccesso;
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		setContentView(R.layout.condivisione );
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		setContentView(R.layout.condivisione);
 
-		final int idAlbero = getIntent().getIntExtra( "idAlbero", 1 );
-		casso = Globale.preferenze.getAlbero( idAlbero );
+		final int treeId = getIntent().getIntExtra("idAlbero", 1);
+		tree = Global.settings.getTree(treeId);
 
 		// Titolo dell'albero
-		final EditText editaTitolo = findViewById( R.id.condividi_titolo );
-		editaTitolo.setText( casso.nome );
+		final EditText editaTitolo = findViewById(R.id.condividi_titolo);
+		editaTitolo.setText(tree.title);
 
-		if( casso.grado == 10 )
+		if( tree.grade == 10 )
 			((TextView)findViewById( R.id.condividi_tit_autore )).setText( R.string.changes_submitter );
 
 		esporter = new Esportatore( this );
-		esporter.apriAlbero( idAlbero );
-		gc = Globale.gc;
+		esporter.apriAlbero( treeId );
+		gc = Global.gc;
 		if( gc != null ) {
 			// Radice dell'albero
 			String idRadice;
-			if( casso.radiceCondivisione != null && gc.getPerson(casso.radiceCondivisione) != null )
-				idRadice = casso.radiceCondivisione;
-			else if( casso.radice != null && gc.getPerson(casso.radice) != null ) {
-				idRadice = casso.radice;
-				casso.radiceCondivisione = idRadice; // per poter condividere subito l'albero senza cambiare la radice
+			if( tree.shareRoot != null && gc.getPerson(tree.shareRoot) != null )
+				idRadice = tree.shareRoot;
+			else if( tree.root != null && gc.getPerson(tree.root) != null ) {
+				idRadice = tree.root;
+				tree.shareRoot = idRadice; // per poter condividere subito l'albero senza cambiare la radice
 			} else {
 				idRadice = U.trovaRadice( gc );
-				casso.radiceCondivisione = idRadice;
+				tree.shareRoot = idRadice;
 			}
 			Person radice = gc.getPerson(idRadice);
-			if( radice != null && casso.grado < 10 ) { // viene mostrata solo alla prima condivisione, non al ritorno
+			if( radice != null && tree.grade < 10 ) { // viene mostrata solo alla prima condivisione, non al ritorno
 				LinearLayout scatolaRadice = findViewById(R.id.condividi_radice);
 				scatolaRadice.setVisibility( View.VISIBLE );
 				View vistaRadice = U.linkaPersona( scatolaRadice, radice, 1 );
 				vistaRadice.setOnClickListener( v -> {
-					Intent intento = new Intent( this, Principe.class );
+					Intent intento = new Intent( this, Principal.class );
 					intento.putExtra( "anagrafeScegliParente", true );
 					startActivityForResult( intento,5007 );
 				});
@@ -89,26 +89,26 @@ public class Condivisione extends AppCompatActivity {
 			// Nome autore
 			final Submitter[] autore = new Submitter[1];
 			// albero in Italia con submitter referenziato
-			if( casso.grado == 0 && gc.getHeader() != null && gc.getHeader().getSubmitter(gc) != null )
+			if( tree.grade == 0 && gc.getHeader() != null && gc.getHeader().getSubmitter(gc) != null )
 				autore[0] = gc.getHeader().getSubmitter( gc );
 			// in Italia ci sono autori ma nessuno referenziato, prende l'ultimo
-			else if( casso.grado == 0 && !gc.getSubmitters().isEmpty() )
+			else if( tree.grade == 0 && !gc.getSubmitters().isEmpty() )
 				autore[0] = gc.getSubmitters().get(gc.getSubmitters().size()-1);
 			// in Australia ci sono autori freschi, ne prende uno
-			else if( casso.grado == 10 && U.autoreFresco(gc) != null )
+			else if( tree.grade == 10 && U.autoreFresco(gc) != null )
 				autore[0] = U.autoreFresco(gc);
 			final EditText editaAutore = findViewById(R.id.condividi_autore);
 			nomeAutore = autore[0] == null ? "" : autore[0].getName();
 			editaAutore.setText( nomeAutore );
 
 			// Display an alert for the acknowledgment of sharing
-			if( !Globale.preferenze.shareAgreement ) {
-				new AlertDialog.Builder(this).setTitle("Share sensitive data") // todo traduci
-						.setMessage("Please be aware that you are going to upload the whole tree to an online server.")
+			if( !Global.settings.shareAgreement ) {
+				new AlertDialog.Builder(this).setTitle(R.string.share_sensitive)
+						.setMessage(R.string.aware_upload_server)
 						.setPositiveButton(android.R.string.ok, (dialog, id) -> {
-							Globale.preferenze.shareAgreement = true;
-							Globale.preferenze.salva();
-						}).setNeutralButton("Remind me later", null).show(); // todo traduci
+							Global.settings.shareAgreement = true;
+							Global.settings.save();
+						}).setNeutralButton(R.string.remind_later, null).show();
 			}
 
 			// Raccoglie i dati della condivisione e posta al database
@@ -119,37 +119,37 @@ public class Condivisione extends AppCompatActivity {
 					if( controlla(editaTitolo, R.string.please_title) || controlla(editaAutore, R.string.please_name) )
 						return;
 
-					v.setEnabled( false );
-					findViewById( R.id.condividi_circolo ).setVisibility(View.VISIBLE);
+					v.setEnabled(false);
+					findViewById(R.id.condividi_circolo).setVisibility(View.VISIBLE);
 
 					// Titolo dell'albero
 					String titoloEditato = editaTitolo.getText().toString();
-					if( !casso.nome.equals(titoloEditato) ) {
-						casso.nome = titoloEditato;
-						Globale.preferenze.salva();
+					if( !tree.title.equals(titoloEditato) ) {
+						tree.title = titoloEditato;
+						Global.settings.save();
 					}
 
 					// Aggiornamento del submitter
 					Header header = gc.getHeader();
 					if( header == null ) {
-						header = AlberoNuovo.creaTestata( casso.id + ".json" );
-						gc.setHeader( header );
+						header = AlberoNuovo.creaTestata(tree.id + ".json");
+						gc.setHeader(header);
 					} else
-						header.setDateTime( U.dataTempoAdesso() );
+						header.setDateTime(U.dataTempoAdesso());
 					if( autore[0] == null ) {
-						autore[0] = Podio.nuovoAutore( null );
+						autore[0] = Podio.nuovoAutore(null);
 					}
 					if( header.getSubmitterRef() == null ) {
-						header.setSubmitterRef( autore[0].getId() );
+						header.setSubmitterRef(autore[0].getId());
 					}
 					String nomeAutoreEditato = editaAutore.getText().toString();
 					if( !nomeAutoreEditato.equals(nomeAutore) ) {
 						nomeAutore = nomeAutoreEditato;
-						autore[0].setName( nomeAutore );
-						U.aggiornaDate( autore[0] );
+						autore[0].setName(nomeAutore);
+						U.aggiornaDate(autore[0]);
 					}
 					idAutore = autore[0].getId();
-					U.salvaJson( gc, idAlbero ); // baypassando la preferenza di non salvare in atomatico
+					U.salvaJson(gc, treeId); // baypassando la preferenza di non salvare in atomatico
 
 					// Tree accessibility for app developer
 					CheckBox accessibleTree = findViewById(R.id.condividi_allow);
@@ -190,7 +190,7 @@ public class Condivisione extends AppCompatActivity {
 				OutputStream out = new BufferedOutputStream( conn.getOutputStream() );
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
 				String dati = "password=" + URLEncoder.encode( BuildConfig.passwordAruba, "UTF-8") +
-						"&titoloAlbero=" + URLEncoder.encode( questo.casso.nome, "UTF-8") +
+						"&titoloAlbero=" + URLEncoder.encode( questo.tree.title, "UTF-8") +
 						"&nomeAutore=" + URLEncoder.encode( questo.nomeAutore, "UTF-8") +
 						"&accessibile=" + questo.accessible;
 				writer.write( dati );
@@ -205,9 +205,9 @@ public class Condivisione extends AppCompatActivity {
 				conn.disconnect();
 				if( linea1.startsWith("20") ) {
 					questo.dataId = linea1.replaceAll( "[-: ]", "" );
-					Armadio.Invio invio = new Armadio.Invio( questo.dataId, questo.idAutore );
-					questo.casso.aggiungiCondivisione(invio);
-					Globale.preferenze.salva();
+					Settings.Share share = new Settings.Share( questo.dataId, questo.idAutore );
+					questo.tree.aggiungiCondivisione(share);
+					Global.settings.save();
 				}
 			} catch( Exception e ) {
 				U.tosta( questo, e.getLocalizedMessage() );
@@ -219,7 +219,7 @@ public class Condivisione extends AppCompatActivity {
 		protected void onPostExecute(Condivisione questo) {
 			if( questo.dataId != null && questo.dataId.startsWith("20") ) {
 				File fileTree = new File( questo.getCacheDir(), questo.dataId + ".zip" );
-				if( questo.esporter.esportaBackupZip(questo.casso.radiceCondivisione, 9, Uri.fromFile(fileTree)) ) {
+				if( questo.esporter.esportaBackupZip(questo.tree.shareRoot, 9, Uri.fromFile(fileTree)) ) {
 					new InvioFTP().execute( questo );
 					return;
 				} else
@@ -286,19 +286,19 @@ public class Condivisione extends AppCompatActivity {
 
 	// Aggiorna le preferenze così da mostrare la nuova radice scelta in Anagrafe
 	@Override
-	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		super.onActivityResult( requestCode, resultCode, data );
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		if( resultCode == AppCompatActivity.RESULT_OK ) {
 			if( requestCode == 5007 ) {
-				casso.radiceCondivisione = data.getStringExtra( "idParente" );
-				Globale.preferenze.salva();
+				tree.shareRoot = data.getStringExtra("idParente");
+				Global.settings.save();
 				recreate();
 			}
 		}
 		// Ritorno indietro da qualsiasi app di condivisione, nella quale il messaggio è stato inviato oppure no
-		if ( requestCode == 35417 ) {
+		if( requestCode == 35417 ) {
 			// Todo chiudi tastiera
-			Toast.makeText( getApplicationContext(), R.string.sharing_completed, Toast.LENGTH_LONG ).show();
+			Toast.makeText(getApplicationContext(), R.string.sharing_completed, Toast.LENGTH_LONG).show();
 		}
 	}
 

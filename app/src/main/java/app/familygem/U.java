@@ -26,7 +26,6 @@ import com.google.gson.JsonPrimitive;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -78,16 +77,27 @@ import app.familygem.visita.TrovaPila;
 public class U {
 
 	static String s(int id) {
-		return Globale.contesto.getString(id);
+		return Global.context.getString(id);
 	}
 
-	// Da usare dove capita che 'Globale.gc' possa essere null per ricaricarlo
+	// Da usare dove capita che 'Global.gc' possa essere null per ricaricarlo
 	static void gedcomSicuro(Gedcom gc) {
 		if( gc == null )
-			Globale.gc = Alberi.leggiJson(Globale.preferenze.idAprendo);
+			Global.gc = Alberi.leggiJson(Global.settings.openTree);
+	}
+
+	// Id of the main person of a GEDCOM or null
+	static String getRootId(Gedcom gedcom, Settings.Tree tree) {
+		if( tree.root != null ) {
+			Person root = gedcom.getPerson(tree.root);
+			if( root != null )
+				return root.getId();
+		}
+		return trovaRadice(gedcom);
 	}
 
 	// restituisce l'id della Person iniziale di un Gedcom
+	// Todo Integrate into getRootId(Gedcom,Tree) ???
 	static String trovaRadice(Gedcom gc) {
 		if( gc.getHeader() != null )
 			if( valoreTag(gc.getHeader().getExtensions(), "_ROOT") != null )
@@ -104,6 +114,33 @@ public class U {
 		return "[" + s(R.string.no_name) + "]";
 	}
 
+	// The given name of a person or something
+	static String givenName(Person person) {
+		if( person.getNames().isEmpty() ) {
+			return "[" + s(R.string.no_name) + "]";
+		} else {
+			String given = "";
+			Name name = person.getNames().get(0);
+			if( name.getValue() != null ) {
+				String value = name.getValue().trim();
+				if( value.indexOf('/') == 0 && value.lastIndexOf('/') == 1 && value.length() > 2 ) // Suffix only
+					given = value.substring(2);
+				else if( value.indexOf('/') == 0 && value.lastIndexOf('/') > 1 ) // Surname only
+					given = value.substring(1, value.lastIndexOf('/'));
+				else if( value.indexOf('/') > 0 ) // Name and surname
+					given = value.substring(0, value.indexOf('/'));
+				else if( !value.isEmpty() ) // Name only
+					given = value;
+			} else if( name.getGiven() != null ) {
+				given = name.getGiven();
+			} else if( name.getSurname() != null ) {
+				given = name.getSurname();
+			}
+			given = given.trim();
+			return given.isEmpty() ? "[" + s(R.string.empty_name) + "]" : given;
+		}
+	}
+
 	// riceve una Person e restituisce il titolo nobiliare
 	static String titolo(Person p) {
 		// GEDCOM standard INDI.TITL
@@ -117,17 +154,8 @@ public class U {
 		return "";
 	}
 
-	static String[] NAME_TYPES = { "aka", "birth", "immigrant", "maiden", "married" };
-	static String[] TIPI_NOME = { s(R.string.aka), s(R.string.birth), s(R.string.immigrant), s(R.string.maiden), s(R.string.married) };
-
-	// Riceve un NAME_TYPE e restituisce la corrispondente traduzione
-	static String tipoNomeTradotto(String type) {
-		int index = Arrays.asList(NAME_TYPES).indexOf(type);
-		return index >= 0 ? TIPI_NOME[index] : type;
-	}
-
 	// Restituisce il nome e cognome addobbato di un Name
-	static String nomeCognome( Name n ) {
+	static String nomeCognome(Name n) {
 		String completo = "";
 		if( n.getValue() != null ) {
 			String grezzo = n.getValue().trim();
@@ -174,50 +202,85 @@ public class U {
 	}
 
 	// Riceve una person e trova se è morto o seppellito
-	static boolean morto( Person p ) {
-		for( EventFact fatto : p.getEventsFacts() ) {
-			if( fatto.getTag().equals( "DEAT" ) || fatto.getTag().equals( "BURI" ) )
+	static boolean isDead(Person person) {
+		for( EventFact eventFact : person.getEventsFacts() ) {
+			if( eventFact.getTag().equals("DEAT") || eventFact.getTag().equals("BURI") )
 				return true;
 		}
 		return false;
 	}
 
-	/** Write the basic dates of a person's life, optionally with the age
+	// Check whether a family has a marriage event of type 'marriage'
+	public static boolean areMarried(Family family) {
+		if( family != null ) {
+			for( EventFact eventFact : family.getEventsFacts() ) {
+				String tag = eventFact.getTag();
+				if( tag.equals("MARR") ) {
+					String type = eventFact.getType();
+					if( type == null || type.equals("marriage") || type.equals("civil") || type.equals("religious") || type.equals("common law") )
+						return true;
+				} else if( tag.equals("MARB") || tag.equals("MARC") || tag.equals("MARL") || tag.equals("MARS") )
+					return true;
+			}
+		}
+		return false;
+	}
+
+	// Check whether a family has a divorce event
+	public static boolean areDivorced(Family family) {
+		if( family != null ) {
+			for( EventFact eventFact : family.getEventsFacts() ) {
+				if( eventFact.getTag().equals("DIV") )
+					return true;
+			}
+		}
+		return false;
+	}
+
+	/** Write the basic dates of a person's life with the age
 	 * @param person The dude to investigate
-	 * @param simple Dates with year only and no age between parentheses
+	 * @param vertical Dates and age can be written on multiple lines
 	 * @return A string with date of birth an death
 	 */
-	static String twoDates(Person person, boolean simple) {
+	static String twoDates(Person person, boolean vertical) {
 		String text = "";
 		String endYear = "";
 		Datatore start = null, end = null;
+		boolean ageBelow = false;
 		for( EventFact fact : person.getEventsFacts() ) {
 			if( fact.getTag() != null && fact.getTag().equals("BIRT") && fact.getDate() != null ) {
 				start = new Datatore(fact.getDate());
-				text = start.writeDate(simple);
+				text = start.writeDate(false);
 				break;
 			}
 		}
 		for( EventFact fact : person.getEventsFacts() ) {
 			if( fact.getTag() != null && fact.getTag().equals("DEAT") && fact.getDate() != null ) {
 				end = new Datatore(fact.getDate());
-				endYear = end.writeDate(simple);
-				if( !text.isEmpty() && !endYear.isEmpty() )
-					text += " – ";
+				endYear = end.writeDate(false);
+				if( !text.isEmpty() && !endYear.isEmpty() ) {
+					if( vertical && (text.length() > 7 || endYear.length() > 7) ) {
+						text += "\n";
+						ageBelow = true;
+					} else {
+						text += " – ";
+					}
+				}
 				text += endYear;
 				break;
 			}
 		}
 		// Add the age between parentheses
-		if( !simple && start != null && start.tipo <= 3 && !start.data1.format.toPattern().equals(Format.D_M) ) {
+		if( start != null && start.isSingleKind() && !start.data1.isFormat(Format.D_M) ) {
 			LocalDate startDate = new LocalDate( start.data1.date ); // Converted to joda time
-			// If person is still alive the end is now
-			if( end == null && startDate.isBefore(LocalDate.now())
-					&& Years.yearsBetween(startDate, LocalDate.now()).getYears() < 120 && !morto(person) ) {
-				end = new Datatore(String.format(Locale.ENGLISH, "%te %<Tb %<tY", new Date()));
+			// If the person is still alive the end is now
+			LocalDate now = LocalDate.now();
+			if( end == null && startDate.isBefore(now)
+					&& Years.yearsBetween(startDate, now).getYears() < 120 && !isDead(person) ) {
+				end = new Datatore(now.toDate());
 				endYear = end.writeDate(false);
 			}
-			if( end != null && end.tipo <= 3 && !endYear.equals("") ) { // Plausible dates
+			if( end != null && end.isSingleKind() && !endYear.equals("") ) { // Plausible dates
 				LocalDate endDate = new LocalDate(end.data1.date);
 				if( startDate.isBefore(endDate) || startDate.isEqual(endDate) ) {
 					String units = "";
@@ -225,14 +288,17 @@ public class U {
 					if( age < 2 ) {
 						// Without day and/or month the years start at 1 January
 						age = Months.monthsBetween(startDate, endDate).getMonths();
-						units = " " + Globale.contesto.getText(R.string.months);
+						units = " " + Global.context.getText(R.string.months);
 						if( age < 2 ) {
 							age = Days.daysBetween(startDate, endDate).getDays();
-							units = " " + Globale.contesto.getText(R.string.days);
-							;
+							units = " " + Global.context.getText(R.string.days);
 						}
 					}
-					text += "  (" + age + units + ")";
+					if( ageBelow )
+						text += "\n";
+					else
+						text += "  ";
+					text += "(" + age + units + ")";
 				}
 			}
 		}
@@ -256,46 +322,46 @@ public class U {
 
 	// Genera il nuovo id seguente a quelli già esistenti
 	static int max;
-	public static String nuovoId( Gedcom gc, Class classe ) {
+	public static String nuovoId(Gedcom gc, Class classe) {
 		max = 0;
 		String pre = "";
 		if( classe == Note.class ) {
 			pre = "N";
 			for( Note n : gc.getNotes() )
-				calcolaMax( n );
+				calcolaMax(n);
 		} else if( classe == Submitter.class ) {
 			pre = "U";
 			for( Submitter a : gc.getSubmitters() )
-				calcolaMax( a );
+				calcolaMax(a);
 		} else if( classe == Repository.class ) {
 			pre = "R";
 			for( Repository r : gc.getRepositories() )
-				calcolaMax( r );
+				calcolaMax(r);
 		} else if( classe == Media.class ) {
 			pre = "M";
 			for( Media m : gc.getMedia() )
-				calcolaMax( m );
+				calcolaMax(m);
 		} else if( classe == Source.class ) {
 			pre = "S";
 			for( Source f : gc.getSources() )
-				calcolaMax( f );
+				calcolaMax(f);
 		} else if( classe == Person.class ) {
 			pre = "I";
 			for( Person p : gc.getPeople() )
-				calcolaMax( p );
+				calcolaMax(p);
 		} else if( classe == Family.class ) {
 			pre = "F";
 			for( Family f : gc.getFamilies() )
-				calcolaMax( f );
+				calcolaMax(f);
 		}
-		return pre + (max+1);
+		return pre + (max + 1);
 	}
 
-	private static void calcolaMax( Object oggetto ) {
+	private static void calcolaMax(Object oggetto) {
 		try {
-			String idStringa = (String) oggetto.getClass().getMethod("getId").invoke( oggetto );
-			int num = soloNumeri( idStringa );
-			if( num > max )	max = num;
+			String idStringa = (String)oggetto.getClass().getMethod("getId").invoke(oggetto);
+			int num = soloNumeri(idStringa);
+			if( num > max ) max = num;
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
@@ -303,7 +369,7 @@ public class U {
 
 	// Copia testo negli appunti
 	static void copiaNegliAppunti(CharSequence label, CharSequence text) {
-		ClipboardManager clipboard = (ClipboardManager) Globale.contesto.getSystemService(Context.CLIPBOARD_SERVICE);
+		ClipboardManager clipboard = (ClipboardManager) Global.context.getSystemService(Context.CLIPBOARD_SERVICE);
 		ClipData clip = ClipData.newPlainText( label, text );
 		if (clipboard != null) clipboard.setPrimaryClip(clip);
 	}
@@ -385,14 +451,14 @@ public class U {
 
 	// aggiunge a un Layout una generica voce titolo-testo
 	// Usato seriamente solo da dettaglio.Cambiamenti
-	public static void metti( LinearLayout scatola, String tit, String testo ) {
-		View vistaPezzo = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_fatto, scatola, false );
-		scatola.addView( vistaPezzo );
-		((TextView)vistaPezzo.findViewById( R.id.fatto_titolo )).setText( tit );
-		TextView vistaTesto = vistaPezzo.findViewById( R.id.fatto_testo );
-		if( testo == null ) vistaTesto.setVisibility( View.GONE );
+	public static void metti(LinearLayout scatola, String tit, String testo) {
+		View vistaPezzo = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_fatto, scatola, false);
+		scatola.addView(vistaPezzo);
+		((TextView)vistaPezzo.findViewById(R.id.fatto_titolo)).setText(tit);
+		TextView vistaTesto = vistaPezzo.findViewById(R.id.fatto_testo);
+		if( testo == null ) vistaTesto.setVisibility(View.GONE);
 		else {
-			vistaTesto.setText( testo );
+			vistaTesto.setText(testo);
 			//((TextView)vistaPezzo.findViewById( R.id.fatto_edita )).setText( testo );
 		}
 		//((Activity)scatola.getContext()).registerForContextMenu( vistaPezzo );
@@ -400,7 +466,7 @@ public class U {
 
 	// Compone il testo coi dettagli di un individuo e lo mette nella vista testo
 	// inoltre restituisce lo stesso testo per Confrontatore
-	static String details(Person person, TextView detailsView ) {
+	static String details(Person person, TextView detailsView) {
 		String anni = twoDates(person, false);
 		String luoghi = Anagrafe.dueLuoghi(person);
 		if( anni.isEmpty() && luoghi.isEmpty() && detailsView != null ) {
@@ -419,163 +485,163 @@ public class U {
 	}
 
 	public static View mettiIndividuo( LinearLayout scatola, Person persona, String ruolo ) {
-		View vistaIndi = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_individuo, scatola, false);
-		scatola.addView( vistaIndi );
-		TextView vistaRuolo = vistaIndi.findViewById( R.id.indi_ruolo );
-		if( ruolo == null ) vistaRuolo.setVisibility( View.GONE );
-		else vistaRuolo.setText( ruolo );
-		TextView vistaNome = vistaIndi.findViewById( R.id.indi_nome );
+		View vistaIndi = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo, scatola, false);
+		scatola.addView(vistaIndi);
+		TextView vistaRuolo = vistaIndi.findViewById(R.id.indi_ruolo);
+		if( ruolo == null ) vistaRuolo.setVisibility(View.GONE);
+		else vistaRuolo.setText(ruolo);
+		TextView vistaNome = vistaIndi.findViewById(R.id.indi_nome);
 		String nome = epiteto(persona);
-		if( nome.isEmpty() && ruolo != null ) vistaNome.setVisibility( View.GONE );
-		else vistaNome.setText( nome );
+		if( nome.isEmpty() && ruolo != null ) vistaNome.setVisibility(View.GONE);
+		else vistaNome.setText(nome);
 		TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
-		String titolo = titolo( persona );
-		if( titolo.isEmpty() ) vistaTitolo.setVisibility( View.GONE );
-		else vistaTitolo.setText( titolo );
-		details( persona, vistaIndi.findViewById( R.id.indi_dettagli ) );
-		F.unaFoto( Globale.gc, persona, vistaIndi.findViewById(R.id.indi_foto) );
-		if( !morto(persona) )
-			vistaIndi.findViewById( R.id.indi_lutto ).setVisibility( View.GONE );
+		String titolo = titolo(persona);
+		if( titolo.isEmpty() ) vistaTitolo.setVisibility(View.GONE);
+		else vistaTitolo.setText(titolo);
+		details(persona, vistaIndi.findViewById(R.id.indi_dettagli));
+		F.unaFoto(Global.gc, persona, vistaIndi.findViewById(R.id.indi_foto));
+		if( !isDead(persona) )
+			vistaIndi.findViewById(R.id.indi_lutto).setVisibility(View.GONE);
 		if( Gender.isMale(persona) )
-			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( R.drawable.casella_bordo_maschio );
+			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource(R.drawable.casella_bordo_maschio);
 		else if( Gender.isFemale(persona) )
-			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource( R.drawable.casella_bordo_femmina );
-		vistaIndi.setTag( persona.getId() );
+			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource(R.drawable.casella_bordo_femmina);
+		vistaIndi.setTag(persona.getId());
 		return vistaIndi;
 	}
 
 	// Tutte le note di un oggetto
-	public static void mettiNote( LinearLayout scatola, Object contenitore, boolean dettagli ) {
-		for( final Note nota : ((NoteContainer)contenitore).getAllNotes( Globale.gc ) ) {
-			mettiNota( scatola, nota, dettagli );
+	public static void mettiNote(LinearLayout scatola, Object contenitore, boolean dettagli) {
+		for( final Note nota : ((NoteContainer)contenitore).getAllNotes(Global.gc) ) {
+			mettiNota(scatola, nota, dettagli);
 		}
 	}
 
 	// Aggiunge una singola nota a un layout, con i dettagli o no
-	static void mettiNota( final LinearLayout scatola, final Note nota, boolean dettagli ) {
+	static void mettiNota(final LinearLayout scatola, final Note nota, boolean dettagli) {
 		final Context contesto = scatola.getContext();
-		View vistaNota = LayoutInflater.from(contesto).inflate( R.layout.pezzo_nota, scatola, false);
-		scatola.addView( vistaNota );
-		TextView testoNota = vistaNota.findViewById( R.id.nota_testo );
-		testoNota.setText( nota.getValue() );
+		View vistaNota = LayoutInflater.from(contesto).inflate(R.layout.pezzo_nota, scatola, false);
+		scatola.addView(vistaNota);
+		TextView testoNota = vistaNota.findViewById(R.id.nota_testo);
+		testoNota.setText(nota.getValue());
 		int quanteCitaFonti = nota.getSourceCitations().size();
-		TextView vistaCitaFonti = vistaNota.findViewById( R.id.nota_fonti );
-		if( quanteCitaFonti > 0 && dettagli ) vistaCitaFonti.setText( String.valueOf(quanteCitaFonti) );
-		else vistaCitaFonti.setVisibility( View.GONE );
-		testoNota.setEllipsize( TextUtils.TruncateAt.END );
+		TextView vistaCitaFonti = vistaNota.findViewById(R.id.nota_fonti);
+		if( quanteCitaFonti > 0 && dettagli ) vistaCitaFonti.setText(String.valueOf(quanteCitaFonti));
+		else vistaCitaFonti.setVisibility(View.GONE);
+		testoNota.setEllipsize(TextUtils.TruncateAt.END);
 		if( dettagli ) {
-			testoNota.setMaxLines( 10 );
-			vistaNota.setTag( R.id.tag_oggetto, nota );
+			testoNota.setMaxLines(10);
+			vistaNota.setTag(R.id.tag_oggetto, nota);
 			if( contesto instanceof Individuo ) { // Fragment individuoEventi
 				((AppCompatActivity)contesto).getSupportFragmentManager()
-						.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )	// non garantito in futuro
-						.registerForContextMenu( vistaNota );
+						.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1")    // non garantito in futuro
+						.registerForContextMenu(vistaNota);
 			} else if( scatola.getId() != R.id.dispensa_scatola ) // nelle AppCompatActivity tranne che nella dispensa
-				((AppCompatActivity)contesto).registerForContextMenu( vistaNota );
-			vistaNota.setOnClickListener( v -> {
+				((AppCompatActivity)contesto).registerForContextMenu(vistaNota);
+			vistaNota.setOnClickListener(v -> {
 				if( nota.getId() != null )
-					Memoria.setPrimo( nota );
+					Memoria.setPrimo(nota);
 				else
-					Memoria.aggiungi( nota );
-				contesto.startActivity( new Intent( contesto, Nota.class ) );
+					Memoria.aggiungi(nota);
+				contesto.startActivity(new Intent(contesto, Nota.class));
 			});
 		} else {
-			testoNota.setMaxLines( 3 );
+			testoNota.setMaxLines(3);
 		}
 	}
 
-	static void scollegaNota( Note nota, Object contenitore, View vista ) {
+	static void scollegaNota(Note nota, Object contenitore, View vista) {
 		List<NoteRef> lista = ((NoteContainer)contenitore).getNoteRefs();
 		for( NoteRef ref : lista )
-			if( ref.getNote(Globale.gc).equals( nota ) ) {
-				lista.remove( ref );
+			if( ref.getNote(Global.gc).equals(nota) ) {
+				lista.remove(ref);
 				break;
 			}
-		((NoteContainer)contenitore).setNoteRefs( lista );
+		((NoteContainer)contenitore).setNoteRefs(lista);
 		if( vista != null )
-			vista.setVisibility( View.GONE );
+			vista.setVisibility(View.GONE);
 	}
 
 	// Elimina una Nota inlinea o condivisa
 	// Restituisce un array dei capostipiti modificati
-	public static Object[] eliminaNota( Note nota, View vista ) {
+	public static Object[] eliminaNota(Note note, View view) {
 		Set<Object> capi;
-		if( nota.getId() != null ) {	// nota OBJECT
+		if( note.getId() != null ) { // OBJECT note
 			// Prima rimuove i ref alla nota con un bel Visitor
-			RiferimentiNota eliminatoreNote = new RiferimentiNota( Globale.gc, nota.getId(), true );
-			Globale.gc.accept( eliminatoreNote );
-			Globale.gc.getNotes().remove( nota );	// ok la rimuove se è un'object note
+			RiferimentiNota eliminatoreNote = new RiferimentiNota(Global.gc, note.getId(), true);
+			Global.gc.accept(eliminatoreNote);
+			Global.gc.getNotes().remove(note); // ok la rimuove se è un'object note
 			capi = eliminatoreNote.capostipiti;
-			if( Globale.gc.getNotes().isEmpty() )
-				Globale.gc.setNotes( null );
-		} else { // nota LOCALE
-			new TrovaPila( Globale.gc, nota );
-			NoteContainer nc = (NoteContainer) Memoria.oggettoContenitore();
-			nc.getNotes().remove( nota ); // rimuove solo se è una nota locale, non se object note
+			if( Global.gc.getNotes().isEmpty() )
+				Global.gc.setNotes(null);
+		} else { // LOCAL note
+			new TrovaPila(Global.gc, note);
+			NoteContainer nc = (NoteContainer)Memoria.oggettoContenitore();
+			nc.getNotes().remove(note); // rimuove solo se è una nota locale, non se object note
 			if( nc.getNotes().isEmpty() )
-				nc.setNotes( null );
+				nc.setNotes(null);
 			capi = new HashSet<>();
-			capi.add( Memoria.oggettoCapo() );
+			capi.add(Memoria.oggettoCapo());
 			Memoria.arretra();
 		}
-		Memoria.annullaIstanze( nota );
-		if( vista != null )
-			vista.setVisibility( View.GONE );
+		Memoria.annullaIstanze(note);
+		if( view != null )
+			view.setVisibility(View.GONE);
 		return capi.toArray();
 	}
 
 	// Elenca tutti i media di un oggetto contenitore
-	public static void mettiMedia( LinearLayout scatola, Object contenitore, boolean dettagli ) {
-		RecyclerView griglia = new AdattatoreGalleriaMedia.RiciclaVista( scatola.getContext(), dettagli );
-		griglia.setHasFixedSize( true );
-		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( scatola.getContext(), dettagli?2:3 );
-		griglia.setLayoutManager( gestoreLayout );
+	public static void mettiMedia(LinearLayout scatola, Object contenitore, boolean dettagli) {
+		RecyclerView griglia = new AdattatoreGalleriaMedia.RiciclaVista(scatola.getContext(), dettagli);
+		griglia.setHasFixedSize(true);
+		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(scatola.getContext(), dettagli ? 2 : 3);
+		griglia.setLayoutManager(gestoreLayout);
 		List<ListaMediaContenitore.MedCont> listaMedia = new ArrayList<>();
-		for( Media med : ((MediaContainer)contenitore).getAllMedia(Globale.gc) )
-			listaMedia.add( new ListaMediaContenitore.MedCont(med,contenitore) );
-		AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia( listaMedia, dettagli );
-		griglia.setAdapter( adattatore );
-		scatola.addView( griglia );
+		for( Media med : ((MediaContainer)contenitore).getAllMedia(Global.gc) )
+			listaMedia.add(new ListaMediaContenitore.MedCont(med, contenitore));
+		AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia(listaMedia, dettagli);
+		griglia.setAdapter(adattatore);
+		scatola.addView(griglia);
 	}
 
 	// Di un oggetto inserisce le citazioni alle fonti
-	public static void citaFonti( LinearLayout scatola, Object contenitore ) {
-		if( Globale.preferenze.esperto ) {
+	public static void citaFonti(LinearLayout layout, Object container) {
+		if( Global.settings.expert ) {
 			List<SourceCitation> listaCitaFonti;
-			if( contenitore instanceof Note )	// Note non estende SourceCitationContainer
-				listaCitaFonti = ( (Note) contenitore ).getSourceCitations();
-			else listaCitaFonti = ((SourceCitationContainer)contenitore).getSourceCitations();
+			if( container instanceof Note )    // Note non estende SourceCitationContainer
+				listaCitaFonti = ((Note)container).getSourceCitations();
+			else listaCitaFonti = ((SourceCitationContainer)container).getSourceCitations();
 			for( final SourceCitation citaz : listaCitaFonti ) {
-				View vistaCita = LayoutInflater.from( scatola.getContext() ).inflate( R.layout.pezzo_citazione_fonte, scatola, false );
-				scatola.addView( vistaCita );
-				if( citaz.getSource(Globale.gc) != null )	// source CITATION
-					((TextView)vistaCita.findViewById( R.id.fonte_testo )).setText( Biblioteca.titoloFonte(citaz.getSource(Globale.gc)) );
+				View vistaCita = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_citazione_fonte, layout, false);
+				layout.addView(vistaCita);
+				if( citaz.getSource(Global.gc) != null )    // source CITATION
+					((TextView)vistaCita.findViewById(R.id.fonte_testo)).setText(Biblioteca.titoloFonte(citaz.getSource(Global.gc)));
 				else // source NOTE, oppure Citazione di fonte che è stata eliminata
-					vistaCita.findViewById( R.id.citazione_fonte ).setVisibility( View.GONE );
+					vistaCita.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
 				String t = "";
 				if( citaz.getValue() != null ) t += citaz.getValue() + "\n";
 				if( citaz.getPage() != null ) t += citaz.getPage() + "\n";
 				if( citaz.getDate() != null ) t += citaz.getDate() + "\n";
-				if( citaz.getText() != null ) t += citaz.getText() + "\n";	// vale sia per sourceNote che per sourceCitation
-				TextView vistaTesto = vistaCita.findViewById( R.id.citazione_testo );
-				if( t.isEmpty() ) vistaTesto.setVisibility( View.GONE );
-				else vistaTesto.setText( t.substring( 0, t.length() - 1 ) );
+				if( citaz.getText() != null ) t += citaz.getText() + "\n"; // vale sia per sourceNote che per sourceCitation
+				TextView vistaTesto = vistaCita.findViewById(R.id.citazione_testo);
+				if( t.isEmpty() ) vistaTesto.setVisibility(View.GONE);
+				else vistaTesto.setText(t.substring(0, t.length() - 1));
 				// Tutto il resto
-				LinearLayout scatolaAltro = vistaCita.findViewById( R.id.citazione_note );
-				mettiNote( scatolaAltro, citaz, false );
-				mettiMedia( scatolaAltro, citaz, false );
-				vistaCita.setTag( R.id.tag_oggetto, citaz );
-				if( scatola.getContext() instanceof Individuo ) { // Fragment individuoEventi
-					((AppCompatActivity)scatola.getContext()).getSupportFragmentManager()
-							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":1" )
-							.registerForContextMenu( vistaCita );
-				} else	// AppCompatActivity
-					((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaCita );
+				LinearLayout scatolaAltro = vistaCita.findViewById(R.id.citazione_note);
+				mettiNote(scatolaAltro, citaz, false);
+				mettiMedia(scatolaAltro, citaz, false);
+				vistaCita.setTag(R.id.tag_oggetto, citaz);
+				if( layout.getContext() instanceof Individuo ) { // Fragment individuoEventi
+					((AppCompatActivity)layout.getContext()).getSupportFragmentManager()
+							.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1")
+							.registerForContextMenu(vistaCita);
+				} else    // AppCompatActivity
+					((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaCita);
 
-				vistaCita.setOnClickListener( v -> {
-					Intent intento = new Intent( scatola.getContext(), CitazioneFonte.class );
-					Memoria.aggiungi( citaz );
-					scatola.getContext().startActivity( intento );
+				vistaCita.setOnClickListener(v -> {
+					Intent intento = new Intent(layout.getContext(), CitazioneFonte.class);
+					Memoria.aggiungi(citaz);
+					layout.getContext().startActivity(intento);
 				});
 			}
 		}
@@ -620,13 +686,13 @@ public class U {
 	public static View linkaPersona(LinearLayout scatola, Person p, int scheda) {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo_piccolo, scatola, false);
 		scatola.addView(vistaPersona);
-		F.unaFoto(Globale.gc, p, vistaPersona.findViewById(R.id.collega_foto));
+		F.unaFoto(Global.gc, p, vistaPersona.findViewById(R.id.collega_foto));
 		((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(epiteto(p));
-		String dati = twoDates(p, true);
+		String dati = twoDates(p, false);
 		TextView vistaDettagli = vistaPersona.findViewById(R.id.collega_dati);
 		if( dati.isEmpty() ) vistaDettagli.setVisibility(View.GONE);
 		else vistaDettagli.setText( dati );
-		if( !morto(p) )
+		if( !isDead(p) )
 			vistaPersona.findViewById( R.id.collega_lutto ).setVisibility(View.GONE);
 		if( Gender.isMale(p) )
 			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_maschio);
@@ -663,7 +729,7 @@ public class U {
 	static void linkaFamiglia( LinearLayout scatola, Family fam ) {
 		View vistaFamiglia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_famiglia_piccolo, scatola, false );
 		scatola.addView( vistaFamiglia );
-		((TextView)vistaFamiglia.findViewById( R.id.famiglia_testo )).setText( testoFamiglia(scatola.getContext(),Globale.gc,fam,false) );
+		((TextView)vistaFamiglia.findViewById( R.id.famiglia_testo )).setText( testoFamiglia(scatola.getContext(), Global.gc,fam,false) );
 		vistaFamiglia.setOnClickListener( v -> {
 			Memoria.setPrimo( fam );
 			scatola.getContext().startActivity( new Intent( scatola.getContext(), Famiglia.class ) );
@@ -714,44 +780,49 @@ public class U {
 	}
 
 	// Riconosce il tipo di record e aggiunge il link appropriato alla scatola
-	static void mettiQualsiasi( LinearLayout scatola, Object record ) {
+	static void mettiQualsiasi(LinearLayout scatola, Object record) {
 		if( record instanceof Person )
-			linkaPersona( scatola, (Person)record, 1 );
+			linkaPersona(scatola, (Person)record, 1);
 		else if( record instanceof Source )
-			mettiFonte( scatola, (Source)record, false );
+			mettiFonte(scatola, (Source)record, false);
 		else if( record instanceof Family )
-			linkaFamiglia( scatola, (Family)record );
+			linkaFamiglia(scatola, (Family)record);
 		else if( record instanceof Repository )
-			ArchivioRef.mettiArchivio( scatola, (Repository)record );
+			ArchivioRef.mettiArchivio(scatola, (Repository)record);
 		else if( record instanceof Note )
-			mettiNota( scatola, (Note)record, true );
+			mettiNota(scatola, (Note)record, true);
 		else if( record instanceof Media )
-			linkaMedia( scatola, (Media)record );
+			linkaMedia(scatola, (Media)record);
 		else if( record instanceof Submitter )
-			linkAutore( scatola, (Submitter)record );
+			linkAutore(scatola, (Submitter)record);
 	}
 
 	// Aggiunge al layout il pezzo con la data e tempo di Cambiamento
-	public static View cambiamenti( final LinearLayout scatola, final Change cambi ) {
-		View vistaCambio = null;
-		if( cambi != null && Globale.preferenze.esperto ) {
-			vistaCambio = LayoutInflater.from( scatola.getContext() ).inflate( R.layout.pezzo_data_cambiamenti, scatola, false );
-			scatola.addView( vistaCambio );
-			TextView vistaTesto = vistaCambio.findViewById( R.id.cambi_testo );
-			String dataOra = cambi.getDateTime().getValue() + " - " + cambi.getDateTime().getTime();
-			if( dataOra.isEmpty() ) vistaTesto.setVisibility( View.GONE );
-			else vistaTesto.setText( dataOra );
-			LinearLayout scatolaNote = vistaCambio.findViewById( R.id.cambi_note );
-			for( Estensione altroTag : trovaEstensioni( cambi ) )
-				metti( scatolaNote, altroTag.nome, altroTag.testo );
+	public static View cambiamenti(final LinearLayout layout, final Change change) {
+		View changeView = null;
+		if( change != null && Global.settings.expert ) {
+			changeView = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_data_cambiamenti, layout, false);
+			layout.addView(changeView);
+			TextView textView = changeView.findViewById(R.id.cambi_testo);
+			if( change.getDateTime() != null ) {
+				String txt = "";
+				if( change.getDateTime().getValue() != null )
+					txt = new Datatore(change.getDateTime().getValue()).writeDateLong();
+				if( change.getDateTime().getTime() != null )
+					txt += " - " + change.getDateTime().getTime();
+				textView.setText(txt);
+			}
+			LinearLayout scatolaNote = changeView.findViewById(R.id.cambi_note);
+			for( Estensione altroTag : trovaEstensioni(change) )
+				metti(scatolaNote, altroTag.nome, altroTag.testo);
 			// Grazie al mio contributo la data cambiamento può avere delle note
-			mettiNote( scatolaNote, cambi, false );
-			vistaCambio.setOnClickListener( v -> {
-				Memoria.aggiungi( cambi );
-				scatola.getContext().startActivity( new Intent( scatola.getContext(), Cambiamenti.class ) );
+			mettiNote(scatolaNote, change, false);
+			changeView.setOnClickListener(v -> {
+				Memoria.aggiungi(change);
+				layout.getContext().startActivity(new Intent(layout.getContext(), Cambiamenti.class));
 			});
 		}
-		return vistaCambio;
+		return changeView;
 	}
 
 	// Chiede conferma di eliminare un elemento
@@ -789,22 +860,22 @@ public class U {
 		if( objects != null )
 			aggiornaDate( objects );
 		if( refresh )
-			Globale.editato = true;
+			Global.edited = true;
 
 		// al primo salvataggio marchia gli autori
-		if( Globale.preferenze.alberoAperto().grado == 9 ) {
-			for( Submitter autore : Globale.gc.getSubmitters() )
-				autore.putExtension("passato", true);
-			Globale.preferenze.alberoAperto().grado = 10;
-			Globale.preferenze.salva();
+		if( Global.settings.getCurrentTree().grade == 9 ) {
+			for( Submitter autore : Global.gc.getSubmitters() )
+				autore.putExtension("passed", true);
+			Global.settings.getCurrentTree().grade = 10;
+			Global.settings.save();
 		}
 
-		if( Globale.preferenze.autoSalva )
-			salvaJson(Globale.gc, Globale.preferenze.idAprendo);
+		if( Global.settings.autoSave )
+			salvaJson(Global.gc, Global.settings.openTree);
 		else { // mostra il tasto Salva
-			Globale.daSalvare = true;
-			if( Globale.vistaPrincipe != null ) {
-				NavigationView menu = Globale.vistaPrincipe.findViewById(R.id.menu);
+			Global.daSalvare = true;
+			if( Global.principalView != null ) {
+				NavigationView menu = Global.principalView.findViewById(R.id.menu);
 				menu.getHeaderView(0).findViewById(R.id.menu_salva).setVisibility(View.VISIBLE);
 			}
 		}
@@ -824,11 +895,11 @@ public class U {
 		}
 		try {
 			FileUtils.writeStringToFile(
-					new File( Globale.contesto.getFilesDir(), idAlbero + ".json" ),
-					new JsonParser().toJson( gc ), "UTF-8"
+					new File(Global.context.getFilesDir(), idAlbero + ".json"),
+					new JsonParser().toJson(gc), "UTF-8"
 			);
 		} catch (IOException e) {
-			Toast.makeText( Globale.contesto, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+			Toast.makeText(Global.context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -844,14 +915,14 @@ public class U {
 	}
 
 	static int dpToPx(float dips) {
-		return (int) (dips * Globale.contesto.getResources().getDisplayMetrics().density + 0.5f);
+		return (int) (dips * Global.context.getResources().getDisplayMetrics().density + 0.5f);
 	}
 
 	// Valuta se ci sono individui collegabili rispetto a un individuo.
 	// Usato per decidere se far comparire 'Collega persona esistente' nel menu
 	static boolean ciSonoIndividuiCollegabili(Person person) {
-		int total = Globale.gc.getPeople().size();
-		if( total > 0 && (Globale.preferenze.esperto // gli esperti possono sempre
+		int total = Global.gc.getPeople().size();
+		if( total > 0 && (Global.settings.expert // gli esperti possono sempre
 				|| person == null) ) // in una famiglia vuota unRappresentanteDellaFamiglia è null
 			return true;
 		int kin = Anagrafe.countRelatives(person);
@@ -860,13 +931,13 @@ public class U {
 
 	// Chiede se referenziare un autore nell'header
 	static void autorePrincipale( Context contesto, final String idAutore ) {
-		final Header[] testa = { Globale.gc.getHeader() };
+		final Header[] testa = {Global.gc.getHeader()};
 		if( testa[0] == null || testa[0].getSubmitterRef() == null ) {
 			new AlertDialog.Builder( contesto ).setMessage( R.string.make_main_submitter )
 					.setPositiveButton( android.R.string.yes, (dialog, id) -> {
 						if( testa[0] == null ) {
-							testa[0] = AlberoNuovo.creaTestata( Globale.preferenze.idAprendo+".json" );
-							Globale.gc.setHeader(testa[0]);
+							testa[0] = AlberoNuovo.creaTestata( Global.settings.openTree +".json" );
+							Global.gc.setHeader(testa[0]);
 						}
 						testa[0].setSubmitterRef( idAutore );
 						salvaJson( true );
@@ -875,9 +946,9 @@ public class U {
 	}
 
 	// Restituisce il primo autore non passato
-	static Submitter autoreFresco( Gedcom gc ) {
+	static Submitter autoreFresco(Gedcom gc) {
 		for( Submitter autore : gc.getSubmitters() ) {
-			if( autore.getExtension( "passato" ) == null )
+			if( autore.getExtension("passed") == null )
 				return autore;
 		}
 		return null;
@@ -885,11 +956,11 @@ public class U {
 
 	// Verifica se un autore ha partecipato alle condivisioni, per non farlo eliminare
 	static boolean autoreHaCondiviso( Submitter autore ) {
-		List<Armadio.Invio> condivisioni = Globale.preferenze.alberoAperto().condivisioni;
+		List<Settings.Share> condivisioni = Global.settings.getCurrentTree().shares;
 		boolean inviatore = false;
 		if( condivisioni != null )
-			for( Armadio.Invio invio : condivisioni )
-				if( autore.getId().equals( invio.submitter ) )
+			for( Settings.Share share : condivisioni )
+				if( autore.getId().equals( share.submitter ) )
 					inviatore = true;
 		return inviatore;
 	}
@@ -898,7 +969,7 @@ public class U {
 	static String[] elencoFamiglie(List<Family> listaFamiglie) {
 		List<String> famigliePerno = new ArrayList<>();
 		for( Family fam : listaFamiglie ) {
-			String etichetta = testoFamiglia(Globale.contesto, Globale.gc, fam, true);
+			String etichetta = testoFamiglia(Global.context, Global.gc, fam, true);
 			famigliePerno.add( etichetta );
 		}
 		return famigliePerno.toArray(new String[0]);
@@ -914,7 +985,7 @@ public class U {
 		if( perno == null )
 			concludiSceltaGenitori( contesto, null, 1, 0 );
 		else {
-			List<Family> famiglie = perno.getParentFamilies(Globale.gc);
+			List<Family> famiglie = perno.getParentFamilies(Global.gc);
 			if( famiglie.size() > 1 && cosaAprire > 0 ) {
 				new AlertDialog.Builder( contesto ).setTitle( R.string.which_family )
 						.setItems( elencoFamiglie(famiglie), (dialog, quale) -> {
@@ -927,37 +998,37 @@ public class U {
 	}
 	private static void concludiSceltaGenitori( Context contesto, Person perno, int cosaAprire, int qualeFamiglia ) {
 		if( perno != null )
-			Globale.individuo = perno.getId();
+			Global.indi = perno.getId();
 		if( cosaAprire > 0 ) // Viene impostata la famiglia da mostrare
-			Globale.numFamiglia = qualeFamiglia; // normalmente è la 0
+			Global.familyNum = qualeFamiglia; // normalmente è la 0
 		if( cosaAprire < 2 ) { // Mostra il diagramma
-			if( contesto instanceof Principe ) { // Diagram, Anagrafe o Principe stesso
+			if( contesto instanceof Principal ) { // Diagram, Anagrafe o Principal stesso
 				FragmentManager fm = ((AppCompatActivity)contesto).getSupportFragmentManager();
 				// Nome del frammento precedente nel backstack
-				String previousName = fm.getBackStackEntryAt( fm.getBackStackEntryCount() - 1 ).getName();
+				String previousName = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
 				if( previousName != null && previousName.equals("diagram") )
 					fm.popBackStack(); // Ricliccando su Diagram rimuove dalla storia il frammento di diagramma predente
 				fm.beginTransaction().replace(R.id.contenitore_fragment, new Diagram()).addToBackStack("diagram").commit();
 			} else { // Da individuo o da famiglia
-				contesto.startActivity( new Intent( contesto, Principe.class ) );
+				contesto.startActivity(new Intent(contesto, Principal.class));
 			}
 		} else { // Viene mostrata la famiglia
-			Family family = perno.getParentFamilies(Globale.gc).get(qualeFamiglia);
+			Family family = perno.getParentFamilies(Global.gc).get(qualeFamiglia);
 			if( contesto instanceof Famiglia ) { // Passando di Famiglia in Famiglia non accumula attività nello stack
-				Memoria.replacePrimo( family );
+				Memoria.replacePrimo(family);
 				((Activity)contesto).recreate();
 			} else {
-				Memoria.setPrimo( family );
-				contesto.startActivity( new Intent( contesto, Famiglia.class ) );
+				Memoria.setPrimo(family);
+				contesto.startActivity(new Intent(contesto, Famiglia.class));
 			}
 		}
 	}
 
 	// Per un perno che ha molteplici matrimoni chiede quale mostrare
 	public static void qualiConiugiMostrare(Context contesto, Person perno, Family famiglia) {
-		if( perno.getSpouseFamilies(Globale.gc).size() > 1 && famiglia == null ) {
+		if( perno.getSpouseFamilies(Global.gc).size() > 1 && famiglia == null ) {
 			new AlertDialog.Builder( contesto ).setTitle( R.string.which_family )
-					.setItems( elencoFamiglie(perno.getSpouseFamilies(Globale.gc)), (dialog, quale) -> {
+					.setItems( elencoFamiglie(perno.getSpouseFamilies(Global.gc)), (dialog, quale) -> {
 						concludiSceltaConiugi( contesto, perno, null, quale );
 					}).show();
 		} else {
@@ -965,8 +1036,8 @@ public class U {
 		}
 	}
 	private static void concludiSceltaConiugi(Context contesto, Person perno, Family famiglia, int quale) {
-		Globale.individuo = perno.getId();
-		famiglia = famiglia == null ? perno.getSpouseFamilies(Globale.gc).get(quale) : famiglia;
+		Global.indi = perno.getId();
+		famiglia = famiglia == null ? perno.getSpouseFamilies(Global.gc).get(quale) : famiglia;
 		if( contesto instanceof Famiglia ) {
 			Memoria.replacePrimo( famiglia );
 			((Activity)contesto).recreate(); // Non accumula activity nello stack
@@ -981,9 +1052,9 @@ public class U {
 	// È anche responsabile di settare 'idFamiglia' oppure 'collocazione'
 	static boolean controllaMultiMatrimoni( Intent intento, Context contesto, Fragment frammento ) {
 		String idPerno = intento.getStringExtra( "idIndividuo" );
-		Person perno = Globale.gc.getPerson(idPerno);
-		List<Family> famGenitori = perno.getParentFamilies(Globale.gc);
-		List<Family> famSposi = perno.getSpouseFamilies(Globale.gc);
+		Person perno = Global.gc.getPerson(idPerno);
+		List<Family> famGenitori = perno.getParentFamilies(Global.gc);
+		List<Family> famSposi = perno.getSpouseFamilies(Global.gc);
 		int relazione = intento.getIntExtra( "relazione", 0 );
 		ArrayAdapter<NuovoParente.VoceFamiglia> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
 
@@ -1079,8 +1150,8 @@ public class U {
 		List<Family> vuote = new ArrayList<>();
 		for( Family fam : famiglie ) {
 			int membri = fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size();
-			if( membri <= 1 && fam.getEventsFacts().isEmpty() && fam.getAllMedia(Globale.gc).isEmpty()
-					&& fam.getAllNotes(Globale.gc).isEmpty() && fam.getSourceCitations().isEmpty() ) {
+			if( membri <= 1 && fam.getEventsFacts().isEmpty() && fam.getAllMedia(Global.gc).isEmpty()
+					&& fam.getAllNotes(Global.gc).isEmpty() && fam.getSourceCitations().isEmpty() ) {
 				vuote.add(fam);
 			}
 		}

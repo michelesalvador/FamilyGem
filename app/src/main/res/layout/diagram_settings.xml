@@ -33,8 +33,8 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Uncles and great-uncles"
-			android:layout_marginTop="40dp"/><!-- todo traduci -->
+			android:text="@string/uncles_great_uncles"
+			android:layout_marginTop="40dp"/>
 		<SeekBar
 			android:id="@+id/settings_great_uncles"
 			android:layout_width="match_parent"
@@ -47,8 +47,8 @@
 			android:id="@+id/settings_spouses"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="Spouses"
-			android:layout_marginTop="40dp"/><!-- todo traduci -->
+			android:text="@string/partners"
+			android:layout_marginTop="40dp"/>
 
 		<TextView
 			android:layout_width="wrap_content"
@@ -66,8 +66,8 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Siblings and nephews"
-			android:layout_marginTop="40dp"/><!-- todo traduci -->
+			android:text="@string/siblings_nephews"
+			android:layout_marginTop="40dp"/>
 		<SeekBar
 			android:id="@+id/settings_siblings_nephews"
 			android:layout_width="match_parent"
@@ -79,8 +79,8 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Uncles and cousins"
-			android:layout_marginTop="40dp"/><!-- todo traduci -->
+			android:text="@string/uncles_cousins"
+			android:layout_marginTop="40dp"/>
 		<SeekBar
 			android:id="@+id/settings_uncles_cousins"
 			android:layout_width="match_parent"

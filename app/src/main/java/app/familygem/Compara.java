@@ -38,10 +38,10 @@ public class Compara extends AppCompatActivity {
 		setContentView( R.layout.compara );
 		int idAlbero = getIntent().getIntExtra("idAlbero",1); // Albero vecchio
 		int idAlbero2 = getIntent().getIntExtra("idAlbero2",1); // Albero nuovo ricevuto in condivisione
-		Globale.idAlbero2 = idAlbero2; // servirà alle immagini di Confrontatore e a Conferma
-		Globale.gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
-		Globale.gc2 = Alberi.apriGedcomTemporaneo( idAlbero2, false );
-		if( Globale.gc == null || Globale.gc2 == null ) {
+		Global.treeId2 = idAlbero2; // servirà alle immagini di Confrontatore e a Conferma
+		Global.gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
+		Global.gc2 = Alberi.apriGedcomTemporaneo( idAlbero2, false );
+		if( Global.gc == null || Global.gc2 == null ) {
 			Toast.makeText( this, R.string.no_useful_data, Toast.LENGTH_LONG ).show();
 			onBackPressed();
 			return;
@@ -59,75 +59,75 @@ public class Compara extends AppCompatActivity {
 		Confronto.reset(); // Necessario svuotarlo, ad esempio dopo un cambio di configurazione
 
 		// Confronta tutti i record dei due Gedcom
-		for( Family o2 : Globale.gc2.getFamilies() )
-			confronta( Globale.gc.getFamily(o2.getId()), o2, 7 );
-		for( Family o : Globale.gc.getFamilies() )
-			riconfronta( o, Globale.gc2.getFamily(o.getId()), 7 );
+		for( Family o2 : Global.gc2.getFamilies() )
+			confronta( Global.gc.getFamily(o2.getId()), o2, 7 );
+		for( Family o : Global.gc.getFamilies() )
+			riconfronta( o, Global.gc2.getFamily(o.getId()), 7 );
 
-		for( Person o2 : Globale.gc2.getPeople() )
-			confronta( Globale.gc.getPerson(o2.getId()), o2, 6 );
-		for( Person o : Globale.gc.getPeople() )
-			riconfronta( o, Globale.gc2.getPerson(o.getId()), 6 );
+		for( Person o2 : Global.gc2.getPeople() )
+			confronta( Global.gc.getPerson(o2.getId()), o2, 6 );
+		for( Person o : Global.gc.getPeople() )
+			riconfronta( o, Global.gc2.getPerson(o.getId()), 6 );
 
-		for( Source o2 : Globale.gc2.getSources() )
-			confronta( Globale.gc.getSource(o2.getId()), o2, 5 );
-		for( Source o : Globale.gc.getSources() )
-			riconfronta( o, Globale.gc2.getSource(o.getId()), 5 );
+		for( Source o2 : Global.gc2.getSources() )
+			confronta( Global.gc.getSource(o2.getId()), o2, 5 );
+		for( Source o : Global.gc.getSources() )
+			riconfronta( o, Global.gc2.getSource(o.getId()), 5 );
 
-		for( Media o2 : Globale.gc2.getMedia() )
-			confronta( Globale.gc.getMedia(o2.getId()), o2, 4 );
-		for( Media o : Globale.gc.getMedia() )
-			riconfronta( o, Globale.gc2.getMedia(o.getId()), 4 );
+		for( Media o2 : Global.gc2.getMedia() )
+			confronta( Global.gc.getMedia(o2.getId()), o2, 4 );
+		for( Media o : Global.gc.getMedia() )
+			riconfronta( o, Global.gc2.getMedia(o.getId()), 4 );
 
-		for( Repository o2 : Globale.gc2.getRepositories() )
-			confronta( Globale.gc.getRepository(o2.getId()), o2, 3 );
-		for( Repository o : Globale.gc.getRepositories() )
-			riconfronta( o, Globale.gc2.getRepository(o.getId()), 3 );
+		for( Repository o2 : Global.gc2.getRepositories() )
+			confronta( Global.gc.getRepository(o2.getId()), o2, 3 );
+		for( Repository o : Global.gc.getRepositories() )
+			riconfronta( o, Global.gc2.getRepository(o.getId()), 3 );
 
-		for( Submitter o2 : Globale.gc2.getSubmitters() )
-			confronta( Globale.gc.getSubmitter(o2.getId()), o2, 2 );
-		for( Submitter o : Globale.gc.getSubmitters() )
-			riconfronta( o, Globale.gc2.getSubmitter(o.getId()), 2 );
+		for( Submitter o2 : Global.gc2.getSubmitters() )
+			confronta( Global.gc.getSubmitter(o2.getId()), o2, 2 );
+		for( Submitter o : Global.gc.getSubmitters() )
+			riconfronta( o, Global.gc2.getSubmitter(o.getId()), 2 );
 
-		for( Note o2 : Globale.gc2.getNotes() )
-			confronta( Globale.gc.getNote(o2.getId()), o2, 1 );
-		for( Note o : Globale.gc.getNotes() )
-			riconfronta( o, Globale.gc2.getNote(o.getId()), 1 );
+		for( Note o2 : Global.gc2.getNotes() )
+			confronta( Global.gc.getNote(o2.getId()), o2, 1 );
+		for( Note o : Global.gc.getNotes() )
+			riconfronta( o, Global.gc2.getNote(o.getId()), 1 );
 
-		Armadio.Cassetto cassetto2 = Globale.preferenze.getAlbero( idAlbero2 );
+		Settings.Tree tree2 = Global.settings.getTree(idAlbero2);
 		if( Confronto.getLista().isEmpty() ) {
-			setTitle( R.string.tree_without_news );
-			if( cassetto2.grado != 30 ) {
-				cassetto2.grado = 30;
-				Globale.preferenze.salva();
+			setTitle(R.string.tree_without_news);
+			if( tree2.grade != 30 ) {
+				tree2.grade = 30;
+				Global.settings.save();
 			}
-		} else if( cassetto2.grado != 20 ) {
-			cassetto2.grado = 20;
-			Globale.preferenze.salva();
+		} else if( tree2.grade != 20 ) {
+			tree2.grade = 20;
+			Global.settings.save();
 		}
 
-		arredaScheda( Globale.gc, idAlbero, R.id.compara_vecchio );
-		arredaScheda( Globale.gc2, idAlbero2, R.id.compara_nuovo );
+		arredaScheda(Global.gc, idAlbero, R.id.compara_vecchio);
+		arredaScheda(Global.gc2, idAlbero2, R.id.compara_nuovo);
 
-		((TextView)findViewById(R.id.compara_testo )).setText( getString(R.string.tree_news_imported,Confronto.getLista().size()) );
+		((TextView)findViewById(R.id.compara_testo)).setText(getString(R.string.tree_news_imported, Confronto.getLista().size()));
 
-		Button botton1 = findViewById(R.id.compara_bottone1 );
-		Button botton2 = findViewById(R.id.compara_bottone2 );
+		Button botton1 = findViewById(R.id.compara_bottone1);
+		Button botton2 = findViewById(R.id.compara_bottone2);
 		if( Confronto.getLista().size() > 0 ) {
 			// Rivedi singolarmente
-			botton1.setOnClickListener( v -> {
-				startActivity( new Intent( Compara.this, Confrontatore.class ).putExtra("posizione", 1) );
+			botton1.setOnClickListener(v -> {
+				startActivity(new Intent(Compara.this, Confrontatore.class).putExtra("posizione", 1));
 			});
 			// Accetta tutto
-			botton2.setOnClickListener( v -> {
+			botton2.setOnClickListener(v -> {
 				v.setEnabled(false);
 				Confronto.get().quanteScelte = 0;
 				for( Confronto.Fronte fronte : Confronto.getLista() ) {
 					if( fronte.doppiaOpzione )
 						Confronto.get().quanteScelte++;
 				}
-				Intent intent = new Intent( Compara.this, Confrontatore.class );
-				intent.putExtra( "posizione", 1 );
+				Intent intent = new Intent(Compara.this, Confrontatore.class);
+				intent.putExtra("posizione", 1);
 				if( Confronto.get().quanteScelte > 0 ) { // Dialogo di richiesta revisione
 					new AlertDialog.Builder(this)
 							.setTitle( Confronto.get().quanteScelte == 1 ? getString(R.string.one_update_choice)
@@ -145,12 +145,12 @@ public class Compara extends AppCompatActivity {
 				}
 			});
 		} else {
-			botton1.setText( R.string.delete_imported_tree );
-			botton1.setOnClickListener( v -> {
-				Alberi.eliminaAlbero( Compara.this, idAlbero2 );
+			botton1.setText(R.string.delete_imported_tree);
+			botton1.setOnClickListener(v -> {
+				Alberi.deleteTree(Compara.this, idAlbero2);
 				onBackPressed();
 			});
-			botton2.setVisibility( View.GONE );
+			botton2.setVisibility(View.GONE);
 		}
 	}
 
@@ -225,21 +225,21 @@ public class Compara extends AppCompatActivity {
 
 	void arredaScheda( Gedcom gc, int idAlbero, int idScheda ) {
 		CardView carta = findViewById(idScheda);
-		Armadio.Cassetto cassetto = Globale.preferenze.getAlbero( idAlbero );
-		((TextView)carta.findViewById(R.id.confronto_titolo )).setText( cassetto.nome );
-		((TextView)carta.findViewById(R.id.confronto_testo)).setText( Alberi.scriviDati(this, cassetto) );
+		Settings.Tree tree = Global.settings.getTree(idAlbero);
+		((TextView)carta.findViewById(R.id.confronto_titolo)).setText(tree.title);
+		((TextView)carta.findViewById(R.id.confronto_testo)).setText(Alberi.scriviDati(this, tree));
 		if( idScheda == R.id.compara_nuovo ) {
-			if( cassetto.grado == 30 )
-				carta.setCardBackgroundColor( 0xffdddddd );
+			if( tree.grade == 30 )
+				carta.setCardBackgroundColor(0xffdddddd);
 			else
-				carta.setCardBackgroundColor( getResources().getColor(R.color.evidenzia) );
-			Submitter autore = gc.getSubmitter( cassetto.condivisioni.get( cassetto.condivisioni.size()-1 ).submitter );
-			String txt =  "";
+				carta.setCardBackgroundColor(getResources().getColor(R.color.evidenzia));
+			Submitter autore = gc.getSubmitter(tree.shares.get(tree.shares.size() - 1).submitter);
+			String txt = "";
 			if( autore != null ) {
 				String nome = autore.getName();
 				if( nome == null || nome.isEmpty() )
-					nome = getString( android.R.string.unknownName );
-				txt += getString( R.string.sent_by, nome ) + "\n";
+					nome = getString(android.R.string.unknownName);
+				txt += getString(R.string.sent_by, nome) + "\n";
 			}
 			//if( Confronto.getLista().size() > 0 )
 			//	txt += "Updates:\t";
