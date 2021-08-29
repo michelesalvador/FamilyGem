@@ -105,9 +105,9 @@
     <string name="state">Stát/provincie/kraj</string>
     <string name="city">Město</string>
     <string name="postal_code">PSČ</string>
-    <string name="line_3">Linie 3</string>
-    <string name="line_2">Linie 2</string>
-    <string name="line_1">Linie 1</string>
+    <string name="line_3">Řádek 3</string>
+    <string name="line_2">Řádek 2</string>
+    <string name="line_1">Řádek 1</string>
     <string name="into">Do</string>
     <string name="used_by">Používané</string>
     <string name="blob">Blob</string>

@@ -21,7 +21,7 @@
     <string name="phonetic">Фонетический</string>
     <string name="aka">Также известен как</string>
     <string name="married_name">Замужнее имя</string>
-    <string name="given">Имя</string>
+    <string name="given">Собственное имя</string>
     <string name="link_repository">Ссылка на репозиторий</string>
     <string name="link_source">Источник ссылки</string>
     <string name="link_shared_note">Ссылка на общую заметку</string>

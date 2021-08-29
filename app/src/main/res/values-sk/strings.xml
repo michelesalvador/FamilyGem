@@ -39,9 +39,9 @@
     <string name="which_family_add_sibling">Do ktorej rodiny pridať súrodenca\?</string>
     <string name="which_family_add_parent">Do ktorej rodiny pridať rodiča\?</string>
     <string name="shared_by">Používané</string>
-    <string name="line_3">Línia 3</string>
-    <string name="line_2">Línia 2</string>
-    <string name="line_1">Línia 1</string>
+    <string name="line_3">Riadok 3</string>
+    <string name="line_2">Riadok 2</string>
+    <string name="line_1">Riadok 1</string>
     <string name="used_by">Používané</string>
     <string name="blob">Blob</string>
     <string name="slideshow">Prezentácia</string>
