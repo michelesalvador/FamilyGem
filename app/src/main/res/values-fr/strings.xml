@@ -293,7 +293,7 @@
     <string name="events">Faits</string>
     <string name="really_delete_person">Vous confirmez supprimer cette personne \?</string>
     <string name="person_deleted">Personne supprimée.</string>
-    <string name="generations_display_diagram">Combien de générations à montrer dans le diagramme.</string>
+    <string name="generations_display_diagram">Choisir combien de générations montrer dans le diagramme.</string>
     <string name="diagram_settings">Paramètres de diagramme</string>
     <string name="pdf_exported_ok">PDF exporté.</string>
     <string name="export_pdf">Export PDF</string>
