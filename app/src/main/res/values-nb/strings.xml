@@ -24,7 +24,7 @@
     <string name="february">Februar</string>
     <string name="january">Januar</string>
     <string name="new_family">Ny familie</string>
-    <string name="saved">Lagret</string>
+    <string name="saved">Lagret.</string>
     <string name="dead">Død</string>
     <string name="birth_place">Fødested</string>
     <string name="birth_date">Fødselsdato</string>
@@ -81,7 +81,7 @@
     <string name="id">ID</string>
     <string name="order_by">Sorter etter</string>
     <string name="descendants">Etterfølgere</string>
-    <string name="uncles">Unkler</string>
+    <string name="uncles_great_uncles">Unkler</string>
     <string name="child">Barn</string>
     <string name="parent">Forelder</string>
     <string name="unlink">Opphev lenke</string>
@@ -182,7 +182,7 @@
     <string name="aka">Kallenavn</string>
     <string name="half_sibling">Halvsøsken</string>
     <string name="this_is_root">%s er slektstreets hovedperson.</string>
-    <string name="siblings">Søsken</string>
+    <string name="siblings_nephews">Søsken</string>
     <string name="ancestors">Forfedre</string>
     <string name="diagram_settings">Diagraminnstillinger</string>
     <string name="long_press_menu">Trykk lenge for å vise menyen.
@@ -255,7 +255,7 @@
     <string name="empty_name">Tomt navn</string>
     <string name="no_name">Uten navn</string>
     <string name="from_to">Fra… til</string>
-    <string name="between">Mellom… og</string>
+    <string name="between_and">Mellom… og</string>
     <string name="female">Kvinne</string>
     <string name="male">Mann</string>
     <string name="shared_by">Brukt av</string>

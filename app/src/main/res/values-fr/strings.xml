@@ -50,8 +50,8 @@
     <string name="id">ID</string>
     <string name="order_by">Trier par</string>
     <string name="descendants">Descendants</string>
-    <string name="siblings">Fratrie</string>
-    <string name="uncles">Oncles</string>
+    <string name="siblings_nephews">Fratrie</string>
+    <string name="uncles_great_uncles">Oncles</string>
     <string name="ancestors">Ancêtres</string>
     <string name="child">Enfant</string>
     <string name="spouse">Conjoint</string>
@@ -195,7 +195,7 @@
     <string name="which_family_add_spouse">à quelle famille faut-il ajouter l\'épouse \?</string>
     <string name="which_family_add_parent">à quelle famille faut-il ajouter les parents \?</string>
     <string name="new_family">Nouvelle famille</string>
-    <string name="saved">Enregistré</string>
+    <string name="saved">Enregistré.</string>
     <string name="death_place">Lieu de décès</string>
     <string name="death_date">Date de décès</string>
     <string name="dead">Décédé(e)</string>
@@ -255,10 +255,12 @@
     <string name="empty_name">Nom manquant</string>
     <string name="no_name">Pas de nom</string>
     <string name="date_phrase">Phrase</string>
-    <string name="from_to">De... à</string>
-    <string name="to">à</string>
+    <string name="from_to">De… à</string>
+    <string name="to">À</string>
     <string name="from">De</string>
-    <string name="between">Entre... et</string>
+    <string name="between_and">Entre… et</string>
+    <string name="between">Entre</string>
+    <string name="and">Et</string>
     <string name="before">Avant</string>
     <string name="after">Après</string>
     <string name="publication_facts">Faits publiés</string>

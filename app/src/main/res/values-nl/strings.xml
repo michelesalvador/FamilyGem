@@ -82,8 +82,8 @@
     <string name="surname">Achternaam</string>
     <string name="order_by">Sorteer op</string>
     <string name="descendants">Afstammelingen</string>
-    <string name="siblings">Broers/Zussen</string>
-    <string name="uncles">Ooms</string>
+    <string name="siblings_nephews">Broers/Zussen</string>
+    <string name="uncles_great_uncles">Ooms</string>
     <string name="ancestors">Voorouders</string>
     <string name="generations_display_diagram">Stel in hoeveel generaties u in het diagram wilt weergeven.</string>
     <string name="long_press_menu">Lang indrukken om het menu weer te geven.
@@ -245,7 +245,7 @@
     <string name="inexistent_repository_citation">Bronvermelding ontbreekt</string>
     <string name="ideally_recipient">Normalerwijze de ontvanger van het delen.</string>
     <string name="immigrant">Inwijkeling</string>
-    <string name="between">Tussen... en</string>
+    <string name="between_and">Tussen... en</string>
     <string name="before">Voor</string>
     <string name="after">Na</string>
     <string name="estimated">Geschat</string>
@@ -255,7 +255,7 @@
     <string name="which_family_add_sibling">Aan welk gezin moet de broer of zus worden toegevoegd\?</string>
     <string name="which_family_add_parent">Aan welk gezin moet de ouder worden toegevoegd\?</string>
     <string name="new_family">Nieuwe familie</string>
-    <string name="saved">Opgeslagen</string>
+    <string name="saved">Opgeslagen.</string>
     <string name="death_date">Overlijdensdatum</string>
     <string name="birth_place">Geboorteplaats</string>
     <string name="birth_date">Geboortedatum</string>

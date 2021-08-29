@@ -53,7 +53,7 @@
     <string name="no_name">Без имени</string>
     <string name="date_phrase">Фраза</string>
     <string name="from">Из</string>
-    <string name="between">Между… и</string>
+    <string name="between_and">Между… и</string>
     <string name="before">До</string>
     <string name="after">После</string>
     <string name="estimated">Примерный</string>
@@ -78,7 +78,7 @@
     <string name="which_family_add_sibling">В какую семью следует добавить брата или сестру\?</string>
     <string name="which_family_add_parent">В какую семью следует добавить родителя\?</string>
     <string name="new_family">Новая семья</string>
-    <string name="saved">Сохранено</string>
+    <string name="saved">Сохранено.</string>
     <string name="death_place">Место смерти</string>
     <string name="death_date">Дата смерти</string>
     <string name="dead">Мертв</string>
@@ -193,8 +193,8 @@
     <string name="id">ID</string>
     <string name="order_by">Сортировать по</string>
     <string name="descendants">Потомки</string>
-    <string name="siblings">Братья или сёстры</string>
-    <string name="uncles">Дяди</string>
+    <string name="siblings_nephews">Братья или сёстры</string>
+    <string name="uncles_great_uncles">Дяди</string>
     <string name="ancestors">Предки</string>
     <string name="generations_display_diagram">Установите, сколько поколений отображать на диаграмме.</string>
     <string name="diagram_settings">Настройки диаграммы</string>

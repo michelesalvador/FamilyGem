@@ -49,8 +49,8 @@
     <string name="id">ID</string>
     <string name="order_by">Сортувати за</string>
     <string name="descendants">Нащадки</string>
-    <string name="siblings">Брати/сестри</string>
-    <string name="uncles">Дядьки</string>
+    <string name="siblings_nephews">Брати/сестри</string>
+    <string name="uncles_great_uncles">Дядьки</string>
     <string name="ancestors">Предки</string>
     <string name="generations_display_diagram">Встановіть, скільки поколінь відображати на схемі.</string>
     <string name="diagram_settings">Налаштування діаграми</string>
@@ -202,7 +202,7 @@
     <string name="maiden">Уроджена/Уроджений</string>
     <string name="daughter">Дочка</string>
     <string name="from">Від</string>
-    <string name="between">Між... І</string>
+    <string name="between_and">Між... І</string>
     <string name="exact">Точно</string>
     <string name="december">Грудень</string>
     <string name="november">Листопад</string>
@@ -222,7 +222,7 @@
     <string name="which_family_add_sibling">До якої сім\'ї слід додати брата і сестру\?</string>
     <string name="which_family_add_parent">До якої сім\'ї слід додати батьків\?</string>
     <string name="new_family">Нова сім\'я</string>
-    <string name="saved">Збережено</string>
+    <string name="saved">Збережено.</string>
     <string name="death_place">Місце смерті</string>
     <string name="death_date">Дата смерті</string>
     <string name="birth_place">Місце народження</string>

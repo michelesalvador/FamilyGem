@@ -195,7 +195,7 @@
     <string name="dead">Difunto</string>
     <string name="death_date">Fecha defunción</string>
     <string name="death_place">Lugar defunción</string>
-    <string name="saved">Guardado</string>
+    <string name="saved">Guardado.</string>
     <string name="new_family">Nueva familia</string>
     <string name="which_family_add_parent">¿A qué familia quiere añadir el padre\?</string>
     <string name="which_family_add_sibling">¿A qué familia quiere añadir el hermano\?</string>
@@ -219,10 +219,12 @@
     <string name="estimated">Estimada</string>
     <string name="after">Después</string>
     <string name="before">Antes</string>
-    <string name="between">Entre… y</string>
+    <string name="between_and">Entre… y</string>
+    <string name="between">Entre</string>
+    <string name="and">Y</string>
+    <string name="from_to">De… a</string>
     <string name="from">De</string>
     <string name="to">A</string>
-    <string name="from_to">De… a</string>
     <string name="date_phrase">Frase</string>
     <string name="want_crop_image">¿Quiere recortar esta imagen?</string>
     <string name="not_granted">%s no concedido.</string>
@@ -286,8 +288,8 @@
     <string name="ancestors">Antepasados</string>
     <string name="descendants">Descendientes</string>
     <string name="diagram_settings">Configuración del diagrama</string>
-    <string name="siblings">Hermanos</string>
-    <string name="uncles">Tíos</string>
+    <string name="siblings_nephews">Hermanos</string>
+    <string name="uncles_great_uncles">Tíos</string>
     <string name="accept_all">Aceptar todas</string>
     <string name="long_press_menu">Mantener presionado para mostrar el menú.
 \nPulsar para abrir el perfil.</string>

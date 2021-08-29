@@ -36,7 +36,7 @@ public class EditoreData extends LinearLayout {
 			s(R.string.july), s(R.string.august), s(R.string.september), s(R.string.october), s(R.string.november), s(R.string.december) };
 	String[] anniRuota = new String[101];
 	int[] dateKinds = { R.string.exact, R.string.approximate, R.string.calculated, R.string.estimated,
-			R.string.after, R.string.before, R.string.between,
+			R.string.after, R.string.before, R.string.between_and,
 			R.string.from, R.string.to, R.string.from_to, R.string.date_phrase };
 	Calendar calenda = GregorianCalendar.getInstance();
 	boolean veroImputTesto; // stabilisce se l'utente sta effettivamente digitando sulla tastiera virtuale o se il testo viene cambiato in altro modo

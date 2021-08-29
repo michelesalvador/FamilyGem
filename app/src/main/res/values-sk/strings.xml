@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="want_crop_image">Orezať tento obrázok\?</string>
-    <string name="saved">Uložené</string>
+    <string name="saved">Uložené.</string>
     <string name="dead">Úmrtie</string>
     <string name="publication_facts">Publikácia</string>
     <string name="make_main_submitter">Má byť tento autor hlavnou osobou v rodokmeni\?</string>
     <string name="make_root">Označiť ako hlavnú osobu</string>
-    <string name="uncles">Strýkovia/tety</string>
+    <string name="uncles_great_uncles">Strýkovia/tety</string>
     <string name="generations_display_diagram">Počet generácií zobrazených v diagrame.</string>
     <string name="diagram_settings">Nastavenia diagramu</string>
     <string name="export_pdf">Exportovať súbor PDF</string>
@@ -74,7 +74,7 @@
     <string name="from_to">Od… do</string>
     <string name="to">Do</string>
     <string name="from">Od</string>
-    <string name="between">Medzi… a</string>
+    <string name="between_and">Medzi… a</string>
     <string name="before">Pred</string>
     <string name="after">Po</string>
     <string name="calculated">Vypočítaný</string>
@@ -161,7 +161,7 @@
     <string name="surname">Priezvisko</string>
     <string name="order_by">Zoradiť podľa</string>
     <string name="descendants">Potomkovia</string>
-    <string name="siblings">Súrodenci</string>
+    <string name="siblings_nephews">Súrodenci</string>
     <string name="ancestors">Predkovia</string>
     <string name="pdf_exported_ok">Súbor PDF exportovaný.</string>
     <string name="long_press_menu">Dlhým stlačením zobraziť ponuku.

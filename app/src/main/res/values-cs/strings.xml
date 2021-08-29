@@ -10,7 +10,7 @@
     <string name="tagline">Vytvořte si vlastní rodokmen</string>
     <string name="not_granted">%s neověřený.</string>
     <string name="want_crop_image">Oříznout tenhle obrázek\?</string>
-    <string name="saved">Uloženo</string>
+    <string name="saved">Uloženo.</string>
     <string name="birth_place">Místo narození</string>
     <string name="really_delete_family">Tato rodina bude odstraněna, ale její členové nebudou odstraněni.</string>
     <string name="repository">Archiv</string>
@@ -58,7 +58,7 @@
     <string name="from_to">Od… do</string>
     <string name="to">Do</string>
     <string name="from">Od</string>
-    <string name="between">Mezi... a</string>
+    <string name="between_and">Mezi... a</string>
     <string name="before">Před</string>
     <string name="after">Po</string>
     <string name="estimated">Odhadovaný</string>
@@ -243,8 +243,8 @@
     <string name="id">ID</string>
     <string name="order_by">Seřadit podle</string>
     <string name="descendants">Potomci</string>
-    <string name="siblings">Sourozenci</string>
-    <string name="uncles">Strýcové/tety</string>
+    <string name="siblings_nephews">Sourozenci</string>
+    <string name="uncles_great_uncles">Strýcové/tety</string>
     <string name="ancestors">Předci</string>
     <string name="diagram_settings">Nastavení diagramu</string>
     <string name="pdf_exported_ok">Soubor PDF exportován.</string>

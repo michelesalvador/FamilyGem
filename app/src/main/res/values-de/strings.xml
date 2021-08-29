@@ -54,7 +54,7 @@
     <string name="from_to">Von… zu</string>
     <string name="to">Zu</string>
     <string name="from">Von</string>
-    <string name="between">Zwischen… und</string>
+    <string name="between_and">Zwischen… und</string>
     <string name="before">Vor</string>
     <string name="after">Nach</string>
     <string name="estimated">Geschätzt</string>
@@ -79,7 +79,7 @@
     <string name="which_family_add_sibling">Welcher Familie soll das Geschwisterkind zugeordnet werden\?</string>
     <string name="which_family_add_parent">Welche Familie soll dem Verwandten zugeordnet werden\?</string>
     <string name="new_family">Neue Familie</string>
-    <string name="saved">Gesichert</string>
+    <string name="saved">Gesichert.</string>
     <string name="death_place">Sterbeort</string>
     <string name="death_date">Totesdatum</string>
     <string name="dead">Verstorben</string>
@@ -196,8 +196,8 @@
     <string name="id">ID</string>
     <string name="order_by">Sortiert nach</string>
     <string name="descendants">Nachkommen</string>
-    <string name="siblings">Geschwister</string>
-    <string name="uncles">Onkels/Tanten</string>
+    <string name="siblings_nephews">Geschwister</string>
+    <string name="uncles_great_uncles">Onkels/Tanten</string>
     <string name="ancestors">Vorfahren</string>
     <string name="generations_display_diagram">Wieviele Generationen in einem Diagramm dargestellt werden.</string>
     <string name="diagram_settings">Diagramm einstellungen</string>

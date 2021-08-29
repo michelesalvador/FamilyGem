@@ -24,7 +24,7 @@ android {
 		versionCode 19
 		versionName '0.7.16.5'
 		vectorDrawables.useSupportLibrary = true
-		resConfigs "en", "cs", "de", "eo", "es", "fr", "hr", "it", "nb", "nl", "pl", "pt", "ru", "sk", "sr", "uk"
+		resConfigs "en", "cs", "de", "eo", "es", "fr", "hr", "it", "kn", "mr", "nb", "nl", "pl", "pt", "ru", "sk", "sr", "uk"
 		def utenteAruba = ""
 		def passwordAruba = ""
 		def utenteGeoNames = "demo"

@@ -204,7 +204,7 @@
     <string name="tree_without_news">Stablo bez aktualiziranja</string>
     <string name="notes">Napomene</string>
     <string name="create">Stvori</string>
-    <string name="uncles">Stričevi/Ujaci</string>
+    <string name="uncles_great_uncles">Stričevi/Ujaci</string>
     <string name="complex_tree_advanced_tools">Ovo stablo izgleda prilično složeno.
 \nŽeliš li vidjeti napredne alate koji olakšavaju upravljanje stablom\?</string>
     <string name="cant_understand_uri">Nerazumljena primljena URI adresa.</string>
@@ -248,7 +248,7 @@
     <string name="correct">Ispravno</string>
     <string name="death_date">Datum smrti</string>
     <string name="confirm">Potvrdi</string>
-    <string name="between">Između … i</string>
+    <string name="between_and">Između … i</string>
     <string name="shared_media">Dijeljeni medij</string>
     <string name="written_in">Napisano u</string>
     <string name="link_repository">Poveži spremište</string>
@@ -258,7 +258,7 @@
     <string name="descendants">Potomci</string>
     <string name="given">Ime</string>
     <string name="repository_citation">Citiranje spremišta</string>
-    <string name="siblings">Braća/sestre</string>
+    <string name="siblings_nephews">Braća/sestre</string>
     <string name="reference_number">Broj reference</string>
     <string name="make_root">Postavi kao glavnu osobu</string>
     <string name="date_phrase">Izraz</string>
@@ -273,7 +273,7 @@
     <string name="surname_prefix">Prefiks u prezimenu</string>
     <string name="text">Tekst</string>
     <string name="immigrant">Imigrant</string>
-    <string name="saved">Spremljeno</string>
+    <string name="saved">Spremljeno.</string>
     <string name="accepted_news">Prihvaćena su %d aktualiziranja:
 \n\tDodaci: %d
 \n\tZamjene: %d

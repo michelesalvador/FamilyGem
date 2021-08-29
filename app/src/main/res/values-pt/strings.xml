@@ -108,7 +108,7 @@
     <string name="tagline">Crie sua própria árvore genealógica</string>
     <string name="given">Nome dado</string>
     <string name="sibling">Irmã ou Irmão</string>
-    <string name="siblings">Irmãos</string>
+    <string name="siblings_nephews">Irmãos</string>
     <string name="parent">Pai ou Mãe</string>
     <string name="empty_family_delete">Restaram algumas famílias vazias.
 \nQuer apagá-los\?</string>
@@ -126,7 +126,7 @@
     <string name="from_to">De... para</string>
     <string name="to">Para</string>
     <string name="from">De</string>
-    <string name="between">Entre... e</string>
+    <string name="between_and">Entre... e</string>
     <string name="before">Antes</string>
     <string name="after">Depois de</string>
     <string name="estimated">Estimado</string>
@@ -151,7 +151,7 @@
     <string name="which_family_add_sibling">A qual família o irmão deve ser adicionado\?</string>
     <string name="which_family_add_parent">A qual família o pai deve ser adicionado\?</string>
     <string name="new_family">Família nova</string>
-    <string name="saved">Salvou</string>
+    <string name="saved">Salvou.</string>
     <string name="death_place">Local da morte</string>
     <string name="death_date">Data de óbito</string>
     <string name="dead">Morto</string>
@@ -284,7 +284,7 @@
     <string name="id">ID</string>
     <string name="order_by">Ordenar por</string>
     <string name="descendants">Descendentes</string>
-    <string name="uncles">Tios</string>
+    <string name="uncles_great_uncles">Tios</string>
     <string name="ancestors">Antepassados</string>
     <string name="generations_display_diagram">Defina quantas gerações mostrar no diagrama.</string>
     <string name="diagram_settings">Configurações do diagrama</string>

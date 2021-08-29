@@ -134,8 +134,8 @@
     <string name="diagram_settings">Ustawienia diagramu</string>
     <string name="generations_display_diagram">Ustaw liczbę pokoleń do wyświetlenia na schemacie.</string>
     <string name="ancestors">Przodków</string>
-    <string name="uncles">Wujków/Ciotek</string>
-    <string name="siblings">Rodzeństwo</string>
+    <string name="uncles_great_uncles">Wujków/Ciotek</string>
+    <string name="siblings_nephews">Rodzeństwo</string>
     <string name="descendants">Potomków</string>
     <string name="order_by">Sortuj według</string>
     <string name="id">ID</string>
@@ -264,7 +264,7 @@
     <string name="dead">Nie żyje</string>
     <string name="death_date">Data śmierci</string>
     <string name="death_place">Miejsce śmierci</string>
-    <string name="saved">Zapisano</string>
+    <string name="saved">Zapisano.</string>
     <string name="new_family">Nowa rodzina</string>
     <string name="which_family_add_parent">Do której rodziny dodać rodzica?</string>
     <string name="which_family_add_sibling">Do której rodziny dodać rodzeństwo?</string>
@@ -289,7 +289,7 @@
     <string name="estimated">Szacowana</string>
     <string name="after">Po</string>
     <string name="before">Przed</string>
-    <string name="between">Pomiędzy… i</string>
+    <string name="between_and">Pomiędzy… i</string>
     <string name="from">Z</string>
     <string name="to">Do</string>
     <string name="from_to">Z… do</string>

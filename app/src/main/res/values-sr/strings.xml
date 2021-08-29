@@ -16,7 +16,7 @@
     <string name="from_to">Od … do</string>
     <string name="to">Do</string>
     <string name="from">Od</string>
-    <string name="between">Između … i</string>
+    <string name="between_and">Između … i</string>
     <string name="before">Pre</string>
     <string name="after">Nakon</string>
     <string name="estimated">Približno</string>
@@ -41,7 +41,7 @@
     <string name="which_family_add_sibling">Kojoj porodici dodati brata/sestru\?</string>
     <string name="which_family_add_parent">Kojoj porodici dodati roditelja\?</string>
     <string name="new_family">Nova porodica</string>
-    <string name="saved">Sačuvano</string>
+    <string name="saved">Sačuvano.</string>
     <string name="death_place">Mesto smrti</string>
     <string name="death_date">Datum smrti</string>
     <string name="dead">Mrtav/mrtva</string>
@@ -175,8 +175,8 @@
     <string name="id">ID</string>
     <string name="order_by">Sortiraj po</string>
     <string name="descendants">Potomci</string>
-    <string name="siblings">Braća/sestre</string>
-    <string name="uncles">Stričevi/Ujaci</string>
+    <string name="siblings_nephews">Braća/sestre</string>
+    <string name="uncles_great_uncles">Stričevi/Ujaci</string>
     <string name="ancestors">Preci</string>
     <string name="generations_display_diagram">Postavi broj generacija koje se prikazuju u dijagramu.</string>
     <string name="diagram_settings">Postavke dijagrama</string>

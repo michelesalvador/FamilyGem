@@ -11,7 +11,7 @@
     <string name="from_to">El… al</string>
     <string name="to">Al</string>
     <string name="from">El</string>
-    <string name="between">Inter… kaj</string>
+    <string name="between_and">Inter… kaj</string>
     <string name="after">Post</string>
     <string name="before">Antaŭ</string>
     <string name="estimated">Taksita</string>
@@ -31,7 +31,7 @@
     <string name="february">Februaro</string>
     <string name="january">Januaro</string>
     <string name="new_family">Nova familio</string>
-    <string name="saved">Konservita</string>
+    <string name="saved">Konservita.</string>
     <string name="death_place">Mortejo</string>
     <string name="death_date">Mortotago</string>
     <string name="dead">Malviva</string>
@@ -103,8 +103,8 @@
     <string name="year">Jaro</string>
     <string name="order_by">Ordigi laŭ</string>
     <string name="descendants">Idoj</string>
-    <string name="siblings">Fratoj</string>
-    <string name="uncles">Onkloj</string>
+    <string name="siblings_nephews">Fratoj</string>
+    <string name="uncles_great_uncles">Onkloj</string>
     <string name="pdf_exported_ok">PDF elportita.</string>
     <string name="export_pdf">Elporti PDF</string>
     <string name="child">Infano</string>
