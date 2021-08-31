@@ -176,7 +176,7 @@
     <string name="residence">Prebivalište</string>
     <string name="new_family">Nova obitelj</string>
     <string name="shares">Dijeljenja</string>
-    <string name="copy">Kopiraj</string>
+    <string name="copy">Kopiraj tekst</string>
     <string name="italic">Kurzivi</string>
     <string name="sex">Spol</string>
     <string name="new_shared_media">Nov dijeljeni medij</string>
@@ -204,7 +204,7 @@
     <string name="tree_without_news">Stablo bez aktualiziranja</string>
     <string name="notes">Napomene</string>
     <string name="create">Stvori</string>
-    <string name="uncles_great_uncles">Stričevi/Ujaci</string>
+    <string name="uncles_great_uncles">Stričevi i ujaci</string>
     <string name="complex_tree_advanced_tools">Ovo stablo izgleda prilično složeno.
 \nŽeliš li vidjeti napredne alate koji olakšavaju upravljanje stablom\?</string>
     <string name="cant_understand_uri">Nerazumljena primljena URI adresa.</string>
@@ -258,7 +258,7 @@
     <string name="descendants">Potomci</string>
     <string name="given">Ime</string>
     <string name="repository_citation">Citiranje spremišta</string>
-    <string name="siblings_nephews">Braća/sestre</string>
+    <string name="siblings_nephews">Braća i sestara i nećaci</string>
     <string name="reference_number">Broj reference</string>
     <string name="make_root">Postavi kao glavnu osobu</string>
     <string name="date_phrase">Izraz</string>
@@ -342,4 +342,29 @@
     <string name="aware_upload_server">Imajte na umu da ćete cijelo stablo prenijeti na poslužitelj na mreži.</string>
     <string name="share_sensitive">Dijeljenje osjetljivih podataka</string>
     <string name="not_memory_tree">Nema dovoljno memorije za ovo stablo.</string>
+    <string name="and">i</string>
+    <string name="between">između</string>
+    <string name="separation">Odvajanje</string>
+    <string name="common_law_marriage">Opće pravo</string>
+    <string name="religious_marriage">Vjerski</string>
+    <string name="civil_marriage">Građanski</string>
+    <string name="living_apart_together">Odvojeni suživot</string>
+    <string name="living_together">Suživot</string>
+    <string name="registered_partnership">Registrirano partnerstvo</string>
+    <string name="partnership">Partnerstvo</string>
+    <string name="not_married">Neoženjen/neudata</string>
+    <string name="unknown_relationship">Nepoznata</string>
+    <string name="relationship">Veza</string>
+    <string name="ex_wife">Bivša žena</string>
+    <string name="ex_husband">Bivši muž</string>
+    <string name="ex_spouse">Bivši supružnik</string>
+    <string name="ex_female_partner">Bivša partnerica</string>
+    <string name="ex_male_partner">Bivši partner</string>
+    <string name="ex_partner">Bivši partner</string>
+    <string name="female_partner">Partnerica</string>
+    <string name="male_partner">Partner</string>
+    <string name="partner">Partner</string>
+    <string name="age">Dob</string>
+    <string name="uncles_cousins">Stričevi i rođaci</string>
+    <string name="partners">Partneri</string>
 </resources>
