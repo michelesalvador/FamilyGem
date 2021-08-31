@@ -7,7 +7,7 @@
     <string name="make_main_submitter">Má byť tento autor hlavnou osobou v rodokmeni\?</string>
     <string name="make_root">Označiť ako hlavnú osobu</string>
     <string name="uncles_great_uncles">Strýkovia/tety</string>
-    <string name="generations_display_diagram">Počet generácií zobrazených v diagrame.</string>
+    <string name="generations_display_diagram">Nastavenie počtu generácií zobrazených v diagrame.</string>
     <string name="diagram_settings">Nastavenia diagramu</string>
     <string name="export_pdf">Exportovať súbor PDF</string>
     <string name="all_imported_delete">Všetky aktualizácie sú importované.
@@ -333,4 +333,13 @@
     <string name="change_date">Dátum zmeny</string>
     <string name="done">Hotovo</string>
     <string name="cancel">Zrušiť</string>
+    <string name="family_as">Rodina (ako %s)</string>
+    <string name="turns_years_old">%s má dnes %d rokov.</string>
+    <string name="birthday_notified_midday">Dátum narodenia každej osoby bude oznámený na poludnie.</string>
+    <string name="birthdays">Narodeniny</string>
+    <string name="allow_developer_access">Povoliť vývojárovi aplikáciíe prístup k zdieľanému stromu</string>
+    <string name="remind_later">Pripomenúť neskôr</string>
+    <string name="aware_upload_server">Uvedomte si, že nahráte celý strom na server online.</string>
+    <string name="share_sensitive">Zdieľanie citlivých údajov</string>
+    <string name="not_memory_tree">Nedostatok pamäte pre tento strom.</string>
 </resources>
