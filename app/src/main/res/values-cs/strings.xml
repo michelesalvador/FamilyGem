@@ -25,7 +25,7 @@
     <string name="half_sibling">Nevlastní sourozenec</string>
     <string name="make_root">Označit jako hlavní osobu</string>
     <string name="really_delete_person">Opravdu odstranit tuhle osobu\?</string>
-    <string name="generations_display_diagram">Počet generací zobrazených v diagramu.</string>
+    <string name="generations_display_diagram">Nastavení počtu generací zobrazených v diagramu.</string>
     <string name="updates_replace_add">Vybrat, zda aktualizace mají nahradit stávající položky nebo být přidány jako nové.</string>
     <string name="sent_by">Odeslané %s</string>
     <string name="click_this_link">Kliknutím na tenhle odkaz zobrazit můj rodokmen: %s</string>
@@ -333,4 +333,13 @@
     <string name="version_name">Verze %s</string>
     <string name="cant_understand_uri">Nelze pochopit přijatý identifikátor URI.</string>
     <string name="sure_delete">Opravdu odstranit\?</string>
+    <string name="family_as">Rodina (jako %s)</string>
+    <string name="turns_years_old">%s má dnes %d let.</string>
+    <string name="birthday_notified_midday">Narozeniny každé osoby budou oznámeny v poledne.</string>
+    <string name="birthdays">Narozeniny</string>
+    <string name="allow_developer_access">Povolení přístupu vývojáři aplikace ke sdílenému stromu</string>
+    <string name="remind_later">Připomenout později</string>
+    <string name="aware_upload_server">Uvědomte si, že celý strom nahrajete na server online.</string>
+    <string name="share_sensitive">Sdílení citlivých údajů</string>
+    <string name="not_memory_tree">Nedostatek paměti pro tenhle strom.</string>
 </resources>
