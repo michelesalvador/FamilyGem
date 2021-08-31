@@ -333,4 +333,13 @@
     <string name="half_brother">Зведений брат</string>
     <string name="half_sibling">Пасинок</string>
     <string name="to">До</string>
+    <string name="family_as">Сім\'я (як %s)</string>
+    <string name="turns_years_old">%s сьогодні виповнюється %d років.</string>
+    <string name="birthday_notified_midday">День народження кожної людини буде повідомлено опівдні.</string>
+    <string name="birthdays">День народження</string>
+    <string name="allow_developer_access">Дозволити розробнику програми отримати доступ до спільного дерева</string>
+    <string name="remind_later">Нагадати пізніше</string>
+    <string name="aware_upload_server">Майте на увазі, що ви збираєтесь завантажити все дерево на сервер в Інтернеті.</string>
+    <string name="share_sensitive">Надання спільного доступу до конфіденційних даних</string>
+    <string name="not_memory_tree">Недостатньо пам\'яті для цього дерева.</string>
 </resources>
