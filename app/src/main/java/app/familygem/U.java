@@ -467,21 +467,21 @@ public class U {
 	// Compone il testo coi dettagli di un individuo e lo mette nella vista testo
 	// inoltre restituisce lo stesso testo per Confrontatore
 	static String details(Person person, TextView detailsView) {
-		String anni = twoDates(person, false);
-		String luoghi = Anagrafe.dueLuoghi(person);
-		if( anni.isEmpty() && luoghi.isEmpty() && detailsView != null ) {
+		String dates = twoDates(person, false);
+		String places = Anagrafe.twoPlaces(person);
+		if( dates.isEmpty() && places == null && detailsView != null ) {
 			detailsView.setVisibility(View.GONE);
 		} else {
-			if( (anni.length() >= 10 || luoghi.length() >= 20) && (!anni.isEmpty() && !luoghi.isEmpty()) )
-				anni += "\n" + luoghi;
-			else
-				anni += "   " + luoghi;
+			if( !dates.isEmpty() && places != null && (dates.length() >= 10 || places.length() >= 20) )
+				dates += "\n" + places;
+			else if( places != null )
+				dates += "   " + places;
 			if( detailsView != null ) {
-				detailsView.setText(anni.trim());
+				detailsView.setText(dates.trim());
 				detailsView.setVisibility(View.VISIBLE);
 			}
 		}
-		return anni.trim();
+		return dates.trim();
 	}
 
 	public static View mettiIndividuo( LinearLayout scatola, Person persona, String ruolo ) {

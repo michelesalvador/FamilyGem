@@ -1,4 +1,10 @@
-Family Gem è uno strumento che ti permette di creare alberi genealogici completi.
-Puoi inserire nomi, date, luoghi, eventi e foto nei profili delle persone e soprattutto stabilire le relazioni di parentela tra di loro, e automagicamente il tuo albero genealogico prenderà forma.
-Family Gem può scambiare alberi con altri programmi tramite file GEDCOM.
-Una volta creato l'albero puio condividerlo con i tuoi parenti.
+Family Gem è un'app gratutita per Android che ti consente di creare alberi genealogici completi.
+
+Con Family Gem puoi:
+
+* Creare un albero genealogico da zero, inserendo nomi, date, luoghi, eventi, foto e fonti.
+* Importare un albero esistente attraverso un file GEDCOM e modificarlo come preferisci.
+* Esportare l'albero che hai creato (sempre tramite GEDCOM) in qualsiasi altro programma genealogico.
+* Condividere un albero con i tuoi parenti, lasciando che lo arrichiscano e ricevendo indietro gli aggiornamenti.
+
+Per un aiuto, prima dai un'occhiata alle <a href='https://github.com/michelesalvador/FamilyGem/wiki'>pagine wiki</a>.

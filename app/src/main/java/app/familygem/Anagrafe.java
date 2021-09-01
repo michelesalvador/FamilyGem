@@ -38,8 +38,8 @@ import static app.familygem.Global.gc;
 
 public class Anagrafe extends Fragment {
 
-	private List<Person> listaIndividui;
-	public AdattatoreAnagrafe adattatore;
+	List<Person> people;
+	AdattatoreAnagrafe adapter;
 	private Order order;
 	private boolean gliIdsonoNumerici;
 
@@ -59,29 +59,29 @@ public class Anagrafe extends Fragment {
 	};
 
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
-		View vista = inflater.inflate( R.layout.ricicla_vista, container, false );
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+		View vista = inflater.inflate(R.layout.ricicla_vista, container, false);
 		if( gc != null ) {
-			listaIndividui = gc.getPeople();
+			people = gc.getPeople();
 			arredaBarra();
-			RecyclerView vistaLista = vista.findViewById( R.id.riciclatore );
-			vistaLista.setPadding( 12, 12, 12, vistaLista.getPaddingBottom() );
-			adattatore = new AdattatoreAnagrafe();
-			vistaLista.setAdapter( adattatore );
+			RecyclerView vistaLista = vista.findViewById(R.id.riciclatore);
+			vistaLista.setPadding(12, 12, 12, vistaLista.getPaddingBottom());
+			adapter = new AdattatoreAnagrafe();
+			vistaLista.setAdapter(adapter);
 			gliIdsonoNumerici = verificaIdNumerici();
-			vista.findViewById( R.id.fab ).setOnClickListener( v -> {
-				Intent intento = new Intent( getContext(), EditaIndividuo.class );
-				intento.putExtra( "idIndividuo", "TIZIO_NUOVO" );
-				startActivity( intento );
+			vista.findViewById(R.id.fab).setOnClickListener(v -> {
+				Intent intento = new Intent(getContext(), EditaIndividuo.class);
+				intento.putExtra("idIndividuo", "TIZIO_NUOVO");
+				startActivity(intento);
 			});
 		}
 		return vista;
 	}
 
 	void arredaBarra() {
-		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaIndividui.size() + " "
-				+ getString(listaIndividui.size()==1 ? R.string.person : R.string.persons).toLowerCase() );
-		if( listaIndividui.size() > 1 )
+		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(people.size() + " "
+				+ getString(people.size() == 1 ? R.string.person : R.string.persons).toLowerCase());
+		if( people.size() > 1 )
 			setHasOptionsMenu(true);
 		else
 			setHasOptionsMenu(false);
@@ -89,15 +89,15 @@ public class Anagrafe extends Fragment {
 
 	public class AdattatoreAnagrafe extends RecyclerView.Adapter<GestoreIndividuo> implements Filterable {
 		@Override
-		public GestoreIndividuo onCreateViewHolder( ViewGroup parent, int tipo ) {
-			View vistaIndividuo = LayoutInflater.from( parent.getContext() )
+		public GestoreIndividuo onCreateViewHolder(ViewGroup parent, int tipo) {
+			View vistaIndividuo = LayoutInflater.from(parent.getContext())
 					.inflate(R.layout.pezzo_individuo, parent, false);
-			registerForContextMenu( vistaIndividuo );
-			return new GestoreIndividuo( vistaIndividuo );
+			registerForContextMenu(vistaIndividuo);
+			return new GestoreIndividuo(vistaIndividuo);
 		}
 		@Override
 		public void onBindViewHolder(GestoreIndividuo gestore, int posizione) {
-			Person person = listaIndividui.get(posizione);
+			Person person = people.get(posizione);
 			View vistaIndi = gestore.vista;
 
 			String label = null;
@@ -147,7 +147,7 @@ public class Anagrafe extends Fragment {
 				protected FilterResults performFiltering(CharSequence charSequence) {
 					String query = charSequence.toString();
 					if (query.isEmpty()) {
-						listaIndividui = gc.getPeople();
+						people = gc.getPeople();
 					} else {
 						List<Person> filteredList = new ArrayList<>();
 						for (Person pers : gc.getPeople()) {
@@ -155,11 +155,11 @@ public class Anagrafe extends Fragment {
 								filteredList.add(pers);
 							}
 						}
-						listaIndividui = filteredList;
+						people = filteredList;
 					}
 					sortPeople();
 					FilterResults filterResults = new FilterResults();
-					filterResults.values = listaIndividui;
+					filterResults.values = people;
 					return filterResults;
 				}
 				@Override
@@ -170,7 +170,7 @@ public class Anagrafe extends Fragment {
 		}
 		@Override
 		public int getItemCount() {
-			return listaIndividui.size();
+			return people.size();
 		}
 	}
 
@@ -256,7 +256,7 @@ public class Anagrafe extends Fragment {
 	}
 
 	private void sortPeople() {
-		Collections.sort(listaIndividui, (p1, p2) -> {
+		Collections.sort(people, (p1, p2) -> {
 			switch( order ) {
 				case ID_ASC: // Sort for GEDCOM ID
 					if( gliIdsonoNumerici )
@@ -392,41 +392,98 @@ public class Anagrafe extends Fragment {
 		return days;
 	}
 
-	// riceve una persona e restitusce i due luoghi: iniziale – finale
-	static String dueLuoghi( Person p ) {
-		String luoghi = "";
-		List<EventFact> fatti = p.getEventsFacts();
-		for( EventFact unFatto : fatti ) {
-			if( unFatto.getPlace() != null ) {
-				luoghi = togliVirgole( unFatto.getPlace() );
-				break;
+	// Write the two main places of a person (initial – final) or null
+	static String twoPlaces(Person person) {
+		List<EventFact> facts = person.getEventsFacts();
+		// One single event
+		if( facts.size() == 1 ) {
+			String place = facts.get(0).getPlace();
+			if( place != null )
+				return stripCommas(place);
+		} // Sex and another event
+		else if( facts.size() == 2 && ("SEX".equals(facts.get(0).getTag()) || "SEX".equals(facts.get(1).getTag())) ) {
+			String place;
+			if( "SEX".equals(facts.get(0).getTag()) )
+				place = facts.get(1).getPlace();
+			else
+				place = facts.get(0).getPlace();
+			if( place != null )
+				return stripCommas(place);
+		} // Multiple events
+		else if( facts.size() >= 2 ) {
+			String[] places = new String[7];
+			for( EventFact ef : facts ) {
+				String place = ef.getPlace();
+				if( place != null ) {
+					switch( ef.getTag() ) {
+						case "BIRT":
+							places[0] = place;
+							break;
+						case "BAPM":
+							places[1] = place;
+							break;
+						case "DEAT":
+							places[4] = place;
+							break;
+						case "CREM":
+							places[5] = place;
+							break;
+						case "BURI":
+							places[6] = place;
+							break;
+						default:
+							if( places[2] == null ) // First of other events
+								places[2] = place;
+							if( !place.equals(places[2]) )
+								places[3] = place; // Last of other events
+					}
+				}
 			}
-		}
-		for(int i=fatti.size()-1; i>=0; i-- ) {
-			String secondoLuogo = fatti.get(i).getPlace();
-			if( secondoLuogo != null ) {
-				secondoLuogo = togliVirgole(secondoLuogo);
-				if( !secondoLuogo.equals(luoghi) )
-					luoghi = luoghi.concat(" – ").concat(secondoLuogo);
-				break;
+			String text = null;
+			int i;
+			// Write initial place
+			for( i = 0; i < places.length; i++ ) {
+				String place = places[i];
+				if( place != null ) {
+					text = stripCommas(place);
+					break;
+				}
 			}
+			// Priority to death event as final place
+			if( text != null && i < 4 && places[4] != null ) {
+				String place = stripCommas(places[4]);
+				if( !place.equals(text) )
+					text += " – " + place;
+			} else {
+				for( int j = places.length - 1; j > i; j-- ) {
+					String place = places[j];
+					if( place != null ) {
+						place = stripCommas(place);
+						if( !place.equals(text) ) {
+							text += " – " + place;
+							break;
+						}
+					}
+				}
+			}
+			return text;
 		}
-		return luoghi;
+		return null;
 	}
 
 	// riceve un luogo stile Gedcom e restituisce il primo nome tra le virgole
-	private static String togliVirgole( String luogo ) {
+	private static String stripCommas(String place) {
 		// salta le virgole iniziali per luoghi tipo ',,,England'
-		int iniz = 0;
-		for( char c : luogo.toCharArray() ) {
-			if( c!=',' && c!=' ' )
+		int start = 0;
+		for( char c : place.toCharArray() ) {
+			if( c != ',' && c != ' ' )
 				break;
-			iniz++;
+			start++;
 		}
-		luogo = luogo.substring(iniz);
-		if( luogo.indexOf(",") > 0 )
-			luogo = luogo.substring( 0, luogo.indexOf(",") );
-		return luogo;
+		place = place.substring(start);
+		if( place.indexOf(",") > 0 )
+			place = place.substring(0, place.indexOf(","));
+		return place;
 	}
 
 	/** Count how many near relatives a person has: parents, siblings, step-siblings, spouses and children.
@@ -491,7 +548,7 @@ public class Anagrafe extends Fragment {
 		vistaCerca.setOnQueryTextListener( new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextChange( String query ) {
-				adattatore.getFilter().filter(query);
+				adapter.getFilter().filter(query);
 				return true;
 			}
 			@Override
@@ -513,7 +570,7 @@ public class Anagrafe extends Fragment {
 			else
 				order = Order.values()[id * 2 - 1];
 			sortPeople();
-			adattatore.notifyDataSetChanged();
+			adapter.notifyDataSetChanged();
 			//U.salvaJson( false ); // dubbio se metterlo per salvare subito il riordino delle persone...
 			return true;
 		}
@@ -551,7 +608,7 @@ public class Anagrafe extends Fragment {
 			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_person )
 					.setPositiveButton( R.string.delete, (dialog, i) -> {
 						Family[] famiglie = eliminaPersona(getContext(), idIndi);
-						adattatore.notifyDataSetChanged();
+						adapter.notifyDataSetChanged();
 						arredaBarra();
 						U.controllaFamiglieVuote(getContext(), null, false, famiglie);
 					}).setNeutralButton( R.string.cancel, null ).show();

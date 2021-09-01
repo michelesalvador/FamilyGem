@@ -110,9 +110,12 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			if( attuale instanceof Diagram ) {
 				((Diagram)attuale).forceDraw = true; // Così ridisegna il diagramma
 			} else if( attuale instanceof Anagrafe ) {
-				// Aggiorna la lista di persone
-				((Anagrafe)attuale).adattatore.notifyDataSetChanged();
-				((Anagrafe)attuale).arredaBarra();
+				// Update persons list
+				Anagrafe anagrafe = (Anagrafe)attuale;
+				if( anagrafe.people.size() == 0 ) // Probably it's a Collections.EmptyList
+					anagrafe.people = gc.getPeople(); // replace it with the real ArrayList
+				anagrafe.adapter.notifyDataSetChanged();
+				anagrafe.arredaBarra();
 			} else if( attuale instanceof Galleria ) {
 				((Galleria)attuale).ricrea();
 			} else {

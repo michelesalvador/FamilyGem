@@ -307,62 +307,62 @@ public class Dettaglio extends AppCompatActivity {
 
 	// Imposta ciò che è stato scelto nelle liste
 	@Override
-	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
-		super.onActivityResult( requestCode, resultCode, data );
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		if( resultCode == RESULT_OK ) {
 			// Dal submenu 'Collega...' in FAB
 			if( requestCode == 34417 ) { // Familiare scelto in Anagrafe
 				Person aggiungendo = gc.getPerson(data.getStringExtra("idParente"));
-				Famiglia.aggrega( aggiungendo, (Family)object, data.getIntExtra("relazione",0) );
-				U.salvaJson( true, Memoria.oggettoCapo() );
+				Famiglia.aggrega(aggiungendo, (Family)object, data.getIntExtra("relazione", 0));
+				U.salvaJson(true, Memoria.oggettoCapo());
 				return;
 			} else if( requestCode == 5065 ) { // Fonte scelta in Biblioteca
 				SourceCitation citaFonte = new SourceCitation();
-				citaFonte.setRef( data.getStringExtra("idFonte") );
-				if( object instanceof Note ) ((Note)object).addSourceCitation( citaFonte );
-				else ((SourceCitationContainer)object).addSourceCitation( citaFonte );
-			} else if( requestCode == 7074 ) {  // Nota condivisa
+				citaFonte.setRef(data.getStringExtra("idFonte"));
+				if( object instanceof Note ) ((Note)object).addSourceCitation(citaFonte);
+				else ((SourceCitationContainer)object).addSourceCitation(citaFonte);
+			} else if( requestCode == 7074 ) { // Nota condivisa
 				NoteRef rifNota = new NoteRef();
-				rifNota.setRef( data.getStringExtra( "idNota" ) );
-				((NoteContainer)object).addNoteRef( rifNota );
+				rifNota.setRef(data.getStringExtra("idNota"));
+				((NoteContainer)object).addNoteRef(rifNota);
 			} else if( requestCode == 4173 ) { // File preso dal file manager o altra app diventa media locale
 				Media media = new Media();
 				media.setFileTag("FILE");
-				((MediaContainer)object).addMedia( media );
-				if( F.proponiRitaglio( this, null, data, media ) ) {
-					U.salvaJson( false, Memoria.oggettoCapo() );
+				((MediaContainer)object).addMedia(media);
+				if( F.proponiRitaglio(this, null, data, media) ) {
+					U.salvaJson(false, Memoria.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == 4174 ) { // File preso dal file manager diventa media condiviso
 				Media media = Galleria.nuovoMedia(object);
-				if( F.proponiRitaglio( this, null, data, media ) ) {
-					U.salvaJson( false, media, Memoria.oggettoCapo() );
+				if( F.proponiRitaglio(this, null, data, media) ) {
+					U.salvaJson(false, media, Memoria.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == 43616 ) { // Media da Galleria
 				MediaRef rifMedia = new MediaRef();
-				rifMedia.setRef( data.getStringExtra("idMedia") );
-				((MediaContainer)object).addMediaRef( rifMedia );
-			} else if( requestCode == 4562  ) { // Archivio scelto in Magazzino da Fonte
+				rifMedia.setRef(data.getStringExtra("idMedia"));
+				((MediaContainer)object).addMediaRef(rifMedia);
+			} else if( requestCode == 4562 ) { // Archivio scelto in Magazzino da Fonte
 				RepositoryRef archRef = new RepositoryRef();
-				archRef.setRef( data.getStringExtra("idArchivio") );
-				((Source)object).setRepositoryRef( archRef );
+				archRef.setRef(data.getStringExtra("idArchivio"));
+				((Source)object).setRepositoryRef(archRef);
 			} else if( requestCode == 5173 ) { // Salva in Media un file scelto con le app da Immagine
-				if( F.proponiRitaglio( this, null, data, (Media)object) ) {
-					U.salvaJson( false, Memoria.oggettoCapo() );
+				if( F.proponiRitaglio(this, null, data, (Media)object) ) {
+					U.salvaJson(false, Memoria.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-				F.fineRitaglioImmagine( data );
+				F.fineRitaglioImmagine(data);
 			}
 			//  da menu contestuale 'Scegli...'
-			if( requestCode == 5390  ) { // Imposta l'archivio che è stato scelto in Magazzino da ArchivioRef
-				((RepositoryRef)object).setRef( data.getStringExtra("idArchivio") );
-			} else if( requestCode == 7047  ) { // Imposta la fonte che è stata scelta in Biblioteca da CitazioneFonte
-				((SourceCitation)object).setRef( data.getStringExtra("idFonte") );
+			if( requestCode == 5390 ) { // Imposta l'archivio che è stato scelto in Magazzino da ArchivioRef
+				((RepositoryRef)object).setRef(data.getStringExtra("idArchivio"));
+			} else if( requestCode == 7047 ) { // Imposta la fonte che è stata scelta in Biblioteca da CitazioneFonte
+				((SourceCitation)object).setRef(data.getStringExtra("idFonte"));
 			}
-			U.salvaJson( true, Memoria.oggettoCapo() );
-					 // indica di ricaricare sia questo Dettaglio grazie al seguente onRestart(), sia Individuo o Famiglia
+			U.salvaJson(true, Memoria.oggettoCapo());
+				// 'true' indica di ricaricare sia questo Dettaglio grazie al seguente onRestart(), sia Individuo o Famiglia
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE )
 			Global.edited = true;
 	}

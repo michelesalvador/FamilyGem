@@ -47,16 +47,16 @@ public class Individuo extends AppCompatActivity {
 	List<Pair<String, String>> otherEvents; // List of tag + label
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		U.gedcomSicuro( gc );
-		uno = (Person) Memoria.getOggetto();
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		U.gedcomSicuro(gc);
+		uno = (Person)Memoria.getOggetto();
 		// Se l'app va in background e viene stoppata, 'Memoria' è resettata e quindi 'uno' sarà null
-		if( uno == null && bandolo != null ) {
-			uno = gc.getPerson( bandolo.getString("idUno") ); // In Bundle è salvato l'id dell'individuo
-			Memoria.setPrimo( uno ); // Altrimenti la memoria è senza una pila
+		if( uno == null && bundle != null ) {
+			uno = gc.getPerson(bundle.getString("idUno")); // In bundle è salvato l'id dell'individuo
+			Memoria.setPrimo(uno); // Altrimenti la memoria è senza una pila
 		}
-		// In effetti Memoria viene resettata, ma Global.individuo sembra vivo e vegeto.. vabbè, comunque il Bundle fa il suo lavoro
+		if( uno == null ) return; // Capita raramente che il bundle non faccia il suo lavoro
 		Global.indi = uno.getId();
 		setContentView(R.layout.individuo);
 
@@ -365,9 +365,10 @@ public class Individuo extends AppCompatActivity {
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle bandolo) {
-		super.onSaveInstanceState(bandolo);
-		bandolo.putString("idUno", uno.getId());
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString("idUno", uno.getId());
+		s.l("outState",outState);
 	}
 
 	@Override
