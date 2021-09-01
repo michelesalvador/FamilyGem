@@ -117,7 +117,7 @@
     <string name="repository_citation">Zitat Archiv</string>
     <string name="cited_by">Zitiert in</string>
     <string name="reference_number">Referenz Nummer</string>
-    <string name="italic">Italics</string>
+    <string name="italic">Kursiv</string>
     <string name="call_number">Telefonnummer</string>
     <string name="author">Autor</string>
     <string name="title">Titel</string>
@@ -333,11 +333,11 @@
     <string name="media_searched_list">Mediendateien werden in diesen Ordnern durchsucht.</string>
     <string name="zip_exported_ok">ZIP exportiert.</string>
     <string name="gedcom_exported_ok">GEDCOM exportiert.</string>
-    <string name="partners">Partners</string>
+    <string name="partners">Partner</string>
     <string name="and">und</string>
     <string name="between">zwischen</string>
     <string name="separation">Trennung</string>
-    <string name="common_law_marriage">Zivilrecht</string>
+    <string name="common_law_marriage">Gewohnheitsrecht</string>
     <string name="religious_marriage">Religiös</string>
     <string name="civil_marriage">Bürgerlich</string>
     <string name="living_apart_together">Gemeinsam getrennt leben</string>
@@ -364,5 +364,7 @@
     <string name="remind_later">Erinnern mich später</string>
     <string name="aware_upload_server">Bitte beachten Sie, dass Sie den gesamten Baum online auf einen Server hochladen werden.</string>
     <string name="share_sensitive">Weitergabe sensibler Daten.</string>
-    <string name="not_memory_tree">Nicht genügend Speicher für diesen Baum.</string>
+    <string name="not_memory_tree">Nicht genug Speicher für diesen Baum.</string>
+    <string name="relationship">Beziehung</string>
+    <string name="uncles_cousins">Onkel und Cousins</string>
 </resources>
