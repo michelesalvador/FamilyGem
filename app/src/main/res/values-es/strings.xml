@@ -328,4 +328,6 @@
     <string name="media_searched_list">Limas de medios están buscadas dentro de estas carpetas.</string>
     <string name="zip_exported_ok">ZIP exportado.</string>
     <string name="gedcom_exported_ok">GEDCOM exportado.</string>
+    <string name="share_sensitive">Intercambio de datos sensibles.</string>
+    <string name="not_memory_tree">No hay suficiente memoria para este arbol.</string>
 </resources>
