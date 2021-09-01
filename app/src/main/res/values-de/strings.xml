@@ -363,7 +363,7 @@
     <string name="allow_developer_access">Erlauben dem App-Entwickler den Zugriff auf den freigegebenen Baum</string>
     <string name="remind_later">Erinnern mich später</string>
     <string name="aware_upload_server">Bitte beachten Sie, dass Sie den gesamten Baum online auf einen Server hochladen werden.</string>
-    <string name="share_sensitive">Weitergabe sensibler Daten.</string>
+    <string name="share_sensitive">Weitergabe sensibler Daten</string>
     <string name="not_memory_tree">Nicht genug Speicher für diesen Baum.</string>
     <string name="relationship">Beziehung</string>
     <string name="uncles_cousins">Onkel und Cousins</string>
