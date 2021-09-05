@@ -3,7 +3,7 @@
     <string name="tagline">Crea tu propio árbol genealógico</string>
     <string name="delete">Eliminar</string>
     <string name="cancel">Cancelar</string>
-    <string name="done">Listo</string>
+    <string name="done">Hecho</string>
     <string name="change_date">Fecha modificación</string>
     <string name="something_wrong">Algo no ha funcionado.</string>
     <string name="drawer_open">Abrir el menú</string>
@@ -129,7 +129,7 @@
     <string name="choose_repository">Elegir repositorio</string>
     <string name="choose_file">Elegir archivo</string>
     <string name="crop">Recortar</string>
-    <string name="copy">Copiar</string>
+    <string name="copy">Copiar texto</string>
     <string name="value">Valor</string>
     <string name="type">Tipo</string>
     <string name="prefix">Prefijo</string>
@@ -288,8 +288,8 @@
     <string name="ancestors">Antepasados</string>
     <string name="descendants">Descendientes</string>
     <string name="diagram_settings">Configuración del diagrama</string>
-    <string name="siblings_nephews">Hermanos</string>
-    <string name="uncles_great_uncles">Tíos</string>
+    <string name="siblings_nephews">Hermanos y sobrinos</string>
+    <string name="uncles_great_uncles">Tíos y tíos abuelos</string>
     <string name="accept_all">Aceptar todas</string>
     <string name="long_press_menu">Mantener presionado para mostrar el menú.
 \nPulsar para abrir el perfil.</string>
@@ -335,4 +335,28 @@
     <string name="allow_developer_access">Permitir al programador de la applicación de acceder al arbol compartido</string>
     <string name="remind_later">Recordarlo después</string>
     <string name="aware_upload_server">Ten en cuenta que está a punto de cargar todo el arbol en un servidor en linea.</string>
+    <string name="common_law_marriage">Pareja de hecho</string>
+    <string name="turns_years_old">%s cumple %d años hoy.</string>
+    <string name="separation">Separación</string>
+    <string name="religious_marriage">Religioso</string>
+    <string name="civil_marriage">Civil</string>
+    <string name="living_together">Convivencia</string>
+    <string name="registered_partnership">Pareja registrada</string>
+    <string name="partnership">De pareja</string>
+    <string name="not_married">No casados</string>
+    <string name="unknown_relationship">Desconocida</string>
+    <string name="relationship">Relación</string>
+    <string name="ex_wife">Ex esposa</string>
+    <string name="ex_husband">Ex marido</string>
+    <string name="ex_spouse">Ex cónyuge</string>
+    <string name="ex_female_partner">Ex pareja</string>
+    <string name="ex_male_partner">Ex pareja</string>
+    <string name="ex_partner">Ex pareja</string>
+    <string name="female_partner">Pareja</string>
+    <string name="male_partner">Pareja</string>
+    <string name="partner">Pareja</string>
+    <string name="age">Edad</string>
+    <string name="uncles_cousins">Tíos y primos</string>
+    <string name="partners">Pareja</string>
+    <string name="family_as">Familia (como %s)</string>
 </resources>

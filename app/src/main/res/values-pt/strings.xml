@@ -108,7 +108,7 @@
     <string name="tagline">Crie sua própria árvore genealógica</string>
     <string name="given">Nome dado</string>
     <string name="sibling">Irmã ou Irmão</string>
-    <string name="siblings_nephews">Irmãos</string>
+    <string name="siblings_nephews">Irmãos e sobrinhos</string>
     <string name="parent">Pai ou Mãe</string>
     <string name="empty_family_delete">Restaram algumas famílias vazias.
 \nQuer apagá-los\?</string>
@@ -179,7 +179,7 @@
     <string name="line_3">Linha 3</string>
     <string name="line_2">Linha 2</string>
     <string name="line_1">Linha 1</string>
-    <string name="into">Para dentro</string>
+    <string name="into">Dentro</string>
     <string name="used_by">Usado por</string>
     <string name="blob">Solta</string>
     <string name="slideshow">Apresentação de slides</string>
@@ -230,7 +230,7 @@
     <string name="crop">Cortar</string>
     <string name="choose_file">Escolher ficheiro</string>
     <string name="choose_repository">Escolha o repositório</string>
-    <string name="copy">Cópia</string>
+    <string name="copy">Copiar texto</string>
     <string name="choose_source">Escolha a fonte</string>
     <string name="link_repository">Repositório de links</string>
     <string name="new_repository">Novo repositório</string>
@@ -284,7 +284,7 @@
     <string name="id">ID</string>
     <string name="order_by">Ordenar por</string>
     <string name="descendants">Descendentes</string>
-    <string name="uncles_great_uncles">Tios</string>
+    <string name="uncles_great_uncles">Tios e tios-avós</string>
     <string name="ancestors">Antepassados</string>
     <string name="generations_display_diagram">Defina quantas gerações mostrar no diagrama.</string>
     <string name="diagram_settings">Configurações do diagrama</string>
@@ -333,4 +333,37 @@
     <string name="media_searched_list">Os ficheiros de mídia são pesquisados dentro destas pastas.</string>
     <string name="zip_exported_ok">ZIP exportado.</string>
     <string name="gedcom_exported_ok">GEDCOM exportado.</string>
+    <string name="common_law_marriage">Direito consuetudinário</string>
+    <string name="religious_marriage">Religioso</string>
+    <string name="civil_marriage">Civil</string>
+    <string name="living_apart_together">Vivendo juntos à parte</string>
+    <string name="living_together">Vivendo juntos</string>
+    <string name="registered_partnership">Parceria registada</string>
+    <string name="partnership">Parceria</string>
+    <string name="not_married">Não casado/a</string>
+    <string name="unknown_relationship">Desconhecido</string>
+    <string name="relationship">Relacionamento</string>
+    <string name="ex_wife">Ex-mulher</string>
+    <string name="ex_husband">Ex-marido</string>
+    <string name="ex_spouse">Ex-cônjuge</string>
+    <string name="ex_female_partner">Ex-parceira</string>
+    <string name="ex_male_partner">Ex-parceiro</string>
+    <string name="ex_partner">Ex-parceiro</string>
+    <string name="female_partner">Parceira</string>
+    <string name="male_partner">Parceiro</string>
+    <string name="partner">Parceiro</string>
+    <string name="age">Idade</string>
+    <string name="uncles_cousins">Tios e primos</string>
+    <string name="partners">Parceiros</string>
+    <string name="family_as">Família (como %s)</string>
+    <string name="turns_years_old">%s completa %d anos hoje.</string>
+    <string name="birthday_notified_midday">O aniversário de cada pessoa será avisado ao meio-dia.</string>
+    <string name="birthdays">Aniversários</string>
+    <string name="allow_developer_access">Permitir que o desenvolvedor do aplicativo acesse a árvore compartilhada</string>
+    <string name="remind_later">Lembrar mais tarde</string>
+    <string name="aware_upload_server">Por favor, esteja ciente de que você vai carregar a árvore inteira para um servidor online.</string>
+    <string name="share_sensitive">Partilha de dados sensíveis</string>
+    <string name="not_memory_tree">Memória insuficiente para esta árvore</string>
+    <string name="between">entre</string>
+    <string name="separation">Separação</string>
 </resources>
