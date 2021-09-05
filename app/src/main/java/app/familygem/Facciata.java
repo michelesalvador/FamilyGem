@@ -14,9 +14,9 @@ import java.io.InputStream;
 public class Facciata extends AppCompatActivity {
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		setContentView( R.layout.facciata );
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		setContentView(R.layout.facciata);
 
 		/* Apertura in seguito al click su vari tipi di link:
 		https://www.familygem.app/share.php?tree=20190802224208

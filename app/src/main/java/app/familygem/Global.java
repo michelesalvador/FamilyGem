@@ -41,7 +41,7 @@ public class Global extends Application {
 
 	public static void start(Context context) {
 		Gson gson = new Gson();
-		String jsonString = "{ referrer:start, alberi:[], autoSalva:true }"; // preferenze vuote
+		String jsonString = "{referrer:start, trees:[], autoSave:true}"; // Empty settings
 		                    // i boolean false non hanno bisogno di essere inizializzati
 		File settingsFile = new File(context.getFilesDir(), "settings.json");
 		// Rename "preferenze.json" to "settings.json" (introduced in version 0.8)
@@ -52,11 +52,13 @@ public class Global extends Application {
 				settingsFile = preferenzeFile;
 			}
 		}
-		try {
-			jsonString = FileUtils.readFileToString(settingsFile, "UTF-8");
-			jsonString = updateSettings(jsonString);
-		} catch( Exception e ) {
-			Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+		if( settingsFile.exists() ) {
+			try {
+				jsonString = FileUtils.readFileToString(settingsFile, "UTF-8");
+				jsonString = updateSettings(jsonString);
+			} catch( Exception e ) {
+				Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+			}
 		}
 		settings = gson.fromJson( jsonString, Settings.class );
 		if( settings.diagram == null )

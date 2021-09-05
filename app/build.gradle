@@ -22,7 +22,7 @@ android {
 		minSdkVersion 19
 		targetSdkVersion 30
 		versionCode 19
-		versionName '0.7.16.6'
+		versionName '0.7.16.7'
 		vectorDrawables.useSupportLibrary = true
 		resConfigs "en", "cs", "de", "eo", "es", "fr", "hr", "it", "kn", "mr", "nb", "nl", "pl", "pt", "ru", "sk", "sr", "uk"
 		def utenteAruba = ""
@@ -65,7 +65,7 @@ dependencies {
 	implementation 'org.familysearch.gedcom:gedcom:1.11.0'
 	implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
 	implementation 'androidx.lifecycle:lifecycle-process:2.3.1'
-	implementation 'androidx.work:work-runtime:2.5.0'
+	implementation 'androidx.work:work-runtime:2.6.0'
 	implementation 'com.google.android.material:material:1.4.0'
 	implementation 'com.google.code.gson:gson:2.8.7'
 	implementation 'commons-io:commons-io:2.7'
