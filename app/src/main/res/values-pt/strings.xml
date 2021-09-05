@@ -364,4 +364,6 @@
     <string name="aware_upload_server">Por favor, esteja ciente de que você vai carregar a árvore inteira para um servidor online.</string>
     <string name="share_sensitive">Partilha de dados sensíveis</string>
     <string name="not_memory_tree">Memória insuficiente para esta árvore</string>
+    <string name="between">entre</string>
+    <string name="separation">Separação</string>
 </resources>
