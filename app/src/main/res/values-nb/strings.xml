@@ -46,7 +46,7 @@
     <string name="nickname">Kallenavn</string>
     <string name="type">Type</string>
     <string name="value">Verdi</string>
-    <string name="copy">Kopier</string>
+    <string name="copy">Kopier tekst</string>
     <string name="choose_file">Velg fil</string>
     <string name="choose_source">Velg kilde</string>
     <string name="son">Sønn</string>
