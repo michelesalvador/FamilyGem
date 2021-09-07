@@ -21,8 +21,8 @@ android {
 		applicationId "app.familygem"
 		minSdkVersion 19
 		targetSdkVersion 30
-		versionCode 19
-		versionName '0.7.16.7'
+		versionCode 20
+		versionName '0.8'
 		vectorDrawables.useSupportLibrary = true
 		resConfigs "en", "cs", "de", "eo", "es", "fr", "hr", "it", "kn", "mr", "nb", "nl", "pl", "pt", "ru", "sk", "sr", "uk"
 		def utenteAruba = ""
