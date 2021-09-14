@@ -199,7 +199,7 @@
     <string name="siblings_nephews">Geschwister und Neffen</string>
     <string name="uncles_great_uncles">Onkeln und Großonkeln</string>
     <string name="ancestors">Vorfahren</string>
-    <string name="generations_display_diagram">Wieviele Generationen in einem Diagramm dargestellt werden.</string>
+    <string name="generations_display_diagram">Wieviele Generationen in einem Diagramm dargestellt werden:</string>
     <string name="diagram_settings">Diagramm einstellungen</string>
     <string name="child">Kind</string>
     <string name="spouse">Ehepartner</string>
@@ -330,7 +330,7 @@
     <string name="pdf_exported_ok">PDF exportiert.</string>
     <string name="export_pdf">PDF exportieren</string>
     <string name="add_device_folder">Einen Ordner von diesem Gerät hinzufügen.</string>
-    <string name="media_searched_list">Mediendateien werden in diesen Ordnern durchsucht.</string>
+    <string name="media_searched_list">Mediendateien werden in diesen Ordnern durchsucht:</string>
     <string name="zip_exported_ok">ZIP exportiert.</string>
     <string name="gedcom_exported_ok">GEDCOM exportiert.</string>
     <string name="partners">Partner</string>
