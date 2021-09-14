@@ -29,7 +29,7 @@
     <string name="type">Type</string>
     <string name="value">Waarde</string>
     <string name="make_main_submitter">Wilt u dat deze indiener de hoofdpersoon van de boom is\?</string>
-    <string name="copy">Kopiëren</string>
+    <string name="copy">Kopiëren tekst</string>
     <string name="crop">Bijsnijden</string>
     <string name="choose_file">Kies bestand</string>
     <string name="choose_repository">Kies opslagplaats</string>
@@ -85,7 +85,7 @@
     <string name="siblings_nephews">Broers/Zussen</string>
     <string name="uncles_great_uncles">Ooms</string>
     <string name="ancestors">Voorouders</string>
-    <string name="generations_display_diagram">Stel in hoeveel generaties u in het diagram wilt weergeven.</string>
+    <string name="generations_display_diagram">Stel in hoeveel generaties u in het diagram wilt weergeven:</string>
     <string name="long_press_menu">Lang indrukken om het menu weer te geven.
 \nTik om het profiel te openen.</string>
     <string name="child">Kind</string>
@@ -329,8 +329,9 @@
     <string name="export_pdf">PDF exporteren</string>
     <string name="add_device_folder">Voeg een map toe vanaf dit apparaat.</string>
     <string name="app_storage">Applicatie-opslag</string>
-    <string name="media_searched_list">Mediabestanden worden doorzocht in deze mappen.</string>
+    <string name="media_searched_list">Mediabestanden worden doorzocht in deze mappen:</string>
     <string name="zip_exported_ok">ZIP geëxporteerd.</string>
     <string name="gedcom_exported_ok">GEDCOM geëxporteerd.</string>
     <string name="sure_delete">Echt verwijderen\?</string>
+    <string name="age">Leeftijd</string>
 </resources>
