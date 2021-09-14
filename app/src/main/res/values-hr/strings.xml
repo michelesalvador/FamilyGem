@@ -4,7 +4,7 @@
     <string name="relatives">Rodbina</string>
     <string name="no_useful_data">Neuspjelo dohvaćanje korisnih podataka.</string>
     <string name="modify">Uredi</string>
-    <string name="generations_display_diagram">Postavi broj generacija koje se prikazuju u dijagramu.</string>
+    <string name="generations_display_diagram">Postavi broj generacija koje se prikazuju u dijagramu:</string>
     <string name="empty_family_delete">Preostalo je nekoliko praznih obitelji.
 \nŽeliš li ih izbrisati\?</string>
     <string name="really_delete_family">Ova će se obitelj izbrisati, ali ne i članovi obitelji.</string>
@@ -159,7 +159,7 @@
     <string name="birth_date">Datum rođenja</string>
     <string name="april">Travanj</string>
     <string name="death">Smrt</string>
-    <string name="into">U</string>
+    <string name="into">Unutra</string>
     <string name="changes_submitter">Podnositelj promjena</string>
     <string name="form">Obrazac</string>
     <string name="please_name">Upiši ime.</string>
@@ -256,7 +256,7 @@
     <string name="from">Od</string>
     <string name="tree">Stablo</string>
     <string name="descendants">Potomci</string>
-    <string name="given">Ime</string>
+    <string name="given">Dato ime</string>
     <string name="repository_citation">Citiranje spremišta</string>
     <string name="siblings_nephews">Braća i sestara i nećaci</string>
     <string name="reference_number">Broj reference</string>
@@ -329,7 +329,7 @@
     <string name="sure_delete">Sigurno\?</string>
     <string name="pdf_exported_ok">PDF je izvezen.</string>
     <string name="zip_exported_ok">ZIP je izvezen.</string>
-    <string name="media_searched_list">Medijske datoteke se traže u ovim mapama.</string>
+    <string name="media_searched_list">Medijske datoteke se traže u ovim mapama:</string>
     <string name="gedcom_exported_ok">GEDCOM je izvezen.</string>
     <string name="export_pdf">Izvezi PDF</string>
     <string name="add_device_folder">Dodaj mapu ovog uređaja.</string>
