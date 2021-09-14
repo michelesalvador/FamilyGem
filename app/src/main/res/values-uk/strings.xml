@@ -17,7 +17,7 @@
     <string name="empty_family">Порожня сім\'я</string>
     <string name="which_family">Яка сім\'я\?</string>
     <string name="empty_family_delete">Залишилось кілька порожніх сімей.
-\n Ви хочете їх видалити\?</string>
+\nВи хочете їх видалити\?</string>
     <string name="source">Джерело</string>
     <string name="link_shared_note">Посилання на спільну нотатку</string>
     <string name="new_shared_note">Нова спільна нотатка</string>
@@ -52,10 +52,10 @@
     <string name="siblings_nephews">Брати і сестри та племінники</string>
     <string name="uncles_great_uncles">Дядьки і двоюрідні дядьки</string>
     <string name="ancestors">Предки</string>
-    <string name="generations_display_diagram">Встановіть, скільки поколінь відображати на схемі.</string>
+    <string name="generations_display_diagram">Встановіть, скільки поколінь відображати на схемі:</string>
     <string name="diagram_settings">Налаштування діаграми</string>
     <string name="long_press_menu">Тривале натискання відображає меню.
-\n Торкніться, щоб відкрити профіль.</string>
+\nТоркніться, щоб відкрити профіль.</string>
     <string name="child">Дитина</string>
     <string name="spouse">Жона</string>
     <string name="sibling">Брат</string>
@@ -66,7 +66,7 @@
     <string name="new_relative">Пов’язати нову особу</string>
     <string name="family_as_spouse">Сім\'я (як подружжя)</string>
     <string name="family_as_child">Сім\'я (як дитина)</string>
-    <string name="card">\"Профіль\" - це головна сторінка людини. Він відображає ім’я та фотографії людини та містить 3 вклад</string>
+    <string name="card">Профіль</string>
     <string name="new_person">Створити нову особу.</string>
     <string name="all_imported_delete">Усі оновлення імпортовано.
 \nВидалити імпортоване дерево\?</string>
@@ -300,7 +300,7 @@
     <string name="export_pdf">Експортувати PDF</string>
     <string name="add_device_folder">Додайте папку з цього пристрою.</string>
     <string name="app_storage">Сховище додатків</string>
-    <string name="media_searched_list">Пошук у медіафайлах виконується в цих папках.</string>
+    <string name="media_searched_list">Пошук у медіафайлах виконується в цих папках:</string>
     <string name="update_header">Оновити заголовок</string>
     <string name="zip_exported_ok">ZIP експортовано.</string>
     <string name="gedcom_exported_ok">GEDCOM експортував.</string>
@@ -314,7 +314,7 @@
     <string name="approximate">Приблизно</string>
     <string name="dead">Смерть</string>
     <string name="female">Жінка</string>
-    <string name="into">До</string>
+    <string name="into">Всередині</string>
     <string name="repository">Архів</string>
     <string name="repository_note">Примітка-архів</string>
     <string name="repository_citation">Архів цитування</string>
