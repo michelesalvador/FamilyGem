@@ -286,7 +286,7 @@
     <string name="descendants">Descendentes</string>
     <string name="uncles_great_uncles">Tios e tios-avós</string>
     <string name="ancestors">Antepassados</string>
-    <string name="generations_display_diagram">Defina quantas gerações mostrar no diagrama.</string>
+    <string name="generations_display_diagram">Defina quantas gerações mostrar no diagrama:</string>
     <string name="diagram_settings">Configurações do diagrama</string>
     <string name="long_press_menu">Pressione longamente para exibir o menu.
 \nToque para abrir o perfil.</string>
@@ -330,7 +330,7 @@
     <string name="pdf_exported_ok">PDF exportado.</string>
     <string name="export_pdf">Exportar PDF</string>
     <string name="add_device_folder">Adicione uma pasta deste aparelho.</string>
-    <string name="media_searched_list">Os ficheiros de mídia são pesquisados dentro destas pastas.</string>
+    <string name="media_searched_list">Os ficheiros de mídia são pesquisados dentro destas pastas:</string>
     <string name="zip_exported_ok">ZIP exportado.</string>
     <string name="gedcom_exported_ok">GEDCOM exportado.</string>
     <string name="common_law_marriage">Direito consuetudinário</string>
