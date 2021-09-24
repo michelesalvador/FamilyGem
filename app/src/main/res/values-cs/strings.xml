@@ -77,7 +77,7 @@
     <string name="march">Březen</string>
     <string name="february">Únor</string>
     <string name="january">Leden</string>
-    <string name="double_date">Duální</string>
+    <string name="double_date">Duálné</string>
     <string name="which_family_add_child">Do které rodiny přidat dítě\?</string>
     <string name="form">Forma</string>
     <string name="which_family_add_spouse">Do které rodiny přidat manžela/manželku\?</string>
@@ -121,7 +121,7 @@
     <string name="parentheses">Závorky</string>
     <string name="media_type">Typ média</string>
     <string name="italic">Kurzíva</string>
-    <string name="call_number">Telefonní číslo</string>
+    <string name="call_number">Referenční číslo</string>
     <string name="publication_facts">Publikace</string>
     <string name="author">Autor</string>
     <string name="title">Název</string>
