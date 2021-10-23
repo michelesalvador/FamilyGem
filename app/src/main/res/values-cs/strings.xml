@@ -21,7 +21,7 @@
     <string name="inexistent_source_citation">Chybějící citace pramene</string>
     <string name="source_citation">Citace pramene</string>
     <string name="www">Webová stránka</string>
-    <string name="make_main_submitter">Má být tento autor hlavní osobou v stromu\?</string>
+    <string name="make_main_submitter">Má být tento zadavatel hlavním autorem stromu\?</string>
     <string name="half_sibling">Nevlastní sourozenec</string>
     <string name="make_root">Označit jako hlavní osobu</string>
     <string name="really_delete_person">Opravdu odstranit tuto osobu\?</string>
@@ -144,10 +144,10 @@
     <string name="suffix">Přípona</string>
     <string name="surname_prefix">Předpona příjmení</string>
     <string name="nickname">Přezdívka</string>
-    <string name="given">Křestní jméno</string>
+    <string name="given">Dané (křestní) jméno</string>
     <string name="prefix">Předpona</string>
     <string name="type">Typ</string>
-    <string name="value">Veličina</string>
+    <string name="value">Hodnota</string>
     <string name="copy">Kopírovat text</string>
     <string name="software">Software</string>
     <string name="copyright">Copyright</string>
