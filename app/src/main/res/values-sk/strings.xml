@@ -4,7 +4,7 @@
     <string name="saved">Uložené.</string>
     <string name="dead">Úmrtie</string>
     <string name="publication_facts">Publikácia</string>
-    <string name="make_main_submitter">Má byť tento autor hlavnou osobou v strome\?</string>
+    <string name="make_main_submitter">Má byť tento zadávateľ hlavným autorom stromu\?</string>
     <string name="make_root">Označiť ako hlavnú osobu</string>
     <string name="uncles_great_uncles">Strýkovia a prastrýkovia</string>
     <string name="generations_display_diagram">Nastavenie počtu generácií zobrazených v diagrame:</string>
@@ -132,7 +132,7 @@
     <string name="romanized">Romanizované</string>
     <string name="married_name">Manželské meno</string>
     <string name="surname_prefix">Predpona priezviska</string>
-    <string name="given">Krstné meno</string>
+    <string name="given">Dané (krstné) meno</string>
     <string name="choose_source">Zvoliť zdroj</string>
     <string name="move_after">Presunúť za</string>
     <string name="move_before">Presunúť pred</string>
@@ -230,7 +230,7 @@
     <string name="nickname">Prezývka</string>
     <string name="prefix">Predpona</string>
     <string name="type">Typ</string>
-    <string name="value">Veličina</string>
+    <string name="value">Hodnota</string>
     <string name="copy">Kopírovať text</string>
     <string name="crop">Orezať</string>
     <string name="choose_file">Zvoliť súbor</string>
