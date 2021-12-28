@@ -1,0 +1,61 @@
+name: Pull request
+
+on: [pull_request]
+
+jobs:
+  Build:
+    name: Build & Test
+    runs-on: macOS-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [ 28 ]
+        abi: [ x86 ]
+        tag: [ 'default']
+#        include:
+#          - api: 31
+#            abi: x86_64
+#            tag: 'google_apis'
+#          - api: 30
+#            abi: x86
+#            tag: 'google_apis'
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - name: set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 11
+      - name: Run tests
+        run: ./gradlew test
+#      - name: Install Android SDK
+#        uses: malinskiy/action-android/install-sdk@release/0.1.2
+#      - name: Android Emulator test
+#        uses: malinskiy/action-android/emulator-run-cmd@release/0.1.2
+#        with:
+#          cmd: ./gradlew cAT
+#          api: ${{ matrix.api }}
+#          tag: ${{ matrix.tag }}
+#          abi: ${{ matrix.abi }}
+#          cmdOptions: -noaudio -no-boot-anim -no-window
+#      - uses: actions/upload-artifact@v2.3.1
+#        if: ${{ always() }}
+#        with:
+#          name: GEM-Espresso-${{ matrix.api }}-${{ matrix.abi }}-report
+#          path: ./**/build/reports/androidTests/connected
+  Check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+      - name: Install Android SDK
+        uses: malinskiy/action-android/install-sdk@release/0.1.2
+      - name: Code checks
+        run: ./gradlew check
+      - name: Archive Lint report
+        uses: actions/upload-artifact@v2.3.1
+        if: ${{ always() }}
+        with:
+          name: GEM-Lint-report
+          path: ./**/build/reports/lint-results.html
