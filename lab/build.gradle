@@ -35,6 +35,12 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
+
+    // TODO remove this disable
+    lintOptions {
+        disable 'MissingConstraints'
+    }
+
 }
 
 allprojects { // Fatto aggiungere da Yalantis/uCrop

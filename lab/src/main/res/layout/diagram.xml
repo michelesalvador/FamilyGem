@@ -2,6 +2,7 @@
 <com.otaliastudios.zoom.ZoomLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/diagram_zoom"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -103,7 +104,8 @@
                 android:orientation="vertical"
                 android:padding="6dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="MissingConstraints">
 
                 <ImageView
                     android:layout_width="60dp"

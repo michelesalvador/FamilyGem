@@ -52,7 +52,6 @@
 		<item name="android:textColor">#FFF</item>
 	</style>
 	<style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
-		<item name="android:backgroundTint">@color/primarioChiaro</item>
 	</style>
 
 	<attr name="spouseColor" format="reference|color"/>

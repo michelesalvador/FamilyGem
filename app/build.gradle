@@ -58,6 +58,11 @@ android {
 	packagingOptions {
 		excludes += ['**/*.properties','META-INF/*.md','META-INF/*.xml']
 	}
+
+	// TODO remove this disable
+	lintOptions {
+		disable 'MissingConstraints','MissingTranslation'
+	}
 }
 
 dependencies {

@@ -287,7 +287,8 @@ public class Officina extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
-		F.risultatoPermessi( this, codice, permessi, accordi );
+		super.onRequestPermissionsResult(codice, permessi, accordi);
+		F.risultatoPermessi(this, codice, permessi, accordi);
 	}
 
 	// Venendo da Windows, cercavo una semplice finestra di apertura file... ma qui siamo nel mondo degli uri

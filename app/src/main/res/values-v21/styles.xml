@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
+        <item name="android:backgroundTint">@color/primarioChiaro</item>
+    </style>
+</resources>

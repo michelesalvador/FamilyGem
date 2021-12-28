@@ -1,5 +1,6 @@
 package app.familygem;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
@@ -210,10 +211,11 @@ public class EditoreData extends LinearLayout {
 	void stilizza( NumberPicker ruota ) {
 		// Toglie le famigerate linee divisorie azzurre
 		try {
+			@SuppressLint("SoonBlockedPrivateApi")
 			Field campo = NumberPicker.class.getDeclaredField( "mSelectionDivider" );
 			campo.setAccessible( true );
 			campo.set( ruota, null );
-		} catch( Exception e ) {}
+		} catch( Exception ignored) {}
 		// Risolve il bug https://issuetracker.google.com/issues/37055335
 		ruota.setSaveFromParentEnabled(false);
 	}

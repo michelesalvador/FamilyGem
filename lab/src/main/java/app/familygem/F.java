@@ -19,6 +19,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -461,7 +463,13 @@ public class F {
 				}
 				vista.setTag( R.id.tag_percorso, percorso );    // usato da Immagine.java
 			} else if( media.getFile() != null )	// Cerca il file in internet
-				new ZuppaMedia( vista, null, null ).execute( media.getFile() );
+				new Handler(Looper.getMainLooper()).post(new Runnable() {
+					@Override
+					public void run() {
+						new ZuppaMedia( vista, null, null ).execute( media.getFile() );
+					}
+				});
+
 			return bitmap;
 		}
 		@Override
