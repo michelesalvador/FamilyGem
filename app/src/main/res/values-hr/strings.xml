@@ -339,7 +339,7 @@
     <string name="birthdays">Rođendane</string>
     <string name="allow_developer_access">Omogući razvojnom programeru aplikacije pristup zajedničkom stablu</string>
     <string name="remind_later">Podsjeti kasnije</string>
-    <string name="aware_upload_server">Imajte na umu da ćete cijelo stablo prenijeti na poslužitelj na mreži.</string>
+    <string name="aware_upload_server">Imaj na umu da ćeš cijelo stablo prenijeti na poslužitelj na mreži.</string>
     <string name="share_sensitive">Dijeljenje osjetljivih podataka</string>
     <string name="not_memory_tree">Nema dovoljno memorije za ovo stablo.</string>
     <string name="and">i</string>
