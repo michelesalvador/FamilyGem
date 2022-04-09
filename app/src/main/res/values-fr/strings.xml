@@ -155,7 +155,7 @@
     <string name="revert">Annuler les modifications</string>
     <string name="drawer_close">Fermer la barre de navigation</string>
     <string name="drawer_open">Ouvrir la barre de navigation</string>
-    <string name="existing_family">La famille existe déjà</string>
+    <string name="existing_family">Famille déjà existante</string>
     <string name="new_family_of">Nouvelle famille de %s</string>
     <string name="extension">Extension</string>
     <string name="www">Site web</string>
