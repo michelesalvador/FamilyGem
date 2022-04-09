@@ -213,7 +213,7 @@
     <string name="user_id">Identyfikator użytkownika</string>
     <string name="source_citation">Źródło cytatu</string>
     <string name="inexistent_source_citation">Brak źródła cytatu</string>
-    <string name="source_note">Żródło notatki</string>
+    <string name="source_note">Źródło notatki</string>
     <string name="page">Strona</string>
     <string name="text">Tekst</string>
     <string name="certainty">Pewność</string>
