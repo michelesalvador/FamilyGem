@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.2'
+        classpath 'com.android.tools.build:gradle:7.1.2'
     }
 }
 allprojects {
@@ -13,5 +13,6 @@ allprojects {
         jcenter()
         mavenCentral()
         mavenLocal()
+        maven { url 'https://jitpack.io' } // For FastScrollerAndRecyclerViewFixes
     }
 }

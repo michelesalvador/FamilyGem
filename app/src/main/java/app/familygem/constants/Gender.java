@@ -13,12 +13,12 @@ public enum Gender {
 
 	// Find the gender of a Person
 	public static Gender getGender(Person person) {
-		for( EventFact fatto : person.getEventsFacts() ) {
-			if( fatto.getTag()!=null && fatto.getTag().equals("SEX") ) {
-				if( fatto.getValue() == null )
+		for( EventFact fact : person.getEventsFacts() ) {
+			if( fact.getTag() != null && fact.getTag().equals("SEX") ) {
+				if( fact.getValue() == null )
 					return OTHER;  // There is 'SEX' tag but the value is empty
 				else {
-					switch( fatto.getValue() ) {
+					switch( fact.getValue() ) {
 						case "M": return MALE;
 						case "F": return FEMALE;
 						case "U": return UNDEFINED;

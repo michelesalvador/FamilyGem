@@ -1,6 +1,6 @@
-package app.familygem;
-
 // Fumetto con un suggerimento che compare sopra al FAB
+
+package app.familygem;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,22 +14,22 @@ public class Fabuloso {
 
 	private final View baloon;
 
-	public Fabuloso( Context contesto, int textId ) {
-		this( contesto, contesto.getString( textId ) );
+	public Fabuloso(Context context, int textId) {
+		this(context, context.getString(textId));
 	}
 
-	public Fabuloso( Context contesto, String testo ) {
-		Activity attivita = (Activity) contesto;
-		baloon = attivita.getLayoutInflater().inflate( R.layout.fabuloso, null );
-		baloon.setVisibility( View.INVISIBLE );
-		((LinearLayout)attivita.findViewById( R.id.fab_box )).addView( baloon, 0,
-				new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT) );
-		((TextView)baloon.findViewById( R.id.fabuloso_text )).setText( testo );
-		baloon.setOnTouchListener( (vista, evento) -> {
+	public Fabuloso(Context context, String testo) {
+		Activity attivita = (Activity)context;
+		baloon = attivita.getLayoutInflater().inflate(R.layout.fabuloso, null);
+		baloon.setVisibility(View.INVISIBLE);
+		((LinearLayout)attivita.findViewById(R.id.fab_box)).addView(baloon, 0,
+				new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		((TextView)baloon.findViewById(R.id.fabuloso_text)).setText(testo);
+		baloon.setOnTouchListener((vista, evento) -> {
 			hide();
 			return true;
 		});
-		attivita.findViewById( R.id.fab ).setOnTouchListener( (vista, evento) -> {
+		attivita.findViewById(R.id.fab).setOnTouchListener((vista, evento) -> {
 			hide();
 			//vista.performClick();
 			return false; // Per eseguire il click dopo

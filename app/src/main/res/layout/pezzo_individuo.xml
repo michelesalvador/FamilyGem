@@ -30,7 +30,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_ruolo"
-			android:layout_toLeftOf="@+id/indi_foto"
+			android:layout_toStartOf="@+id/indi_foto"
 			android:textSize="17sp"/>
 		<TextView
 			android:id="@+id/indi_titolo"
@@ -44,24 +44,26 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/indi_titolo"
-			android:layout_toLeftOf="@+id/indi_foto"
+			android:layout_toStartOf="@+id/indi_foto"
 			android:textSize="14sp"
 			android:textColor="@color/grayText"/>
 		<ImageView
 			android:id="@+id/indi_foto"
 			android:layout_width="65dp"
 			android:layout_height="80dp"
-			android:layout_alignParentRight="true"
-			android:layout_marginLeft="8dp"
+			android:layout_alignParentEnd="true"
+			android:layout_marginStart="8dp"
 			android:scaleType="centerCrop"
+			android:autoMirrored="true"
 			app:srcCompat="@drawable/manichino" />
 		<ImageView
 			android:id="@+id/indi_lutto"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentRight="true"
-			android:layout_marginRight="-8dp"
+			android:layout_alignParentEnd="true"
+			android:layout_marginEnd="-8dp"
 			android:layout_marginTop="-8dp"
+			android:autoMirrored="true"
 			app:srcCompat="@drawable/defunto" />
 	</RelativeLayout>
 </FrameLayout>

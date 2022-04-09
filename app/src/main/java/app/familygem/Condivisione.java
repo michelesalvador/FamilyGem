@@ -64,28 +64,7 @@ public class Condivisione extends AppCompatActivity {
 		esporter.apriAlbero( treeId );
 		gc = Global.gc;
 		if( gc != null ) {
-			// Radice dell'albero
-			String idRadice;
-			if( tree.shareRoot != null && gc.getPerson(tree.shareRoot) != null )
-				idRadice = tree.shareRoot;
-			else if( tree.root != null && gc.getPerson(tree.root) != null ) {
-				idRadice = tree.root;
-				tree.shareRoot = idRadice; // per poter condividere subito l'albero senza cambiare la radice
-			} else {
-				idRadice = U.trovaRadice( gc );
-				tree.shareRoot = idRadice;
-			}
-			Person radice = gc.getPerson(idRadice);
-			if( radice != null && tree.grade < 10 ) { // viene mostrata solo alla prima condivisione, non al ritorno
-				LinearLayout scatolaRadice = findViewById(R.id.condividi_radice);
-				scatolaRadice.setVisibility( View.VISIBLE );
-				View vistaRadice = U.linkaPersona( scatolaRadice, radice, 1 );
-				vistaRadice.setOnClickListener( v -> {
-					Intent intento = new Intent( this, Principal.class );
-					intento.putExtra( "anagrafeScegliParente", true );
-					startActivityForResult( intento,5007 );
-				});
-			}
+			displayShareRoot();
 			// Nome autore
 			final Submitter[] autore = new Submitter[1];
 			// albero in Italia con submitter referenziato
@@ -162,6 +141,33 @@ public class Condivisione extends AppCompatActivity {
 			});
 		} else
 			findViewById( R.id.condividi_scatola ).setVisibility( View.GONE );
+	}
+
+	// The person root of the tree
+	View rootView;
+	void displayShareRoot() {
+		String rootId;
+		if( tree.shareRoot != null && gc.getPerson(tree.shareRoot) != null )
+			rootId = tree.shareRoot;
+		else if( tree.root != null && gc.getPerson(tree.root) != null ) {
+			rootId = tree.root;
+			tree.shareRoot = rootId; // per poter condividere subito l'albero senza cambiare la radice
+		} else {
+			rootId = U.trovaRadice(gc);
+			tree.shareRoot = rootId;
+		}
+		Person person = gc.getPerson(rootId);
+		if( person != null && tree.grade < 10 ) { // viene mostrata solo alla prima condivisione, non al ritorno
+			LinearLayout rootLayout = findViewById(R.id.condividi_radice);
+			rootLayout.removeView(rootView);
+			rootLayout.setVisibility(View.VISIBLE);
+			rootView = U.linkaPersona(rootLayout, person, 1);
+			rootView.setOnClickListener(v -> {
+				Intent intent = new Intent(this, Principal.class);
+				intent.putExtra("anagrafeScegliParente", true);
+				startActivityForResult(intent, 5007);
+			});
+		}
 	}
 
 	// Verifica che un campo sia compilato
@@ -292,7 +298,7 @@ public class Condivisione extends AppCompatActivity {
 			if( requestCode == 5007 ) {
 				tree.shareRoot = data.getStringExtra("idParente");
 				Global.settings.save();
-				recreate();
+				displayShareRoot();
 			}
 		}
 		// Ritorno indietro da qualsiasi app di condivisione, nella quale il messaggio è stato inviato oppure no

@@ -36,12 +36,12 @@
 		android:layout_above="@+id/menu_titolo"
 		android:layout_marginBottom="8dp"
 		android:background="@drawable/menu_alberi_sfondo"
+		android:foreground="?android:attr/selectableItemBackground"
 		android:gravity="center_vertical"
-		android:paddingLeft="16dp"
+		android:paddingStart="16dp"
 		android:paddingTop="12dp"
-		android:paddingRight="32dp"
-		android:paddingBottom="12dp"
-		android:foreground="?android:attr/selectableItemBackground" >
+		android:paddingEnd="32dp"
+		android:paddingBottom="12dp">
 
 		<ImageView
 			android:layout_width="0dp"
@@ -52,9 +52,8 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginLeft="32dp"
+			android:layout_marginStart="32dp"
 			android:text="@string/trees"
-			android:textColor="#000"
 			android:textSize="15sp" />
 	</LinearLayout>
 
@@ -63,9 +62,9 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentTop="true"
-		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
 		android:layout_marginTop="30dp"
-		android:layout_marginRight="16dp"
+		android:layout_marginEnd="16dp"
 		android:textSize="14sp"
 		android:textColor="#dfff"
 		android:visibility="gone"/>
@@ -76,8 +75,8 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_above="@+id/menu_titolo"
-		android:layout_alignParentRight="true"
-		android:layout_marginRight="16dp"
+		android:layout_alignParentEnd="true"
+		android:layout_marginEnd="16dp"
 		android:layout_marginBottom="8dp"
 		android:text="@string/save"
 		android:visibility="gone"/>

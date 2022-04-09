@@ -9,7 +9,7 @@
 		android:id="@+id/diagram_frame"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@drawable/diagramma_sfondo">
+		android:background="@drawable/diagram_background">
 		<RelativeLayout
 			android:id="@+id/diagram_box"
 			android:layout_width="wrap_content"

@@ -217,20 +217,10 @@ public class U {
 				String tag = eventFact.getTag();
 				if( tag.equals("MARR") ) {
 					String type = eventFact.getType();
-					if( type == null || type.equals("marriage") || type.equals("civil") || type.equals("religious") || type.equals("common law") )
+					if( type == null || type.isEmpty() || type.equals("marriage")
+							|| type.equals("civil") || type.equals("religious") || type.equals("common law") )
 						return true;
 				} else if( tag.equals("MARB") || tag.equals("MARC") || tag.equals("MARL") || tag.equals("MARS") )
-					return true;
-			}
-		}
-		return false;
-	}
-
-	// Check whether a family has a divorce event
-	public static boolean areDivorced(Family family) {
-		if( family != null ) {
-			for( EventFact eventFact : family.getEventsFacts() ) {
-				if( eventFact.getTag().equals("DIV") )
 					return true;
 			}
 		}
@@ -247,14 +237,17 @@ public class U {
 		String endYear = "";
 		Datatore start = null, end = null;
 		boolean ageBelow = false;
-		for( EventFact fact : person.getEventsFacts() ) {
+		List<EventFact> facts = person.getEventsFacts();
+		// Birth date
+		for( EventFact fact : facts ) {
 			if( fact.getTag() != null && fact.getTag().equals("BIRT") && fact.getDate() != null ) {
 				start = new Datatore(fact.getDate());
 				text = start.writeDate(false);
 				break;
 			}
 		}
-		for( EventFact fact : person.getEventsFacts() ) {
+		// Death date
+		for( EventFact fact : facts ) {
 			if( fact.getTag() != null && fact.getTag().equals("DEAT") && fact.getDate() != null ) {
 				end = new Datatore(fact.getDate());
 				endYear = end.writeDate(false);
@@ -270,13 +263,21 @@ public class U {
 				break;
 			}
 		}
+		// Otherwise find the first available date
+		if( text.isEmpty() ) {
+			for( EventFact fact : facts ) {
+				if( fact.getDate() != null ) {
+					return new Datatore(fact.getDate()).writeDate(false);
+				}
+			}
+		}
 		// Add the age between parentheses
 		if( start != null && start.isSingleKind() && !start.data1.isFormat(Format.D_M) ) {
 			LocalDate startDate = new LocalDate( start.data1.date ); // Converted to joda time
 			// If the person is still alive the end is now
 			LocalDate now = LocalDate.now();
 			if( end == null && startDate.isBefore(now)
-					&& Years.yearsBetween(startDate, now).getYears() < 120 && !isDead(person) ) {
+					&& Years.yearsBetween(startDate, now).getYears() <= 120 && !isDead(person) ) {
 				end = new Datatore(now.toDate());
 				endYear = end.writeDate(false);
 			}

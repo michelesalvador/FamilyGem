@@ -1,7 +1,6 @@
 package app.familygem;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.net.Uri;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.WorkManager;
 import android.os.Handler;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -60,7 +58,6 @@ public class Alberi extends AppCompatActivity {
 	protected void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
 		setContentView(R.layout.alberi);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		ListView vistaLista = findViewById(R.id.lista_alberi);
 		rotella = findViewById(R.id.alberi_circolo);
 		welcome = new Fabuloso(this, R.string.tap_add_tree);
@@ -125,7 +122,7 @@ public class Alberi extends AppCompatActivity {
 							}
 						});
 					} else {
-						vistaAlbero.setBackgroundColor(Color.WHITE); // bisogna dirglielo esplicitamente altrimenti colora a caso
+						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.back_element));
 						vistaAlbero.setOnClickListener(v -> {
 							rotella.setVisibility(View.VISIBLE);
 							if( !(Global.gc != null && treeId == Global.settings.openTree) ) { // se non è già aperto
@@ -192,12 +189,12 @@ public class Alberi extends AppCompatActivity {
 									return false;
 								});
 								dialogo.show();
-								vistaMessaggio.post( () -> {
+								vistaMessaggio.postDelayed( () -> {
 									editaNome.requestFocus();
 									editaNome.setSelection(editaNome.getText().length());
 									InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 									inputMethodManager.showSoftInput(editaNome, InputMethodManager.SHOW_IMPLICIT);
-								});
+								}, 300);
 							} else if( id == 3 ) { // Media folders
 								startActivity(new Intent(Alberi.this, CartelleMedia.class)
 										.putExtra("idAlbero", treeId)
@@ -504,12 +501,6 @@ public class Alberi extends AppCompatActivity {
 			else
 				Toast.makeText( Alberi.this, esportatore.messaggioErrore, Toast.LENGTH_LONG ).show();
 		}
-	}
-
-	@Override
-	public boolean onOptionsItemSelected( MenuItem i ) {
-		onBackPressed();
-		return true;
 	}
 
 	Gedcom findErrors(final int treeId, final boolean correct) {

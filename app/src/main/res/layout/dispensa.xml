@@ -10,10 +10,9 @@
 		android:id="@+id/dispensa_titolo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:paddingLeft="10dp"
+		android:paddingStart="10dp"
 		android:paddingTop="2dp"
-		android:paddingRight="28dp"
-		android:text="Titoletto lunghetto"
+		android:paddingEnd="28dp"
 		android:textColor="#fff"
 		android:textSize="15sp"
 		android:textStyle="bold" />

@@ -2,7 +2,10 @@ package app.familygem;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +38,7 @@ import java.util.Set;
 import app.familygem.constants.Format;
 import app.familygem.constants.Gender;
 import static app.familygem.Global.gc;
+import com.lb.fast_scroller_and_recycler_view_fixes_library.FastScrollerEx;
 
 public class Anagrafe extends Fragment {
 
@@ -47,7 +51,7 @@ public class Anagrafe extends Fragment {
 		NONE,
 		ID_ASC, ID_DESC,
 		SURNAME_ASC, SURNAME_DESC,
-		YEAR_ASC, YEAR_DESC,
+		DATE_ASC, DATE_DESC,
 		AGE_ASC, AGE_DESC,
 		KIN_ASC, KIN_DESC;
 		public Order next() {
@@ -60,31 +64,34 @@ public class Anagrafe extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-		View vista = inflater.inflate(R.layout.ricicla_vista, container, false);
+		View view = inflater.inflate(R.layout.ricicla_vista, container, false);
 		if( gc != null ) {
 			people = gc.getPeople();
 			arredaBarra();
-			RecyclerView vistaLista = vista.findViewById(R.id.riciclatore);
+			RecyclerView vistaLista = view.findViewById(R.id.riciclatore);
 			vistaLista.setPadding(12, 12, 12, vistaLista.getPaddingBottom());
 			adapter = new AdattatoreAnagrafe();
 			vistaLista.setAdapter(adapter);
 			gliIdsonoNumerici = verificaIdNumerici();
-			vista.findViewById(R.id.fab).setOnClickListener(v -> {
-				Intent intento = new Intent(getContext(), EditaIndividuo.class);
-				intento.putExtra("idIndividuo", "TIZIO_NUOVO");
-				startActivity(intento);
+			view.findViewById(R.id.fab).setOnClickListener(v -> {
+				Intent intent = new Intent(getContext(), EditaIndividuo.class);
+				intent.putExtra("idIndividuo", "TIZIO_NUOVO");
+				startActivity(intent);
 			});
+
+			// Fast scroller
+			StateListDrawable thumbDrawable = (StateListDrawable)ContextCompat.getDrawable(getContext(), R.drawable.scroll_thumb);
+			Drawable lineDrawable = ContextCompat.getDrawable(getContext(), R.drawable.empty);
+			new FastScrollerEx(vistaLista, thumbDrawable, lineDrawable, thumbDrawable, lineDrawable,
+					 U.dpToPx(40), U.dpToPx(100), 0, true, U.dpToPx(80));
 		}
-		return vista;
+		return view;
 	}
 
 	void arredaBarra() {
 		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(people.size() + " "
 				+ getString(people.size() == 1 ? R.string.person : R.string.persons).toLowerCase());
-		if( people.size() > 1 )
-			setHasOptionsMenu(true);
-		else
-			setHasOptionsMenu(false);
+		setHasOptionsMenu(people.size() > 1);
 	}
 
 	public class AdattatoreAnagrafe extends RecyclerView.Adapter<GestoreIndividuo> implements Filterable {
@@ -293,22 +300,26 @@ public class Anagrafe extends Fragment {
 					if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
 						return -1;
 					return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
-				case YEAR_ASC: // Sort for person's main year
-					return annoBase(p1) - annoBase(p2);
-				case YEAR_DESC:
-					if( annoBase(p2) == 9999 ) // Those without year go to the bottom
+				case DATE_ASC: // Sort for person's main year
+					return getDate(p1) - getDate(p2);
+				case DATE_DESC:
+					int date1 = getDate(p1);
+					int date2 = getDate(p2);
+					if( date2 == Integer.MAX_VALUE ) // Those without year go to the bottom
 						return -1;
-					if( annoBase(p1) == 9999 )
-						return annoBase(p2) == 9999 ? 0 : 1;
-					return annoBase(p2) - annoBase(p1);
+					if( date1 == Integer.MAX_VALUE )
+						return date2 == Integer.MAX_VALUE ? 0 : 1;
+					return date2 - date1;
 				case AGE_ASC: // Sort for main person's year
-					return calcAge(p1) - calcAge(p2);
+					return getAge(p1) - getAge(p2);
 				case AGE_DESC:
-					if( calcAge(p2) == Integer.MAX_VALUE ) // Those without age go to the bottom
+					int age1 = getAge(p1);
+					int age2 = getAge(p2);
+					if( age2 == Integer.MAX_VALUE ) // Those without age go to the bottom
 						return -1;
-					if( calcAge(p1) == Integer.MAX_VALUE )
-						return calcAge(p2) == Integer.MAX_VALUE ? 0 : 1;
-					return calcAge(p2) - calcAge(p1);
+					if( age1 == Integer.MAX_VALUE )
+						return age2 == Integer.MAX_VALUE ? 0 : 1;
+					return age2 - age1;
 				case KIN_ASC: // Sort for number of relatives
 					return countRelatives(p1) - countRelatives(p2);
 				case KIN_DESC:
@@ -345,17 +356,21 @@ public class Anagrafe extends Fragment {
 		return cognome.concat( nomeDato );
 	}
 
-	// riceve una Person e restituisce un anno base della sua esistenza
-	private int annoBase( Person p ) {
-		int min = 9999;
-		for( EventFact unFatto : p.getEventsFacts() ) {
-			if( unFatto.getDate() != null ) {
-				int anno = new Datatore( unFatto.getDate() ).soloAnno();
-				if( anno < min )
-					min = anno;
+	// riceve una Person e restituisce il primo anno della sua esistenza
+	Datatore datatore = new Datatore("");
+	private int findDate(Person person) {
+		for( EventFact event : person.getEventsFacts() ) {
+			if( event.getDate() != null ) {
+				datatore.analizza(event.getDate());
+				return datatore.getDateNumber();
 			}
 		}
-		return min;
+		return Integer.MAX_VALUE;
+	}
+
+	int getDate(Person person) {
+		Object date = person.getExtension("date");
+		return date == null ? Integer.MAX_VALUE : (int)date;
 	}
 
 	// Calculate the age of a person in days or MAX_VALUE
@@ -379,7 +394,7 @@ public class Anagrafe extends Fragment {
 			// If the person is still alive the end is now
 			LocalDate now = LocalDate.now();
 			if( end == null && startDate.isBefore(now)
-					&& Years.yearsBetween(startDate, now).getYears() < 120 && !U.isDead(person) ) {
+					&& Years.yearsBetween(startDate, now).getYears() <= 120 && !U.isDead(person) ) {
 				end = new Datatore(now.toDate());
 			}
 			if( end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M) ) {
@@ -390,6 +405,11 @@ public class Anagrafe extends Fragment {
 			}
 		}
 		return days;
+	}
+
+	int getAge(Person person) {
+		Object age = person.getExtension("age");
+		return age == null ? Integer.MAX_VALUE : (int)age;
 	}
 
 	// Write the two main places of a person (initial – final) or null
@@ -538,7 +558,7 @@ public class Anagrafe extends Fragment {
 		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
 		subMenu.add(0, 1, 0, R.string.id);
 		subMenu.add(0, 2, 0, R.string.surname);
-		subMenu.add(0, 3, 0, R.string.year);
+		subMenu.add(0, 3, 0, R.string.date);
 		subMenu.add(0, 4, 0, R.string.age);
 		subMenu.add(0, 5, 0, R.string.number_relatives);
 
@@ -569,6 +589,24 @@ public class Anagrafe extends Fragment {
 				order = order.prev();
 			else
 				order = Order.values()[id * 2 - 1];
+
+			if( order == Order.DATE_ASC ) {
+				for( Person p : gc.getPeople() ) {
+					int date = findDate(p);
+					if( date < Integer.MAX_VALUE )
+						p.putExtension("date", date);
+					else
+						p.getExtensions().remove("date");
+				}
+			} else if( order == Order.AGE_ASC ) {
+				for( Person p : gc.getPeople() ) {
+					int age = calcAge(p);
+					if( age < Integer.MAX_VALUE )
+						p.putExtension("age", age);
+					else
+						p.getExtensions().remove("age");
+				}
+			}
 			sortPeople();
 			adapter.notifyDataSetChanged();
 			//U.salvaJson( false ); // dubbio se metterlo per salvare subito il riordino delle persone...

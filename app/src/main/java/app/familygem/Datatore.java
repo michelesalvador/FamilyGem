@@ -269,12 +269,12 @@ class Datatore {
 		return txt;
 	}
 
-	// Restituisce l'anno della data principale oppure 9999
-	public int soloAnno() {
-		int anno = 9999;
-		if( data1.date != null && !data1.isFormat(Format.D_M) )
-			anno = data1.date.getYear() + 1900;
-		return anno;
+	// Return an integer representing the main date in the format YYYYMMDD, otherwise MAX_VALUE
+	public int getDateNumber() {
+		if( data1.date != null && !data1.isFormat(Format.D_M) ) {
+			return (data1.date.getYear() + 1900) * 10000 + (data1.date.getMonth() + 1) * 100 + data1.date.getDate();
+		}
+		return Integer.MAX_VALUE;
 	}
 
 	// Kinds of date that represent a single event in time

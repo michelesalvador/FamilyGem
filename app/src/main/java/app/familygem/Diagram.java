@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.pdf.PdfDocument;
@@ -27,7 +28,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.text.TextUtilsCompat;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -36,6 +39,7 @@ import org.folg.gedcom.model.Person;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -61,6 +65,7 @@ public class Diagram extends Fragment {
 	private Person fulcrum;
 	private FulcrumGlow glow;
 	private Lines lines;
+	private Lines backLines;
 	private float density;
 	private int STROKE;
 	private final int GLOW_SPACE = 35; // Space to display glow, in dp
@@ -70,6 +75,7 @@ public class Diagram extends Fragment {
 	private boolean play;
 	private AnimatorSet animator;
 	private boolean printPDF; // We are exporting a PDF
+	private final boolean leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
@@ -85,7 +91,7 @@ public class Diagram extends Fragment {
 		view.findViewById(R.id.diagram_options).setOnClickListener(vista -> {
 			PopupMenu opzioni = new PopupMenu(getContext(), vista);
 			Menu menu = opzioni.getMenu();
-			menu.add(0, 0, 0, R.string.settings);
+			menu.add(0, 0, 0, R.string.diagram_settings);
 			if( gc.getPeople().size() > 0 )
 				menu.add(0, 1, 0, R.string.export_pdf);
 			opzioni.show();
@@ -105,6 +111,7 @@ public class Diagram extends Fragment {
 		});
 
 		moveLayout = view.findViewById(R.id.diagram_frame);
+		moveLayout.leftToRight = leftToRight;
 		box = view.findViewById(R.id.diagram_box);
 		//box.setBackgroundColor(0x22ff0000);
 		graph = new Graph(Global.gc); // Create a diagram model
@@ -259,8 +266,10 @@ public class Diagram extends Fragment {
 				graph.placeNodes(); // Calculate first raw position
 
 				// Add the lines
-				lines = new Lines(getContext());
+				lines = new Lines(getContext(), graph.getLines(), null);
 				box.addView(lines, 0);
+				backLines = new Lines(getContext(), graph.getBackLines(), new DashPathEffect(new float[]{toPx(4), toPx(4)}, 0));
+				box.addView(backLines, 0);
 
 				// Add the glow
 				PersonNode fulcrumNode = (PersonNode)fulcrumView.metric;
@@ -304,13 +313,15 @@ public class Diagram extends Fragment {
 			if( nodeView instanceof GraphicMetric ) {
 				GraphicMetric graphicNode = (GraphicMetric)nodeView;
 				RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)graphicNode.getLayoutParams();
-				params.leftMargin = toPx(graphicNode.metric.x);
+				if( leftToRight ) params.leftMargin = toPx(graphicNode.metric.x);
+				else params.rightMargin = toPx(graphicNode.metric.x);
 				params.topMargin = toPx(graphicNode.metric.y);
 			}
 		}
 		// The glow follows fulcrum
 		RelativeLayout.LayoutParams glowParams = (RelativeLayout.LayoutParams)glow.getLayoutParams();
-		glowParams.leftMargin = toPx(fulcrumView.metric.x - GLOW_SPACE);
+		if( leftToRight ) glowParams.leftMargin = toPx(fulcrumView.metric.x - GLOW_SPACE);
+		else glowParams.rightMargin = toPx(fulcrumView.metric.x - GLOW_SPACE);
 		glowParams.topMargin = toPx(fulcrumView.metric.y - GLOW_SPACE);
 
 		moveLayout.childWidth = toPx(graph.getWidth()) + box.getPaddingStart() * 2;
@@ -318,12 +329,14 @@ public class Diagram extends Fragment {
 
 		// Update lines
 		lines.invalidate();
+		backLines.invalidate();
 
 		// Pan to fulcrum
 		if( moveLayout.virgin ) {
 			float scale = moveLayout.minimumScale();
 			float padding = box.getPaddingTop() * scale;
-			moveLayout.panTo((int)(toPx(fulcrumView.metric.centerX()) * scale - moveLayout.width / 2 + padding),
+			moveLayout.panTo((int)(leftToRight ? toPx(fulcrumView.metric.centerX()) * scale - moveLayout.width / 2 + padding
+							: moveLayout.width / 2 - toPx(fulcrumView.metric.centerX()) * scale - padding),
 					(int)(toPx(fulcrumView.metric.centerY()) * scale - moveLayout.height / 2 + padding));
 		} else {
 			moveLayout.keepPositionResizing();
@@ -440,7 +453,7 @@ public class Diagram extends Fragment {
 				bondLayout.addView(hearth, hearthParams);
 			} else {
 				TextView year = new TextView( context );
-				year.setBackgroundResource(R.drawable.diagramma_cerchio_anno);
+				year.setBackgroundResource(R.drawable.diagram_year_oval);
 				year.setGravity(Gravity.CENTER);
 				year.setText(new Datatore(bond.marriageDate).writeDate(true));
 				year.setTextSize(13f);
@@ -503,12 +516,15 @@ public class Diagram extends Fragment {
 
 	// Generate the view of lines connecting the cards
 	class Lines extends View {
+		List<Set<Line>> lineGroups;
 		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		List<Path> paths = new ArrayList<>(); // Each path contains many lines
 		//int[] colors = {Color.WHITE, Color.RED, Color.CYAN, Color.MAGENTA, Color.GREEN, Color.BLACK, Color.YELLOW, Color.BLUE};
-		public Lines(Context context) {
+		public Lines(Context context, List<Set<Line>> lineGroups, DashPathEffect effect) {
 			super(context == null ? Global.context : context);
 			//setBackgroundColor(0x330000ff);
+			this.lineGroups = lineGroups;
+			paint.setPathEffect(effect);
 			paint.setStyle(Paint.Style.STROKE);
 			paint.setStrokeWidth(STROKE);
 		}
@@ -518,18 +534,23 @@ public class Diagram extends Fragment {
 			for( Path path : paths ){
 				path.rewind();
 			}
+			float width = toPx(graph.getWidth());
 			int pathNum = 0; // index of paths
 			// Put the lines in one or more paths
-			for( Set<Line> linesGroup : graph.getLines() ) {
+			for( Set<Line> lineGroup : lineGroups ) {
 				if( pathNum >= paths.size() )
 					paths.add(new Path());
 				Path path = paths.get(pathNum);
-				for( Line line : linesGroup ) {
+				for( Line line : lineGroup ) {
 					float x1 = toPx(line.x1), y1 = toPx(line.y1), x2 = toPx(line.x2), y2 = toPx(line.y2);
+					if( !leftToRight ) {
+						x1 = width - x1;
+						x2 = width - x2;
+					}
 					path.moveTo(x1, y1);
 					if( line instanceof CurveLine ) {
 						path.cubicTo(x1, y2, x2, y1, x2, y2);
-					} else {
+					} else { // Horizontal or vertical line
 						path.lineTo(x2, y2);
 					}
 				}

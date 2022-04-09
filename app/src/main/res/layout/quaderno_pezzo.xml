@@ -3,15 +3,15 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:background="?android:attr/selectableItemBackground"
-	android:paddingLeft="10dp"
-	android:paddingRight="8dp"
+	android:paddingStart="10dp"
+	android:paddingEnd="8dp"
 	android:paddingTop="8dp">
 
 	<TextView
 		android:id="@+id/nota_testo"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_toLeftOf="@+id/nota_citazioni"
+		android:layout_toStartOf="@+id/nota_citazioni"
 		android:ellipsize="end"
 		android:maxLines="4"/>
 
@@ -19,8 +19,8 @@
 		android:id="@+id/nota_citazioni"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignParentRight="true"
-		android:layout_marginLeft="4dp"
+		android:layout_alignParentEnd="true"
+		android:layout_marginStart="4dp"
 		android:background="@drawable/cerchietto"
 		android:paddingLeft="5dp"
 		android:paddingTop="2dp"

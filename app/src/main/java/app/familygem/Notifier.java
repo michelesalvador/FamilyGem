@@ -35,6 +35,7 @@ class Notifier implements LifecycleObserver {
 	static final String WORK_TAG = "notificationsForTree"; // Add tree.id to it, to be able to cancel all works related to a tree
 	private static final String CHANNEL_ID = "birthdays";
 	private final Date now = new Date();
+	private final int notifyHour = 12;
 
 	Notifier(Context context) {
 
@@ -59,7 +60,7 @@ class Notifier implements LifecycleObserver {
 						Datatore datator = new Datatore(event.getDate());
 						if( datator.data1.date != null ) { // 'data1' could be a phrase
 							int years = getYears(datator.data1.date);
-							if( datator.isSingleKind() && datator.data1.isFormat(Format.D_M_Y) && years < 120 ) {
+							if( datator.isSingleKind() && datator.data1.isFormat(Format.D_M_Y) && years <= 120 ) {
 								birthdays.add(new Birthday(person, datator.data1.date, years));
 							}
 						}
@@ -79,12 +80,15 @@ class Notifier implements LifecycleObserver {
 					.putString("indiId", birthday.person.getId());
 
 			OneTimeWorkRequest notificationWork = new OneTimeWorkRequest.Builder(NotifyWorker.class)
+			//WorkRequest notificationWork = new PeriodicWorkRequest.Builder(NotifyWorker.class, 15, TimeUnit.MINUTES)
 					.addTag(WORK_TAG + tree.id)
 					.setInputData(inputData.build())
 					.setInitialDelay(calcDelay(birthday.date), TimeUnit.MINUTES)
 					//.setInitialDelay(5, TimeUnit.SECONDS)
+					//.setConstraints(Constraints.NONE)
 					.build();
 			WorkManager.getInstance(context).enqueue(notificationWork);
+			//WorkManager.getInstance(context).enqueue(U.epiteto(birthday.person), ExistingPeriodicWorkPolicy.REPLACE, notificationWork);
 		}
 	}
 
@@ -92,15 +96,14 @@ class Notifier implements LifecycleObserver {
 	private int getYears(Date birthday) {
 		int diff = now.getYear() - birthday.getYear();
 		if( birthday.getMonth() < now.getMonth()
-				|| (birthday.getMonth() == now.getMonth() && birthday.getDate() < now.getDate()) ) {
+				|| (birthday.getMonth() == now.getMonth() && birthday.getDate() < now.getDate())
+				|| (birthday.getMonth() == now.getMonth() && birthday.getDate() == now.getDate() && now.getHours() >= notifyHour) )
 			diff++;
-		}
 		return diff;
 	}
 
 	// Calculate the number of minutes from now to the next birthday
 	private long calcDelay(Date birthday) {
-		int notifyHour = 12;
 		int year = now.getYear();
 		if( birthday.getMonth() < now.getMonth()
 				|| (birthday.getMonth() == now.getMonth() && birthday.getDate() < now.getDate())
@@ -115,7 +118,7 @@ class Notifier implements LifecycleObserver {
 	// This class represents the birthday of a person
 	private static class Birthday {
 		Person person;
-		Date date; // Date of birth
+		Date date; // Date of birthday
 		int years; // Turned years
 		public Birthday(Person person, Date date, int years) {
 			this.person = person;
@@ -144,8 +147,8 @@ class Notifier implements LifecycleObserver {
 					.putExtra(TREE_ID_KEY, inputData.getInt("treeId", 0))
 					.putExtra(INDI_ID_KEY, inputData.getString("indiId"))
 					.putExtra(NOTIFY_ID_KEY, inputData.getInt("id", 0));
-			PendingIntent pendingIntent = PendingIntent.getActivity(context,
-					inputData.getInt("id", 0), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingIntent = PendingIntent.getActivity(context, inputData.getInt("id", 0),
+					intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
 					.setSmallIcon(R.drawable.albero_cherokee)
@@ -158,6 +161,9 @@ class Notifier implements LifecycleObserver {
 
 			NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 			notificationManager.notify(inputData.getInt("id", 0), builder.build());
+
+			// Cancel this "periodic" work
+			//WorkManager.getInstance(context).cancelWorkById(getId());
 			return Result.success();
 		}
 	}

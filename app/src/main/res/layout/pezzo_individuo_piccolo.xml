@@ -23,14 +23,14 @@
 			android:layout_width="40dp"
 			android:layout_height="45dp"
 			android:layout_alignParentEnd="true"
-			android:layout_marginLeft="6dp"
+			android:layout_marginStart="6dp"
 			android:scaleType="centerCrop"
 			app:srcCompat="@drawable/manichino" />
 		<TextView
 			android:id="@+id/collega_nome"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@+id/collega_foto"
+			android:layout_toStartOf="@+id/collega_foto"
 			android:textSize="15sp"/>
 		<TextView
 			android:id="@+id/collega_dati"
@@ -43,8 +43,8 @@
 			android:id="@+id/collega_lutto"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentRight="true"
-			android:layout_marginRight="-8dp"
+			android:layout_alignParentEnd="true"
+			android:layout_marginEnd="-8dp"
 			android:layout_marginTop="-8dp"
 			app:srcCompat="@drawable/defunto"/>
 	</RelativeLayout>

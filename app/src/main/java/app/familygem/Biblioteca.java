@@ -51,7 +51,7 @@ public class Biblioteca extends Fragment {
 				getString(listaFonti.size()==1 ? R.string.source : R.string.sources).toLowerCase() );
 		if( listaFonti.size() > 1 )
 			setHasOptionsMenu(true);
-		View vista = inflater.inflate(R.layout.ricicla_vista, container, false);
+		View vista = inflater.inflate(R.layout.biblioteca, container, false);
 		RecyclerView vistaFonti = vista.findViewById( R.id.riciclatore );
 		adattatore = new BibliotecAdapter();
 		vistaFonti.setAdapter( adattatore );

@@ -17,8 +17,7 @@
 		android:allowBackup="true"
 		android:usesCleartextTraffic="true"
 		android:requestLegacyExternalStorage="true"
-		android:supportsRtl="false"
-		tools:replace="android:supportsRtl">
+		android:supportsRtl="true">
 		<provider
 			android:name="androidx.core.content.FileProvider"
 			android:authorities="${applicationId}.provider"
@@ -30,7 +29,8 @@
 		</provider>
 		<activity
 			android:name=".Facciata"
-			android:noHistory="true" >
+			android:noHistory="true"
+			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />

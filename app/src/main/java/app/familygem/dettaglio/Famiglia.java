@@ -21,6 +21,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constants.Gender;
 import app.familygem.constants.Relation;
+import app.familygem.constants.Status;
 import static app.familygem.Global.gc;
 
 public class Famiglia extends Dettaglio {
@@ -62,13 +63,13 @@ public class Famiglia extends Dettaglio {
 		 */
 		if( relation == Relation.PARTNER ) {
 			for( SpouseFamilyRef sfr : p.getSpouseFamilyRefs() )
-				if( sfr.getRef().equals(f.getId()) ) {
+				if( f.getId().equals(sfr.getRef()) ) {
 					vistaPersona.setTag(R.id.tag_spouse_family_ref, sfr);
 					break;
 				}
 		} else if( relation == Relation.CHILD ) {
 			for( ParentFamilyRef pfr : p.getParentFamilyRefs() )
-				if( pfr.getRef().equals(f.getId()) ) {
+				if( f.getId().equals(pfr.getRef()) ) {
 					vistaPersona.setTag(R.id.tag_spouse_family_ref, pfr);
 					break;
 				}
@@ -113,7 +114,7 @@ public class Famiglia extends Dettaglio {
 
 	/** Find the role of a person from their relation with a family
 	 * @param person
-	 * @param family
+	 * @param family Can be null
 	 * @param relation
 	 * @param respectFamily The role to find is relative to the family (it becomes 'parent' with children)
 	 * @return A descriptor text of the person's role
@@ -122,15 +123,20 @@ public class Famiglia extends Dettaglio {
 		int role = 0;
 		if( respectFamily && relation == Relation.PARTNER && family != null && !family.getChildRefs().isEmpty() )
 			relation = Relation.PARENT;
-		boolean married = U.areMarried(family);
-		boolean divorced = U.areDivorced(family);
+		Status status = Status.getStatus(family);
 		if( Gender.isMale(person) ) {
 			switch( relation ) {
 				case PARENT: role = R.string.father; break;
 				case SIBLING: role = R.string.brother; break;
 				case HALF_SIBLING: role = R.string.half_brother; break;
-				case PARTNER: role = married ? (divorced ? R.string.ex_husband : R.string.husband)
-						: (divorced ? R.string.ex_male_partner : R.string.male_partner); break;
+				case PARTNER:
+					switch( status ) {
+						case MARRIED: role = R.string.husband; break;
+						case DIVORCED: role = R.string.ex_husband; break;
+						case SEPARATED: role = R.string.ex_male_partner; break;
+						default: role = R.string.male_partner;
+					}
+					break;
 				case CHILD: role = R.string.son;
 			}
 		} else if( Gender.isFemale(person) ) {
@@ -138,8 +144,14 @@ public class Famiglia extends Dettaglio {
 				case PARENT: role = R.string.mother; break;
 				case SIBLING: role = R.string.sister; break;
 				case HALF_SIBLING: role = R.string.half_sister; break;
-				case PARTNER: role = married ? (divorced ? R.string.ex_wife : R.string.wife)
-						: (divorced ? R.string.ex_female_partner : R.string.female_partner); break;
+				case PARTNER:
+					switch( status ) {
+						case MARRIED: role = R.string.wife; break;
+						case DIVORCED: role = R.string.ex_wife; break;
+						case SEPARATED: role = R.string.ex_female_partner; break;
+						default: role = R.string.female_partner;
+					}
+					break;
 				case CHILD: role = R.string.daughter;
 			}
 		} else {
@@ -147,8 +159,14 @@ public class Famiglia extends Dettaglio {
 				case PARENT: role = R.string.parent; break;
 				case SIBLING: role = R.string.sibling; break;
 				case HALF_SIBLING: role = R.string.half_sibling; break;
-				case PARTNER: role = married ? (divorced ? R.string.ex_spouse : R.string.spouse)
-						: (divorced ? R.string.ex_partner : R.string.partner); break;
+				case PARTNER:
+					switch( status ) {
+						case MARRIED: role = R.string.spouse; break;
+						case DIVORCED: role = R.string.ex_spouse; break;
+						case SEPARATED: role = R.string.ex_partner; break;
+						default: role = R.string.partner;
+					}
+					break;
 				case CHILD: role = R.string.child;
 			}
 		}

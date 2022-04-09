@@ -57,7 +57,7 @@ public class Quaderno extends Fragment {
 						registerForContextMenu( mettiNota(scatola,(Note)nota) );
 				}
 			}
-			int totaleNote = listaNoteCondivise.size()+visitaNote.listaNote.size();
+			int totaleNote = listaNoteCondivise.size() + visitaNote.listaNote.size();
 			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( totaleNote + " "
 					+ getString(totaleNote==1 ? R.string.note : R.string.notes).toLowerCase() );
 			vista.findViewById( R.id.fab ).setOnClickListener( v -> nuovaNota( getContext(), null ) );

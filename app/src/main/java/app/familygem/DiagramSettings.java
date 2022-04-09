@@ -9,15 +9,19 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.text.TextUtilsCompat;
+import androidx.core.view.ViewCompat;
+import java.util.Locale;
 
 public class DiagramSettings extends AppCompatActivity {
 
-	SeekBar ancestors;
-	SeekBar uncles;
-	SeekBar siblings;
-	SeekBar cousins;
-	LinearLayout indicator;
-	AnimatorSet anima;
+	private SeekBar ancestors;
+	private SeekBar uncles;
+	private SeekBar siblings;
+	private SeekBar cousins;
+	private LinearLayout indicator;
+	private AnimatorSet anima;
+	private final boolean leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR;
 
 	@Override
 	protected void onCreate( Bundle bandolo ) {
@@ -157,7 +161,11 @@ public class DiagramSettings extends AppCompatActivity {
 		int i = seekBar.getProgress();
 		((TextView)indicator.findViewById(R.id.settings_indicator_text)).setText(String.valueOf(converti(i)));
 		int width = seekBar.getWidth() - seekBar.getPaddingLeft() - seekBar.getPaddingRight();
-		float x = (seekBar.getX() + seekBar.getPaddingLeft() + width / 9f * i) - indicator.getWidth() / 2f;
+		float x;
+		if( leftToRight )
+			x = seekBar.getX() + seekBar.getPaddingLeft() + width / 9f * i - indicator.getWidth() / 2f;
+		else
+			x = seekBar.getX() + seekBar.getWidth() + seekBar.getPaddingRight() - width / 9f * (i + 1) - indicator.getWidth() / 2f;
 		indicator.setX(x);
 		indicator.setY(seekBar.getY() - indicator.getHeight());
 		anima.cancel();

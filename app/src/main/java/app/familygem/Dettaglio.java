@@ -603,7 +603,7 @@ public class Dettaglio extends AppCompatActivity {
 			default:
 				tit = event.getDisplayType();
 		}
-		if( event.getType() != null && !event.getType().equals("marriage") )
+		if( event.getType() != null && !event.getType().isEmpty() && !event.getType().equals("marriage") )
 			tit += " (" + TypeView.getTranslatedType(event.getType(), TypeView.Combo.RELATIONSHIP) + ")";
 		return tit;
 	}

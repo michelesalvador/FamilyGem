@@ -21,7 +21,7 @@
 		android:layout_height="wrap_content"
 		android:layout_centerVertical="true"
 		android:layout_toRightOf="@+id/intento_icona"
-		android:textColor="#333"
+		android:textColor="@color/text"
 		android:textSize="18sp" />
 
 	<View

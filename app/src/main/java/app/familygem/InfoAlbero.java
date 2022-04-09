@@ -215,24 +215,23 @@ public class InfoAlbero extends AppCompatActivity {
 	}
 
 	boolean testoMesso;  // impedisce di mettere più di uno spazio() consecutivo
-	void poni(CharSequence titolo, String testo) {
-		if( testo != null ) {
-			TableRow riga = new TableRow(getApplicationContext());
-			TextView cella1 = new TextView(getApplicationContext());
-			cella1.setTextSize(14);
-			cella1.setTextColor(Color.BLACK);
-			cella1.setTypeface(null, Typeface.BOLD);
-			cella1.setPadding(0, 0, 10, 0);
-			cella1.setGravity(Gravity.END);
-			cella1.setText(titolo);
-			riga.addView(cella1);
-			TextView cella2 = new TextView(getApplicationContext());
-			cella2.setTextSize(14);
-			cella2.setTextColor(Color.BLACK);
-			cella2.setPadding(0, 0, 0, 0);
-			cella2.setText(testo);
-			riga.addView(cella2);
-			((TableLayout)findViewById(R.id.info_tabella)).addView(riga);
+	void poni(CharSequence title, String text) {
+		if( text != null ) {
+			TableRow row = new TableRow(this);
+			TextView cell1 = new TextView(this);
+			cell1.setTextSize(14);
+			cell1.setTypeface(null, Typeface.BOLD);
+			cell1.setPaddingRelative(0, 0, 10, 0);
+			cell1.setGravity(Gravity.END); // Does not work on RTL layout
+			cell1.setText(title);
+			row.addView(cell1);
+			TextView cell2 = new TextView(this);
+			cell2.setTextSize(14);
+			cell2.setPadding(0, 0, 0, 0);
+			cell2.setGravity(Gravity.START);
+			cell2.setText(text);
+			row.addView(cell2);
+			((TableLayout)findViewById(R.id.info_tabella)).addView(row);
 			testoMesso = true;
 		}
 	}
@@ -313,7 +312,8 @@ public class InfoAlbero extends AppCompatActivity {
 				if( marito.getExtension("gen") == null )
 					risaliGenerazioni(marito, gc, gen);
 			for( Person figlio : fam.getChildren(gc) )
-				discendiGenerazioni(figlio, gc, gen + 1);
+				if( figlio.getExtension("gen") == null )
+					discendiGenerazioni(figlio, gc, gen + 1);
 		}
 	}
 

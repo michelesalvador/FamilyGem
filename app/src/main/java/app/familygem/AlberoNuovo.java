@@ -88,11 +88,11 @@ public class AlberoNuovo extends AppCompatActivity {
 				}
 				return false; // Eventuali altri action che non esistono
 			});
-			vistaMessaggio.post( () -> {
+			vistaMessaggio.postDelayed( () -> {
 				nuovoNome.requestFocus();
 				InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				inputMethodManager.showSoftInput(nuovoNome, InputMethodManager.SHOW_IMPLICIT);
-			});
+			}, 300);
 		});
 
 		Button scaricaEsempio = findViewById(R.id.bottone_scarica_esempio);
