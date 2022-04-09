@@ -171,7 +171,7 @@
     <string name="family">Famille</string>
     <string name="blob">bulle</string>
     <string name="slideshow">Présentation</string>
-    <string name="make_main_submitter">Voulez que cette personne soit la principale de cet arbre \?</string>
+    <string name="make_main_submitter">Voulez que cet auteur soit le principal de l\'arbre \?</string>
     <string name="not_granted">%s pas garanti.</string>
     <string name="estimated">Estimée</string>
     <string name="calculated">Calculée</string>
@@ -293,7 +293,7 @@
     <string name="events">Faits</string>
     <string name="really_delete_person">Vous confirmez supprimer cette personne \?</string>
     <string name="person_deleted">Personne supprimée.</string>
-    <string name="generations_display_diagram">Choisir combien de générations montrer dans le diagramme:</string>
+    <string name="generations_display_diagram">Choisir combien de générations montrer dans le diagramme :</string>
     <string name="diagram_settings">Paramètres de diagramme</string>
     <string name="pdf_exported_ok">PDF exporté.</string>
     <string name="export_pdf">Export PDF</string>
@@ -314,11 +314,11 @@
     <string name="shared_medias">Média partagé</string>
     <string name="tree_news_imported">Les anciens arbres peuvent recevoir %d les mises à jour de l\'arbre importé :</string>
     <string name="usually_your_name">En général, votre nom et prénom.</string>
-    <string name="changes_submitter">Validateur de ces changements</string>
+    <string name="changes_submitter">Auteur des changements</string>
     <string name="ideally_recipient">En principe, le réceptionnaire de cet échange.</string>
     <string name="add_device_folder">Ajouter un répertoire de cet appareil.</string>
     <string name="app_storage">Stockage des applications</string>
-    <string name="media_searched_list">Les fichier de médias sont recherchés dans ces répertoires:</string>
+    <string name="media_searched_list">Les fichier de médias sont recherchés dans ces répertoires :</string>
     <string name="destination">Destination</string>
     <string name="submission">Validation</string>
     <string name="characrter_set">Caractères</string>
