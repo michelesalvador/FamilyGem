@@ -46,7 +46,7 @@
     <string name="nickname">Kallenavn</string>
     <string name="type">Type</string>
     <string name="value">Verdi</string>
-    <string name="copy">Kopier</string>
+    <string name="copy">Kopier tekst</string>
     <string name="choose_file">Velg fil</string>
     <string name="choose_source">Velg kilde</string>
     <string name="son">Sønn</string>
@@ -81,7 +81,7 @@
     <string name="id">ID</string>
     <string name="order_by">Sorter etter</string>
     <string name="descendants">Etterfølgere</string>
-    <string name="uncles_great_uncles">Unkler</string>
+    <string name="uncles_great_uncles">Onkler og storonkler</string>
     <string name="child">Barn</string>
     <string name="parent">Forelder</string>
     <string name="unlink">Opphev lenke</string>
@@ -182,7 +182,7 @@
     <string name="aka">Kallenavn</string>
     <string name="half_sibling">Halvsøsken</string>
     <string name="this_is_root">%s er slektstreets hovedperson.</string>
-    <string name="siblings_nephews">Søsken</string>
+    <string name="siblings_nephews">Søsken og nevøer</string>
     <string name="ancestors">Forfedre</string>
     <string name="diagram_settings">Diagraminnstillinger</string>
     <string name="long_press_menu">Trykk lenge for å vise menyen.
@@ -221,7 +221,7 @@
     <string name="link_shared_media">Lenk delt media</string>
     <string name="new_shared_media">Ny delt media</string>
     <string name="new_media">Ny media</string>
-    <string name="link_person">Link eksisterende person</string>
+    <string name="link_person">Lenk eksisterende person</string>
     <string name="new_relative">Lenk ny person</string>
     <string name="new_person">Opprett ny person.</string>
     <string name="confirm_news">Bekreft oppdateringer</string>
@@ -307,7 +307,7 @@
     <string name="choose_repository">Velg depotet</string>
     <string name="link_repository">Link depotet</string>
     <string name="new_repository">Nye depotet</string>
-    <string name="generations_display_diagram">Angi hvor mange generasjoner skal vises i diagrammet.</string>
+    <string name="generations_display_diagram">Angi hvor mange generasjoner skal vises i diagrammet:</string>
     <string name="spouse">Ektefelle</string>
     <string name="family_as_spouse">Familie (som ektefelle)</string>
     <string name="family_as_child">Familie (som barn)</string>
@@ -330,7 +330,7 @@
     <string name="pdf_exported_ok">PDF eksportert.</string>
     <string name="zip_exported_ok">ZIP eksportert.</string>
     <string name="gedcom_exported_ok">GEDCOM eksportert.</string>
-    <string name="media_searched_list">Det søkes etter mediefiler i disse mappene.</string>
+    <string name="media_searched_list">Det søkes etter mediefiler i disse mappene:</string>
     <string name="export_pdf">Eksporter PDF</string>
     <string name="add_device_folder">Legg til en mappe fra denne enheten.</string>
     <string name="female_partner">Partner</string>

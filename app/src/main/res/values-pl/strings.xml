@@ -65,7 +65,7 @@
     <string name="auto_save">Automatyczne zapisywanie</string>
     <string name="load_tree_startup">Załaduj ostatnio otwarte drzewo podczas uruchamiania</string>
     <string name="show_advanced_functions">Pokaż zaawansowane narzędzia</string>
-    <string name="about">O alikacji</string>
+    <string name="about">O aplikacji</string>
     <string name="item_exists_but_file">Pozycja drzewa znajduje się w indeksie, ale z jakiegoś powodu brakuje powiązanego pliku:</string>
     <string name="root">Główny</string>
     <string name="media_folders">Foldery multimediów</string>
@@ -132,7 +132,7 @@
     <string name="child">Dziecko</string>
     <string name="long_press_menu">Przytrzymaj dłużej, aby wyświetlić menu.\nDotknij, aby otworzyć profil.</string>
     <string name="diagram_settings">Ustawienia diagramu</string>
-    <string name="generations_display_diagram">Ustaw liczbę pokoleń do wyświetlenia na schemacie.</string>
+    <string name="generations_display_diagram">Ustaw liczbę pokoleń do wyświetlenia na schemacie:</string>
     <string name="ancestors">Przodków</string>
     <string name="uncles_great_uncles">Wujkowie i pradziadkowie</string>
     <string name="siblings_nephews">Rodzeństwo i siostrzeńcy</string>
@@ -213,7 +213,7 @@
     <string name="user_id">Identyfikator użytkownika</string>
     <string name="source_citation">Źródło cytatu</string>
     <string name="inexistent_source_citation">Brak źródła cytatu</string>
-    <string name="source_note">Żródło notatki</string>
+    <string name="source_note">Źródło notatki</string>
     <string name="page">Strona</string>
     <string name="text">Tekst</string>
     <string name="certainty">Pewność</string>
@@ -323,7 +323,7 @@
     <string name="pdf_exported_ok">Wyeksportowano plik PDF.</string>
     <string name="export_pdf">Eksportuj do PDF</string>
     <string name="add_device_folder">Dodaj folder z tego urządzenia.</string>
-    <string name="media_searched_list">Pliki multimedialne są przeszukiwane wewnątrz tych folderów.</string>
+    <string name="media_searched_list">Pliki multimedialne są przeszukiwane wewnątrz tych folderów:</string>
     <string name="zip_exported_ok">Wyeksportowano ZIP.</string>
     <string name="gedcom_exported_ok">Wyeksportowano GEDCOM.</string>
     <string name="living_apart_together">Żyć razem osobno</string>

@@ -101,7 +101,7 @@
     <string name="destination">Destination</string>
     <string name="time">Time</string>
     <string name="media_folders">Media folders</string>
-    <string name="media_searched_list">Media files are searched inside these folders.</string>
+    <string name="media_searched_list">Media files are searched inside these folders:</string>
     <string name="app_storage">App storage</string>
     <string name="add_device_folder">Add a folder from this device.</string>
     <string name="share_sensitive">Sharing sensitive data</string>
@@ -154,7 +154,7 @@
     <string name="export_pdf">Export PDF</string>
     <string name="pdf_exported_ok">PDF exported.</string>
     <string name="diagram_settings">Diagram settings</string>
-    <string name="generations_display_diagram">Set how many generations display in the diagram.</string>
+    <string name="generations_display_diagram">Set how many generations display in the diagram:</string>
     <string name="ancestors">Ancestors</string>
     <string name="uncles_great_uncles">Uncles and great-uncles</string>
     <string name="partners">Partners</string>

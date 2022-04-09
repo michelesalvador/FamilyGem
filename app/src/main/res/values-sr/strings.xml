@@ -178,7 +178,7 @@
     <string name="siblings_nephews">Braća, sestre i nećaci</string>
     <string name="uncles_great_uncles">Ujaci i praujaci</string>
     <string name="ancestors">Preci</string>
-    <string name="generations_display_diagram">Postavi broj generacija koje se prikazuju u dijagramu.</string>
+    <string name="generations_display_diagram">Postavi broj generacija koje se prikazuju u dijagramu:</string>
     <string name="diagram_settings">Postavke dijagrama</string>
     <string name="long_press_menu">Pritisni dugo, za prikaz menija.
 \nDodirni, za otvaranje profila.</string>
@@ -326,7 +326,7 @@
     <string name="delete">Izbriši</string>
     <string name="tagline">Stvori vlastito porodično stablo</string>
     <string name="sure_delete">Da li ste sigurni\?</string>
-    <string name="media_searched_list">U ovim mapama se pretražuju medijske datoteke.</string>
+    <string name="media_searched_list">U ovim mapama se pretražuju medijske datoteke:</string>
     <string name="pdf_exported_ok">PDF izvezen.</string>
     <string name="export_pdf">Izvoz PDF</string>
     <string name="add_device_folder">Dodati direktoriju sa ovogo urežaja.</string>

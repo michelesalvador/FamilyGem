@@ -105,7 +105,7 @@
     <string name="time">Ora</string>
     <!-- Cartelle media -->
     <string name="media_folders">Cartelle media</string>
-    <string name="media_searched_list">I file media vengono cercati dentro a queste cartelle.</string>
+    <string name="media_searched_list">I file media vengono cercati dentro a queste cartelle:</string>
     <string name="app_storage">Archiviazione app</string>
     <string name="add_device_folder">Aggiungi una cartella da questo dispositivo.</string>
     <!-- Condivisione -->
@@ -166,7 +166,7 @@
     <string name="pdf_exported_ok">PDF esportato.</string>
     <!-- Diagram settings -->
     <string name="diagram_settings">Impostazioni diagramma</string>
-    <string name="generations_display_diagram">Scegli quante generazioni mostrare nel diagramma.</string>
+    <string name="generations_display_diagram">Scegli quante generazioni mostrare nel diagramma:</string>
     <string name="ancestors">Antenati</string>
     <string name="uncles_great_uncles">Zii e prozii</string>
     <string name="partners">Compagni/e</string>

@@ -33,7 +33,7 @@
     <string name="submission">Представление</string>
     <string name="submitter">Автор</string>
     <string name="corporation">Корпорация</string>
-    <string name="software">Программное обеспечение</string>
+    <string name="software">Программа</string>
     <string name="family_gem_example">Family Gem пример</string>
     <string name="complex_tree_advanced_tools">Это дерево выглядит довольно сложным.
 \nВы хотите видеть дополнительные инструменты для лучшего управления им\?</string>
@@ -196,7 +196,7 @@
     <string name="siblings_nephews">Братья и сестры и племянники</string>
     <string name="uncles_great_uncles">Дяди и двоюродные дедушки</string>
     <string name="ancestors">Предки</string>
-    <string name="generations_display_diagram">Установите, сколько поколений отображать на диаграмме.</string>
+    <string name="generations_display_diagram">Установите, сколько поколений отображать на диаграмме:</string>
     <string name="diagram_settings">Настройки диаграммы</string>
     <string name="long_press_menu">Нажмите и удерживайте для отображения меню.
 \nНажмите, чтобы открыть профиль.</string>
@@ -330,7 +330,7 @@
     <string name="export_pdf">Экспорт PDF</string>
     <string name="add_device_folder">Добавьте папку из этого устройства.</string>
     <string name="app_storage">Хранилище приложения</string>
-    <string name="media_searched_list">Мультимедийные файлы ищутся внутри этих папок.</string>
+    <string name="media_searched_list">Мультимедийные файлы ищутся внутри этих папок:</string>
     <string name="zip_exported_ok">ZIP экспортирован.</string>
     <string name="gedcom_exported_ok">GEDCOM экспортирован.</string>
     <string name="family_as">Семья (как %s)</string>

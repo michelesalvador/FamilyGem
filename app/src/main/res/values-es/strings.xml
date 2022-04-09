@@ -305,7 +305,7 @@
     <string name="empty_name">Nombre vacío</string>
     <string name="empty_family">Familia vacía</string>
     <string name="new_family_of">Nueva familia de %s</string>
-    <string name="generations_display_diagram">Establece cuántas generaciones mostrar en el diagrama.</string>
+    <string name="generations_display_diagram">Establece cuántas generaciones mostrar en el diagrama:</string>
     <string name="existing_family">Familia ya existente</string>
     <string name="refresh">Actualizar</string>
     <string name="immigrant">Inmigrado</string>
@@ -325,7 +325,7 @@
     <string name="export_pdf">Exportar PDF</string>
     <string name="add_device_folder">Añadir una carpeta de este aparato.</string>
     <string name="app_storage">Almacenamiento de aplicación</string>
-    <string name="media_searched_list">Limas de medios están buscadas dentro de estas carpetas.</string>
+    <string name="media_searched_list">Limas de medios están buscadas dentro de estas carpetas:</string>
     <string name="zip_exported_ok">ZIP exportado.</string>
     <string name="gedcom_exported_ok">GEDCOM exportado.</string>
     <string name="share_sensitive">Intercambio de datos sensibles</string>
@@ -359,4 +359,5 @@
     <string name="uncles_cousins">Tíos y primos</string>
     <string name="partners">Pareja</string>
     <string name="family_as">Familia (como %s)</string>
+    <string name="living_apart_together">Viviente aparte junto</string>
 </resources>
