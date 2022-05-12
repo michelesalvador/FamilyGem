@@ -226,13 +226,17 @@ public class Compara extends AppCompatActivity {
 	void arredaScheda( Gedcom gc, int idAlbero, int idScheda ) {
 		CardView carta = findViewById(idScheda);
 		Settings.Tree tree = Global.settings.getTree(idAlbero);
-		((TextView)carta.findViewById(R.id.confronto_titolo)).setText(tree.title);
-		((TextView)carta.findViewById(R.id.confronto_testo)).setText(Alberi.scriviDati(this, tree));
+		TextView title = carta.findViewById(R.id.confronto_titolo);
+		TextView data = carta.findViewById(R.id.confronto_testo);
+		title.setText(tree.title);
+		data.setText(Alberi.scriviDati(this, tree));
 		if( idScheda == R.id.compara_nuovo ) {
-			if( tree.grade == 30 )
-				carta.setCardBackgroundColor(0xffdddddd);
-			else
-				carta.setCardBackgroundColor(getResources().getColor(R.color.evidenzia));
+			if( tree.grade == 30 ) {
+				carta.setCardBackgroundColor(getResources().getColor(R.color.consumed));
+				title.setTextColor(getResources().getColor(R.color.grayText));
+				data.setTextColor(getResources().getColor(R.color.grayText));
+			} else
+				carta.setCardBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
 			Submitter autore = gc.getSubmitter(tree.shares.get(tree.shares.size() - 1).submitter);
 			String txt = "";
 			if( autore != null ) {

@@ -58,7 +58,6 @@ public class Confrontatore extends AppCompatActivity {
 			else classe = o2.getClass();
 			arredaScheda( Global.gc, R.id.confronto_vecchio, o );
 			arredaScheda( Global.gc2, R.id.confronto_nuovo, o2 );
-			((CardView)findViewById( R.id.confronto_nuovo )).setCardBackgroundColor( getResources().getColor(R.color.evidenzia) );
 
 			destino = 2;
 
@@ -115,7 +114,7 @@ public class Confrontatore extends AppCompatActivity {
 		String tit = "";
 		String txt = "";
 		String data = "";
-		View carta = findViewById(idScheda);
+		CardView carta = findViewById(idScheda);
 		ImageView vistaFoto = carta.findViewById( R.id.confronto_foto );
 		if( o instanceof Note ) {
 			tipoRecord( R.string.shared_note );
@@ -188,11 +187,15 @@ public class Confrontatore extends AppCompatActivity {
 			testoTesto.setText( txt );
 		}
 
-		View vistaCambi = carta.findViewById( R.id.confronto_data );
+		View vistaCambi = carta.findViewById(R.id.confronto_data);
 		if( data.isEmpty() )
-			vistaCambi.setVisibility( View.GONE );
+			vistaCambi.setVisibility(View.GONE);
 		else
-			((TextView)vistaCambi.findViewById( R.id.cambi_testo )).setText( data );
+			((TextView)vistaCambi.findViewById(R.id.cambi_testo)).setText(data);
+
+		if( idScheda == R.id.confronto_nuovo ) {
+			carta.setCardBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
+		}
 
 		if( tit.isEmpty() && txt.isEmpty() && data.isEmpty() ) // todo intendi oggetto null?
 			carta.setVisibility( View.GONE );

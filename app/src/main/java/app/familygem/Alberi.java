@@ -19,6 +19,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.android.installreferrer.api.InstallReferrerClient;
 import com.android.installreferrer.api.InstallReferrerStateListener;
@@ -102,7 +103,8 @@ public class Alberi extends AppCompatActivity {
 					boolean derivato = tree.grade == 20;
 					boolean esaurito = tree.grade == 30;
 					if( derivato ) {
-						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.evidenzia));
+						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
+						((TextView)vistaAlbero.findViewById(R.id.albero_dati)).setTextColor(getResources().getColor(R.color.text));
 						vistaAlbero.setOnClickListener(v -> {
 							if( !AlberoNuovo.confronta(Alberi.this, tree, true) ) {
 								tree.grade = 10; // viene retrocesso
@@ -111,8 +113,9 @@ public class Alberi extends AppCompatActivity {
 								Toast.makeText(Alberi.this, R.string.something_wrong, Toast.LENGTH_LONG).show();
 							}
 						});
-					} else if ( esaurito ) {
-						vistaAlbero.setBackgroundColor(0xffdddddd);
+					} else if( esaurito ) {
+						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.consumed));
+						((TextView)vistaAlbero.findViewById(R.id.albero_titolo)).setTextColor(getResources().getColor(R.color.grayText));
 						vistaAlbero.setOnClickListener(v -> {
 							if( !AlberoNuovo.confronta(Alberi.this, tree, true) ) {
 								tree.grade = 10; // viene retrocesso

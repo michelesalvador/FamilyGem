@@ -4,6 +4,7 @@
 	<color name="primarioScuro">#720426</color>
 	<color name="primarioChiaro">#be4265</color>
 	<color name="evidenzia">#E99725</color>
+	<color name="evidenziaMedio">#FCC762</color>
 	<color name="evidenziaChiaro">#FFE6AA</color>
 	<color name="icon">#ffc42f</color>
 	<color name="background">#FAFAFA</color>
@@ -12,6 +13,7 @@
 	<color name="text">#000</color>
 	<color name="grayText">#777</color>
 	<color name="text_veiled">#AA000000</color>
+	<color name="consumed">#DDD</color>
 	<color name="maschio">#44AAff</color>
 	<color name="femmina">#ff66dd</color>
 	<color name="consorteSchermo">#cccccc</color>

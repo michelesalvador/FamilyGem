@@ -35,9 +35,9 @@ public class InfoAlbero extends AppCompatActivity {
 		LinearLayout scatola = findViewById(R.id.info_scatola);
 
 		final int treeId = getIntent().getIntExtra("idAlbero", 1);
-		final Settings.Tree questoAlbero = Global.settings.getTree(treeId);
+		final Settings.Tree tree = Global.settings.getTree(treeId);
 		final File file = new File(getFilesDir(), treeId + ".json");
-		String i = getText(R.string.title) + ": " + questoAlbero.title;
+		String i = getText(R.string.title) + ": " + tree.title;
 		if( !file.exists() ) {
 			i += "\n\n" + getText(R.string.item_exists_but_file) + "\n" + file.getAbsolutePath();
 		} else  {
@@ -47,28 +47,28 @@ public class InfoAlbero extends AppCompatActivity {
 				i += "\n\n" + getString(R.string.no_useful_data);
 			else {
 				// Aggiornamento dei dati automatico o su richiesta
-				if( questoAlbero.persons < 100 ) {
-					refreshData(gc, questoAlbero);
+				if( tree.persons < 100 ) {
+					refreshData(gc, tree);
 				} else {
 					Button bottoneAggiorna = findViewById(R.id.info_aggiorna);
 					bottoneAggiorna.setVisibility(View.VISIBLE);
 					bottoneAggiorna.setOnClickListener(v -> {
-						refreshData(gc, questoAlbero);
+						refreshData(gc, tree);
 						recreate();
 					});
 				}
-				i += "\n\n" + getText(R.string.persons) + ": "+ questoAlbero.persons
+				i += "\n\n" + getText(R.string.persons) + ": "+ tree.persons
 					+ "\n" + getText(R.string.families) + ": "+ gc.getFamilies().size()
-					+ "\n" + getText(R.string.generations) + ": "+ questoAlbero.generations
-					+ "\n" + getText(R.string.media) + ": "+ questoAlbero.media
+					+ "\n" + getText(R.string.generations) + ": "+ tree.generations
+					+ "\n" + getText(R.string.media) + ": "+ tree.media
 					+ "\n" + getText(R.string.sources) + ": "+ gc.getSources().size()
 					+ "\n" + getText(R.string.repositories) + ": "+ gc.getRepositories().size();
-				if( questoAlbero.root != null ) {
-					i += "\n" + getText(R.string.root) + ": " + U.epiteto(gc.getPerson(questoAlbero.root));
+				if( tree.root != null ) {
+					i += "\n" + getText(R.string.root) + ": " + U.epiteto(gc.getPerson(tree.root));
 				}
-				if( questoAlbero.shares != null && !questoAlbero.shares.isEmpty() ) {
+				if( tree.shares != null && !tree.shares.isEmpty() ) {
 					i += "\n\n" + getText(R.string.shares) + ":";
-					for( Settings.Share share : questoAlbero.shares ) {
+					for( Settings.Share share : tree.shares ) {
 						i += "\n" + dataIdVersoData(share.dateId);
 						if( gc.getSubmitter(share.submitter) != null )
 							i += " - " + nomeAutore( gc.getSubmitter(share.submitter) );
@@ -255,65 +255,64 @@ public class InfoAlbero extends AppCompatActivity {
 		}
 	}
 
+	static int genMin;
+	static int genMax;
+
 	public static int quanteGenerazioni(Gedcom gc, String radice) {
 		if( gc.getPeople().isEmpty() )
 			return 0;
 		genMin = 0;
 		genMax = 0;
 		risaliGenerazioni(gc.getPerson(radice), gc, 0);
+		discendiGenerazioni(gc.getPerson(radice), gc, 0);
 		// Rimuove dalle persone l'estensione 'gen' per permettere successivi conteggi
-		for( Person p : gc.getPeople() ) {
-			p.getExtensions().remove("gen");
-			if( p.getExtensions().isEmpty() )
-				p.setExtensions(null);
+		for( Person person : gc.getPeople() ) {
+			person.getExtensions().remove("gen");
+			if( person.getExtensions().isEmpty() )
+				person.setExtensions(null);
 		}
 		return 1 - genMin + genMax;
 	}
 
-	static int genMin;
-	static int genMax;
-
 	// riceve una Person e trova il numero della generazione di antenati più remota
-	static void risaliGenerazioni(Person p, Gedcom gc, int gen) {
+	static void risaliGenerazioni(Person person, Gedcom gc, int gen) {
 		if( gen < genMin )
 			genMin = gen;
 		// aggiunge l'estensione per indicare che è passato da questa Persona
-		p.putExtension("gen", gen);
-		// se è un capostipite va a contare le generazioni di discendenti
-		if( p.getParentFamilies(gc).isEmpty() )
-			discendiGenerazioni(p, gc, gen);
-		for( Family f : p.getParentFamilies(gc) ) {
-			// intercetta eventuali fratelli del capostipite
-			if( f.getHusbands(gc).isEmpty() && f.getWives(gc).isEmpty() ) {
-				for( Person frate : f.getChildren(gc) )
-					if( frate.getExtension("gen") == null )
-						discendiGenerazioni(frate, gc, gen);
-			}
-			for( Person padre : f.getHusbands(gc) )
-				if( padre.getExtension("gen") == null )
-					risaliGenerazioni(padre, gc, gen - 1);
-			for( Person madre : f.getWives(gc) )
-				if( madre.getExtension("gen") == null )
-					risaliGenerazioni(madre, gc, gen - 1);
+		person.putExtension("gen", gen);
+		// se è un capostipite va a contare le generazioni di discendenti o risale su eventuali altri matrimoni
+		if( person.getParentFamilies(gc).isEmpty() )
+			discendiGenerazioni(person, gc, gen);
+		for( Family family : person.getParentFamilies(gc) ) {
+			// intercetta eventuali fratelli della radice
+			for( Person sibling : family.getChildren(gc) )
+				if( sibling.getExtension("gen") == null )
+					discendiGenerazioni(sibling, gc, gen);
+			for( Person father : family.getHusbands(gc) )
+				if( father.getExtension("gen") == null )
+					risaliGenerazioni(father, gc, gen - 1);
+			for( Person mother : family.getWives(gc) )
+				if( mother.getExtension("gen") == null )
+					risaliGenerazioni(mother, gc, gen - 1);
 		}
 	}
 
 	// riceve una Person e trova il numero della generazione più remota di discendenti
-	static void discendiGenerazioni(Person p, Gedcom gc, int gen) {
+	static void discendiGenerazioni(Person person, Gedcom gc, int gen) {
 		if( gen > genMax )
 			genMax = gen;
-		p.putExtension("gen", gen);
-		for( Family fam : p.getSpouseFamilies(gc) ) {
+		person.putExtension("gen", gen);
+		for( Family family : person.getSpouseFamilies(gc) ) {
 			// individua anche la famiglia dei coniugi
-			for( Person moglie : fam.getWives(gc) )
-				if( moglie.getExtension("gen") == null )
-					risaliGenerazioni(moglie, gc, gen);
-			for( Person marito : fam.getHusbands(gc) )
-				if( marito.getExtension("gen") == null )
-					risaliGenerazioni(marito, gc, gen);
-			for( Person figlio : fam.getChildren(gc) )
-				if( figlio.getExtension("gen") == null )
-					discendiGenerazioni(figlio, gc, gen + 1);
+			for( Person wife : family.getWives(gc) )
+				if( wife.getExtension("gen") == null )
+					risaliGenerazioni(wife, gc, gen);
+			for( Person husband : family.getHusbands(gc) )
+				if( husband.getExtension("gen") == null )
+					risaliGenerazioni(husband, gc, gen);
+			for( Person child : family.getChildren(gc) )
+				if( child.getExtension("gen") == null )
+					discendiGenerazioni(child, gc, gen + 1);
 		}
 	}
 

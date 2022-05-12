@@ -40,6 +40,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -292,6 +293,14 @@ public class Diagram extends Fragment {
 						});
 						if( !play ) { // Animation is complete
 							timer.cancel();
+							// Sometimes lines need to be redrawn because MaxBitmap was not passed to graph
+							if( graph.needMaxBitmap() ) {
+								lines.postDelayed(() -> {
+									graph.playNodes();
+									lines.invalidate();
+									backLines.invalidate();
+								}, 500);
+							}
 						}
 					}
 				};
@@ -522,7 +531,7 @@ public class Diagram extends Fragment {
 		//int[] colors = {Color.WHITE, Color.RED, Color.CYAN, Color.MAGENTA, Color.GREEN, Color.BLACK, Color.YELLOW, Color.BLUE};
 		public Lines(Context context, List<Set<Line>> lineGroups, DashPathEffect effect) {
 			super(context == null ? Global.context : context);
-			//setBackgroundColor(0x330000ff);
+			//setBackgroundColor(0x330066ff);
 			this.lineGroups = lineGroups;
 			paint.setPathEffect(effect);
 			paint.setStyle(Paint.Style.STROKE);
@@ -697,8 +706,7 @@ public class Diagram extends Fragment {
 			} else
 				U.qualiGenitoriMostrare(getContext(), pers, 2);
 		} else if( id == 2 ) { // Famiglia come coniuge
-			U.qualiConiugiMostrare(getContext(), pers,
-					idPersona.equals(Global.indi) ? spouseFam : null); // Se è fulcro apre direttamente la famiglia
+			U.qualiConiugiMostrare(getContext(), pers, null);
 		} else if( id == 3 ) { // Collega persona nuova
 			if( Global.settings.expert ) {
 				DialogFragment dialog = new NuovoParente(pers, parentFam, spouseFam, true, null);

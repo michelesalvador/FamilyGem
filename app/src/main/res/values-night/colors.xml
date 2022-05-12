@@ -4,6 +4,7 @@
 	<color name="primarioScuro">#4C0219</color>
 	<color name="primarioChiaro">#960f3e</color>
 	<color name="evidenzia">#DD7803</color>
+	<color name="evidenziaMedio">#AA6009</color>
 	<color name="evidenziaChiaro">#7C4901</color>
 	<color name="background">#000</color>
 	<color name="back_element">#222</color>
@@ -11,8 +12,10 @@
 	<color name="text">#FFF</color>
 	<color name="grayText">#AAA</color>
 	<color name="text_veiled">#AAFFFFFF</color>
+	<color name="consumed">#555</color>
 	<color name="consorteSchermo">#66000000</color>
-	<color name="lineeDiagrammaSchermo">#ddd</color>
+	<color name="consorteStampa">#111</color>
+	<color name="lineeDiagrammaSchermo">#DDD</color>
 	<color name="fonte">#884B00</color>
 	<color name="citazioneFonte">#B17000</color>
 	<color name="archivio">#49423B</color>

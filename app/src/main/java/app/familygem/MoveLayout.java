@@ -228,6 +228,6 @@ public class MoveLayout extends FrameLayout {
 		scale = 0;
 		minimumScale();
 		calcOverScroll(true);
-		scrollTo(mendX, mendY);
+		scrollTo(leftToRight ? mendX : -mendX, mendY);
 	}
 }

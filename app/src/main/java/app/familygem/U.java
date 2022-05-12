@@ -281,7 +281,7 @@ public class U {
 				end = new Datatore(now.toDate());
 				endYear = end.writeDate(false);
 			}
-			if( end != null && end.isSingleKind() && !endYear.equals("") ) { // Plausible dates
+			if( end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M) && !endYear.isEmpty() ) { // Plausible dates
 				LocalDate endDate = new LocalDate(end.data1.date);
 				if( startDate.isBefore(endDate) || startDate.isEqual(endDate) ) {
 					String units = "";
@@ -298,7 +298,7 @@ public class U {
 					if( ageBelow )
 						text += "\n";
 					else
-						text += "  ";
+						text += " ";
 					text += "(" + age + units + ")";
 				}
 			}

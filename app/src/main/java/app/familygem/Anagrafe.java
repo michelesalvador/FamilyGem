@@ -517,8 +517,8 @@ public class Anagrafe extends Fragment {
 			// Famiglie di origine: genitori e fratelli
 			List<Family> listaFamiglie = person.getParentFamilies(gc);
 			for( Family famiglia : listaFamiglie ) {
-				count += famiglia.getHusbands(gc).size();
-				count += famiglia.getWives(gc).size();
+				count += famiglia.getHusbandRefs().size();
+				count += famiglia.getWifeRefs().size();
 				for( Person fratello : famiglia.getChildren(gc) ) // solo i figli degli stessi due genitori, non i fratellastri
 					if( !fratello.equals(person) )
 						count++;
@@ -529,22 +529,21 @@ public class Anagrafe extends Fragment {
 					List<Family> famigliePadre = padre.getSpouseFamilies(gc);
 					famigliePadre.removeAll(listaFamiglie);
 					for( Family fam : famigliePadre )
-						count += fam.getChildren(gc).size();
+						count += fam.getChildRefs().size();
 				}
 				for( Person madre : famiglia.getWives(gc) ) {
 					List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
 					famiglieMadre.removeAll(listaFamiglie);
 					for( Family fam : famiglieMadre )
-						count += fam.getChildren(gc).size();
+						count += fam.getChildRefs().size();
 				}
 			}
 			// Coniugi e figli
 			for( Family famiglia : person.getSpouseFamilies(gc) ) {
-				if( Gender.isMale(person) )
-					count += famiglia.getWives(gc).size();
-				else
-					count += famiglia.getHusbands(gc).size();
-				count += famiglia.getChildren(gc).size();
+				count += famiglia.getWifeRefs().size();
+				count += famiglia.getHusbandRefs().size();
+				count--; // Minus their self
+				count += famiglia.getChildRefs().size();
 			}
 			person.putExtension("kin", count);
 		}

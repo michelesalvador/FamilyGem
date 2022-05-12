@@ -22,7 +22,7 @@ android {
 		minSdkVersion 19
 		targetSdkVersion 32
 		versionCode 20
-		versionName '0.8.0.5'
+		versionName '0.8.0.6'
 		vectorDrawables.useSupportLibrary = true
 		resConfigs "en", "cs", "de", "eo", "es", "fa", "fr", "hr", "hu", "in", "it", "iw", "kn", "mr", "nb", "nl", "pl", "pt", "ru", "sk", "sr", "uk"
 		def utenteAruba = ""
@@ -68,7 +68,7 @@ dependencies {
 	implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
 	implementation 'androidx.lifecycle:lifecycle-process:2.4.1'
 	implementation 'androidx.work:work-runtime:2.7.1'
-	implementation 'com.google.android.material:material:1.5.0'
+	implementation 'com.google.android.material:material:1.6.0'
 	implementation 'com.google.code.gson:gson:2.8.7'
 	implementation 'commons-io:commons-io:2.7'
 	implementation 'commons-net:commons-net:3.6'

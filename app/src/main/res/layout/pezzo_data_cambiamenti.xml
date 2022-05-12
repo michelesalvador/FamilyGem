@@ -11,7 +11,7 @@
 		android:layout_toStartOf="@id/cambi_testo"
 		android:text="@string/change_date"
 		android:textSize="14sp"
-		android:textColor="@color/grayText"/>
+		android:textColor="@color/text_veiled"/>
 
 	<TextView
 		android:id="@+id/cambi_testo"
@@ -19,7 +19,7 @@
 		android:layout_height="wrap_content"
 		android:layout_alignParentEnd="true"
 		android:textSize="14sp"
-		android:textColor="@color/grayText"/>
+		android:textColor="@color/text_veiled"/>
 
 	<LinearLayout
 		android:id="@+id/cambi_note"

@@ -19,8 +19,6 @@
 			android:layout_height="wrap_content"
 			android:layout_marginTop="12dp"
 			android:layout_marginBottom="12dp"
-			android:text="Hai scelto  di importare 123 novità:\n\t13 aggiunte\n\t10 sostituzioni\n\t5 eliminazioni"
-			android:textColor="#000"
 			android:textSize="20sp" />
 
 		<LinearLayout
