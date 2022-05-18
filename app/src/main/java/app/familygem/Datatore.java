@@ -238,34 +238,34 @@ class Datatore {
 		if( pre > 0 )
 			txt = Global.context.getString(pre) + " ";
 		if( data1.date != null ) {
-			Locale locale = Locale.getDefault();
-			DateFormat dateFormat = new SimpleDateFormat(data1.format.toPattern().replace("MMM","MMMM"), locale);
-			txt += dateFormat.format(data1.date);
+			txt += writePiece(data1);
 			// Uppercase initial
-			if( kind == Kind.EXACT && data1.isFormat(Format.M_Y) )
+			if( kind == Kind.EXACT && data1.isFormat(Format.M_Y) ) {
 				txt = txt.substring(0, 1).toUpperCase() + txt.substring(1);
-			if( data1.doppia ) {
-				String year2 = String.valueOf(data1.date.getYear() + 1901);
-				txt += "/" + year2.substring(year2.length() - 2);
 			}
-			if( data1.negativa )
-				txt += " B.C.";
 			if( kind == Kind.BETWEEN_AND || kind == Kind.FROM_TO ) {
 				txt += " " + Global.context.getString(kind == Kind.BETWEEN_AND ? R.string.and : R.string.to).toLowerCase();
-				if( data2.date != null ) {
-					dateFormat = new SimpleDateFormat(data2.format.toPattern().replace("MMM", "MMMM"), locale);
-					txt += " " + dateFormat.format(data2.date);
-					if( data2.doppia ) {
-						String year2 = String.valueOf(data2.date.getYear() + 1901);
-						txt += "/" + year2.substring(year2.length() - 2);
-					}
-					if( data2.negativa )
-						txt += " B.C.";
-				}
+				if( data2.date != null )
+					txt += writePiece(data2);
 			}
 		} else if( frase != null ) {
 			txt = frase;
 		}
+		return txt.trim();
+	}
+
+	String writePiece(Data date) {
+		DateFormat dateFormat = new SimpleDateFormat(date.format.toPattern().replace("MMM", "MMMM"), Locale.getDefault());
+		String txt = " " + dateFormat.format(date.date);
+		if( date.doppia ) {
+			String year = String.valueOf(date.date.getYear() + 1901);
+			if( year.length() > 1 ) // Two or more digits
+				txt += "/" + year.substring(year.length() - 2);
+			else // One digit
+				txt += "/0" + year;
+		}
+		if( date.negativa )
+			txt += " B.C.";
 		return txt;
 	}
 

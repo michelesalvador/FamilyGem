@@ -24,8 +24,7 @@
 			android:layout_height="45dp"
 			android:layout_alignParentEnd="true"
 			android:layout_marginStart="6dp"
-			android:scaleType="centerCrop"
-			app:srcCompat="@drawable/manichino" />
+			android:scaleType="centerCrop"/>
 		<TextView
 			android:id="@+id/collega_nome"
 			android:layout_width="match_parent"

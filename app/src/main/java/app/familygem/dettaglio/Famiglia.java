@@ -206,66 +206,66 @@ public class Famiglia extends Dettaglio {
 	}
 
 	// Rimuove il singolo SpouseFamilyRef dall'individuo e il corrispondente SpouseRef dalla famiglia
-	public static void scollega( SpouseFamilyRef sfr, SpouseRef sr ) {
+	public static void scollega(SpouseFamilyRef sfr, SpouseRef sr) {
 		// Dalla persona alla famiglia
-		Person pers = sr.getPerson( gc );
-		pers.getSpouseFamilyRefs().remove( sfr );
-		if( pers.getSpouseFamilyRefs().isEmpty() )
-			pers.setSpouseFamilyRefs( null ); // Eventuale lista vuota viene eliminata
-		pers.getParentFamilyRefs().remove( sfr );
-		if( pers.getParentFamilyRefs().isEmpty() )
-			pers.setParentFamilyRefs( null );
+		Person person = sr.getPerson(gc);
+		person.getSpouseFamilyRefs().remove(sfr);
+		if( person.getSpouseFamilyRefs().isEmpty() )
+			person.setSpouseFamilyRefs(null); // Eventuale lista vuota viene eliminata
+		person.getParentFamilyRefs().remove(sfr);
+		if( person.getParentFamilyRefs().isEmpty() )
+			person.setParentFamilyRefs(null);
 		// Dalla famiglia alla persona
-		Family fam = sfr.getFamily( gc );
-		fam.getHusbandRefs().remove( sr );
+		Family fam = sfr.getFamily(gc);
+		fam.getHusbandRefs().remove(sr);
 		if( fam.getHusbandRefs().isEmpty() )
-			fam.setHusbandRefs( null );
-		fam.getWifeRefs().remove( sr );
+			fam.setHusbandRefs(null);
+		fam.getWifeRefs().remove(sr);
 		if( fam.getWifeRefs().isEmpty() )
-			fam.setWifeRefs( null );
-		fam.getChildRefs().remove( sr );
+			fam.setWifeRefs(null);
+		fam.getChildRefs().remove(sr);
 		if( fam.getChildRefs().isEmpty() )
-			fam.setChildRefs( null );
+			fam.setChildRefs(null);
 	}
 
 	// Rimuove TUTTI i ref di un individuo in una famiglia
-	public static void scollega( String idIndi, Family fam ) {
+	public static void scollega(String indiId, Family family) {
 		// Rimuove i ref dell'indi nella famiglia
-		Iterator<SpouseRef> refiSposo = fam.getHusbandRefs().iterator();
-		while( refiSposo.hasNext() )
-			if( refiSposo.next().getRef().equals(idIndi) )
-				refiSposo.remove();
-		if( fam.getHusbandRefs().isEmpty() )
-			fam.setHusbandRefs( null ); // Elimina eventuale lista vuota
+		Iterator<SpouseRef> spouseRefs = family.getHusbandRefs().iterator();
+		while( spouseRefs.hasNext() )
+			if( spouseRefs.next().getRef().equals(indiId) )
+				spouseRefs.remove();
+		if( family.getHusbandRefs().isEmpty() )
+			family.setHusbandRefs(null); // Elimina eventuale lista vuota
 
-		refiSposo = fam.getWifeRefs().iterator();
-		while( refiSposo.hasNext() )
-			if( refiSposo.next().getRef().equals(idIndi) )
-				refiSposo.remove();
-		if( fam.getWifeRefs().isEmpty() )
-			fam.setWifeRefs( null );
+		spouseRefs = family.getWifeRefs().iterator();
+		while( spouseRefs.hasNext() )
+			if( spouseRefs.next().getRef().equals(indiId) )
+				spouseRefs.remove();
+		if( family.getWifeRefs().isEmpty() )
+			family.setWifeRefs(null);
 
-		Iterator<ChildRef> refiFiglio = fam.getChildRefs().iterator();
-		while( refiFiglio.hasNext() )
-			if( refiFiglio.next().getRef().equals(idIndi) )
-				refiFiglio.remove();
-		if( fam.getChildRefs().isEmpty() )
-			fam.setChildRefs( null );
+		Iterator<ChildRef> childRefs = family.getChildRefs().iterator();
+		while( childRefs.hasNext() )
+			if( childRefs.next().getRef().equals(indiId) )
+				childRefs.remove();
+		if( family.getChildRefs().isEmpty() )
+			family.setChildRefs(null);
 
 		// Rimuove i ref della famiglia nell'indi
-		Person person = gc.getPerson(idIndi);
+		Person person = gc.getPerson(indiId);
 		Iterator<SpouseFamilyRef> iterSfr = person.getSpouseFamilyRefs().iterator();
 		while( iterSfr.hasNext() )
-			if( iterSfr.next().getRef().equals(fam.getId()) )
+			if( iterSfr.next().getRef().equals(family.getId()) )
 				iterSfr.remove();
 		if( person.getSpouseFamilyRefs().isEmpty() )
-			person.setSpouseFamilyRefs( null );
+			person.setSpouseFamilyRefs(null);
 
 		Iterator<ParentFamilyRef> iterPfr = person.getParentFamilyRefs().iterator();
 		while( iterPfr.hasNext() )
-			if( iterPfr.next().getRef().equals(fam.getId()) )
+			if( iterPfr.next().getRef().equals(family.getId()) )
 				iterPfr.remove();
 		if( person.getParentFamilyRefs().isEmpty() )
-			person.setParentFamilyRefs( null );
+			person.setParentFamilyRefs(null);
 	}
 }

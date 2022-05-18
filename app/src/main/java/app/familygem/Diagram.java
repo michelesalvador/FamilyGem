@@ -40,10 +40,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import app.familygem.constants.Gender;
 import app.familygem.constants.Relation;
 import app.familygem.dettaglio.Famiglia;
@@ -72,11 +69,10 @@ public class Diagram extends Fragment {
 	private final int GLOW_SPACE = 35; // Space to display glow, in dp
 	private View popup; // Suggestion balloon
 	boolean forceDraw;
-	private Timer timer;
-	private boolean play;
 	private AnimatorSet animator;
 	private boolean printPDF; // We are exporting a PDF
 	private final boolean leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR;
+	private boolean firstTime = true;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
@@ -116,7 +112,8 @@ public class Diagram extends Fragment {
 		box = view.findViewById(R.id.diagram_box);
 		//box.setBackgroundColor(0x22ff0000);
 		graph = new Graph(Global.gc); // Create a diagram model
-		forceDraw = true; // To be sure the diagram will be draw
+		moveLayout.graph = graph;
+		forceDraw = true; // To be sure the diagram will be drawn
 
 		// Fade in animation
 		ObjectAnimator alphaIn = ObjectAnimator.ofFloat(box, View.ALPHA, 1);
@@ -261,15 +258,15 @@ public class Diagram extends Fragment {
 
 				// Add bond nodes
 				for( Bond bond : graph.getBonds() ) {
-					box.addView(new GraphicBond(getContext(), bond));
+					box.addView(new GraphicBond(context(), bond));
 				}
 
-				graph.placeNodes(); // Calculate first raw position
+				graph.placeNodes(); // Calculate final position
 
 				// Add the lines
-				lines = new Lines(getContext(), graph.getLines(), null);
+				lines = new Lines(context(), graph.getLines(), null);
 				box.addView(lines, 0);
-				backLines = new Lines(getContext(), graph.getBackLines(), new DashPathEffect(new float[]{toPx(4), toPx(4)}, 0));
+				backLines = new Lines(context(), graph.getBackLines(), new DashPathEffect(new float[]{toPx(4), toPx(4)}, 0));
 				box.addView(backLines, 0);
 
 				// Add the glow
@@ -278,38 +275,17 @@ public class Diagram extends Fragment {
 						toPx(fulcrumNode.width + GLOW_SPACE * 2), toPx(fulcrumNode.height + GLOW_SPACE * 2));
 				glowParams.rightMargin = -toPx(GLOW_SPACE);
 				glowParams.bottomMargin = -toPx(GLOW_SPACE);
-				box.addView(new FulcrumGlow(getContext()), 0, glowParams);
+				box.addView(new FulcrumGlow(context()), 0, glowParams);
 
-				play = true;
-				timer = new Timer();
-				TimerTask task = new TimerTask() {
-					@Override
-					public void run() {
-						getActivity().runOnUiThread(() -> {
-							if( play ) {
-								play = graph.playNodes(); // Check if there is still some nodes to move
-								displaceDiagram();
-							}
-						});
-						if( !play ) { // Animation is complete
-							timer.cancel();
-							// Sometimes lines need to be redrawn because MaxBitmap was not passed to graph
-							if( graph.needMaxBitmap() ) {
-								lines.postDelayed(() -> {
-									graph.playNodes();
-									lines.invalidate();
-									backLines.invalidate();
-								}, 500);
-							}
-						}
-					}
-				};
-				moveLayout.virgin = true;
-				timer.scheduleAtFixedRate(task, 0, 40); // 40 milliseconds = 25 fps
-
+				displaceDiagram();
 				animator.start();
-			}, 100);
+				firstTime = false;
+			}, firstTime ? 500 : 50); // The first time Picasso needs time to load images so that graph has correct cards size
 		}
+	}
+
+	private Context context() {
+		return getContext() != null ? getContext() : Global.context;
 	}
 
 	// Update visible position of nodes and lines
@@ -341,16 +317,11 @@ public class Diagram extends Fragment {
 		backLines.invalidate();
 
 		// Pan to fulcrum
-		if( moveLayout.virgin ) {
-			float scale = moveLayout.minimumScale();
-			float padding = box.getPaddingTop() * scale;
-			moveLayout.panTo((int)(leftToRight ? toPx(fulcrumView.metric.centerX()) * scale - moveLayout.width / 2 + padding
-							: moveLayout.width / 2 - toPx(fulcrumView.metric.centerX()) * scale - padding),
-					(int)(toPx(fulcrumView.metric.centerY()) * scale - moveLayout.height / 2 + padding));
-		} else {
-			moveLayout.keepPositionResizing();
-		}
-		box.requestLayout();
+		float scale = moveLayout.minimumScale();
+		float padding = box.getPaddingTop() * scale;
+		moveLayout.panTo((int)(leftToRight ? toPx(fulcrumView.metric.centerX()) * scale - moveLayout.width / 2 + padding
+						: moveLayout.width / 2 - toPx(fulcrumView.metric.centerX()) * scale - padding),
+				(int)(toPx(fulcrumView.metric.centerY()) * scale - moveLayout.height / 2 + padding));
 	}
 
 	// The glow around fulcrum card
@@ -359,7 +330,7 @@ public class Diagram extends Fragment {
 		BlurMaskFilter bmf = new BlurMaskFilter(toPx(25), BlurMaskFilter.Blur.NORMAL);
 		int extend = 5; // draw a rectangle a little bigger
 		FulcrumGlow(Context context) {
-			super(context == null ? Global.context : context);
+			super(context);
 			glow = this;
 		}
 		@Override
@@ -408,9 +379,9 @@ public class Diagram extends Fragment {
 			} else if( personNode.acquired ) {
 				background.setBackgroundResource(R.drawable.casella_sfondo_sposo);
 			}
-			F.unaFoto( Global.gc, person, view.findViewById( R.id.card_photo ) );
+			F.unaFoto(Global.gc, person, view.findViewById(R.id.card_photo));
 			TextView vistaNome = view.findViewById(R.id.card_name);
-			String nome = U.epiteto(person);
+			String nome = U.epiteto(person, true);
 			if( nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility()==View.VISIBLE )
 				vistaNome.setVisibility( View.GONE );
 			else vistaNome.setText( nome );
@@ -530,7 +501,7 @@ public class Diagram extends Fragment {
 		List<Path> paths = new ArrayList<>(); // Each path contains many lines
 		//int[] colors = {Color.WHITE, Color.RED, Color.CYAN, Color.MAGENTA, Color.GREEN, Color.BLACK, Color.YELLOW, Color.BLUE};
 		public Lines(Context context, List<Set<Line>> lineGroups, DashPathEffect effect) {
-			super(context == null ? Global.context : context);
+			super(context);
 			//setBackgroundColor(0x330066ff);
 			this.lineGroups = lineGroups;
 			paint.setPathEffect(effect);
@@ -573,12 +544,6 @@ public class Diagram extends Fragment {
 		}
 		@Override
 		protected void onDraw(Canvas canvas) {
-			if( graph.needMaxBitmap() ) {
-				int maxBitmapWidth = canvas.getMaximumBitmapWidth() // is 16384 on emulators, 4096 on my physical devices
-						- STROKE * 4; // the space actually occupied by the line is a little bit larger
-				int maxBitmapHeight = canvas.getMaximumBitmapHeight() - STROKE * 4;
-				graph.setMaxBitmap((int)toDp(maxBitmapWidth), (int)toDp(maxBitmapHeight));
-			}
 			// Draw the paths
 			//int p = 0;
 			for( Path path : paths) {
@@ -589,16 +554,7 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		if( timer != null ) {
-			timer.cancel();
-		}
-	}
-
 	private void clickCard(Person person) {
-		timer.cancel();
 		selectParentFamily(person);
 	}
 

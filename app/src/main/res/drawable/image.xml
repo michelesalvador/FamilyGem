@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-
 	<item android:top="0dp" android:left="0dp" android:bottom="0dp" android:right="0dp" >
 		<shape android:shape="rectangle">
 		<size
-			android:width="100dp"
+			android:width="70dp"
 			android:height="100dp" />
 			<gradient
 				android:endColor="#ddd"
 				android:startColor="#eaeaea"
 				android:type="linear"
-				android:angle="90"  />
+				android:angle="90"/>
 		</shape>
 	</item>
-
-	<item android:top="10dp" android:left="25dp" android:bottom="40dp" android:right="25dp" >
+	<item android:top="10dp" android:left="15dp" android:bottom="40dp" android:right="15dp" >
 		<shape android:shape="oval">
 			<size
 				android:width="50dp"
@@ -22,8 +20,7 @@
 			<solid android:color="#ccc"/>
 		</shape>
 	</item>
-
-	<item android:top="60dp" android:left="15dp" android:bottom="0dp" android:right="15dp"	   >
+	<item android:top="60dp" android:left="5dp" android:bottom="0dp" android:right="5dp"	   >
 		<shape android:shape="rectangle">
 			<solid android:color="#ccc"/>
 			<corners
@@ -31,5 +28,4 @@
 				android:topRightRadius="20dp" />
 		</shape>
 	</item>
-
 </layer-list>

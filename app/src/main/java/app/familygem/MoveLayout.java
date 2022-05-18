@@ -1,6 +1,7 @@
 package app.familygem;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -8,9 +9,11 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.OverScroller;
+import graph.gedcom.Graph;
 
 public class MoveLayout extends FrameLayout {
 
+	Graph graph;
 	private View child;
 	final ScaleGestureDetector scaleDetector;
 	private final OverScroller scroller;
@@ -23,7 +26,6 @@ public class MoveLayout extends FrameLayout {
 	private int mendX, mendY; // Position correction for the child with scaled size
 	float scale = .7f;
 	boolean scaling; // the screen has been touched with two fingers
-	boolean virgin; // The screen has not been touched
 	boolean leftToRight; // LTR (otherwise RTL)
 
 	public MoveLayout(Context context, AttributeSet attributeSet) {
@@ -88,7 +90,6 @@ public class MoveLayout extends FrameLayout {
 				else
 					velocityTracker.clear();
 				velocityTracker.addMovement(event);
-				virgin = false;
 				break;
 			case MotionEvent.ACTION_POINTER_DOWN: // Second finger touch
 				scaling = true;
@@ -212,22 +213,21 @@ public class MoveLayout extends FrameLayout {
 		}
 	}
 
-	// Adjust the child position while its size could change during the initial animation
-	void keepPositionResizing() {
-		if( child.getWidth() != childWidth ) {
-			float initialMendX = (child.getWidth() - child.getWidth() * scale) / 2;
-			float spaceLeft = getScrollX() - initialMendX + width / 2f;
-			float shiftX = (childWidth * scale * spaceLeft) / (child.getWidth() * scale) - spaceLeft
-					+ ((childWidth - childWidth * scale) / 2 - initialMendX);
-			scroller.startScroll(getScrollX(), getScrollY(), (int)shiftX, 0, 0);
-			lastX = getScrollX();
-		}
-	}
-
 	void displayAll() {
 		scale = 0;
 		minimumScale();
 		calcOverScroll(true);
 		scrollTo(leftToRight ? mendX : -mendX, mendY);
+	}
+
+	@Override
+	protected void onDraw(Canvas canvas) {
+		// Pass the max possible size of a bitmap to the graph, so it can distribute lines in groups
+		if( graph.needMaxBitmap() ) {
+			int maxBitmapWidth = canvas.getMaximumBitmapWidth() // 4096 on my old physical devices, 16384 on the new ones
+					- 10; // the space actually occupied by the line is a little bit larger
+			int maxBitmapHeight = canvas.getMaximumBitmapHeight() - 10;
+			graph.setMaxBitmap((int)U.pxToDp(maxBitmapWidth), (int)U.pxToDp(maxBitmapHeight));
+		}
 	}
 }

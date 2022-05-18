@@ -234,41 +234,41 @@ public class F {
 	}
 
 	// Mostra le immagini con Picasso
-	public static void dipingiMedia( Media media, ImageView vistaImmagine, ProgressBar circo ) {
+	public static void dipingiMedia( Media media, ImageView imageView, ProgressBar circo ) {
 		int idAlbero;
 		// Confrontatore ha bisogno dell'id dell'albero nuovo per cercare nella sua cartella
 		View probabile = null;
-		if( vistaImmagine.getParent() != null && vistaImmagine.getParent().getParent() != null )
-			probabile = (View) vistaImmagine.getParent().getParent().getParent();
+		if( imageView.getParent() != null && imageView.getParent().getParent() != null )
+			probabile = (View) imageView.getParent().getParent().getParent();
 		if( probabile != null && probabile.getId() == R.id.confronto_nuovo )
 			idAlbero = Global.treeId2;
 		else idAlbero = Global.settings.openTree;
-		String percorso = percorsoMedia( idAlbero, media );
+		String percorso = percorsoMedia(idAlbero, media);
 		Uri[] uri = new Uri[1];
 		if( percorso == null )
-			uri[0] = uriMedia( idAlbero, media );
-		if( circo!=null ) circo.setVisibility( View.VISIBLE );
-		vistaImmagine.setTag( R.id.tag_tipo_file, 0 );
+			uri[0] = uriMedia(idAlbero, media);
+		if( circo != null ) circo.setVisibility(View.VISIBLE);
+		imageView.setTag(R.id.tag_tipo_file, 0);
 		if( percorso != null || uri[0] != null ) {
-			RequestCreator creatore;
+			RequestCreator creator;
 			if( percorso != null )
-				creatore = Picasso.get().load( "file://" + percorso );
+				creator = Picasso.get().load("file://" + percorso);
 			else
-				creatore = Picasso.get().load( uri[0] );
-			creatore.placeholder( R.drawable.manichino )
+				creator = Picasso.get().load(uri[0]);
+			creator.placeholder(R.drawable.image)
 					.fit()
 					.centerInside()
-					.into( vistaImmagine, new Callback() {
+					.into(imageView, new Callback() {
 						@Override
 						public void onSuccess() {
-							if( circo!=null ) circo.setVisibility( View.GONE );
-							vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
-							vistaImmagine.setTag( R.id.tag_percorso, percorso ); // 'percorso' o 'uri' uno dei 2 è valido, l'altro è null
-							vistaImmagine.setTag( R.id.tag_uri, uri[0] );
+							if( circo != null ) circo.setVisibility(View.GONE);
+							imageView.setTag(R.id.tag_tipo_file, 1);
+							imageView.setTag(R.id.tag_percorso, percorso); // 'percorso' o 'uri' uno dei 2 è valido, l'altro è null
+							imageView.setTag(R.id.tag_uri, uri[0]);
 							// Nella pagina Dettaglio Immagine ricarica il menu opzioni per mostrare il comando Crop
-							if( vistaImmagine.getId() == R.id.immagine_foto ) {
-								if( vistaImmagine.getContext() instanceof Activity ) // In KitKat è instance di TintContextWrapper
-									((Activity)vistaImmagine.getContext()).invalidateOptionsMenu();
+							if( imageView.getId() == R.id.immagine_foto ) {
+								if( imageView.getContext() instanceof Activity ) // In KitKat è instance di TintContextWrapper
+									((Activity)imageView.getContext()).invalidateOptionsMenu();
 							}
 						}
 						@Override
@@ -284,7 +284,7 @@ public class F {
 									bitmap = mMR.getFrameAtTime();
 								}
 							} catch( Exception excpt ) {}
-							vistaImmagine.setTag( R.id.tag_tipo_file, 2 );
+							imageView.setTag(R.id.tag_tipo_file, 2);
 							if( bitmap == null ) {
 								// un File locale senza anteprima
 								String formato = media.getFormat();
@@ -293,32 +293,32 @@ public class F {
 									// Rimuove gli spazi bianchi che non fanno trovare l'estensione
 								if( formato.isEmpty() && uri[0] != null )
 									formato = MimeTypeMap.getFileExtensionFromUrl( uri[0].getLastPathSegment() );
-								bitmap = generaIcona( vistaImmagine, R.layout.media_file, formato );
-								vistaImmagine.setScaleType( ImageView.ScaleType.FIT_CENTER );
-								if( vistaImmagine.getParent() instanceof RelativeLayout && // brutto ma efficace
-										((RelativeLayout)vistaImmagine.getParent()).findViewById(R.id.media_testo) != null ) {
+								bitmap = generaIcona( imageView, R.layout.media_file, formato );
+								imageView.setScaleType( ImageView.ScaleType.FIT_CENTER );
+								if( imageView.getParent() instanceof RelativeLayout && // brutto ma efficace
+										((RelativeLayout)imageView.getParent()).findViewById(R.id.media_testo) != null ) {
 									RelativeLayout.LayoutParams parami = new RelativeLayout.LayoutParams(
 											RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT );
 									parami.addRule( RelativeLayout.ABOVE, R.id.media_testo );
-									vistaImmagine.setLayoutParams( parami );
+									imageView.setLayoutParams( parami );
 								}
-								vistaImmagine.setTag( R.id.tag_tipo_file, 3 );
+								imageView.setTag( R.id.tag_tipo_file, 3 );
 							}
-							vistaImmagine.setImageBitmap( bitmap );
-							vistaImmagine.setTag( R.id.tag_percorso, percorso );
-							vistaImmagine.setTag( R.id.tag_uri, uri[0] );
+							imageView.setImageBitmap(bitmap);
+							imageView.setTag( R.id.tag_percorso, percorso );
+							imageView.setTag( R.id.tag_uri, uri[0] );
 							if( circo!=null ) circo.setVisibility( View.GONE );
 						}
 					});
 		} else if( media.getFile() != null && !media.getFile().isEmpty() ) { // magari è un'immagine in internet
 			String percorsoFile = media.getFile();
 			Picasso.get().load(percorsoFile).fit()
-					.placeholder( R.drawable.manichino ).centerInside()
-					.into(vistaImmagine, new Callback() {
+					.placeholder(R.drawable.image).centerInside()
+					.into(imageView, new Callback() {
 						@Override
 						public void onSuccess() {
-							if( circo!=null ) circo.setVisibility( View.GONE );
-							vistaImmagine.setTag( R.id.tag_tipo_file, 1 );
+							if( circo != null ) circo.setVisibility(View.GONE);
+							imageView.setTag(R.id.tag_tipo_file, 1);
 							try {
 								new ImboscaImmagine(media).execute(new URL(percorsoFile));
 							} catch( Exception e ) {}
@@ -326,13 +326,12 @@ public class F {
 						@Override
 						public void onError( Exception e ) {
 							// Proviamo con una pagina web
-							new ZuppaMedia( vistaImmagine, circo, media ).execute( percorsoFile );
+							new ZuppaMedia(imageView, circo, media).execute(percorsoFile);
 						}
 					});
 		} else { // Media privo di collegamento a un file
-			if( circo!=null ) circo.setVisibility( View.GONE );
-			vistaImmagine.setImageResource( R.drawable.manichino );
-			vistaImmagine.setAlpha( 0.5f );
+			if( circo != null ) circo.setVisibility(View.GONE);
+			imageView.setImageResource(R.drawable.image);
 		}
 	}
 
@@ -348,6 +347,10 @@ public class F {
 				// Cartella media + percorso FILE
 				String percorso = dir + '/' + nome;
 				File prova = new File(percorso);
+				/* Todo Talvolta File.isFile() produce un ANR, tipo https://stackoverflow.com/questions/224756
+				   Ho provato con vari percorsi inesistenti, tipo la scheda SD rimossa, o con caratteri assurdi,
+				   ma tutti restituiscono semplicemente false.
+				   Probabilmente l'ANR è quando il percorso punta a una risorsa esistente che però attende per tempo indefinito. */
 				if( prova.isFile() && prova.canRead() )
 					return percorso;
 				// Cartella media + nome del FILE
@@ -537,16 +540,16 @@ public class F {
 			return bitmap;
 		}
 		@Override
-		protected void onPostExecute( Bitmap bitmap ) {
-			vistaImmagine.setTag( R.id.tag_tipo_file, tagTipoFile );
+		protected void onPostExecute(Bitmap bitmap) {
+			vistaImmagine.setTag(R.id.tag_tipo_file, tagTipoFile);
 			if( bitmap != null ) {
-				vistaImmagine.setImageBitmap( bitmap );
-				vistaImmagine.setTag( R.id.tag_percorso, url.toString() );	// usato da Immagine
+				vistaImmagine.setImageBitmap(bitmap);
+				vistaImmagine.setTag(R.id.tag_percorso, url.toString());    // usato da Immagine
 				if( tagTipoFile == 1 )
-					new ImboscaImmagine(media).execute( url );
+					new ImboscaImmagine(media).execute(url);
 			}
 			if( circo != null ) // può arrivare molto in ritardo quando la pagina non esiste più
-				circo.setVisibility( View.GONE );
+				circo.setVisibility(View.GONE);
 		}
 	}
 
@@ -635,20 +638,20 @@ public class F {
 				}).show();
 	}
 	// Strettamente legato a quello qui sopra
-	private static ArrayAdapter<ResolveInfo> faiAdattatore( final Context contesto, final List<ResolveInfo> listaRisolvi) {
-		return new ArrayAdapter<ResolveInfo>( contesto, R.layout.pezzo_app, R.id.intento_titolo, listaRisolvi ) {
+	private static ArrayAdapter<ResolveInfo> faiAdattatore(final Context contesto, final List<ResolveInfo> listaRisolvi) {
+		return new ArrayAdapter<ResolveInfo>(contesto, R.layout.pezzo_app, R.id.intento_titolo, listaRisolvi) {
 			@Override
-			public View getView( int posizione, View vista, ViewGroup genitore ) {
-				View view = super.getView( posizione, vista, genitore );
-				ResolveInfo info = listaRisolvi.get( posizione );
+			public View getView(int posizione, View vista, ViewGroup genitore) {
+				View view = super.getView(posizione, vista, genitore);
+				ResolveInfo info = listaRisolvi.get(posizione);
 				ImageView image = view.findViewById(R.id.intento_icona);
 				TextView textview = view.findViewById(R.id.intento_titolo);
 				if( info.activityInfo.packageName.equals("app.familygem") ) {
-					image.setImageResource( R.drawable.manichino );
-					textview.setText( R.string.empty_media );
+					image.setImageResource(R.drawable.image);
+					textview.setText(R.string.empty_media);
 				} else {
-					image.setImageDrawable( info.loadIcon(contesto.getPackageManager()) );
-					textview.setText( info.loadLabel(contesto.getPackageManager()).toString() );
+					image.setImageDrawable(info.loadIcon(contesto.getPackageManager()));
+					textview.setText(info.loadLabel(contesto.getPackageManager()).toString());
 				}
 				return view;
 			}

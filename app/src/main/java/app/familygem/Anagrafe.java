@@ -331,8 +331,8 @@ public class Anagrafe extends Fragment {
 
 	// Restituisce una stringa con cognome e nome attaccati:
 	// 'SalvadorMichele ' oppure 'ValleFrancesco Maria ' oppure ' Donatella '
-	static String cognomeNome( Person tizio ) {
-		Name name = tizio.getNames().get(0);
+	private static String cognomeNome(Person person) {
+		Name name = person.getNames().get(0);
 		String epiteto = name.getValue();
 		String nomeDato = "";
 		String cognome = " "; // deve esserci uno spazio per ordinare i nomi senza cognome

@@ -51,7 +51,7 @@ public class IndividuoEventi extends Fragment {
 					if( nome.getType() != null && !nome.getType().isEmpty() ) {
 						tit += " (" + TypeView.getTranslatedType(nome.getType(), TypeView.Combo.NAME) + ")";
 					}
-					piazzaEvento(scatola, tit, U.nomeCognome(nome), nome);
+					piazzaEvento(scatola, tit, U.nomeCognome(nome, " "), nome);
 				}
 				for (EventFact fatto : uno.getEventsFacts() ) {
 					String txt = "";

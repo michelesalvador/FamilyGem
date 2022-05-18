@@ -67,14 +67,14 @@ public class Facciata extends AppCompatActivity {
 		new Thread( () -> {
 			try {
 				FTPClient client = new FTPClient();
-				client.connect( "89.46.104.211" );
+				client.connect("89.46.104.211");
 				client.enterLocalPassiveMode();
-				client.login( BuildConfig.utenteAruba, BuildConfig.passwordAruba );
+				client.login(BuildConfig.utenteAruba, BuildConfig.passwordAruba);
 				// Todo: Forse si potrebbe usare il download manager così da avere il file anche elencato in 'Downloads'
 				String percorsoZip = contesto.getExternalCacheDir() + "/" + idData + ".zip";
-				FileOutputStream fos = new FileOutputStream( percorsoZip );
+				FileOutputStream fos = new FileOutputStream(percorsoZip);
 				String percorso = "/www.familygem.app/condivisi/" + idData + ".zip";
-				InputStream input = client.retrieveFileStream( percorso );
+				InputStream input = client.retrieveFileStream(percorso);
 				if( input != null ) {
 					byte[] data = new byte[1024];
 					int count;
@@ -82,19 +82,21 @@ public class Facciata extends AppCompatActivity {
 						fos.write(data, 0, count);
 					}
 					fos.close();
-					if( client.completePendingCommand()
-							&& AlberoNuovo.decomprimiZip( contesto, percorsoZip, null )
-							// Se l'albero è stato scaricato con l'install referrer
-							&& Global.settings.referrer != null && Global.settings.referrer.equals(idData) ) {
-						Global.settings.referrer = null;
-						Global.settings.save();
+					if( client.completePendingCommand() && AlberoNuovo.decomprimiZip(contesto, percorsoZip, null) ) {
+						// Se l'albero è stato scaricato con l'install referrer
+						if( Global.settings.referrer != null && Global.settings.referrer.equals(idData) ) {
+							Global.settings.referrer = null;
+							Global.settings.save();
+						}
+					} else { // Failed decompression of downloaded ZIP (e.g. corrupted file)
+						scaricamentoFallito(contesto, contesto.getString(R.string.backup_invalid), rotella);
 					}
 				} else // Non ha trovato il file sul server
-					scaricamentoFallito( contesto, contesto.getString(R.string.something_wrong), rotella );
+					scaricamentoFallito(contesto, contesto.getString(R.string.something_wrong), rotella);
 				client.logout();
 				client.disconnect();
 			} catch( Exception e ) {
-				scaricamentoFallito( contesto, e.getLocalizedMessage(), rotella );
+				scaricamentoFallito(contesto, e.getLocalizedMessage(), rotella);
 			}
 		}).start();
 	}

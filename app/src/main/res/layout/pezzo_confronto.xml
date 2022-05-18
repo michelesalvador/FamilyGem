@@ -24,7 +24,7 @@
 				android:layout_height="wrap_content"
 				android:layout_alignParentRight="true"
 				android:visibility="gone"
-				app:srcCompat="@drawable/manichino" />
+				app:srcCompat="@drawable/image" />
 
 			<TextView
 				android:id="@+id/confronto_titolo"

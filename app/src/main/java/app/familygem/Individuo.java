@@ -368,7 +368,6 @@ public class Individuo extends AppCompatActivity {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putString("idUno", uno.getId());
-		s.l("outState",outState);
 	}
 
 	@Override

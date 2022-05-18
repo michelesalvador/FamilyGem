@@ -53,9 +53,7 @@
 			android:layout_height="80dp"
 			android:layout_alignParentEnd="true"
 			android:layout_marginStart="8dp"
-			android:scaleType="centerCrop"
-			android:autoMirrored="true"
-			app:srcCompat="@drawable/manichino" />
+			android:scaleType="centerCrop" />
 		<ImageView
 			android:id="@+id/indi_lutto"
 			android:layout_width="wrap_content"

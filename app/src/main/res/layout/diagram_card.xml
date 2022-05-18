@@ -41,8 +41,7 @@
 			android:id="@+id/card_photo"
 			android:layout_width="wrap_content"
 			android:layout_height="80dp"
-			android:adjustViewBounds="true"
-			app:srcCompat="@drawable/manichino"/>
+			android:adjustViewBounds="true"/>
 		<app.familygem.VistaTesto
 			android:id="@+id/card_name"
 			android:layout_width="wrap_content"

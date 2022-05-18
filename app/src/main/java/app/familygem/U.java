@@ -106,11 +106,14 @@ public class U {
 			return gc.getPeople().get(0).getId();
 		return null;
 	}
-	
+
 	// riceve una Person e restituisce stringa con nome e cognome principale
-	static String epiteto(Person p) {
-		if( p != null && !p.getNames().isEmpty() )
-			return nomeCognome(p.getNames().get(0));
+	static String epiteto(Person person) {
+		return epiteto(person, false);
+	}
+	static String epiteto(Person person, boolean twoLines) {
+		if( person != null && !person.getNames().isEmpty() )
+			return nomeCognome(person.getNames().get(0), twoLines ? "\n" : " ");
 		return "[" + s(R.string.no_name) + "]";
 	}
 
@@ -155,20 +158,20 @@ public class U {
 	}
 
 	// Restituisce il nome e cognome addobbato di un Name
-	static String nomeCognome(Name n) {
+	static String nomeCognome(Name n, String divider) {
 		String completo = "";
 		if( n.getValue() != null ) {
 			String grezzo = n.getValue().trim();
 			int slashPos = grezzo.indexOf('/');
 			int lastSlashPos = grezzo.lastIndexOf('/');
 			if( slashPos > -1 ) // Se c'è un cognome tra '/'
-				completo = grezzo.substring( 0, slashPos ).trim(); // nome
+				completo = grezzo.substring(0, slashPos).trim(); // nome
 			else // Oppure è solo nome senza cognome
 				completo = grezzo;
 			if( n.getNickname() != null )
-				completo += " \"" + n.getNickname() + "\"";
+				completo += divider + "\"" + n.getNickname() + "\"";
 			if( slashPos < lastSlashPos )
-				completo += " " + grezzo.substring( slashPos + 1, lastSlashPos ).trim(); // cognome
+				completo += divider + grezzo.substring( slashPos + 1, lastSlashPos ).trim(); // cognome
 			if( lastSlashPos > -1 && grezzo.length() - 1 > lastSlashPos )
 				completo += " " + grezzo.substring( lastSlashPos + 1 ).trim(); // dopo il cognome
 		} else {
@@ -177,9 +180,9 @@ public class U {
 			if( n.getGiven() != null )
 				completo += " " + n.getGiven();
 			if( n.getNickname() != null )
-				completo += " \"" + n.getNickname() + "\"";
+				completo += divider + "\"" + n.getNickname() + "\"";
 			if( n.getSurname() != null )
-				completo += " " + n.getSurname();
+				completo += divider + n.getSurname();
 			if( n.getSuffix() != null )
 				completo += " " + n.getSuffix();
 		}
@@ -913,6 +916,10 @@ public class U {
 		if( ignoto == null ) return null;
 		else if( ignoto instanceof String ) return (String) ignoto;
 		else return ((JsonPrimitive)ignoto).getAsString();
+	}
+
+	static float pxToDp(float pixels) {
+		return pixels / Global.context.getResources().getDisplayMetrics().density;
 	}
 
 	static int dpToPx(float dips) {
