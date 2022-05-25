@@ -1,6 +1,5 @@
 package app.familygem;
 
-import android.app.Application;
 import android.content.Context;
 import android.view.View;
 import android.widget.Toast;
@@ -8,13 +7,14 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.multidex.MultiDexApplication;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
 import java.io.File;
 
-public class Global extends Application {
+public class Global extends MultiDexApplication {
 
 	public static Gedcom gc;
 	public static Context context;

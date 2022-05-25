@@ -22,7 +22,7 @@ android {
 		minSdkVersion 19
 		targetSdkVersion 32
 		versionCode 20
-		versionName '0.8.0.10'
+		versionName '0.8.0.12'
 		vectorDrawables.useSupportLibrary = true
 		resConfigs "en", "cs", "de", "eo", "es", "fa", "fr", "hr", "hu", "in", "it", "iw", "kn", "mr", "nb", "nl", "pl", "pt", "ru", "sk", "sr", "uk"
 		def utenteAruba = ""
@@ -38,7 +38,6 @@ android {
 		buildConfigField "String", "utenteGeoNames", "\""+utenteGeoNames+"\""
 		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 		multiDexEnabled true
-		multiDexKeepProguard file('multidex-config.pro')
 	}
 	buildTypes {
 		debug {
@@ -64,12 +63,12 @@ android {
 }
 
 dependencies {
+	implementation 'androidx.multidex:multidex:2.0.1'
 	implementation 'commons-io:commons-io:2.8.0' // Versions from 2.9.0 to 2.11.0 give NoClassDefFoundError on old devices
 	implementation 'com.google.code.gson:gson:2.8.7'
 	implementation 'commons-net:commons-net:3.6'
 	implementation 'androidx.lifecycle:lifecycle-process:2.4.1'
 	implementation 'org.familysearch.gedcom:gedcom:1.11.0'
-	implementation 'androidx.appcompat:appcompat:1.4.1'
 	implementation 'androidx.work:work-runtime:2.7.1'
 	implementation 'com.android.installreferrer:installreferrer:2.2'
 	implementation 'com.google.android.material:material:1.6.0'
