@@ -8,8 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import app.familygem.constants.Format;
-import app.familygem.constants.Kind;
+import app.familygem.constant.Format;
+import app.familygem.constant.Kind;
 
 class Datatore {
 

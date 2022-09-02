@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.pdf.PdfDocument;
@@ -41,9 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import app.familygem.constants.Gender;
-import app.familygem.constants.Relation;
-import app.familygem.dettaglio.Famiglia;
+import app.familygem.constant.Gender;
+import app.familygem.constant.Relation;
+import app.familygem.detail.Famiglia;
 import graph.gedcom.Bond;
 import graph.gedcom.CurveLine;
 import graph.gedcom.FamilyNode;
@@ -65,8 +66,9 @@ public class Diagram extends Fragment {
 	private Lines lines;
 	private Lines backLines;
 	private float density;
-	private int STROKE;
-	private final int GLOW_SPACE = 35; // Space to display glow, in dp
+	private int STROKE; // Lines thickness, in pixels
+	private int DASH; // Dashed lines interval
+	private int GLOW_SPACE; // Space to display glow around cards
 	private View popup; // Suggestion balloon
 	boolean forceDraw;
 	private AnimatorSet animator;
@@ -78,6 +80,8 @@ public class Diagram extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
 		density = getResources().getDisplayMetrics().density;
 		STROKE = toPx(2);
+		DASH = toPx(4);
+		GLOW_SPACE = toPx(35);
 
 		getActivity().findViewById(R.id.toolbar).setVisibility(View.GONE); // Necessario in caso di backPressed dopo onActivityresult
 		final View view = inflater.inflate(R.layout.diagram, container, false);
@@ -232,7 +236,7 @@ public class Diagram extends Fragment {
 			if( fulcrumView != null ) {
 				box.post(() -> {
 					ConstraintLayout.LayoutParams glowParams = new ConstraintLayout.LayoutParams(
-							singleNode.getWidth() + toPx(GLOW_SPACE * 2), singleNode.getHeight() + toPx(GLOW_SPACE * 2));
+							singleNode.getWidth() + GLOW_SPACE * 2, singleNode.getHeight() + GLOW_SPACE * 2);
 					glowParams.topToTop = R.id.tag_fulcrum;
 					glowParams.bottomToBottom = R.id.tag_fulcrum;
 					glowParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
@@ -264,17 +268,17 @@ public class Diagram extends Fragment {
 				graph.placeNodes(); // Calculate final position
 
 				// Add the lines
-				lines = new Lines(context(), graph.getLines(), null);
+				lines = new Lines(context(), graph.getLines(), false);
 				box.addView(lines, 0);
-				backLines = new Lines(context(), graph.getBackLines(), new DashPathEffect(new float[]{toPx(4), toPx(4)}, 0));
+				backLines = new Lines(context(), graph.getBackLines(), true);
 				box.addView(backLines, 0);
 
 				// Add the glow
 				PersonNode fulcrumNode = (PersonNode)fulcrumView.metric;
 				RelativeLayout.LayoutParams glowParams = new RelativeLayout.LayoutParams(
-						toPx(fulcrumNode.width + GLOW_SPACE * 2), toPx(fulcrumNode.height + GLOW_SPACE * 2));
-				glowParams.rightMargin = -toPx(GLOW_SPACE);
-				glowParams.bottomMargin = -toPx(GLOW_SPACE);
+						toPx(fulcrumNode.width) + GLOW_SPACE * 2, toPx(fulcrumNode.height) + GLOW_SPACE * 2);
+				glowParams.rightMargin = -GLOW_SPACE;
+				glowParams.bottomMargin = -GLOW_SPACE;
 				box.addView(new FulcrumGlow(context()), 0, glowParams);
 
 				displaceDiagram();
@@ -305,9 +309,9 @@ public class Diagram extends Fragment {
 		}
 		// The glow follows fulcrum
 		RelativeLayout.LayoutParams glowParams = (RelativeLayout.LayoutParams)glow.getLayoutParams();
-		if( leftToRight ) glowParams.leftMargin = toPx(fulcrumView.metric.x - GLOW_SPACE);
-		else glowParams.rightMargin = toPx(fulcrumView.metric.x - GLOW_SPACE);
-		glowParams.topMargin = toPx(fulcrumView.metric.y - GLOW_SPACE);
+		if( leftToRight ) glowParams.leftMargin = toPx(fulcrumView.metric.x) - GLOW_SPACE;
+		else glowParams.rightMargin = toPx(fulcrumView.metric.x) - GLOW_SPACE;
+		glowParams.topMargin = toPx(fulcrumView.metric.y) - GLOW_SPACE;
 
 		moveLayout.childWidth = toPx(graph.getWidth()) + box.getPaddingStart() * 2;
 		moveLayout.childHeight = toPx(graph.getHeight()) + box.getPaddingTop() * 2;
@@ -328,7 +332,7 @@ public class Diagram extends Fragment {
 	class FulcrumGlow extends View {
 		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		BlurMaskFilter bmf = new BlurMaskFilter(toPx(25), BlurMaskFilter.Blur.NORMAL);
-		int extend = 5; // draw a rectangle a little bigger
+		int extend = toPx(5); // draw a rectangle a little bigger
 		FulcrumGlow(Context context) {
 			super(context);
 			glow = this;
@@ -338,9 +342,9 @@ public class Diagram extends Fragment {
 			paint.setColor(getResources().getColor(R.color.evidenzia));
 			paint.setMaskFilter(bmf);
 			setLayerType(View.LAYER_TYPE_SOFTWARE, paint);
-			canvas.drawRect(toPx(GLOW_SPACE - extend), toPx(GLOW_SPACE - extend),
-					toPx(fulcrumView.metric.width + GLOW_SPACE + extend),
-					toPx(fulcrumView.metric.height + GLOW_SPACE + extend), paint);
+			canvas.drawRect(GLOW_SPACE - extend, GLOW_SPACE - extend,
+					toPx(fulcrumView.metric.width) + GLOW_SPACE + extend,
+					toPx(fulcrumView.metric.height) + GLOW_SPACE + extend, paint);
 		}
 		@Override
 		public void invalidate() {
@@ -497,23 +501,24 @@ public class Diagram extends Fragment {
 	// Generate the view of lines connecting the cards
 	class Lines extends View {
 		List<Set<Line>> lineGroups;
+		boolean dashed;
 		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		List<Path> paths = new ArrayList<>(); // Each path contains many lines
+		float biggestPath = graph.getBiggestPathSize();
+		float maxBitmap = graph.getMaxBitmapSize();
+		Matrix matrix = new Matrix();
 		//int[] colors = {Color.WHITE, Color.RED, Color.CYAN, Color.MAGENTA, Color.GREEN, Color.BLACK, Color.YELLOW, Color.BLUE};
-		public Lines(Context context, List<Set<Line>> lineGroups, DashPathEffect effect) {
+		public Lines(Context context, List<Set<Line>> lineGroups, boolean dashed) {
 			super(context);
 			//setBackgroundColor(0x330066ff);
 			this.lineGroups = lineGroups;
-			paint.setPathEffect(effect);
+			this.dashed = dashed;
 			paint.setStyle(Paint.Style.STROKE);
-			paint.setStrokeWidth(STROKE);
 		}
 		@Override
 		public void invalidate() {
 			paint.setColor(getResources().getColor(printPDF ? R.color.lineeDiagrammaStampa : R.color.lineeDiagrammaSchermo));
-			for( Path path : paths ){
-				path.rewind();
-			}
+			paths.clear(); // In case of PDF print
 			float width = toPx(graph.getWidth());
 			int pathNum = 0; // index of paths
 			// Put the lines in one or more paths
@@ -536,6 +541,23 @@ public class Diagram extends Fragment {
 				}
 				pathNum++;
 			}
+			// Possibly downscale paths and thickness
+			float stroke = STROKE;
+			float[] dashIntervals = new float[]{DASH, DASH};
+			if( biggestPath > maxBitmap ) {
+				float factor = maxBitmap / biggestPath;
+				matrix.setScale(factor, factor);
+				for( Path path : paths ) {
+					path.transform(matrix);
+				}
+				stroke *= factor;
+				dashIntervals[0] *= factor;
+				dashIntervals[1] *= factor;
+			}
+			paint.setStrokeWidth(stroke);
+			if( dashed )
+				paint.setPathEffect(new DashPathEffect(dashIntervals, 0));
+
 			// Update this view size
 			RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)getLayoutParams();
 			params.width = toPx(graph.getWidth());
@@ -544,6 +566,12 @@ public class Diagram extends Fragment {
 		}
 		@Override
 		protected void onDraw(Canvas canvas) {
+			// Possibly upscale canvas
+			if( biggestPath > maxBitmap ) {
+				float factor = biggestPath / maxBitmap;
+				matrix.setScale(factor, factor);
+				canvas.concat(matrix);
+			}
 			// Draw the paths
 			//int p = 0;
 			for( Path path : paths) {
@@ -712,8 +740,8 @@ public class Diagram extends Fragment {
 			ripristina();
 			Family[] modificateArr = modificate.toArray(new Family[0]);
 			U.controllaFamiglieVuote(getContext(), this::ripristina, false, modificateArr);
-			U.aggiornaDate(pers);
-			U.salvaJson(true, (Object[])modificateArr);
+			U.updateChangeDate(pers);
+			U.save(true, (Object[])modificateArr);
 		} else if( id == 7 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
@@ -742,7 +770,7 @@ public class Diagram extends Fragment {
 						data.getStringExtra("idFamiglia"),
 						data.getIntExtra("relazione", 0),
 						data.getStringExtra("collocazione") );
-				U.salvaJson( true, modificati );
+				U.save( true, modificati );
 			} // Export diagram to PDF
 			else if( requestCode == 903 ) {
 				// Stylize diagram for print
@@ -754,8 +782,8 @@ public class Diagram extends Fragment {
 				// Create PDF
 				PdfDocument document = new PdfDocument();
 				PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(box.getWidth(), box.getHeight(), 1).create();
-				PdfDocument.Page page = document.startPage( pageInfo );
-				box.draw( page.getCanvas() );
+				PdfDocument.Page page = document.startPage(pageInfo);
+				box.draw(page.getCanvas());
 				document.finishPage(page);
 				printPDF = false;
 				// Write PDF

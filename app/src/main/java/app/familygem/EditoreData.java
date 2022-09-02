@@ -21,8 +21,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import app.familygem.constants.Format;
-import app.familygem.constants.Kind;
+import app.familygem.constant.Format;
+import app.familygem.constant.Kind;
 
 public class EditoreData extends LinearLayout {
 

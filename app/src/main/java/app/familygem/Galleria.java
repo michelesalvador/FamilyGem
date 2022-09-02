@@ -23,9 +23,9 @@ import org.folg.gedcom.model.MediaRef;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import app.familygem.visita.ListaMediaContenitore;
-import app.familygem.visita.RiferimentiMedia;
-import app.familygem.visita.TrovaPila;
+import app.familygem.visitor.ListaMediaContenitore;
+import app.familygem.visitor.RiferimentiMedia;
+import app.familygem.visitor.TrovaPila;
 import static app.familygem.Global.gc;
 
 public class Galleria extends Fragment {
@@ -139,14 +139,14 @@ public class Galleria extends Fragment {
 			if( requestCode == 4546 ) { // File preso da app fornitrice viene salvato in Media ed eventualmente ritagliato
 				Media media = nuovoMedia(null);
 				if( F.proponiRitaglio(getContext(), this, data, media) ) { // se è un'immagine (quindi ritagliabile)
-					U.salvaJson(false, media);
+					U.save(false, media);
 							// Non deve scattare onRestart() + recreate() perché poi il fragment di arrivo non è più lo stesso
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
 				F.fineRitaglioImmagine(data);
 			}
-			U.salvaJson(true, Global.mediaCroppato);
+			U.save(true, Global.mediaCroppato);
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
 			Global.edited = true;
 	}
@@ -163,7 +163,7 @@ public class Galleria extends Fragment {
 		if( item.getItemId() == 0 ) {
 			Object[] modificati = eliminaMedia(media, null);
 			ricrea();
-			U.salvaJson(false, modificati);
+			U.save(false, modificati);
 			return true;
 		}
 		return false;

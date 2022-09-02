@@ -21,19 +21,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import app.familygem.dettaglio.Archivio;
-import app.familygem.dettaglio.ArchivioRef;
-import app.familygem.dettaglio.Autore;
-import app.familygem.dettaglio.Cambiamenti;
-import app.familygem.dettaglio.CitazioneFonte;
-import app.familygem.dettaglio.Estensione;
-import app.familygem.dettaglio.Evento;
-import app.familygem.dettaglio.Famiglia;
-import app.familygem.dettaglio.Fonte;
-import app.familygem.dettaglio.Immagine;
-import app.familygem.dettaglio.Indirizzo;
-import app.familygem.dettaglio.Nome;
-import app.familygem.dettaglio.Nota;
+import app.familygem.detail.Archivio;
+import app.familygem.detail.ArchivioRef;
+import app.familygem.detail.Autore;
+import app.familygem.detail.Cambiamenti;
+import app.familygem.detail.CitazioneFonte;
+import app.familygem.detail.Estensione;
+import app.familygem.detail.Evento;
+import app.familygem.detail.Famiglia;
+import app.familygem.detail.Fonte;
+import app.familygem.detail.Immagine;
+import app.familygem.detail.Indirizzo;
+import app.familygem.detail.Nome;
+import app.familygem.detail.Nota;
 
 public class Memoria {
 

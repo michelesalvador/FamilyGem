@@ -62,8 +62,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import app.familygem.dettaglio.Immagine;
-import app.familygem.visita.ListaMedia;
+import app.familygem.detail.Immagine;
+import app.familygem.visitor.ListaMedia;
 
 public class F {
 
@@ -630,7 +630,7 @@ public class F {
 						}
 						med.setFile( "" );
 						contesto.startActivity( intento );
-						U.salvaJson( true, Memoria.oggettoCapo() );
+						U.save( true, Memoria.oggettoCapo() );
 					} else if( frammento != null )
 						frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
 					else

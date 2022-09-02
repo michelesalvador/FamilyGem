@@ -11,7 +11,7 @@ With Family Gem you can:
 - Export the family tree you created (via GEDCOM again) to import in every other genealogy program.
 - Share a tree with your relatives, letting them improve it and receiving back the updates. Then you can choose whether accept them or not.
 
-Minimum supported version is Android 4.4 KitKat (API 19), maximum is Android 12 S (API 31).
+Minimum supported version is Android 4.4 KitKat (API 19), maximum is Android 13 Tiramisu (API 33).
 The intent is that data structure respects as much as possible the latest version of GEDCOM standard: [5.5.1](https://www.familysearch.org/developers/docs/gedcom/) and possibly also [5.5.5](https://www.gedcom.org/gedcom.html).<br>
 Family Gem is strongly based on the library [Gedcom 5 Java](https://github.com/FamilySearch/gedcom5-java) by FamilySearch.
 

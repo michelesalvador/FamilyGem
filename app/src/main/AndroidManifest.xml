@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
 	android:installLocation="auto"
 	package="app.familygem">
 
@@ -67,7 +66,7 @@
 		<activity
 			android:name=".Opzioni"
 			android:label="@string/settings"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".Alberi"/>
 		<activity
 			android:name=".Lapide"
 			android:label="@string/about"
@@ -103,39 +102,46 @@
 			android:name=".Individuo"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity
-			android:name=".dettaglio.Famiglia" />
+			android:name=".detail.Famiglia" />
 		<activity
-			android:name=".dettaglio.Nome" />
+			android:name=".detail.Nome" />
 		<activity
-			android:name=".dettaglio.Archivio" />
+			android:name=".detail.Archivio" />
 		<activity
-			android:name=".dettaglio.ArchivioRef" />
+			android:name=".detail.ArchivioRef" />
 		<activity
-			android:name=".dettaglio.Nota" />
+			android:name=".detail.Nota" />
 		<activity
-			android:name=".dettaglio.Fonte" />
+			android:name=".detail.Fonte" />
 		<activity
-			android:name=".dettaglio.CitazioneFonte" />
+			android:name=".detail.CitazioneFonte" />
 		<activity
-			android:name=".dettaglio.Immagine" />
+			android:name=".detail.Immagine" />
 		<activity
-			android:name=".dettaglio.Evento" />
+			android:name=".detail.Evento" />
 		<activity
-			android:name=".dettaglio.Indirizzo" />
+			android:name=".detail.Indirizzo" />
 		<activity
-			android:name=".dettaglio.Autore" />
+			android:name=".detail.Autore" />
 		<activity
-			android:name=".dettaglio.Estensione" />
+			android:name=".detail.Estensione" />
 		<activity
-			android:name=".dettaglio.Cambiamenti" />
+			android:name=".detail.Cambiamenti" />
 		<activity
 			android:name=".Lavagna"
-			android:parentActivityName=".dettaglio.Immagine"
+			android:parentActivityName=".detail.Immagine"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity android:name=".EditaIndividuo" />
 		<activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
+		<service
+			android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+			android:enabled="false"
+			android:exported="false">
+			<meta-data
+				android:name="autoStoreLocales"
+				android:value="true" />
+		</service>
 	</application>
-
 	<queries>
 		<intent>
 			<action android:name="android.media.action.IMAGE_CAPTURE"/>
@@ -145,5 +151,4 @@
 			<data android:mimeType="*/*"/>
 		</intent>
 	</queries>
-
 </manifest>

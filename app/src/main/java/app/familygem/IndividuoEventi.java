@@ -29,31 +29,31 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import app.familygem.constants.Gender;
-import app.familygem.dettaglio.Evento;
-import app.familygem.dettaglio.Nome;
+import app.familygem.constant.Gender;
+import app.familygem.detail.Evento;
+import app.familygem.detail.Nome;
 import static app.familygem.Global.gc;
 
 public class IndividuoEventi extends Fragment {
 
-	Person uno;
-	private View vistaCambi;
+	Person one;
+	private View changeView;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View vistaEventi = inflater.inflate(R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
-			LinearLayout scatola = vistaEventi.findViewById(R.id.contenuto_scheda);
-			uno = gc.getPerson(Global.indi);
-			if( uno != null ) {
-				for( Name nome : uno.getNames()) {
+			LinearLayout layout = vistaEventi.findViewById(R.id.contenuto_scheda);
+			one = gc.getPerson(Global.indi);
+			if( one != null ) {
+				for( Name nome : one.getNames()) {
 					String tit = getString(R.string.name);
 					if( nome.getType() != null && !nome.getType().isEmpty() ) {
 						tit += " (" + TypeView.getTranslatedType(nome.getType(), TypeView.Combo.NAME) + ")";
 					}
-					piazzaEvento(scatola, tit, U.nomeCognome(nome, " "), nome);
+					placeEvent(layout, tit, U.nomeCognome(nome, " "), nome);
 				}
-				for (EventFact fatto : uno.getEventsFacts() ) {
+				for (EventFact fatto : one.getEventsFacts() ) {
 					String txt = "";
 					if( fatto.getValue() != null ) {
 						if( fatto.getValue().equals("Y") && fatto.getTag()!=null &&
@@ -67,16 +67,16 @@ public class IndividuoEventi extends Fragment {
 					if( fatto.getPlace() != null ) txt += fatto.getPlace() + "\n";
 					Address indirizzo = fatto.getAddress();
 					if( indirizzo != null ) txt += Dettaglio.writeAddress(indirizzo, true) + "\n";
-					if( fatto.getCause() != null )	txt += fatto.getCause();
+					if( fatto.getCause() != null ) txt += fatto.getCause();
 					if( txt.endsWith("\n") ) txt = txt.substring(0, txt.length() - 1); // Rimuove l'ultimo acapo
-					piazzaEvento( scatola, writeEventTitle(fatto), txt, fatto );
+					placeEvent(layout, writeEventTitle(fatto), txt, fatto);
 				}
-				for( Estensione est : U.trovaEstensioni( uno ) ) {
-					piazzaEvento( scatola, est.nome, est.testo, est.gedcomTag );
+				for( Estensione est : U.trovaEstensioni(one) ) {
+					placeEvent(layout, est.nome, est.testo, est.gedcomTag);
 				}
-				U.mettiNote( scatola, uno, true );
-				U.citaFonti( scatola, uno );
-				vistaCambi = U.cambiamenti( scatola, uno.getChange() );
+				U.placeNotes(layout, one, true);
+				U.placeSourceCitations(layout, one);
+				changeView = U.placeChangeDate(layout, one.getChange());
 			}
 		}
 		return vistaEventi;
@@ -122,83 +122,83 @@ public class IndividuoEventi extends Fragment {
 		return txt;
 	}
 
-	private int sessoCapitato;
-	private void piazzaEvento(LinearLayout scatola, String titolo, String testo, Object oggetto) {
-		View vistaFatto = LayoutInflater.from(scatola.getContext()).inflate( R.layout.individuo_eventi_pezzo, scatola, false);
-		scatola.addView( vistaFatto );
-		((TextView)vistaFatto.findViewById( R.id.evento_titolo )).setText( titolo );
-		TextView vistaTesto = vistaFatto.findViewById( R.id.evento_testo );
-		if( testo.isEmpty() ) vistaTesto.setVisibility( View.GONE );
-		else vistaTesto.setText( testo );
-		if( oggetto instanceof SourceCitationContainer ) {
-			List<SourceCitation> citaFonti = ((SourceCitationContainer)oggetto).getSourceCitations();
-			TextView vistaCitaFonti = vistaFatto.findViewById( R.id.evento_fonti );
-			if( !citaFonti.isEmpty() ) {
-				vistaCitaFonti.setText( String.valueOf(citaFonti.size()) );
-				vistaCitaFonti.setVisibility( View.VISIBLE );
+	private int chosenSex;
+	private void placeEvent(LinearLayout layout, String title, String text, Object object) {
+		View eventView = LayoutInflater.from(layout.getContext()).inflate(R.layout.individuo_eventi_pezzo, layout, false);
+		layout.addView(eventView);
+		((TextView)eventView.findViewById(R.id.evento_titolo)).setText(title);
+		TextView textView = eventView.findViewById(R.id.evento_testo);
+		if( text.isEmpty() ) textView.setVisibility(View.GONE);
+		else textView.setText(text);
+		if( Global.settings.expert && object instanceof SourceCitationContainer ) {
+			List<SourceCitation> sourceCitations = ((SourceCitationContainer)object).getSourceCitations();
+			TextView sourceView = eventView.findViewById(R.id.evento_fonti);
+			if( !sourceCitations.isEmpty() ) {
+				sourceView.setText(String.valueOf(sourceCitations.size()));
+				sourceView.setVisibility(View.VISIBLE);
 			}
 		}
-		LinearLayout scatolaAltro = vistaFatto.findViewById( R.id.evento_altro );
-		if( oggetto instanceof NoteContainer )
-			U.mettiNote( scatolaAltro, oggetto, false );
-		vistaFatto.setTag( R.id.tag_oggetto, oggetto );
-		registerForContextMenu( vistaFatto );
-		if( oggetto instanceof Name ) {
-			U.mettiMedia( scatolaAltro, oggetto, false );
-			vistaFatto.setOnClickListener( v -> {
+		LinearLayout otherLayout = eventView.findViewById(R.id.evento_altro);
+		if( object instanceof NoteContainer )
+			U.placeNotes(otherLayout, object, false);
+		eventView.setTag(R.id.tag_oggetto, object);
+		registerForContextMenu(eventView);
+		if( object instanceof Name ) {
+			U.placeMedia(otherLayout, object, false);
+			eventView.setOnClickListener(v -> {
 				// Se è un nome complesso propone la modalità esperto
-				if( !Global.settings.expert && nomeComplesso((Name)oggetto) ) {
-					new AlertDialog.Builder(getContext()).setMessage( R.string.complex_tree_advanced_tools )
-							.setPositiveButton( android.R.string.ok, (dialog, i) -> {
+				if( !Global.settings.expert && nomeComplesso((Name)object) ) {
+					new AlertDialog.Builder(getContext()).setMessage(R.string.complex_tree_advanced_tools)
+							.setPositiveButton(android.R.string.ok, (dialog, i) -> {
 								Global.settings.expert = true;
 								Global.settings.save();
-								Memoria.aggiungi( oggetto );
-								startActivity( new Intent(getContext(), Nome.class) );
-							}).setNegativeButton( android.R.string.cancel, (dialog, i) -> {
-								Memoria.aggiungi( oggetto );
-								startActivity( new Intent(getContext(), Nome.class) );
+								Memoria.aggiungi(object);
+								startActivity(new Intent(getContext(), Nome.class));
+							}).setNegativeButton(android.R.string.cancel, (dialog, i) -> {
+								Memoria.aggiungi(object);
+								startActivity(new Intent(getContext(), Nome.class));
 							}).show();
 				} else {
-					Memoria.aggiungi( oggetto );
-					startActivity( new Intent(getContext(), Nome.class) );
+					Memoria.aggiungi(object);
+					startActivity(new Intent(getContext(), Nome.class));
 				}
 			});
-		} else if( oggetto instanceof EventFact ) {
-			// Evento Sesso
-			if( ((EventFact)oggetto).getTag() != null && ((EventFact)oggetto).getTag().equals("SEX") ) {
-				Map<String,String> sessi = new LinkedHashMap<>();
-				sessi.put( "M", getString(R.string.male) );
-				sessi.put( "F", getString(R.string.female) );
-				sessi.put( "U", getString(R.string.unknown) );
-				vistaTesto.setText( testo );
-				sessoCapitato = 0;
-				for( Map.Entry<String,String> sex : sessi.entrySet() ) {
-					if( testo.equals( sex.getKey() ) ) {
-						vistaTesto.setText( sex.getValue() );
+		} else if( object instanceof EventFact ) {
+			// Sex fact
+			if( ((EventFact)object).getTag() != null && ((EventFact)object).getTag().equals("SEX") ) {
+				Map<String, String> sexes = new LinkedHashMap<>();
+				sexes.put("M", getString(R.string.male));
+				sexes.put("F", getString(R.string.female));
+				sexes.put("U", getString(R.string.unknown));
+				textView.setText(text);
+				chosenSex = 0;
+				for( Map.Entry<String, String> sex : sexes.entrySet() ) {
+					if( text.equals(sex.getKey()) ) {
+						textView.setText(sex.getValue());
 						break;
 					}
-					sessoCapitato++;
+					chosenSex++;
 				}
-				if( sessoCapitato > 2 ) sessoCapitato = -1;
-				vistaFatto.setOnClickListener( vista -> new AlertDialog.Builder( vista.getContext() )
-					.setSingleChoiceItems( sessi.values().toArray(new String[0]), sessoCapitato, (dialog, item) -> {
-						((EventFact)oggetto).setValue( new ArrayList<>(sessi.keySet()).get(item) );
-						aggiornaRuoliConiugali(uno);
-						dialog.dismiss();
-						refresh(1);
-						U.salvaJson( true, uno );
-					}).show() );
-			} else { // Tutti gli altri eventi
-				U.mettiMedia(scatolaAltro, oggetto, false);
-				vistaFatto.setOnClickListener( v -> {
-					Memoria.aggiungi(oggetto);
+				if( chosenSex > 2 ) chosenSex = -1;
+				eventView.setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
+						.setSingleChoiceItems(sexes.values().toArray(new String[0]), chosenSex, (dialog, item) -> {
+							((EventFact)object).setValue(new ArrayList<>(sexes.keySet()).get(item));
+							aggiornaRuoliConiugali(one);
+							dialog.dismiss();
+							refresh(1);
+							U.save(true, one);
+						}).show());
+			} else { // All other events
+				U.placeMedia(otherLayout, object, false);
+				eventView.setOnClickListener(v -> {
+					Memoria.aggiungi(object);
 					startActivity(new Intent(getContext(), Evento.class));
 				});
 			}
-		} else if( oggetto instanceof GedcomTag ) {
-			vistaFatto.setOnClickListener( v -> {
-				Memoria.aggiungi( oggetto );
-				startActivity( new Intent( getContext(), app.familygem.dettaglio.Estensione.class ) );
+		} else if( object instanceof GedcomTag ) {
+			eventView.setOnClickListener(v -> {
+				Memoria.aggiungi(object);
+				startActivity(new Intent(getContext(), app.familygem.detail.Estensione.class));
 			});
 		}
 	}
@@ -250,16 +250,16 @@ public class IndividuoEventi extends Fragment {
 		oggettoPezzo = vista.getTag( R.id.tag_oggetto );
 		if( oggettoPezzo instanceof Name ) {
 			menu.add( 0, 200, 0, R.string.copy );
-			if( uno.getNames().indexOf(oggettoPezzo) > 0 )
+			if( one.getNames().indexOf(oggettoPezzo) > 0 )
 				menu.add( 0, 201, 0, R.string.move_up );
-			if( uno.getNames().indexOf(oggettoPezzo) < uno.getNames().size()-1 )
+			if( one.getNames().indexOf(oggettoPezzo) < one.getNames().size()-1 )
 				menu.add( 0, 202, 0, R.string.move_down );
 			menu.add( 0, 203, 0, R.string.delete );
 		} else if( oggettoPezzo instanceof EventFact ) {
 			menu.add( 0, 210, 0, R.string.copy );
-			if( uno.getEventsFacts().indexOf(oggettoPezzo) > 0 )
+			if( one.getEventsFacts().indexOf(oggettoPezzo) > 0 )
 				menu.add( 0, 211, 0, R.string.move_up );
-			if( uno.getEventsFacts().indexOf(oggettoPezzo) < uno.getEventsFacts().size()-1 )
+			if( one.getEventsFacts().indexOf(oggettoPezzo) < one.getEventsFacts().size()-1 )
 				menu.add( 0, 212, 0, R.string.move_down );
 			menu.add( 0, 213, 0, R.string.delete );
 		} else if( oggettoPezzo instanceof GedcomTag ) {
@@ -277,8 +277,8 @@ public class IndividuoEventi extends Fragment {
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		List<Name> nomi = uno.getNames();
-		List<EventFact> fatti = uno.getEventsFacts();
+		List<Name> nomi = one.getNames();
+		List<EventFact> fatti = one.getEventsFacts();
 		int cosa = 0; // cosa aggiornare dopo la modifica
 		switch( item.getItemId() ) {
 			// Nome
@@ -300,7 +300,7 @@ public class IndividuoEventi extends Fragment {
 				break;
 			case 203: // Elimina
 				if( U.preserva(oggettoPezzo) ) return false;
-				uno.getNames().remove(oggettoPezzo);
+				one.getNames().remove(oggettoPezzo);
 				Memoria.annullaIstanze(oggettoPezzo);
 				vistaPezzo.setVisibility(View.GONE);
 				cosa = 2;
@@ -318,24 +318,24 @@ public class IndividuoEventi extends Fragment {
 				break;
 			case 213:
 				// todo Conferma elimina
-				uno.getEventsFacts().remove(oggettoPezzo);
+				one.getEventsFacts().remove(oggettoPezzo);
 				Memoria.annullaIstanze(oggettoPezzo);
 				vistaPezzo.setVisibility(View.GONE);
 				break;
 			// Estensione
 			case 221: // Elimina
-				U.eliminaEstensione((GedcomTag)oggettoPezzo, uno, vistaPezzo);
+				U.eliminaEstensione((GedcomTag)oggettoPezzo, one, vistaPezzo);
 				break;
 			// Nota
 			case 225: // Copia
 				U.copiaNegliAppunti(getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText());
 				return true;
 			case 226: // Scollega
-				U.scollegaNota((Note)oggettoPezzo, uno, vistaPezzo);
+				U.scollegaNota((Note)oggettoPezzo, one, vistaPezzo);
 				break;
 			case 227:
 				Object[] capi = U.eliminaNota((Note)oggettoPezzo, vistaPezzo);
-				U.salvaJson(true, capi);
+				U.save(true, capi);
 				refresh(0);
 				return true;
 			// Citazione fonte
@@ -346,14 +346,14 @@ public class IndividuoEventi extends Fragment {
 				return true;
 			case 231: // Elimina
 				// todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
-				uno.getSourceCitations().remove(oggettoPezzo);
+				one.getSourceCitations().remove(oggettoPezzo);
 				Memoria.annullaIstanze(oggettoPezzo);
 				vistaPezzo.setVisibility(View.GONE);
 				break;
 			default:
 				return false;
 		}
-		U.salvaJson(true, uno);
+		U.save(true, one);
 		refresh(cosa);
 		return true;
 	}
@@ -362,16 +362,16 @@ public class IndividuoEventi extends Fragment {
 	void refresh(int what) {
 		if( what == 0 ) { // sostituisce solo la data di cambiamento
 			LinearLayout scatola = getActivity().findViewById(R.id.contenuto_scheda);
-			if( vistaCambi != null )
-				scatola.removeView(vistaCambi);
-			vistaCambi = U.cambiamenti(scatola, uno.getChange());
+			if( changeView != null )
+				scatola.removeView(changeView);
+			changeView = U.placeChangeDate(scatola, one.getChange());
 		} else { // ricarica il fragment
 			FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
 			fragmentManager.beginTransaction().detach(this).commit();
 			fragmentManager.beginTransaction().attach(this).commit();
 			if( what == 2 ) { // aggiorna anche il titolo dell'activity
 				CollapsingToolbarLayout barraCollasso = requireActivity().findViewById(R.id.toolbar_layout);
-				barraCollasso.setTitle(U.epiteto(uno));
+				barraCollasso.setTitle(U.epiteto(one));
 			}
 		}
 	}

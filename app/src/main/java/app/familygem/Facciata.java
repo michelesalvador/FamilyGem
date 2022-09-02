@@ -3,13 +3,16 @@ package app.familygem;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import android.view.View;
 import org.apache.commons.net.ftp.FTPClient;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Locale;
 
 public class Facciata extends AppCompatActivity {
 
@@ -17,6 +20,14 @@ public class Facciata extends AppCompatActivity {
 	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
 		setContentView(R.layout.facciata);
+
+		// Set app locale for application context and resources (localized gedcom.jar library)
+		Locale locale = AppCompatDelegate.getApplicationLocales().get(0); // Find app locale, or null if not existing
+		if( locale != null ) {
+			Configuration config = getResources().getConfiguration();
+			config.setLocale(locale);
+			getApplicationContext().getResources().updateConfiguration(config, null); // Change locale both for static methods and jar library
+		}
 
 		/* Apertura in seguito al click su vari tipi di link:
 		https://www.familygem.app/share.php?tree=20190802224208

@@ -35,7 +35,11 @@ public class MoveLayout extends FrameLayout {
 			public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
 				final float scaleFactor = scaleGestureDetector.getScaleFactor();
 				float minimum = Math.min((float)width / childWidth, (float)height / childHeight);
-				scale = Math.max(minimum, Math.min(scale * scaleFactor, 3));
+				scale = Math.max(minimum, scale * scaleFactor);
+				if( scale > 5 ) {
+					scale = child.getScaleX();
+					return false;
+				}
 				child.setScaleX(scale);
 				child.setScaleY(scale);
 				calcOverScroll(true);
@@ -223,11 +227,9 @@ public class MoveLayout extends FrameLayout {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		// Pass the max possible size of a bitmap to the graph, so it can distribute lines in groups
-		if( graph.needMaxBitmap() ) {
-			int maxBitmapWidth = canvas.getMaximumBitmapWidth() // 4096 on my old physical devices, 16384 on the new ones
-					- 10; // the space actually occupied by the line is a little bit larger
-			int maxBitmapHeight = canvas.getMaximumBitmapHeight() - 10;
-			graph.setMaxBitmap((int)U.pxToDp(maxBitmapWidth), (int)U.pxToDp(maxBitmapHeight));
+		if( graph.needMaxBitmapSize() ) {
+			graph.setMaxBitmapSize(U.pxToDp(canvas.getMaximumBitmapWidth()) // 4096 on my old physical devices, 16384 on the new ones
+					- 10); // The space actually occupied by a path is a little bit larger
 		}
 	}
 }

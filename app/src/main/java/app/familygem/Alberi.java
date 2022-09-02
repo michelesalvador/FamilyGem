@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import app.familygem.visita.ListaMedia;
+import app.familygem.visitor.ListaMedia;
 
 public class Alberi extends AppCompatActivity {
 
@@ -167,7 +167,7 @@ public class Alberi extends AppCompatActivity {
 						popup.setOnMenuItemClickListener(item -> {
 							int id = item.getItemId();
 							if( id == -1 ) { // Salva
-								U.salvaJson(Global.gc, treeId);
+								U.saveJson(Global.gc, treeId);
 								Global.daSalvare = false;
 							} else if( id == 0 ) { // Apre un albero derivato
 								apriGedcom(treeId, true);
@@ -803,7 +803,7 @@ public class Alberi extends AppCompatActivity {
 				dialog.setPositiveButton(R.string.correct, (dialogo, i) -> {
 					dialogo.cancel();
 					Gedcom gcCorretto = findErrors(treeId, true);
-					U.salvaJson(gcCorretto, treeId);
+					U.saveJson(gcCorretto, treeId);
 					Global.gc = null; // così se era aperto poi lo ricarica corretto
 					findErrors(treeId, false);    // riapre per ammirere il risultato
 					aggiornaLista();

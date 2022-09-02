@@ -17,7 +17,7 @@ import android.widget.TextView;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Submitter;
 import java.util.List;
-import app.familygem.dettaglio.Autore;
+import app.familygem.detail.Autore;
 import static app.familygem.Global.gc;
 
 public class Podio extends Fragment {
@@ -44,7 +44,7 @@ public class Podio extends Fragment {
 		}
 		vista.findViewById(R.id.fab).setOnClickListener(v -> {
 			nuovoAutore(getContext());
-			U.salvaJson(true);
+			U.save(true);
 		});
 		return vista;
 	}
@@ -68,7 +68,7 @@ public class Podio extends Fragment {
 		Submitter subm = new Submitter();
 		subm.setId(U.nuovoId(gc, Submitter.class));
 		subm.setName("");
-		U.aggiornaDate(subm);
+		U.updateChangeDate(subm);
 		gc.addSubmitter(subm);
 		if( contesto != null ) {
 			Memoria.setPrimo(subm);
@@ -84,7 +84,7 @@ public class Podio extends Fragment {
 			gc.setHeader(testa);
 		}
 		testa.setSubmitterRef(subm.getId());
-		U.salvaJson(false, subm);
+		U.save(false, subm);
 	}
 
 	// Menu contestuale
@@ -107,7 +107,7 @@ public class Podio extends Fragment {
 			case 1:
 				// Todo conferma elimina
 				eliminaAutore(subm);
-				U.salvaJson(false);
+				U.save(false);
 				getActivity().recreate();
 				return true;
 		}

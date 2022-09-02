@@ -34,7 +34,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-public class Condivisione extends AppCompatActivity {
+public class Condivisione extends BaseActivity {
 
 	Gedcom gc;
 	Settings.Tree tree;
@@ -114,7 +114,7 @@ public class Condivisione extends AppCompatActivity {
 						header = AlberoNuovo.creaTestata(tree.id + ".json");
 						gc.setHeader(header);
 					} else
-						header.setDateTime(U.dataTempoAdesso());
+						header.setDateTime(U.actualDateTime());
 					if( autore[0] == null ) {
 						autore[0] = Podio.nuovoAutore(null);
 					}
@@ -125,10 +125,10 @@ public class Condivisione extends AppCompatActivity {
 					if( !nomeAutoreEditato.equals(nomeAutore) ) {
 						nomeAutore = nomeAutoreEditato;
 						autore[0].setName(nomeAutore);
-						U.aggiornaDate(autore[0]);
+						U.updateChangeDate(autore[0]);
 					}
 					idAutore = autore[0].getId();
-					U.salvaJson(gc, treeId); // baypassando la preferenza di non salvare in atomatico
+					U.saveJson(gc, treeId); // baypassando la preferenza di non salvare in atomatico
 
 					// Tree accessibility for app developer
 					CheckBox accessibleTree = findViewById(R.id.condividi_allow);

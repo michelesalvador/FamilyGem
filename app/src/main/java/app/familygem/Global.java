@@ -1,8 +1,10 @@
 package app.familygem;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.view.View;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -13,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
 import java.io.File;
+import java.util.Locale;
 
 public class Global extends MultiDexApplication {
 
@@ -96,5 +99,17 @@ public class Global extends MultiDexApplication {
 				new Notifier(context);
 			}
 		}
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		// Keep the app locale if system language is changed while the app is running
+		Locale appLocale = AppCompatDelegate.getApplicationLocales().get(0);
+		if( appLocale != null ) {
+			Locale.setDefault(appLocale); // Keep the gedcom.jar library locale
+			newConfig.setLocale(appLocale);
+			getApplicationContext().getResources().updateConfiguration(newConfig, null); // Keep global context
+		}
+		super.onConfigurationChanged(newConfig);
 	}
 }

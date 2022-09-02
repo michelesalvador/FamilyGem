@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Person;
-import app.familygem.visita.ListaMediaContenitore;
+import app.familygem.visitor.ListaMediaContenitore;
 import static app.familygem.Global.gc;
 
 public class IndividuoMedia extends Fragment {
@@ -65,19 +65,19 @@ public class IndividuoMedia extends Fragment {
 				medCont.media.setPrimary(null);
 			media.setPrimary("Y");
 			if( media.getId() != null ) // Per aggiornare la data cambiamento nel Media record piuttosto che nella Person
-				U.salvaJson(true, media);
+				U.save(true, media);
 			else
-				U.salvaJson(true, uno);
+				U.save(true, uno);
 			refresh();
 			return true;
 		} else if( id == 1 ) { // Scollega
 			Galleria.scollegaMedia(media.getId(), (MediaContainer)container);
-			U.salvaJson(true, uno);
+			U.save(true, uno);
 			refresh();
 			return true;
 		} else if( id == 2 ) { // Elimina
 			Object[] capi = Galleria.eliminaMedia(media, null);
-			U.salvaJson(true, capi);
+			U.save(true, capi);
 			refresh();
 			return true;
 		}

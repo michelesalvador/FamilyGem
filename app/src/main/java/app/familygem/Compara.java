@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import org.folg.gedcom.model.Change;
 import org.folg.gedcom.model.Family;
@@ -27,7 +26,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class Compara extends AppCompatActivity {
+public class Compara extends BaseActivity {
 
 	Date sharingDate;
 	SimpleDateFormat changeDateFormat;
@@ -201,7 +200,7 @@ public class Compara extends AppCompatActivity {
 		boolean itIs = false;
 		if( change != null && change.getDateTime() != null ) {
 			try { // todo con time null
-				String zoneId = U.castaJsonString(change.getExtension("zone"));
+				String zoneId = U.castJsonString(change.getExtension("zone"));
 				if( zoneId == null )
 					zoneId = "UTC";
 				TimeZone timeZone = TimeZone.getTimeZone(zoneId);

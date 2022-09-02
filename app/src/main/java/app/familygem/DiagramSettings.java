@@ -7,13 +7,12 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.text.TextUtilsCompat;
 import androidx.core.view.ViewCompat;
 import java.util.Locale;
 
-public class DiagramSettings extends AppCompatActivity {
+public class DiagramSettings extends BaseActivity {
 
 	private SeekBar ancestors;
 	private SeekBar uncles;

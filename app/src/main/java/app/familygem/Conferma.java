@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.ChildRef;
@@ -25,12 +24,12 @@ import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.model.Visitable;
 import java.io.File;
 import java.io.IOException;
-import app.familygem.visita.ContenitoriMedia;
-import app.familygem.visita.ContenitoriNota;
-import app.familygem.visita.ListaCitazioniFonte;
-import app.familygem.visita.ListaMedia;
+import app.familygem.visitor.ContenitoriMedia;
+import app.familygem.visitor.ContenitoriNota;
+import app.familygem.visitor.ListaCitazioniFonte;
+import app.familygem.visitor.ListaMedia;
 
-public class Conferma extends AppCompatActivity {
+public class Conferma extends BaseActivity {
 
 	@Override
 	protected void onCreate( Bundle bandolo ) {
@@ -138,7 +137,7 @@ public class Conferma extends AppCompatActivity {
 					}
 				}
 				if( fattoQualcosa )
-					U.salvaJson( Global.gc2, Global.treeId2);
+					U.saveJson( Global.gc2, Global.treeId2);
 
 				// La regolare aggiunta/sostituzione/eliminazione dei record da albero2 ad albero
 				for( Confronto.Fronte fronte : Confronto.getLista() ) {
@@ -198,7 +197,7 @@ public class Conferma extends AppCompatActivity {
 							}
 					}
 				}
-				U.salvaJson( Global.gc, Global.settings.openTree);
+				U.saveJson( Global.gc, Global.settings.openTree);
 
 				// Se ha fatto tutto propone di eliminare l'albero importato
 				boolean tuttiOk = true;

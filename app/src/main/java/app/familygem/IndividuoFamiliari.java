@@ -16,8 +16,8 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import java.util.Collections;
 import java.util.List;
-import app.familygem.constants.Relation;
-import app.familygem.dettaglio.Famiglia;
+import app.familygem.constant.Relation;
+import app.familygem.detail.Famiglia;
 import static app.familygem.Global.gc;
 
 public class IndividuoFamiliari extends Fragment {
@@ -102,7 +102,7 @@ public class IndividuoFamiliari extends Fragment {
 
 	private void spostaRiferimentoFamiglia(int direzione) {
 		Collections.swap(uno.getSpouseFamilyRefs(), posFam, posFam + direzione);
-		U.salvaJson(true, uno);
+		U.save(true, uno);
 		refresh();
 	}
 
@@ -162,7 +162,7 @@ public class IndividuoFamiliari extends Fragment {
 			Famiglia.scollega(idIndividuo, familia);
 			refresh();
 			U.controllaFamiglieVuote(getContext(), this::refresh, false, familia);
-			U.salvaJson(true, familia, pers);
+			U.save(true, familia, pers);
 		} else if( id == 307 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {

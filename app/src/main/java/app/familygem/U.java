@@ -41,6 +41,7 @@ import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.Submitter;
+import org.folg.gedcom.parser.ModelParser;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.folg.gedcom.model.EventFact;
@@ -60,19 +61,19 @@ import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.parser.JsonParser;
 import org.joda.time.Months;
 import org.joda.time.Years;
-import app.familygem.constants.Format;
-import app.familygem.constants.Gender;
-import app.familygem.dettaglio.ArchivioRef;
-import app.familygem.dettaglio.Autore;
-import app.familygem.dettaglio.Cambiamenti;
-import app.familygem.dettaglio.CitazioneFonte;
-import app.familygem.dettaglio.Famiglia;
-import app.familygem.dettaglio.Fonte;
-import app.familygem.dettaglio.Immagine;
-import app.familygem.dettaglio.Nota;
-import app.familygem.visita.ListaMediaContenitore;
-import app.familygem.visita.RiferimentiNota;
-import app.familygem.visita.TrovaPila;
+import app.familygem.constant.Format;
+import app.familygem.constant.Gender;
+import app.familygem.detail.ArchivioRef;
+import app.familygem.detail.Autore;
+import app.familygem.detail.Cambiamenti;
+import app.familygem.detail.CitazioneFonte;
+import app.familygem.detail.Famiglia;
+import app.familygem.detail.Fonte;
+import app.familygem.detail.Immagine;
+import app.familygem.detail.Nota;
+import app.familygem.visitor.ListaMediaContenitore;
+import app.familygem.visitor.RiferimentiNota;
+import app.familygem.visitor.TrovaPila;
 
 public class U {
 
@@ -309,15 +310,109 @@ public class U {
 		return text;
 	}
 
+	// Write the two main places of a person (initial – final) or null
+	static String twoPlaces(Person person) {
+		List<EventFact> facts = person.getEventsFacts();
+		// One single event
+		if( facts.size() == 1 ) {
+			String place = facts.get(0).getPlace();
+			if( place != null )
+				return stripCommas(place);
+		} // Sex and another event
+		else if( facts.size() == 2 && ("SEX".equals(facts.get(0).getTag()) || "SEX".equals(facts.get(1).getTag())) ) {
+			String place;
+			if( "SEX".equals(facts.get(0).getTag()) )
+				place = facts.get(1).getPlace();
+			else
+				place = facts.get(0).getPlace();
+			if( place != null )
+				return stripCommas(place);
+		} // Multiple events
+		else if( facts.size() >= 2 ) {
+			String[] places = new String[7];
+			for( EventFact ef : facts ) {
+				String place = ef.getPlace();
+				if( place != null ) {
+					switch( ef.getTag() ) {
+						case "BIRT":
+							places[0] = place;
+							break;
+						case "BAPM":
+							places[1] = place;
+							break;
+						case "DEAT":
+							places[4] = place;
+							break;
+						case "CREM":
+							places[5] = place;
+							break;
+						case "BURI":
+							places[6] = place;
+							break;
+						default:
+							if( places[2] == null ) // First of other events
+								places[2] = place;
+							if( !place.equals(places[2]) )
+								places[3] = place; // Last of other events
+					}
+				}
+			}
+			String text = null;
+			int i;
+			// Write initial place
+			for( i = 0; i < places.length; i++ ) {
+				String place = places[i];
+				if( place != null ) {
+					text = stripCommas(place);
+					break;
+				}
+			}
+			// Priority to death event as final place
+			if( text != null && i < 4 && places[4] != null ) {
+				String place = stripCommas(places[4]);
+				if( !place.equals(text) )
+					text += " – " + place;
+			} else {
+				for( int j = places.length - 1; j > i; j-- ) {
+					String place = places[j];
+					if( place != null ) {
+						place = stripCommas(place);
+						if( !place.equals(text) ) {
+							text += " – " + place;
+							break;
+						}
+					}
+				}
+			}
+			return text;
+		}
+		return null;
+	}
+
+	// riceve un luogo stile Gedcom e restituisce il primo nome tra le virgole
+	private static String stripCommas(String place) {
+		// salta le virgole iniziali per luoghi tipo ',,,England'
+		int start = 0;
+		for( char c : place.toCharArray() ) {
+			if( c != ',' && c != ' ' )
+				break;
+			start++;
+		}
+		place = place.substring(start);
+		if( place.indexOf(",") > 0 )
+			place = place.substring(0, place.indexOf(","));
+		return place;
+	}
+
 	// Estrae i soli numeri da una stringa che può contenere anche lettere
-	static int soloNumeri( String id ) {
+	static int soloNumeri(String id) {
 		//return Integer.parseInt( id.replaceAll("\\D+","") );	// sintetico ma lento
 		int num = 0;
 		int x = 1;
-		for( int i = id.length()-1; i >= 0; --i ){
-			int c = id.charAt( i );
-			if( c > 47 && c < 58 ){
-				num += (c-48) * x;
+		for( int i = id.length() - 1; i >= 0; --i ) {
+			int c = id.charAt(i);
+			if( c > 47 && c < 58 ) {
+				num += (c - 48) * x;
 				x *= 10;
 			}
 		}
@@ -380,14 +475,14 @@ public class U {
 
 	// Restituisce la lista di estensioni
 	@SuppressWarnings("unchecked")
-	public static List<Estensione> trovaEstensioni( ExtensionContainer contenitore ) {
-		if( contenitore.getExtension( "folg.more_tags" ) != null ) {
+	public static List<Estensione> trovaEstensioni(ExtensionContainer contenitore) {
+		if( contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) != null ) {
 			List<Estensione> lista = new ArrayList<>();
-			for( GedcomTag est : (List<GedcomTag>)contenitore.getExtension("folg.more_tags") ) {
-				String testo = scavaEstensione(est,0);
+			for( GedcomTag est : (List<GedcomTag>)contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) ) {
+				String testo = scavaEstensione(est, 0);
 				if( testo.endsWith("\n") )
-					testo = testo.substring( 0, testo.length()-1 );
-				lista.add( new Estensione( est.getTag(), testo, est ) );
+					testo = testo.substring(0, testo.length() - 1);
+				lista.add(new Estensione(est.getTag(), testo, est));
 			}
 			return lista;
 		}
@@ -410,25 +505,25 @@ public class U {
 		return testo;
 	}
 
-	public static void eliminaEstensione( GedcomTag estensione, Object contenitore, View vista ) {
+	public static void eliminaEstensione(GedcomTag estensione, Object contenitore, View vista) {
 		if( contenitore instanceof ExtensionContainer ) { // IndividuoEventi
-			ExtensionContainer exc = (ExtensionContainer) contenitore;
+			ExtensionContainer exc = (ExtensionContainer)contenitore;
 			@SuppressWarnings("unchecked")
-			List<GedcomTag> lista = (List<GedcomTag>) exc.getExtension( "folg.more_tags" );
-			lista.remove( estensione );
+			List<GedcomTag> lista = (List<GedcomTag>)exc.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY);
+			lista.remove(estensione);
 			if( lista.isEmpty() )
-				exc.getExtensions().remove( "folg.more_tags" );
+				exc.getExtensions().remove(ModelParser.MORE_TAGS_EXTENSION_KEY);
 			if( exc.getExtensions().isEmpty() )
-				exc.setExtensions( null );
+				exc.setExtensions(null);
 		} else if( contenitore instanceof GedcomTag ) { // Dettaglio
-			GedcomTag gt = (GedcomTag) contenitore;
-			gt.getChildren().remove( estensione );
+			GedcomTag gt = (GedcomTag)contenitore;
+			gt.getChildren().remove(estensione);
 			if( gt.getChildren().isEmpty() )
-				gt.setChildren( null );
+				gt.setChildren(null);
 		}
 		Memoria.annullaIstanze(estensione);
 		if( vista != null )
-			vista.setVisibility( View.GONE );
+			vista.setVisibility(View.GONE);
 	}
 
 	// Restituisce il valore di un determinato tag in una estensione (GedcomTag)
@@ -472,7 +567,7 @@ public class U {
 	// inoltre restituisce lo stesso testo per Confrontatore
 	static String details(Person person, TextView detailsView) {
 		String dates = twoDates(person, false);
-		String places = Anagrafe.twoPlaces(person);
+		String places = twoPlaces(person);
 		if( dates.isEmpty() && places == null && detailsView != null ) {
 			detailsView.setVisibility(View.GONE);
 		} else {
@@ -514,43 +609,43 @@ public class U {
 		return vistaIndi;
 	}
 
-	// Tutte le note di un oggetto
-	public static void mettiNote(LinearLayout scatola, Object contenitore, boolean dettagli) {
-		for( final Note nota : ((NoteContainer)contenitore).getAllNotes(Global.gc) ) {
-			mettiNota(scatola, nota, dettagli);
+	// Place all the notes of an object
+	public static void placeNotes(LinearLayout layout, Object container, boolean detailed) {
+		for( final Note nota : ((NoteContainer)container).getAllNotes(Global.gc) ) {
+			placeNote(layout, nota, detailed);
 		}
 	}
 
-	// Aggiunge una singola nota a un layout, con i dettagli o no
-	static void mettiNota(final LinearLayout scatola, final Note nota, boolean dettagli) {
-		final Context contesto = scatola.getContext();
-		View vistaNota = LayoutInflater.from(contesto).inflate(R.layout.pezzo_nota, scatola, false);
-		scatola.addView(vistaNota);
-		TextView testoNota = vistaNota.findViewById(R.id.nota_testo);
-		testoNota.setText(nota.getValue());
-		int quanteCitaFonti = nota.getSourceCitations().size();
-		TextView vistaCitaFonti = vistaNota.findViewById(R.id.nota_fonti);
-		if( quanteCitaFonti > 0 && dettagli ) vistaCitaFonti.setText(String.valueOf(quanteCitaFonti));
-		else vistaCitaFonti.setVisibility(View.GONE);
-		testoNota.setEllipsize(TextUtils.TruncateAt.END);
-		if( dettagli ) {
-			testoNota.setMaxLines(10);
-			vistaNota.setTag(R.id.tag_oggetto, nota);
-			if( contesto instanceof Individuo ) { // Fragment individuoEventi
-				((AppCompatActivity)contesto).getSupportFragmentManager()
-						.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1")    // non garantito in futuro
-						.registerForContextMenu(vistaNota);
-			} else if( scatola.getId() != R.id.dispensa_scatola ) // nelle AppCompatActivity tranne che nella dispensa
-				((AppCompatActivity)contesto).registerForContextMenu(vistaNota);
-			vistaNota.setOnClickListener(v -> {
-				if( nota.getId() != null )
-					Memoria.setPrimo(nota);
+	// Place a single note on a layout, with details or not
+	static void placeNote(final LinearLayout layout, final Note note, boolean detailed) {
+		final Context context = layout.getContext();
+		View noteView = LayoutInflater.from(context).inflate(R.layout.pezzo_nota, layout, false);
+		layout.addView(noteView);
+		TextView textView = noteView.findViewById(R.id.nota_testo);
+		textView.setText(note.getValue());
+		int sourceCiteNum = note.getSourceCitations().size();
+		TextView sourceCiteView = noteView.findViewById(R.id.nota_fonti);
+		if( sourceCiteNum > 0 && detailed ) sourceCiteView.setText(String.valueOf(sourceCiteNum));
+		else sourceCiteView.setVisibility(View.GONE);
+		textView.setEllipsize(TextUtils.TruncateAt.END);
+		if( detailed ) {
+			textView.setMaxLines(10);
+			noteView.setTag(R.id.tag_oggetto, note);
+			if( context instanceof Individuo ) { // Fragment individuoEventi
+				((AppCompatActivity)context).getSupportFragmentManager()
+						.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1") // non garantito in futuro
+						.registerForContextMenu(noteView);
+			} else if( layout.getId() != R.id.dispensa_scatola ) // nelle AppCompatActivity tranne che nella dispensa
+				((AppCompatActivity)context).registerForContextMenu(noteView);
+			noteView.setOnClickListener(v -> {
+				if( note.getId() != null )
+					Memoria.setPrimo(note);
 				else
-					Memoria.aggiungi(nota);
-				contesto.startActivity(new Intent(contesto, Nota.class));
+					Memoria.aggiungi(note);
+				context.startActivity(new Intent(context, Nota.class));
 			});
 		} else {
-			testoNota.setMaxLines(3);
+			textView.setMaxLines(3);
 		}
 	}
 
@@ -595,30 +690,30 @@ public class U {
 	}
 
 	// Elenca tutti i media di un oggetto contenitore
-	public static void mettiMedia(LinearLayout scatola, Object contenitore, boolean dettagli) {
-		RecyclerView griglia = new AdattatoreGalleriaMedia.RiciclaVista(scatola.getContext(), dettagli);
+	public static void placeMedia(LinearLayout layout, Object container, boolean detailed) {
+		RecyclerView griglia = new AdattatoreGalleriaMedia.RiciclaVista(layout.getContext(), detailed);
 		griglia.setHasFixedSize(true);
-		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(scatola.getContext(), dettagli ? 2 : 3);
+		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(layout.getContext(), detailed ? 2 : 3);
 		griglia.setLayoutManager(gestoreLayout);
 		List<ListaMediaContenitore.MedCont> listaMedia = new ArrayList<>();
-		for( Media med : ((MediaContainer)contenitore).getAllMedia(Global.gc) )
-			listaMedia.add(new ListaMediaContenitore.MedCont(med, contenitore));
-		AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia(listaMedia, dettagli);
+		for( Media med : ((MediaContainer)container).getAllMedia(Global.gc) )
+			listaMedia.add(new ListaMediaContenitore.MedCont(med, container));
+		AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia(listaMedia, detailed);
 		griglia.setAdapter(adattatore);
-		scatola.addView(griglia);
+		layout.addView(griglia);
 	}
 
 	// Di un oggetto inserisce le citazioni alle fonti
-	public static void citaFonti(LinearLayout layout, Object container) {
+	public static void placeSourceCitations(LinearLayout layout, Object container) {
 		if( Global.settings.expert ) {
 			List<SourceCitation> listaCitaFonti;
-			if( container instanceof Note )    // Note non estende SourceCitationContainer
+			if( container instanceof Note ) // Note non estende SourceCitationContainer
 				listaCitaFonti = ((Note)container).getSourceCitations();
 			else listaCitaFonti = ((SourceCitationContainer)container).getSourceCitations();
 			for( final SourceCitation citaz : listaCitaFonti ) {
 				View vistaCita = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_citazione_fonte, layout, false);
 				layout.addView(vistaCita);
-				if( citaz.getSource(Global.gc) != null )    // source CITATION
+				if( citaz.getSource(Global.gc) != null ) // source CITATION
 					((TextView)vistaCita.findViewById(R.id.fonte_testo)).setText(Biblioteca.titoloFonte(citaz.getSource(Global.gc)));
 				else // source NOTE, oppure Citazione di fonte che è stata eliminata
 					vistaCita.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
@@ -632,14 +727,14 @@ public class U {
 				else vistaTesto.setText(t.substring(0, t.length() - 1));
 				// Tutto il resto
 				LinearLayout scatolaAltro = vistaCita.findViewById(R.id.citazione_note);
-				mettiNote(scatolaAltro, citaz, false);
-				mettiMedia(scatolaAltro, citaz, false);
+				placeNotes(scatolaAltro, citaz, false);
+				placeMedia(scatolaAltro, citaz, false);
 				vistaCita.setTag(R.id.tag_oggetto, citaz);
 				if( layout.getContext() instanceof Individuo ) { // Fragment individuoEventi
 					((AppCompatActivity)layout.getContext()).getSupportFragmentManager()
 							.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1")
 							.registerForContextMenu(vistaCita);
-				} else    // AppCompatActivity
+				} else // AppCompatActivity
 					((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaCita);
 
 				vistaCita.setOnClickListener(v -> {
@@ -652,37 +747,37 @@ public class U {
 	}
 
 	// Inserisce nella scatola il richiamo ad una fonte, con dettagli o essenziale
-	public static void mettiFonte( final LinearLayout scatola, final Source fonte, boolean dettagli ) {
-		View vistaFonte = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_fonte, scatola, false );
-		scatola.addView( vistaFonte );
-		TextView vistaTesto = vistaFonte.findViewById( R.id.fonte_testo );
+	public static void placeSource(final LinearLayout layout, final Source source, boolean detailed) {
+		View vistaFonte = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_fonte, layout, false);
+		layout.addView(vistaFonte);
+		TextView vistaTesto = vistaFonte.findViewById(R.id.fonte_testo);
 		String txt = "";
-		if( dettagli ) {
-			if( fonte.getTitle() != null )
-				txt = fonte.getTitle() + "\n";
-			else if( fonte.getAbbreviation() != null )
-				txt = fonte.getAbbreviation() + "\n";
-			if( fonte.getType() != null )
-				txt += fonte.getType().replaceAll("\n", " ") + "\n";
-			if( fonte.getPublicationFacts() != null )
-				txt += fonte.getPublicationFacts().replaceAll("\n", " ") + "\n";
-			if( fonte.getText() != null )
-				txt += fonte.getText().replaceAll("\n", " ");
+		if( detailed ) {
+			if( source.getTitle() != null )
+				txt = source.getTitle() + "\n";
+			else if( source.getAbbreviation() != null )
+				txt = source.getAbbreviation() + "\n";
+			if( source.getType() != null )
+				txt += source.getType().replaceAll("\n", " ") + "\n";
+			if( source.getPublicationFacts() != null )
+				txt += source.getPublicationFacts().replaceAll("\n", " ") + "\n";
+			if( source.getText() != null )
+				txt += source.getText().replaceAll("\n", " ");
 			if( txt.endsWith("\n") )
-				txt = txt.substring( 0, txt.length()-1 );
-			LinearLayout scatolaAltro = vistaFonte.findViewById( R.id.fonte_scatola );
-			mettiNote( scatolaAltro, fonte, false );
-			mettiMedia( scatolaAltro, fonte, false );
-			vistaFonte.setTag( R.id.tag_oggetto, fonte );
-			((AppCompatActivity)scatola.getContext()).registerForContextMenu( vistaFonte );
+				txt = txt.substring(0, txt.length() - 1);
+			LinearLayout scatolaAltro = vistaFonte.findViewById(R.id.fonte_scatola);
+			placeNotes(scatolaAltro, source, false);
+			placeMedia(scatolaAltro, source, false);
+			vistaFonte.setTag(R.id.tag_oggetto, source);
+			((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaFonte);
 		} else {
-			vistaTesto.setMaxLines( 2 );
-			txt = Biblioteca.titoloFonte(fonte);
+			vistaTesto.setMaxLines(2);
+			txt = Biblioteca.titoloFonte(source);
 		}
-		vistaTesto.setText( txt );
-		vistaFonte.setOnClickListener( v -> {
-			Memoria.setPrimo( fonte );
-			scatola.getContext().startActivity( new Intent( scatola.getContext(), Fonte.class) );
+		vistaTesto.setText(txt);
+		vistaFonte.setOnClickListener(v -> {
+			Memoria.setPrimo(source);
+			layout.getContext().startActivity(new Intent(layout.getContext(), Fonte.class));
 		});
 	}
 
@@ -769,18 +864,18 @@ public class U {
 	}
 
 	// Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipiti
-	public static void mettiDispensa( LinearLayout scatola, Object cosa, int tit ) {
-		View vista = LayoutInflater.from(scatola.getContext()).inflate( R.layout.dispensa, scatola, false );
-		TextView vistaTit = vista.findViewById( R.id.dispensa_titolo );
-		vistaTit.setText( tit );
-		vistaTit.setBackground( AppCompatResources.getDrawable(scatola.getContext(),R.drawable.sghembo) ); // per android 4
-		scatola.addView( vista );
-		LinearLayout dispensa = vista.findViewById( R.id.dispensa_scatola );
+	public static void mettiDispensa(LinearLayout scatola, Object cosa, int tit) {
+		View vista = LayoutInflater.from(scatola.getContext()).inflate(R.layout.dispensa, scatola, false);
+		TextView vistaTit = vista.findViewById(R.id.dispensa_titolo);
+		vistaTit.setText(tit);
+		vistaTit.setBackground(AppCompatResources.getDrawable(scatola.getContext(), R.drawable.sghembo)); // per android 4
+		scatola.addView(vista);
+		LinearLayout dispensa = vista.findViewById(R.id.dispensa_scatola);
 		if( cosa instanceof Object[] ) {
 			for( Object o : (Object[])cosa )
-				mettiQualsiasi( dispensa, o );
+				mettiQualsiasi(dispensa, o);
 		} else
-			mettiQualsiasi( dispensa, cosa );
+			mettiQualsiasi(dispensa, cosa);
 	}
 
 	// Riconosce il tipo di record e aggiunge il link appropriato alla scatola
@@ -788,13 +883,13 @@ public class U {
 		if( record instanceof Person )
 			linkaPersona(scatola, (Person)record, 1);
 		else if( record instanceof Source )
-			mettiFonte(scatola, (Source)record, false);
+			placeSource(scatola, (Source)record, false);
 		else if( record instanceof Family )
 			linkaFamiglia(scatola, (Family)record);
 		else if( record instanceof Repository )
 			ArchivioRef.mettiArchivio(scatola, (Repository)record);
 		else if( record instanceof Note )
-			mettiNota(scatola, (Note)record, true);
+			placeNote(scatola, (Note)record, true);
 		else if( record instanceof Media )
 			linkaMedia(scatola, (Media)record);
 		else if( record instanceof Submitter )
@@ -802,7 +897,7 @@ public class U {
 	}
 
 	// Aggiunge al layout il pezzo con la data e tempo di Cambiamento
-	public static View cambiamenti(final LinearLayout layout, final Change change) {
+	public static View placeChangeDate(final LinearLayout layout, final Change change) {
 		View changeView = null;
 		if( change != null && Global.settings.expert ) {
 			changeView = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_data_cambiamenti, layout, false);
@@ -820,7 +915,7 @@ public class U {
 			for( Estensione altroTag : trovaEstensioni(change) )
 				metti(scatolaNote, altroTag.nome, altroTag.testo);
 			// Grazie al mio contributo la data cambiamento può avere delle note
-			mettiNote(scatolaNote, change, false);
+			placeNotes(scatolaNote, change, false);
 			changeView.setOnClickListener(v -> {
 				Memoria.aggiungi(change);
 				layout.getContext().startActivity(new Intent(layout.getContext(), Cambiamenti.class));
@@ -835,36 +930,15 @@ public class U {
 		return false;
 	}
 
-	// Restituisce un DateTime con data e ora aggiornate
-	public static DateTime dataTempoAdesso() {
-		DateTime dataTempo = new DateTime();
-		Date now = new Date();
-		dataTempo.setValue( String.format(Locale.ENGLISH,"%te %<Tb %<tY",now) );
-		dataTempo.setTime( String.format(Locale.ENGLISH,"%tT",now) );
-		return dataTempo;
-	}
-
-	// Aggiorna la data di cambiamento del/dei record
-	public static void aggiornaDate( Object ... oggetti ) {
-		for( Object aggiornando : oggetti ) {
-			try { // se aggiornando non ha il metodo get/setChange, passa oltre silenziosamente
-				Change chan = (Change)aggiornando.getClass().getMethod( "getChange" ).invoke( aggiornando );
-				if( chan == null ) // il record non ha ancora un CHAN
-					chan = new Change();
-				chan.setDateTime( dataTempoAdesso() );
-				aggiornando.getClass().getMethod( "setChange", Change.class ).invoke( aggiornando, chan );
-				// Estensione con l'id della zona, una stringa tipo 'America/Sao_Paulo'
-				chan.putExtension( "zone", TimeZone.getDefault().getID() );
-			} catch( Exception e ) {}
-		}
-	}
-
-	// Eventualmente salva il Json
-	public static void salvaJson(boolean refresh, Object... objects) {
-		if( objects != null )
-			aggiornaDate( objects );
+	/** Save the tree.
+	 * @param refresh Will refresh also other activities
+	 * @param objects Record(s) of which update the change date
+	 */
+	public static void save(boolean refresh, Object... objects) {
 		if( refresh )
 			Global.edited = true;
+		if( objects != null )
+			updateChangeDate(objects);
 
 		// al primo salvataggio marchia gli autori
 		if( Global.settings.getCurrentTree().grade == 9 ) {
@@ -875,7 +949,7 @@ public class U {
 		}
 
 		if( Global.settings.autoSave )
-			salvaJson(Global.gc, Global.settings.openTree);
+			saveJson(Global.gc, Global.settings.openTree);
 		else { // mostra il tasto Salva
 			Global.daSalvare = true;
 			if( Global.principalView != null ) {
@@ -885,37 +959,63 @@ public class U {
 		}
 	}
 
-	static void salvaJson( Gedcom gc, int idAlbero ) {
-		Header h = gc.getHeader();
+	// Update the change date of record(s)
+	public static void updateChangeDate(Object... objects) {
+		for( Object object : objects ) {
+			try { // Se aggiornando non ha il metodo get/setChange, passa oltre silenziosamente
+				Change change = (Change)object.getClass().getMethod("getChange").invoke(object);
+				if( change == null ) // il record non ha ancora un CHAN
+					change = new Change();
+				change.setDateTime(actualDateTime());
+				object.getClass().getMethod("setChange", Change.class).invoke(object, change);
+				// Estensione con l'id della zona, una stringa tipo 'America/Sao_Paulo'
+				change.putExtension("zone", TimeZone.getDefault().getID());
+			} catch( Exception e ) {
+			}
+		}
+	}
+
+	// Return actual DateTime
+	public static DateTime actualDateTime() {
+		DateTime dateTime = new DateTime();
+		Date now = new Date();
+		dateTime.setValue(String.format(Locale.ENGLISH, "%te %<Tb %<tY", now));
+		dateTime.setTime(String.format(Locale.ENGLISH, "%tT", now));
+		return dateTime;
+	}
+
+	// Save the Json
+	static void saveJson(Gedcom gedcom, int treeId) {
+		Header h = gedcom.getHeader();
 		// Solo se l'header è di Family Gem
 		if( h != null && h.getGenerator() != null
 				&& h.getGenerator().getValue() != null && h.getGenerator().getValue().equals("FAMILY_GEM") ) {
 			// Aggiorna la data e l'ora
-			h.setDateTime( dataTempoAdesso() );
+			h.setDateTime( actualDateTime() );
 			// Eventualmente aggiorna la versione di Family Gem
 			if( (h.getGenerator().getVersion() != null && !h.getGenerator().getVersion().equals(BuildConfig.VERSION_NAME))
 					|| h.getGenerator().getVersion() == null )
-				h.getGenerator().setVersion( BuildConfig.VERSION_NAME );
+				h.getGenerator().setVersion(BuildConfig.VERSION_NAME);
 		}
 		try {
 			FileUtils.writeStringToFile(
-					new File(Global.context.getFilesDir(), idAlbero + ".json"),
-					new JsonParser().toJson(gc), "UTF-8"
+					new File(Global.context.getFilesDir(), treeId + ".json"),
+					new JsonParser().toJson(gedcom), "UTF-8"
 			);
 		} catch (IOException e) {
 			Toast.makeText(Global.context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 		}
 	}
 
-	static int castaJsonInt( Object ignoto ) {
-		if( ignoto instanceof Integer ) return (int) ignoto;
-		else return ((JsonPrimitive)ignoto).getAsInt();
+	static int castJsonInt(Object unknown) {
+		if( unknown instanceof Integer ) return (int)unknown;
+		else return ((JsonPrimitive)unknown).getAsInt();
 	}
 
-	static String castaJsonString( Object ignoto ) {
-		if( ignoto == null ) return null;
-		else if( ignoto instanceof String ) return (String) ignoto;
-		else return ((JsonPrimitive)ignoto).getAsString();
+	static String castJsonString(Object unknown) {
+		if( unknown == null ) return null;
+		else if( unknown instanceof String ) return (String)unknown;
+		else return ((JsonPrimitive)unknown).getAsString();
 	}
 
 	static float pxToDp(float pixels) {
@@ -948,7 +1048,7 @@ public class U {
 							Global.gc.setHeader(testa[0]);
 						}
 						testa[0].setSubmitterRef( idAutore );
-						salvaJson( true );
+						save( true );
 					}).setNegativeButton( R.string.no, null ).show();
 		}
 	}

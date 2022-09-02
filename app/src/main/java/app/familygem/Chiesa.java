@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import app.familygem.dettaglio.Famiglia;
+import app.familygem.detail.Famiglia;
 import static app.familygem.Global.gc;
 
 public class Chiesa extends Fragment {
@@ -36,24 +36,24 @@ public class Chiesa extends Fragment {
 	private boolean gliIdsonoNumerici;
 	
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle stato ) {
-		View vista = inflater.inflate( R.layout.magazzino, container, false );
-		scatola = vista.findViewById( R.id.magazzino_scatola );
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+		View vista = inflater.inflate(R.layout.magazzino, container, false);
+		scatola = vista.findViewById(R.id.magazzino_scatola);
 		if( gc != null ) {
 			listaFamiglie = gc.getFamilies();
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( listaFamiglie.size() + " "
-					+ getString(listaFamiglie.size()==1 ? R.string.family : R.string.families).toLowerCase() );
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(listaFamiglie.size() + " "
+					+ getString(listaFamiglie.size() == 1 ? R.string.family : R.string.families).toLowerCase());
 			for( Family fam : listaFamiglie )
-				mettiFamiglia( scatola, fam );
+				mettiFamiglia(scatola, fam);
 			if( listaFamiglie.size() > 1 )
-				setHasOptionsMenu( true );
+				setHasOptionsMenu(true);
 			gliIdsonoNumerici = verificaIdNumerici();
-			vista.findViewById( R.id.fab ).setOnClickListener( v -> {
+			vista.findViewById(R.id.fab).setOnClickListener(v -> {
 				Family nuovaFamiglia = nuovaFamiglia(true);
-				U.salvaJson( true, nuovaFamiglia );
+				U.save(true, nuovaFamiglia);
 				// Se torna subito indietro in Chiesa rinfresca la lista con la famiglia vuota
-				Memoria.setPrimo( nuovaFamiglia );
-				startActivity( new Intent( getContext(), Famiglia.class ) );
+				Memoria.setPrimo(nuovaFamiglia);
+				startActivity(new Intent(getContext(), Famiglia.class));
 			});
 		}
 		return vista;
@@ -129,7 +129,7 @@ public class Chiesa extends Fragment {
 		gc.createIndexes();	// necessario per aggiornare gli individui
 		Memoria.annullaIstanze(family);
 		Global.familyNum = 0; // Nel caso fortuito che sia stata eliminata proprio questa famiglia
-		U.salvaJson(true, membri.toArray(new Object[0]));
+		U.save(true, membri.toArray(new Object[0]));
 	}
 
 	static Family nuovaFamiglia( boolean aggiungi ) {

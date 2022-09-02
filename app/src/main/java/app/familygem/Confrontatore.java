@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.cardview.widget.CardView;
 import org.folg.gedcom.model.Change;
@@ -26,7 +25,7 @@ import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.Submitter;
 
-public class Confrontatore extends AppCompatActivity {
+public class Confrontatore extends BaseActivity {
 
 	Class classe; // la classe dominante dell'attività
 	int destino;

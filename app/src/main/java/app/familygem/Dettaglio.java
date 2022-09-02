@@ -55,14 +55,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import app.familygem.dettaglio.CitazioneFonte;
-import app.familygem.dettaglio.Estensione;
-import app.familygem.dettaglio.Evento;
-import app.familygem.dettaglio.Famiglia;
-import app.familygem.dettaglio.Immagine;
-import app.familygem.dettaglio.Indirizzo;
-import app.familygem.dettaglio.Nota;
-import app.familygem.visita.TrovaPila;
+import app.familygem.detail.CitazioneFonte;
+import app.familygem.detail.Estensione;
+import app.familygem.detail.Evento;
+import app.familygem.detail.Famiglia;
+import app.familygem.detail.Immagine;
+import app.familygem.detail.Indirizzo;
+import app.familygem.detail.Nota;
+import app.familygem.visitor.TrovaPila;
 import static app.familygem.Global.gc;
 
 public class Dettaglio extends AppCompatActivity {
@@ -92,7 +92,9 @@ public class Dettaglio extends AppCompatActivity {
 		String[] otherEventTags = {"ANUL", "CENS", "DIVF", "ENGA", "MARB", "MARC", "MARL", "MARS", "RESI", "EVEN", "NCHI"};
 		otherEvents = new ArrayList<>();
 		for( String tag : otherEventTags ) {
-			String label = EventFact.DISPLAY_TYPE.get(tag);
+			EventFact event = new EventFact();
+			event.setTag(tag);
+			String label = event.getDisplayType();
 			if( Global.settings.expert )
 				label += " — " + tag;
 			otherEvents.add(new Pair<>(tag, label));
@@ -131,16 +133,16 @@ public class Dettaglio extends AppCompatActivity {
 						if( coso.equals("Email") )
 							((Submitter)object).setEmailTag("EMAIL");
 					}
-					View pezzo = creaPezzo(eggs.get(id).title, "", coso, eggs.get(id).multiLine);
+					View pezzo = placePiece(eggs.get(id).title, "", coso, eggs.get(id).multiLine);
 					if( coso instanceof String )
-						edita( pezzo );
+						edit(pezzo);
 					// todo : aprire Address nuovo per editarlo
 				} else if( id == 101 ) {
-					Magazzino.nuovoArchivio( this, (Source)object);
+					Magazzino.nuovoArchivio(this, (Source)object);
 				} else if( id == 102 ) {
-					Intent intento = new Intent( this, Principal.class );
-					intento.putExtra( "magazzinoScegliArchivio", true );
-					startActivityForResult( intento,4562 );
+					Intent intento = new Intent(this, Principal.class);
+					intento.putExtra("magazzinoScegliArchivio", true);
+					startActivityForResult(intento, 4562);
 				} else if( id == 103 ) { // Nuova nota
 					Note note = new Note();
 					note.setValue("");
@@ -149,33 +151,33 @@ public class Dettaglio extends AppCompatActivity {
 					startActivity(new Intent(this, Nota.class));
 					toBeSaved = true;
 				} else if( id == 104 ) { // Nuova nota condivisa
-					Quaderno.nuovaNota( this, object);
+					Quaderno.newNote(this, object);
 				} else if( id == 105 ) { // Collega nota condivisa
-					Intent intento = new Intent( this, Principal.class );
-					intento.putExtra( "quadernoScegliNota", true );
-					startActivityForResult( intento,7074 );
+					Intent intento = new Intent(this, Principal.class);
+					intento.putExtra("quadernoScegliNota", true);
+					startActivityForResult(intento, 7074);
 				} else if( id == 106 ) { // Cerca media locale
-					F.appAcquisizioneImmagine( this, null, 4173, (MediaContainer)object);
+					F.appAcquisizioneImmagine(this, null, 4173, (MediaContainer)object);
 				} else if( id == 107 ) { // Cerca media condiviso
-					F.appAcquisizioneImmagine( this, null, 4174, (MediaContainer)object);
+					F.appAcquisizioneImmagine(this, null, 4174, (MediaContainer)object);
 				} else if( id == 108 ) { // Collega media condiviso
-					Intent inten = new Intent( this, Principal.class );
-					inten.putExtra( "galleriaScegliMedia", true );
-					startActivityForResult( inten,43616 );
+					Intent inten = new Intent(this, Principal.class);
+					inten.putExtra("galleriaScegliMedia", true);
+					startActivityForResult(inten, 43616);
 				} else if( id == 109 ) { // Nuova fonte-nota
 					SourceCitation citaz = new SourceCitation();
-					citaz.setValue( "" );
-					if( object instanceof Note ) ((Note)object).addSourceCitation( citaz );
-					else ((SourceCitationContainer)object).addSourceCitation( citaz );
-					Memoria.aggiungi( citaz );
-					startActivity( new Intent( this, CitazioneFonte.class ) );
+					citaz.setValue("");
+					if( object instanceof Note ) ((Note)object).addSourceCitation(citaz);
+					else ((SourceCitationContainer)object).addSourceCitation(citaz);
+					Memoria.aggiungi(citaz);
+					startActivity(new Intent(this, CitazioneFonte.class));
 					toBeSaved = true;
 				} else if( id == 110 ) {  // Nuova fonte
-					Biblioteca.nuovaFonte( this, object);
+					Biblioteca.nuovaFonte(this, object);
 				} else if( id == 111 ) { // Collega fonte
-					Intent intent = new Intent( this, Principal.class );
-					intent.putExtra( "bibliotecaScegliFonte", true );
-					startActivityForResult( intent, 5065 );
+					Intent intent = new Intent(this, Principal.class);
+					intent.putExtra("bibliotecaScegliFonte", true);
+					startActivityForResult(intent, 5065);
 				} else if( id == 120 || id == 121 ) { // Crea nuovo familiare
 					Intent intent = new Intent(this, EditaIndividuo.class);
 					intent.putExtra("idIndividuo", "TIZIO_NUOVO");
@@ -213,7 +215,7 @@ public class Dettaglio extends AppCompatActivity {
 					toBeSaved = true;
 				}
 				if( toBeSaved )
-					U.salvaJson(true, object);
+					U.save(true, object);
 				return true;
 			});
 		});
@@ -314,7 +316,7 @@ public class Dettaglio extends AppCompatActivity {
 			if( requestCode == 34417 ) { // Familiare scelto in Anagrafe
 				Person aggiungendo = gc.getPerson(data.getStringExtra("idParente"));
 				Famiglia.aggrega(aggiungendo, (Family)object, data.getIntExtra("relazione", 0));
-				U.salvaJson(true, Memoria.oggettoCapo());
+				U.save(true, Memoria.oggettoCapo());
 				return;
 			} else if( requestCode == 5065 ) { // Fonte scelta in Biblioteca
 				SourceCitation citaFonte = new SourceCitation();
@@ -330,13 +332,13 @@ public class Dettaglio extends AppCompatActivity {
 				media.setFileTag("FILE");
 				((MediaContainer)object).addMedia(media);
 				if( F.proponiRitaglio(this, null, data, media) ) {
-					U.salvaJson(false, Memoria.oggettoCapo());
+					U.save(false, Memoria.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == 4174 ) { // File preso dal file manager diventa media condiviso
 				Media media = Galleria.nuovoMedia(object);
 				if( F.proponiRitaglio(this, null, data, media) ) {
-					U.salvaJson(false, media, Memoria.oggettoCapo());
+					U.save(false, media, Memoria.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == 43616 ) { // Media da Galleria
@@ -349,7 +351,7 @@ public class Dettaglio extends AppCompatActivity {
 				((Source)object).setRepositoryRef(archRef);
 			} else if( requestCode == 5173 ) { // Salva in Media un file scelto con le app da Immagine
 				if( F.proponiRitaglio(this, null, data, (Media)object) ) {
-					U.salvaJson(false, Memoria.oggettoCapo());
+					U.save(false, Memoria.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
@@ -361,7 +363,7 @@ public class Dettaglio extends AppCompatActivity {
 			} else if( requestCode == 7047 ) { // Imposta la fonte che è stata scelta in Biblioteca da CitazioneFonte
 				((SourceCitation)object).setRef(data.getStringExtra("idFonte"));
 			}
-			U.salvaJson(true, Memoria.oggettoCapo());
+			U.save(true, Memoria.oggettoCapo());
 				// 'true' indica di ricaricare sia questo Dettaglio grazie al seguente onRestart(), sia Individuo o Famiglia
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE )
 			Global.edited = true;
@@ -386,11 +388,11 @@ public class Dettaglio extends AppCompatActivity {
 	}
 
 	// Inserisce la bava di lumaca
-	public void mettiBava(String tag) {
-		mettiBava(tag, null);
+	public void placeSlug(String tag) {
+		placeSlug(tag, null);
 	}
 
-	public void mettiBava(String tag, String id) {
+	public void placeSlug(String tag, String id) {
 		LinearLayout vistaBava = findViewById(R.id.dettaglio_bava);
 		if( Global.settings.expert ) {
 			vistaBava.removeAllViews();
@@ -422,21 +424,21 @@ public class Dettaglio extends AppCompatActivity {
 			vistaBava.setVisibility(View.GONE);
 	}
 
-	// Restitisce 'oggetto' castato nella classe richiesta,
-	// oppure una nuova istanza della classe ma in questo caso torna subito indietro
-	public Object casta( Class classe ) {
-		Object castato = null;
+	// Return 'object' casted in the required class,
+	// or a new instance of the class, but in this case it immediately goes back
+	public Object cast(Class aClass) {
+		Object casted = null;
 		try {
 			// male che vada gli passa una nuova istanza della classe, giusto per non inchiodare il dettaglio
-			if( classe.equals( GedcomTag.class ) )
-				castato = new GedcomTag(null, null, null);
+			if( aClass.equals(GedcomTag.class) )
+				casted = new GedcomTag(null, null, null);
 			else
-				castato = classe.newInstance();
-			castato = classe.cast(object);
+				casted = aClass.newInstance();
+			casted = aClass.cast(object);
 		} catch( Exception e ) {
 			onBackPressed();
 		}
-		return castato;
+		return casted;
 	}
 
 	// An item of all the possible that can be displayed on a 'dettaglio' activity
@@ -455,12 +457,12 @@ public class Dettaglio extends AppCompatActivity {
 	}
 
 	// Overloading of the following method
-	public void metti(String title, String method) {
-		metti(title, method, true, false);
+	public void place(String title, String method) {
+		place(title, method, true, false);
 	}
 
 	// Try to put a basic editable text piece
-	public void metti(String title, String method, boolean common, boolean multiLine) {
+	public void place(String title, String method, boolean common, boolean multiLine) {
 		new Egg(title, method, common, multiLine);
 		String text;
 		try {
@@ -476,77 +478,72 @@ public class Dettaglio extends AppCompatActivity {
 					|| tag.equals("MARR") || tag.equals("DIV")) )
 				return;
 		}
-		creaPezzo(title, text, method, multiLine);
+		placePiece(title, text, method, multiLine);
 	}
 
 	// Diverse firme per intercettare i vari tipi di oggetto
-	public void metti(String title, Address address) {
+	public void place(String title, Address address) {
 		Address addressNotNull = address == null ? new Address() : address;
 		new Egg(title, addressNotNull, true, false);
-		creaPezzo(title, writeAddress(address, false), addressNotNull, false);
+		placePiece(title, writeAddress(address, false), addressNotNull, false);
 	}
 
 	// Events of Famiglia
-	public void metti(String title, EventFact event) {
+	public void place(String title, EventFact event) {
 		EventFact eventNotNull = event == null ? new EventFact() : event;
-		creaPezzo(title, writeEvent(event), eventNotNull, false);
+		placePiece(title, writeEvent(event), eventNotNull, false);
 	}
 
-	public View creaPezzo(String title, String text, Object object, boolean multiLine) {
+	public View placePiece(String title, String text, Object object, boolean multiLine) {
 		if( text == null ) return null;
-		View vistaPezzo = LayoutInflater.from(box.getContext()).inflate(R.layout.pezzo_fatto, box, false);
-		box.addView(vistaPezzo);
-		((TextView)vistaPezzo.findViewById(R.id.fatto_titolo)).setText(title);
-		((TextView)vistaPezzo.findViewById(R.id.fatto_testo)).setText(text);
-		// todo: e se spostassi vistaEditabile.setText in edita()? Da testare con editoreData e onActivityResult()...
-		EditText vistaEditabile = vistaPezzo.findViewById(R.id.fatto_edita);
-		vistaEditabile.setText(text); // ok nella maggior parte dei casi, ma il testo mostrato in vistaEditabile non si aggiorna dopo onActivityResult()
-		vistaEditabile.post(() -> {
-			vistaEditabile.setText(text); // un po' ridondante, ma aggiorna il testo in vistaEditabile dopo onActivityResult()
-		});
+		View pieceView = LayoutInflater.from(box.getContext()).inflate(R.layout.pezzo_fatto, box, false);
+		box.addView(pieceView);
+		((TextView)pieceView.findViewById(R.id.fatto_titolo)).setText(title);
+		((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text.replace("@@","@"));
+		EditText editText = pieceView.findViewById(R.id.fatto_edita);
 		if( multiLine ) {
-			vistaEditabile.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-			vistaEditabile.setVerticalScrollBarEnabled(true);
+			editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+			editText.setVerticalScrollBarEnabled(true);
 		}
 		View.OnClickListener click = null;
 		if( object instanceof Integer ) {    // Nome e cognome in modalità inesperto
-			click = this::edita;
-		} else if( object instanceof String ) { // Metodo
-			click = this::edita;
+			click = this::edit;
+		} else if( object instanceof String ) { // Method
+			click = this::edit;
 			// Se si tratta di una data
 			if( object.equals("Date") ) {
-				editoreData = vistaPezzo.findViewById(R.id.fatto_data);
-				editoreData.inizia(vistaEditabile);
+				editoreData = pieceView.findViewById(R.id.fatto_data);
+				editoreData.inizia(editText);
 			}
 		} else if( object instanceof Address ) { // Indirizzo
-			click = vista -> {
+			click = v -> {
 				Memoria.aggiungi(object);
 				startActivity(new Intent(this, Indirizzo.class));
 			};
 		} else if( object instanceof EventFact ) { // Evento
-			click = vista -> {
+			click = v -> {
 				Memoria.aggiungi(object);
 				startActivity(new Intent(this, Evento.class));
 			};
 			// Gli EventFact della famiglia possono avere delle note e dei media
-			LinearLayout scatolaNote = vistaPezzo.findViewById(R.id.fatto_note);
-			U.mettiNote(scatolaNote, object, false);
-			U.mettiMedia(scatolaNote, object, false);
+			LinearLayout scatolaNote = pieceView.findViewById(R.id.fatto_note);
+			U.placeNotes(scatolaNote, object, false);
+			U.placeMedia(scatolaNote, object, false);
 		} else if( object instanceof GedcomTag ) { // Estensione
-			click = vista -> {
+			click = v -> {
 				Memoria.aggiungi(object);
 				startActivity(new Intent(this, Estensione.class));
 			};
 		}
-		vistaPezzo.setOnClickListener(click);
-		registerForContextMenu(vistaPezzo);
-		vistaPezzo.setTag(R.id.tag_oggetto, object); // Serve a vari processi per riconoscere il pezzo
-		return vistaPezzo;
+		pieceView.setOnClickListener(click);
+		registerForContextMenu(pieceView);
+		pieceView.setTag(R.id.tag_oggetto, object); // Serve a vari processi per riconoscere il pezzo
+		return pieceView;
 	}
 
-	public void mettiEstensioni( ExtensionContainer contenitore ) {
-		for( app.familygem.Estensione est : U.trovaEstensioni( contenitore ) ) {
-			creaPezzo( est.nome, est.testo, est.gedcomTag, false );
+	public void placeExtensions(ExtensionContainer contenitore) {
+		for( app.familygem.Estensione est : U.trovaEstensioni(contenitore) ) {
+			placePiece(est.nome, est.testo, est.gedcomTag, false);
 		}
 	}
 
@@ -632,91 +629,90 @@ public class Dettaglio extends AppCompatActivity {
 		return txt;
 	}
 
-	EditText editView;
-	void edita( View pieceView ) {
-		FloatingActionButton fab = findViewById( R.id.fab );
+	EditText editText;
+	void edit(View pieceView) {
+		FloatingActionButton fab = findViewById(R.id.fab);
 		ActionBar barra = getSupportActionBar();
 
 		// Termina l'eventuale editazione di un altro pezzo
-		for( int i=0; i < box.getChildCount(); i++ ) {
-			View altroPezzo = box.getChildAt(i);
-			EditText vistaEdita = altroPezzo.findViewById( R.id.fatto_edita );
-			if( vistaEdita != null && vistaEdita.isShown() ) {
-				TextView vistaTesto = altroPezzo.findViewById( R.id.fatto_testo );
-				if( !vistaEdita.getText().toString().equals(vistaTesto.getText().toString()) ) // se c'è stata editazione
-					salva( altroPezzo, barra, fab );
+		for( int i = 0; i < box.getChildCount(); i++ ) {
+			View otherPiece = box.getChildAt(i);
+			EditText editText = otherPiece.findViewById(R.id.fatto_edita);
+			if( editText != null && editText.isShown() ) {
+				TextView textView = otherPiece.findViewById(R.id.fatto_testo);
+				if( !editText.getText().toString().equals(textView.getText().toString()) ) // se c'è stata editazione
+					save(otherPiece, barra, fab);
 				else
-					ripristina( altroPezzo, barra, fab );
+					ripristina(otherPiece, barra, fab);
 			}
 		}
 		// Poi rende editabile questo pezzo
 		TextView textView = pieceView.findViewById(R.id.fatto_testo);
 		textView.setVisibility(View.GONE);
 		fab.hide();
-		Object contenutoPezzo = pieceView.getTag(R.id.tag_oggetto);
-		boolean mostraTastiera = false;
-		editView = pieceView.findViewById(R.id.fatto_edita);
+		Object pieceObject = pieceView.getTag(R.id.tag_oggetto);
+		boolean showInput = false;
+		editText = pieceView.findViewById(R.id.fatto_edita);
 		// Luogo
-		if( contenutoPezzo.equals("Place") ) {
-			mostraTastiera = true;
+		if( pieceObject.equals("Place") ) {
+			showInput = true;
 			// Se non l'ha già fatto, sostituisce vistaEdita con TrovaLuogo
-			if( !(editView instanceof TrovaLuogo) ) {
+			if( !(editText instanceof TrovaLuogo) ) {
 				ViewGroup parent = (ViewGroup)pieceView;  // todo: si potrebbe usare direttamente vistaPezzo se fosse un ViewGroup o LinearLayout anzicé View
-				int index = parent.indexOfChild(editView);
-				parent.removeView(editView);
-				editView = new TrovaLuogo(editView.getContext(), null);
-				editView.setId(R.id.fatto_edita);
-				editView.setText(textView.getText());
-				parent.addView(editView, index);
+				int index = parent.indexOfChild(editText);
+				parent.removeView(editText);
+				editText = new TrovaLuogo(editText.getContext(), null);
+				editText.setId(R.id.fatto_edita);
+				parent.addView(editText, index);
 			} else
-				editView.setVisibility(View.VISIBLE);
+				editText.setVisibility(View.VISIBLE);
 		} // Name type
-		else if( object instanceof Name && contenutoPezzo.equals("Type") ) {
-			if( !(editView instanceof TypeView) ) {
+		else if( object instanceof Name && pieceObject.equals("Type") ) {
+			if( !(editText instanceof TypeView) ) {
 				ViewGroup parent = (ViewGroup)pieceView;
-				parent.removeView(editView);
-				editView = new TypeView(editView.getContext(), TypeView.Combo.NAME);
-				editView.setText(textView.getText());
-				parent.addView(editView, parent.indexOfChild(editView));
+				parent.removeView(editText);
+				editText = new TypeView(editText.getContext(), TypeView.Combo.NAME);
+				parent.addView(editText, parent.indexOfChild(editText));
 			} else
-				editView.setVisibility(View.VISIBLE);
+				editText.setVisibility(View.VISIBLE);
 		} // Marriage/relationship type
-		else if( object instanceof EventFact && contenutoPezzo.equals("Type") && ((EventFact)object).getTag().equals("MARR") ) {
-			if( !(editView instanceof TypeView) ) {
+		else if( object instanceof EventFact && pieceObject.equals("Type") && ((EventFact)object).getTag().equals("MARR") ) {
+			if( !(editText instanceof TypeView) ) {
 				ViewGroup parent = (ViewGroup)pieceView;
-				parent.removeView(editView);
-				editView = new TypeView(editView.getContext(), TypeView.Combo.RELATIONSHIP);
-				editView.setText(textView.getText());
-				parent.addView(editView, parent.indexOfChild(editView));
+				parent.removeView(editText);
+				editText = new TypeView(editText.getContext(), TypeView.Combo.RELATIONSHIP);
+				parent.addView(editText, parent.indexOfChild(editText));
 			} else
-				editView.setVisibility(View.VISIBLE);
+				editText.setVisibility(View.VISIBLE);
 		} // Data
-		else if( contenutoPezzo.equals("Date") ) {
-			editView.setVisibility( View.VISIBLE );
+		else if( pieceObject.equals("Date") ) {
+			editText.setVisibility(View.VISIBLE);
 		} // Tutti gli altri casi normali di editazione
 		else {
-			mostraTastiera = true;
-			editView.setVisibility( View.VISIBLE );
+			showInput = true;
+			editText.setVisibility(View.VISIBLE);
 		}
-		if( mostraTastiera ) {
-			InputMethodManager imm = (InputMethodManager) getSystemService( Context.INPUT_METHOD_SERVICE );
-			imm.toggleSoftInput( InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY );
+		if( showInput ) {
+			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 		}
-		editView.requestFocus();
-		editView.setSelection( editView.getText().length() );	// cursore alla fine
+		CharSequence text = textView.getText();
+		editText.setText(text);
+		editText.requestFocus();
+		editText.setSelection(text.length()); // Cursor at the end
 
 		// Intercetta il 'Done' e 'Next' sulla tastiera
-		editView.setOnEditorActionListener( (vista, actionId, keyEvent) -> {
+		editText.setOnEditorActionListener((vista, actionId, keyEvent) -> {
 			if( actionId == EditorInfo.IME_ACTION_DONE )
-				salva( pieceView, barra, fab );
+				save(pieceView, barra, fab);
 			else if( actionId == EditorInfo.IME_ACTION_NEXT ) {
-				if( !editView.getText().toString().equals(textView.getText().toString()) )
-					salva( pieceView, barra, fab );
+				if( !editText.getText().toString().equals(textView.getText().toString()) )
+					save(pieceView, barra, fab);
 				else
-					ripristina( pieceView, barra, fab );
-				View nextPezzo = box.getChildAt(box.indexOfChild(pieceView) + 1);
-				if( nextPezzo != null && nextPezzo.getTag(R.id.tag_oggetto) instanceof String )
-					edita(nextPezzo);
+					ripristina(pieceView, barra, fab);
+				View nextPiece = box.getChildAt(box.indexOfChild(pieceView) + 1);
+				if( nextPiece != null && nextPiece.getTag(R.id.tag_oggetto) instanceof String )
+					edit(nextPiece);
 			}
 			return false;
 		});
@@ -727,55 +723,55 @@ public class Dettaglio extends AppCompatActivity {
 		invalidateOptionsMenu();
 		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(box.getContext()), false);
 		barraAzione.findViewById(R.id.edita_annulla).setOnClickListener( v -> {
-			editView.setText( textView.getText() );
+			editText.setText( textView.getText() );
 			ripristina( pieceView, barra, fab );
 		});
-		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( v -> salva( pieceView, barra, fab ) );
+		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( v -> save( pieceView, barra, fab ) );
 		barra.setCustomView( barraAzione );
 		barra.setDisplayShowCustomEnabled( true );
 	}
 
-	void salva( View vistaPezzo, ActionBar barra, FloatingActionButton fab ) {
+	void save(View pieceView, ActionBar actionBar, FloatingActionButton fab) {
 		if( editoreData != null ) editoreData.chiudi(); // In sostanza solo per aggiungere le parentesi alla data frase
-		String testo = editView.getText().toString().trim();
-		Object oggettoPezzo = vistaPezzo.getTag(R.id.tag_oggetto);
-		if( oggettoPezzo instanceof Integer ) { // Salva nome e cognome per inesperti
+		String text = editText.getText().toString().trim();
+		Object pieceObject = pieceView.getTag(R.id.tag_oggetto);
+		if( pieceObject instanceof Integer ) { // Salva nome e cognome per inesperti
 			String nome = ((EditText)box.getChildAt(0).findViewById(R.id.fatto_edita)).getText().toString();
 			String cognome = ((EditText)box.getChildAt(1).findViewById(R.id.fatto_edita)).getText().toString();
 			((Name)object).setValue( nome + " /" + cognome + "/" );
 		} else try { // Tutti gli altri normali metodi
-			object.getClass().getMethod( "set" + oggettoPezzo, String.class ).invoke(object, testo );
+			object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, text.replace("@","@@"));
 		} catch( Exception e ) {
-			Toast.makeText( box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
-			return;	// in caso di errore rimane in modalità editore
+			Toast.makeText(box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+			return; // in caso di errore rimane in modalità editore
 		}
-		((TextView)vistaPezzo.findViewById( R.id.fatto_testo )).setText( testo );
-		ripristina( vistaPezzo, barra, fab );
-		U.salvaJson( true, Memoria.oggettoCapo() );
+		((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
+		ripristina(pieceView, actionBar, fab);
+		U.save(true, Memoria.oggettoCapo());
 		/*if( Memoria.getPila().size() == 1 ) {
 			ricrea(); // Todo Bisognerebbe aggiornare la data Cambiamento del record, però magari senza ricaricare tutto.
 		}*/
 		// In immagine modificato il percorso aggiorna l'immagine
-		if( this instanceof Immagine && oggettoPezzo.equals("File") )
+		if( this instanceof Immagine && pieceObject.equals("File") )
 			((Immagine)this).aggiornaImmagine();
 		// Se ha modificato un autore chiede di referenziarlo in header
 		else if( object instanceof Submitter )
-			U.autorePrincipale( this, ((Submitter)object).getId() );
+			U.autorePrincipale(this, ((Submitter)object).getId());
 		else if( this instanceof Evento )
 			refresh(); // To update the title bar
 	}
 
 	// Operazioni comuni a Salva e Annulla
-	void ripristina( View vistaPezzo, ActionBar barra, FloatingActionButton fab ) {
-		editView.setVisibility( View.GONE );
-		vistaPezzo.findViewById( R.id.fatto_data ).setVisibility( View.GONE );
-		vistaPezzo.findViewById( R.id.fatto_testo ).setVisibility( View.VISIBLE );
-		barra.setDisplayShowCustomEnabled( false );	// nasconde barra personalizzata
-		barra.setDisplayHomeAsUpEnabled( true );
+	void ripristina(View vistaPezzo, ActionBar barra, FloatingActionButton fab) {
+		editText.setVisibility(View.GONE);
+		vistaPezzo.findViewById(R.id.fatto_data).setVisibility(View.GONE);
+		vistaPezzo.findViewById(R.id.fatto_testo).setVisibility(View.VISIBLE);
+		barra.setDisplayShowCustomEnabled(false); // nasconde barra personalizzata
+		barra.setDisplayHomeAsUpEnabled(true);
 		qualeMenu = 1;
 		invalidateOptionsMenu();
 		InputMethodManager imm = (InputMethodManager)getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow( vistaPezzo.getWindowToken(), 0 );
+		imm.hideSoftInputFromWindow(vistaPezzo.getWindowToken(), 0);
 		if( !(object instanceof Note && !Global.settings.expert) ) // Le note in modalità inesperto non hanno fab
 			fab.show();
 	}
@@ -824,7 +820,7 @@ public class Dettaglio extends AppCompatActivity {
 		} else if( id == 5 ) { // Tutti gli altri
 			// todo: conferma eliminazione di tutti gli oggetti..
 			elimina();
-			U.salvaJson(true); // l'aggiornamento delle date avviene negli Override di elimina()
+			U.save(true); // l'aggiornamento delle date avviene negli Override di elimina()
 			onBackPressed();
 		} else if( id == android.R.id.home ){
 			onBackPressed();
@@ -836,7 +832,7 @@ public class Dettaglio extends AppCompatActivity {
 	public void onBackPressed() {
 		super.onBackPressed();
 		if( object instanceof EventFact )
-			Evento.ripulisciTag( (EventFact)object);
+			Evento.ripulisciTag((EventFact)object);
 		Memoria.arretra();
 	}
 
@@ -977,7 +973,7 @@ public class Dettaglio extends AppCompatActivity {
 			case 17: // Scollega
 				Famiglia.scollega((SpouseFamilyRef)vistaPezzo.getTag(R.id.tag_spouse_family_ref),
 						(SpouseRef)vistaPezzo.getTag(R.id.tag_spouse_ref));
-				U.aggiornaDate(pers);
+				U.updateChangeDate(pers);
 				trovaUnAltroRappresentanteDellaFamiglia(pers);
 				break;
 			case 18: // Elimina membro
@@ -996,7 +992,7 @@ public class Dettaglio extends AppCompatActivity {
 				break;
 			case 22:
 				Object[] capi = U.eliminaNota((Note)oggettoPezzo, vistaPezzo);
-				U.salvaJson(true, capi);
+				U.save(true, capi);
 				return true;
 			case 30: // Citazione fonte
 				U.copiaNegliAppunti(getText(R.string.source_citation),
@@ -1015,7 +1011,7 @@ public class Dettaglio extends AppCompatActivity {
 				break;
 			case 41:
 				Object[] capiMedia = Galleria.eliminaMedia((Media)oggettoPezzo, null);
-				U.salvaJson(true, capiMedia); // un media condiviso può dover aggiornare le date di più capi
+				U.save(true, capiMedia); // un media condiviso può dover aggiornare le date di più capi
 				refresh();
 				return true;
 			case 51:
@@ -1076,9 +1072,9 @@ public class Dettaglio extends AppCompatActivity {
 		// Prima ricrea la pagina e poi salva, che per alberi grossi può metterci alcuni secondi
 		//closeContextMenu(); // Inutile. La chiusura del menu aspetta la fine del salvataggio,
 		// a meno di mettere salvaJson() dentro un postDelayed() di almeno 500 ms
-		U.aggiornaDate(Memoria.oggettoCapo());
+		U.updateChangeDate(Memoria.oggettoCapo());
 		refresh();
-		U.salvaJson(true, (Object[])null);
+		U.save(true, (Object[])null);
 		return true;
 	}
 
@@ -1113,9 +1109,9 @@ public class Dettaglio extends AppCompatActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if( editView != null ) {
+		if( editText != null ) {
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(editView.getWindowToken(), 0);
+			imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 		}
 	}
 

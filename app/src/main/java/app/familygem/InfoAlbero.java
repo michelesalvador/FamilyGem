@@ -1,9 +1,7 @@
 package app.familygem;
 
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,9 +20,9 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.Submitter;
 import java.io.File;
 import java.util.Locale;
-import app.familygem.visita.ListaMedia;
+import app.familygem.visitor.ListaMedia;
 
-public class InfoAlbero extends AppCompatActivity {
+public class InfoAlbero extends BaseActivity {
 
 	Gedcom gc;
 
@@ -85,7 +83,7 @@ public class InfoAlbero extends AppCompatActivity {
 				bottoneHeader.setText( R.string.create_header );
 				bottoneHeader.setOnClickListener( view -> {
 					gc.setHeader( AlberoNuovo.creaTestata( file.getName() ) );
-					U.salvaJson(gc, treeId);
+					U.saveJson(gc, treeId);
 					recreate();
 				});
 			} else {
@@ -175,11 +173,11 @@ public class InfoAlbero extends AppCompatActivity {
 					versioneGc.setForm( "LINEAGE-LINKED" );
 					h.setDestination( null );
 
-					U.salvaJson(gc, treeId);
+					U.saveJson(gc, treeId);
 					recreate();
 				});
 
-				U.mettiNote(scatola, h, true);
+				U.placeNotes(scatola, h, true);
 			}
 			// Estensioni del Gedcom, ovvero tag non standard di livello 0 zero
 			for( Estensione est : U.trovaEstensioni(gc) ) {

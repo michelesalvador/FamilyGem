@@ -22,9 +22,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import app.familygem.constants.Gender;
-import app.familygem.dettaglio.Evento;
-import app.familygem.dettaglio.Famiglia;
+import app.familygem.constant.Gender;
+import app.familygem.detail.Evento;
+import app.familygem.detail.Famiglia;
 import static app.familygem.Global.gc;
 
 public class EditaIndividuo extends AppCompatActivity {
@@ -303,7 +303,7 @@ public class EditaIndividuo extends AppCompatActivity {
 				modificati = aggiungiParente( idIndi, nuovoId, idFamiglia, relazione, getIntent().getStringExtra("collocazione") );
 		} else
 			Global.indi = p.getId(); // per mostrarlo orgogliosi in Diagramma
-		U.salvaJson(true, modificati);
+		U.save(true, modificati);
 		onBackPressed();
 	}
 
@@ -373,7 +373,7 @@ public class EditaIndividuo extends AppCompatActivity {
 		if( refFiglio2.getRef() != null )
 			famiglia.addChild(refFiglio2);
 
-		if( (relazione == 1 || relazione == 2) ) // Farà comparire la famiglia selezionata
+		if( relazione == 1 || relazione == 2 ) // Farà comparire la famiglia selezionata
 			Global.familyNum = gc.getPerson(Global.indi).getParentFamilies(gc).indexOf(famiglia);
 		else
 			Global.familyNum = 0; // eventuale reset

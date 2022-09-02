@@ -34,8 +34,8 @@ import org.folg.gedcom.model.SourceCitationContainer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import app.familygem.dettaglio.Fonte;
-import app.familygem.visita.ListaCitazioniFonte;
+import app.familygem.detail.Fonte;
+import app.familygem.visitor.ListaCitazioniFonte;
 import static app.familygem.Global.gc;
 
 public class Biblioteca extends Fragment {
@@ -170,9 +170,9 @@ public class Biblioteca extends Fragment {
 					case 4:
 						return titoloFonte(f2).compareToIgnoreCase( titoloFonte(f1) );
 					case 5:	// Ordina per numero di citazioni
-						return U.castaJsonInt(f1.getExtension("citaz")) - U.castaJsonInt(f2.getExtension("citaz"));
+						return U.castJsonInt(f1.getExtension("citaz")) - U.castJsonInt(f2.getExtension("citaz"));
 					case 6:
-						return U.castaJsonInt(f2.getExtension("citaz")) - U.castaJsonInt(f1.getExtension("citaz"));
+						return U.castJsonInt(f2.getExtension("citaz")) - U.castJsonInt(f1.getExtension("citaz"));
 				}
 				return 0;
 			});
@@ -246,7 +246,7 @@ public class Biblioteca extends Fragment {
 			if( contenitore instanceof Note ) ((Note)contenitore).addSourceCitation( citaFonte );
 			else ((SourceCitationContainer)contenitore).addSourceCitation( citaFonte );
 		}
-		U.salvaJson( true, fonte );
+		U.save( true, fonte );
 		Memoria.setPrimo( fonte );
 		contesto.startActivity( new Intent( contesto, Fonte.class ) );
 	}
@@ -340,7 +340,7 @@ public class Biblioteca extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) {	// Elimina
 			Object[] oggetti = eliminaFonte( gc.getSource(idFonte) );
-			U.salvaJson( false, oggetti );
+			U.save( false, oggetti );
 			getActivity().recreate();
 		} else {
 			return false;

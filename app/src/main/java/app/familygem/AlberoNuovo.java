@@ -45,15 +45,15 @@ import org.folg.gedcom.model.Header;
 import org.folg.gedcom.parser.JsonParser;
 import org.folg.gedcom.parser.ModelParser;
 
-public class AlberoNuovo extends AppCompatActivity {
+public class AlberoNuovo extends BaseActivity {
 
 	View rotella;
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
 		setContentView(R.layout.albero_nuovo);
-		rotella = findViewById( R.id.nuovo_circolo );
+		rotella = findViewById(R.id.nuovo_circolo);
 		String referrer = Global.settings.referrer; // Dataid proveniente da una condivisione
 		boolean esisteDataId = referrer != null && referrer.matches("[0-9]{14}");
 
@@ -286,50 +286,50 @@ public class AlberoNuovo extends AppCompatActivity {
 				// Legge l'input
 				Uri uri = data.getData();
 				InputStream input = getContentResolver().openInputStream(uri);
-				Gedcom gc = new ModelParser().parseGedcom( input );
-				if( gc.getHeader() == null ) {
-					Toast.makeText( this, R.string.invalid_gedcom, Toast.LENGTH_LONG ).show();
+				Gedcom gedcom = new ModelParser().parseGedcom(input);
+				if( gedcom.getHeader() == null ) {
+					Toast.makeText(this, R.string.invalid_gedcom, Toast.LENGTH_LONG).show();
 					return;
 				}
-				gc.createIndexes(); // necessario per poi calcolare le generazioni
+				gedcom.createIndexes(); // necessario per poi calcolare le generazioni
 				// Salva il file Json
-				int nuovoNum = Global.settings.max() + 1;
-				PrintWriter pw = new PrintWriter( getFilesDir() + "/" + nuovoNum + ".json" );
-				JsonParser jp = new JsonParser();
-				pw.print( jp.toJson(gc) );
-				pw.close();
+				int newNumber = Global.settings.max() + 1;
+				PrintWriter printWriter = new PrintWriter(getFilesDir() + "/" + newNumber + ".json");
+				JsonParser jsonParser = new JsonParser();
+				printWriter.print(jsonParser.toJson(gedcom));
+				printWriter.close();
 				// Nome albero e percorso della cartella
-				String percorso = F.uriPercorsoFile( uri );
+				String percorso = F.uriPercorsoFile(uri);
 				String nomeAlbero;
 				String percorsoCartella = null;
 				if( percorso != null && percorso.lastIndexOf('/') > 0 ) { // è un percorso completo del file gedcom
-					File fileGedcom = new File( percorso );
+					File fileGedcom = new File(percorso);
 					percorsoCartella = fileGedcom.getParent();
 					nomeAlbero = fileGedcom.getName();
 				} else if( percorso != null ) { // È solo il nome del file 'famiglia.ged'
 					nomeAlbero = percorso;
 				} else // percorso null
-					nomeAlbero = getString( R.string.tree ) + " " + nuovoNum;
+					nomeAlbero = getString(R.string.tree) + " " + newNumber;
 				if( nomeAlbero.lastIndexOf('.') > 0 ) // Toglie l'estensione
 					nomeAlbero = nomeAlbero.substring(0, nomeAlbero.lastIndexOf('.'));
 				// Salva le impostazioni in preferenze
-				String idRadice = U.trovaRadice(gc);
-				Global.settings.aggiungi(new Settings.Tree(nuovoNum, nomeAlbero, percorsoCartella,
-						gc.getPeople().size(), InfoAlbero.quanteGenerazioni(gc,idRadice), idRadice, null, 0));
+				String idRadice = U.trovaRadice(gedcom);
+				Global.settings.aggiungi(new Settings.Tree(newNumber, nomeAlbero, percorsoCartella,
+						gedcom.getPeople().size(), InfoAlbero.quanteGenerazioni(gedcom, idRadice), idRadice, null, 0));
 				Global.settings.save();
 				// Se necessario propone di mostrare le funzioni avanzate
-				if( !gc.getSources().isEmpty() && !Global.settings.expert ) {
-					new AlertDialog.Builder(this).setMessage( R.string.complex_tree_advanced_tools )
-							.setPositiveButton( android.R.string.ok, (dialog, i) -> {
+				if( !gedcom.getSources().isEmpty() && !Global.settings.expert ) {
+					new AlertDialog.Builder(this).setMessage(R.string.complex_tree_advanced_tools)
+							.setPositiveButton(android.R.string.ok, (dialog, i) -> {
 								Global.settings.expert = true;
 								Global.settings.save();
 								concludiImportaGedcom();
-							}).setNegativeButton( android.R.string.cancel, (dialog, i) -> concludiImportaGedcom() )
+							}).setNegativeButton(android.R.string.cancel, (dialog, i) -> concludiImportaGedcom())
 							.show();
 				} else
 					concludiImportaGedcom();
 			} catch( Exception e ) {
-				Toast.makeText( this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+				Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 			}
 		}
 
@@ -444,7 +444,7 @@ public class AlberoNuovo extends AppCompatActivity {
 		// C'è anche   Resources.getSystem().getConfiguration().locale.getLanguage() che ritorna lo stesso 'it'
 		testa.setLanguage(loc.getDisplayLanguage(Locale.ENGLISH));    // ok prende la lingua di sistema in inglese, non nella lingua locale
 		// in header ci sono due campi data: TRANSMISSION_DATE un po' forzatamente può contenere la data di ultima modifica
-		testa.setDateTime(U.dataTempoAdesso());
+		testa.setDateTime(U.actualDateTime());
 		return testa;
 	}
 

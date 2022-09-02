@@ -4,13 +4,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.2.2'
     }
 }
 allprojects {
     repositories {
         google()
-        jcenter()
+        jcenter() // Necessary for android-image-cropper
         mavenCentral()
         mavenLocal()
         maven { url 'https://jitpack.io' } // For FastScrollerAndRecyclerViewFixes

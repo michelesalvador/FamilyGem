@@ -16,9 +16,9 @@ import android.widget.TextView;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.Person;
 import java.util.List;
-import app.familygem.dettaglio.Immagine;
-import app.familygem.visita.ListaMediaContenitore;
-import app.familygem.visita.TrovaPila;
+import app.familygem.detail.Immagine;
+import app.familygem.visitor.ListaMediaContenitore;
+import app.familygem.visitor.TrovaPila;
 
 class AdattatoreGalleriaMedia extends RecyclerView.Adapter<AdattatoreGalleriaMedia.gestoreVistaMedia> {
 

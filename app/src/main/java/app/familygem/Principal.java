@@ -24,8 +24,8 @@ import org.folg.gedcom.model.Media;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import app.familygem.visita.ListaMedia;
-import app.familygem.visita.ListaNote;
+import app.familygem.visitor.ListaMedia;
+import app.familygem.visitor.ListaNote;
 import static app.familygem.Global.gc;
 
 public class Principal extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -190,7 +190,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 		Button saveButton = menuHeader.findViewById( R.id.menu_salva );
 		saveButton.setOnClickListener( view -> {
 			view.setVisibility( View.GONE );
-			U.salvaJson( Global.gc, Global.settings.openTree);
+			U.saveJson( Global.gc, Global.settings.openTree);
 			scatolissima.closeDrawer(GravityCompat.START);
 			Global.daSalvare = false;
 			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();

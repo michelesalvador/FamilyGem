@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import app.familygem.visita.ListaMedia;
+import app.familygem.visitor.ListaMedia;
 
 public class Esportatore {
 
@@ -177,7 +177,7 @@ public class Esportatore {
 			gc.setHeader(AlberoNuovo.creaTestata(nomeFileGedcom));
 		else {
 			testa.setFile(nomeFileGedcom);
-			testa.setDateTime(U.dataTempoAdesso());
+			testa.setDateTime(U.actualDateTime());
 		}
 	}
 

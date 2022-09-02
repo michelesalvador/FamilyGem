@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import app.familygem.dettaglio.Archivio;
+import app.familygem.detail.Archivio;
 import static app.familygem.Global.gc;
 
 public class Magazzino extends Fragment {
@@ -52,7 +52,7 @@ public class Magazzino extends Fragment {
 					case 2:	// Ordine alfabeto
 						return r1.getName().compareToIgnoreCase(r2.getName());
 					case 3:	// Ordina per numero di fonti
-						return U.castaJsonInt(r2.getExtension("fonti")) - U.castaJsonInt(r1.getExtension("fonti"));
+						return U.castJsonInt(r2.getExtension("fonti")) - U.castJsonInt(r1.getExtension("fonti"));
 					default:
 						return 0;
 				}
@@ -109,7 +109,7 @@ public class Magazzino extends Fragment {
 			archRef.setRef( arch.getId() );
 			fonte.setRepositoryRef( archRef );
 		}
-		U.salvaJson( true, arch );
+		U.save( true, arch );
 		Memoria.setPrimo( arch );
 		contesto.startActivity( new Intent( contesto, Archivio.class ) );
 	}
@@ -168,7 +168,7 @@ public class Magazzino extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		if ( item.getItemId() == 0 ) {
 			Source[] fonti = elimina( archivio );
-			U.salvaJson( false, (Object[])fonti );
+			U.save( false, (Object[])fonti );
 			getActivity().recreate();
 			return true;
 		}
