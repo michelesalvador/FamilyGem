@@ -122,7 +122,7 @@
     <string name="create_header">Створити заголовок</string>
     <string name="header">Заголовок</string>
     <string name="refresh">Оновити</string>
-    <string name="media_folders">Медіапапки</string>
+    <string name="media_folders">Медіатеки</string>
     <string name="root">Корінь</string>
     <string name="item_exists_but_file">Запис дерева знаходиться в індексі, але з якоїсь причини пов\'язаний файл відсутній:</string>
     <string name="about">Про</string>
@@ -298,9 +298,9 @@
     <string name="move_before">Рухайтеся раніше</string>
     <string name="pdf_exported_ok">PDF експортовано.</string>
     <string name="export_pdf">Експортувати PDF</string>
-    <string name="add_device_folder">Додайте папку з цього пристрою.</string>
+    <string name="add_device_folder">Додайте теку з цього пристрою.</string>
     <string name="app_storage">Сховище додатків</string>
-    <string name="media_searched_list">Пошук у медіафайлах виконується в цих папках:</string>
+    <string name="media_searched_list">Пошук у медіафайлах виконується в цих теках:</string>
     <string name="update_header">Оновити заголовок</string>
     <string name="zip_exported_ok">ZIP експортовано.</string>
     <string name="gedcom_exported_ok">GEDCOM експортував.</string>
