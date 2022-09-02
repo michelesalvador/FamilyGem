@@ -360,4 +360,5 @@
     <string name="partners">Pareja</string>
     <string name="family_as">Familia (como %s)</string>
     <string name="living_apart_together">Viviente aparte junto</string>
+    <string name="system_language">Lenguaje del sistema</string>
 </resources>

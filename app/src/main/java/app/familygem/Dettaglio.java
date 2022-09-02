@@ -499,7 +499,7 @@ public class Dettaglio extends AppCompatActivity {
 		View pieceView = LayoutInflater.from(box.getContext()).inflate(R.layout.pezzo_fatto, box, false);
 		box.addView(pieceView);
 		((TextView)pieceView.findViewById(R.id.fatto_titolo)).setText(title);
-		((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text.replace("@@","@"));
+		((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
 		EditText editText = pieceView.findViewById(R.id.fatto_edita);
 		if( multiLine ) {
 			editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
@@ -740,7 +740,7 @@ public class Dettaglio extends AppCompatActivity {
 			String cognome = ((EditText)box.getChildAt(1).findViewById(R.id.fatto_edita)).getText().toString();
 			((Name)object).setValue( nome + " /" + cognome + "/" );
 		} else try { // Tutti gli altri normali metodi
-			object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, text.replace("@","@@"));
+			object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, text);
 		} catch( Exception e ) {
 			Toast.makeText(box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 			return; // in caso di errore rimane in modalità editore

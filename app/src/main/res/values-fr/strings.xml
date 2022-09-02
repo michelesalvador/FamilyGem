@@ -367,4 +367,5 @@
     <string name="birthday_notified_midday">L\'anniversaire de chaque personne sera communiqué à midi.</string>
     <string name="birthdays">Anniversaires</string>
     <string name="share_sensitive">Partage de données sensibles</string>
+    <string name="system_language">Langue du système</string>
 </resources>

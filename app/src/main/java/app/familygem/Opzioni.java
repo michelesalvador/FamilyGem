@@ -40,6 +40,7 @@ public class Opzioni extends BaseActivity {
 			new Language("ru", 100),
 			new Language("sk", 100),
 			new Language("sr", 100),
+			new Language("tr", 19),
 			new Language("uk", 100)
 	};
 
@@ -151,8 +152,7 @@ public class Opzioni extends BaseActivity {
 				// Return the string "System language" on the system locale, not on the app locale
 				Configuration config = new Configuration(getResources().getConfiguration());
 				config.setLocale(Resources.getSystem().getConfiguration().locale);
-				//return createConfigurationContext(config).getText(R.string.system_language).toString(); todo traduci
-				return "System language";
+				return createConfigurationContext(config).getText(R.string.system_language).toString();
 			} else {
 				Locale locale = new Locale(code);
 				String txt = locale.getDisplayLanguage(locale);

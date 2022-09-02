@@ -75,6 +75,7 @@
     <string name="auto_save">Auto save</string>
     <string name="load_tree_startup">Load last opened tree at startup</string>
     <string name="show_advanced_functions">Show advanced tools</string>
+    <string name="system_language">System language</string>
     <string name="about">About</string>
     <string name="item_exists_but_file">The tree entry is in the index, but for some reason the related file is missing:</string>
     <string name="root">Root</string>

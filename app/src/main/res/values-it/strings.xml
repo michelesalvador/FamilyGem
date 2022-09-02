@@ -78,6 +78,7 @@
     <string name="auto_save">Salvataggio automatico</string>
     <string name="load_tree_startup">All\'avvio carica l\'ultimo albero aperto</string>
     <string name="show_advanced_functions">Mostra le funzioni avanzate</string>
+    <string name="system_language">Lingua di sistema</string>
     <string name="about">Informazioni</string>
     <!-- InfoAlbero -->
     <string name="item_exists_but_file">Esiste la voce nell\'indice degli alberi, ma per qualche ragione è scomparso il file corrispondente:</string>
