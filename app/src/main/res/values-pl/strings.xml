@@ -360,4 +360,5 @@
     <string name="aware_upload_server">Pamiętaj, że zamierzasz przesłać całe drzewo na serwer online.</string>
     <string name="share_sensitive">Udostępnianie danych wrażliwych</string>
     <string name="not_memory_tree">Za mało pamięci dla tego drzewa.</string>
+    <string name="system_language">Język systemu</string>
 </resources>

@@ -367,4 +367,5 @@
     <string name="age">Dob</string>
     <string name="uncles_cousins">Stričevi i rođaci</string>
     <string name="partners">Partneri</string>
+    <string name="system_language">Jezik sustava</string>
 </resources>

@@ -18,7 +18,7 @@
     <string name="cause">Причина</string>
     <string name="married">Женат или замужем</string>
     <string name="maiden">Девушка</string>
-    <string name="phonetic">Фонетический</string>
+    <string name="phonetic">фонетически</string>
     <string name="aka">Также известен как</string>
     <string name="married_name">Замужнее имя</string>
     <string name="given">Собственное имя</string>
@@ -130,7 +130,7 @@
     <string name="www">Веб-сайт</string>
     <string name="place">Место</string>
     <string name="immigrant">Иммигрант</string>
-    <string name="romanized">Романизированный</string>
+    <string name="romanized">Романизированное</string>
     <string name="suffix">Суффикс</string>
     <string name="surname_prefix">Префикс фамилии</string>
     <string name="nickname">Ник</string>
@@ -367,4 +367,5 @@
     <string name="age">Возраст</string>
     <string name="uncles_cousins">Дяди и двоюродные братья</string>
     <string name="partners">Партнеры</string>
+    <string name="system_language">Язык системы</string>
 </resources>

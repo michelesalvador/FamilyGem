@@ -25,7 +25,7 @@
     <string name="cancel">Batalkan</string>
     <string name="families">Keluarga</string>
     <string name="repositories">Repositori</string>
-    <string name="complex_tree_advanced_tools">Pohon ini terlihat cukup kompleks.
+    <string name="complex_tree_advanced_tools">Silsilah ini terlihat cukup rumit.
 \nUntuk mengelolanya dengan lebih baik, apakah anda ingin menampilkan peralatan tambahan\?</string>
     <string name="done">Selesai</string>
     <string name="notes">Catatan</string>
@@ -367,4 +367,5 @@
     <string name="slideshow">Peragaan slide</string>
     <string name="birth_date">Tanggal lahir</string>
     <string name="not_granted">%s tidak diberikan.</string>
+    <string name="system_language">Bahasa sistem</string>
 </resources>

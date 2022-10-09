@@ -367,4 +367,5 @@
     <string name="aware_upload_server">Molimo vas da budete svesni da ćete da učitate celo drvo na server online.</string>
     <string name="share_sensitive">Deljenje osetljivih podataka</string>
     <string name="not_memory_tree">Nema dovoljno pamćenja za ovo drvo.</string>
+    <string name="system_language">Sistemski jezik</string>
 </resources>
