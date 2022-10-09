@@ -292,7 +292,8 @@ public class Biblioteca extends Fragment {
 	@Override
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
 		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
-		subMenu.add(0, 1, 0, R.string.id);
+		if( Global.settings.expert )
+			subMenu.add(0, 1, 0, R.string.id);
 		subMenu.add(0, 2, 0, R.string.title);
 		subMenu.add(0, 3, 0, R.string.citations);
 
@@ -330,17 +331,20 @@ public class Biblioteca extends Fragment {
 		return false;
 	}
 
-	private String idFonte;
+	private Source source;
 	@Override
-	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		idFonte = ((TextView)vista.findViewById(R.id.biblioteca_id)).getText().toString();
-		menu.add(0, 0, 0, R.string.delete );
+	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
+		source = gc.getSource(((TextView)vista.findViewById(R.id.biblioteca_id)).getText().toString());
+		menu.add(0, 0, 0, "Edit ID"); // todo traduci
+		menu.add(0, 1, 0, R.string.delete);
 	}
 	@Override
-	public boolean onContextItemSelected( MenuItem item ) {
-		if( item.getItemId() == 0 ) {	// Elimina
-			Object[] oggetti = eliminaFonte( gc.getSource(idFonte) );
-			U.save( false, oggetti );
+	public boolean onContextItemSelected(MenuItem item) {
+		if( item.getItemId() == 0 ) { // Edit source ID
+			U.editId(getContext(), source, getActivity()::recreate);
+		} else if( item.getItemId() == 1 ) { // Delete source
+			Object[] objects = eliminaFonte(source);
+			U.save(false, objects);
 			getActivity().recreate();
 		} else {
 			return false;

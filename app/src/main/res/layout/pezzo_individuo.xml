@@ -23,7 +23,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textAllCaps="true"
-			android:textSize="15sp"
+			android:textSize="14sp"
 			android:textColor="@color/grayText"/>
 		<TextView
 			android:id="@+id/indi_nome"

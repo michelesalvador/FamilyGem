@@ -236,7 +236,7 @@ class Datatore {
 			case TO: pre = R.string.to;
 		}
 		if( pre > 0 )
-			txt = Global.context.getString(pre) + " ";
+			txt = Global.context.getString(pre);
 		if( data1.date != null ) {
 			txt += writePiece(data1);
 			// Uppercase initial

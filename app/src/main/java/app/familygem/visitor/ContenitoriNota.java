@@ -1,6 +1,6 @@
 /* Visitatore un po' complementare a RiferimentiNota, avente una doppia funzione:
-- produce una lista dei contenitori che includono una certa Nota condivisa
-- modifica il ref che punta alla nota
+- Modifica i ref che puntano alla nota condivisa
+- Colleziona una lista dei contenitori che includono la Nota condivisa
 */
 
 package app.familygem.visitor;
@@ -9,31 +9,30 @@ import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ContenitoriNota extends VisitorTotale {
 
-	public Set<NoteContainer> contenitori = new LinkedHashSet<>();
-	private Note nota; // la nota condivisa da cercare
-	private String nuovoId; // il nuovo id da mettere nei ref
+	public Set<NoteContainer> containers = new HashSet<>();
+	private Note note; // la nota condivisa da cercare
+	private String newId; // il nuovo id da mettere nei ref
 
-	public ContenitoriNota( Gedcom gc, Note nota, String nuovoId ) {
-		this.nota = nota;
-		this.nuovoId = nuovoId;
-		gc.accept( this );
+	public ContenitoriNota(Gedcom gc, Note note, String newId) {
+		this.note = note;
+		this.newId = newId;
+		gc.accept(this);
 	}
 
 	@Override
-	boolean visita( Object oggetto, boolean capostipite ) {
-		if( oggetto instanceof NoteContainer ) {
-			for( NoteRef nr : ((NoteContainer)oggetto).getNoteRefs() )
-				if( nr.getRef().equals( nota.getId() ) ) {
-					if( nuovoId != null )
-						nr.setRef( nuovoId );
-					else
-						contenitori.add( (NoteContainer) oggetto );
+	boolean visita(Object object, boolean capostipite) {
+		if( object instanceof NoteContainer ) {
+			for( NoteRef noteRef : ((NoteContainer)object).getNoteRefs() ) {
+				if( noteRef.getRef().equals(note.getId()) ) {
+					noteRef.setRef(newId);
+					containers.add((NoteContainer)object);
 				}
+			}
 		}
 		return true;
 	}

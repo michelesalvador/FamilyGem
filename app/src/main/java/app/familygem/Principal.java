@@ -106,18 +106,23 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 	public void onRestart() {
 		super.onRestart();
 		if( Global.edited ) {
-			Fragment attuale = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
-			if( attuale instanceof Diagram ) {
-				((Diagram)attuale).forceDraw = true; // Così ridisegna il diagramma
-			} else if( attuale instanceof Anagrafe ) {
+			Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
+			if( fragment instanceof Diagram ) {
+				((Diagram)fragment).forceDraw = true; // Così ridisegna il diagramma
+			} else if( fragment instanceof Anagrafe ) {
 				// Update persons list
-				Anagrafe anagrafe = (Anagrafe)attuale;
+				Anagrafe anagrafe = (Anagrafe)fragment;
 				if( anagrafe.people.size() == 0 ) // Probably it's a Collections.EmptyList
 					anagrafe.people = gc.getPeople(); // replace it with the real ArrayList
 				anagrafe.adapter.notifyDataSetChanged();
 				anagrafe.arredaBarra();
-			} else if( attuale instanceof Galleria ) {
-				((Galleria)attuale).ricrea();
+			} else if( fragment instanceof Chiesa ) {
+				((Chiesa)fragment).refresh(Chiesa.What.RELOAD);
+			} else if( fragment instanceof Galleria ) {
+				((Galleria)fragment).ricrea();
+			/*} else if( fragment instanceof Quaderno ) {
+				// Doesn't work to update Quaderno when a note is deleted
+				((Quaderno)fragment).adapter.notifyDataSetChanged();*/
 			} else {
 				recreate(); // questo dovrebbe andare a scomparire man mano
 			}
@@ -187,10 +192,10 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			}
 		}
 		// Save button
-		Button saveButton = menuHeader.findViewById( R.id.menu_salva );
-		saveButton.setOnClickListener( view -> {
-			view.setVisibility( View.GONE );
-			U.saveJson( Global.gc, Global.settings.openTree);
+		Button saveButton = menuHeader.findViewById(R.id.menu_salva);
+		saveButton.setOnClickListener(view -> {
+			view.setVisibility(View.GONE);
+			U.saveJson(Global.gc, Global.settings.openTree);
 			scatolissima.closeDrawer(GravityCompat.START);
 			Global.daSalvare = false;
 			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
@@ -201,7 +206,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			popup.show();
 			popup.setOnMenuItemClickListener( item -> {
 				if( item.getItemId() == 0 ) {
-					Alberi.apriGedcom(Global.settings.openTree, false);
+					Alberi.openGedcom(Global.settings.openTree, false);
 					U.qualiGenitoriMostrare(this, null, 0); // Semplicemente ricarica il diagramma
 					scatolissima.closeDrawer(GravityCompat.START);
 					saveButton.setVisibility(View.GONE);

@@ -110,14 +110,17 @@ public class Anagrafe extends Fragment {
 			String label = null;
 			if( order == Order.ID_ASC || order == Order.ID_DESC )
 				label = person.getId();
+			else if( order == Order.SURNAME_ASC || order == Order.SURNAME_DESC )
+				label = U.surname(person);
 			else if( order == Order.KIN_ASC || order == Order.KIN_DESC )
 				label = String.valueOf(person.getExtension("kin"));
-			TextView vistaRuolo = vistaIndi.findViewById(R.id.indi_ruolo);
+			TextView infoView = vistaIndi.findViewById(R.id.indi_ruolo);
 			if( label == null )
-				vistaRuolo.setVisibility(View.GONE);
+				infoView.setVisibility(View.GONE);
 			else {
-				vistaRuolo.setText(label);
-				vistaRuolo.setVisibility(View.VISIBLE);
+				infoView.setAllCaps(false);
+				infoView.setText(label);
+				infoView.setVisibility(View.VISIBLE);
 			}
 
 			TextView vistaNome = vistaIndi.findViewById(R.id.indi_nome);
@@ -461,7 +464,8 @@ public class Anagrafe extends Fragment {
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
 
 		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
-		subMenu.add(0, 1, 0, R.string.id);
+		if( Global.settings.expert )
+			subMenu.add(0, 1, 0, R.string.id);
 		subMenu.add(0, 2, 0, R.string.surname);
 		subMenu.add(0, 3, 0, R.string.date);
 		subMenu.add(0, 4, 0, R.string.age);
@@ -532,7 +536,9 @@ public class Anagrafe extends Fragment {
 		if( familyLabels[1] != null )
 			menu.add(0, 2, 0, familyLabels[1]);
 		menu.add(0, 3, 0, R.string.modify);
-		menu.add(0, 4, 0, R.string.delete);
+		if( Global.settings.expert )
+			menu.add(0, 4, 0, "Edit ID"); // todo traduci
+		menu.add(0, 5, 0, R.string.delete);
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
@@ -547,10 +553,12 @@ public class Anagrafe extends Fragment {
 			Intent intento = new Intent(getContext(), EditaIndividuo.class);
 			intento.putExtra("idIndividuo", idIndi);
 			startActivity(intento);
-		} else if( id == 4 ) { // Elimina
+		} else if( id == 4 ) { // Edit ID
+			U.editId(getContext(), gc.getPerson(idIndi), adapter::notifyDataSetChanged);
+		} else if( id == 5 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_person )
 					.setPositiveButton( R.string.delete, (dialog, i) -> {
-						Family[] famiglie = eliminaPersona(getContext(), idIndi);
+						Family[] famiglie = deletePerson(getContext(), idIndi);
 						adapter.notifyDataSetChanged();
 						arredaBarra();
 						U.controllaFamiglieVuote(getContext(), null, false, famiglie);
@@ -585,22 +593,26 @@ public class Anagrafe extends Fragment {
 		return famiglie.toArray( new Family[0] );
 	}
 
-	// Elimina una persona dal gedcom, trova eventuale nuova radice, restituisce famiglie modificate
-	static Family[] eliminaPersona(Context contesto, String idEliminando) {
-		Family[] famiglie = scollega( idEliminando );
-		Person eliminando = gc.getPerson( idEliminando );
-		Memoria.annullaIstanze( eliminando );
-		gc.getPeople().remove( eliminando );
-		gc.createIndexes();	// necessario
-		String idNuovaRadice = U.trovaRadice(gc);	// Todo dovrebbe essere: trovaParentePiuProssimo
-		if( Global.settings.getCurrentTree().root !=null && Global.settings.getCurrentTree().root.equals(idEliminando) ) {
-			Global.settings.getCurrentTree().root = idNuovaRadice;
+	/** Delete a person from the tree, possibly find the new root.
+	 * @param context
+	 * @param personId Id of the person to be deleted
+	 * @return Array of modified families
+	 */
+	static Family[] deletePerson(Context context, String personId) {
+		Family[] families = scollega(personId);
+		Person person = gc.getPerson(personId);
+		Memoria.annullaIstanze(person);
+		gc.getPeople().remove(person);
+		gc.createIndexes(); // Necessary
+		String newRootId = U.trovaRadice(gc); // Todo dovrebbe essere: trovaParentePiuProssimo
+		if( Global.settings.getCurrentTree().root != null && Global.settings.getCurrentTree().root.equals(personId) ) {
+			Global.settings.getCurrentTree().root = newRootId;
 		}
 		Global.settings.save();
-		if( Global.indi != null && Global.indi.equals(idEliminando) )
-			Global.indi = idNuovaRadice;
-		Toast.makeText( contesto, R.string.person_deleted, Toast.LENGTH_SHORT ).show();
-		U.save( true, (Object[])famiglie );
-		return famiglie;
+		if( Global.indi != null && Global.indi.equals(personId) )
+			Global.indi = newRootId;
+		Toast.makeText(context, R.string.person_deleted, Toast.LENGTH_SHORT).show();
+		U.save(true, (Object[])families);
+		return families;
 	}
 }

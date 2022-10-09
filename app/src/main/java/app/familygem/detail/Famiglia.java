@@ -1,5 +1,6 @@
 package app.familygem.detail;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import org.folg.gedcom.model.ChildRef;
@@ -10,12 +11,14 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import app.familygem.Dettaglio;
 import app.familygem.EditaIndividuo;
 import app.familygem.Global;
 import app.familygem.Individuo;
+import app.familygem.IndividuoFamiliari;
 import app.familygem.Memoria;
 import app.familygem.R;
 import app.familygem.U;
@@ -23,10 +26,13 @@ import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.constant.Status;
 import static app.familygem.Global.gc;
+import androidx.appcompat.app.AlertDialog;
 
 public class Famiglia extends Dettaglio {
 
 	Family f;
+	static String[] pediTexts = {"None", U.s(R.string.birth), "Adopted", "Foster"}; // todo traduci
+	static String[] pediTypes = {null, "birth", "adopted", "foster"};
 
 	@Override
 	public void impagina() {
@@ -53,7 +59,7 @@ public class Famiglia extends Dettaglio {
 	void member(SpouseRef sr, Relation relation) {
 		Person p = sr.getPerson(gc);
 		if( p == null ) return;
-		View vistaPersona = U.mettiIndividuo(box, p, getRole(p, f, relation, true));
+		View vistaPersona = U.mettiIndividuo(box, p, getRole(p, f, relation, true) + writeLineage(p, f));
 		vistaPersona.setTag(R.id.tag_oggetto, p); // per il menu contestuale in Dettaglio
 		/*  Ref nell'individuo verso la famiglia
 			Se la stessa persona è presente più volte con lo stesso ruolo (parent/child) nella stessa famiglia
@@ -171,6 +177,45 @@ public class Famiglia extends Dettaglio {
 			}
 		}
 		return Global.context.getString(role);
+	}
+
+	// Find the ParentFamilyRef of a child person in a family
+	public static ParentFamilyRef findParentFamilyRef(Person person, Family family) {
+		for( ParentFamilyRef parentFamilyRef : person.getParentFamilyRefs() ) {
+			if( parentFamilyRef.getRef().equals(family.getId()) ) {
+				return parentFamilyRef;
+			}
+		}
+		return null;
+	}
+
+	// Compose the lineage definition to be added to the role
+	public static String writeLineage(Person person, Family family) {
+		ParentFamilyRef parentFamilyRef = findParentFamilyRef(person, family);
+		if( parentFamilyRef != null ) {
+			int actual = Arrays.asList(pediTypes).indexOf(parentFamilyRef.getRelationshipType());
+			if( actual > 0 )
+				return " – " + pediTexts[actual];
+		}
+		return "";
+	}
+
+	// Display the alert dialog to choose the lineage of one person
+	public static void chooseLineage(Context context, Person person, Family family) {
+		ParentFamilyRef parentFamilyRef = findParentFamilyRef(person, family);
+		if( parentFamilyRef != null ) {
+			int actual = Arrays.asList(pediTypes).indexOf(parentFamilyRef.getRelationshipType());
+			new AlertDialog.Builder(context).setSingleChoiceItems(pediTexts, actual, (dialog, i) -> {
+				parentFamilyRef.setRelationshipType(pediTypes[i]);
+				dialog.dismiss();
+				if( context instanceof Individuo )
+					((IndividuoFamiliari)((Individuo)context).getSupportFragmentManager()
+							.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":2")).refresh();
+				else if( context instanceof Famiglia )
+					((Famiglia)context).refresh();
+				U.save(true, person);
+			}).show();
+		}
 	}
 
 	// Collega una persona ad una famiglia come genitore o figlio

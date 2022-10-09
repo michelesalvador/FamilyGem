@@ -8,7 +8,7 @@ public enum Gender {
 	NONE, // No SEX tag
 	MALE, // 'SEX M'
 	FEMALE, // 'SEX F'
-	UNDEFINED, // 'SEX U'
+	UNKNOWN, // 'SEX U'
 	OTHER; // Some other value
 
 	// Find the gender of a Person
@@ -21,7 +21,7 @@ public enum Gender {
 					switch( fact.getValue() ) {
 						case "M": return MALE;
 						case "F": return FEMALE;
-						case "U": return UNDEFINED;
+						case "U": return UNKNOWN;
 						default: return OTHER;
 					}
 				}

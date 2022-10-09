@@ -123,18 +123,18 @@ public class Quaderno extends Fragment implements QuadernoAdapter.ItemClickListe
 
 	// Crea una nuova nota condivisa, attaccata a un contenitore oppure slegata
 	static void newNote(Context context, Object container) {
-		Note notaNova = new Note();
+		Note note = new Note();
 		String id = U.nuovoId(gc, Note.class);
-		notaNova.setId(id);
-		notaNova.setValue("");
-		gc.addNote(notaNova);
+		note.setId(id);
+		note.setValue("");
+		gc.addNote(note);
 		if( container != null ) {
-			NoteRef refNota = new NoteRef();
-			refNota.setRef(id);
-			((NoteContainer)container).addNoteRef(refNota);
+			NoteRef noteRef = new NoteRef();
+			noteRef.setRef(id);
+			((NoteContainer)container).addNoteRef(noteRef);
 		}
-		U.save(true, notaNova);
-		Memoria.setPrimo(notaNova);
+		U.save(true, note);
+		Memoria.setPrimo(note);
 		context.startActivity(new Intent(context, Nota.class));
 	}
 }

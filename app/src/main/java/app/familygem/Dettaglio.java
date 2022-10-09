@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -73,17 +74,21 @@ public class Dettaglio extends AppCompatActivity {
 	List<Pair<String, String>> otherEvents; // Eventi per il FAB di Famiglia
 	public Person unRappresentanteDellaFamiglia; // una Person della Famiglia per nascondere nel FAB 'Collega persona'
 	EditoreData editoreData;
+	FloatingActionButton fab;
+	ActionBar actionBar;
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		setContentView( R.layout.dettaglio );
-		getSupportActionBar().setDisplayHomeAsUpEnabled( true );
-		box = findViewById( R.id.dettaglio_scatola );
-		U.gedcomSicuro( gc );
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		setContentView(R.layout.dettaglio);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		box = findViewById(R.id.dettaglio_scatola);
+		fab = findViewById(R.id.fab);
+		actionBar = getSupportActionBar();
+		U.gedcomSicuro(gc);
 
 		object = Memoria.getOggetto();
-		if( object == null) {
+		if( object == null ) {
 			onBackPressed(); // salta tutti gli altri dettagli senza oggetto
 		} else
 			impagina();
@@ -138,7 +143,7 @@ public class Dettaglio extends AppCompatActivity {
 						edit(pezzo);
 					// todo : aprire Address nuovo per editarlo
 				} else if( id == 101 ) {
-					Magazzino.nuovoArchivio(this, (Source)object);
+					Magazzino.newRepository(this, (Source)object);
 				} else if( id == 102 ) {
 					Intent intento = new Intent(this, Principal.class);
 					intento.putExtra("magazzinoScegliArchivio", true);
@@ -387,41 +392,56 @@ public class Dettaglio extends AppCompatActivity {
 		impagina();
 	}
 
-	// Inserisce la bava di lumaca
+	// Place the tags slug
 	public void placeSlug(String tag) {
 		placeSlug(tag, null);
 	}
 
 	public void placeSlug(String tag, String id) {
-		LinearLayout vistaBava = findViewById(R.id.dettaglio_bava);
+		FlexboxLayout slugLayout = findViewById(R.id.dettaglio_bava);
 		if( Global.settings.expert ) {
-			vistaBava.removeAllViews();
-			for( final Memoria.Passo passo : Memoria.getPila() ) {
-				View vistaGoccia = LayoutInflater.from(this).inflate(R.layout.pezzo_bava, box, false);
-				TextView testoGoccia = vistaGoccia.findViewById(R.id.bava_goccia);
-				if( Memoria.getPila().indexOf(passo) < Memoria.getPila().size() - 1 ) {
-					if( passo.oggetto instanceof Visitable ) // le estensioni GedcomTag non sono Visitable ed è impossibile trovargli la pila
-						vistaGoccia.setOnClickListener(v -> {
-							new TrovaPila(gc, passo.oggetto);
-							startActivity(new Intent(this, Memoria.classi.get(passo.oggetto.getClass())));
+			slugLayout.removeAllViews();
+			for( final Memoria.Passo step : Memoria.getPila() ) {
+				View stepView = LayoutInflater.from(this).inflate(R.layout.pezzo_bava, box, false);
+				TextView stepText = stepView.findViewById(R.id.bava_goccia);
+				if( Memoria.getPila().indexOf(step) < Memoria.getPila().size() - 1 ) {
+					if( step.oggetto instanceof Visitable ) // le estensioni GedcomTag non sono Visitable ed è impossibile trovargli la pila
+						stepView.setOnClickListener(v -> {
+							new TrovaPila(gc, step.oggetto);
+							startActivity(new Intent(this, Memoria.classi.get(step.oggetto.getClass())));
 						});
 				} else {
-					passo.tag = tag;
-					testoGoccia.setTypeface(null, Typeface.BOLD);
+					step.tag = tag;
+					stepText.setTypeface(Typeface.MONOSPACE,Typeface.BOLD);
 				}
-				testoGoccia.setText(passo.tag);
-				vistaBava.addView(vistaGoccia);
-			}
-			// Agiunge l'id ai record capostipiti INDI, FAMI, REPO... ad es. 'SOUR S123'
-			if( id != null ) {
-				View vistaId = LayoutInflater.from(this).inflate(R.layout.pezzo_bava, vistaBava, false);
-				TextView testoId = vistaId.findViewById(R.id.bava_goccia);
-				testoId.setText(id);
-				testoId.setTypeface(null, Typeface.BOLD);
-				vistaBava.addView(vistaId);
+				String label = step.tag;
+				if( id != null ) {
+					label += " " + id; // Id for main records INDI, FAMI, REPO... e.g. 'SOUR S123'
+					stepView.setOnClickListener(v -> {
+						concludeOtherPiece();
+						U.editId(this, (ExtensionContainer)object, this::refresh);
+					});
+				}
+				stepText.setText(label);
+				slugLayout.addView(stepView);
 			}
 		} else
-			vistaBava.setVisibility(View.GONE);
+			slugLayout.setVisibility(View.GONE);
+	}
+
+	// Conclude the possible editing of another piece
+	private void concludeOtherPiece() {
+		for( int i = 0; i < box.getChildCount(); i++ ) {
+			View otherPiece = box.getChildAt(i);
+			EditText editText = otherPiece.findViewById(R.id.fatto_edita);
+			if( editText != null && editText.isShown() ) {
+				TextView textView = otherPiece.findViewById(R.id.fatto_testo);
+				if( !editText.getText().toString().equals(textView.getText().toString()) ) // se c'è stata editazione
+					save(otherPiece);
+				else
+					restore(otherPiece);
+			}
+		}
 	}
 
 	// Return 'object' casted in the required class,
@@ -631,21 +651,7 @@ public class Dettaglio extends AppCompatActivity {
 
 	EditText editText;
 	void edit(View pieceView) {
-		FloatingActionButton fab = findViewById(R.id.fab);
-		ActionBar barra = getSupportActionBar();
-
-		// Termina l'eventuale editazione di un altro pezzo
-		for( int i = 0; i < box.getChildCount(); i++ ) {
-			View otherPiece = box.getChildAt(i);
-			EditText editText = otherPiece.findViewById(R.id.fatto_edita);
-			if( editText != null && editText.isShown() ) {
-				TextView textView = otherPiece.findViewById(R.id.fatto_testo);
-				if( !editText.getText().toString().equals(textView.getText().toString()) ) // se c'è stata editazione
-					save(otherPiece, barra, fab);
-				else
-					ripristina(otherPiece, barra, fab);
-			}
-		}
+		concludeOtherPiece();
 		// Poi rende editabile questo pezzo
 		TextView textView = pieceView.findViewById(R.id.fatto_testo);
 		textView.setVisibility(View.GONE);
@@ -704,12 +710,12 @@ public class Dettaglio extends AppCompatActivity {
 		// Intercetta il 'Done' e 'Next' sulla tastiera
 		editText.setOnEditorActionListener((vista, actionId, keyEvent) -> {
 			if( actionId == EditorInfo.IME_ACTION_DONE )
-				save(pieceView, barra, fab);
+				save(pieceView);
 			else if( actionId == EditorInfo.IME_ACTION_NEXT ) {
 				if( !editText.getText().toString().equals(textView.getText().toString()) )
-					save(pieceView, barra, fab);
+					save(pieceView);
 				else
-					ripristina(pieceView, barra, fab);
+					restore(pieceView);
 				View nextPiece = box.getChildAt(box.indexOfChild(pieceView) + 1);
 				if( nextPiece != null && nextPiece.getTag(R.id.tag_oggetto) instanceof String )
 					edit(nextPiece);
@@ -718,20 +724,20 @@ public class Dettaglio extends AppCompatActivity {
 		});
 
 		// ActionBar personalizzata
-		barra.setDisplayHomeAsUpEnabled( false );	// nasconde freccia <-
+		actionBar.setDisplayHomeAsUpEnabled(false);    // nasconde freccia <-
 		qualeMenu = 0;
 		invalidateOptionsMenu();
-		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(box.getContext()), false);
-		barraAzione.findViewById(R.id.edita_annulla).setOnClickListener( v -> {
-			editText.setText( textView.getText() );
-			ripristina( pieceView, barra, fab );
+		View editBar = getLayoutInflater().inflate(R.layout.barra_edita, new LinearLayout(box.getContext()), false);
+		editBar.findViewById(R.id.edita_annulla).setOnClickListener(v -> {
+			editText.setText(textView.getText());
+			restore(pieceView);
 		});
-		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( v -> save( pieceView, barra, fab ) );
-		barra.setCustomView( barraAzione );
-		barra.setDisplayShowCustomEnabled( true );
+		editBar.findViewById(R.id.edita_salva).setOnClickListener(v -> save(pieceView));
+		actionBar.setCustomView(editBar);
+		actionBar.setDisplayShowCustomEnabled(true);
 	}
 
-	void save(View pieceView, ActionBar actionBar, FloatingActionButton fab) {
+	void save(View pieceView) {
 		if( editoreData != null ) editoreData.chiudi(); // In sostanza solo per aggiungere le parentesi alla data frase
 		String text = editText.getText().toString().trim();
 		Object pieceObject = pieceView.getTag(R.id.tag_oggetto);
@@ -746,7 +752,7 @@ public class Dettaglio extends AppCompatActivity {
 			return; // in caso di errore rimane in modalità editore
 		}
 		((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
-		ripristina(pieceView, actionBar, fab);
+		restore(pieceView);
 		U.save(true, Memoria.oggettoCapo());
 		/*if( Memoria.getPila().size() == 1 ) {
 			ricrea(); // Todo Bisognerebbe aggiornare la data Cambiamento del record, però magari senza ricaricare tutto.
@@ -762,12 +768,12 @@ public class Dettaglio extends AppCompatActivity {
 	}
 
 	// Operazioni comuni a Salva e Annulla
-	void ripristina(View vistaPezzo, ActionBar barra, FloatingActionButton fab) {
+	void restore(View vistaPezzo) {
 		editText.setVisibility(View.GONE);
 		vistaPezzo.findViewById(R.id.fatto_data).setVisibility(View.GONE);
 		vistaPezzo.findViewById(R.id.fatto_testo).setVisibility(View.VISIBLE);
-		barra.setDisplayShowCustomEnabled(false); // nasconde barra personalizzata
-		barra.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowCustomEnabled(false); // nasconde barra personalizzata
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		qualeMenu = 1;
 		invalidateOptionsMenu();
 		InputMethodManager imm = (InputMethodManager)getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
@@ -780,35 +786,35 @@ public class Dettaglio extends AppCompatActivity {
 	int qualeMenu = 1;	// serve per nasconderlo quando si entra in modalità editore
 	@Override
 	public boolean onCreateOptionsMenu( Menu menu ) {
-		if( qualeMenu == 1 ) {	// Menu standard della barra
-			if( object instanceof Submitter && ( gc.getHeader()==null || // Autore non principale
-					gc.getHeader().getSubmitter(gc)==null || !gc.getHeader().getSubmitter(gc).equals(object) ))
-				menu.add( 0, 1, 0, R.string.make_default );
+		if( qualeMenu == 1 ) { // Menu standard della barra
+			if( object instanceof Submitter && (gc.getHeader() == null || // Autore non principale
+					gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(object)) )
+				menu.add(0, 1, 0, R.string.make_default);
 			if( object instanceof Media ) {
 				if( box.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
-					menu.add( 0, 2, 0, R.string.crop );
-				menu.add( 0, 3, 0, R.string.choose_file );
+					menu.add(0, 2, 0, R.string.crop);
+				menu.add(0, 3, 0, R.string.choose_file);
 			}
 			if( object instanceof Family )
-				menu.add( 0, 4, 0, R.string.delete );
+				menu.add(0, 4, 0, R.string.delete);
 			else if( !(object instanceof Submitter && U.autoreHaCondiviso((Submitter)object)) ) // autore che ha condiviso non può essere eliminato
-				menu.add( 0, 5, 0, R.string.delete );
+				menu.add(0, 5, 0, R.string.delete);
 		}
 		return true;
 	}
 	@Override // è evocato quando viene scelta una voce del menu E cliccando freccia indietro
-	public boolean onOptionsItemSelected( MenuItem item ) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if( id == 1 ) { // Autore principale
-			Podio.autorePrincipale( (Submitter)object);
+			Podio.autorePrincipale((Submitter)object);
 		} else if( id == 2 ) { // Immagine: ritaglia
-			croppaImmagine( box );
+			croppaImmagine(box);
 		} else if( id == 3 ) { // Immagine: scegli
-			F.appAcquisizioneImmagine( this, null, 5173, null );
-		} else if( id == 4 ) {	// Famiglia
+			F.appAcquisizioneImmagine(this, null, 5173, null);
+		} else if( id == 4 ) { // Famiglia
 			Family fam = (Family)object;
 			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
-				new AlertDialog.Builder(this).setMessage( R.string.really_delete_family )
+				new AlertDialog.Builder(this).setMessage(R.string.really_delete_family)
 						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
 							Chiesa.deleteFamily(fam);
 							onBackPressed();
@@ -822,7 +828,7 @@ public class Dettaglio extends AppCompatActivity {
 			elimina();
 			U.save(true); // l'aggiornamento delle date avviene negli Override di elimina()
 			onBackPressed();
-		} else if( id == android.R.id.home ){
+		} else if( id == android.R.id.home ) {
 			onBackPressed();
 		}
 		return true;
@@ -839,83 +845,86 @@ public class Dettaglio extends AppCompatActivity {
 	public void elimina() {}
 
 	// Menu contestuale
-	View vistaPezzo;	// testo editabile, note, citazioni, media...
-	Object oggettoPezzo;
-	Person pers; // siccome usato molto ne facciamo un oggettoPezzo a sè stante
+	View pieceView; // testo editabile, note, citazioni, media...
+	Object pieceObject;
+	Person person; // siccome usato molto ne facciamo un pieceObject a sè stante
 	@Override
-	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {	// info è null
-		if( qualeMenu != 0 ) {	// Se siamo in modalità edita mostra i menu editore
-			vistaPezzo = vista;
-			oggettoPezzo = vista.getTag( R.id.tag_oggetto );
-			if( oggettoPezzo instanceof Person ) {
-				pers = (Person) oggettoPezzo;
+	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) { // info is null
+		if( qualeMenu != 0 ) { // Se siamo in modalità edita mostra i menu editore
+			pieceView = view;
+			pieceObject = view.getTag(R.id.tag_oggetto);
+			if( pieceObject instanceof Person ) {
+				person = (Person)pieceObject;
 				Family fam = (Family)object;
 				// Genera le etichette per le voci 'famiglia' (come figlio e come coniuge)
-				String[] etichetteFam = { null, null };
-				if( pers.getParentFamilies(gc).size() > 1 && pers.getSpouseFamilies(gc).size() > 1 ) {
+				String[] etichetteFam = {null, null};
+				if( person.getParentFamilies(gc).size() > 1 && person.getSpouseFamilies(gc).size() > 1 ) {
 					etichetteFam[0] = getString(R.string.family_as_child);
 					etichetteFam[1] = getString(R.string.family_as_spouse);
 				}
-				menu.add(0, 10, 0, R.string.diagram );
-				menu.add(0, 11, 0, R.string.card );
+				menu.add(0, 10, 0, R.string.diagram);
+				menu.add(0, 11, 0, R.string.card);
 				if( etichetteFam[0] != null )
 					menu.add(0, 12, 0, etichetteFam[0]);
 				if( etichetteFam[1] != null )
 					menu.add(0, 13, 0, etichetteFam[1]);
-				if( fam.getChildren(gc).indexOf(pers) > 0 )
+				if( fam.getChildren(gc).indexOf(person) > 0 )
 					menu.add(0, 14, 0, R.string.move_before);
-				if( fam.getChildren(gc).indexOf(pers) < fam.getChildren(gc).size() - 1 && fam.getChildren(gc).contains(pers) )
+				if( fam.getChildren(gc).indexOf(person) < fam.getChildren(gc).size() - 1 && fam.getChildren(gc).contains(person) )
 					// così esclude i genitori il cui indice è -1
 					menu.add(0, 15, 0, R.string.move_after);
 				menu.add(0, 16, 0, R.string.modify);
-				menu.add(0, 17, 0, R.string.unlink);
-				menu.add(0, 18, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof Note ) {
+				if( Famiglia.findParentFamilyRef(person, fam) != null )
+					menu.add(0, 17, 0, "Lineage"); // todo traduci
+				menu.add(0, 18, 0, R.string.unlink);
+				menu.add(0, 19, 0, R.string.delete);
+			} else if( pieceObject instanceof Note ) {
 				menu.add(0, 20, 0, R.string.copy);
-				if( ((Note)oggettoPezzo).getId() != null )
+				if( ((Note)pieceObject).getId() != null )
 					menu.add(0, 21, 0, R.string.unlink);
 				menu.add(0, 22, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof SourceCitation ) {
+			} else if( pieceObject instanceof SourceCitation ) {
 				menu.add(0, 30, 0, R.string.copy);
 				menu.add(0, 31, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof Media ) {
-				if( ((Media)oggettoPezzo).getId() != null )
+			} else if( pieceObject instanceof Media ) {
+				if( ((Media)pieceObject).getId() != null )
 					menu.add(0, 40, 0, R.string.unlink);
 				menu.add(0, 41, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof Address ) {
+			} else if( pieceObject instanceof Address ) {
 				menu.add(0, 50, 0, R.string.copy);
 				menu.add(0, 51, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof EventFact ) {
+			} else if( pieceObject instanceof EventFact ) {
 				menu.add(0, 55, 0, R.string.copy);
 				Family fam = (Family)object;
-				if( fam.getEventsFacts().indexOf(oggettoPezzo) > 0 )
+				if( fam.getEventsFacts().indexOf(pieceObject) > 0 )
 					menu.add(0, 56, 0, R.string.move_up);
-				if( fam.getEventsFacts().contains(oggettoPezzo)
-						&& fam.getEventsFacts().indexOf(oggettoPezzo) < fam.getEventsFacts().size() - 1 )
+				if( fam.getEventsFacts().contains(pieceObject)
+						&& fam.getEventsFacts().indexOf(pieceObject) < fam.getEventsFacts().size() - 1 )
 					menu.add(0, 57, 0, R.string.move_down);
 				menu.add(0, 58, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof GedcomTag ) {
+			} else if( pieceObject instanceof GedcomTag ) {
 				menu.add(0, 60, 0, R.string.copy);
 				menu.add(0, 61, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof Source ) {
+			} else if( pieceObject instanceof Source ) {
 				menu.add(0, 70, 0, R.string.copy);
 				menu.add(0, 71, 0, R.string.choose_source);
-			} else if( oggettoPezzo instanceof RepositoryRef ) {
+			} else if( pieceObject instanceof RepositoryRef ) {
 				menu.add(0, 80, 0, R.string.copy);
 				menu.add(0, 81, 0, R.string.delete);
-			} else if( oggettoPezzo instanceof Repository ) {
+			} else if( pieceObject instanceof Repository ) {
 				menu.add(0, 90, 0, R.string.copy);
 				menu.add(0, 91, 0, R.string.choose_repository);
-			} else if( oggettoPezzo instanceof Integer ) {
-				if( oggettoPezzo.equals(43614) ) { // Immaginona
+			} else if( pieceObject instanceof Integer ) {
+				if( pieceObject.equals(43614) ) { // Immaginona
 					// è un'immagine ritagliabile
-					if( vistaPezzo.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
+					if( pieceView.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
 						menu.add(0, 100, 0, R.string.crop);
 					menu.add(0, 101, 0, R.string.choose_file);
-				} else if( oggettoPezzo.equals(4043) || oggettoPezzo.equals(6064) ) // Nome e cognome per inesperti
+				} else if( pieceObject.equals(4043) || pieceObject.equals(6064) ) // Nome e cognome per inesperti
 					menu.add(0, 0, 0, R.string.copy);
-			} else if( oggettoPezzo instanceof String ) {
-				menu.add(0, 0, 0, R.string.copy);
+			} else if( pieceObject instanceof String ) {
+				if( ((TextView)view.findViewById(R.id.fatto_testo)).getText().length() > 0 )
+					menu.add(0, 0, 0, R.string.copy);
 				menu.add(0, 1, 0, R.string.delete);
 			}
 		}
@@ -929,88 +938,91 @@ public class Dettaglio extends AppCompatActivity {
 			case 50: // Address
 			case 55: // Evento
 			case 60: // Estensione
-				U.copiaNegliAppunti(((TextView)vistaPezzo.findViewById(R.id.fatto_titolo)).getText(),
-						((TextView)vistaPezzo.findViewById(R.id.fatto_testo)).getText());
+				U.copiaNegliAppunti(((TextView)pieceView.findViewById(R.id.fatto_titolo)).getText(),
+						((TextView)pieceView.findViewById(R.id.fatto_testo)).getText());
 				return true;
 			case 1: // Elimina pezzo editabile
 				try {
-					object.getClass().getMethod("set" + oggettoPezzo, String.class).invoke(object, (Object)null);
+					object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, (Object)null);
 				} catch( Exception e ) {
 					Toast.makeText(box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 					break;
 				}
 				break;
 			case 10: // Diagramma
-				U.qualiGenitoriMostrare(this, pers, 1);
+				U.qualiGenitoriMostrare(this, person, 1);
 				return true;
 			case 11: // Scheda persona
-				Memoria.setPrimo(pers);
+				Memoria.setPrimo(person);
 				startActivity(new Intent(this, Individuo.class));
 				return true;
 			case 12: // Famiglia come figlio
-				U.qualiGenitoriMostrare(this, pers, 2);
+				U.qualiGenitoriMostrare(this, person, 2);
 				return true;
 			case 13: // Famiglia come coniuge
-				U.qualiConiugiMostrare(this, pers, null);
+				U.qualiConiugiMostrare(this, person, null);
 				return true;
 			case 14: // Figlio sposta su
 				Family fa = (Family)object;
-				ChildRef refBimbo = fa.getChildRefs().get(fa.getChildren(gc).indexOf(pers));
+				ChildRef refBimbo = fa.getChildRefs().get(fa.getChildren(gc).indexOf(person));
 				fa.getChildRefs().add(fa.getChildRefs().indexOf(refBimbo) - 1, refBimbo);
 				fa.getChildRefs().remove(fa.getChildRefs().lastIndexOf(refBimbo));
 				break;
 			case 15: // Figlio sposta giù
 				Family f = (Family)object;
-				ChildRef childRef = f.getChildRefs().get(f.getChildren(gc).indexOf(pers));
+				ChildRef childRef = f.getChildRefs().get(f.getChildren(gc).indexOf(person));
 				f.getChildRefs().add(f.getChildRefs().indexOf(childRef) + 2, childRef);
 				f.getChildRefs().remove(f.getChildRefs().indexOf(childRef));
 				break;
 			case 16: // Modifica
 				Intent i = new Intent(this, EditaIndividuo.class);
-				i.putExtra("idIndividuo", pers.getId());
+				i.putExtra("idIndividuo", person.getId());
 				startActivity(i);
 				return true;
-			case 17: // Scollega
-				Famiglia.scollega((SpouseFamilyRef)vistaPezzo.getTag(R.id.tag_spouse_family_ref),
-						(SpouseRef)vistaPezzo.getTag(R.id.tag_spouse_ref));
-				U.updateChangeDate(pers);
-				trovaUnAltroRappresentanteDellaFamiglia(pers);
+			case 17: // Lineage
+				Famiglia.chooseLineage(this, person, (Family)object);
 				break;
-			case 18: // Elimina membro
+			case 18: // Scollega
+				Famiglia.scollega((SpouseFamilyRef)pieceView.getTag(R.id.tag_spouse_family_ref),
+						(SpouseRef)pieceView.getTag(R.id.tag_spouse_ref));
+				U.updateChangeDate(person);
+				trovaUnAltroRappresentanteDellaFamiglia(person);
+				break;
+			case 19: // Elimina membro
 				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
 						.setPositiveButton(R.string.delete, (dialog, id) -> {
-							Anagrafe.eliminaPersona(this, pers.getId());
-							box.removeView(vistaPezzo);
-							trovaUnAltroRappresentanteDellaFamiglia(pers);
+							Anagrafe.deletePerson(this, person.getId());
+							box.removeView(pieceView);
+							trovaUnAltroRappresentanteDellaFamiglia(person);
 						}).setNeutralButton(R.string.cancel, null).show();
 				return true;
 			case 20: // Nota
-				U.copiaNegliAppunti(getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText());
+				U.copiaNegliAppunti(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.nota_testo)).getText());
 				return true;
 			case 21:
-				U.scollegaNota((Note)oggettoPezzo, object, null);
+				U.scollegaNota((Note)pieceObject, object, null);
 				break;
 			case 22:
-				Object[] capi = U.eliminaNota((Note)oggettoPezzo, vistaPezzo);
+				Object[] capi = U.eliminaNota((Note)pieceObject, pieceView);
 				U.save(true, capi);
 				return true;
 			case 30: // Citazione fonte
 				U.copiaNegliAppunti(getText(R.string.source_citation),
-						((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText() + "\n"
-								+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText());
+						((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
+								+ ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
 				return true;
 			case 31:
 				if( object instanceof Note ) // Note non estende SourceCitationContainer
-					((Note)object).getSourceCitations().remove(oggettoPezzo);
+					((Note)object).getSourceCitations().remove(pieceObject);
 				else
-					((SourceCitationContainer)object).getSourceCitations().remove(oggettoPezzo);
-				Memoria.annullaIstanze(oggettoPezzo);
+					((SourceCitationContainer)object).getSourceCitations().remove(pieceObject);
+				Memoria.annullaIstanze(pieceObject);
 				break;
 			case 40: // Media
-				Galleria.scollegaMedia(((Media)oggettoPezzo).getId(), (MediaContainer)object);
+				Galleria.scollegaMedia(((Media)pieceObject).getId(), (MediaContainer)object);
 				break;
 			case 41:
-				Object[] capiMedia = Galleria.eliminaMedia((Media)oggettoPezzo, null);
+				Object[] capiMedia = Galleria.eliminaMedia((Media)pieceObject, null);
 				U.save(true, capiMedia); // un media condiviso può dover aggiornare le date di più capi
 				refresh();
 				return true;
@@ -1018,23 +1030,23 @@ public class Dettaglio extends AppCompatActivity {
 				eliminaIndirizzo(object);
 				break;
 			case 56: // Evento di Famiglia
-				int index1 = ((Family)object).getEventsFacts().indexOf(oggettoPezzo);
+				int index1 = ((Family)object).getEventsFacts().indexOf(pieceObject);
 				Collections.swap(((Family)object).getEventsFacts(), index1, index1 - 1);
 				break;
 			case 57:
-				int index2 = ((Family)object).getEventsFacts().indexOf(oggettoPezzo);
+				int index2 = ((Family)object).getEventsFacts().indexOf(pieceObject);
 				Collections.swap(((Family)object).getEventsFacts(), index2, index2 + 1);
 				break;
 			case 58:
-				((Family)object).getEventsFacts().remove(oggettoPezzo);
-				Memoria.annullaIstanze(oggettoPezzo);
+				((Family)object).getEventsFacts().remove(pieceObject);
+				Memoria.annullaIstanze(pieceObject);
 				break;
 			case 61: // Estensione
-				U.eliminaEstensione((GedcomTag)oggettoPezzo, object, null);
+				U.eliminaEstensione((GedcomTag)pieceObject, object, null);
 				break;
 			// Fonte
 			case 70: // Copia
-				U.copiaNegliAppunti(getText(R.string.source), ((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText());
+				U.copiaNegliAppunti(getText(R.string.source), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
 				return true;
 			case 71: // Scegli in Biblioteca
 				Intent inte = new Intent(this, Principal.class);
@@ -1044,16 +1056,16 @@ public class Dettaglio extends AppCompatActivity {
 			// Citazione archivio
 			case 80: // Copia
 				U.copiaNegliAppunti(getText(R.string.repository_citation),
-						((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText() + "\n"
-								+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText());
+						((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
+								+ ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
 				return true;
 			case 81: // Elimina
 				((Source)object).setRepositoryRef(null);
-				Memoria.annullaIstanze(oggettoPezzo);
+				Memoria.annullaIstanze(pieceObject);
 				break;
 			// Archivio
 			case 90: // Copia
-				U.copiaNegliAppunti(getText(R.string.repository), ((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText());
+				U.copiaNegliAppunti(getText(R.string.repository), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
 				return true;
 			case 91: // Scegli in Magazzino
 				Intent intn = new Intent(this, Principal.class);
@@ -1061,7 +1073,7 @@ public class Dettaglio extends AppCompatActivity {
 				startActivityForResult(intn, 5390);
 				return true;
 			case 100: // Immaginona ritaglia
-				croppaImmagine(vistaPezzo);
+				croppaImmagine(pieceView);
 				return true;
 			case 101: // scegli immagine
 				F.appAcquisizioneImmagine(this, null, 5173, null);

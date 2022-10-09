@@ -87,7 +87,8 @@ public class IndividuoFamiliari extends Fragment {
 
 	void createCard(final Person person, Relation relation, Family family) {
 		LinearLayout scatola = vistaFamiglia.findViewById(R.id.contenuto_scheda);
-		View vistaPersona = U.mettiIndividuo(scatola, person, Famiglia.getRole(person, family, relation, false));
+		View vistaPersona = U.mettiIndividuo(scatola, person,
+				Famiglia.getRole(person, family, relation, false) + Famiglia.writeLineage(person, family));
 		vistaPersona.setOnClickListener(v -> {
 			getActivity().finish(); // Rimuove l'attività attale dallo stack
 			Memoria.replacePrimo(person);
@@ -107,26 +108,25 @@ public class IndividuoFamiliari extends Fragment {
 	}
 
 	// Menu contestuale
-	private String idIndividuo;
-	private Person pers;
-	private Family familia;
-	private int posFam;
+	private String indiId;
+	private Person person;
+	private Family family;
+	private int posFam; // posizione della famiglia coniugale per chi ne ha più di una
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		idIndividuo = (String)vista.getTag();
-		pers = gc.getPerson(idIndividuo);
-		familia = (Family)vista.getTag( R.id.tag_famiglia );
-		// posizione della famiglia coniugale per chi ne ha più di una
+		indiId = (String)vista.getTag();
+		person = gc.getPerson(indiId);
+		family = (Family)vista.getTag(R.id.tag_famiglia);
 		posFam = -1;
-		if( uno.getSpouseFamilyRefs().size() > 1 && !familia.getChildren(gc).contains(pers) ) { // solo i coniugi, non i figli
+		if( uno.getSpouseFamilyRefs().size() > 1 && !family.getChildren(gc).contains(person) ) { // solo i coniugi, non i figli
 			List<SpouseFamilyRef> refi = uno.getSpouseFamilyRefs();
 			for( SpouseFamilyRef sfr : refi )
-				if( sfr.getRef().equals(familia.getId()) )
+				if( sfr.getRef().equals(family.getId()) )
 					posFam = refi.indexOf(sfr);
 		}
 		// Meglio usare numeri che non confliggano con i menu contestuali delle altre schede individuo
 		menu.add(0, 300, 0, R.string.diagram);
-		String[] familyLabels = Diagram.getFamilyLabels(getContext(), pers, familia);
+		String[] familyLabels = Diagram.getFamilyLabels(getContext(), person, family);
 		if( familyLabels[0] != null )
 			menu.add(0, 301, 0, familyLabels[0]);
 		if( familyLabels[1] != null )
@@ -136,39 +136,43 @@ public class IndividuoFamiliari extends Fragment {
 		if( posFam >= 0 && posFam < uno.getSpouseFamilyRefs().size() - 1 )
 			menu.add(0, 304, 0, R.string.move_after);
 		menu.add(0, 305, 0, R.string.modify);
-		menu.add(0, 306, 0, R.string.unlink);
-		if( !pers.equals(uno) ) // Qui non può eliminare sè stesso
-			menu.add(0, 307, 0, R.string.delete);
+		if( Famiglia.findParentFamilyRef(person, family) != null )
+			menu.add(0, 306, 0, "Lineage"); // todo traduci
+		menu.add(0, 307, 0, R.string.unlink);
+		if( !person.equals(uno) ) // Qui non può eliminare sè stesso
+			menu.add(0, 308, 0, R.string.delete);
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if( id == 300 ) { // Diagramma
-			U.qualiGenitoriMostrare(getContext(), pers, 1);
+			U.qualiGenitoriMostrare(getContext(), person, 1);
 		} else if( id == 301 ) { // Famiglia come figlio
-			U.qualiGenitoriMostrare(getContext(), pers, 2);
+			U.qualiGenitoriMostrare(getContext(), person, 2);
 		} else if( id == 302 ) { // Famiglia come coniuge
-			U.qualiConiugiMostrare(getContext(), pers, familia);
+			U.qualiConiugiMostrare(getContext(), person, family);
 		} else if( id == 303 ) { // Sposta su
 			spostaRiferimentoFamiglia(-1);
 		} else if( id == 304 ) { // Sposta giù
 			spostaRiferimentoFamiglia(1);
 		} else if( id == 305 ) { // Modifica
 			Intent intento = new Intent(getContext(), EditaIndividuo.class);
-			intento.putExtra("idIndividuo", idIndividuo);
+			intento.putExtra("idIndividuo", indiId);
 			startActivity(intento);
-		} else if( id == 306 ) { // Scollega da questa famiglia
-			Famiglia.scollega(idIndividuo, familia);
+		} else if( id == 306 ) { // Lineage
+			Famiglia.chooseLineage(getContext(), person, family);
+		} else if( id == 307 ) { // Scollega da questa famiglia
+			Famiglia.scollega(indiId, family);
 			refresh();
-			U.controllaFamiglieVuote(getContext(), this::refresh, false, familia);
-			U.save(true, familia, pers);
-		} else if( id == 307 ) { // Elimina
+			U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
+			U.save(true, family, person);
+		} else if( id == 308 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
-						Anagrafe.eliminaPersona(getContext(), idIndividuo);
+						Anagrafe.deletePerson(getContext(), indiId);
 						refresh();
-						U.controllaFamiglieVuote(getContext(), this::refresh, false, familia);
+						U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
 					}).setNeutralButton(R.string.cancel, null).show();
 		} else {
 			return false;
@@ -177,7 +181,7 @@ public class IndividuoFamiliari extends Fragment {
 	}
 
 	// Rinfresca il contenuto del frammento Familiari
-	void refresh() {
+	public void refresh() {
 		FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
 		fragmentManager.beginTransaction().detach(this).commit();
 		fragmentManager.beginTransaction().attach(this).commit();

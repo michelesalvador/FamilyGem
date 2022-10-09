@@ -52,7 +52,7 @@ public class Facciata extends AppCompatActivity {
 			else if( uri.getLastPathSegment().endsWith( ".zip" ) ) // click sulla pagina di invito
 				dataId = uri.getLastPathSegment().replace(".zip","");
 			else {
-				U.tosta( this, R.string.cant_understand_uri );
+				U.toast( this, R.string.cant_understand_uri );
 				return;
 			}
 			if( !BuildConfig.utenteAruba.isEmpty() ) {
@@ -93,7 +93,7 @@ public class Facciata extends AppCompatActivity {
 						fos.write(data, 0, count);
 					}
 					fos.close();
-					if( client.completePendingCommand() && AlberoNuovo.decomprimiZip(contesto, percorsoZip, null) ) {
+					if( client.completePendingCommand() && AlberoNuovo.unZip(contesto, percorsoZip, null) ) {
 						// Se l'albero è stato scaricato con l'install referrer
 						if( Global.settings.referrer != null && Global.settings.referrer.equals(idData) ) {
 							Global.settings.referrer = null;
@@ -114,7 +114,7 @@ public class Facciata extends AppCompatActivity {
 
 	// Conclusione negativa del metodo qui sopra
 	static void scaricamentoFallito( Context contesto, String messaggio, View rotella ) {
-		U.tosta( (Activity)contesto, messaggio );
+		U.toast( (Activity)contesto, messaggio );
 		if( rotella != null )
 			((Activity)contesto).runOnUiThread( () -> rotella.setVisibility( View.GONE ) );
 		else

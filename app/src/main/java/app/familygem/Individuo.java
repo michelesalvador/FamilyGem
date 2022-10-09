@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -152,8 +153,13 @@ public class Individuo extends AppCompatActivity {
 		}
 
 		// Tutto ciò che nella pagina può cambiare
-		if( Global.settings.expert )
-			((TextView)findViewById(R.id.persona_id)).setText("INDI " + one.getId());
+		TextView idView = findViewById(R.id.persona_id);
+		if( Global.settings.expert ) {
+			idView.setText("INDI " + one.getId());
+			idView.setOnClickListener(v -> {
+				U.editId(this, one, ((IndividuoEventi)getTab(1))::refreshId);
+			});
+		} else idView.setVisibility(View.GONE);
 		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
 		barraCollasso.setTitle(U.epiteto(one)); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
 		F.unaFoto(Global.gc, one, findViewById(R.id.persona_foto));
@@ -161,7 +167,7 @@ public class Individuo extends AppCompatActivity {
 		if( Global.edited ) {
 			// Ricostruisce le tre schede ritornando alla pagina
 			for( int i = 0; i < 3; i++ ) {
-				Fragment scheda = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.schede_persona + ":" + i);
+				Fragment scheda = getTab(i);
 				if( scheda != null ) { // alla prima creazione dell'activity sono null
 					getSupportFragmentManager().beginTransaction().detach(scheda).commit();
 					getSupportFragmentManager().beginTransaction().attach(scheda).commit();
@@ -248,6 +254,7 @@ public class Individuo extends AppCompatActivity {
 						one.addName(name);
 						Memoria.aggiungi(name);
 						startActivity(new Intent(Individuo.this, Nome.class));
+						U.save(true, one);
 						break;
 					case 21: // Create sex
 						String[] sexNames = {getString(R.string.male), getString(R.string.female), getString(R.string.unknown)};
@@ -260,20 +267,20 @@ public class Individuo extends AppCompatActivity {
 									one.addEventFact(gender);
 									dialog.dismiss();
 									IndividuoEventi.aggiornaRuoliConiugali(one);
-									IndividuoEventi factsTab = (IndividuoEventi)getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1");
+									IndividuoEventi factsTab = (IndividuoEventi)getTab(1);
 									factsTab.refresh(1);
 									U.save(true, one);
 								}).show();
 						break;
-					case 22: { // Create note
+					case 22: // Create note
 						Note note = new Note();
 						note.setValue("");
 						one.addNote(note);
 						Memoria.aggiungi(note);
 						startActivity(new Intent(Individuo.this, Nota.class));
 						// todo? Dettaglio.edita(View vistaValore);
+						U.save(true, one);
 						break;
-					}
 					case 23: // Create shared note
 						Quaderno.newNote(Individuo.this, one);
 						break;
@@ -288,6 +295,7 @@ public class Individuo extends AppCompatActivity {
 						one.addSourceCitation(citaz);
 						Memoria.aggiungi(citaz);
 						startActivity(new Intent(Individuo.this, CitazioneFonte.class));
+						U.save(true, one);
 						break;
 					case 26: // Nuova fonte
 						Biblioteca.nuovaFonte(Individuo.this, one);
@@ -335,35 +343,38 @@ public class Individuo extends AppCompatActivity {
 							keyTag = otherEvents.get(item.getItemId() - 50).first;
 						} else if( item.getItemId() >= 40 )
 							keyTag = mainEventTags[item.getItemId() - 40];
-						if( keyTag != null ) {
-							EventFact nuovoEvento = new EventFact();
-							nuovoEvento.setTag(keyTag);
-							switch( keyTag ) {
-								case "OCCU":
-									nuovoEvento.setValue("");
-									break;
-								case "RESI":
-									nuovoEvento.setPlace("");
-									break;
-								case "BIRT":
-								case "DEAT":
-								case "CHR":
-								case "BAPM":
-								case "BURI":
-									nuovoEvento.setPlace("");
-									nuovoEvento.setDate("");
-							}
-							one.addEventFact(nuovoEvento);
-							Memoria.aggiungi(nuovoEvento);
-							startActivity(new Intent(Individuo.this, Evento.class));
-							U.save(true, one);
-							return true;
+						if( keyTag == null )
+							return false;
+						EventFact nuovoEvento = new EventFact();
+						nuovoEvento.setTag(keyTag);
+						switch( keyTag ) {
+							case "OCCU":
+								nuovoEvento.setValue("");
+								break;
+							case "RESI":
+								nuovoEvento.setPlace("");
+								break;
+							case "BIRT":
+							case "DEAT":
+							case "CHR":
+							case "BAPM":
+							case "BURI":
+								nuovoEvento.setPlace("");
+								nuovoEvento.setDate("");
 						}
-						return false;
+						one.addEventFact(nuovoEvento);
+						Memoria.aggiungi(nuovoEvento);
+						startActivity(new Intent(Individuo.this, Evento.class));
+						U.save(true, one);
 				}
 				return true;
 			});
 		});
+	}
+
+	// 0:Media, 1:Facts, 2:Relatives
+	private Fragment getTab(int num) {
+		return getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.schede_persona + ":" + num);
 	}
 
 	@Override
@@ -447,30 +458,30 @@ public class Individuo extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch ( item.getItemId() ) {
-			case 0:	// Diagramma
+			case 0:	// Diagram
 				U.qualiGenitoriMostrare(this, one, 1);
 				return true;
-			case 1: // Famiglia come figlio
+			case 1: // Family as child
 				U.qualiGenitoriMostrare(this, one, 2);
 				return true;
-			case 2: // Famiglia come coniuge
+			case 2: // Family as partner
 				U.qualiConiugiMostrare(this, one, null);
 				return true;
-			case 3: // Imposta come radice
+			case 3: // Set as root
 				Global.settings.getCurrentTree().root = one.getId();
 				Global.settings.save();
 				Toast.makeText(this, getString(R.string.this_is_root, U.epiteto(one)), Toast.LENGTH_LONG).show();
 				return true;
-			case 4: // Modifica
+			case 4: // Edit
 				Intent intent1 = new Intent(this, EditaIndividuo.class);
 				intent1.putExtra("idIndividuo", one.getId());
 				startActivity(intent1);
 				return true;
-			case 5:	// Elimina
+			case 5:	// Delete
 				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
 						.setPositiveButton(R.string.delete, (dialog, i) -> {
-							Family[] famiglie = Anagrafe.eliminaPersona(this, one.getId());
-							if( !U.controllaFamiglieVuote( this, this::onBackPressed, true, famiglie) )
+							Family[] famiglie = Anagrafe.deletePerson(this, one.getId());
+							if( !U.controllaFamiglieVuote(this, this::onBackPressed, true, famiglie) )
 								onBackPressed();
 						}).setNeutralButton(R.string.cancel, null).show();
 				return true;

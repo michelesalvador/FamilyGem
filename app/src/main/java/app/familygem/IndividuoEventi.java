@@ -241,42 +241,45 @@ public class IndividuoEventi extends Fragment {
 	}
 
 	// Menu contestuale
-	View vistaPezzo;
-	Object oggettoPezzo;
+	View pieceView;
+	Object pieceObject;
 	@Override
-	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
+	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
 		// menuInfo come al solito è null
-		vistaPezzo = vista;
-		oggettoPezzo = vista.getTag( R.id.tag_oggetto );
-		if( oggettoPezzo instanceof Name ) {
-			menu.add( 0, 200, 0, R.string.copy );
-			if( one.getNames().indexOf(oggettoPezzo) > 0 )
-				menu.add( 0, 201, 0, R.string.move_up );
-			if( one.getNames().indexOf(oggettoPezzo) < one.getNames().size()-1 )
-				menu.add( 0, 202, 0, R.string.move_down );
-			menu.add( 0, 203, 0, R.string.delete );
-		} else if( oggettoPezzo instanceof EventFact ) {
-			menu.add( 0, 210, 0, R.string.copy );
-			if( one.getEventsFacts().indexOf(oggettoPezzo) > 0 )
-				menu.add( 0, 211, 0, R.string.move_up );
-			if( one.getEventsFacts().indexOf(oggettoPezzo) < one.getEventsFacts().size()-1 )
-				menu.add( 0, 212, 0, R.string.move_down );
-			menu.add( 0, 213, 0, R.string.delete );
-		} else if( oggettoPezzo instanceof GedcomTag ) {
-			menu.add( 0, 220, 0, R.string.copy );
-			menu.add( 0, 221, 0, R.string.delete );
-		} else if( oggettoPezzo instanceof Note ) {
-			menu.add( 0, 225, 0, R.string.copy );
-			if( ((Note)oggettoPezzo).getId() != null )
-				menu.add( 0, 226, 0, R.string.unlink );
-			menu.add( 0, 227, 0, R.string.delete );
-		} else if( oggettoPezzo instanceof SourceCitation ) {
-			menu.add( 0, 230, 0, R.string.copy );
-			menu.add( 0, 231, 0, R.string.delete );
+		pieceView = view;
+		pieceObject = view.getTag(R.id.tag_oggetto);
+		if( pieceObject instanceof Name ) {
+			menu.add(0, 200, 0, R.string.copy);
+			if( one.getNames().indexOf(pieceObject) > 0 )
+				menu.add(0, 201, 0, R.string.move_up);
+			if( one.getNames().indexOf(pieceObject) < one.getNames().size() - 1 )
+				menu.add(0, 202, 0, R.string.move_down);
+			menu.add(0, 203, 0, R.string.delete);
+		} else if( pieceObject instanceof EventFact ) {
+			if( view.findViewById(R.id.evento_testo).getVisibility() == View.VISIBLE )
+				menu.add(0, 210, 0, R.string.copy);
+			if( one.getEventsFacts().indexOf(pieceObject) > 0 )
+				menu.add(0, 211, 0, R.string.move_up);
+			if( one.getEventsFacts().indexOf(pieceObject) < one.getEventsFacts().size() - 1 )
+				menu.add(0, 212, 0, R.string.move_down);
+			menu.add(0, 213, 0, R.string.delete);
+		} else if( pieceObject instanceof GedcomTag ) {
+			menu.add(0, 220, 0, R.string.copy);
+			menu.add(0, 221, 0, R.string.delete);
+		} else if( pieceObject instanceof Note ) {
+			if( ((TextView)view.findViewById(R.id.nota_testo)).getText().length() > 0 )
+				menu.add(0, 225, 0, R.string.copy);
+			if( ((Note)pieceObject).getId() != null )
+				menu.add(0, 226, 0, R.string.unlink);
+			menu.add(0, 227, 0, R.string.delete);
+		} else if( pieceObject instanceof SourceCitation ) {
+			menu.add(0, 230, 0, R.string.copy);
+			menu.add(0, 231, 0, R.string.delete);
 		}
 	}
+
 	@Override
-	public boolean onContextItemSelected( MenuItem item ) {
+	public boolean onContextItemSelected(MenuItem item) {
 		List<Name> nomi = one.getNames();
 		List<EventFact> fatti = one.getEventsFacts();
 		int cosa = 0; // cosa aggiornare dopo la modifica
@@ -285,70 +288,70 @@ public class IndividuoEventi extends Fragment {
 			case 200: // Copia nome
 			case 210: // Copia evento
 			case 220: // Copia estensione
-				U.copiaNegliAppunti(((TextView)vistaPezzo.findViewById(R.id.evento_titolo)).getText(),
-						((TextView)vistaPezzo.findViewById(R.id.evento_testo)).getText());
+				U.copiaNegliAppunti(((TextView)pieceView.findViewById(R.id.evento_titolo)).getText(),
+						((TextView)pieceView.findViewById(R.id.evento_testo)).getText());
 				return true;
 			case 201: // Sposta su
-				nomi.add(nomi.indexOf(oggettoPezzo) - 1, (Name)oggettoPezzo);
-				nomi.remove(nomi.lastIndexOf(oggettoPezzo));
+				nomi.add(nomi.indexOf(pieceObject) - 1, (Name)pieceObject);
+				nomi.remove(nomi.lastIndexOf(pieceObject));
 				cosa = 2;
 				break;
 			case 202: // Sposta giù
-				nomi.add(nomi.indexOf(oggettoPezzo) + 2, (Name)oggettoPezzo);
-				nomi.remove(nomi.indexOf(oggettoPezzo));
+				nomi.add(nomi.indexOf(pieceObject) + 2, (Name)pieceObject);
+				nomi.remove(nomi.indexOf(pieceObject));
 				cosa = 2;
 				break;
 			case 203: // Elimina
-				if( U.preserva(oggettoPezzo) ) return false;
-				one.getNames().remove(oggettoPezzo);
-				Memoria.annullaIstanze(oggettoPezzo);
-				vistaPezzo.setVisibility(View.GONE);
+				if( U.preserva(pieceObject) ) return false;
+				one.getNames().remove(pieceObject);
+				Memoria.annullaIstanze(pieceObject);
+				pieceView.setVisibility(View.GONE);
 				cosa = 2;
 				break;
 			// Evento generico
 			case 211: // Sposta su
-				fatti.add(fatti.indexOf(oggettoPezzo) - 1, (EventFact)oggettoPezzo);
-				fatti.remove(fatti.lastIndexOf(oggettoPezzo));
+				fatti.add(fatti.indexOf(pieceObject) - 1, (EventFact)pieceObject);
+				fatti.remove(fatti.lastIndexOf(pieceObject));
 				cosa = 1;
 				break;
 			case 212: // Sposta giu
-				fatti.add(fatti.indexOf(oggettoPezzo) + 2, (EventFact)oggettoPezzo);
-				fatti.remove(fatti.indexOf(oggettoPezzo));
+				fatti.add(fatti.indexOf(pieceObject) + 2, (EventFact)pieceObject);
+				fatti.remove(fatti.indexOf(pieceObject));
 				cosa = 1;
 				break;
 			case 213:
 				// todo Conferma elimina
-				one.getEventsFacts().remove(oggettoPezzo);
-				Memoria.annullaIstanze(oggettoPezzo);
-				vistaPezzo.setVisibility(View.GONE);
+				one.getEventsFacts().remove(pieceObject);
+				Memoria.annullaIstanze(pieceObject);
+				pieceView.setVisibility(View.GONE);
 				break;
 			// Estensione
 			case 221: // Elimina
-				U.eliminaEstensione((GedcomTag)oggettoPezzo, one, vistaPezzo);
+				U.eliminaEstensione((GedcomTag)pieceObject, one, pieceView);
 				break;
 			// Nota
 			case 225: // Copia
-				U.copiaNegliAppunti(getText(R.string.note), ((TextView)vistaPezzo.findViewById(R.id.nota_testo)).getText());
+				U.copiaNegliAppunti(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.nota_testo)).getText());
 				return true;
 			case 226: // Scollega
-				U.scollegaNota((Note)oggettoPezzo, one, vistaPezzo);
+				U.scollegaNota((Note)pieceObject, one, pieceView);
 				break;
 			case 227:
-				Object[] capi = U.eliminaNota((Note)oggettoPezzo, vistaPezzo);
+				Object[] capi = U.eliminaNota((Note)pieceObject, pieceView);
 				U.save(true, capi);
 				refresh(0);
 				return true;
 			// Citazione fonte
 			case 230: // Copia
 				U.copiaNegliAppunti(getText(R.string.source_citation),
-						((TextView)vistaPezzo.findViewById(R.id.fonte_testo)).getText() + "\n"
-								+ ((TextView)vistaPezzo.findViewById(R.id.citazione_testo)).getText());
+						((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
+								+ ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
 				return true;
 			case 231: // Elimina
 				// todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
-				one.getSourceCitations().remove(oggettoPezzo);
-				Memoria.annullaIstanze(oggettoPezzo);
-				vistaPezzo.setVisibility(View.GONE);
+				one.getSourceCitations().remove(pieceObject);
+				Memoria.annullaIstanze(pieceObject);
+				pieceView.setVisibility(View.GONE);
 				break;
 			default:
 				return false;
@@ -358,20 +361,27 @@ public class IndividuoEventi extends Fragment {
 		return true;
 	}
 
-	// Rinfresca il contenuto del frammento Eventi
+	// Update person ID in the toolbar and change date
+	void refreshId() {
+		TextView idView = getActivity().findViewById(R.id.persona_id);
+		idView.setText("INDI " + one.getId());
+		refresh(1);
+	}
+
+	// Update content of Facts tab
 	void refresh(int what) {
-		if( what == 0 ) { // sostituisce solo la data di cambiamento
-			LinearLayout scatola = getActivity().findViewById(R.id.contenuto_scheda);
+		if( what == 0 ) { // Only replace change date
+			LinearLayout layout = getActivity().findViewById(R.id.contenuto_scheda);
 			if( changeView != null )
-				scatola.removeView(changeView);
-			changeView = U.placeChangeDate(scatola, one.getChange());
-		} else { // ricarica il fragment
+				layout.removeView(changeView);
+			changeView = U.placeChangeDate(layout, one.getChange());
+		} else { // Reload the fragment
 			FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
 			fragmentManager.beginTransaction().detach(this).commit();
 			fragmentManager.beginTransaction().attach(this).commit();
-			if( what == 2 ) { // aggiorna anche il titolo dell'activity
-				CollapsingToolbarLayout barraCollasso = requireActivity().findViewById(R.id.toolbar_layout);
-				barraCollasso.setTitle(U.epiteto(one));
+			if( what == 2 ) { // Also update person name in toolbar
+				CollapsingToolbarLayout toolbarLayout = requireActivity().findViewById(R.id.toolbar_layout);
+				toolbarLayout.setTitle(U.epiteto(one));
 			}
 		}
 	}

@@ -32,6 +32,17 @@
 		<item name="android:textSize">15sp</item>
 	</style>
 
+	<style name="AppTheme.Slug">
+		<item name="android:textColor">@color/grayText</item>
+		<item name="android:textSize">13sp</item>
+		<item name="android:typeface">monospace</item>
+		<item name="android:background">@drawable/slug_background</item>
+		<item name="android:paddingLeft">6dp</item>
+		<item name="android:paddingTop">2dp</item>
+		<item name="android:paddingRight">6dp</item>
+		<item name="android:paddingBottom">3dp</item>
+	</style>
+
 	<style name="AppTheme.Navigator" parent="ThemeOverlay.AppCompat">
 		<item name="colorPrimary">@color/primario</item><!-- Selected text and icon -->
 		<item name="colorControlHighlight">@color/evidenzia</item><!-- Selected background -->

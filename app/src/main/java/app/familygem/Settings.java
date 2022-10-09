@@ -6,9 +6,14 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class Settings {
 
@@ -25,23 +30,32 @@ public class Settings {
 	boolean shareAgreement;
 	Diagram diagram;
 
+	// Firt boot values
+	// False booleans don't need to be initialized
+	void init() {
+		referrer = "start";
+		trees = new ArrayList<>();
+		autoSave = true;
+		diagram = new Diagram().init();
+	}
+
 	int max() {
 		int num = 0;
-		for( Tree c : trees ) {
-			if( c.id > num )
-				num = c.id;
+		for( Tree tree : trees ) {
+			if( tree.id > num )
+				num = tree.id;
 		}
 		return num;
 	}
 
-	void aggiungi(Tree c) {
-		trees.add(c);
+	void aggiungi(Tree tree) {
+		trees.add(tree);
 	}
 
 	void rinomina(int id, String nuovoNome) {
-		for( Tree c : trees ) {
-			if( c.id == id ) {
-				c.title = nuovoNome;
+		for( Tree tree : trees ) {
+			if( tree.id == id ) {
+				tree.title = nuovoNome;
 				break;
 			}
 		}
@@ -49,9 +63,9 @@ public class Settings {
 	}
 
 	void deleteTree(int id) {
-		for( Tree c : trees ) {
-			if( c.id == id ) {
-				trees.remove(c);
+		for( Tree tree : trees ) {
+			if( tree.id == id ) {
+				trees.remove(tree);
 				break;
 			}
 		}
@@ -107,17 +121,19 @@ public class Settings {
 		int siblings;
 		int cousins;
 		boolean spouses;
+
+		// Default values
+		Diagram init() {
+			ancestors = 3;
+			uncles = 2;
+			descendants = 3;
+			siblings = 2;
+			cousins = 1;
+			spouses = true;
+			return this;
+		}
 	}
 
-	void defaultDiagram() {
-		diagram = new Diagram();
-		diagram.ancestors = 3;
-		diagram.uncles = 2;
-		diagram.descendants = 3;
-		diagram.siblings = 2;
-		diagram.cousins = 1;
-		diagram.spouses = true;
-	}
 /*
 "grado":
 0	albero creato da zero in Italia
@@ -133,8 +149,8 @@ public class Settings {
 	static class Tree {
 		int id;
 		String title;
-		LinkedHashSet<String> dirs;
-		LinkedHashSet<String> uris;
+		Set<String> dirs;
+		Set<String> uris;
 		int persons;
 		int generations;
 		int media;
@@ -142,6 +158,7 @@ public class Settings {
 		List<Share> shares; // dati identificativi delle condivisioni attraverso il tempo e lo spazio
 		String shareRoot; // id della Person radice dell'albero in Condivisione
 		int grade; // grado della condivisione
+		Set<Birthday> birthdays;
 
 		Tree(int id, String title, String dir, int persons, int generations, String root, List<Share> shares, int grade) {
 			this.id = id;
@@ -155,6 +172,7 @@ public class Settings {
 			this.root = root;
 			this.shares = shares;
 			this.grade = grade;
+			birthdays = new HashSet<>();
 		}
 
 		void aggiungiCondivisione(Share share) {
@@ -171,6 +189,27 @@ public class Settings {
 		Share(String dateId, String submitter) {
 			this.dateId = dateId;
 			this.submitter = submitter;
+		}
+	}
+
+	// Birthday of one person
+	static class Birthday {
+		String id; // E.g. 'I123'
+		String given; // 'John'
+		String name; // 'John Doe III'
+		long date; // Date of next birthday in Unix time
+		int age; // Turned years
+		public Birthday(String id, String given, String name, long date, int age) {
+			this.id = id;
+			this.given = given;
+			this.name = name;
+			this.date = date;
+			this.age = age;
+		}
+		@Override
+		public String toString() {
+			DateFormat sdf = new SimpleDateFormat("d MMM y", Locale.US);
+			return "[" + name + ": " + age + " (" + sdf.format(date) + ")]";
 		}
 	}
 

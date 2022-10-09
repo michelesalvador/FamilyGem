@@ -51,13 +51,13 @@ public class ListaCitazioniFonte extends VisitorTotale {
 	public Object[] getCapi() {
 		Set<Object> capi = new LinkedHashSet<>(); // unifica i duplicati
 		for( Tripletta tri : lista ) {
-			capi.add( tri.capostipite );
+			capi.add(tri.capostipite);
 		}
 		return capi.toArray();
 	}
 
 	// Classe per stoccare insieme i tre elementi capostipite - contenitore - citazione
-	public class Tripletta {
+	public static class Tripletta {
 		public Object capostipite;
 		public Object contenitore; // Sarebbe un SourceCitationContainer ma Note fa eccezione
 		public SourceCitation citazione;

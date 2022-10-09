@@ -249,14 +249,16 @@ public class Diagram extends Fragment {
 
 		} else { // Two or more persons in the diagram or PDF print
 
-			box.postDelayed( () -> {
+			box.postDelayed(() -> {
 				// Get the dimensions of each node converting from pixel to dip
 				for( int i = 0; i < box.getChildCount(); i++ ) {
-					View nodeView = box.getChildAt( i );
-					GraphicMetric graphic = (GraphicMetric)nodeView;
-					// GraphicPerson can be larger because of VistaTesto, the child has the correct width
-					graphic.metric.width = toDp(graphic.getChildAt(0).getWidth());
-					graphic.metric.height = toDp(graphic.getChildAt(0).getHeight());
+					View nodeView = box.getChildAt(i);
+					if( nodeView instanceof GraphicMetric ) { // To avoid ClassCastException that mysteriously happens sometimes
+						GraphicMetric graphic = (GraphicMetric)nodeView;
+						// GraphicPerson can be larger because of VistaTesto, the child has the correct width
+						graphic.metric.width = toDp(graphic.getChildAt(0).getWidth());
+						graphic.metric.height = toDp(graphic.getChildAt(0).getHeight());
+					}
 				}
 				graph.initNodes(); // Initialize nodes and lines
 
@@ -745,7 +747,7 @@ public class Diagram extends Fragment {
 		} else if( id == 7 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
-						Family[] famiglie = Anagrafe.eliminaPersona(getContext(), idPersona);
+						Family[] famiglie = Anagrafe.deletePerson(getContext(), idPersona);
 						ripristina();
 						U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
 					}).setNeutralButton(R.string.cancel, null).show();

@@ -21,7 +21,7 @@ The code provided in this repository should compile and build a working version 
 |-|-|
 |App signature|You loose saved trees when you install over a signed version|
 |Server account|You can't share trees|
-|GeoNames "demo" account|Place names suggestions probably don't appear|
+|GeoNames account|Place names suggestions probably don't appear|
 
 The code (classes, variables, comments...) is almost all written in Italian (my native language), because I started just as a personal hobby project.
 Obviously everyone expects an English code: it's hard to change at this point but I'm trying to translate all to English.

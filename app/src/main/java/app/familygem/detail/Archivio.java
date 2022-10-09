@@ -39,11 +39,10 @@ public class Archivio extends Dettaglio {
 				fontiCitanti.add(fonte);
 		if( !fontiCitanti.isEmpty() )
 			U.mettiDispensa(box, fontiCitanti.toArray(), R.string.sources);
-		a.putExtension("fonti", fontiCitanti.size());
 	}
 
 	@Override
 	public void elimina() {
-		U.updateChangeDate((Object[])Magazzino.elimina(a));
+		U.updateChangeDate((Object[])Magazzino.delete(a));
 	}
 }

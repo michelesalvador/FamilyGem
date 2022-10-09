@@ -216,7 +216,7 @@ public class Condivisione extends BaseActivity {
 					Global.settings.save();
 				}
 			} catch( Exception e ) {
-				U.tosta( questo, e.getLocalizedMessage() );
+				U.toast( questo, e.getLocalizedMessage() );
 			}
 			return questo;
 		}
@@ -256,7 +256,7 @@ public class Condivisione extends BaseActivity {
 				ftpClient.logout();
 				ftpClient.disconnect();
 			} catch( Exception e ) {
-				U.tosta( questo, e.getLocalizedMessage() );
+				U.toast( questo, e.getLocalizedMessage() );
 			}
 			return questo;
 		}

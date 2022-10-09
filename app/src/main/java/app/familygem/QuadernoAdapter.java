@@ -64,7 +64,7 @@ public class QuadernoAdapter extends RecyclerView.Adapter<QuadernoAdapter.ViewHo
 					Iterator<Note> noteIterator = noteList.iterator();
 					while( noteIterator.hasNext() ) {
 						Note note = noteIterator.next();
-						if( !note.getValue().toLowerCase().contains(query.toLowerCase()) ) {
+						if( note.getValue() == null || !note.getValue().toLowerCase().contains(query.toLowerCase()) ) {
 							noteIterator.remove();
 						}
 					}

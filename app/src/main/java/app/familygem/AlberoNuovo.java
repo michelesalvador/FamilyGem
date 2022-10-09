@@ -174,7 +174,7 @@ public class AlberoNuovo extends BaseActivity {
 		BroadcastReceiver alCompletamento = new BroadcastReceiver() {
 			@Override
 			public void onReceive( Context contesto, Intent intento ) {
-				decomprimiZip( contesto, percorsoZip, null );
+				unZip( contesto, percorsoZip, null );
 				unregisterReceiver( this );
 			}
 		};
@@ -182,9 +182,9 @@ public class AlberoNuovo extends BaseActivity {
 		// ACTION_DOWNLOAD_COMPLETE intende il completamento di QUALSIASI download che è in corso, non solo questo.
 	}
 
-	// Decomprime il file zip nella memoria esterna e cartella col numero dell'albero
-	// Usato ugualmente da: esempio Simpson, file di backup e alberi condivisi
-	static boolean decomprimiZip(Context context, String percorsoZip, Uri uriZip) {
+	// Unzip a ZIP file in the device storage
+	// Used equally by: Simpsons example, backup files and shared trees
+	static boolean unZip(Context context, String zipPath, Uri zipUri) {
 		int treeNumber = Global.settings.max() + 1;
 		File mediaDir = context.getExternalFilesDir(String.valueOf(treeNumber));
 		String sourceDir = context.getApplicationInfo().sourceDir;
@@ -196,10 +196,10 @@ public class AlberoNuovo extends BaseActivity {
 		}
 		try {
 			InputStream is;
-			if( percorsoZip != null )
-				is = new FileInputStream(percorsoZip);
+			if( zipPath != null )
+				is = new FileInputStream(zipPath);
 			else
-				is = context.getContentResolver().openInputStream(uriZip);
+				is = context.getContentResolver().openInputStream(zipUri);
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry zipEntry;
 			int len;
@@ -225,30 +225,29 @@ public class AlberoNuovo extends BaseActivity {
 			String json = FileUtils.readFileToString(settingsFile, "UTF-8");
 			json = updateLanguage(json);
 			Gson gson = new Gson();
-			Settings.ZippedTree cassa = gson.fromJson(json, Settings.ZippedTree.class);
-			Settings.Tree tree = new Settings.Tree(treeNumber, cassa.title, mediaDir.getPath(),
-					cassa.persons, cassa.generations, cassa.root, cassa.shares, cassa.grade);
+			Settings.ZippedTree zipped = gson.fromJson(json, Settings.ZippedTree.class);
+			Settings.Tree tree = new Settings.Tree(treeNumber, zipped.title, mediaDir.getPath(),
+					zipped.persons, zipped.generations, zipped.root, zipped.shares, zipped.grade);
 			Global.settings.aggiungi(tree);
 			settingsFile.delete();
-			//fileZip.delete();
 			// Albero proveniente da condivisione destinato al confronto
-			if( cassa.grade == 9 && confronta(context, tree,false) ) {
+			if( zipped.grade == 9 && confronta(context, tree, false) ) {
 				tree.grade = 20; // lo marchia come derivato
 			}
 			// Il download è avvenuto dal dialogo del referrer in Alberi
 			if( context instanceof Alberi ) {
-				Alberi alberi = (Alberi)context;
-				alberi.runOnUiThread( () -> {
-					alberi.rotella.setVisibility(View.GONE);
-					alberi.aggiornaLista();
+				Alberi treesPage = (Alberi)context;
+				treesPage.runOnUiThread( () -> {
+					treesPage.rotella.setVisibility(View.GONE);
+					treesPage.aggiornaLista();
 				});
 			} else // Albero di esempio (Simpson) o di backup (da Facciata o da AlberoNuovo)
 				context.startActivity(new Intent(context, Alberi.class));
 			Global.settings.save();
-			U.tosta((Activity)context, R.string.tree_imported_ok);
+			U.toast((Activity)context, R.string.tree_imported_ok);
 			return true;
 		} catch( Exception e ) {
-			U.tosta((Activity)context, e.getLocalizedMessage());
+			U.toast((Activity)context, e.getLocalizedMessage());
 		}
 		return false;
 	}
@@ -268,13 +267,13 @@ public class AlberoNuovo extends BaseActivity {
 
 	// Fa scegliere un file Gedcom da importare
 	void importaGedcom() {
-		Intent intent = new Intent( Intent.ACTION_GET_CONTENT );
+		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 		// KitKat disabilita i file .ged nella cartella Download se il type è 'application/*'
 		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT )
-			intent.setType( "*/*" );
+			intent.setType("*/*");
 		else
-			intent.setType( "application/*" );
-		startActivityForResult( intent,630 );
+			intent.setType("application/*");
+		startActivityForResult(intent, 630);
 	}
 
 	@Override
@@ -316,7 +315,7 @@ public class AlberoNuovo extends BaseActivity {
 				String idRadice = U.trovaRadice(gedcom);
 				Global.settings.aggiungi(new Settings.Tree(newNumber, nomeAlbero, percorsoCartella,
 						gedcom.getPeople().size(), InfoAlbero.quanteGenerazioni(gedcom, idRadice), idRadice, null, 0));
-				Global.settings.save();
+				new Notifier(this, gedcom, newNumber, Notifier.What.CREATE);
 				// Se necessario propone di mostrare le funzioni avanzate
 				if( !gedcom.getSources().isEmpty() && !Global.settings.expert ) {
 					new AlertDialog.Builder(this).setMessage(R.string.complex_tree_advanced_tools)
@@ -333,26 +332,23 @@ public class AlberoNuovo extends BaseActivity {
 			}
 		}
 
-		// Estrae un file ZIP di backup, mantenendo la compatibilità con il precedente tipo di backup:
-		// - un backup di tipo vecchio SOSTITUISCE tutti gli alberi esistenti
-		// - un backup nuovo AGGIUNGE un singolo albero
-		if( resultCode == RESULT_OK && requestCode == 219 ){
+		// Try to unzip the retrieved backup ZIP file
+		if( resultCode == RESULT_OK && requestCode == 219 ) {
 			try {
 				Uri uri = data.getData();
-				boolean ceFileSettings = false;
-				boolean ceFilePreferenze = false;
-				final ZipInputStream zis = new ZipInputStream( getContentResolver().openInputStream(uri) );
+				boolean settingsFileExists = false;
+				final ZipInputStream zis = new ZipInputStream(getContentResolver().openInputStream(uri));
 				ZipEntry zipEntry;
 				while( (zipEntry = zis.getNextEntry()) != null ) {
-					if(zipEntry.getName().equals( "settings.json" ))
-						ceFileSettings = true;
-					if(zipEntry.getName().equals( "preferenze.json" ))
-						ceFilePreferenze = true;
+					if( zipEntry.getName().equals("settings.json") ) {
+						settingsFileExists = true;
+						break;
+					}
 				}
 				zis.closeEntry();
 				zis.close();
-				if( ceFileSettings ) {
-					decomprimiZip( this, null, uri );
+				if( settingsFileExists ) {
+					unZip(this, null, uri);
 					/* todo nello strano caso che viene importato col backup ZIP lo stesso albero suggerito dal referrer
 					    bisognerebbe annullare il referrer:
 						if( decomprimiZip( this, null, uri ) ){
@@ -362,36 +358,10 @@ public class AlberoNuovo extends BaseActivity {
 							Global.preferenze.salva();
 						}}
 					 */
-				} else if(ceFilePreferenze){
-					AlertDialog.Builder builder = new AlertDialog.Builder( AlberoNuovo.this );
-					builder.setTitle( R.string.warning );
-					builder.setMessage( R.string.old_backup_overwrite );
-					builder.setPositiveButton( android.R.string.yes, (dialog, id) -> {
-						try {
-							ZipInputStream zis2 = new ZipInputStream( getContentResolver().openInputStream(uri) );
-							ZipEntry zipEntry2;
-							int len;
-							byte[] buffer = new byte[1024];
-							while( (zipEntry2 = zis2.getNextEntry()) != null ) {
-								File newFile = new File( getFilesDir(), zipEntry2.getName() );
-								FileOutputStream fos = new FileOutputStream(newFile);
-								while ((len = zis2.read(buffer)) > 0) {
-									fos.write(buffer, 0, len);
-								}
-								fos.close();
-							}
-							zis2.closeEntry();
-							zis2.close();
-							Global.start( getApplicationContext() );
-							startActivity( new Intent( AlberoNuovo.this, Alberi.class ));
-						} catch( IOException e ) {
-							e.printStackTrace();
-						}
-					}).setNeutralButton( android.R.string.cancel, null ).create().show();
 				} else
-					Toast.makeText( AlberoNuovo.this, R.string.backup_invalid, Toast.LENGTH_LONG ).show();
+					Toast.makeText(AlberoNuovo.this, R.string.backup_invalid, Toast.LENGTH_LONG).show();
 			} catch( Exception e ) {
-				Toast.makeText( AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG ).show();
+				Toast.makeText(AlberoNuovo.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 			}
 		}
 	}

@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -33,6 +34,10 @@ public class EditaIndividuo extends AppCompatActivity {
 	String idIndi;
 	String idFamiglia;
 	int relazione;
+	RadioButton sexMale;
+	RadioButton sexFemale;
+	RadioButton sexUnknown;
+	int lastChecked;
 	EditText dataNascita;
 	EditoreData editoreDataNascita;
 	EditText luogoNascita;
@@ -52,6 +57,9 @@ public class EditaIndividuo extends AppCompatActivity {
 		idFamiglia = bundle.getString("idFamiglia");
 		relazione = bundle.getInt("relazione", 0 );
 
+		sexMale = findViewById(R.id.sesso1);
+		sexFemale = findViewById(R.id.sesso2);
+		sexUnknown = findViewById(R.id.sesso3);
 		dataNascita = findViewById( R.id.data_nascita );
 		editoreDataNascita = findViewById(R.id.editore_data_nascita);
 		luogoNascita = findViewById(R.id.luogo_nascita);
@@ -60,35 +68,51 @@ public class EditaIndividuo extends AppCompatActivity {
 		editoreDataMorte = findViewById( R.id.editore_data_morte );
 		luogoMorte = findViewById( R.id.luogo_morte );
 
+		// Toggle sex radio buttons
+		RadioGroup radioGroup = findViewById(R.id.radioGroup);
+		View.OnClickListener radioClick = radioButton -> {
+			if( radioButton.getId() == lastChecked ) {
+				radioGroup.clearCheck();
+			}
+		};
+		sexMale.setOnClickListener(radioClick);
+		sexFemale.setOnClickListener(radioClick);
+		sexUnknown.setOnClickListener(radioClick);
+		radioGroup.setOnCheckedChangeListener((group, checked) -> {
+			group.post(() -> {
+				lastChecked = checked;
+			});
+		});
+
 		disattivaMorte();
 
 		// Nuovo individuo in relazione di parentela
 		if( relazione > 0 ) {
 			p = new Person();
-			Person perno = gc.getPerson( idIndi );
-			String cogno = "";
+			Person pivot = gc.getPerson(idIndi);
+			String surname = null;
 			// Cognome del fratello
 			if( relazione == 2 ) { // = fratello
-				cogno = U.cognome(perno);
+				surname = U.surname(pivot);
 			// Cognome del padre
 			} else if( relazione == 4 ) { // = figlio da Diagramma o Individuo
-				if( Gender.isMale(perno) )
-					cogno = U.cognome( perno );
+				if( Gender.isMale(pivot) )
+					surname = U.surname(pivot);
 				else if( idFamiglia != null ) {
 					Family fam = gc.getFamily(idFamiglia);
 					if( fam != null && !fam.getHusbands(gc).isEmpty() )
-						cogno = U.cognome( fam.getHusbands(gc).get(0) );
+						surname = U.surname(fam.getHusbands(gc).get(0));
 				}
 			} else if( relazione == 6 ) { // = figlio da Famiglia
 				Family fam = gc.getFamily(idFamiglia);
 				if( !fam.getHusbands(gc).isEmpty() )
-					cogno = U.cognome( fam.getHusbands(gc).get(0) );
+					surname = U.surname(fam.getHusbands(gc).get(0));
 				else if( !fam.getChildren(gc).isEmpty() )
-					cogno = U.cognome( fam.getChildren(gc).get(0) );
+					surname = U.surname(fam.getChildren(gc).get(0));
 			}
-			((EditText)findViewById( R.id.cognome )).setText( cogno );
+			((EditText)findViewById(R.id.cognome)).setText(surname);
 		// Nuovo individuo scollegato
-		} else if ( idIndi.equals("TIZIO_NUOVO") ) {
+		} else if( idIndi.equals("TIZIO_NUOVO") ) {
 			p = new Person();
 		// Carica i dati di un individuo esistente da modificare
 		} else {
@@ -97,7 +121,7 @@ public class EditaIndividuo extends AppCompatActivity {
 			if( !p.getNames().isEmpty() ) {
 				String nome = "";
 				String cognome = "";
-				Name n = p.getNames().get( 0 );
+				Name n = p.getNames().get(0);
 				String epiteto = n.getValue();
 				if( epiteto != null ) {
 					nome = epiteto.replaceAll( "/.*?/", "" ).trim(); // rimuove il cognome '/.../'
@@ -119,14 +143,15 @@ public class EditaIndividuo extends AppCompatActivity {
 			// Sex
 			switch( Gender.getGender(p) ) {
 				case MALE:
-					((RadioButton)findViewById( R.id.sesso1 )).setChecked(true);
+					sexMale.setChecked(true);
 					break;
 				case FEMALE:
-					((RadioButton)findViewById( R.id.sesso2 )).setChecked(true);
+					sexFemale.setChecked(true);
 					break;
-				case UNDEFINED:
-					((RadioButton)findViewById( R.id.sesso3 )).setChecked(true);
+				case UNKNOWN:
+					sexUnknown.setChecked(true);
 			}
+			lastChecked = radioGroup.getCheckedRadioButtonId();
 			// Nascita e morte
 			for( EventFact fatto : p.getEventsFacts() ) {
 				if( fatto.getTag().equals("BIRT") ) {
@@ -169,11 +194,11 @@ public class EditaIndividuo extends AppCompatActivity {
 	}
 
 	void disattivaMorte() {
-		findViewById(R.id.morte).setVisibility( View.GONE );
-		luogoNascita.setImeOptions( EditorInfo.IME_ACTION_DONE );
-		luogoNascita.setNextFocusForwardId( 0 );
+		findViewById(R.id.morte).setVisibility(View.GONE);
+		luogoNascita.setImeOptions(EditorInfo.IME_ACTION_DONE);
+		luogoNascita.setNextFocusForwardId(0);
 		// Intercetta il 'Done' sulla tastiera
-		luogoNascita.setOnEditorActionListener( (view, action, event) -> {
+		luogoNascita.setOnEditorActionListener((view, action, event) -> {
 			if( action == EditorInfo.IME_ACTION_DONE )
 				salva();
 			return false;
@@ -181,63 +206,70 @@ public class EditaIndividuo extends AppCompatActivity {
 	}
 
 	void attivaMorte() {
-		luogoNascita.setImeOptions( EditorInfo.IME_ACTION_NEXT );
-		luogoNascita.setNextFocusForwardId( R.id.data_morte );
-		luogoNascita.setOnEditorActionListener( null );
-		findViewById(R.id.morte).setVisibility( View.VISIBLE );
+		luogoNascita.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+		luogoNascita.setNextFocusForwardId(R.id.data_morte);
+		luogoNascita.setOnEditorActionListener(null);
+		findViewById(R.id.morte).setVisibility(View.VISIBLE);
 	}
 
 	void salva() {
 		U.gedcomSicuro(gc); // È capitato un crash perché qui gc era null
 
 		// Nome
-		String nome = ((EditText)findViewById(R.id.nome)).getText().toString();
-		String cognome = ((EditText)findViewById(R.id.cognome)).getText().toString();
+		String nome = ((EditText)findViewById(R.id.nome)).getText().toString().trim();
+		String cognome = ((EditText)findViewById(R.id.cognome)).getText().toString().trim();
 		Name name;
 		if( p.getNames().isEmpty() ) {
 			List<Name> nomi = new ArrayList<>();
 			name = new Name();
-			nomi.add( name );
-			p.setNames( nomi );
+			nomi.add(name);
+			p.setNames(nomi);
 		} else
 			name = p.getNames().get(0);
 
 		if( nomeDaPieces ) {
-			name.setGiven( nome );
-			name.setSurname( cognome );
+			name.setGiven(nome);
+			name.setSurname(cognome);
 		} else {
-			name.setValue( nome + " /" + cognome + "/".trim() );
+			name.setValue(nome + " /" + cognome + "/".trim());
 		}
 
 		// Sesso
 		String sessoScelto = null;
-		if( ((RadioButton)findViewById(R.id.sesso1)).isChecked() )
+		if( sexMale.isChecked() )
 			sessoScelto = "M";
-		else if( ((RadioButton)findViewById(R.id.sesso2)).isChecked() )
+		else if( sexFemale.isChecked() )
 			sessoScelto = "F";
-		else if( ((RadioButton) findViewById(R.id.sesso3)).isChecked() )
+		else if( sexUnknown.isChecked() )
 			sessoScelto = "U";
 		if( sessoScelto != null ) {
 			boolean mancaSesso = true;
-			for( EventFact fatto : p.getEventsFacts() ) {
-				if (fatto.getTag().equals("SEX")) {
-					fatto.setValue(sessoScelto);
+			for( EventFact fact : p.getEventsFacts() ) {
+				if( fact.getTag().equals("SEX") ) {
+					fact.setValue(sessoScelto);
 					mancaSesso = false;
 				}
 			}
 			if( mancaSesso ) {
 				EventFact sesso = new EventFact();
-				sesso.setTag( "SEX" );
-				sesso.setValue( sessoScelto );
-				p.addEventFact( sesso );
+				sesso.setTag("SEX");
+				sesso.setValue(sessoScelto);
+				p.addEventFact(sesso);
 			}
 			IndividuoEventi.aggiornaRuoliConiugali(p);
+		} else { // Remove existing sex tag
+			for( EventFact fact : p.getEventsFacts() ) {
+				if( fact.getTag().equals("SEX") ) {
+					p.getEventsFacts().remove(fact);
+					break;
+				}
+			}
 		}
 
 		// Nascita
 		editoreDataNascita.chiudi();
-		String data = dataNascita.getText().toString();
-		String luogo = luogoNascita.getText().toString();
+		String data = dataNascita.getText().toString().trim();
+		String luogo = luogoNascita.getText().toString().trim();
 		boolean trovato = false;
 		for (EventFact fatto : p.getEventsFacts()) {
 			if( fatto.getTag().equals("BIRT") ) {
@@ -262,8 +294,8 @@ public class EditaIndividuo extends AppCompatActivity {
 
 		// Morte
 		editoreDataMorte.chiudi();
-		data = dataMorte.getText().toString();
-		luogo = luogoMorte.getText().toString();
+		data = dataMorte.getText().toString().trim();
+		luogo = luogoMorte.getText().toString().trim();
 		trovato = false;
 		for( EventFact fatto : p.getEventsFacts() ) {
 			if( fatto.getTag().equals("DEAT") ) {

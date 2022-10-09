@@ -1,6 +1,6 @@
-/* Visitatore un po' complementare a RiferimentiMedia, avente una funzione:
-- modifica il ref che punta alla nota
-- potrebbe produrre una lista dei contenitori che includono un certo Media condiviso
+/* Visitatore un po' complementare a RiferimentiMedia, avente una doppia funzione:
+- Modifica i ref che puntano al Media condiviso
+- Colleziona una lista dei contenitori che includono il Media condiviso
 */
 
 package app.familygem.visitor;
@@ -9,29 +9,30 @@ import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.MediaRef;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ContenitoriMedia extends VisitorTotale {
 
-	//public Set<MediaContainer> contenitori = new LinkedHashSet<>();
-	private Media media;
-	private String nuovoId;
+	public Set<MediaContainer> containers = new HashSet<>();
+	private final Media media;
+	private final String newId;
 
-	public ContenitoriMedia( Gedcom gc, Media media, String nuovoId ) {
+	public ContenitoriMedia(Gedcom gedcom, Media media, String newId) {
 		this.media = media;
-		this.nuovoId = nuovoId;
-		gc.accept( this );
+		this.newId = newId;
+		gedcom.accept(this);
 	}
 
 	@Override
-	boolean visita( Object oggetto, boolean capostipite ) {
-		if( oggetto instanceof MediaContainer ) {
-			for( MediaRef mr : ((MediaContainer)oggetto).getMediaRefs() )
-				if( mr.getRef().equals( media.getId() ) ) {
-					//if( nuovoId != null )
-					mr.setRef( nuovoId );
-					//else
-						//contenitori.add( (MediaContainer) oggetto );
+	boolean visita(Object object, boolean capostipite) {
+		if( object instanceof MediaContainer ) {
+			for( MediaRef mediaRef : ((MediaContainer)object).getMediaRefs() ) {
+				if( mediaRef.getRef().equals(media.getId()) ) {
+					mediaRef.setRef(newId);
+					containers.add((MediaContainer)object);
 				}
+			}
 		}
 		return true;
 	}

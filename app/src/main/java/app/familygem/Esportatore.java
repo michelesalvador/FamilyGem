@@ -67,7 +67,7 @@ public class Esportatore {
 		// Rende il file visibile da Windows
 		// Ma pare inefficace in KitKat in cui il file rimane invisibile
 		contesto.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
-		Global.gc = Alberi.leggiJson(idAlbero); // Resetta le modifiche
+		Global.gc = Alberi.readJson(idAlbero); // Resetta le modifiche
 		return successo(R.string.gedcom_exported_ok);
 	}
 
@@ -93,7 +93,7 @@ public class Esportatore {
 		if( !creaFileZip(raccolta) )
 			return false;
 		contesto.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
-		Global.gc = Alberi.leggiJson(idAlbero);
+		Global.gc = Alberi.readJson(idAlbero);
 		return successo(R.string.zip_exported_ok);
 	}
 

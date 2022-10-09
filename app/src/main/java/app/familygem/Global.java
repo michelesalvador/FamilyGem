@@ -5,10 +5,6 @@ import android.content.res.Configuration;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
-import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.multidex.MultiDexApplication;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
@@ -39,13 +35,9 @@ public class Global extends MultiDexApplication {
 		super.onCreate();
 		context = getApplicationContext();
 		start(context);
-		ProcessLifecycleOwner.get().getLifecycle().addObserver(new LifecycleListener());
 	}
 
 	public static void start(Context context) {
-		Gson gson = new Gson();
-		String jsonString = "{referrer:start, trees:[], autoSave:true}"; // Empty settings
-		                    // i boolean false non hanno bisogno di essere inizializzati
 		File settingsFile = new File(context.getFilesDir(), "settings.json");
 		// Rename "preferenze.json" to "settings.json" (introduced in version 0.8)
 		File preferenzeFile = new File(context.getFilesDir(), "preferenze.json");
@@ -55,17 +47,44 @@ public class Global extends MultiDexApplication {
 				settingsFile = preferenzeFile;
 			}
 		}
-		if( settingsFile.exists() ) {
-			try {
-				jsonString = FileUtils.readFileToString(settingsFile, "UTF-8");
-				jsonString = updateSettings(jsonString);
-			} catch( Exception e ) {
+		try {
+			String jsonString = FileUtils.readFileToString(settingsFile, "UTF-8");
+			jsonString = updateSettings(jsonString);
+			Gson gson = new Gson();
+			settings = gson.fromJson(jsonString, Settings.class);
+		} catch( Exception e ) {
+			// At first boot avoid to show the toast saying that settings.json doesn't exist
+			if( !(e instanceof java.io.FileNotFoundException) ) {
 				Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 			}
 		}
-		settings = gson.fromJson( jsonString, Settings.class );
-		if( settings.diagram == null )
-			settings.defaultDiagram();
+		if( settings == null ) {
+			settings = new Settings();
+			settings.init();
+			// Restore possibly lost trees
+			for( File file : context.getFilesDir().listFiles() ) {
+				String name = file.getName();
+				if( file.isFile() && name.endsWith(".json") ) {
+					try {
+						int treeId = Integer.parseInt(name.substring(0, name.lastIndexOf(".json")));
+						File mediaDir = new File(context.getExternalFilesDir(null), String.valueOf(treeId));
+						settings.trees.add(new Settings.Tree(treeId, String.valueOf(treeId),
+								mediaDir.exists() ? mediaDir.getPath() : null,
+								0, 0, null, null, 0));
+					} catch( Exception e ) {
+					}
+				}
+			}
+			// Some tree has been restored
+			if( !settings.trees.isEmpty() )
+				settings.referrer = null;
+			settings.save();
+		}
+		// Diagram settings were (probably) introduced in version 0.7.4
+		if( settings.diagram == null ) {
+			settings.diagram = new Settings.Diagram().init();
+			settings.save();
+		}
 	}
 
 	// Modifications to the text coming from files/settings.json
@@ -89,16 +108,6 @@ public class Global extends MultiDexApplication {
 		json = json.replace("\"grado\":", "\"grade\":");
 		json = json.replace("\"data\":", "\"dateId\":");
 		return json;
-	}
-
-	// The birthdays notifier is activated when the app goes to background
-	static class LifecycleListener implements LifecycleObserver {
-		@OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-		void onMoveToBackground() {
-			if( gc != null && settings.openTree > 0 ) {
-				new Notifier(context);
-			}
-		}
 	}
 
 	@Override

@@ -16,10 +16,10 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.folg.gedcom.model.Family;
-import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.ParentFamilyRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,63 +30,80 @@ import static app.familygem.Global.gc;
 
 public class Chiesa extends Fragment {
 
-	private LinearLayout scatola;
-	private List<Family> listaFamiglie;
-	private int ordine;
-	private boolean gliIdsonoNumerici;
+	private LinearLayout layout;
+	private List<FamilyWrapper> familyList;
+	private int order;
+	private boolean idsAreNumeric;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-		View vista = inflater.inflate(R.layout.magazzino, container, false);
-		scatola = vista.findViewById(R.id.magazzino_scatola);
+		View view = inflater.inflate(R.layout.magazzino, container, false);
+		layout = view.findViewById(R.id.magazzino_scatola);
 		if( gc != null ) {
-			listaFamiglie = gc.getFamilies();
-			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(listaFamiglie.size() + " "
-					+ getString(listaFamiglie.size() == 1 ? R.string.family : R.string.families).toLowerCase());
-			for( Family fam : listaFamiglie )
-				mettiFamiglia(scatola, fam);
-			if( listaFamiglie.size() > 1 )
+			familyList = new ArrayList<>();
+			refresh(What.RELOAD);
+			if( familyList.size() > 1 )
 				setHasOptionsMenu(true);
-			gliIdsonoNumerici = verificaIdNumerici();
-			vista.findViewById(R.id.fab).setOnClickListener(v -> {
-				Family nuovaFamiglia = nuovaFamiglia(true);
-				U.save(true, nuovaFamiglia);
+			idsAreNumeric = verificaIdNumerici();
+			view.findViewById(R.id.fab).setOnClickListener(v -> {
+				Family newFamily = nuovaFamiglia(true);
+				U.save(true, newFamily);
 				// Se torna subito indietro in Chiesa rinfresca la lista con la famiglia vuota
-				Memoria.setPrimo(nuovaFamiglia);
+				Memoria.setPrimo(newFamily);
 				startActivity(new Intent(getContext(), Famiglia.class));
 			});
 		}
-		return vista;
+		return view;
 	}
 
-	void mettiFamiglia( LinearLayout scatola, Family fam ) {
-		View vistaFamiglia = LayoutInflater.from(scatola.getContext()).inflate( R.layout.pezzo_famiglia, scatola, false );
-		scatola.addView( vistaFamiglia );
-		String genitori = "";
-		for( Person marito : fam.getHusbands(gc) )
-			genitori += U.epiteto( marito ) + "\n";
-		for( Person moglie : fam.getWives(gc) )
-			genitori += U.epiteto( moglie ) + "\n";
-		if( !genitori.isEmpty() )
-			genitori = genitori.substring( 0, genitori.length() - 1 );
-		((TextView)vistaFamiglia.findViewById( R.id.famiglia_genitori )).setText( genitori );
-		String figli = "";
-		for( Person figlio : fam.getChildren(gc) )
-			figli += U.epiteto( figlio ) + "\n";
-		if( !figli.isEmpty() )
-			figli = figli.substring( 0, figli.length() - 1 );
-		TextView testoFigli = vistaFamiglia.findViewById( R.id.famiglia_figli );
-		if( figli.isEmpty() ) {
-			vistaFamiglia.findViewById( R.id.famiglia_strut ).setVisibility( View.GONE );
-			testoFigli.setVisibility( View.GONE );
+	void placeFamily(LinearLayout layout, FamilyWrapper wrapper) {
+		View familyView = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_famiglia, layout, false);
+		layout.addView(familyView);
+		TextView infoView = familyView.findViewById(R.id.family_info);
+		switch( order ) {
+			case 1:
+			case 2:
+				infoView.setText(wrapper.id);
+				break;
+			case 3:
+			case 4:
+				if( wrapper.originalSurname != null )
+					infoView.setText(wrapper.originalSurname);
+				else
+					infoView.setVisibility(View.GONE);
+				break;
+			case 5:
+			case 6:
+				infoView.setText(String.valueOf(wrapper.members));
+				break;
+			default:
+				infoView.setVisibility(View.GONE);
+		}
+		String parents = "";
+		for( Person husband : wrapper.family.getHusbands(gc) )
+			parents += U.epiteto(husband) + "\n";
+		for( Person wife : wrapper.family.getWives(gc) )
+			parents += U.epiteto(wife) + "\n";
+		if( !parents.isEmpty() )
+			parents = parents.substring(0, parents.length() - 1);
+		((TextView)familyView.findViewById(R.id.family_parents)).setText(parents);
+		String children = "";
+		for( Person child : wrapper.family.getChildren(gc) )
+			children += U.epiteto(child) + "\n";
+		if( !children.isEmpty() )
+			children = children.substring(0, children.length() - 1);
+		TextView childrenView = familyView.findViewById(R.id.family_children);
+		if( children.isEmpty() ) {
+			familyView.findViewById(R.id.family_strut).setVisibility(View.GONE);
+			childrenView.setVisibility(View.GONE);
 		} else
-			testoFigli.setText( figli );
-		registerForContextMenu( vistaFamiglia );
-		vistaFamiglia.setOnClickListener( v -> {
-			Memoria.setPrimo( fam );
-			scatola.getContext().startActivity( new Intent( scatola.getContext(), Famiglia.class ) );
+			childrenView.setText(children);
+		registerForContextMenu(familyView);
+		familyView.setOnClickListener(v -> {
+			Memoria.setPrimo(wrapper.family);
+			layout.getContext().startActivity(new Intent(layout.getContext(), Famiglia.class));
 		});
-		vistaFamiglia.setTag( fam.getId() );	// solo per il menu contestuale Elimina qui in Chiesa
+		familyView.setTag(wrapper.id); // solo per il menu contestuale Elimina qui in Chiesa
 	}
 
 	// Delete a family, removing the refs from members
@@ -132,33 +149,36 @@ public class Chiesa extends Fragment {
 		U.save(true, membri.toArray(new Object[0]));
 	}
 
-	static Family nuovaFamiglia( boolean aggiungi ) {
+	static Family nuovaFamiglia(boolean aggiungi) {
 		Family nuova = new Family();
-		nuova.setId( U.nuovoId( gc, Family.class ));
+		nuova.setId(U.nuovoId(gc, Family.class));
 		if( aggiungi )
-			gc.addFamily( nuova );
+			gc.addFamily(nuova);
 		return nuova;
 	}
 
-	private View vistaScelta;
+	private Family selected;
 	@Override
-	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		vistaScelta = vista;
-		menu.add(0, 0, 0, R.string.delete );
+	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
+		selected = gc.getFamily((String)view.getTag());
+		if( Global.settings.expert )
+			menu.add(0, 0, 0, "Edit ID"); // todo traduci
+		menu.add(0, 1, 0, R.string.delete);
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
-		if( item.getItemId() == 0 ) {	// Elimina
-			Family fam = gc.getFamily( (String)vistaScelta.getTag() );
-			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
-				new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_family )
+		if( item.getItemId() == 0 ) { // Edit ID
+			U.editId(getContext(), selected, () -> this.refresh(What.UPDATE));
+		} else if( item.getItemId() == 1 ) { // Elimina
+			if( selected.getHusbandRefs().size() + selected.getWifeRefs().size() + selected.getChildRefs().size() > 0 ) {
+				new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_family)
 						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
-							deleteFamily(fam);
-							getActivity().recreate();
+							deleteFamily(selected);
+							refresh(What.RELOAD);
 						}).setNeutralButton(android.R.string.cancel, null).show();
 			} else {
-				deleteFamily(fam);
-				getActivity().recreate();
+				deleteFamily(selected);
+				refresh(What.RELOAD);
 			}
 		} else {
 			return false;
@@ -167,7 +187,7 @@ public class Chiesa extends Fragment {
 	}
 
 	// Verifica se tutti gli id delle famiglie contengono numeri
-	// Appena un id contiene solo lettere restituisce falso
+	// Appena un id contiene solo lettere restituisce false
 	boolean verificaIdNumerici() {
 		esterno:
 		for( Family f : gc.getFamilies() ) {
@@ -180,81 +200,99 @@ public class Chiesa extends Fragment {
 		return true;
 	}
 
-	// Cognome della persona
-	String cognome(Person tizio) {
-		if( !tizio.getNames().isEmpty() ) {
-			Name epiteto = tizio.getNames().get(0);
-			if( epiteto.getSurname() != null )
-				return epiteto.getSurname().toLowerCase();
-			else if( epiteto.getValue() != null ) {
-				String tutto = epiteto.getValue();
-				if( tutto.lastIndexOf('/') - tutto.indexOf('/') > 1 )	// se c'è un cognome tra i due '/'
-					return tutto.substring( tutto.indexOf('/')+1, tutto.lastIndexOf('/') ).toLowerCase();
-			}
-		}
-		return null;
-	}
-
-	// Restituisce una stringa con cognome principale della famiglia
-	private String cognomeDiFamiglia(Family fam) {
-		if( !fam.getHusbands(gc).isEmpty() )
-			return( cognome(fam.getHusbands(gc).get(0)) );
-		if( !fam.getWives(gc).isEmpty() )
-			return( cognome(fam.getWives(gc).get(0)) );
-		if( !fam.getChildren(gc).isEmpty() )
-			return( cognome(fam.getChildren(gc).get(0)) );
-		return null;
-	}
-
-	// Conta quanti familiari in una famiglia
-	private int quantiFamiliari(Family fam) {
-		return fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size();
-	}
-
-	void ordinaFamiglie() {
-		if( ordine > 0 ) {  // 0 ovvero rimane l'ordinamento già esistente
-			Collections.sort(listaFamiglie, ( f1, f2 ) -> {
-				switch( ordine ) {
+	void sortFamilies() {
+		if( order > 0 ) {  // 0 keeps actual sorting
+			Collections.sort(familyList, (f1, f2 ) -> {
+				switch( order ) {
 					case 1: // Ordina per ID
-						if( gliIdsonoNumerici )
-							return U.soloNumeri(f1.getId()) - U.soloNumeri(f2.getId());
+						if( idsAreNumeric )
+							return U.soloNumeri(f1.id) - U.soloNumeri(f2.id);
 						else
-							return f1.getId().compareToIgnoreCase(f2.getId());
+							return f1.id.compareToIgnoreCase(f2.id);
 					case 2:
-						if( gliIdsonoNumerici )
-							return U.soloNumeri(f2.getId()) - U.soloNumeri(f1.getId());
+						if( idsAreNumeric )
+							return U.soloNumeri(f2.id) - U.soloNumeri(f1.id);
 						else
-							return f2.getId().compareToIgnoreCase(f1.getId());
+							return f2.id.compareToIgnoreCase(f1.id);
 					case 3: // Ordina per cognome
-						String cognome1 = cognomeDiFamiglia(f1);
-						String cognome2 = cognomeDiFamiglia(f2);
-						if (cognome1 == null) // i nomi null vanno in fondo
-							return cognome2 == null ? 0 : 1;
-						if (cognome2 == null)
+						if (f1.lowerSurname == null) // i nomi null vanno in fondo
+							return f2.lowerSurname == null ? 0 : 1;
+						if (f2.lowerSurname == null)
 							return -1;
-						return cognome1.compareTo(cognome2);
+						return f1.lowerSurname.compareTo(f2.lowerSurname);
 					case 4:
-						String cognom1 = cognomeDiFamiglia(f1);
-						String cognom2 = cognomeDiFamiglia(f2);
-						if (cognom1 == null)
-							return cognom2 == null ? 0 : 1;
-						if (cognom2 == null)
+						if (f1.lowerSurname == null)
+							return f2.lowerSurname == null ? 0 : 1;
+						if (f2.lowerSurname == null)
 							return -1;
-						return cognom2.compareTo(cognom1);
+						return f2.lowerSurname.compareTo(f1.lowerSurname);
 					case 5:	// Ordina per numero di familiari
-						return quantiFamiliari(f1) - quantiFamiliari(f2);
+						return f1.members - f2.members;
 					case 6:
-						return quantiFamiliari(f2) - quantiFamiliari(f1);
+						return f2.members - f1.members;
 				}
 				return 0;
 			});
 		}
 	}
 
+	enum What {
+		RELOAD, UPDATE, BASIC
+	}
+	void refresh(What toDo) {
+		if( toDo == What.RELOAD ) { // Reload all families from Global.gc
+			familyList.clear();
+			for( Family family : gc.getFamilies() )
+				familyList.add(new FamilyWrapper(family));
+			((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(familyList.size() + " "
+					+ getString(familyList.size() == 1 ? R.string.family : R.string.families).toLowerCase());
+			sortFamilies();
+		} else if( toDo == What.UPDATE) { // Update the content of existing family wrappers
+			for( FamilyWrapper wrapper : familyList )
+				wrapper.id = wrapper.family.getId();
+		}
+		layout.removeAllViews();
+		for( FamilyWrapper wrapper : familyList )
+			placeFamily(layout, wrapper);
+	}
+
+	private class FamilyWrapper {
+		Family family;
+		String id;
+		String lowerSurname;
+		String originalSurname;
+		int members;
+
+		public FamilyWrapper(Family family) {
+			this.family=family;
+			id = family.getId();
+			lowerSurname = familySurname(true);
+			originalSurname = familySurname(false);
+			members = countMembers();
+		}
+
+		// Main surname of the family
+		private String familySurname(boolean lowerCase) {
+			if( !family.getHusbands(gc).isEmpty() )
+				return U.surname(family.getHusbands(gc).get(0), lowerCase);
+			if( !family.getWives(gc).isEmpty() )
+				return U.surname(family.getWives(gc).get(0), lowerCase);
+			if( !family.getChildren(gc).isEmpty() )
+				return U.surname(family.getChildren(gc).get(0), lowerCase);
+			return null;
+		}
+
+		// Count how many family members
+		private int countMembers() {
+			return family.getHusbandRefs().size() + family.getWifeRefs().size() + family.getChildRefs().size();
+		}
+	}
+
 	@Override
-	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
-		subMenu.add(0, 1, 0, R.string.id);
+		if( Global.settings.expert )
+			subMenu.add(0, 1, 0, R.string.id);
 		subMenu.add(0, 2, 0, R.string.surname);
 		subMenu.add(0, 3, 0, R.string.number_members);
 	}
@@ -262,16 +300,14 @@ public class Chiesa extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if( id > 0 && id <= 3 ) {
-			if( ordine == id * 2 - 1 )
-				ordine++;
-			else if( ordine == id * 2 )
-				ordine--;
+			if( order == id * 2 - 1 )
+				order++;
+			else if( order == id * 2 )
+				order--;
 			else
-				ordine = id * 2 - 1;
-			ordinaFamiglie();
-			scatola.removeAllViews();
-			for( Family fam : listaFamiglie )
-				mettiFamiglia(scatola, fam);
+				order = id * 2 - 1;
+			sortFamilies();
+			refresh(What.BASIC);
 			//U.salvaJson( false ); // dubbio se metterlo per salvare subito il riordino delle famiglie
 			return true;
 		}

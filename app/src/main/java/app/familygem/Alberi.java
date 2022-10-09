@@ -9,7 +9,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.work.WorkManager;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.View;
@@ -52,7 +51,7 @@ public class Alberi extends AppCompatActivity {
 	Fabuloso welcome;
 	Esportatore esportatore;
 	private boolean autoOpenedTree; // To open automatically the tree at startup only once
-	// The birthday notification IDs are stored to display the relative person only once
+	// The birthday notification IDs are stored to display the corresponding person only once
 	private ArrayList<Integer> consumedNotifications = new ArrayList<>();
 
 	@Override
@@ -90,22 +89,22 @@ public class Alberi extends AppCompatActivity {
 			elencoAlberi = new ArrayList<>();
 
 			// Dà i dati in pasto all'adattatore
-			adapter = new SimpleAdapter( this, elencoAlberi,
+			adapter = new SimpleAdapter(this, elencoAlberi,
 					R.layout.pezzo_albero,
-					new String[] { "titolo", "dati" },
-					new int[] { R.id.albero_titolo, R.id.albero_dati }) {
+					new String[]{"titolo", "dati"},
+					new int[]{R.id.albero_titolo, R.id.albero_dati}) {
 				// Individua ciascuna vista dell'elenco
 				@Override
-				public View getView( final int posiz, View convertView, ViewGroup parent ) {
-					View vistaAlbero = super.getView( posiz, convertView, parent );
-					int treeId = Integer.parseInt(elencoAlberi.get(posiz).get("id"));
+				public View getView(final int position, View convertView, ViewGroup parent) {
+					View treeView = super.getView(position, convertView, parent);
+					int treeId = Integer.parseInt(elencoAlberi.get(position).get("id"));
 					Settings.Tree tree = Global.settings.getTree(treeId);
 					boolean derivato = tree.grade == 20;
 					boolean esaurito = tree.grade == 30;
 					if( derivato ) {
-						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
-						((TextView)vistaAlbero.findViewById(R.id.albero_dati)).setTextColor(getResources().getColor(R.color.text));
-						vistaAlbero.setOnClickListener(v -> {
+						treeView.setBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
+						((TextView)treeView.findViewById(R.id.albero_dati)).setTextColor(getResources().getColor(R.color.text));
+						treeView.setOnClickListener(v -> {
 							if( !AlberoNuovo.confronta(Alberi.this, tree, true) ) {
 								tree.grade = 10; // viene retrocesso
 								Global.settings.save();
@@ -114,9 +113,9 @@ public class Alberi extends AppCompatActivity {
 							}
 						});
 					} else if( esaurito ) {
-						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.consumed));
-						((TextView)vistaAlbero.findViewById(R.id.albero_titolo)).setTextColor(getResources().getColor(R.color.grayText));
-						vistaAlbero.setOnClickListener(v -> {
+						treeView.setBackgroundColor(getResources().getColor(R.color.consumed));
+						((TextView)treeView.findViewById(R.id.albero_titolo)).setTextColor(getResources().getColor(R.color.grayText));
+						treeView.setOnClickListener(v -> {
 							if( !AlberoNuovo.confronta(Alberi.this, tree, true) ) {
 								tree.grade = 10; // viene retrocesso
 								Global.settings.save();
@@ -125,11 +124,11 @@ public class Alberi extends AppCompatActivity {
 							}
 						});
 					} else {
-						vistaAlbero.setBackgroundColor(getResources().getColor(R.color.back_element));
-						vistaAlbero.setOnClickListener(v -> {
+						treeView.setBackgroundColor(getResources().getColor(R.color.back_element));
+						treeView.setOnClickListener(v -> {
 							rotella.setVisibility(View.VISIBLE);
 							if( !(Global.gc != null && treeId == Global.settings.openTree) ) { // se non è già aperto
-								if( !apriGedcom(treeId, true) ) {
+								if( !openGedcom(treeId, true) ) {
 									rotella.setVisibility(View.GONE);
 									return;
 								}
@@ -137,7 +136,7 @@ public class Alberi extends AppCompatActivity {
 							startActivity(new Intent(Alberi.this, Principal.class));
 						});
 					}
-					vistaAlbero.findViewById(R.id.albero_menu).setOnClickListener( vista -> {
+					treeView.findViewById(R.id.albero_menu).setOnClickListener( vista -> {
 						boolean esiste = new File( getFilesDir(), treeId + ".json" ).exists();
 						PopupMenu popup = new PopupMenu( Alberi.this, vista );
 						Menu menu = popup.getMenu();
@@ -170,7 +169,7 @@ public class Alberi extends AppCompatActivity {
 								U.saveJson(Global.gc, treeId);
 								Global.daSalvare = false;
 							} else if( id == 0 ) { // Apre un albero derivato
-								apriGedcom(treeId, true);
+								openGedcom(treeId, true);
 								startActivity(new Intent(Alberi.this, Principal.class));
 							} else if( id == 1 ) { // Info Gedcom
 								Intent intento = new Intent(Alberi.this, InfoAlbero.class);
@@ -181,7 +180,7 @@ public class Alberi extends AppCompatActivity {
 								View vistaMessaggio = getLayoutInflater().inflate(R.layout.albero_nomina, vistaLista, false);
 								builder.setView(vistaMessaggio).setTitle(R.string.title);
 								EditText editaNome = vistaMessaggio.findViewById(R.id.nuovo_nome_albero);
-								editaNome.setText(elencoAlberi.get(posiz).get("titolo"));
+								editaNome.setText(elencoAlberi.get(position).get("titolo"));
 								AlertDialog dialogo = builder.setPositiveButton(R.string.rename, (dialog, i1) -> {
 									Global.settings.rinomina(treeId, editaNome.getText().toString());
 									aggiornaLista();
@@ -241,7 +240,7 @@ public class Alberi extends AppCompatActivity {
 							return true;
 						});
 					});
-					return vistaAlbero;
+					return treeView;
 				}
 			};
 			vistaLista.setAdapter(adapter);
@@ -267,7 +266,7 @@ public class Alberi extends AppCompatActivity {
 		if( !birthdayNotifyTapped(getIntent()) && !autoOpenedTree
 				&& getIntent().getBooleanExtra("apriAlberoAutomaticamente", false) && Global.settings.openTree > 0 ) {
 			vistaLista.post(() -> {
-				if( Alberi.apriGedcom(Global.settings.openTree, false) ) {
+				if( openGedcom(Global.settings.openTree, false) ) {
 					rotella.setVisibility(View.VISIBLE);
 					autoOpenedTree = true;
 					startActivity(new Intent(this, Principal.class));
@@ -309,13 +308,14 @@ public class Alberi extends AppCompatActivity {
 	private boolean birthdayNotifyTapped(Intent intent) {
 		int treeId = intent.getIntExtra(Notifier.TREE_ID_KEY, 0);
 		int notifyId = intent.getIntExtra(Notifier.NOTIFY_ID_KEY, 0);
-		if( treeId > 0 && !consumedNotifications.contains(notifyId)) {
+		if( treeId > 0 && !consumedNotifications.contains(notifyId) ) {
 			new Handler().post(() -> {
-				if( Alberi.apriGedcom(treeId, true) ) {
+				if( openGedcom(treeId, true) ) {
 					rotella.setVisibility(View.VISIBLE);
 					Global.indi = intent.getStringExtra(Notifier.INDI_ID_KEY);
 					consumedNotifications.add(notifyId);
 					startActivity(new Intent(this, Principal.class));
+					new Notifier(this, Global.gc, treeId, Notifier.What.DEFAULT); // Actually delete present notification
 				}
 			});
 			return true;
@@ -327,9 +327,9 @@ public class Alberi extends AppCompatActivity {
 	// Se trova il dataid propone di scaricare l'albero condiviso
 	void recuperaReferrer() {
 		InstallReferrerClient irc = InstallReferrerClient.newBuilder(this).build();
-		irc.startConnection( new InstallReferrerStateListener() {
+		irc.startConnection(new InstallReferrerStateListener() {
 			@Override
-			public void onInstallReferrerSetupFinished( int risposta ) {
+			public void onInstallReferrerSetupFinished(int risposta) {
 				switch( risposta ) {
 					case InstallReferrerClient.InstallReferrerResponse.OK:
 						try {
@@ -352,7 +352,7 @@ public class Alberi extends AppCompatActivity {
 							Global.settings.save();
 							irc.endConnection();
 						} catch( Exception e ) {
-							U.tosta( Alberi.this, e.getLocalizedMessage() );
+							U.toast(Alberi.this, e.getLocalizedMessage());
 						}
 						break;
 					// App Play Store inesistente sul device o comunque risponde in modo errato
@@ -367,7 +367,7 @@ public class Alberi extends AppCompatActivity {
 			@Override
 			public void onInstallReferrerServiceDisconnected() {
 				// Mai visto comparire
-				U.tosta( Alberi.this, "Install Referrer Service Disconnected" );
+				U.toast(Alberi.this, "Install Referrer Service Disconnected");
 			}
 		});
 	}
@@ -404,7 +404,7 @@ public class Alberi extends AppCompatActivity {
 		if( Global.gc != null && Global.settings.openTree == idAlbero )
 			gc = Global.gc;
 		else {
-			gc = leggiJson(idAlbero);
+			gc = readJson(idAlbero);
 			if( mettiInGlobale ) {
 				Global.gc = gc; // per poter usare ad esempio U.unaFoto()
 				Global.settings.openTree = idAlbero; // così Global.gc e Global.preferenze.idAprendo sono sincronizzati
@@ -414,12 +414,12 @@ public class Alberi extends AppCompatActivity {
 	}
 
 	// Apertura del Gedcom per editare tutto in Family Gem
-	static boolean apriGedcom(int idAlbero, boolean salvaPreferenze) {
-		Global.gc = leggiJson(idAlbero);
+	static boolean openGedcom(int treeId, boolean savePreferences) {
+		Global.gc = readJson(treeId);
 		if( Global.gc == null )
 			return false;
-		if( salvaPreferenze ) {
-			Global.settings.openTree = idAlbero;
+		if( savePreferences ) {
+			Global.settings.openTree = treeId;
 			Global.settings.save();
 		}
 		Global.indi = Global.settings.getCurrentTree().root;
@@ -428,8 +428,8 @@ public class Alberi extends AppCompatActivity {
 		return true;
 	}
 
-	// Legge il Json e restituisce un Gedcom
-	static Gedcom leggiJson(int treeId) {
+	// Read the Json and return a Gedcom
+	static Gedcom readJson(int treeId) {
 		Gedcom gedcom;
 		File file = new File(Global.context.getFilesDir(), treeId + ".json");
 		StringBuilder text = new StringBuilder();
@@ -453,6 +453,11 @@ public class Alberi extends AppCompatActivity {
 			Toast.makeText(Global.context, R.string.no_useful_data, Toast.LENGTH_LONG).show();
 			return null;
 		}
+		// This Notifier was introduced in version 0.9.1
+		// Todo: Can be removed from here in the future because tree.birthdays will never more be null
+		if( Global.settings.getTree(treeId).birthdays == null) {
+			new Notifier(Global.context, gedcom, treeId, Notifier.What.CREATE);
+		}
 		return gedcom;
 	}
 
@@ -473,8 +478,8 @@ public class Alberi extends AppCompatActivity {
 		if( Global.settings.openTree == treeId ) {
 			Global.gc = null;
 		}
+		new Notifier(context, null, treeId, Notifier.What.DELETE);
 		Global.settings.deleteTree(treeId);
-		WorkManager.getInstance(context).cancelAllWorkByTag(Notifier.WORK_TAG + treeId);
 	}
 
 	static void deleteFilesAndDirs(File fileOrDirectory) {
@@ -507,7 +512,7 @@ public class Alberi extends AppCompatActivity {
 	}
 
 	Gedcom findErrors(final int treeId, final boolean correct) {
-		Gedcom gc = leggiJson(treeId);
+		Gedcom gc = readJson(treeId);
 		if( gc == null ) {
 			// todo fai qualcosa per recuperare un file introvabile..?
 			return null;
