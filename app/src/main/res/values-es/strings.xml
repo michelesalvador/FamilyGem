@@ -359,4 +359,10 @@
     <string name="family_as">Familia (como %s)</string>
     <string name="living_apart_together">Viviente aparte junto</string>
     <string name="system_language">Lenguaje del sistema</string>
+    <string name="lineage">Linaje</string>
+    <string name="adopted">Adoptado/a</string>
+    <string name="edit_id">Editar ID</string>
+    <string name="existing_id">ID ya existente</string>
+    <string name="foster">De acogida</string>
+    <string name="invalid_id">ID no válido</string>
 </resources>
