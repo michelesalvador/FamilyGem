@@ -137,7 +137,7 @@ public class IndividuoFamiliari extends Fragment {
 			menu.add(0, 304, 0, R.string.move_after);
 		menu.add(0, 305, 0, R.string.modify);
 		if( Famiglia.findParentFamilyRef(person, family) != null )
-			menu.add(0, 306, 0, "Lineage"); // todo traduci
+			menu.add(0, 306, 0, R.string.lineage);
 		menu.add(0, 307, 0, R.string.unlink);
 		if( !person.equals(uno) ) // Qui non può eliminare sè stesso
 			menu.add(0, 308, 0, R.string.delete);

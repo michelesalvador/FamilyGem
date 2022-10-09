@@ -132,7 +132,6 @@
     <string name="simpsons_tree">Simpsons-familietreet</string>
     <string name="tree">Tre</string>
     <string name="invalid_gedcom">Ugyldig GEDCOM.</string>
-    <string name="warning">Advarse</string>
     <string name="tree_created">Nytt tre opprettet.</string>
     <string name="create">Opprett</string>
     <string name="name_of_tree">Treets navn</string>
@@ -196,8 +195,6 @@
     <string name="make_backup">Lagre ZIP-sikkerhetskopi</string>
     <string name="no_useful_data">Kan ikke få nyttige data.</string>
     <string name="backup_invalid">Sikkerhetskopien er ugyldig.</string>
-    <string name="old_backup_overwrite">Dette er en gammel type backup. Alle eksisterende trær vil bli overskrevet!
-\nFortsette\?</string>
     <string name="complex_tree_advanced_tools">Dette slektstreet ser ganske komplekst ut.
 \nØnsker du å vise de avanserte verktøyene for å håndtere det\?</string>
     <string name="diagram">Diagram</string>

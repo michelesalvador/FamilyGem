@@ -1309,7 +1309,7 @@ public class U {
 			String oldId = (String)record.getClass().getMethod("getId").invoke(record);
 			inputField.setText(oldId);
 			AlertDialog alertDialog = new AlertDialog.Builder(context)
-					.setTitle("Edit ID").setView(view) // todo traduci
+					.setTitle(R.string.edit_id).setView(view)
 					.setPositiveButton(R.string.save, (dialog, i) -> {
 						String newId = inputField.getText().toString().trim();
 						if( newId.equals(oldId) ) return;
@@ -1444,9 +1444,9 @@ public class U {
 					String error = null;
 					String proposal = sequence.toString().trim();
 					if( allIds.contains(proposal) )
-						error = "Already existing ID"; // todo traduci
+						error = context.getString(R.string.existing_id);
 					else if( proposal.isEmpty() || proposal.matches("^[#].*|.*[@:!].*") )
-						error = "Invalid ID"; // todo traduci
+						error = context.getString(R.string.invalid_id);
 					inputLayout.setError(error);
 					okButton.setEnabled(error == null);
 				}

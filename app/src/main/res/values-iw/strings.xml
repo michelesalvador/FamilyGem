@@ -104,9 +104,6 @@
     <string name="create">יצירה</string>
     <string name="tree_created">נוצר עץ חדש.</string>
     <string name="tree_imported_ok">העץ ייובא בהצלחה.</string>
-    <string name="warning">אזהרה</string>
-    <string name="old_backup_overwrite">סוג הגיבוי הזה ישן. כל העצים הקיימים ישוכתבו!
-\nלהמשיך\?</string>
     <string name="backup_invalid">גיבוי זה שגוי.</string>
     <string name="invalid_gedcom">GEDCOM שגוי.</string>
     <string name="tree">עץ</string>

@@ -152,9 +152,6 @@
     <string name="tree">Дерево</string>
     <string name="invalid_gedcom">Недійсний GEDCOM.</string>
     <string name="backup_invalid">Ця резервна копія недійсна.</string>
-    <string name="old_backup_overwrite">Це старий тип резервного копіювання. Усі існуючі дерева будуть перезаписані!
-\n Продовжити\?</string>
-    <string name="warning">Увага</string>
     <string name="tree_imported_ok">Дерево успішно імпортовано.</string>
     <string name="complex_tree_advanced_tools">Виглядає це дерево досить складно.
 \n Щоб краще керувати ним, ви хочете показати вдосконалені інструменти\?</string>
@@ -202,7 +199,7 @@
     <string name="maiden">Уроджена/Уроджений</string>
     <string name="daughter">Дочка</string>
     <string name="from">З</string>
-    <string name="between_and">Між... і</string>
+    <string name="between_and">Між… і</string>
     <string name="exact">Точнa</string>
     <string name="december">Грудень</string>
     <string name="november">Листопад</string>

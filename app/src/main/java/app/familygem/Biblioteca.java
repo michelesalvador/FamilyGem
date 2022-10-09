@@ -335,7 +335,8 @@ public class Biblioteca extends Fragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
 		source = gc.getSource(((TextView)vista.findViewById(R.id.biblioteca_id)).getText().toString());
-		menu.add(0, 0, 0, "Edit ID"); // todo traduci
+		if( Global.settings.expert )
+			menu.add(0, 0, 0, R.string.edit_id);
 		menu.add(0, 1, 0, R.string.delete);
 	}
 	@Override

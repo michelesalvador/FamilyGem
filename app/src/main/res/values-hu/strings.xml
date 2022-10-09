@@ -31,9 +31,6 @@
     <string name="create">Létrehozás</string>
     <string name="tree_created">Új fa létrehozva.</string>
     <string name="tree_imported_ok">Fa sikeresen importálva.</string>
-    <string name="warning">Figyelmeztetés</string>
-    <string name="old_backup_overwrite">Ez egy régi biztonsági mentés. Összes meglévő fa felül lesz írva!
-\nFolytassa\?</string>
     <string name="backup_invalid">Ez a biztonsági másolat érvénytelen.</string>
     <string name="import_backup">Állítson vissza egy ZIP biztonsági másolatot</string>
     <string name="simpsons_tree">Simpsons családfa</string>
@@ -341,7 +338,7 @@
     <string name="family_as_spouse">Család (mint házastárs)</string>
     <string name="new_relative">Csatlakoztasson új személyt</string>
     <string name="link_person">Csatlakoztasson létezö személyt</string>
-    <string name="long_press_menu">Hosszan nyomja meg a menü megjelenítéséhez. 
+    <string name="long_press_menu">Hosszan nyomja meg a menü megjelenítéséhez.
 \nÉrintse meg a profil megnyitásához.</string>
     <string name="uncles_cousins">Nagybácsik és unokatestvérek</string>
     <string name="repository_citation">Az adattár hivatkozása</string>
@@ -362,8 +359,8 @@
     <string name="repository_note">Megjegyzés-adattár</string>
     <string name="living_apart_together">Különélő együttélés</string>
     <string name="double_date">Kettős</string>
-    <string name="between_and">Között... és</string>
-    <string name="from_to">Tól... ig</string>
+    <string name="between_and">Között… és</string>
+    <string name="from_to">Tól… ig</string>
     <string name="from">Tól</string>
     <string name="to">Ig</string>
     <string name="empty_media">Üres média</string>

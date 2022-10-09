@@ -125,9 +125,6 @@
     <string name="tree">Arbre</string>
     <string name="invalid_gedcom">GEDCOM invalide.</string>
     <string name="backup_invalid">Cette sauvegarde est invalide.</string>
-    <string name="old_backup_overwrite">Ceci est un ancien type de sauvegarde. Tous les arbres existants seront remplacés !
-\nContinuer \?</string>
-    <string name="warning">Avertissement</string>
     <string name="tree_imported_ok">Arbre importé avec succès.</string>
     <string name="complex_tree_advanced_tools">Cet arbre a l\'air assez complexe.
 \nPour mieux le gérer, voulez-vous afficher des outils avancés \?</string>

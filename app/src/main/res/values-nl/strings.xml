@@ -14,7 +14,7 @@
     <string name="empty_name">Lege naam</string>
     <string name="no_name">Geen naam</string>
     <string name="date_phrase">Zin</string>
-    <string name="from_to">Van...naar</string>
+    <string name="from_to">Van… naar</string>
     <string name="to">Naar</string>
     <string name="from">Van</string>
     <string name="phonetic">Fonetisch</string>
@@ -196,9 +196,6 @@
     <string name="tree">Boom</string>
     <string name="invalid_gedcom">Ongeldige GEDCOM.</string>
     <string name="backup_invalid">Deze back-up is ongeldig.</string>
-    <string name="old_backup_overwrite">Dit is een oud type back-up. Alle bestaande bomen worden overschreven!
-\nDoorgaan\?</string>
-    <string name="warning">Waarschuwing</string>
     <string name="tree_imported_ok">Boom met succes geïmporteerd.</string>
     <string name="complex_tree_advanced_tools">Deze boom ziet er vrij complex uit.
 \nWilt u geavanceerde tools zien om het beter te beheren\?</string>
@@ -245,7 +242,7 @@
     <string name="inexistent_repository_citation">Bronvermelding ontbreekt</string>
     <string name="ideally_recipient">Normalerwijze de ontvanger van het delen.</string>
     <string name="immigrant">Inwijkeling</string>
-    <string name="between_and">Tussen... en</string>
+    <string name="between_and">Tussen… en</string>
     <string name="before">Voor</string>
     <string name="after">Na</string>
     <string name="estimated">Geschat</string>

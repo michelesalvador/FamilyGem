@@ -119,9 +119,6 @@
     <string name="sure_delete">آیا مطمئن هستید؟</string>
     <string name="create">ایجاد</string>
     <string name="tree_imported_ok">درخت با موفقیت وارد شد.</string>
-    <string name="warning">هشدار</string>
-    <string name="old_backup_overwrite">این نوع پشتیبان قدیمی است. همه درختان موجود از نو نوشته خواهند شد!
-\nادامه دهیم؟</string>
     <string name="invalid_gedcom">GEDCOM نامعتبر.</string>
     <string name="tree">درخت</string>
     <string name="family_gem_example">مثال Family Gem</string>

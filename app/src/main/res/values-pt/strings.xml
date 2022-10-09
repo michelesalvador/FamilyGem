@@ -53,9 +53,6 @@
     <string name="tree">Árvore</string>
     <string name="invalid_gedcom">GEDCOM inválido.</string>
     <string name="backup_invalid">Este backup é inválido.</string>
-    <string name="old_backup_overwrite">Este é um tipo antigo de backup. Todas as árvores existentes serão sobrescritas!
-\nContinuar\?</string>
-    <string name="warning">Atenção</string>
     <string name="tree_imported_ok">Árvore importada com sucesso.</string>
     <string name="complex_tree_advanced_tools">Esta árvore parece bastante complexa.
 \nPara melhor administrar, você quer mostrar ferramentas avançadas\?</string>
@@ -93,7 +90,7 @@
     <string name="drawer_close">Fechar gaveta de navegação</string>
     <string name="drawer_open">Abra a gaveta de navegação</string>
     <string name="existing_family">Família já existente</string>
-    <string name="new_family_of">Nova familia de %s</string>
+    <string name="new_family_of">Nova família de %s</string>
     <string name="extension">Extensão</string>
     <string name="sources_number">Número de fontes</string>
     <string name="citations">Citações</string>
@@ -113,7 +110,7 @@
     <string name="empty_family_delete">Restaram algumas famílias vazias.
 \nQuer apagá-los\?</string>
     <string name="which_family">Qual família\?</string>
-    <string name="empty_family">Familia vazia</string>
+    <string name="empty_family">Família vazia</string>
     <string name="empty_media">Mídia vazia</string>
     <string name="not_granted">%s não concedido.</string>
     <string name="no">Não</string>
@@ -123,10 +120,10 @@
     <string name="empty_name">Nome vazio</string>
     <string name="no_name">Sem nome</string>
     <string name="date_phrase">Frase</string>
-    <string name="from_to">De... para</string>
+    <string name="from_to">De… para</string>
     <string name="to">Para</string>
     <string name="from">De</string>
-    <string name="between_and">Entre... e</string>
+    <string name="between_and">Entre… e</string>
     <string name="before">Antes</string>
     <string name="after">Depois de</string>
     <string name="estimated">Estimado</string>
@@ -196,7 +193,7 @@
     <string name="parentheses">Parênteses</string>
     <string name="media_type">Tipo de mídia</string>
     <string name="italic">Itálico</string>
-    <string name="call_number">Numero de telefone</string>
+    <string name="call_number">Número de telefone</string>
     <string name="publication_facts">Fatos de publicação</string>
     <string name="author">Autor</string>
     <string name="title">Título</string>

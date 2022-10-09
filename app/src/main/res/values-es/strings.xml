@@ -276,9 +276,7 @@
     <string name="sharing_tree">Compartir un árbol genealógico</string>
     <string name="sharing_completed">Intercambio completado.</string>
     <string name="ideally_recipient">Idealmente el destinatario del intercambio.</string>
-    <string name="warning">Advertencia</string>
     <string name="simpsons_tree">Árbol de los Simpson</string>
-    <string name="old_backup_overwrite">Este es un viejo tipo de copia de seguridad. Todos los árboles se sobrescribirán!\n¿Desea continuar?</string>
     <string name="move_before">Mover antes</string>
     <string name="move_after">Mover después</string>
     <string name="delete_imported_tree">Eliminar el árbol importado</string>

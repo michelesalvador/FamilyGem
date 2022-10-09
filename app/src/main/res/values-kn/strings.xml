@@ -62,9 +62,6 @@
     <string name="tree">ಮರ</string>
     <string name="invalid_gedcom">ಅಮಾನ್ಯ GEDCOM.</string>
     <string name="backup_invalid">ಈ ಬ್ಯಾಕಪ್ ಅಮಾನ್ಯವಾಗಿದೆ.</string>
-    <string name="old_backup_overwrite">ಇದು ಹಳೆಯ ರೀತಿಯ ಬ್ಯಾಕಪ್ ಆಗಿದೆ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಎಲ್ಲಾ ಮರಗಳನ್ನು ತಿದ್ದಿ ಬರೆಯಲಾಗುತ್ತದೆ!
-\nಮುಂದುವರೆಯಲು\?</string>
-    <string name="warning">ಎಚ್ಚರಿಕೆ</string>
     <string name="tree_imported_ok">ಮರವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಆಮದು ಮಾಡಲಾಗಿದೆ.</string>
     <string name="complex_tree_advanced_tools">ಈ ಮರವು ಸಾಕಷ್ಟು ಸಂಕೀರ್ಣವಾಗಿ ಕಾಣುತ್ತದೆ.
 \nಅದನ್ನು ಉತ್ತಮವಾಗಿ ನಿರ್ವಹಿಸಲು, ನೀವು ಸುಧಾರಿತ ಪರಿಕರಗಳನ್ನು ತೋರಿಸಲು ಬಯಸುತ್ತೀರಾ\?</string>

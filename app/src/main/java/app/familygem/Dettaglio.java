@@ -875,7 +875,7 @@ public class Dettaglio extends AppCompatActivity {
 					menu.add(0, 15, 0, R.string.move_after);
 				menu.add(0, 16, 0, R.string.modify);
 				if( Famiglia.findParentFamilyRef(person, fam) != null )
-					menu.add(0, 17, 0, "Lineage"); // todo traduci
+					menu.add(0, 17, 0, R.string.lineage);
 				menu.add(0, 18, 0, R.string.unlink);
 				menu.add(0, 19, 0, R.string.delete);
 			} else if( pieceObject instanceof Note ) {

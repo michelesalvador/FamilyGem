@@ -288,9 +288,6 @@
     <string name="tree">Stammbaum</string>
     <string name="invalid_gedcom">GEDCOM-Datei ist ungültig.</string>
     <string name="backup_invalid">Diese Sicherung ist ungültig.</string>
-    <string name="old_backup_overwrite">Dies ist eine alte Version der Datensicherung. Alle bestehenden Stammbäume werden überschrieben!
-\nFortfahren\?</string>
-    <string name="warning">Warnung</string>
     <string name="tree_imported_ok">Stammbaum erfolgreich importiert.</string>
     <string name="complex_tree_advanced_tools">Dieser Stammbaum sieht recht komplex aus.
 \nMöchtest Du die erweiterten Werkzeuge anzeigen, um ihn besser zu verwalten\?</string>

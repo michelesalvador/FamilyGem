@@ -163,7 +163,6 @@
     <string name="simpsons_tree">Familia Arbo de La Simpsonoj</string>
     <string name="tree">Arbo</string>
     <string name="invalid_gedcom">Nevalida GEDCOM.</string>
-    <string name="warning">Averto</string>
     <string name="tree_imported_ok">Arbo sukcese enportita.</string>
     <string name="tree_created">Nova arbo kreita.</string>
     <string name="create">Krei</string>
@@ -326,8 +325,6 @@
 \nPor pli bone administri ĝin, ĉu montri altnivelajn ilojn\?</string>
     <string name="empty_family_delete">Restas iuj malplenaj familioj.
 \nĈu forigi ilin\?</string>
-    <string name="old_backup_overwrite">Jen malnova speco de savkopio. Ĉiuj ekzistantaj arboj estas anstataŭigotaj!
-\nĈu daŭrigi\?</string>
     <string name="make_main_submitter">Ĉu ĉi tiu submetinto estu la ĉefo de la arbo\?</string>
     <string name="generations_display_diagram">Tiom, kiom da generacioj montriĝos en la diagramo:</string>
     <string name="load_tree_startup">Ŝarĝi la laste malfermitan arbon dum lanĉo</string>

@@ -307,9 +307,6 @@
     <string name="family_gem_example">Ukážka Family Gem</string>
     <string name="simpsons_tree">Rodokmeň Simpsonovcov</string>
     <string name="tree">Strom</string>
-    <string name="old_backup_overwrite">Toto je staršia záloha. Všetky existujúce stromy budú prepísané!
-\nPokračovať\?</string>
-    <string name="warning">Upozornenie</string>
     <string name="complex_tree_advanced_tools">Tento strom vyzerá zložitejšie.
 \nZobraziť pre lepšie spravovanie ďalšie nástroje\?</string>
     <string name="tree_created">Nový strom vytvorený.</string>

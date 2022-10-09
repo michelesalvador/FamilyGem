@@ -537,7 +537,7 @@ public class Anagrafe extends Fragment {
 			menu.add(0, 2, 0, familyLabels[1]);
 		menu.add(0, 3, 0, R.string.modify);
 		if( Global.settings.expert )
-			menu.add(0, 4, 0, "Edit ID"); // todo traduci
+			menu.add(0, 4, 0, R.string.edit_id);
 		menu.add(0, 5, 0, R.string.delete);
 	}
 	@Override

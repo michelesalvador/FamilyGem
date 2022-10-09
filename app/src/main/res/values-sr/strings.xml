@@ -284,9 +284,6 @@
     <string name="tree">Stablo</string>
     <string name="invalid_gedcom">Neispravan GEDCOM.</string>
     <string name="backup_invalid">Sigurnosna kopija je neispravna.</string>
-    <string name="old_backup_overwrite">Ovo je stara vrsta sigurnosne kopije. Sva postojeća stabla će se prepisati!
-\nNastaviti\?</string>
-    <string name="warning">Upozorenje</string>
     <string name="tree_imported_ok">Stablo je uspješno uvezeno.</string>
     <string name="complex_tree_advanced_tools">Ovo stablo izgleda prilično složeno.
 \nŽeliš li videti napredne alate koji olakšavaju upravljanje stablom\?</string>

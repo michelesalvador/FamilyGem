@@ -162,7 +162,7 @@ public class Chiesa extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
 		selected = gc.getFamily((String)view.getTag());
 		if( Global.settings.expert )
-			menu.add(0, 0, 0, "Edit ID"); // todo traduci
+			menu.add(0, 0, 0, R.string.edit_id);
 		menu.add(0, 1, 0, R.string.delete);
 	}
 	@Override

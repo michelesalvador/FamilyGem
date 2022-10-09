@@ -17,7 +17,6 @@
     <string name="download_example">Bir örnek indir</string>
     <string name="modify_later">Daha sonra düzenleyebilirsiniz.</string>
     <string name="name_of_tree">Ağacın adı</string>
-    <string name="warning">Uyarı</string>
     <string name="new_tree">Yeni ağaç</string>
     <string name="download_shared_tree">Paylaşılan ağacı indir</string>
     <string name="import_backup">Bir ZIP yedeğini kurtar</string>
@@ -38,8 +37,6 @@
     <string name="repositories">Depolar</string>
     <string name="import_gedcom">GEDCOM dosyasını içe aktar</string>
     <string name="create">Oluştur</string>
-    <string name="old_backup_overwrite">Bu eski bir yedekleme türüdür. Mevcut tüm ağaçların üzerine yazılacaktır!
-\nDevam edelim mi\?</string>
     <string name="backup_invalid">Bu yedekleme geçersiz.</string>
     <string name="invalid_gedcom">Geçersiz GEDCOM.</string>
     <string name="tree">Ağaç</string>

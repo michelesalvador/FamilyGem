@@ -37,8 +37,6 @@
     <string name="really_delete_tree">Opravdu odstranit tento strom\?</string>
     <string name="download">Stáhnout</string>
     <string name="you_can_download">Teď můžete stáhnout sdílený strom.</string>
-    <string name="old_backup_overwrite">Toto je stará záloha. Všechny stávající stromy budou přepsány!
-\nPokračovat\?</string>
     <string name="modify_later">Později to můžete změnit.</string>
     <string name="drawer_close">Zavřít navigační panel</string>
     <string name="drawer_open">Otevřít navigační panel</string>
@@ -303,7 +301,6 @@
     <string name="telephone">Telefon</string>
     <string name="address">Adresa</string>
     <string name="corporation">Společnost</string>
-    <string name="warning">Upozornění</string>
     <string name="tree_imported_ok">Strom úspěšně importován.</string>
     <string name="complex_tree_advanced_tools">Tento strom vypadá docela složitě.
 \nZobrazit pro lepší spravování další nástroje\?</string>

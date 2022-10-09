@@ -40,8 +40,6 @@
     <string name="tree_created">Creato nuovo albero.</string>
     <string name="complex_tree_advanced_tools">Questo albero sembra piuttosto complesso.\nPer gestirlo meglio vuoi mostrare le funzioni avanzate?</string>
     <string name="tree_imported_ok">Albero importato correttamente.</string>
-    <string name="warning">Attenzione</string>
-    <string name="old_backup_overwrite">Questo è un vecchio tipo di backup. Tutti gli alberi esistenti saranno sovrascritti!\nVuoi proseguire?</string>
     <string name="backup_invalid">Questo backup non è valido.</string>
     <string name="invalid_gedcom">GEDCOM non valido.</string>
     <string name="tree">Albero</string>
@@ -327,6 +325,10 @@
     <string name="common_law_marriage">Coppia di fatto</string>
     <string name="separation">Separazione</string>
     <string name="divorce">Divorzio</string>
+    <string name="lineage">Discendenza</string>
+    <string name="none">Nessuna</string>
+    <string name="adopted">Adottato/a</string>
+    <string name="foster">Affidato/a</string>
     <string name="really_delete_family">Questa famiglia sarà eliminata, ma le persone che la compongono non saranno eliminate.</string>
     <!-- Note -->
     <string name="shared_notes">Note condivise</string>
@@ -371,8 +373,7 @@
     <string name="after">Dopo</string>
     <string name="before">Prima</string>
     <string name="between_and">Tra… e</string>
-    <string name="between">Tra</string>
-    <string name="and">E</string>
+    <string name="between">Tra</string>  <string name="and">E</string>
     <string name="from_to">Da… a</string>
     <string name="from">Da</string>
     <string name="to">A</string>
@@ -389,4 +390,7 @@
     <string name="empty_family">Famiglia vuota</string>
     <string name="which_family">Quale famiglia?</string>
     <string name="empty_family_delete">È rimasta qualche famiglia vuota.\nVuoi eliminarla?</string>
+    <string name="edit_id">Modifica ID</string>
+    <string name="invalid_id">ID non valido</string>
+    <string name="existing_id">ID già esistente</string>
 </resources>

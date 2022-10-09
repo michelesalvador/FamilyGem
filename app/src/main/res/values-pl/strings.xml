@@ -37,8 +37,6 @@
     <string name="complex_tree_advanced_tools">To drzewo wygląda na dość złożone.
 \nAby lepiej nim zarządzać, czy chcesz pokazać zaawansowane narzędzia\?</string>
     <string name="tree_imported_ok">Drzewo zostało pomyślnie zaimportowane.</string>
-    <string name="warning">Ostrzeżenie</string>
-    <string name="old_backup_overwrite">To jest stary typ kopii zapasowej. Wszystkie istniejące drzewa zostaną zastąpione!\nKontynuować?</string>
     <string name="backup_invalid">Ta kopia zapasowa jest nieprawidłowa.</string>
     <string name="invalid_gedcom">Nieprawidłowy GEDCOM.</string>
     <string name="tree">Drzewo</string>

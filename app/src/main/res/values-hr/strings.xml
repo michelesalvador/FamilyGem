@@ -71,7 +71,6 @@
     <string name="june">Lipanj</string>
     <string name="cancel">Prekini</string>
     <string name="new_source">Novi izvor</string>
-    <string name="warning">Upozorenje</string>
     <string name="submission">Podnesak</string>
     <string name="rin">Automatski ID zapisa</string>
     <string name="state">Pokrajina/Provincija</string>
@@ -110,8 +109,6 @@
     <string name="address">Adresa</string>
     <string name="copyright">Autorska prava</string>
     <string name="spouse">Supružnik</string>
-    <string name="old_backup_overwrite">Ovo je stara vrsta sigurnosne kopije. Sva postojeća stabla će se prepisati!
-\nNastaviti\?</string>
     <string name="format">Format</string>
     <string name="days">dana</string>
     <string name="submitters">Podnositelji</string>

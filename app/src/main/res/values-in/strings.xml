@@ -40,9 +40,6 @@
     <string name="modify_later">Kamu bisa edit nanti.</string>
     <string name="create">Buat</string>
     <string name="tree_imported_ok">Silsilah berhasil diimpor.</string>
-    <string name="warning">Peringatan</string>
-    <string name="old_backup_overwrite">Ini adalah jenis backup tipe lama. Semua silsilah yang ada akan ditimpa!
-\nLanjutkan\?</string>
     <string name="backup_invalid">Backup ini tidak benar.</string>
     <string name="invalid_gedcom">GEDCOM ini tidak benar.</string>
     <string name="tree">Silsilah</string>
@@ -300,9 +297,9 @@
     <string name="estimated">Diperkirakan</string>
     <string name="after">Setelah</string>
     <string name="before">Sebelum</string>
-    <string name="between_and">Antara... dan</string>
+    <string name="between_and">Antara… dan</string>
     <string name="and">Dan</string>
-    <string name="from_to">Dari... ke</string>
+    <string name="from_to">Dari… ke</string>
     <string name="from">Dari</string>
     <string name="to">Ke</string>
     <string name="note">Catatan</string>

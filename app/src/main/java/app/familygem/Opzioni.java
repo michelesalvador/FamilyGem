@@ -27,7 +27,7 @@ public class Opzioni extends BaseActivity {
 			new Language("fa", 100),
 			new Language("fr", 100),
 			new Language("hr", 100),
-			new Language("hu", 90),
+			new Language("hu", 100),
 			new Language("in", 100),
 			new Language("it", 100),
 			new Language("iw", 100),
@@ -40,7 +40,7 @@ public class Opzioni extends BaseActivity {
 			new Language("ru", 100),
 			new Language("sk", 100),
 			new Language("sr", 100),
-			new Language("tr", 19),
+			new Language("tr", 22),
 			new Language("uk", 100)
 	};
 

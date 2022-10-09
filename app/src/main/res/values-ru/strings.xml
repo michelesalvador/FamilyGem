@@ -292,9 +292,6 @@
     <string name="tree">Дерево</string>
     <string name="invalid_gedcom">Неверный GEDCOM.</string>
     <string name="backup_invalid">Эта резервная копия неисправна.</string>
-    <string name="old_backup_overwrite">Это старый вид резервного копирования. Все существующие деревья будут перезаписаны!
-\nПродолжить\?</string>
-    <string name="warning">Предупреждение</string>
     <string name="tree_imported_ok">Дерево успешно импортировано.</string>
     <string name="tree_created">Создано новое дерево.</string>
     <string name="create">Создать</string>
