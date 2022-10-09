@@ -100,7 +100,7 @@
     <string name="divorce">Rozvod</string>
     <string name="marriage">Sňatek</string>
     <string name="family">Rodina</string>
-    <string name="num_children">%d děti</string>
+    <string name="num_children">%d dětí</string>
     <string name="number_members">Počet členů</string>
     <string name="state">Stát/provincie, kraj</string>
     <string name="city">Město</string>
@@ -128,7 +128,7 @@
     <string name="certainty">Hodnověrnost</string>
     <string name="text">Text</string>
     <string name="page">Strana</string>
-    <string name="source_note">Pramen-pozn</string>
+    <string name="source_note">Pramen-poznámka</string>
     <string name="user_id">ID uživatele</string>
     <string name="rin">ID automatizovaného záznamu</string>
     <string name="email">E-mail</string>
@@ -367,4 +367,5 @@
     <string name="age">Věk</string>
     <string name="uncles_cousins">Strýcové a bratranci</string>
     <string name="partners">Partneři/ky</string>
+    <string name="system_language">Jazyk systému</string>
 </resources>

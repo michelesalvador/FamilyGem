@@ -367,4 +367,5 @@
     <string name="empty_media">מדיה ריקה</string>
     <string name="which_family">איזו משפחה\?</string>
     <string name="simpsons_tree">עץ משפחת סימפסון</string>
+    <string name="system_language">שפת המערכת</string>
 </resources>

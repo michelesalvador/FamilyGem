@@ -367,4 +367,5 @@
     <string name="aware_upload_server">Tenk på at du laster opp hele slektstreet til en tjener på nett.</string>
     <string name="share_sensitive">Deler sensitiv data</string>
     <string name="not_memory_tree">Ikke nok minne for dette slektstreet.</string>
+    <string name="system_language">Systemspråk</string>
 </resources>

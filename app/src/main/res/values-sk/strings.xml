@@ -110,7 +110,7 @@
     <string name="divorce">Rozvod</string>
     <string name="marriage">Sobáš</string>
     <string name="family">Rodina</string>
-    <string name="num_children">%d deti</string>
+    <string name="num_children">%d detí</string>
     <string name="number_members">Počet členov</string>
     <string name="country">Krajina</string>
     <string name="state">Štát/provincia, kraj</string>
@@ -217,7 +217,7 @@
     <string name="certainty">Hodnovernosť</string>
     <string name="text">Text</string>
     <string name="page">Strana</string>
-    <string name="source_note">Zdroj-pozn</string>
+    <string name="source_note">Zdroj-poznámka</string>
     <string name="inexistent_source_citation">Chýbajúca citácia zdroja</string>
     <string name="source_citation">Citácia zdroja</string>
     <string name="cause">Príčina</string>
@@ -367,4 +367,5 @@
     <string name="age">Vek</string>
     <string name="uncles_cousins">Strýkovia a bratranci</string>
     <string name="partners">Partneri/ky</string>
+    <string name="system_language">Jazyk systému</string>
 </resources>

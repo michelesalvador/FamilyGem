@@ -72,4 +72,13 @@
     <string name="show_advanced_functions">Gelişmiş araçları göster</string>
     <string name="about">Hakkında</string>
     <string name="load_tree_startup">Başlangıçta son açılan ağacı yükle</string>
+    <string name="system_language">Sistem dili</string>
+    <string name="change_date">Tarihi değiştir</string>
+    <string name="extension">Uzantı</string>
+    <string name="family_gem_example">Family Gem örneği</string>
+    <string name="open">Aç</string>
+    <string name="export_gedcom">GEDCOM olarak ver</string>
+    <string name="root">Kök</string>
+    <string name="refresh">Yenile</string>
+    <string name="item_exists_but_file">Soy ağacı girişi içindekilerde görünüyor, ancak ilgili dosya bir şekilde kaybolmuş:</string>
 </resources>
