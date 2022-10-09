@@ -303,7 +303,7 @@
     <string name="separation">Separation</string>
     <string name="divorce">Divorce</string>
     <string name="lineage">Lineage</string>
-    <string name="none">None</string>
+    <string name="undefined">Undefined</string>
     <string name="adopted">Adopted</string>
     <string name="foster">Foster</string>
     <string name="really_delete_family">This family will be deleted, but the family members will not be deleted.</string>

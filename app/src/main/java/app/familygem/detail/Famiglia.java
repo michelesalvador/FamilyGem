@@ -31,7 +31,8 @@ import androidx.appcompat.app.AlertDialog;
 public class Famiglia extends Dettaglio {
 
 	Family f;
-	static String[] pediTexts = {U.s(R.string.none), U.s(R.string.birth), U.s(R.string.adopted), U.s(R.string.foster)};
+	static String[] pediTexts = {U.s(R.string.undefined) + " (" + U.s(R.string.birth).toLowerCase() + ")",
+			U.s(R.string.birth), U.s(R.string.adopted), U.s(R.string.foster)};
 	static String[] pediTypes = {null, "birth", "adopted", "foster"};
 
 	@Override

@@ -365,4 +365,5 @@
     <string name="existing_id">ID ya existente</string>
     <string name="foster">De acogida</string>
     <string name="invalid_id">ID no válido</string>
+	<string name="undefined">Indefinido</string>
 </resources>

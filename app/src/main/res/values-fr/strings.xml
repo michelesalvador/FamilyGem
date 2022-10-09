@@ -371,4 +371,5 @@
     <string name="invalid_id">ID invalide</string>
     <string name="lineage">Parenté</string>
     <string name="existing_id">ID déjà existant</string>
+	<string name="undefined">Indéfinie</string>
 </resources>
