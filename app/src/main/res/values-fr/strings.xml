@@ -365,4 +365,10 @@
     <string name="birthdays">Anniversaires</string>
     <string name="share_sensitive">Partage de données sensibles</string>
     <string name="system_language">Langue du système</string>
+    <string name="adopted">Adopté·e</string>
+    <string name="foster">Recueilli·e</string>
+    <string name="edit_id">Modifier ID</string>
+    <string name="invalid_id">ID invalide</string>
+    <string name="lineage">Parenté</string>
+    <string name="existing_id">ID déjà existant</string>
 </resources>
