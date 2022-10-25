@@ -1,17 +1,17 @@
 package app.familygem.detail;
 
 import org.folg.gedcom.model.GedcomTag;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 
-public class ExtensionActivity extends DetailsActivity {
+public class ExtensionActivity extends DetailActivity {
 
 	GedcomTag e;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(getString(R.string.extension));
 		e = (GedcomTag)cast(GedcomTag.class);
 		placeSlug(e.getTag());
@@ -28,8 +28,8 @@ public class ExtensionActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
-		U.eliminaEstensione(e, Memory.oggettoContenitore(), null);
-		U.updateChangeDate(Memory.oggettoCapo());
+	public void delete() {
+		U.deleteExtension(e, Memory.oggettoContenitore(), null);
+		U.updateChangeDate(Memory.firstObject());
 	}
 }

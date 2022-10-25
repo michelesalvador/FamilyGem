@@ -37,30 +37,30 @@ import app.familygem.detail.NoteActivity;
 
 public class Memory {
 
-	static Map<Class,Class> classi = new HashMap<>();
+	static Map<Class,Class> classes = new HashMap<>();
 	private static final Memory memory = new Memory();
 	List<StepStack> lista = new ArrayList<>();
 
 	Memory() {
-		classi.put( Person.class, IndividualPersonActivity.class );
-		classi.put( Repository.class, RepositoryActivity.class );
-		classi.put( RepositoryRef.class, RepositoryRefActivity.class );
-		classi.put( Submitter.class, AuthorActivity.class );
-		classi.put( Change.class, ChangesActivity.class );
-		classi.put( SourceCitation.class, SourceCitationActivity.class );
-		classi.put( GedcomTag.class, ExtensionActivity.class );
-		classi.put( EventFact.class, EventActivity.class );
-		classi.put( Family.class, FamilyActivity.class );
-		classi.put( Source.class, SourceActivity.class );
-		classi.put( Media.class, ImageActivity.class );
-		classi.put( Address.class, AddressActivity.class );
-		classi.put( Name.class, NameActivity.class );
-		classi.put( Note.class, NoteActivity.class );
+		classes.put( Person.class, IndividualPersonActivity.class );
+		classes.put( Repository.class, RepositoryActivity.class );
+		classes.put( RepositoryRef.class, RepositoryRefActivity.class );
+		classes.put( Submitter.class, AuthorActivity.class );
+		classes.put( Change.class, ChangesActivity.class );
+		classes.put( SourceCitation.class, SourceCitationActivity.class );
+		classes.put( GedcomTag.class, ExtensionActivity.class );
+		classes.put( EventFact.class, EventActivity.class );
+		classes.put( Family.class, FamilyActivity.class );
+		classes.put( Source.class, SourceActivity.class );
+		classes.put( Media.class, ImageActivity.class );
+		classes.put( Address.class, AddressActivity.class );
+		classes.put( Name.class, NameActivity.class );
+		classes.put( Note.class, NoteActivity.class );
 	}
 
 	// Restituisce l'ultima pila creata se ce n'è almeno una
 	// oppure ne restituisce una vuota giusto per non restituire null
-	static StepStack getPila() {
+	static StepStack getStepStack() {
 		if( memory.lista.size() > 0 )
 			return memory.lista.get( memory.lista.size() - 1 );
 		else
@@ -73,14 +73,16 @@ public class Memory {
 		return stepStack;
 	}
 
-	// Aggiunge il primo oggetto in una nuova pila
-	public static void setPrimo( Object oggetto ) {
-		setPrimo( oggetto, null );
+	/**
+	 * Adds the first object to a new stack
+	 * */
+	public static void setFirst(Object object ) {
+		setFirst( object, null );
 	}
 
-	public static void setPrimo( Object oggetto, String tag ) {
+	public static void setFirst(Object oggetto, String tag ) {
 		addPila();
-		Step step = aggiungi( oggetto );
+		Step step = add( oggetto );
 		if( tag != null )
 			step.tag = tag;
 		else if( oggetto instanceof Person )
@@ -89,10 +91,10 @@ public class Memory {
 	}
 
 	// Aggiunge un oggetto alla fine dell'ultima pila esistente
-	public static Step aggiungi(Object oggetto ) {
+	public static Step add(Object oggetto ) {
 		Step step = new Step();
-		step.oggetto = oggetto;
-		getPila().add(step);
+		step.object = oggetto;
+		getStepStack().add(step);
 		//stampa("aggiungi");
 		return step;
 	}
@@ -102,57 +104,61 @@ public class Memory {
 	public static void replacePrimo( Object oggetto ) {
 		String tag = oggetto instanceof Family ? "FAM" : "INDI";
 		if( memory.lista.size() == 0 ) {
-			setPrimo( oggetto, tag );
+			setFirst( oggetto, tag );
 		} else {
-			getPila().clear();
-			Step step = aggiungi( oggetto );
+			getStepStack().clear();
+			Step step = add( oggetto );
 			step.tag = tag;
 		}
 		//stampa("replacePrimo");
 	}
 
-	// L'oggetto contenuto nel primo passo della pila
-	public static Object oggettoCapo() {
-		if( getPila().size() > 0 )
-			return getPila().firstElement().oggetto;
+	/**
+	 * The object contained in the first step of the stack
+	 * */
+	public static Object firstObject() {
+		if( getStepStack().size() > 0 )
+			return getStepStack().firstElement().object;
 		else
 			return null;
 	}
 
 	// L'oggetto nel passo precedente all'ultimo
 	public static Object oggettoContenitore() {
-		if( getPila().size() > 1 )
-			return getPila().get( getPila().size() - 2 ).oggetto;
+		if( getStepStack().size() > 1 )
+			return getStepStack().get( getStepStack().size() - 2 ).object;
 		else
 			return null;
 	}
 
 	// L'oggetto nell'ultimo passo
-	public static Object getOggetto() {
-		if( getPila().size() == 0 )
+	public static Object getObject() {
+		if( getStepStack().size() == 0 )
 			return null;
 		else
-			return getPila().peek().oggetto;
+			return getStepStack().peek().object;
 	}
 
-	static void arretra() {
-		while( getPila().size() > 0 && getPila().lastElement().filotto )
-			getPila().pop();
-		if( getPila().size() > 0 )
-			getPila().pop();
-		if( getPila().isEmpty() )
-			memory.lista.remove( getPila() );
+	static void clearStackAndRemove() { //lit. retreat
+		while( getStepStack().size() > 0 && getStepStack().lastElement().filotto )
+			getStepStack().pop();
+		if( getStepStack().size() > 0 )
+			getStepStack().pop();
+		if( getStepStack().isEmpty() )
+			memory.lista.remove( getStepStack() );
 		//stampa("arretra");
 	}
 
-	// Quando un oggetto viene eliminato, lo rende null in tutti i passi,
-	// e anche gli oggetti negli eventuali passi seguenti vengono annullati.
-	public static void annullaIstanze( Object oggio ) {
+	/**
+	 * When an object is deleted, make it null in all steps,
+	 * and the objects in any subsequent steps are also canceled.
+	 * */
+	public static void setInstanceAndAllSubsequentToNull(Object oggio ) {
 		for( StepStack stepStack : memory.lista ) {
 			boolean seguente = false;
 			for( Step step : stepStack) {
-				if( step.oggetto != null && (step.oggetto.equals(oggio) || seguente) ) {
-					step.oggetto = null;
+				if( step.object != null && (step.object.equals(oggio) || seguente) ) {
+					step.object = null;
 					seguente = true;
 				}
 			}
@@ -167,8 +173,8 @@ public class Memory {
 				String filotto = step.filotto ? "< " : "";
 				if( step.tag != null )
 					s.p( filotto + step.tag + " " );
-				else if( step.oggetto != null )
-					s.p( filotto + step.oggetto.getClass().getSimpleName() + " " );
+				else if( step.object != null )
+					s.p( filotto + step.object.getClass().getSimpleName() + " " );
 				else
 					s.p( filotto + "Null" ); // capita in rarissimi casi
 			}
@@ -180,7 +186,7 @@ public class Memory {
 	static class StepStack extends Stack<Step> {}
 
 	public static class Step {
-		public Object oggetto;
+		public Object object;
 		public String tag;
 		public boolean filotto; // TrovaPila lo setta true quindi onBackPressed la pila va eliminata in blocco
 	}

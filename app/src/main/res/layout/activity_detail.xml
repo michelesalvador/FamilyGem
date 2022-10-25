@@ -21,7 +21,7 @@
 				android:layout_marginBottom="12dp"
 				app:flexWrap="wrap"/>
 			<LinearLayout
-				android:id="@+id/dettaglio_scatola"
+				android:id="@+id/detail_box"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:orientation="vertical"/>

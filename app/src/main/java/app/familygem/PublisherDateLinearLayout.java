@@ -355,8 +355,10 @@ public class PublisherDateLinearLayout extends LinearLayout {
 		return fatta;
 	}
 
-	// Chiamato dall'esterno in sostanza solo per aggiungere le parentesi alla data-frase
-	void chiudi() {
+	/**
+	 * Called from outside essentially just to add parentheses to the given sentence
+	 * */
+	void encloseInParentheses() {
 		if( gedcomDateConverter.kind == Kind.PHRASE ) {
 			editaTesto.setText("(" + editaTesto.getText() + ")");
 		}

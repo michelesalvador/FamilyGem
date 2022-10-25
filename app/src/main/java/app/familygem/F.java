@@ -553,10 +553,12 @@ public class F {
 		}
 	}
 
-	// Metodi per acquisizione immagini:
+	// Methods for image acquisition:
 
-	// Propone una bella lista di app per acquisire immagini
-	public static void appAcquisizioneImmagine(Context contesto, Fragment frammento, int codice, MediaContainer contenitore) {
+	/**
+	 * Offers a nice list of apps for capturing images
+	 * */
+	public static void displayImageCaptureDialog(Context contesto, Fragment frammento, int codice, MediaContainer contenitore) {
 		// Richiesta permesso accesso memoria device
 		int perm = ContextCompat.checkSelfPermission(contesto, Manifest.permission.READ_EXTERNAL_STORAGE);
 		if( perm == PackageManager.PERMISSION_DENIED ) {
@@ -571,39 +573,39 @@ public class F {
 		List<ResolveInfo> listaRisolvi = new ArrayList<>();
 		final List<Intent> listaIntenti = new ArrayList<>();
 		// Camere
-		Intent intentoCamera = new Intent( MediaStore.ACTION_IMAGE_CAPTURE );
-		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoCamera,0) ) {
-			Intent finalIntent = new Intent( intentoCamera );
+		Intent intentCamera = new Intent( MediaStore.ACTION_IMAGE_CAPTURE );
+		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentCamera,0) ) {
+			Intent finalIntent = new Intent( intentCamera );
 			finalIntent.setComponent( new ComponentName(info.activityInfo.packageName, info.activityInfo.name) );
 			listaIntenti.add(finalIntent);
 			listaRisolvi.add( info );
 		}
 		// Gallerie
-		Intent intentoGalleria = new Intent( Intent.ACTION_GET_CONTENT );
-		intentoGalleria.setType("image/*");
+		Intent intentGalleria = new Intent( Intent.ACTION_GET_CONTENT );
+		intentGalleria.setType("image/*");
 		String[] mimeTypes = { "image/*", "audio/*", "video/*", "application/*", "text/*" };
 		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT )
 			mimeTypes[0] = "*/*"; // Altrimenti KitKat non vede gli 'application/*' in Downloads
-		intentoGalleria.putExtra( Intent.EXTRA_MIME_TYPES, mimeTypes );
-		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoGalleria,0) ) {
-			Intent finalIntent = new Intent( intentoGalleria );
+		intentGalleria.putExtra( Intent.EXTRA_MIME_TYPES, mimeTypes );
+		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentGalleria,0) ) {
+			Intent finalIntent = new Intent( intentGalleria );
 			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
 			listaIntenti.add( finalIntent );
 			listaRisolvi.add( info );
 		}
 		// Media vuoto
 		if( Global.settings.expert && codice != 5173 ) { // tranne che per la scelta di file in Immagine
-			Intent intento = new Intent( contesto, ImageActivity.class );
-			ResolveInfo info = contesto.getPackageManager().resolveActivity( intento, 0 );
-			intento.setComponent(new ComponentName(info.activityInfo.packageName,info.activityInfo.name));
-			listaIntenti.add( intento );
+			Intent intent = new Intent( contesto, ImageActivity.class );
+			ResolveInfo info = contesto.getPackageManager().resolveActivity( intent, 0 );
+			intent.setComponent(new ComponentName(info.activityInfo.packageName,info.activityInfo.name));
+			listaIntenti.add( intent );
 			listaRisolvi.add( info );
 		}
 		new AlertDialog.Builder( contesto ).setAdapter( faiAdattatore( contesto, listaRisolvi ),
 				(dialog, id) -> {
-					Intent intento = listaIntenti.get(id);
+					Intent intent = listaIntenti.get(id);
 					// Predispone un Uri in cui mettere la foto scattata dall'app fotocamera
-					if( intento.getAction() != null && intento.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE) ) {
+					if( intent.getAction() != null && intent.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE) ) {
 						File dir = contesto.getExternalFilesDir( String.valueOf(Global.settings.openTree) );
 						if( !dir.exists() )
 							dir.mkdir();
@@ -614,38 +616,38 @@ public class F {
 							fotoUri = FileProvider.getUriForFile( contesto, BuildConfig.APPLICATION_ID + ".provider", fotoFile );
 						else // KitKat
 							fotoUri = Uri.fromFile( fotoFile );
-						intento.putExtra( MediaStore.EXTRA_OUTPUT, fotoUri );
+						intent.putExtra( MediaStore.EXTRA_OUTPUT, fotoUri );
 					}
-					if( intento.getComponent().getPackageName().equals("app.familygem") ) {
+					if( intent.getComponent().getPackageName().equals("app.familygem") ) {
 						// Crea un Media vuoto
 						Media med;
 						if( codice==4173 || codice==2173 ) { // Media semplice
 							med = new Media();
 							med.setFileTag( "FILE" );
 							contenitore.addMedia( med );
-							Memory.aggiungi( med );
+							Memory.add( med );
 						} else { // Media condiviso
-							med = GalleryFragment.nuovoMedia( contenitore );
-							Memory.setPrimo( med );
+							med = GalleryFragment.newMedia( contenitore );
+							Memory.setFirst( med );
 						}
 						med.setFile( "" );
-						contesto.startActivity( intento );
-						U.save( true, Memory.oggettoCapo() );
+						contesto.startActivity( intent );
+						U.save( true, Memory.firstObject() );
 					} else if( frammento != null )
-						frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
+						frammento.startActivityForResult( intent, codice ); // Così il risultato ritorna al frammento
 					else
-						((AppCompatActivity)contesto).startActivityForResult( intento, codice );
+						((AppCompatActivity)contesto).startActivityForResult( intent, codice );
 				}).show();
 	}
 	// Strettamente legato a quello qui sopra
 	private static ArrayAdapter<ResolveInfo> faiAdattatore(final Context contesto, final List<ResolveInfo> listaRisolvi) {
-		return new ArrayAdapter<ResolveInfo>(contesto, R.layout.pezzo_app, R.id.intento_titolo, listaRisolvi) {
+		return new ArrayAdapter<ResolveInfo>(contesto, R.layout.pezzo_app, R.id.intent_titolo, listaRisolvi) {
 			@Override
 			public View getView(int posizione, View vista, ViewGroup genitore) {
 				View view = super.getView(posizione, vista, genitore);
 				ResolveInfo info = listaRisolvi.get(posizione);
-				ImageView image = view.findViewById(R.id.intento_icona);
-				TextView textview = view.findViewById(R.id.intento_titolo);
+				ImageView image = view.findViewById(R.id.intent_icona);
+				TextView textview = view.findViewById(R.id.intent_titolo);
 				if( info.activityInfo.packageName.equals("app.familygem") ) {
 					image.setImageResource(R.drawable.image);
 					textview.setText(R.string.empty_media);
@@ -658,9 +660,11 @@ public class F {
 		};
 	}
 
-	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
-	// ritorna true se apre il dialogo e quindi bisogna bloccare l'aggiornamento dell'attività
-	static boolean proponiRitaglio( Context contesto, Fragment frammento, Intent data, Media media ) {
+	/**
+	 * Save the scanned file and propose to crop it if it is an image
+	 * @return true if it opens the dialog and therefore the updating of the activity must be blocked
+	 * */
+	static boolean proposeCropping(Context contesto, Fragment frammento, Intent data, Media media ) {
 		// Trova il percorso dell'immagine
 		Uri uri = null;
 		String percorso;
@@ -712,12 +716,12 @@ public class F {
 		if( tipoMime != null && tipoMime.startsWith("image/") ) {
 			ImageView vistaImmagine = new ImageView( contesto );
 			dipingiMedia( media, vistaImmagine, null );
-			Global.mediaCroppato = media; // Media parcheggiato in attesa di essere aggiornato col nuovo percorso file
+			Global.croppedMedia = media; // Media parcheggiato in attesa di essere aggiornato col nuovo percorso file
 			Global.edited = false; // per non innescare il recreate() che negli Android nuovi non fa comparire l'AlertDialog
 			new AlertDialog.Builder( contesto )
 					.setView(vistaImmagine)
 					.setMessage( R.string.want_crop_image )
-					.setPositiveButton( R.string.yes, (dialog, id) -> tagliaImmagine( contesto, fileMedia[0], null, frammento ) )
+					.setPositiveButton( R.string.yes, (dialog, id) -> cropImage( contesto, fileMedia[0], null, frammento ) )
 					.setNeutralButton( R.string.no, (dialog, which) -> {
 						concludiProponiRitaglio( contesto, frammento );
 					}).setOnCancelListener( dialog -> { // click fuori dal dialogo
@@ -733,8 +737,8 @@ public class F {
 	static void concludiProponiRitaglio( Context contesto, Fragment frammento ) {
 		if( frammento instanceof GalleryFragment)
 			((GalleryFragment)frammento).ricrea();
-		else if( contesto instanceof DetailsActivity)
-			((DetailsActivity)contesto).refresh();
+		else if( contesto instanceof DetailActivity)
+			((DetailActivity)contesto).refresh();
 		else if( contesto instanceof IndividualPersonActivity) {
 			IndividualMediaFragment indiMedia = (IndividualMediaFragment) ((AppCompatActivity)contesto).getSupportFragmentManager()
 					.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" );
@@ -745,7 +749,7 @@ public class F {
 
 	// Avvia il ritaglio di un'immagine con CropImage
 	// 'fileMedia' e 'uriMedia': uno dei due è valido, l'altro è null
-	static void tagliaImmagine( Context contesto, File fileMedia, Uri uriMedia, Fragment frammento ) {
+	static void cropImage(Context contesto, File fileMedia, Uri uriMedia, Fragment frammento ) {
 		// Partenza
 		if( uriMedia == null )
 			uriMedia = Uri.fromFile(fileMedia);
@@ -764,7 +768,7 @@ public class F {
 				nome = DocumentFile.fromSingleUri( contesto, uriMedia ).getName();
 			fileDestinazione = fileNomeProgressivo( dirMemoria.getAbsolutePath(), nome );
 		}
-		Intent intento = CropImage.activity( uriMedia )
+		Intent intent = CropImage.activity( uriMedia )
 				.setOutputUri( Uri.fromFile(fileDestinazione) ) // cartella in memoria esterna
 				.setGuidelines( CropImageView.Guidelines.OFF )
 				.setBorderLineThickness( 1 )
@@ -773,9 +777,9 @@ public class F {
 				.setCropMenuCropButtonTitle( contesto.getText(R.string.done) )
 				.getIntent( contesto );
 		if( frammento != null )
-			frammento.startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
+			frammento.startActivityForResult( intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
 		else
-			((AppCompatActivity)contesto).startActivityForResult( intento, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
+			((AppCompatActivity)contesto).startActivityForResult( intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
 	}
 
 	// Se in quella cartella esiste già un file con quel nome lo incrementa con 1 2 3...
@@ -790,19 +794,24 @@ public class F {
 		return file;
 	}
 
-	// Conclude la procedura di ritaglio di un'immagine
-	static void fineRitaglioImmagine( Intent data ) {
+	/**
+	 * Ends the cropping procedure of an image
+	 * */
+	static void endImageCropping(Intent data ) {
 		CropImage.ActivityResult risultato = CropImage.getActivityResult(data);
 		Uri uri = risultato.getUri(); // ad es. 'file:///storage/emulated/0/Android/data/app.familygem/files/5/anna.webp'
 		Picasso.get().invalidate( uri ); // cancella dalla cache l'eventuale immagine prima del ritaglio che ha lo stesso percorso
 		String percorso = uriPercorsoFile( uri );
-		Global.mediaCroppato.setFile( percorso );
+		Global.croppedMedia.setFile( percorso );
 	}
 
-	// Risposta a tutte le richieste di permessi per Android 6+
-	static void risultatoPermessi( Context contesto, Fragment frammento, int codice, String[] permessi, int[] accordi, MediaContainer contenitore ) {
+	/**
+	 * Answering all permission requests for Android 6+
+	 * Risposta a tutte le richieste di permessi per Android 6+
+	 * */
+	static void permissionsResult(Context contesto, Fragment frammento, int codice, String[] permessi, int[] accordi, MediaContainer contenitore ) {
 		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
-			appAcquisizioneImmagine( contesto, frammento, codice, contenitore );
+			displayImageCaptureDialog( contesto, frammento, codice, contenitore );
 		} else {
 			String permesso = permessi[0].substring(permessi[0].lastIndexOf('.') + 1);
 			Toast.makeText( contesto, contesto.getString(R.string.not_granted,permesso), Toast.LENGTH_LONG ).show();

@@ -172,7 +172,7 @@ public class NewTree extends BaseActivity {
 		gestoreScarico.enqueue( richiesta );
 		BroadcastReceiver alCompletamento = new BroadcastReceiver() {
 			@Override
-			public void onReceive( Context contesto, Intent intento ) {
+			public void onReceive( Context contesto, Intent intent ) {
 				unZip( contesto, percorsoZip, null );
 				unregisterReceiver( this );
 			}

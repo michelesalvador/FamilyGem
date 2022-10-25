@@ -49,7 +49,7 @@ public class ChurchFragment extends Fragment {
 				Family newFamily = nuovaFamiglia(true);
 				U.save(true, newFamily);
 				// Se torna subito indietro in Chiesa rinfresca la lista con la famiglia vuota
-				Memory.setPrimo(newFamily);
+				Memory.setFirst(newFamily);
 				startActivity(new Intent(getContext(), FamilyActivity.class));
 			});
 		}
@@ -100,7 +100,7 @@ public class ChurchFragment extends Fragment {
 			childrenView.setText(children);
 		registerForContextMenu(familyView);
 		familyView.setOnClickListener(v -> {
-			Memory.setPrimo(wrapper.family);
+			Memory.setFirst(wrapper.family);
 			layout.getContext().startActivity(new Intent(layout.getContext(), FamilyActivity.class));
 		});
 		familyView.setTag(wrapper.id); // solo per il menu contestuale Elimina qui in Chiesa
@@ -144,7 +144,7 @@ public class ChurchFragment extends Fragment {
 		// The family is deleted
 		gc.getFamilies().remove(family);
 		gc.createIndexes();	// necessario per aggiornare gli individui
-		Memory.annullaIstanze(family);
+		Memory.setInstanceAndAllSubsequentToNull(family);
 		Global.familyNum = 0; // Nel caso fortuito che sia stata eliminata proprio questa famiglia
 		U.save(true, membri.toArray(new Object[0]));
 	}

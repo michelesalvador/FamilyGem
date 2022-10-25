@@ -9,19 +9,19 @@ import android.widget.TextView;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import app.familygem.LibraryFragment;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.visitor.ListOfSourceCitations;
 import static app.familygem.Global.gc;
 
-public class SourceActivity extends DetailsActivity {
+public class SourceActivity extends DetailActivity {
 
 	Source f;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(R.string.source);
 		f = (Source)cast(Source.class);
 		placeSlug("SOUR", f.getId());
@@ -62,7 +62,7 @@ public class SourceActivity extends DetailsActivity {
 			U.placeNotes((LinearLayout)vistaRef.findViewById(R.id.citazione_note), refArchivio, false);
 			vistaRef.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					Memory.aggiungi(refArchivio);
+					Memory.add(refArchivio);
 					startActivity(new Intent(SourceActivity.this, RepositoryRefActivity.class));
 				}
 			});
@@ -77,7 +77,7 @@ public class SourceActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
+	public void delete() {
 		U.updateChangeDate(LibraryFragment.eliminaFonte(f));
 	}
 }

@@ -2,19 +2,19 @@ package app.familygem.detail;
 
 import android.app.Activity;
 import org.folg.gedcom.model.Note;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.visitor.NoteReferences;
 
-public class NoteActivity extends DetailsActivity {
+public class NoteActivity extends DetailActivity {
 
 	Note n;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		n = (Note)cast(Note.class);
 		if( n.getId() == null ) {
 			setTitle(R.string.note);
@@ -33,12 +33,12 @@ public class NoteActivity extends DetailsActivity {
 			if( rifNota.tot > 0 )
 				U.mettiDispensa(box, rifNota.capostipiti.toArray(), R.string.shared_by);
 		} else if( ((Activity)box.getContext()).getIntent().getBooleanExtra("daQuaderno", false) ) {
-			U.mettiDispensa(box, Memory.oggettoCapo(), R.string.written_in);
+			U.mettiDispensa(box, Memory.firstObject(), R.string.written_in);
 		}
 	}
 
 	@Override
-	public void elimina() {
-		U.updateChangeDate(U.eliminaNota(n, null));
+	public void delete() {
+		U.updateChangeDate(U.deleteNote(n, null));
 	}
 }

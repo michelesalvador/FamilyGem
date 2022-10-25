@@ -67,12 +67,12 @@ public class IndividualEventsFragment extends Fragment {
 					if( fatto.getDate() != null ) txt += new GedcomDateConverter(fatto.getDate()).writeDateLong() + "\n";
 					if( fatto.getPlace() != null ) txt += fatto.getPlace() + "\n";
 					Address indirizzo = fatto.getAddress();
-					if( indirizzo != null ) txt += DetailsActivity.writeAddress(indirizzo, true) + "\n";
+					if( indirizzo != null ) txt += DetailActivity.writeAddress(indirizzo, true) + "\n";
 					if( fatto.getCause() != null ) txt += fatto.getCause();
 					if( txt.endsWith("\n") ) txt = txt.substring(0, txt.length() - 1); // Rimuove l'ultimo acapo
 					placeEvent(layout, writeEventTitle(fatto), txt, fatto);
 				}
-				for( Extension est : U.trovaEstensioni(one) ) {
+				for( Extension est : U.findExtensions(one) ) {
 					placeEvent(layout, est.nome, est.testo, est.gedcomTag);
 				}
 				U.placeNotes(layout, one, true);
@@ -153,14 +153,14 @@ public class IndividualEventsFragment extends Fragment {
 							.setPositiveButton(android.R.string.ok, (dialog, i) -> {
 								Global.settings.expert = true;
 								Global.settings.save();
-								Memory.aggiungi(object);
+								Memory.add(object);
 								startActivity(new Intent(getContext(), NameActivity.class));
 							}).setNegativeButton(android.R.string.cancel, (dialog, i) -> {
-								Memory.aggiungi(object);
+								Memory.add(object);
 								startActivity(new Intent(getContext(), NameActivity.class));
 							}).show();
 				} else {
-					Memory.aggiungi(object);
+					Memory.add(object);
 					startActivity(new Intent(getContext(), NameActivity.class));
 				}
 			});
@@ -192,13 +192,13 @@ public class IndividualEventsFragment extends Fragment {
 			} else { // All other events
 				U.placeMedia(otherLayout, object, false);
 				eventView.setOnClickListener(v -> {
-					Memory.aggiungi(object);
+					Memory.add(object);
 					startActivity(new Intent(getContext(), EventActivity.class));
 				});
 			}
 		} else if( object instanceof GedcomTag ) {
 			eventView.setOnClickListener(v -> {
-				Memory.aggiungi(object);
+				Memory.add(object);
 				startActivity(new Intent(getContext(), ExtensionActivity.class));
 			});
 		}
@@ -289,7 +289,7 @@ public class IndividualEventsFragment extends Fragment {
 			case 200: // Copia nome
 			case 210: // Copia evento
 			case 220: // Copia estensione
-				U.copiaNegliAppunti(((TextView)pieceView.findViewById(R.id.evento_titolo)).getText(),
+				U.copyToClipboard(((TextView)pieceView.findViewById(R.id.evento_titolo)).getText(),
 						((TextView)pieceView.findViewById(R.id.evento_testo)).getText());
 				return true;
 			case 201: // Sposta su
@@ -305,7 +305,7 @@ public class IndividualEventsFragment extends Fragment {
 			case 203: // Elimina
 				if( U.preserva(pieceObject) ) return false;
 				one.getNames().remove(pieceObject);
-				Memory.annullaIstanze(pieceObject);
+				Memory.setInstanceAndAllSubsequentToNull(pieceObject);
 				pieceView.setVisibility(View.GONE);
 				cosa = 2;
 				break;
@@ -323,35 +323,35 @@ public class IndividualEventsFragment extends Fragment {
 			case 213:
 				// todo Conferma elimina
 				one.getEventsFacts().remove(pieceObject);
-				Memory.annullaIstanze(pieceObject);
+				Memory.setInstanceAndAllSubsequentToNull(pieceObject);
 				pieceView.setVisibility(View.GONE);
 				break;
 			// Estensione
 			case 221: // Elimina
-				U.eliminaEstensione((GedcomTag)pieceObject, one, pieceView);
+				U.deleteExtension((GedcomTag)pieceObject, one, pieceView);
 				break;
 			// Nota
 			case 225: // Copia
-				U.copiaNegliAppunti(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.nota_testo)).getText());
+				U.copyToClipboard(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.nota_testo)).getText());
 				return true;
 			case 226: // Scollega
-				U.scollegaNota((Note)pieceObject, one, pieceView);
+				U.disconnectNote((Note)pieceObject, one, pieceView);
 				break;
 			case 227:
-				Object[] capi = U.eliminaNota((Note)pieceObject, pieceView);
+				Object[] capi = U.deleteNote((Note)pieceObject, pieceView);
 				U.save(true, capi);
 				refresh(0);
 				return true;
 			// Citazione fonte
 			case 230: // Copia
-				U.copiaNegliAppunti(getText(R.string.source_citation),
+				U.copyToClipboard(getText(R.string.source_citation),
 						((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
 								+ ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
 				return true;
 			case 231: // Elimina
 				// todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
 				one.getSourceCitations().remove(pieceObject);
-				Memory.annullaIstanze(pieceObject);
+				Memory.setInstanceAndAllSubsequentToNull(pieceObject);
 				pieceView.setVisibility(View.GONE);
 				break;
 			default:

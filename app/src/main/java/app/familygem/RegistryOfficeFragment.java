@@ -237,8 +237,8 @@ public class RegistryOfficeFragment extends Fragment {
 				getActivity().finish();
 			} else { // Normale collegamento alla scheda individuo
 				// todo Click sulla foto apre la scheda media..
-				// intento.putExtra( "scheda", 0 );
-				Memory.setPrimo( parente );
+				// intent.putExtra( "scheda", 0 );
+				Memory.setFirst( parente );
 				startActivity( new Intent(getContext(), IndividualPersonActivity.class) );
 			}
 		}
@@ -544,15 +544,15 @@ public class RegistryOfficeFragment extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id == 0 ) {	// Apri Diagramma
-			U.qualiGenitoriMostrare(getContext(), gc.getPerson(idIndi), 1);
+			U.askWhichParentsToShow(getContext(), gc.getPerson(idIndi), 1);
 		} else if( id == 1 ) { // Famiglia come figlio
-			U.qualiGenitoriMostrare(getContext(), gc.getPerson(idIndi), 2);
+			U.askWhichParentsToShow(getContext(), gc.getPerson(idIndi), 2);
 		} else if( id == 2 ) { // Famiglia come coniuge
-			U.qualiConiugiMostrare(getContext(), gc.getPerson(idIndi), null);
+			U.askWhichSpouceToShow(getContext(), gc.getPerson(idIndi), null);
 		} else if( id == 3 ) { // Modifica
-			Intent intento = new Intent(getContext(), IndividualEditorActivity.class);
-			intento.putExtra("idIndividuo", idIndi);
-			startActivity(intento);
+			Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
+			intent.putExtra("idIndividuo", idIndi);
+			startActivity(intent);
 		} else if( id == 4 ) { // Edit ID
 			U.editId(getContext(), gc.getPerson(idIndi), adapter::notifyDataSetChanged);
 		} else if( id == 5 ) { // Elimina
@@ -601,7 +601,7 @@ public class RegistryOfficeFragment extends Fragment {
 	static Family[] deletePerson(Context context, String personId) {
 		Family[] families = scollega(personId);
 		Person person = gc.getPerson(personId);
-		Memory.annullaIstanze(person);
+		Memory.setInstanceAndAllSubsequentToNull(person);
 		gc.getPeople().remove(person);
 		gc.createIndexes(); // Necessary
 		String newRootId = U.trovaRadice(gc); // Todo dovrebbe essere: trovaParentePiuProssimo

@@ -4,18 +4,18 @@ import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.Source;
 import java.util.ArrayList;
 import java.util.List;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.RepositoryFragment;
 import app.familygem.R;
 import app.familygem.U;
 
-public class RepositoryActivity extends DetailsActivity {
+public class RepositoryActivity extends DetailActivity {
 
 	Repository a;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(R.string.repository);
 		a = (Repository)cast(Repository.class);
 		placeSlug("REPO", a.getId());
@@ -42,7 +42,7 @@ public class RepositoryActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
+	public void delete() {
 		U.updateChangeDate((Object[]) RepositoryFragment.delete(a));
 	}
 }

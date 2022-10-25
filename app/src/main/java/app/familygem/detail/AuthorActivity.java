@@ -1,17 +1,17 @@
 package app.familygem.detail;
 
 import org.folg.gedcom.model.Submitter;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.ListOfAuthorsFragment;
 import app.familygem.R;
 import app.familygem.U;
 
-public class AuthorActivity extends DetailsActivity {
+public class AuthorActivity extends DetailActivity {
 
 	Submitter a;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(R.string.submitter);
 		a = (Submitter)cast(Submitter.class);
 		placeSlug("SUBM", a.getId());
@@ -29,7 +29,7 @@ public class AuthorActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
+	public void delete() {
 		// Ricordiamo che almeno un autore deve essere specificato
 		// non aggiorna la data di nessun record
 		ListOfAuthorsFragment.eliminaAutore( a );

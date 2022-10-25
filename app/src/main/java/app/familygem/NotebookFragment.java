@@ -73,26 +73,26 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 		Note note = adapter.getItem(position);
 		// Restituisce l'id di una nota a Individuo e Dettaglio
 		if( getActivity().getIntent().getBooleanExtra("quadernoScegliNota", false) ) {
-			Intent intento = new Intent();
-			intento.putExtra("idNota", note.getId());
-			getActivity().setResult(AppCompatActivity.RESULT_OK, intento);
+			Intent intent = new Intent();
+			intent.putExtra("idNota", note.getId());
+			getActivity().setResult(AppCompatActivity.RESULT_OK, intent);
 			getActivity().finish();
 		} else { // Apre il dettaglio della nota
-			Intent intento = new Intent(getContext(), NoteActivity.class);
+			Intent intent = new Intent(getContext(), NoteActivity.class);
 			if( note.getId() != null ) { // Nota condivisa
-				Memory.setPrimo(note);
+				Memory.setFirst(note);
 			} else { // Nota semplice
 				new FindStack(gc, note);
-				intento.putExtra("daQuaderno", true);
+				intent.putExtra("daQuaderno", true);
 			}
-			getContext().startActivity(intento);
+			getContext().startActivity(intent);
 		}
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if( item.getItemId() == 0 ) { // Elimina
-			Object[] capi = U.eliminaNota(adapter.selectedNote, null);
+			Object[] capi = U.deleteNote(adapter.selectedNote, null);
 			U.save(false, capi);
 			getActivity().recreate();
 		} else {
@@ -134,7 +134,7 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 			((NoteContainer)container).addNoteRef(noteRef);
 		}
 		U.save(true, note);
-		Memory.setPrimo(note);
+		Memory.setFirst(note);
 		context.startActivity(new Intent(context, NoteActivity.class));
 	}
 }

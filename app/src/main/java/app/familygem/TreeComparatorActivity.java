@@ -126,14 +126,14 @@ public class TreeComparatorActivity extends BaseActivity {
 			Submitter s = (Submitter) o;
 			tit = s.getName();
 			if( s.getEmail() != null ) txt += s.getEmail() + "\n";
-			if( s.getAddress() != null ) txt += DetailsActivity.writeAddress(s.getAddress(), true);
+			if( s.getAddress() != null ) txt += DetailActivity.writeAddress(s.getAddress(), true);
 			data = dataOra(s.getChange());
 		}
 		else if( o instanceof Repository ) {
 			tipoRecord( R.string.repository );
 			Repository r = (Repository) o;
 			tit = r.getName();
-			if( r.getAddress() != null ) txt += DetailsActivity.writeAddress(r.getAddress(), true) + "\n";
+			if( r.getAddress() != null ) txt += DetailActivity.writeAddress(r.getAddress(), true) + "\n";
 			if( r.getEmail() != null ) txt += r.getEmail();
 			data = dataOra(r.getChange());
 		}

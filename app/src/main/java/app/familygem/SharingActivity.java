@@ -273,19 +273,19 @@ public class SharingActivity extends BaseActivity {
 
 	// Mostra le app per condividere il link
 	void concludi() {
-		Intent intento = new Intent( Intent.ACTION_SEND );
-		intento.setType( "text/plain" );
-		intento.putExtra( Intent.EXTRA_SUBJECT, getString( R.string.sharing_tree ) );
-		intento.putExtra( Intent.EXTRA_TEXT, getString( R.string.click_this_link,
+		Intent intent = new Intent( Intent.ACTION_SEND );
+		intent.setType( "text/plain" );
+		intent.putExtra( Intent.EXTRA_SUBJECT, getString( R.string.sharing_tree ) );
+		intent.putExtra( Intent.EXTRA_TEXT, getString( R.string.click_this_link,
 				"https://www.familygem.app/share.php?tree=" + dataId ) );
-		//startActivity( Intent.createChooser( intento, "Condividi con" ) );
+		//startActivity( Intent.createChooser( intent, "Condividi con" ) );
 		/* Tornando indietro da una app di messaggistica il requestCode 35417 arriva sempre corretto
 			Invece il resultCode può essere RESULT_OK o RESULT_CANCELED a capocchia
 			Ad esempio da Gmail ritorna indietro sempre con RESULT_CANCELED sia che l'email è stata inviata o no
 			anche inviando un Sms ritorna RESULT_CANCELED anche se l'sms è stato inviato
 			oppure da Whatsapp è RESULT_OK sia che il messaggio è stato inviato o no
 			In pratica non c'è modo di sapere se nella app di messaggistica il messaggio è stato inviato */
-		startActivityForResult( Intent.createChooser(intento,getText(R.string.share_with)),35417 );
+		startActivityForResult( Intent.createChooser(intent,getText(R.string.share_with)),35417 );
 		findViewById( R.id.bottone_condividi ).setEnabled(true);
 		findViewById( R.id.condividi_circolo ).setVisibility( View.INVISIBLE );
 	}

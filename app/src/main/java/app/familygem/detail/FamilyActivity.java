@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.IndividualEditorActivity;
 import app.familygem.Global;
 import app.familygem.IndividualPersonActivity;
@@ -28,7 +28,7 @@ import app.familygem.constant.Status;
 import static app.familygem.Global.gc;
 import androidx.appcompat.app.AlertDialog;
 
-public class FamilyActivity extends DetailsActivity {
+public class FamilyActivity extends DetailActivity {
 
 	Family f;
 	static String[] pediTexts = {U.s(R.string.undefined) + " (" + U.s(R.string.birth).toLowerCase() + ")",
@@ -36,7 +36,7 @@ public class FamilyActivity extends DetailsActivity {
 	static String[] pediTypes = {null, "birth", "adopted", "foster"};
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(R.string.family);
 		f = (Family)cast(Family.class);
 		placeSlug("FAM", f.getId());
@@ -88,10 +88,10 @@ public class FamilyActivity extends DetailsActivity {
 			List<Family> spouseFam = p.getSpouseFamilies(gc);
 			// un coniuge con una o più famiglie in cui è figlio
 			if( relation == Relation.PARTNER && !parentFam.isEmpty() ) {
-				U.qualiGenitoriMostrare(this, p, 2);
+				U.askWhichParentsToShow(this, p, 2);
 			} // un figlio con una o più famiglie in cui è coniuge
 			else if( relation == Relation.CHILD && !p.getSpouseFamilies(gc).isEmpty() ) {
-				U.qualiConiugiMostrare(this, p, null);
+				U.askWhichSpouceToShow(this, p, null);
 			} // un figlio non sposato che ha più famiglie genitoriali
 			else if( parentFam.size() > 1 ) {
 				if( parentFam.size() == 2 ) { // Swappa tra le 2 famiglie genitoriali
@@ -100,7 +100,7 @@ public class FamilyActivity extends DetailsActivity {
 					Memory.replacePrimo(parentFam.get(Global.familyNum));
 					recreate();
 				} else // Più di due famiglie
-					U.qualiGenitoriMostrare( this, p, 2 );
+					U.askWhichParentsToShow( this, p, 2 );
 			} // un coniuge senza genitori ma con più famiglie coniugali
 			else if( spouseFam.size() > 1 ) {
 				if( spouseFam.size() == 2 ) { // Swappa tra le 2 famiglie coniugali
@@ -109,14 +109,14 @@ public class FamilyActivity extends DetailsActivity {
 					Memory.replacePrimo(altraFamiglia);
 					recreate();
 				} else
-					U.qualiConiugiMostrare(this, p, null);
+					U.askWhichSpouceToShow(this, p, null);
 			} else {
-				Memory.setPrimo(p);
+				Memory.setFirst(p);
 				startActivity(new Intent(this, IndividualPersonActivity.class));
 			}
 		});
-		if( unRappresentanteDellaFamiglia == null )
-			unRappresentanteDellaFamiglia = p;
+		if( aRepresentativeOfTheFamily == null )
+			aRepresentativeOfTheFamily = p;
 	}
 
 	/** Find the role of a person from their relation with a family
@@ -219,16 +219,18 @@ public class FamilyActivity extends DetailsActivity {
 		}
 	}
 
-	// Collega una persona ad una famiglia come genitore o figlio
-	public static void aggrega( Person person, Family fam, int ruolo ) {
-		switch( ruolo ) {
-			case 5:	// Genitore
-				// il ref dell'indi nella famiglia
+	/**
+	 * Connect a person to a family as a parent or child
+	 * */
+	public static void connect(Person person, Family fam, int roleFlag ) {
+		switch( roleFlag ) {
+			case 5:	// Parent //TODO code smell: use of magic number
+				// the ref of the indi in the family //il ref dell'indi nella famiglia
 				SpouseRef sr = new SpouseRef();
 				sr.setRef(person.getId());
-				IndividualEditorActivity.aggiungiConiuge(fam, sr);
+				IndividualEditorActivity.addSpouse(fam, sr);
 
-				// il ref della famiglia nell'indi
+				// the family ref in the indi //il ref della famiglia nell'indi
 				SpouseFamilyRef sfr = new SpouseFamilyRef();
 				sfr.setRef( fam.getId() );
 				//tizio.getSpouseFamilyRefs().add( sfr );	// no: con lista vuota UnsupportedOperationException
@@ -252,7 +254,7 @@ public class FamilyActivity extends DetailsActivity {
 	}
 
 	// Rimuove il singolo SpouseFamilyRef dall'individuo e il corrispondente SpouseRef dalla famiglia
-	public static void scollega(SpouseFamilyRef sfr, SpouseRef sr) {
+	public static void disconnect(SpouseFamilyRef sfr, SpouseRef sr) {
 		// Dalla persona alla famiglia
 		Person person = sr.getPerson(gc);
 		person.getSpouseFamilyRefs().remove(sfr);
@@ -275,7 +277,7 @@ public class FamilyActivity extends DetailsActivity {
 	}
 
 	// Rimuove TUTTI i ref di un individuo in una famiglia
-	public static void scollega(String indiId, Family family) {
+	public static void disconnect(String indiId, Family family) {
 		// Rimuove i ref dell'indi nella famiglia
 		Iterator<SpouseRef> spouseRefs = family.getHusbandRefs().iterator();
 		while( spouseRefs.hasNext() )

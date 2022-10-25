@@ -60,12 +60,12 @@ public class RepositoryFragment extends Fragment {
 				((TextView)repoView.findViewById(R.id.magazzino_archivi)).setText(String.valueOf(countSources(gc, repo)));
 				repoView.setOnClickListener(v -> {
 					if( getActivity().getIntent().getBooleanExtra("magazzinoScegliArchivio", false) ) {
-						Intent intento = new Intent();
-						intento.putExtra("idArchivio", repo.getId());
-						getActivity().setResult(Activity.RESULT_OK, intento);
+						Intent intent = new Intent();
+						intent.putExtra("idArchivio", repo.getId());
+						getActivity().setResult(Activity.RESULT_OK, intent);
 						getActivity().finish();
 					} else {
-						Memory.setPrimo(repo);
+						Memory.setFirst(repo);
 						startActivity(new Intent(getContext(), RepositoryActivity.class));
 					}
 				});
@@ -113,7 +113,7 @@ public class RepositoryFragment extends Fragment {
 			source.setRepositoryRef(repoRef);
 		}
 		U.save(true, repo);
-		Memory.setPrimo(repo);
+		Memory.setFirst(repo);
 		context.startActivity(new Intent(context, RepositoryActivity.class));
 	}
 
@@ -129,7 +129,7 @@ public class RepositoryFragment extends Fragment {
 				sources.add(sour);
 			}
 		gc.getRepositories().remove(repo);
-		Memory.annullaIstanze(repo);
+		Memory.setInstanceAndAllSubsequentToNull(repo);
 		return sources.toArray(new Source[0]);
 	}
 

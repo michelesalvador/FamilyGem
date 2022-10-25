@@ -71,12 +71,12 @@ public class IndividualMediaFragment extends Fragment {
 			refresh();
 			return true;
 		} else if( id == 1 ) { // Scollega
-			GalleryFragment.scollegaMedia(media.getId(), (MediaContainer)container);
+			GalleryFragment.disconnectMedia(media.getId(), (MediaContainer)container);
 			U.save(true, uno);
 			refresh();
 			return true;
 		} else if( id == 2 ) { // Elimina
-			Object[] capi = GalleryFragment.eliminaMedia(media, null);
+			Object[] capi = GalleryFragment.deleteMedia(media, null);
 			U.save(true, capi);
 			refresh();
 			return true;

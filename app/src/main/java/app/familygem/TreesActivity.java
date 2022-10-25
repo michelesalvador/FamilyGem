@@ -172,9 +172,9 @@ public class TreesActivity extends AppCompatActivity {
 								openGedcom(treeId, true);
 								startActivity(new Intent(TreesActivity.this, Principal.class));
 							} else if( id == 1 ) { // Info Gedcom
-								Intent intento = new Intent(TreesActivity.this, TreeInfoActivity.class);
-								intento.putExtra("idAlbero", treeId);
-								startActivity(intento);
+								Intent intent = new Intent(TreesActivity.this, TreeInfoActivity.class);
+								intent.putExtra("idAlbero", treeId);
+								startActivity(intent);
 							} else if( id == 2 ) { // Rinomina albero
 								AlertDialog.Builder builder = new AlertDialog.Builder(TreesActivity.this);
 								View vistaMessaggio = getLayoutInflater().inflate(R.layout.albero_nomina, vistaLista, false);

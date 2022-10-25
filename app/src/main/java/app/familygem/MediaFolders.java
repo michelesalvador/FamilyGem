@@ -192,7 +192,7 @@ public class MediaFolders extends BaseActivity {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) { // Copia
-			U.copiaNegliAppunti( getText(android.R.string.copyUrl), ((TextView)vistaScelta.findViewById(R.id.cartella_url)).getText() );
+			U.copyToClipboard( getText(android.R.string.copyUrl), ((TextView)vistaScelta.findViewById(R.id.cartella_url)).getText() );
 			return true;
 		}
 		return false;

@@ -36,7 +36,7 @@ public class ListOfAuthorsFragment extends Fragment {
 			((TextView)vistaPezzo.findViewById(R.id.magazzino_nome)).setText(TreeInfoActivity.nomeAutore(autor));
 			vistaPezzo.findViewById(R.id.magazzino_archivi).setVisibility(View.GONE);
 			vistaPezzo.setOnClickListener(v -> {
-				Memory.setPrimo(autor);
+				Memory.setFirst(autor);
 				startActivity(new Intent(getContext(), AuthorActivity.class));
 			});
 			registerForContextMenu(vistaPezzo);
@@ -60,7 +60,7 @@ public class ListOfAuthorsFragment extends Fragment {
 		gc.getSubmitters().remove(aut);
 		if( gc.getSubmitters().isEmpty() )
 			gc.setSubmitters(null);
-		Memory.annullaIstanze(aut);
+		Memory.setInstanceAndAllSubsequentToNull(aut);
 	}
 
 	// Crea un Autore nuovo, se riceve un contesto lo apre in modalità editore
@@ -71,13 +71,13 @@ public class ListOfAuthorsFragment extends Fragment {
 		U.updateChangeDate(subm);
 		gc.addSubmitter(subm);
 		if( contesto != null ) {
-			Memory.setPrimo(subm);
+			Memory.setFirst(subm);
 			contesto.startActivity(new Intent(contesto, AuthorActivity.class));
 		}
 		return subm;
 	}
 
-	static void autorePrincipale(Submitter subm) {
+	static void mainAuthor(Submitter subm) {
 		Header testa = gc.getHeader();
 		if( testa == null ) {
 			testa = NewTree.creaTestata(Global.settings.openTree + ".json");
@@ -94,7 +94,7 @@ public class ListOfAuthorsFragment extends Fragment {
 		subm = (Submitter)vista.getTag();
 		if( gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(subm) )
 			menu.add(0, 0, 0, R.string.make_default);
-		if( !U.autoreHaCondiviso(subm) ) // può essere eliminato solo se non ha mai condiviso
+		if( !U.submitterHasShared(subm) ) // può essere eliminato solo se non ha mai condiviso
 			menu.add(0, 1, 0, R.string.delete);
 		// todo spiegare perché non può essere eliminato?
 	}
@@ -102,7 +102,7 @@ public class ListOfAuthorsFragment extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			case 0:
-				autorePrincipale(subm);
+				mainAuthor(subm);
 				return true;
 			case 1:
 				// Todo conferma elimina

@@ -2,19 +2,19 @@ package app.familygem.detail;
 
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import static app.familygem.Global.gc;
 
-public class NameActivity extends DetailsActivity {
+public class NameActivity extends DetailActivity {
 
 	Name n;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(R.string.name);
 		placeSlug("NAME", null);
 		n = (Name)cast(Name.class);
@@ -50,10 +50,10 @@ public class NameActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
+	public void delete() {
 		Person costui = gc.getPerson(Global.indi);
 		costui.getNames().remove(n);
 		U.updateChangeDate(costui);
-		Memory.annullaIstanze(n);
+		Memory.setInstanceAndAllSubsequentToNull(n);
 	}
 }

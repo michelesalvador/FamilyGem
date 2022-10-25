@@ -133,7 +133,7 @@ public class TreeInfoActivity extends BaseActivity {
 					poni( getText(R.string.time), h.getDateTime().getTime() );
 				}
 				spazio();
-				for( Extension est : U.trovaEstensioni(h) ) {	// ogni estensione nella sua riga
+				for( Extension est : U.findExtensions(h) ) {	// ogni estensione nella sua riga
 					poni( est.nome, est.testo );
 				}
 				spazio();
@@ -180,7 +180,7 @@ public class TreeInfoActivity extends BaseActivity {
 				U.placeNotes(scatola, h, true);
 			}
 			// Estensioni del Gedcom, ovvero tag non standard di livello 0 zero
-			for( Extension est : U.trovaEstensioni(gc) ) {
+			for( Extension est : U.findExtensions(gc) ) {
 				U.metti( scatola, est.nome, est.testo );
 			}
 		} else

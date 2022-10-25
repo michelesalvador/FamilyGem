@@ -3,18 +3,18 @@ package app.familygem.detail;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import static app.familygem.Global.gc;
 
-public class SourceCitationActivity extends DetailsActivity {
+public class SourceCitationActivity extends DetailActivity {
 
 	SourceCitation c;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		placeSlug("SOUR");
 		c = (SourceCitation)cast(SourceCitation.class);
 		if( c.getSource(gc) != null ) {  // source CITATION valida
@@ -40,13 +40,13 @@ public class SourceCitationActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
+	public void delete() {
 		Object contenitore = Memory.oggettoContenitore();
 		if( contenitore instanceof Note )	// Note non extende SourceCitationContainer
 			((Note)contenitore).getSourceCitations().remove( c );
 		else
 			((SourceCitationContainer)contenitore).getSourceCitations().remove( c );
-		U.updateChangeDate( Memory.oggettoCapo() );
-		Memory.annullaIstanze(c);
+		U.updateChangeDate( Memory.firstObject() );
+		Memory.setInstanceAndAllSubsequentToNull(c);
 	}
 }

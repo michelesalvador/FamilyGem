@@ -404,7 +404,7 @@ public class Diagram extends Fragment {
 			registerForContextMenu(this);
 			setOnClickListener( v -> {
 				if( person.getId().equals(Global.indi) ) {
-					Memory.setPrimo( person );
+					Memory.setFirst( person );
 					startActivity( new Intent(getContext(), IndividualPersonActivity.class) );
 				} else {
 					clickCard( person );
@@ -448,7 +448,7 @@ public class Diagram extends Fragment {
 				bondLayout.addView(year, yearParams);
 			}
 			setOnClickListener( view -> {
-				Memory.setPrimo( familyNode.spouseFamily );
+				Memory.setFirst( familyNode.spouseFamily );
 				startActivity( new Intent( context, FamilyActivity.class ) );
 			});
 		}
@@ -494,7 +494,7 @@ public class Diagram extends Fragment {
 			getLayoutInflater().inflate(R.layout.diagram_asterisk, this, true);
 			registerForContextMenu(this);
 			setOnClickListener( v -> {
-				Memory.setPrimo(personNode.person);
+				Memory.setFirst(personNode.person);
 				startActivity(new Intent(getContext(), IndividualPersonActivity.class));
 			});
 		}
@@ -683,28 +683,28 @@ public class Diagram extends Fragment {
 			else // Due famiglie
 				completeSelect(pers, Global.familyNum == 0 ? 1 : 0);
 		} else if( id == 0 ) { // Apri scheda individuo
-			Memory.setPrimo(pers);
+			Memory.setFirst(pers);
 			startActivity(new Intent(getContext(), IndividualPersonActivity.class));
 		} else if( id == 1 ) { // Famiglia come figlio
 			if( idPersona.equals(Global.indi) ) { // Se è fulcro apre direttamente la famiglia
-				Memory.setPrimo(parentFam);
+				Memory.setFirst(parentFam);
 				startActivity(new Intent(getContext(), FamilyActivity.class));
 			} else
-				U.qualiGenitoriMostrare(getContext(), pers, 2);
+				U.askWhichParentsToShow(getContext(), pers, 2);
 		} else if( id == 2 ) { // Famiglia come coniuge
-			U.qualiConiugiMostrare(getContext(), pers, null);
+			U.askWhichSpouceToShow(getContext(), pers, null);
 		} else if( id == 3 ) { // Collega persona nuova
 			if( Global.settings.expert ) {
 				DialogFragment dialog = new NewRelativeDialog(pers, parentFam, spouseFam, true, null);
 				dialog.show(getActivity().getSupportFragmentManager(), "scegli");
 			} else {
 				new AlertDialog.Builder(getContext()).setItems(parenti, (dialog, quale) -> {
-					Intent intento = new Intent(getContext(), IndividualEditorActivity.class);
-					intento.putExtra("idIndividuo", idPersona);
-					intento.putExtra("relazione", quale + 1);
-					if( U.controllaMultiMatrimoni(intento, getContext(), null) ) // aggiunge 'idFamiglia' o 'collocazione'
+					Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
+					intent.putExtra("idIndividuo", idPersona);
+					intent.putExtra("relazione", quale + 1);
+					if( U.controllaMultiMatrimoni(intent, getContext(), null) ) // aggiunge 'idFamiglia' o 'collocazione'
 						return; // se perno è sposo in più famiglie, chiede a chi aggiungere un coniuge o un figlio
-					startActivity(intento);
+					startActivity(intent);
 				}).show();
 			}
 		} else if( id == 4 ) { // Collega persona esistente
@@ -713,30 +713,30 @@ public class Diagram extends Fragment {
 				dialog.show(getActivity().getSupportFragmentManager(), "scegli");
 			} else {
 				new AlertDialog.Builder(getContext()).setItems(parenti, (dialog, quale) -> {
-					Intent intento = new Intent(getContext(), Principal.class);
-					intento.putExtra("idIndividuo", idPersona);
-					intento.putExtra("anagrafeScegliParente", true);
-					intento.putExtra("relazione", quale + 1);
-					if( U.controllaMultiMatrimoni(intento, getContext(), Diagram.this) )
+					Intent intent = new Intent(getContext(), Principal.class);
+					intent.putExtra("idIndividuo", idPersona);
+					intent.putExtra("anagrafeScegliParente", true);
+					intent.putExtra("relazione", quale + 1);
+					if( U.controllaMultiMatrimoni(intent, getContext(), Diagram.this) )
 						return;
-					startActivityForResult(intento, 1401);
+					startActivityForResult(intent, 1401);
 				}).show();
 			}
 		} else if( id == 5 ) { // Modifica
-			Intent intento = new Intent(getContext(), IndividualEditorActivity.class);
-			intento.putExtra("idIndividuo", idPersona);
-			startActivity(intento);
+			Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
+			intent.putExtra("idIndividuo", idPersona);
+			startActivity(intent);
 		} else if( id == 6 ) { // Scollega
 			/*  Todo ad esser precisi bisognerebbe usare Famiglia.scollega( sfr, sr )
 				che rimuove esattamente il singolo link anziché tutti i link se una persona è linkata + volte nella stessa famiglia
 			 */
 			List<Family> modificate = new ArrayList<>();
 			if( parentFam != null ) {
-				FamilyActivity.scollega(idPersona, parentFam);
+				FamilyActivity.disconnect(idPersona, parentFam);
 				modificate.add(parentFam);
 			}
 			if( spouseFam != null ) {
-				FamilyActivity.scollega(idPersona, spouseFam);
+				FamilyActivity.disconnect(idPersona, spouseFam);
 				modificate.add(spouseFam);
 			}
 			ripristina();

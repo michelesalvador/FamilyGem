@@ -10,18 +10,18 @@ import android.widget.TextView;
 import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import static app.familygem.Global.gc;
 
-public class RepositoryRefActivity extends DetailsActivity {
+public class RepositoryRefActivity extends DetailActivity {
 
 	RepositoryRef r;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		placeSlug("REPO");
 		r = (RepositoryRef)cast(RepositoryRef.class);
 		if( r.getRepository(gc) != null ) { // valido
@@ -48,18 +48,18 @@ public class RepositoryRefActivity extends DetailsActivity {
 		((TextView)cartaRepo.findViewById(R.id.fonte_testo)).setText(repo.getName());
 		((CardView)cartaRepo).setCardBackgroundColor(contesto.getResources().getColor(R.color.archivio));
 		cartaRepo.setOnClickListener(v -> {
-			Memory.setPrimo(repo);
+			Memory.setFirst(repo);
 			contesto.startActivity(new Intent(contesto, RepositoryActivity.class));
 		});
 		return cartaRepo;
 	}
 
 	@Override
-	public void elimina() {
+	public void delete() {
 		// Elimina la citazione all'archivio a aggiorna la data della fonte che la conteneva
 		Source contenitore = (Source) Memory.oggettoContenitore();
 		contenitore.setRepositoryRef(null);
 		U.updateChangeDate(contenitore);
-		Memory.annullaIstanze(r);
+		Memory.setInstanceAndAllSubsequentToNull(r);
 	}
 }

@@ -28,7 +28,7 @@ import app.familygem.visitor.MediaList;
 import app.familygem.visitor.NoteList;
 import static app.familygem.Global.gc;
 
-public class Principal extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class Principal /*TODO Main?*/extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	DrawerLayout scatolissima;
 	Toolbar toolbar;
@@ -55,7 +55,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 		menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
 		Global.principalView = scatolissima;
-		U.gedcomSicuro( gc );
+		U.ensureGlobalGedcomNotNull( gc );
 		furnishMenu();
 
 		if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
@@ -207,7 +207,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			popup.setOnMenuItemClickListener( item -> {
 				if( item.getItemId() == 0 ) {
 					TreesActivity.openGedcom(Global.settings.openTree, false);
-					U.qualiGenitoriMostrare(this, null, 0); // Semplicemente ricarica il diagramma
+					U.askWhichParentsToShow(this, null, 0); // Semplicemente ricarica il diagramma
 					scatolissima.closeDrawer(GravityCompat.START);
 					saveButton.setVisibility(View.GONE);
 					Global.daSalvare = false;
@@ -263,7 +263,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 					Global.indi = Global.settings.getCurrentTree().root;
 					cosaAprire = 1; // Eventualmente chiede dei molteplici genitori
 				}
-				U.qualiGenitoriMostrare( this, Global.gc.getPerson(Global.indi), cosaAprire );
+				U.askWhichParentsToShow( this, Global.gc.getPerson(Global.indi), cosaAprire );
 			} else {
 				FragmentManager fm = getSupportFragmentManager();
 				// Rimuove frammento precedente dalla storia se è lo stesso che stiamo per vedere

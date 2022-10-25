@@ -92,9 +92,9 @@ public class IndividualFamilyFragment extends Fragment {
 		vistaPersona.setOnClickListener(v -> {
 			getActivity().finish(); // Rimuove l'attività attale dallo stack
 			Memory.replacePrimo(person);
-			Intent intento = new Intent(getContext(), IndividualPersonActivity.class);
-			intento.putExtra("scheda", 2); // apre la scheda famiglia
-			startActivity(intento);
+			Intent intent = new Intent(getContext(), IndividualPersonActivity.class);
+			intent.putExtra("scheda", 2); // apre la scheda famiglia
+			startActivity(intent);
 		});
 		registerForContextMenu(vistaPersona);
 		vistaPersona.setTag(R.id.tag_famiglia, family); // Il principale scopo di questo tag è poter scollegare l'individuo dalla famiglia
@@ -147,23 +147,23 @@ public class IndividualFamilyFragment extends Fragment {
 	public boolean onContextItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if( id == 300 ) { // Diagramma
-			U.qualiGenitoriMostrare(getContext(), person, 1);
+			U.askWhichParentsToShow(getContext(), person, 1);
 		} else if( id == 301 ) { // Famiglia come figlio
-			U.qualiGenitoriMostrare(getContext(), person, 2);
+			U.askWhichParentsToShow(getContext(), person, 2);
 		} else if( id == 302 ) { // Famiglia come coniuge
-			U.qualiConiugiMostrare(getContext(), person, family);
+			U.askWhichSpouceToShow(getContext(), person, family);
 		} else if( id == 303 ) { // Sposta su
 			spostaRiferimentoFamiglia(-1);
 		} else if( id == 304 ) { // Sposta giù
 			spostaRiferimentoFamiglia(1);
 		} else if( id == 305 ) { // Modifica
-			Intent intento = new Intent(getContext(), IndividualEditorActivity.class);
-			intento.putExtra("idIndividuo", indiId);
-			startActivity(intento);
+			Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
+			intent.putExtra("idIndividuo", indiId);
+			startActivity(intent);
 		} else if( id == 306 ) { // Lineage
 			FamilyActivity.chooseLineage(getContext(), person, family);
 		} else if( id == 307 ) { // Scollega da questa famiglia
-			FamilyActivity.scollega(indiId, family);
+			FamilyActivity.disconnect(indiId, family);
 			refresh();
 			U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
 			U.save(true, family, person);

@@ -48,7 +48,7 @@ public class GalleryFragment extends Fragment {
 			adattatore = new MediaGalleryAdapter( visitaMedia.listaMedia, true );
 			griglia.setAdapter( adattatore );
 			vista.findViewById( R.id.fab ).setOnClickListener( v ->
-					F.appAcquisizioneImmagine( getContext(), GalleryFragment.this, 4546, null )
+					F.displayImageCaptureDialog( getContext(), GalleryFragment.this, 4546, null )
 			);
 		}
 		return vista;
@@ -67,7 +67,9 @@ public class GalleryFragment extends Fragment {
 				+ " " + getString(R.string.media).toLowerCase() );
 	}
 
-	// Aggiorna i contenuti della galleria
+	/**
+	 * Update the contents of the gallery
+	 * */
 	void ricrea() {
 		visitaMedia.listaMedia.clear();
 		gc.accept( visitaMedia );
@@ -81,7 +83,7 @@ public class GalleryFragment extends Fragment {
 		return riferiMedia.num;
 	}
 
-	static Media nuovoMedia( Object contenitore ){
+	static Media newMedia(Object contenitore ){
 		Media media = new Media();
 		media.setId( U.nuovoId(gc,Media.class) );
 		media.setFileTag("FILE"); // Necessario per poi esportare il Gedcom
@@ -95,7 +97,7 @@ public class GalleryFragment extends Fragment {
 	}
 
 	// Scollega da un contenitore un media condiviso
-	static void scollegaMedia(String mediaId, MediaContainer container) {
+	static void disconnectMedia(String mediaId, MediaContainer container) {
 		Iterator<MediaRef> refs = container.getMediaRefs().iterator();
 		while( refs.hasNext() ) {
 			MediaRef ref = refs.next();
@@ -109,7 +111,7 @@ public class GalleryFragment extends Fragment {
 
 	// Elimina un media condiviso o locale e rimuove i riferimenti nei contenitori
 	// Restituisce un array con i capostipiti modificati
-	public static Object[] eliminaMedia(Media media, View vista) {
+	public static Object[] deleteMedia(Media media, View vista) {
 		Set<Object> capi;
 		if( media.getId() != null ) { // media OBJECT
 			gc.getMedia().remove(media);
@@ -123,10 +125,10 @@ public class GalleryFragment extends Fragment {
 			if( container.getMedia().isEmpty() )
 				container.setMedia(null);
 			capi = new HashSet<>(); // set con un solo Object capostipite
-			capi.add( Memory.oggettoCapo() );
-			Memory.arretra(); // elimina la pila appena creata
+			capi.add( Memory.firstObject() );
+			Memory.clearStackAndRemove(); // elimina la pila appena creata
 		}
-		Memory.annullaIstanze(media);
+		Memory.setInstanceAndAllSubsequentToNull(media);
 		if( vista != null )
 			vista.setVisibility(View.GONE);
 		return capi.toArray(new Object[0]);
@@ -137,16 +139,16 @@ public class GalleryFragment extends Fragment {
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		if( resultCode == Activity.RESULT_OK ) {
 			if( requestCode == 4546 ) { // File preso da app fornitrice viene salvato in Media ed eventualmente ritagliato
-				Media media = nuovoMedia(null);
-				if( F.proponiRitaglio(getContext(), this, data, media) ) { // se è un'immagine (quindi ritagliabile)
+				Media media = newMedia(null);
+				if( F.proposeCropping(getContext(), this, data, media) ) { // se è un'immagine (quindi ritagliabile)
 					U.save(false, media);
 							// Non deve scattare onRestart() + recreate() perché poi il fragment di arrivo non è più lo stesso
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
-				F.fineRitaglioImmagine(data);
+				F.endImageCropping(data);
 			}
-			U.save(true, Global.mediaCroppato);
+			U.save(true, Global.croppedMedia);
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) // se clic su freccia indietro in Crop Image
 			Global.edited = true;
 	}
@@ -161,7 +163,7 @@ public class GalleryFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if( item.getItemId() == 0 ) {
-			Object[] modificati = eliminaMedia(media, null);
+			Object[] modificati = deleteMedia(media, null);
 			ricrea();
 			U.save(false, modificati);
 			return true;
@@ -186,6 +188,6 @@ public class GalleryFragment extends Fragment {
 
 	@Override
 	public void onRequestPermissionsResult(int codice, String[] permessi, int[] accordi) {
-		F.risultatoPermessi(getContext(), this, codice, permessi, accordi, null);
+		F.permissionsResult(getContext(), this, codice, permessi, accordi, null);
 	}
 }

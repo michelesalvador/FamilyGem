@@ -1,17 +1,17 @@
 package app.familygem.detail;
 
 import org.folg.gedcom.model.Address;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 
-public class AddressActivity extends DetailsActivity {
+public class AddressActivity extends DetailActivity {
 
 	Address a;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(R.string.address);
 		placeSlug("ADDR");
 		a = (Address)cast(Address.class);
@@ -28,9 +28,9 @@ public class AddressActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
-		eliminaIndirizzo(Memory.oggettoContenitore());
-		U.updateChangeDate(Memory.oggettoCapo());
-		Memory.annullaIstanze(a);
+	public void delete() {
+		deleteAddress(Memory.oggettoContenitore());
+		U.updateChangeDate(Memory.firstObject());
+		Memory.setInstanceAndAllSubsequentToNull(a);
 	}
 }

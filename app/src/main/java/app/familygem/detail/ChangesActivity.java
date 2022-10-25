@@ -3,16 +3,16 @@ package app.familygem.detail;
 import android.view.Menu;
 import org.folg.gedcom.model.Change;
 import org.folg.gedcom.model.DateTime;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.R;
 import app.familygem.U;
 
-public class ChangesActivity extends DetailsActivity {
+public class ChangesActivity extends DetailActivity {
 
 	Change c;
 
 	@Override
-	public void impagina() {
+	public void format() {
 		setTitle(R.string.change_date);
 		placeSlug("CHAN");
 		c = (Change)cast(Change.class);

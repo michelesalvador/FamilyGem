@@ -109,18 +109,18 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 				attiva.finish();
 			// Galleria in modalità normale apre Immagine
 			} else {
-				Intent intento = new Intent( v.getContext(), ImageActivity.class );
+				Intent intent = new Intent( v.getContext(), ImageActivity.class );
 				if( media.getId() != null ) { // tutti i Media record
-					Memory.setPrimo( media );
+					Memory.setFirst( media );
 				} else if( (attiva instanceof IndividualPersonActivity && contenitore instanceof Person) // media di primo livello nell'Indi
-						|| attiva instanceof DetailsActivity) { // normale apertura nei Dettagli
-					Memory.aggiungi( media );
+						|| attiva instanceof DetailActivity) { // normale apertura nei Dettagli
+					Memory.add( media );
 				} else { // da Galleria tutti i media semplici, o da IndividuoMedia i media sotto molteplici livelli
 					new FindStack( Global.gc, media );
 					if( attiva instanceof Principal ) // Solo in Galleria
-						intento.putExtra( "daSolo", true ); // così poi Immagine mostra la dispensa
+						intent.putExtra( "daSolo", true ); // così poi Immagine mostra la dispensa
 				}
-				v.getContext().startActivity( intento );
+				v.getContext().startActivity( intent );
 			}
 		}
 	}

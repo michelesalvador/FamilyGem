@@ -4,13 +4,13 @@ import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.PersonFamilyCommonContainer;
 import java.util.Arrays;
-import app.familygem.DetailsActivity;
+import app.familygem.DetailActivity;
 import app.familygem.IndividualEventsFragment;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 
-public class EventActivity extends DetailsActivity {
+public class EventActivity extends DetailActivity {
 
 	EventFact e;
 	// Lista di tag di eventi utili per evitare di mettere il Value dell'EventFact
@@ -19,10 +19,10 @@ public class EventActivity extends DetailsActivity {
 			"ANUL","DIV","DIVF","ENGA","MARB","MARC","MARR","MARL","MARS" }; // eventi di Famiglia
 
 	@Override
-	public void impagina() {
+	public void format() {
 		e = (EventFact)cast(EventFact.class);
-		if( Memory.oggettoCapo() instanceof Family )
-			setTitle(writeEventTitle((Family) Memory.oggettoCapo(), e));
+		if( Memory.firstObject() instanceof Family )
+			setTitle(writeEventTitle((Family) Memory.firstObject(), e));
 		else
 			setTitle(IndividualEventsFragment.writeEventTitle(e)); // It includes e.getDisplayType()
 		placeSlug(e.getTag());
@@ -55,14 +55,17 @@ public class EventActivity extends DetailsActivity {
 	}
 
 	@Override
-	public void elimina() {
+	public void delete() {
 		((PersonFamilyCommonContainer) Memory.oggettoContenitore()).getEventsFacts().remove(e);
-		U.updateChangeDate(Memory.oggettoCapo());
-		Memory.annullaIstanze(e);
+		U.updateChangeDate(Memory.firstObject());
+		Memory.setInstanceAndAllSubsequentToNull(e);
 	}
 
-	// Elimina i principali tag vuoti e eventualmente aggiunge la 'Y'
-	public static void ripulisciTag( EventFact ef ) {
+	/**
+	 * Delete the main empty tags and eventually add the 'Y'
+	 * Elimina i principali tag vuoti e eventualmente aggiunge la 'Y'
+	 * */
+	public static void cleanUpTag(EventFact ef ) {
 		if( ef.getType() != null && ef.getType().isEmpty() ) ef.setType(null);
 		if( ef.getDate() != null && ef.getDate().isEmpty() ) ef.setDate(null);
 		if( ef.getPlace() != null && ef.getPlace().isEmpty() ) ef.setPlace(null);

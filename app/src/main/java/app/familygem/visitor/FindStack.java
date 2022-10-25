@@ -41,7 +41,7 @@ public class FindStack extends Visitor {
 			if( capostipite )
 				pila.clear(); // ogni capostipite fa ricominciare da capo una pila
 			Memory.Step step = new Memory.Step();
-			step.oggetto = oggetto;
+			step.object = oggetto;
 			step.tag = tag;
 			if( !capostipite )
 				step.filotto = true; // li marchia per eliminarli poi in blocco onBackPressed
@@ -51,7 +51,7 @@ public class FindStack extends Visitor {
 			Iterator<Memory.Step> passi = pila.iterator();
 			while( passi.hasNext() ) {
 				CleanStack pulitore = new CleanStack( scopo );
-				((Visitable)passi.next().oggetto).accept( pulitore );
+				((Visitable)passi.next().object).accept( pulitore );
 				if( pulitore.daEliminare )
 					passi.remove();
 			}

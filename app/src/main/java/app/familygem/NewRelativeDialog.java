@@ -82,26 +82,26 @@ public class NewRelativeDialog extends DialogFragment {
 
 		builder.setView(vista).setPositiveButton(android.R.string.ok, (dialog, id) -> {
 			// Setta alcuni valori che verranno passati a EditaIndividuo o ad Anagrafe e arriveranno ad aggiungiParente()
-			Intent intento = new Intent();
-			intento.putExtra("idIndividuo", perno.getId());
-			intento.putExtra("relazione", relazione);
+			Intent intent = new Intent();
+			intent.putExtra("idIndividuo", perno.getId());
+			intent.putExtra("relazione", relazione);
 			VoceFamiglia voceFamiglia = (VoceFamiglia)spinner.getSelectedItem();
 			if( voceFamiglia.famiglia != null )
-				intento.putExtra("idFamiglia", voceFamiglia.famiglia.getId());
+				intent.putExtra("idFamiglia", voceFamiglia.famiglia.getId());
 			else if( voceFamiglia.genitore != null ) // Uso 'collocazione' per veicolare l'id del genitore (il terzo attore della scena)
-				intento.putExtra("collocazione", "NUOVA_FAMIGLIA_DI" + voceFamiglia.genitore.getId());
+				intent.putExtra("collocazione", "NUOVA_FAMIGLIA_DI" + voceFamiglia.genitore.getId());
 			else if( voceFamiglia.esistente ) // veicola ad Anagrafe l'intenzione di congiungersi a famiglia esistente
-				intento.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
+				intent.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
 			if( parenteNuovo ) { // Collega persona nuova
-				intento.setClass(getContext(), IndividualEditorActivity.class);
-				startActivity(intento);
+				intent.setClass(getContext(), IndividualEditorActivity.class);
+				startActivity(intent);
 			} else { // Collega persona esistente
-				intento.putExtra("anagrafeScegliParente", true);
-				intento.setClass(getContext(), Principal.class);
+				intent.putExtra("anagrafeScegliParente", true);
+				intent.setClass(getContext(), Principal.class);
 				if( frammento != null )
-					frammento.startActivityForResult(intento, 1401);
+					frammento.startActivityForResult(intent, 1401);
 				else
-					getActivity().startActivityForResult(intento, 1401);
+					getActivity().startActivityForResult(intent, 1401);
 			}
 		}).setNeutralButton(R.string.cancel, null);
 		dialog = builder.create();

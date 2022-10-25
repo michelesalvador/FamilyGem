@@ -25,7 +25,7 @@ public class Global extends MultiDexApplication {
 	public static boolean edited; // C'è stata un'editazione in EditaIndividuo o in Dettaglio e quindi il contenuto delle attività precedenti va aggiornato
 	static boolean daSalvare; // Il contenuto del Gedcom è stato modificato e deve essere salvato
 	public static String fotoCamera; // percorso in cui l'app fotocamera mette la foto scattata
-	public static Media mediaCroppato; // parcheggio temporaneo del media in fase di croppaggio
+	public static Media croppedMedia; // parcheggio temporaneo del media in fase di croppaggio
 	static Gedcom gc2; // per il confronto degli aggiornamenti
 	static int treeId2; // id dell'albero2 con gli aggiornamenti
 

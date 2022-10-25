@@ -1,7 +1,8 @@
-// Date formats
-
 package app.familygem.constant;
 
+/**
+ * All of the formats a Date can be displayed as
+ * */
 public class Format {
 	public static final String[] PATTERNS = { "d MMM yyy", "d M yyy", "MMM yyy", "M yyy", "d MMM", "yyy" };
 	public static final String D_M_Y = PATTERNS[0];

@@ -97,8 +97,10 @@ public class U {
 		return Global.context.getString(id);
 	}
 
-	// Da usare dove capita che 'Global.gc' possa essere null per ricaricarlo
-	static void gedcomSicuro(Gedcom gc) {
+	/**
+	 * To use where it happens that 'Global.gc' could be null to reload it
+	 * */
+	static void ensureGlobalGedcomNotNull(Gedcom gc) {
 		if( gc == null )
 			Global.gc = TreesActivity.readJson(Global.settings.openTree);
 	}
@@ -487,8 +489,10 @@ public class U {
 		}
 	}
 
-	// Copia testo negli appunti
-	static void copiaNegliAppunti(CharSequence label, CharSequence text) {
+	/**
+	* Copy text to clipboard
+	* */
+	static void copyToClipboard(CharSequence label, CharSequence text) {
 		ClipboardManager clipboard = (ClipboardManager)Global.context.getSystemService(Context.CLIPBOARD_SERVICE);
 		ClipData clip = ClipData.newPlainText(label, text);
 		if( clipboard != null ) clipboard.setPrimaryClip(clip);
@@ -496,7 +500,7 @@ public class U {
 
 	// Restituisce la lista di estensioni
 	@SuppressWarnings("unchecked")
-	public static List<Extension> trovaEstensioni(ExtensionContainer contenitore) {
+	public static List<Extension> findExtensions(ExtensionContainer contenitore) {
 		if( contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) != null ) {
 			List<Extension> lista = new ArrayList<>();
 			for( GedcomTag est : (List<GedcomTag>)contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) ) {
@@ -526,7 +530,7 @@ public class U {
 		return testo;
 	}
 
-	public static void eliminaEstensione(GedcomTag estensione, Object contenitore, View vista) {
+	public static void deleteExtension(GedcomTag estensione, Object contenitore, View vista) {
 		if( contenitore instanceof ExtensionContainer ) { // IndividuoEventi
 			ExtensionContainer exc = (ExtensionContainer)contenitore;
 			@SuppressWarnings("unchecked")
@@ -542,7 +546,7 @@ public class U {
 			if( gt.getChildren().isEmpty() )
 				gt.setChildren(null);
 		}
-		Memory.annullaIstanze(estensione);
+		Memory.setInstanceAndAllSubsequentToNull(estensione);
 		if( vista != null )
 			vista.setVisibility(View.GONE);
 	}
@@ -660,9 +664,9 @@ public class U {
 				((AppCompatActivity)context).registerForContextMenu(noteView);
 			noteView.setOnClickListener(v -> {
 				if( note.getId() != null )
-					Memory.setPrimo(note);
+					Memory.setFirst(note);
 				else
-					Memory.aggiungi(note);
+					Memory.add(note);
 				context.startActivity(new Intent(context, NoteActivity.class));
 			});
 		} else {
@@ -670,7 +674,7 @@ public class U {
 		}
 	}
 
-	static void scollegaNota(Note nota, Object contenitore, View vista) {
+	static void disconnectNote(Note nota, Object contenitore, View vista) {
 		List<NoteRef> lista = ((NoteContainer)contenitore).getNoteRefs();
 		for( NoteRef ref : lista )
 			if( ref.getNote(Global.gc).equals(nota) ) {
@@ -684,7 +688,7 @@ public class U {
 
 	// Elimina una Nota inlinea o condivisa
 	// Restituisce un array dei capostipiti modificati
-	public static Object[] eliminaNota(Note note, View view) {
+	public static Object[] deleteNote(Note note, View view) {
 		Set<Object> capi;
 		if( note.getId() != null ) { // OBJECT note
 			// Prima rimuove i ref alla nota con un bel Visitor
@@ -701,10 +705,10 @@ public class U {
 			if( nc.getNotes().isEmpty() )
 				nc.setNotes(null);
 			capi = new HashSet<>();
-			capi.add(Memory.oggettoCapo());
-			Memory.arretra();
+			capi.add(Memory.firstObject());
+			Memory.clearStackAndRemove();
 		}
-		Memory.annullaIstanze(note);
+		Memory.setInstanceAndAllSubsequentToNull(note);
 		if( view != null )
 			view.setVisibility(View.GONE);
 		return capi.toArray();
@@ -759,9 +763,9 @@ public class U {
 					((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaCita);
 
 				vistaCita.setOnClickListener(v -> {
-					Intent intento = new Intent(layout.getContext(), SourceCitationActivity.class);
-					Memory.aggiungi(citaz);
-					layout.getContext().startActivity(intento);
+					Intent intent = new Intent(layout.getContext(), SourceCitationActivity.class);
+					Memory.add(citaz);
+					layout.getContext().startActivity(intent);
 				});
 			}
 		}
@@ -797,7 +801,7 @@ public class U {
 		}
 		vistaTesto.setText(txt);
 		vistaFonte.setOnClickListener(v -> {
-			Memory.setPrimo(source);
+			Memory.setFirst(source);
 			layout.getContext().startActivity(new Intent(layout.getContext(), SourceActivity.class));
 		});
 	}
@@ -819,10 +823,10 @@ public class U {
 		else if( Gender.isFemale(p) )
 			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_femmina);
 		vistaPersona.setOnClickListener(v -> {
-			Memory.setPrimo(p);
-			Intent intento = new Intent(scatola.getContext(), IndividualPersonActivity.class);
-			intento.putExtra("scheda", scheda);
-			scatola.getContext().startActivity(intento);
+			Memory.setFirst(p);
+			Intent intent = new Intent(scatola.getContext(), IndividualPersonActivity.class);
+			intent.putExtra("scheda", scheda);
+			scatola.getContext().startActivity(intent);
 		});
 		return vistaPersona;
 	}
@@ -851,7 +855,7 @@ public class U {
 		scatola.addView(vistaFamiglia);
 		((TextView)vistaFamiglia.findViewById(R.id.famiglia_testo)).setText(testoFamiglia(scatola.getContext(), Global.gc, fam, false));
 		vistaFamiglia.setOnClickListener(v -> {
-			Memory.setPrimo(fam);
+			Memory.setFirst(fam);
 			scatola.getContext().startActivity(new Intent(scatola.getContext(), FamilyActivity.class));
 		});
 	}
@@ -865,7 +869,7 @@ public class U {
 		parami.height = dpToPx(80);
 		F.dipingiMedia(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));
 		vistaMedia.setOnClickListener(v -> {
-			Memory.setPrimo(media);
+			Memory.setFirst(media);
 			scatola.getContext().startActivity(new Intent(scatola.getContext(), ImageActivity.class));
 		});
 	}
@@ -879,7 +883,7 @@ public class U {
 		testoNota.setText(autor.getName());
 		vista.findViewById(R.id.nota_fonti).setVisibility(View.GONE);
 		vista.setOnClickListener(v -> {
-			Memory.setPrimo(autor);
+			Memory.setFirst(autor);
 			contesto.startActivity(new Intent(contesto, AuthorActivity.class));
 		});
 	}
@@ -933,12 +937,12 @@ public class U {
 				textView.setText(txt);
 			}
 			LinearLayout scatolaNote = changeView.findViewById(R.id.cambi_note);
-			for( Extension altroTag : trovaEstensioni(change) )
+			for( Extension altroTag : findExtensions(change) )
 				metti(scatolaNote, altroTag.nome, altroTag.testo);
 			// Grazie al mio contributo la data cambiamento può avere delle note
 			placeNotes(scatolaNote, change, false);
 			changeView.setOnClickListener(v -> {
-				Memory.aggiungi(change);
+				Memory.add(change);
 				layout.getContext().startActivity(new Intent(layout.getContext(), ChangesActivity.class));
 			});
 		}
@@ -1084,8 +1088,10 @@ public class U {
 		return null;
 	}
 
-	// Verifica se un autore ha partecipato alle condivisioni, per non farlo eliminare
-	static boolean autoreHaCondiviso(Submitter autore) {
+	/**
+	 * Check if an author has participated in the shares, so as not to have them deleted
+	 * */
+	static boolean submitterHasShared(Submitter autore) {
 		List<Settings.Share> condivisioni = Global.settings.getCurrentTree().shares;
 		boolean inviatore = false;
 		if( condivisioni != null )
@@ -1104,29 +1110,28 @@ public class U {
 		}
 		return famigliePerno.toArray(new String[0]);
 	}
-
-	/* Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
-	cosaAprire:
-		0 diagramma della famiglia precedente, senza chiedere quale famiglia (primo click su Diagram)
-		1 diagramma chiedendo eventualmente quale famiglia
-		2 famiglia chiedendo eventualmente quale famiglia
-	 */
-	public static void qualiGenitoriMostrare(Context contesto, Person perno, int cosaAprire) {
-		if( perno == null )
-			concludiSceltaGenitori(contesto, null, 1, 0);
+	/** For a stud? anchor? reference? ("perno") who is a child in more than one family, ask which family to show
+		@param thingToOpen what to open:
+				0 diagram of the previous family, without asking which family (first click on Diagram)
+				1 diagram possibly asking which family
+				2 family possibly asking which family
+	*/
+	public static void askWhichParentsToShow(Context context, Person person, int thingToOpen) {
+		if( person == null )
+			finishParentSelection(context, null, 1, 0);
 		else {
-			List<Family> famiglie = perno.getParentFamilies(Global.gc);
-			if( famiglie.size() > 1 && cosaAprire > 0 ) {
-				new AlertDialog.Builder(contesto).setTitle(R.string.which_family)
+			List<Family> famiglie = person.getParentFamilies(Global.gc);
+			if( famiglie.size() > 1 && thingToOpen > 0 ) {
+				new AlertDialog.Builder(context).setTitle(R.string.which_family)
 						.setItems(elencoFamiglie(famiglie), (dialog, quale) -> {
-							concludiSceltaGenitori(contesto, perno, cosaAprire, quale);
+							finishParentSelection(context, person, thingToOpen, quale);
 						}).show();
 			} else
-				concludiSceltaGenitori(contesto, perno, cosaAprire, 0);
+				finishParentSelection(context, person, thingToOpen, 0);
 		}
 
 	}
-	private static void concludiSceltaGenitori(Context contesto, Person perno, int cosaAprire, int qualeFamiglia) {
+	private static void finishParentSelection(Context contesto, Person perno, int cosaAprire, int qualeFamiglia) {
 		if( perno != null )
 			Global.indi = perno.getId();
 		if( cosaAprire > 0 ) // Viene impostata la famiglia da mostrare
@@ -1148,14 +1153,16 @@ public class U {
 				Memory.replacePrimo(family);
 				((Activity)contesto).recreate();
 			} else {
-				Memory.setPrimo(family);
+				Memory.setFirst(family);
 				contesto.startActivity(new Intent(contesto, FamilyActivity.class));
 			}
 		}
 	}
 
-	// Per un perno che ha molteplici matrimoni chiede quale mostrare
-	public static void qualiConiugiMostrare(Context contesto, Person perno, Family famiglia) {
+	/**
+	 * For an anchor ("perno") who has multiple marriages it asks which one to show
+	 * */
+	public static void askWhichSpouceToShow(Context contesto, Person perno, Family famiglia) {
 		if( perno.getSpouseFamilies(Global.gc).size() > 1 && famiglia == null ) {
 			new AlertDialog.Builder(contesto).setTitle(R.string.which_family)
 					.setItems(elencoFamiglie(perno.getSpouseFamilies(Global.gc)), (dialog, quale) -> {
@@ -1172,7 +1179,7 @@ public class U {
 			Memory.replacePrimo(famiglia);
 			((Activity)contesto).recreate(); // Non accumula activity nello stack
 		} else {
-			Memory.setPrimo(famiglia);
+			Memory.setFirst(famiglia);
 			contesto.startActivity(new Intent(contesto, FamilyActivity.class));
 		}
 	}
@@ -1180,18 +1187,18 @@ public class U {
 	// Usato per collegare una persona ad un'altra, solo in modalità inesperto
 	// Verifica se il perno potrebbe avere o ha molteplici matrimoni e chiede a quale attaccare un coniuge o un figlio
 	// È anche responsabile di settare 'idFamiglia' oppure 'collocazione'
-	static boolean controllaMultiMatrimoni(Intent intento, Context contesto, Fragment frammento) {
-		String idPerno = intento.getStringExtra("idIndividuo");
+	static boolean controllaMultiMatrimoni(Intent intent, Context contesto, Fragment frammento) {
+		String idPerno = intent.getStringExtra("idIndividuo");
 		Person perno = Global.gc.getPerson(idPerno);
 		List<Family> famGenitori = perno.getParentFamilies(Global.gc);
 		List<Family> famSposi = perno.getSpouseFamilies(Global.gc);
-		int relazione = intento.getIntExtra("relazione", 0);
+		int relazione = intent.getIntExtra("relazione", 0);
 		ArrayAdapter<NewRelativeDialog.VoceFamiglia> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
 
 		// Genitori: esiste già una famiglia che abbia almeno uno spazio vuoto
 		if( relazione == 1 && famGenitori.size() == 1
 				&& (famGenitori.get(0).getHusbandRefs().isEmpty() || famGenitori.get(0).getWifeRefs().isEmpty()) )
-			intento.putExtra("idFamiglia", famGenitori.get(0).getId()); // aggiunge 'idFamiglia' all'intent esistente
+			intent.putExtra("idFamiglia", famGenitori.get(0).getId()); // aggiunge 'idFamiglia' all'intent esistente
 		// se questa famiglia è già piena di genitori, 'idFamiglia' rimane null
 		// quindi verrà cercata la famiglia esistente del destinatario oppure si crearà una famiglia nuova
 
@@ -1201,31 +1208,31 @@ public class U {
 				if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() )
 					adapter.add(new NewRelativeDialog.VoceFamiglia(contesto, fam));
 			if( adapter.getCount() == 1 )
-				intento.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+				intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
 			else if( adapter.getCount() > 1 ) {
 				new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_parent)
 						.setAdapter(adapter, (dialog, quale) -> {
-							intento.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
-							concludiMultiMatrimoni(contesto, intento, frammento);
+							intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+							concludiMultiMatrimoni(contesto, intent, frammento);
 						}).show();
 				return true;
 			}
 		}
 		// Fratello
 		else if( relazione == 2 && famGenitori.size() == 1 ) {
-			intento.putExtra("idFamiglia", famGenitori.get(0).getId());
+			intent.putExtra("idFamiglia", famGenitori.get(0).getId());
 		} else if( relazione == 2 && famGenitori.size() > 1 ) {
 			new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_sibling)
 					.setItems(elencoFamiglie(famGenitori), (dialog, quale) -> {
-						intento.putExtra("idFamiglia", famGenitori.get(quale).getId());
-						concludiMultiMatrimoni(contesto, intento, frammento);
+						intent.putExtra("idFamiglia", famGenitori.get(quale).getId());
+						concludiMultiMatrimoni(contesto, intent, frammento);
 					}).show();
 			return true;
 		}
 		// Coniuge
 		else if( relazione == 3 && famSposi.size() == 1 ) {
 			if( famSposi.get(0).getHusbandRefs().isEmpty() || famSposi.get(0).getWifeRefs().isEmpty() ) // Se c'è uno slot libero
-				intento.putExtra("idFamiglia", famSposi.get(0).getId());
+				intent.putExtra("idFamiglia", famSposi.get(0).getId());
 		} else if( relazione == 3 && famSposi.size() > 1 ) {
 			for( Family fam : famSposi ) {
 				if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() )
@@ -1233,45 +1240,45 @@ public class U {
 			}
 			// Nel caso di zero famiglie papabili, idFamiglia rimane null
 			if( adapter.getCount() == 1 ) {
-				intento.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+				intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
 			} else if( adapter.getCount() > 1 ) {
 				//adapter.add(new NuovoParente.VoceFamiglia(contesto,perno) );
 				new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_spouse)
 						.setAdapter(adapter, (dialog, quale) -> {
-							intento.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
-							concludiMultiMatrimoni(contesto, intento, frammento);
+							intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+							concludiMultiMatrimoni(contesto, intent, frammento);
 						}).show();
 				return true;
 			}
 		}
 		// Figlio: esiste già una famiglia con o senza figli
 		else if( relazione == 4 && famSposi.size() == 1 ) {
-			intento.putExtra("idFamiglia", famSposi.get(0).getId());
+			intent.putExtra("idFamiglia", famSposi.get(0).getId());
 		} // Figlio: esistono molteplici famiglie coniugali
 		else if( relazione == 4 && famSposi.size() > 1 ) {
 			new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_child)
 					.setItems(elencoFamiglie(famSposi), (dialog, quale) -> {
-						intento.putExtra("idFamiglia", famSposi.get(quale).getId());
-						concludiMultiMatrimoni(contesto, intento, frammento);
+						intent.putExtra("idFamiglia", famSposi.get(quale).getId());
+						concludiMultiMatrimoni(contesto, intent, frammento);
 					}).show();
 			return true;
 		}
 		// Non avendo trovato una famiglia di perno, dice ad Anagrafe di cercare di collocare perno nella famiglia del destinatario
-		if( intento.getStringExtra("idFamiglia") == null && intento.getBooleanExtra("anagrafeScegliParente", false) )
-			intento.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
+		if( intent.getStringExtra("idFamiglia") == null && intent.getBooleanExtra("anagrafeScegliParente", false) )
+			intent.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
 		return false;
 	}
 
 	// Conclusione della funzione precedente
-	static void concludiMultiMatrimoni(Context contesto, Intent intento, Fragment frammento) {
-		if( intento.getBooleanExtra("anagrafeScegliParente", false) ) {
+	static void concludiMultiMatrimoni(Context contesto, Intent intent, Fragment frammento) {
+		if( intent.getBooleanExtra("anagrafeScegliParente", false) ) {
 			// apre Anagrafe
 			if( frammento != null )
-				frammento.startActivityForResult(intento, 1401);
+				frammento.startActivityForResult(intent, 1401);
 			else
-				((Activity)contesto).startActivityForResult(intento, 1401);
+				((Activity)contesto).startActivityForResult(intent, 1401);
 		} else // apre EditaIndividuo
-			contesto.startActivity(intento);
+			contesto.startActivity(intent);
 	}
 
 	// Controlla che una o più famiglie siano vuote e propone di eliminarle

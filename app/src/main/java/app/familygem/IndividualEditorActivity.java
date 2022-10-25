@@ -50,7 +50,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle bandolo) {
 		super.onCreate(bandolo);
-		U.gedcomSicuro(gc);
+		U.ensureGlobalGedcomNotNull(gc);
 		setContentView( R.layout.edita_individuo );
 		Bundle bundle = getIntent().getExtras();
 		idIndi = bundle.getString("idIndividuo");
@@ -170,14 +170,14 @@ public class IndividualEditorActivity extends AppCompatActivity {
 				}
 			}
 		}
-		publisherDateLinearLayoutNascita.inizia( dataNascita );
+		publisherDateLinearLayoutNascita.initialize( dataNascita );
 		bottonMorte.setOnCheckedChangeListener( (coso, attivo) -> {
 			if (attivo)
 				attivaMorte();
 			else
 				disattivaMorte();
 		});
-		publisherDateLinearLayoutMorte.inizia( dataMorte );
+		publisherDateLinearLayoutMorte.initialize( dataMorte );
 		luogoMorte.setOnEditorActionListener( (vista, actionId, keyEvent) -> {
 			if( actionId == EditorInfo.IME_ACTION_DONE )
 				salva();
@@ -213,7 +213,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 	}
 
 	void salva() {
-		U.gedcomSicuro(gc); // È capitato un crash perché qui gc era null
+		U.ensureGlobalGedcomNotNull(gc); // È capitato un crash perché qui gc era null
 
 		// Nome
 		String nome = ((EditText)findViewById(R.id.nome)).getText().toString().trim();
@@ -267,7 +267,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 		}
 
 		// Nascita
-		publisherDateLinearLayoutNascita.chiudi();
+		publisherDateLinearLayoutNascita.encloseInParentheses();
 		String data = dataNascita.getText().toString().trim();
 		String luogo = luogoNascita.getText().toString().trim();
 		boolean trovato = false;
@@ -278,7 +278,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 					    più in generale, eliminare un tag quando è vuoto */
 				fatto.setDate( data );
 				fatto.setPlace( luogo );
-				EventActivity.ripulisciTag( fatto );
+				EventActivity.cleanUpTag( fatto );
 				trovato = true;
 			}
 		}
@@ -288,12 +288,12 @@ public class IndividualEditorActivity extends AppCompatActivity {
 			nascita.setTag( "BIRT" );
 			nascita.setDate( data );
 			nascita.setPlace( luogo );
-			EventActivity.ripulisciTag( nascita );
+			EventActivity.cleanUpTag( nascita );
 			p.addEventFact( nascita );
 		}
 
 		// Morte
-		publisherDateLinearLayoutMorte.chiudi();
+		publisherDateLinearLayoutMorte.encloseInParentheses();
 		data = dataMorte.getText().toString().trim();
 		luogo = luogoMorte.getText().toString().trim();
 		trovato = false;
@@ -304,7 +304,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 				} else {
 					fatto.setDate( data );
 					fatto.setPlace( luogo );
-					EventActivity.ripulisciTag( fatto );
+					EventActivity.cleanUpTag( fatto );
 				}
 				trovato = true;
 				break;
@@ -315,7 +315,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 			morte.setTag( "DEAT" );
 			morte.setDate( data );
 			morte.setPlace( luogo );
-			EventActivity.ripulisciTag( morte );
+			EventActivity.cleanUpTag( morte );
 			p.addEventFact( morte );
 		}
 
@@ -329,7 +329,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 				Global.settings.getCurrentTree().root = nuovoId;
 			Global.settings.save();
 			if( relazione >= 5 ) { // viene da Famiglia
-				FamilyActivity.aggrega( p, gc.getFamily(idFamiglia), relazione );
+				FamilyActivity.connect( p, gc.getFamily(idFamiglia), relazione );
 				modificati[1] = gc.getFamily(idFamiglia);
 			} else if( relazione > 0 ) // viene da Diagramma o IndividuoFamiliari
 				modificati = aggiungiParente( idIndi, nuovoId, idFamiglia, relazione, getIntent().getStringExtra("collocazione") );
@@ -397,9 +397,9 @@ public class IndividualEditorActivity extends AppCompatActivity {
 		}
 
 		if( refSposo1.getRef() != null )
-			aggiungiConiuge(famiglia, refSposo1);
+			addSpouse(famiglia, refSposo1);
 		if( refSposo2.getRef() != null )
-			aggiungiConiuge(famiglia, refSposo2);
+			addSpouse(famiglia, refSposo2);
 		if( refFiglio1.getRef() != null )
 			famiglia.addChild(refFiglio1);
 		if( refFiglio2.getRef() != null )
@@ -421,7 +421,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 	}
 
 	// Aggiunge il coniuge in una famiglia: sempre e solo in base al sesso
-	public static void aggiungiConiuge(Family family, SpouseRef sr) {
+	public static void addSpouse(Family family, SpouseRef sr) {
 		Person person = Global.gc.getPerson(sr.getRef());
 		if( Gender.isFemale(person) ) family.addWife(sr);
 		else family.addHusband(sr);

@@ -55,7 +55,7 @@ public class LibraryFragment extends Fragment {
 		RecyclerView vistaFonti = vista.findViewById( R.id.riciclatore );
 		adattatore = new BibliotecAdapter();
 		vistaFonti.setAdapter( adattatore );
-		vista.findViewById( R.id.fab ).setOnClickListener( v -> nuovaFonte( getContext(), null ) );
+		vista.findViewById( R.id.fab ).setOnClickListener( v -> newSource( getContext(), null ) );
 		return vista;
 	}
 
@@ -137,7 +137,7 @@ public class LibraryFragment extends Fragment {
 				getActivity().finish();
 			} else {
 				Source fonte = gc.getSource( vistaId.getText().toString() );
-				Memory.setPrimo( fonte );
+				Memory.setFirst( fonte );
 				startActivity( new Intent( getContext(), SourceActivity.class ) );
 			}
 		}
@@ -235,7 +235,7 @@ public class LibraryFragment extends Fragment {
 		}
 	}
 
-	static void nuovaFonte( Context contesto, Object contenitore ){
+	static void newSource(Context contesto, Object contenitore ){
 		Source fonte = new Source();
 		fonte.setId( U.nuovoId( gc, Source.class ) );
 		fonte.setTitle( "" );
@@ -247,7 +247,7 @@ public class LibraryFragment extends Fragment {
 			else ((SourceCitationContainer)contenitore).addSourceCitation( citaFonte );
 		}
 		U.save( true, fonte );
-		Memory.setPrimo( fonte );
+		Memory.setFirst( fonte );
 		contesto.startActivity( new Intent( contesto, SourceActivity.class ) );
 	}
 
@@ -284,7 +284,7 @@ public class LibraryFragment extends Fragment {
 		if( gc.getSources().isEmpty() )
 			gc.setSources( null );
 		gc.createIndexes();	// necessario
-		Memory.annullaIstanze( fon );
+		Memory.setInstanceAndAllSubsequentToNull( fon );
 		return citazioni.getCapi();
 	}
 

@@ -50,12 +50,12 @@ public class IndividualPersonActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		U.gedcomSicuro(gc);
-		one = (Person) Memory.getOggetto();
+		U.ensureGlobalGedcomNotNull(gc);
+		one = (Person) Memory.getObject();
 		// Se l'app va in background e viene stoppata, 'Memoria' è resettata e quindi 'uno' sarà null
 		if( one == null && bundle != null ) {
 			one = gc.getPerson(bundle.getString("idUno")); // In bundle è salvato l'id dell'individuo
-			Memory.setPrimo(one); // Altrimenti la memoria è senza una pila
+			Memory.setFirst(one); // Altrimenti la memoria è senza una pila
 		}
 		if( one == null ) return; // Capita raramente che il bundle non faccia il suo lavoro
 		Global.indi = one.getId();
@@ -238,10 +238,10 @@ public class IndividualPersonActivity extends AppCompatActivity {
 						break;
 					// Media
 					case 10: // Cerca media locale
-						F.appAcquisizioneImmagine(IndividualPersonActivity.this, null, 2173, one);
+						F.displayImageCaptureDialog(IndividualPersonActivity.this, null, 2173, one);
 						break;
 					case 11: // Cerca oggetto media
-						F.appAcquisizioneImmagine(IndividualPersonActivity.this, null, 2174, one);
+						F.displayImageCaptureDialog(IndividualPersonActivity.this, null, 2174, one);
 						break;
 					case 12: // Collega media in Galleria
 						Intent inten = new Intent(IndividualPersonActivity.this, Principal.class);
@@ -252,7 +252,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 						Name name = new Name();
 						name.setValue("//");
 						one.addName(name);
-						Memory.aggiungi(name);
+						Memory.add(name);
 						startActivity(new Intent(IndividualPersonActivity.this, NameActivity.class));
 						U.save(true, one);
 						break;
@@ -276,7 +276,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 						Note note = new Note();
 						note.setValue("");
 						one.addNote(note);
-						Memory.aggiungi(note);
+						Memory.add(note);
 						startActivity(new Intent(IndividualPersonActivity.this, NoteActivity.class));
 						// todo? Dettaglio.edita(View vistaValore);
 						U.save(true, one);
@@ -293,17 +293,17 @@ public class IndividualPersonActivity extends AppCompatActivity {
 						SourceCitation citaz = new SourceCitation();
 						citaz.setValue("");
 						one.addSourceCitation(citaz);
-						Memory.aggiungi(citaz);
+						Memory.add(citaz);
 						startActivity(new Intent(IndividualPersonActivity.this, SourceCitationActivity.class));
 						U.save(true, one);
 						break;
 					case 26: // Nuova fonte
-						LibraryFragment.nuovaFonte(IndividualPersonActivity.this, one);
+						LibraryFragment.newSource(IndividualPersonActivity.this, one);
 						break;
 					case 27: // Collega fonte
-						Intent intento = new Intent(IndividualPersonActivity.this, Principal.class);
-						intento.putExtra("bibliotecaScegliFonte", true);
-						startActivityForResult(intento, 50473);
+						Intent intent = new Intent(IndividualPersonActivity.this, Principal.class);
+						intent.putExtra("bibliotecaScegliFonte", true);
+						startActivityForResult(intent, 50473);
 						break;
 					// Scheda Familiari
 					case 30:// Collega persona nuova
@@ -312,12 +312,12 @@ public class IndividualPersonActivity extends AppCompatActivity {
 							dialog.show(getSupportFragmentManager(), "scegli");
 						} else {
 							builder.setItems(familiari, (dialog, quale) -> {
-								Intent intento1 = new Intent(getApplicationContext(), IndividualEditorActivity.class);
-								intento1.putExtra("idIndividuo", one.getId());
-								intento1.putExtra("relazione", quale + 1);
-								if( U.controllaMultiMatrimoni(intento1, IndividualPersonActivity.this, null) )
+								Intent intent1 = new Intent(getApplicationContext(), IndividualEditorActivity.class);
+								intent1.putExtra("idIndividuo", one.getId());
+								intent1.putExtra("relazione", quale + 1);
+								if( U.controllaMultiMatrimoni(intent1, IndividualPersonActivity.this, null) )
 									return;
-								startActivity(intento1);
+								startActivity(intent1);
 							}).show();
 						}
 						break;
@@ -327,13 +327,13 @@ public class IndividualPersonActivity extends AppCompatActivity {
 							dialog.show(getSupportFragmentManager(), "scegli");
 						} else {
 							builder.setItems(familiari, (dialog, quale) -> {
-								Intent intento2 = new Intent(getApplication(), Principal.class);
-								intento2.putExtra("idIndividuo", one.getId());
-								intento2.putExtra("anagrafeScegliParente", true);
-								intento2.putExtra("relazione", quale + 1);
-								if( U.controllaMultiMatrimoni(intento2, IndividualPersonActivity.this, null) )
+								Intent intent2 = new Intent(getApplication(), Principal.class);
+								intent2.putExtra("idIndividuo", one.getId());
+								intent2.putExtra("anagrafeScegliParente", true);
+								intent2.putExtra("relazione", quale + 1);
+								if( U.controllaMultiMatrimoni(intent2, IndividualPersonActivity.this, null) )
 									return;
-								startActivityForResult(intento2, 1401);
+								startActivityForResult(intent2, 1401);
 							}).show();
 						}
 						break;
@@ -363,7 +363,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 								nuovoEvento.setDate("");
 						}
 						one.addEventFact(nuovoEvento);
-						Memory.aggiungi(nuovoEvento);
+						Memory.add(nuovoEvento);
 						startActivity(new Intent(IndividualPersonActivity.this, EventActivity.class));
 						U.save(true, one);
 				}
@@ -391,19 +391,19 @@ public class IndividualPersonActivity extends AppCompatActivity {
 				Media media = new Media();
 				media.setFileTag("FILE");
 				one.addMedia(media);
-				if( F.proponiRitaglio(this, null, data, media) ) { // restituisce true se è un'immagine ritagliabile
+				if( F.proposeCropping(this, null, data, media) ) { // restituisce true se è un'immagine ritagliabile
 					U.save(true, one);
 					return;
 				}
 			} else if( requestCode == 2174 ) { // File dalle app in nuovo Media condiviso, con proposta di ritagliarlo
-				Media media = GalleryFragment.nuovoMedia(one);
-				if( F.proponiRitaglio(this, null, data, media) ) {
+				Media media = GalleryFragment.newMedia(one);
+				if( F.proposeCropping(this, null, data, media) ) {
 					U.save(true, media, one);
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
 				// Ottiene l'immagine ritagliata da Android Image Cropper
-				F.fineRitaglioImmagine(data);
+				F.endImageCropping(data);
 				U.save(true); // la data di cambio per i Media condivisi viene già salvata nel passaggio precedente
 				           // todo passargli Global.mediaCroppato ?
 				return;
@@ -436,7 +436,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 
 	@Override
 	public void onBackPressed() {
-		Memory.arretra();
+		Memory.clearStackAndRemove();
 		super.onBackPressed();
 	}
 
@@ -459,13 +459,13 @@ public class IndividualPersonActivity extends AppCompatActivity {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch ( item.getItemId() ) {
 			case 0:	// Diagram
-				U.qualiGenitoriMostrare(this, one, 1);
+				U.askWhichParentsToShow(this, one, 1);
 				return true;
 			case 1: // Family as child
-				U.qualiGenitoriMostrare(this, one, 2);
+				U.askWhichParentsToShow(this, one, 2);
 				return true;
 			case 2: // Family as partner
-				U.qualiConiugiMostrare(this, one, null);
+				U.askWhichSpouceToShow(this, one, null);
 				return true;
 			case 3: // Set as root
 				Global.settings.getCurrentTree().root = one.getId();
@@ -494,6 +494,6 @@ public class IndividualPersonActivity extends AppCompatActivity {
 	@Override
 	public void onRequestPermissionsResult( int codice, String[] permessi, int[] accordi ) {
 		super.onRequestPermissionsResult(codice, permessi, accordi);
-		F.risultatoPermessi(this, null, codice, permessi, accordi, one);
+		F.permissionsResult(this, null, codice, permessi, accordi, one);
 	}
 }
