@@ -62,8 +62,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import app.familygem.detail.Immagine;
-import app.familygem.visitor.ListaMedia;
+import app.familygem.detail.ImageActivity;
+import app.familygem.visitor.MediaList;
 
 public class F {
 
@@ -213,7 +213,7 @@ public class F {
 
 	// Riceve una Person e sceglie il Media principale da cui ricavare l'immagine
 	static void unaFoto( Gedcom gc, Person p, ImageView img ) {
-		ListaMedia visita = new ListaMedia( gc, 0 );
+		MediaList visita = new MediaList( gc, 0 );
 		p.accept( visita );
 		boolean trovatoQualcosa = false;
 		for( Media med : visita.lista ) { // Cerca un media contrassegnato Primario Y
@@ -415,7 +415,7 @@ public class F {
 				File cartellaCache = new File( Global.context.getCacheDir().getPath() + "/" + Global.settings.openTree);
 				if( !cartellaCache.exists() ) {
 					// Elimina extension "cache" da tutti i Media
-					ListaMedia visitaMedia = new ListaMedia( Global.gc, 0 );
+					MediaList visitaMedia = new MediaList( Global.gc, 0 );
 					Global.gc.accept( visitaMedia );
 					for( Media media : visitaMedia.lista )
 						if( media.getExtension("cache") != null )
@@ -593,7 +593,7 @@ public class F {
 		}
 		// Media vuoto
 		if( Global.settings.expert && codice != 5173 ) { // tranne che per la scelta di file in Immagine
-			Intent intento = new Intent( contesto, Immagine.class );
+			Intent intento = new Intent( contesto, ImageActivity.class );
 			ResolveInfo info = contesto.getPackageManager().resolveActivity( intento, 0 );
 			intento.setComponent(new ComponentName(info.activityInfo.packageName,info.activityInfo.name));
 			listaIntenti.add( intento );
@@ -623,14 +623,14 @@ public class F {
 							med = new Media();
 							med.setFileTag( "FILE" );
 							contenitore.addMedia( med );
-							Memoria.aggiungi( med );
+							Memory.aggiungi( med );
 						} else { // Media condiviso
-							med = Galleria.nuovoMedia( contenitore );
-							Memoria.setPrimo( med );
+							med = GalleryFragment.nuovoMedia( contenitore );
+							Memory.setPrimo( med );
 						}
 						med.setFile( "" );
 						contesto.startActivity( intento );
-						U.save( true, Memoria.oggettoCapo() );
+						U.save( true, Memory.oggettoCapo() );
 					} else if( frammento != null )
 						frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
 					else
@@ -731,12 +731,12 @@ public class F {
 	}
 	// Conclusione negativa della proposta di ritaglio dell'immagine: aggiorna semplicemente la pagina per mostrare l'immagine
 	static void concludiProponiRitaglio( Context contesto, Fragment frammento ) {
-		if( frammento instanceof Galleria )
-			((Galleria)frammento).ricrea();
-		else if( contesto instanceof Dettaglio )
-			((Dettaglio)contesto).refresh();
-		else if( contesto instanceof Individuo ) {
-			IndividuoMedia indiMedia = (IndividuoMedia) ((AppCompatActivity)contesto).getSupportFragmentManager()
+		if( frammento instanceof GalleryFragment)
+			((GalleryFragment)frammento).ricrea();
+		else if( contesto instanceof DetailsActivity)
+			((DetailsActivity)contesto).refresh();
+		else if( contesto instanceof IndividualPersonActivity) {
+			IndividualMediaFragment indiMedia = (IndividualMediaFragment) ((AppCompatActivity)contesto).getSupportFragmentManager()
 					.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" );
 			indiMedia.refresh();
 		}

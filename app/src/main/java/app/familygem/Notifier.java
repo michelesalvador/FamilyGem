@@ -85,7 +85,7 @@ class Notifier {
 		if( !U.isDead(person) ) {
 			for( EventFact event : person.getEventsFacts() ) {
 				if( event.getTag().equals("BIRT") && event.getDate() != null ) {
-					Datatore datator = new Datatore(event.getDate());
+					GedcomDateConverter datator = new GedcomDateConverter(event.getDate());
 					if( datator.isSingleKind() && datator.data1.isFormat(Format.D_M_Y) ) {
 						return datator.data1.date;
 					}

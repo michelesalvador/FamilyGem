@@ -130,7 +130,7 @@ public class ExportTest {
 		if( !documentsDir.exists() ) documentsDir.mkdir();
 
 		File fileGedcom = new File( documentsDir, "Küçük ağaç.ged" );
-		Esportatore esp = new Esportatore( appContext );
+		Exporter esp = new Exporter( appContext );
 		assertTrue( esp.apriAlbero( idAlbero ) );
 		assertNull( esp.messaggioSuccesso );
 		assertNull( esp.messaggioErrore );
@@ -140,7 +140,7 @@ public class ExportTest {
 		s.l( esp.messaggioSuccesso );
 
 		File fileGedcomZip = new File( documentsDir, "ਸੰਕੁਚਿਤ.zip" );
-		Esportatore esp2 = new Esportatore( appContext );
+		Exporter esp2 = new Exporter( appContext );
 		assertTrue( esp2.apriAlbero( idAlbero ) );
 		boolean result = esp2.esportaGedcomZippato(Uri.fromFile(fileGedcomZip));
 		s.l( esp2.messaggioErrore );
@@ -155,7 +155,7 @@ public class ExportTest {
 		File documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
 		if( !documentsDir.exists() ) documentsDir.mkdir();
 		File fileBackup = new File( documentsDir, "Becàp olè.zip" );
-		Esportatore esp = new Esportatore( appContext );
+		Exporter esp = new Exporter( appContext );
 		Settings.Tree ultimoAlb = Global.settings.trees.get(Global.settings.trees.size()-1);
 		assertTrue( esp.apriAlbero( ultimoAlb.id ) );
 		boolean result = esp.esportaBackupZip( null, -1, Uri.fromFile(fileBackup) );
