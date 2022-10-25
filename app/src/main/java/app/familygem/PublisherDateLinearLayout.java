@@ -47,8 +47,10 @@ public class PublisherDateLinearLayout extends LinearLayout {
 		super( contesto, as );
 	}
 
-	// Azioni da fare una sola volta all'inizio
-	void inizia( final EditText editaTesto ) {
+	/**
+	 * Actions to be done only once at the beginning
+	 * */
+	void initialize(final EditText editaTesto ) {
 
 		addView( inflate( getContext(), R.layout.editore_data, null ), this.getLayoutParams() );
 		this.editaTesto = editaTesto;
@@ -181,41 +183,34 @@ public class PublisherDateLinearLayout extends LinearLayout {
 		ruotaGiorno.setMinValue(0);
 		ruotaGiorno.setMaxValue(31);
 		ruotaGiorno.setDisplayedValues( giorniRuota );
-		stilizza(ruotaGiorno);
+		stylize(ruotaGiorno);
 		ruotaGiorno.setOnValueChangedListener( (picker, vecchio, nuovo) ->
 				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
 		);
 		ruotaMese.setMinValue(0);
 		ruotaMese.setMaxValue(12);
 		ruotaMese.setDisplayedValues( mesiRuota );
-		stilizza(ruotaMese);
+		stylize(ruotaMese);
 		ruotaMese.setOnValueChangedListener( (picker, vecchio, nuovo) ->
 				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
 		);
 		ruotaSecolo.setMinValue(0);
 		ruotaSecolo.setMaxValue(20);
-		stilizza(ruotaSecolo);
+		stylize(ruotaSecolo);
 		ruotaSecolo.setOnValueChangedListener( (picker, vecchio, nuovo) ->
 				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
 		);
 		ruotaAnno.setMinValue(0);
 		ruotaAnno.setMaxValue(100);
 		ruotaAnno.setDisplayedValues( anniRuota );
-		stilizza(ruotaAnno);
+		stylize(ruotaAnno);
 		ruotaAnno.setOnValueChangedListener( ( picker, vecchio, nuovo ) ->
 				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
 		);
 	}
 
-	void stilizza( NumberPicker ruota ) {
-		// Toglie le famigerate linee divisorie azzurre
-		try {
-			Field campo = NumberPicker.class.getDeclaredField( "mSelectionDivider" );
-			campo.setAccessible( true );
-			campo.set( ruota, null );
-		} catch( Exception e ) {}
-		// Risolve il bug https://issuetracker.google.com/issues/37055335
-		ruota.setSaveFromParentEnabled(false);
+	void stylize(NumberPicker wheel) {
+		wheel.setSaveFromParentEnabled(false);
 	}
 
 	// Prende la stringa data, aggiorna le Date e ci modifica tutto l'editore data
