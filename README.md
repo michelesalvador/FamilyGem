@@ -16,4 +16,4 @@ Here is a summary of what is being worked on, and a roadmap for what needs to be
  - Transition app to modern app architecture (see https://github.com/michelesalvador/FamilyGem/issues/67)
  - Bug fixes
  - Integrate Geni API
- - Add feature to import Ancestry.com tree info
+ - Add feature to merge/import other trees from GEDCOM files (such as from Ancestry.com) into Geni
