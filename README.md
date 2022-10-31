@@ -8,9 +8,11 @@ Here is a summary of what is being worked on, and a roadmap for what needs to be
 
 ### Being worked on
  - Translating code and documentation from Italian to English
-   - 10/30/2022: ~30% done
+   - 10/30/2022: ~30% done 
+ - Minor improvements
  
 ### To-Do
 
  - Transition app to modern app architecture (see https://github.com/michelesalvador/FamilyGem/issues/67)
+ - Bug fixes
  - Integrate Geni API
