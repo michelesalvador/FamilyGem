@@ -13,7 +13,21 @@ Here is a summary of what is being worked on, and a roadmap for what needs to be
  
 ### To-Do
 
+#### Maintenance
+
  - Transition app to modern app architecture (see https://github.com/michelesalvador/FamilyGem/issues/67)
  - Bug fixes
- - Integrate Geni API
+ 
+#### Core Geni Features
+ - Ability to add, delete, and edit profiles on your Geni tree in every way that the site makes possible
+
+#### Geni Enhancements
+ - Source matches
+ - DNA matches
+ 
+#### General enhancements
  - Add feature to merge/import other trees from GEDCOM files (such as from Ancestry.com) into Geni
+
+### Undecided (please share your input!)
+ - Implement Geni discussions integration?
+ - Implement Geni messaging integration?
