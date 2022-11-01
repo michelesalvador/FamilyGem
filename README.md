@@ -29,5 +29,5 @@ Here is a summary of what is being worked on, and a roadmap for what needs to be
  - Add feature to merge/import other trees from GEDCOM files (such as from Ancestry.com) into Geni
 
 ### Undecided (please share your input!)
- - Implement Geni discussions integration?
- - Implement Geni messaging integration?
+ - [Implement Geni discussions integration?](../../discussions/2)
+ - [Implement Geni messaging integration?](../../discussions/3)
