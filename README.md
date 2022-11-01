@@ -30,4 +30,4 @@ Here is a summary of what is being worked on, and a roadmap for what needs to be
 
 ### Undecided (please share your input!)
  - [Implement Geni discussions integration?](../../discussions/2)
- - [Implement Geni messaging integration?](../../discussions/3)
+ - [Implement Geni messaging integration?](../../discussions/4)
