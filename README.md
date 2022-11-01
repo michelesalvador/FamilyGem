@@ -27,8 +27,8 @@ Here is a summary of what is being worked on, and a roadmap for what needs to be
  
 #### General enhancements
  - Add feature to merge/import other trees from GEDCOM files (such as from Ancestry.com) into Geni
- - [Implement audit trail](../../discussions/5) of changes made to the tree which can be represented as a to-do list to make it easier to keep trees in sync between various platforms
 
 ### Undecided (please share your input!)
+ - [Tools to help keep trees on multiple platforms in sync with Geni](../../discussions/5)
  - [Implement Geni discussions integration?](../../discussions/2)
  - [Implement Geni messaging integration?](../../discussions/4)
