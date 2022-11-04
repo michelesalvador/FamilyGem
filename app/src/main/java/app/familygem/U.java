@@ -698,7 +698,7 @@ public class U {
 			NoteReferences eliminatoreNote = new NoteReferences(Global.gc, note.getId(), true);
 			Global.gc.accept(eliminatoreNote);
 			Global.gc.getNotes().remove(note); // ok la rimuove se è un'object note
-			capi = eliminatoreNote.capostipiti;
+			capi = eliminatoreNote.founders;
 			if( Global.gc.getNotes().isEmpty() )
 				Global.gc.setNotes(null);
 		} else { // LOCAL note

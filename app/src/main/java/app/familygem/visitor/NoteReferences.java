@@ -19,7 +19,7 @@ public class NoteReferences extends TotalVisitor {
 	private boolean elimina; // bandierina per eliminare i ref alla nota piuttosto che contarli
 	private Object capo;
 	public int tot = 0; // i riferimenti alla nota condivisa
-	public Set<Object> capostipiti = new LinkedHashSet<>();
+	public Set<Object> founders = new LinkedHashSet<>();
 
 	public NoteReferences(Gedcom gc, String id, boolean elimina ) {
 		this.id = id;
@@ -37,7 +37,7 @@ public class NoteReferences extends TotalVisitor {
 			while( refi.hasNext() ) {
 				NoteRef nr = refi.next();
 				if( nr.getRef().equals(id) ) {
-					capostipiti.add( capo );
+					founders.add( capo );
 					if(elimina) refi.remove();
 					else tot++;
 				}
