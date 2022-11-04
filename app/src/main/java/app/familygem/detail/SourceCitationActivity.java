@@ -17,10 +17,10 @@ public class SourceCitationActivity extends DetailActivity {
 	public void format() {
 		placeSlug("SOUR");
 		c = (SourceCitation)cast(SourceCitation.class);
-		if( c.getSource(gc) != null ) {  // source CITATION valida
+		if( c.getSource(gc) != null ) {  // valid source CITATION
 			setTitle(R.string.source_citation);
 			U.placeSource(box, c.getSource(gc), true);
-		} else if( c.getRef() != null ) {  // source CITATION di una fonte inesistente (magari eliminata)
+		} else if( c.getRef() != null ) {  // source CITATION of a non-existent source (perhaps deleted)
 			setTitle(R.string.inexistent_source_citation);
 		} else {    // source NOTE
 			setTitle(R.string.source_note);
@@ -28,12 +28,12 @@ public class SourceCitationActivity extends DetailActivity {
 		}
 		place(getString(R.string.page), "Page", true, true);
 		place(getString(R.string.date), "Date");
-		place(getString(R.string.text), "Text", true, true);    // vale sia per sourceNote che per sourceCitation
-		//c.getTextOrValue();	praticamente inutile
+		place(getString(R.string.text), "Text", true, true);    // applies to both sourceNote and sourceCitation
+		//c.getTextOrValue();	practically useless
 		//if( c.getDataTagContents() != null )
 		//	U.metti( box, "Data Tag Contents", c.getDataTagContents().toString() );	// COMBINED DATA TEXT
-		place(getString(R.string.certainty), "Quality");    // un numero da 0 a 3
-		//metti( "Ref", "Ref", false, false ); // l'id della fonte
+		place(getString(R.string.certainty), "Quality");    // a number from 0 to 3
+		//metti( "Ref", "Ref", false, false ); // the id of the source
 		placeExtensions(c);
 		U.placeNotes(box, c, true);
 		U.placeMedia(box, c, true);
@@ -41,11 +41,11 @@ public class SourceCitationActivity extends DetailActivity {
 
 	@Override
 	public void delete() {
-		Object contenitore = Memory.getSecondToLastObject();
-		if( contenitore instanceof Note )	// Note non extende SourceCitationContainer
-			((Note)contenitore).getSourceCitations().remove( c );
+		Object container = Memory.getSecondToLastObject();
+		if( container instanceof Note )	// Note doesn't extend SourceCitationContainer
+			((Note)container).getSourceCitations().remove( c );
 		else
-			((SourceCitationContainer)contenitore).getSourceCitations().remove( c );
+			((SourceCitationContainer)container).getSourceCitations().remove( c );
 		U.updateChangeDate( Memory.firstObject() );
 		Memory.setInstanceAndAllSubsequentToNull(c);
 	}

@@ -13,10 +13,12 @@ import app.familygem.U;
 public class EventActivity extends DetailActivity {
 
 	EventFact e;
-	// Lista di tag di eventi utili per evitare di mettere il Value dell'EventFact
-	String[] eventTags = { "BIRT","CHR","DEAT","BURI","CREM","ADOP","BAPM","BARM","BASM","BLES", // Eventi di Individuo
+	/**
+	 * List of event tags useful to avoid putting the Value of the EventFact
+	 * */
+	String[] eventTags = { "BIRT","CHR","DEAT","BURI","CREM","ADOP","BAPM","BARM","BASM","BLES", // Individual events
 			"CHRA","CONF","FCOM","ORDN","NATU","EMIG","IMMI","CENS","PROB","WILL","GRAD","RETI",
-			"ANUL","DIV","DIVF","ENGA","MARB","MARC","MARR","MARL","MARS" }; // eventi di Famiglia
+			"ANUL","DIV","DIVF","ENGA","MARB","MARC","MARR","MARL","MARS" }; // Family events
 
 	@Override
 	public void format() {
@@ -26,9 +28,9 @@ public class EventActivity extends DetailActivity {
 		else
 			setTitle(IndividualEventsFragment.writeEventTitle(e)); // It includes e.getDisplayType()
 		placeSlug(e.getTag());
-		if( Arrays.asList(eventTags).contains(e.getTag()) ) // è un evento (senza Value)
+		if( Arrays.asList(eventTags).contains(e.getTag()) ) // is an event (without Value)
 			place(getString(R.string.value), "Value", false, true);
-		else // tutti gli altri casi, solitamente attributi (con Value)
+		else // all other cases, usually attributes (with Value)
 			place(getString(R.string.value), "Value", true, true);
 		if( e.getTag().equals("EVEN") || e.getTag().equals("MARR") )
 			place(getString(R.string.type), "Type"); // Type of event, relationship etc.
@@ -47,7 +49,7 @@ public class EventActivity extends DetailActivity {
 		place(getString(R.string.fax), "Fax", false, false);
 		place(getString(R.string.rin), "Rin", false, false);
 		place(getString(R.string.user_id), "Uid", false, false);
-		//altriMetodi = { "WwwTag", "EmailTag", "UidTag" };
+		//otherMethods = { "WwwTag", "EmailTag", "UidTag" };
 		placeExtensions(e);
 		U.placeNotes(box, e, true);
 		U.placeMedia(box, e, true);
