@@ -67,7 +67,7 @@ public class Memory {
 			return new StepStack(); // una pila vuota che non viene aggiunta alla lista
 	}
 
-	public static StepStack addPila() {
+	public static StepStack addStack() {
 		StepStack stepStack = new StepStack();
 		memory.lista.add(stepStack);
 		return stepStack;
@@ -81,7 +81,7 @@ public class Memory {
 	}
 
 	public static void setFirst(Object oggetto, String tag ) {
-		addPila();
+		addStack();
 		Step step = add( oggetto );
 		if( tag != null )
 			step.tag = tag;
@@ -147,7 +147,7 @@ public class Memory {
 	}
 
 	static void clearStackAndRemove() { //lit. retreat
-		while( getStepStack().size() > 0 && getStepStack().lastElement().filotto )
+		while( getStepStack().size() > 0 && getStepStack().lastElement().clearStackOnBackPressed)
 			getStepStack().pop();
 		if( getStepStack().size() > 0 )
 			getStepStack().pop();
@@ -177,7 +177,7 @@ public class Memory {
 			s.l( intro );
 		for( StepStack stepStack : memory.lista ) {
 			for( Step step : stepStack) {
-				String filotto = step.filotto ? "< " : "";
+				String filotto = step.clearStackOnBackPressed ? "< " : "";
 				if( step.tag != null )
 					s.p( filotto + step.tag + " " );
 				else if( step.object != null )
@@ -195,6 +195,6 @@ public class Memory {
 	public static class Step {
 		public Object object;
 		public String tag;
-		public boolean filotto; // TrovaPila lo setta true quindi onBackPressed la pila va eliminata in blocco
+		public boolean clearStackOnBackPressed; // FindStack sets it to true then onBackPressed the stack must be deleted in bulk
 	}
 }

@@ -1,7 +1,3 @@
-// Visitatore che produce in Memoria la pila gerarchica degli oggetti tra il record capostipite e un oggetto dato
-// ad es. Person > Media semplice
-// oppure Family > Note > SourceCitation > Note semplice
-
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.Change;
@@ -23,97 +19,106 @@ import org.folg.gedcom.model.Visitor;
 import java.util.Iterator;
 import java.util.List;
 import app.familygem.Memory;
-
+/**
+ *
+ * // Visitor that produces in Memory the hierarchical stack of objects between the parent record and a given object
+ * // e.g. Person> Simple media
+ * // or Family> Note> SourceCitation> Simple Note
+ *
+ * // Visitatore che produce in Memoria la pila gerarchica degli oggetti tra il record capostipite e un oggetto dato
+ * // ad es. Person > Media semplice
+ * // oppure Family > Note > SourceCitation > Note semplice
+ * */
 public class FindStack extends Visitor {
 
-	private List<Memory.Step> pila;
-	private Object scopo;
-	private boolean trovato;
+	private List<Memory.Step> stack;
+	private Object scope;
+	private boolean found;
 
 	public FindStack(Gedcom gc, Object scopo ) {
-		pila = Memory.addPila(); // in una nuova pila apposta
-		this.scopo = scopo;
+		stack = Memory.addStack(); //in a new stack on purpose
+		this.scope = scopo;
 		gc.accept( this );
 	}
 
-	private boolean opera( Object oggetto, String tag, boolean capostipite ) {
-		if( !trovato ) {
-			if( capostipite )
-				pila.clear(); // ogni capostipite fa ricominciare da capo una pila
+	private boolean opera( Object object, String tag, boolean progenitor ) {
+		if( !found) {
+			if( progenitor )
+				stack.clear(); // every progenitor makes a stack start all over again
 			Memory.Step step = new Memory.Step();
-			step.object = oggetto;
+			step.object = object;
 			step.tag = tag;
-			if( !capostipite )
-				step.filotto = true; // li marchia per eliminarli poi in blocco onBackPressed
-			pila.add(step);
+			if( !progenitor )
+				step.clearStackOnBackPressed = true; // onBackPressed marks them to delete them in bulk
+			stack.add(step);
 		}
-		if( oggetto.equals(scopo) ) {
-			Iterator<Memory.Step> passi = pila.iterator();
-			while( passi.hasNext() ) {
-				CleanStack pulitore = new CleanStack( scopo );
-				((Visitable)passi.next().object).accept( pulitore );
-				if( pulitore.toDelete)
-					passi.remove();
+		if( object.equals(scope) ) {
+			Iterator<Memory.Step> steps = stack.iterator();
+			while( steps.hasNext() ) {
+				CleanStack janitor = new CleanStack(scope);
+				((Visitable)steps.next().object).accept( janitor );
+				if( janitor.toDelete)
+					steps.remove();
 			}
-			trovato = true;
-			//Memoria.stampa("TrovaPila");
+			found = true;
+			//Memoria.stampa("FindStack"); log?
 		}
 		return true;
 	}
 
 	@Override
-	public boolean visit( Header passo ) {
-		return opera(passo,"HEAD",true);
+	public boolean visit( Header step ) {
+		return opera(step,"HEAD",true);
 	}
 	@Override
-	public boolean visit( Person passo ) {
-		return opera(passo,"INDI",true);
+	public boolean visit( Person step ) {
+		return opera(step,"INDI",true);
 	}
 	@Override
-	public boolean visit( Family passo ) {
-		return opera(passo,"FAM",true);
+	public boolean visit( Family step ) {
+		return opera(step,"FAM",true);
 	}
 	@Override
-	public boolean visit( Source passo ) {
-		return opera(passo,"SOUR",true);
+	public boolean visit( Source step ) {
+		return opera(step,"SOUR",true);
 	}
 	@Override
-	public boolean visit( Repository passo ) {
-		return opera(passo,"REPO",true);
+	public boolean visit( Repository step ) {
+		return opera(step,"REPO",true);
 	}
 	@Override
-	public boolean visit( Submitter passo ) {
-		return opera(passo,"SUBM",true);
+	public boolean visit( Submitter step ) {
+		return opera(step,"SUBM",true);
 	}
 	@Override
-	public boolean visit( Media passo ) {
-		return opera(passo,"OBJE",passo.getId()!=null);
+	public boolean visit( Media step ) {
+		return opera(step,"OBJE",step.getId()!=null);
 	}
 	@Override
-	public boolean visit( Note passo ) {
-		return opera(passo,"NOTE",passo.getId()!=null);
+	public boolean visit( Note step ) {
+		return opera(step,"NOTE",step.getId()!=null);
 	}
 	@Override
-	public boolean visit( Name passo ) {
-		return opera(passo,"NAME",false);
+	public boolean visit( Name step ) {
+		return opera(step,"NAME",false);
 	}
 	@Override
-	public boolean visit( EventFact passo ) {
-		return opera(passo,passo.getTag(),false);
+	public boolean visit( EventFact step ) {
+		return opera(step,step.getTag(),false);
 	}
 	@Override
-	public boolean visit( SourceCitation passo ) {
-		return opera(passo,"SOUR",false);
+	public boolean visit( SourceCitation step ) {
+		return opera(step,"SOUR",false);
 	}
 	@Override
-	public boolean visit( RepositoryRef passo ) {
-		return opera(passo,"REPO",false);
+	public boolean visit( RepositoryRef step ) {
+		return opera(step,"REPO",false);
 	}
 	@Override
-	public boolean visit( Change passo ) {
-		return opera(passo,"CHAN",false);
+	public boolean visit( Change step ) {
+		return opera(step,"CHAN",false);
 	}
-	/* ok ma poi tanto GedcomTag non è Visitable e quindi non prosegue la visita
+	/* ok but then GedcomTag is not Visitable and therefore does not continue the visit
 	@Override
 	public boolean visit( String chiave, Object estensioni ) {
 		if( chiave.equals("folg.more_tags") ) {
