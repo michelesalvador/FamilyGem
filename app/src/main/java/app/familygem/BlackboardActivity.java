@@ -17,7 +17,7 @@ public class BlackboardActivity extends AppCompatActivity {
 		super.onCreate( bandolo );
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView( R.layout.lavagna );
-		// Mostra il file a piena risoluzione
+		// Show the file in full resolution
 		String percorso = getIntent().getStringExtra( "percorso" );
 		Picasso picasso = Picasso.get();
 		RequestCreator creatore;
