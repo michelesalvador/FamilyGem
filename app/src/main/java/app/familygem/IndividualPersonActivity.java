@@ -301,9 +301,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 						LibraryFragment.newSource(IndividualPersonActivity.this, one);
 						break;
 					case 27: // Collega fonte
-						Intent intent = new Intent(IndividualPersonActivity.this, Principal.class);
-						intent.putExtra("bibliotecaScegliFonte", true);
-						startActivityForResult(intent, 50473);
+						startActivityForResult(new Intent(IndividualPersonActivity.this, Principal.class).putExtra("bibliotecaScegliFonte", true), 50473);
 						break;
 					// Scheda Familiari
 					case 30:// Collega persona nuova
