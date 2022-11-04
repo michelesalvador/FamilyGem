@@ -1,6 +1,3 @@
-// Partendo dall'id di una fonte genera una lista di triplette: capostipite / contenitore / citazioni della fonte
-// Usato da Biblioteca, da Fonte e da Conferma
-
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.Gedcom;
@@ -12,6 +9,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * // Starting from the id of a source it generates a list of triplets: parent / container / citations of the source
+ * // Used by [LibraryFragment], [SourceActivity] and [ConfirmationActivity]
+ *
+ * // Partendo dall'id di una fonte genera una lista di triplette: capostipite / contenitore / citazioni della fonte
+ * // Usato da Biblioteca, da Fonte e da Conferma
+ * */
 public class ListOfSourceCitations extends TotalVisitor {
 
 	public List<Tripletta> lista = new ArrayList<>();

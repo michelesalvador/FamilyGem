@@ -1,4 +1,5 @@
 package app.familygem.visitor;
+
 /**
  * Closely connected to [FindStack, locate objects to keep in the stack
  * */
