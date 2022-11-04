@@ -19,7 +19,7 @@ public class RepositoryActivity extends DetailActivity {
 		setTitle(R.string.repository);
 		a = (Repository)cast(Repository.class);
 		placeSlug("REPO", a.getId());
-		place(getString(R.string.value), "Value", false, true);    // Non molto Gedcom standard
+		place(getString(R.string.value), "Value", false, true);    // Not very standard Gedcom //Non molto Gedcom standard
 		place(getString(R.string.name), "Name");
 		place(getString(R.string.address), a.getAddress());
 		place(getString(R.string.www), "Www");
@@ -31,14 +31,14 @@ public class RepositoryActivity extends DetailActivity {
 		U.placeNotes(box, a, true);
 		U.placeChangeDate(box, a.getChange());
 
-		// Raccoglie e mostra le fonti che citano questo Repository
-		List<Source> fontiCitanti = new ArrayList<>();
-		for( Source fonte : Global.gc.getSources() )
-			if( fonte.getRepositoryRef() != null && fonte.getRepositoryRef().getRef() != null
-					&& fonte.getRepositoryRef().getRef().equals(a.getId()) )
-				fontiCitanti.add(fonte);
-		if( !fontiCitanti.isEmpty() )
-			U.putContainer(box, fontiCitanti.toArray(), R.string.sources);
+		// Collects and displays the sources citing this Repository //Raccoglie e mostra le fonti che citano questo Repository
+		List<Source> citingSources = new ArrayList<>();
+		for( Source source : Global.gc.getSources() )
+			if( source.getRepositoryRef() != null && source.getRepositoryRef().getRef() != null
+					&& source.getRepositoryRef().getRef().equals(a.getId()) )
+				citingSources.add(source);
+		if( !citingSources.isEmpty() )
+			U.putContainer(box, citingSources.toArray(), R.string.sources);
 	}
 
 	@Override
