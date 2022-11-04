@@ -38,7 +38,7 @@ public class RepositoryActivity extends DetailActivity {
 					&& fonte.getRepositoryRef().getRef().equals(a.getId()) )
 				fontiCitanti.add(fonte);
 		if( !fontiCitanti.isEmpty() )
-			U.mettiDispensa(box, fontiCitanti.toArray(), R.string.sources);
+			U.putContainer(box, fontiCitanti.toArray(), R.string.sources);
 	}
 
 	@Override

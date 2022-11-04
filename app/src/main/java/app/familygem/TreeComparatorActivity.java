@@ -144,7 +144,7 @@ public class TreeComparatorActivity extends BaseActivity {
 			txt = m.getFile();
 			data = dataOra( m.getChange() );
 			vistaFoto.setVisibility( View.VISIBLE );
-			F.dipingiMedia( m, vistaFoto, null );
+			F.showImage( m, vistaFoto, null );
 		}
 		else if( o instanceof Source ) {
 			tipoRecord( R.string.source );

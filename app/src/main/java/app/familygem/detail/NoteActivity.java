@@ -31,9 +31,9 @@ public class NoteActivity extends DetailActivity {
 		if( n.getId() != null ) {
 			NoteReferences rifNota = new NoteReferences(Global.gc, n.getId(), false);
 			if( rifNota.tot > 0 )
-				U.mettiDispensa(box, rifNota.capostipiti.toArray(), R.string.shared_by);
+				U.putContainer(box, rifNota.capostipiti.toArray(), R.string.shared_by);
 		} else if( ((Activity)box.getContext()).getIntent().getBooleanExtra("daQuaderno", false) ) {
-			U.mettiDispensa(box, Memory.firstObject(), R.string.written_in);
+			U.putContainer(box, Memory.firstObject(), R.string.written_in);
 		}
 	}
 

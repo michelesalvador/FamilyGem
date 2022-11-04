@@ -870,7 +870,7 @@ public class U {
 		MediaGalleryAdapter.arredaMedia(media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num));
 		LinearLayout.LayoutParams parami = (LinearLayout.LayoutParams)vistaMedia.getLayoutParams();
 		parami.height = dpToPx(80);
-		F.dipingiMedia(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));
+		F.showImage(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));
 		vistaMedia.setOnClickListener(v -> {
 			Memory.setFirst(media);
 			scatola.getContext().startActivity(new Intent(scatola.getContext(), ImageActivity.class));
@@ -891,8 +891,10 @@ public class U {
 		});
 	}
 
-	// Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipiti
-	public static void mettiDispensa(LinearLayout scatola, Object cosa, int tit) {
+	/**
+	 * Adds a generic container with one or more links to parent records to the layout // Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipiti
+	 * */
+	public static void putContainer(LinearLayout scatola, Object cosa, int tit) {
 		View vista = LayoutInflater.from(scatola.getContext()).inflate(R.layout.dispensa, scatola, false);
 		TextView vistaTit = vista.findViewById(R.id.dispensa_titolo);
 		vistaTit.setText(tit);

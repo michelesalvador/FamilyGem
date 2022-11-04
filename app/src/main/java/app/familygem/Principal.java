@@ -152,7 +152,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 				int caso = new Random().nextInt( cercaMedia.lista.size() );
 				for( Media med : cercaMedia.lista )
 					if( --caso < 0 ) { // arriva a -1
-						F.dipingiMedia( med, imageView, null );
+						F.showImage( med, imageView, null );
 						imageView.setVisibility( ImageView.VISIBLE );
 						break;
 					}

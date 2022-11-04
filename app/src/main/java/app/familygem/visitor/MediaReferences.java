@@ -21,7 +21,7 @@ public class MediaReferences extends TotalVisitor {
 	private boolean elimina; // eliminare i Ref o no
 	private Object capo; // il capostipite della pila
 	public int num = 0; // il conto dei riferimenti a un Media
-	public Set<Object> capostipiti = new LinkedHashSet<>(); // l'elenco degli oggetti capostipiti contenti un Media
+	public Set<Object> founders = new LinkedHashSet<>(); // the list of the founding objects containing a Media//l'elenco degli oggetti capostipiti contenti un Media
 
 	public MediaReferences(Gedcom gc, Media media, boolean elimina ) {
 		this.media = media;
@@ -38,7 +38,7 @@ public class MediaReferences extends TotalVisitor {
 			Iterator<MediaRef> refiMedia = contenitore.getMediaRefs().iterator();
 			while( refiMedia.hasNext() )
 				if( refiMedia.next().getRef().equals(media.getId()) ) {
-					capostipiti.add( capo );
+					founders.add( capo );
 					if( elimina )
 						refiMedia.remove();
 					else

@@ -28,23 +28,23 @@ import static app.familygem.Global.gc;
 public class ImageActivity extends DetailActivity {
 
 	Media m;
-	View vistaMedia;
+	View imageView;
 
 	@Override
 	public void format() {
 		m = (Media)cast(Media.class);
 		if( m.getId() != null ) {
 			setTitle(R.string.shared_media);
-			placeSlug("OBJE", m.getId());    // 'O1' solo per Multimedia Records
+			placeSlug("OBJE", m.getId());    // 'O1' for Multimedia Records only//'O1' solo per Multimedia Records
 		} else {
 			setTitle(R.string.media);
 			placeSlug("OBJE", null);
 		}
-		immaginona(m, box.getChildCount());
+		displayMedia(m, box.getChildCount());
 		place(getString(R.string.title), "Title");
 		place(getString(R.string.type), "Type", false, false);    // _type
-		if( Global.settings.expert ) place(getString(R.string.file), "File");    // 'Angelina Guadagnoli.jpg' visibile solo agli esperti
-			// todo dovrebbe essere max 259 characters
+		if( Global.settings.expert ) place(getString(R.string.file), "File");    // 'Angelina Guadagnoli.jpg' visible only to experts //'Angelina Guadagnoli.jpg' visibile solo agli esperti
+			// TODO should be max 259 characters
 		place(getString(R.string.format), "Format", Global.settings.expert, false);    // jpeg
 		place(getString(R.string.primary), "Primary");    // _prim
 		place(getString(R.string.scrapbook), "Scrapbook", false, false);    // _scbk the multimedia object should be in the scrapbook
@@ -54,68 +54,68 @@ public class ImageActivity extends DetailActivity {
 		placeExtensions(m);
 		U.placeNotes(box, m, true);
 		U.placeChangeDate(box, m.getChange());
-		// Lista dei record in cui è usato il media
-		MediaReferences riferiMedia = new MediaReferences(gc, m, false);
-		if( riferiMedia.capostipiti.size() > 0 )
-			U.mettiDispensa(box, riferiMedia.capostipiti.toArray(), R.string.used_by);
+		// List of records in which the media is used
+		MediaReferences mediaReferences = new MediaReferences(gc, m, false);
+		if( mediaReferences.founders.size() > 0 )
+			U.putContainer(box, mediaReferences.founders.toArray(), R.string.used_by);
 		else if( ((Activity)box.getContext()).getIntent().getBooleanExtra("daSolo", false) )
-			U.mettiDispensa(box, Memory.firstObject(), R.string.into);
+			U.putContainer(box, Memory.firstObject(), R.string.into);
 	}
 
-	void immaginona(Media m, int posizione) {
-		vistaMedia = LayoutInflater.from(this).inflate(R.layout.immagine_immagine, box, false);
-		box.addView(vistaMedia, posizione);
-		ImageView vistaImg = vistaMedia.findViewById(R.id.immagine_foto);
-		F.dipingiMedia(m, vistaImg, vistaMedia.findViewById(R.id.immagine_circolo));
-		vistaMedia.setOnClickListener(vista -> {
-			String percorso = (String)vistaImg.getTag(R.id.tag_percorso);
-			Uri uri = (Uri)vistaImg.getTag(R.id.tag_uri);
-			int tipoFile = (int)vistaImg.getTag(R.id.tag_tipo_file);
-			if( tipoFile == 0 ) {    // Il file è da trovare
+	void displayMedia(Media m, int position) {
+		imageView = LayoutInflater.from(this).inflate(R.layout.immagine_immagine, box, false);
+		box.addView(imageView, position);
+		ImageView imageView = this.imageView.findViewById(R.id.immagine_foto);
+		F.showImage(m, imageView, this.imageView.findViewById(R.id.immagine_circolo));
+		this.imageView.setOnClickListener(vista -> {
+			String path = (String)imageView.getTag(R.id.tag_percorso);
+			Uri uri = (Uri)imageView.getTag(R.id.tag_uri);
+			int fileType = (int)imageView.getTag(R.id.tag_tipo_file);
+			if( fileType == 0 ) {    // The file is to be found //Il file è da trovare
 				F.displayImageCaptureDialog(this, null, 5173, null);
-			} else if( tipoFile == 2 || tipoFile == 3 ) { // Apre file con altra app
-				// todo se il tipo è 3 ma è un url (pagina web senza immagini) cerca di aprirlo come un file://
-				if( percorso != null ) {
-					File file = new File(percorso);
+			} else if( fileType == 2 || fileType == 3 ) { // Open files with another app //Apre file con altra app
+				// TODO if the type is 3 but it is a url (web page without images) try to open it as a file: //
+				if( path != null ) {
+					File file = new File(path);
 					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-							&& percorso.startsWith(getExternalFilesDir(null).getPath()) )
-							// Un'app può essere file provider solo delle SUE cartelle
+							&& path.startsWith(getExternalFilesDir(null).getPath()) )
+							// An app can be a file provider of only ITS folders
 						uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file);
-					else // KitKat e tutte le altre cartelle
+					else // KitKat and all other folders //KitKat e tutte le altre cartelle
 						uri = Uri.fromFile(file);
 				}
 				String mimeType = getContentResolver().getType(uri);
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				intent.setDataAndType(uri, mimeType);
-				intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // Serve per le cartelle di proprietà dell'app (provider)
+				intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // It is for app properties folders (provider) //Serve per le cartelle di proprietà dell'app (provider)
 				List<ResolveInfo> resolvers = getPackageManager().queryIntentActivities(intent, 0);
-					// per un'estensione come .tex di cui ha trovato il tipo mime, non c'è nessuna app predefinita
+					// for an extension like .tex that found the mime type, there is no default app //per un'estensione come .tex di cui ha trovato il tipo mime, non c'è nessuna app predefinita
 				if( mimeType == null || resolvers.isEmpty() ) {
-					intent.setDataAndType(uri, "*/*");    // Brutta lista di app generiche
+					intent.setDataAndType(uri, "*/*");    // Brutta lista di app generiche //Brutta lista di app generiche
 				}
-				// Da android 7 (Nougat api 24) gli uri file:// sono banditi in favore di uri content:// perciò non riesce ad aprire i file
-				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) { // ok funziona nell'emulatore con Android 9
+				// From android 7 (Nougat api 24) uri file: // are banned in favor of uri content: // so it can't open files
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) { // ok works in the emulator with Android 9 //ok funziona nell'emulatore con Android 9
 					try {
-						StrictMode.class.getMethod("disableDeathOnFileUriExposure").invoke(null);
+						StrictMode.class.getMethod("disableDeathOnFileUriExposure").invoke(null); //TODO don't use reflection to use functions you shouldn't!
 					} catch( Exception e ) {}
 				}
 				startActivity( intent );
-			} else { // Immagine vera e propria
+			} else { // Real image //Immagine vera e propria
 				Intent intent = new Intent( ImageActivity.this, BlackboardActivity.class );
-				intent.putExtra( "percorso", percorso );
+				intent.putExtra( "path", path );
 				if( uri != null )
 					intent.putExtra( "uri", uri.toString() );
 				startActivity( intent );
 			}
 		});
-		vistaMedia.setTag( R.id.tag_oggetto, 43614 );	// per il suo menu contestuale
-		registerForContextMenu( vistaMedia );
+		this.imageView.setTag( R.id.tag_oggetto, 43614 /*TODO Magic Number*/);	// for its context menu //per il suo menu contestuale
+		registerForContextMenu(this.imageView);
 	}
 
 	public void updateImage() {
-		int posizione = box.indexOfChild( vistaMedia );
-		box.removeView( vistaMedia );
-		immaginona( m, posizione );
+		int position = box.indexOfChild(imageView);
+		box.removeView(imageView);
+		displayMedia( m, position );
 	}
 
 	@Override

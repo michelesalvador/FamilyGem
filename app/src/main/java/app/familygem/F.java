@@ -218,14 +218,14 @@ public class F {
 		boolean trovatoQualcosa = false;
 		for( Media med : visita.lista ) { // Cerca un media contrassegnato Primario Y
 			if( med.getPrimary() != null && med.getPrimary().equals("Y") ) {
-				dipingiMedia( med, img, null );
+				showImage( med, img, null );
 				trovatoQualcosa = true;
 				break;
 			}
 		}
 		if( !trovatoQualcosa ) { // In alternativa restituisce il primo che trova
 			for( Media med : visita.lista ) {
-				dipingiMedia( med, img, null );
+				showImage( med, img, null );
 				trovatoQualcosa = true;
 				break;
 			}
@@ -233,8 +233,10 @@ public class F {
 		img.setVisibility( trovatoQualcosa ? View.VISIBLE : View.GONE );
 	}
 
-	// Mostra le immagini con Picasso
-	public static void dipingiMedia( Media media, ImageView imageView, ProgressBar circo ) {
+	/**
+	 * Show pictures with Picasso
+	 * */
+	public static void showImage(Media media, ImageView imageView, ProgressBar circo ) {
 		int idAlbero;
 		// Confrontatore ha bisogno dell'id dell'albero nuovo per cercare nella sua cartella
 		View probabile = null;
@@ -715,7 +717,7 @@ public class F {
 		String tipoMime = URLConnection.guessContentTypeFromName( fileMedia[0].getName() );
 		if( tipoMime != null && tipoMime.startsWith("image/") ) {
 			ImageView vistaImmagine = new ImageView( contesto );
-			dipingiMedia( media, vistaImmagine, null );
+			showImage( media, vistaImmagine, null );
 			Global.croppedMedia = media; // Media parcheggiato in attesa di essere aggiornato col nuovo percorso file
 			Global.edited = false; // per non innescare il recreate() che negli Android nuovi non fa comparire l'AlertDialog
 			new AlertDialog.Builder( contesto )

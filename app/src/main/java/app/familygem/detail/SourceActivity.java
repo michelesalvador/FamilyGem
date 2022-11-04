@@ -73,7 +73,7 @@ public class SourceActivity extends DetailActivity {
 		U.placeMedia(box, f, true);
 		U.placeChangeDate(box, f.getChange());
 		if( !citazioni.lista.isEmpty() )
-			U.mettiDispensa(box, citazioni.getCapi(), R.string.cited_by);
+			U.putContainer(box, citazioni.getCapi(), R.string.cited_by);
 	}
 
 	@Override

@@ -117,7 +117,7 @@ public class GalleryFragment extends Fragment {
 			gc.getMedia().remove(media);
 			// Elimina i riferimenti in tutti i contenitori
 			MediaReferences eliminaMedia = new MediaReferences(gc, media, true);
-			capi = eliminaMedia.capostipiti;
+			capi = eliminaMedia.founders;
 		} else { // media LOCALE
 			new FindStack(gc, media); // trova temporaneamente la pila del media per individuare il container
 			MediaContainer container = (MediaContainer) Memory.getSecondToLastObject();

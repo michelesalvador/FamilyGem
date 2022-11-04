@@ -95,7 +95,7 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 				vistaTesto.setVisibility( View.GONE );
 				vistaNumero.setVisibility( View.GONE );
 			}
-			F.dipingiMedia( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
+			F.showImage( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
 		}
 		@Override
 		public void onClick( View v ) {
