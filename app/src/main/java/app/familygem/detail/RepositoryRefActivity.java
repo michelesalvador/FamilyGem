@@ -24,14 +24,14 @@ public class RepositoryRefActivity extends DetailActivity {
 	public void format() {
 		placeSlug("REPO");
 		r = (RepositoryRef)cast(RepositoryRef.class);
-		if( r.getRepository(gc) != null ) { // valido
+		if( r.getRepository(gc) != null ) { // valid
 			setTitle(R.string.repository_citation);
-			View cartaRepo = mettiArchivio(box, r.getRepository(gc));
-			cartaRepo.setTag(R.id.tag_oggetto, r.getRepository(gc)); // per il menu contestuale todo ancora necessario?
-			registerForContextMenu(cartaRepo);
-		} else if( r.getRef() != null ) { // di un archivio inesistente (magari eliminato)
+			View repositoryCard = putRepository(box, r.getRepository(gc));
+			repositoryCard.setTag(R.id.tag_oggetto, r.getRepository(gc)); //for the context menu TODO still needed?
+			registerForContextMenu(repositoryCard);
+		} else if( r.getRef() != null ) { // of a non-existent archive (perhaps deleted) //di un archivio inesistente (magari eliminato)
 			setTitle(R.string.inexistent_repository_citation);
-		} else { // senza ref??
+		} else { // without ref??
 			setTitle(R.string.repository_note);
 		}
 		place(getString(R.string.value), "Value", false, true);
@@ -41,25 +41,25 @@ public class RepositoryRefActivity extends DetailActivity {
 		U.placeNotes(box, r, true);
 	}
 
-	public static View mettiArchivio(LinearLayout scatola, final Repository repo) {
-		final Context contesto = scatola.getContext();
-		View cartaRepo = LayoutInflater.from(contesto).inflate(R.layout.pezzo_fonte, scatola, false);
-		scatola.addView(cartaRepo);
-		((TextView)cartaRepo.findViewById(R.id.fonte_testo)).setText(repo.getName());
-		((CardView)cartaRepo).setCardBackgroundColor(contesto.getResources().getColor(R.color.archivio));
-		cartaRepo.setOnClickListener(v -> {
+	public static View putRepository(LinearLayout container, final Repository repo) {
+		final Context context = container.getContext();
+		View repositoryCard = LayoutInflater.from(context).inflate(R.layout.pezzo_fonte, container, false);
+		container.addView(repositoryCard);
+		((TextView)repositoryCard.findViewById(R.id.fonte_testo)).setText(repo.getName());
+		((CardView)repositoryCard).setCardBackgroundColor(context.getResources().getColor(R.color.archivio));
+		repositoryCard.setOnClickListener(v -> {
 			Memory.setFirst(repo);
-			contesto.startActivity(new Intent(contesto, RepositoryActivity.class));
+			context.startActivity(new Intent(context, RepositoryActivity.class));
 		});
-		return cartaRepo;
+		return repositoryCard;
 	}
 
 	@Override
 	public void delete() {
-		// Elimina la citazione all'archivio a aggiorna la data della fonte che la conteneva
-		Source contenitore = (Source) Memory.getSecondToLastObject();
-		contenitore.setRepositoryRef(null);
-		U.updateChangeDate(contenitore);
+		// Delete the citation from the archive and update the date of the source that contained it
+		Source container = (Source) Memory.getSecondToLastObject();
+		container.setRepositoryRef(null);
+		U.updateChangeDate(container);
 		Memory.setInstanceAndAllSubsequentToNull(r);
 	}
 }

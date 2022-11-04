@@ -128,6 +128,7 @@ public class Memory {
 	/**
 	 * If the stack has more than one object, get the second to last object, otherwise return null
 	 * The object in the previous step to the last - L'oggetto nel passo precedente all'ultimo
+	 * I think it was called containerObject()?
 	 * */
 	public static Object getSecondToLastObject() {
 		StepStack stepStack = getStepStack();

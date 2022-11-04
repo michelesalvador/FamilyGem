@@ -917,7 +917,7 @@ public class U {
 		else if( record instanceof Family )
 			linkaFamiglia(scatola, (Family)record);
 		else if( record instanceof Repository )
-			RepositoryRefActivity.mettiArchivio(scatola, (Repository)record);
+			RepositoryRefActivity.putRepository(scatola, (Repository)record);
 		else if( record instanceof Note )
 			placeNote(scatola, (Note)record, true);
 		else if( record instanceof Media )
