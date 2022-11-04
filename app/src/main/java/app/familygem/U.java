@@ -504,7 +504,7 @@ public class U {
 		if( contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) != null ) {
 			List<Extension> lista = new ArrayList<>();
 			for( GedcomTag est : (List<GedcomTag>)contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) ) {
-				String testo = scavaEstensione(est, 0);
+				String testo = traverseExtension(est, 0);
 				if( testo.endsWith("\n") )
 					testo = testo.substring(0, testo.length() - 1);
 				lista.add(new Extension(est.getTag(), testo, est));
@@ -514,20 +514,22 @@ public class U {
 		return Collections.emptyList();
 	}
 
-	// Costruisce un testo con il contenuto ricorsivo dell'estensione
-	public static String scavaEstensione(GedcomTag pacco, int grado) {
-		String testo = "";
+	/**
+	 * Constructs a text with the recursive content of the extension
+	 * */
+	public static String traverseExtension(GedcomTag pacco, int grado) {
+		StringBuilder testo = new StringBuilder();
 		if( grado > 0 )
-			testo += pacco.getTag() + " ";
+			testo.append(pacco.getTag()).append(" ");
 		if( pacco.getValue() != null )
-			testo += pacco.getValue() + "\n";
+			testo.append(pacco.getValue()).append("\n");
 		else if( pacco.getId() != null )
-			testo += pacco.getId() + "\n";
+			testo.append(pacco.getId()).append("\n");
 		else if( pacco.getRef() != null )
-			testo += pacco.getRef() + "\n";
+			testo.append(pacco.getRef()).append("\n");
 		for( GedcomTag unPezzo : pacco.getChildren() )
-			testo += scavaEstensione(unPezzo, ++grado);
-		return testo;
+			testo.append(traverseExtension(unPezzo, ++grado));
+		return testo.toString();
 	}
 
 	public static void deleteExtension(GedcomTag estensione, Object contenitore, View vista) {
