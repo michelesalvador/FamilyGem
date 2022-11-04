@@ -254,7 +254,7 @@ public class LibraryFragment extends Fragment {
 	// Elimina la fonte, i Ref in tutte le SourceCitation che puntano ad essa, e le SourceCitation vuote
 	// Restituisce un array dei capostipiti modificati
 	// Todo le citazioni alla Source eliminata diventano Fonte-nota a cui bisognerebbe poter riattaccare una Source
-	public static Object[] eliminaFonte( Source fon ) {
+	public static Object[] deleteSource(Source fon ) {
 		ListOfSourceCitations citazioni = new ListOfSourceCitations( gc, fon.getId() );
 		for( ListOfSourceCitations.Tripletta cita : citazioni.lista ) {
 			SourceCitation sc = cita.citazione;
@@ -344,7 +344,7 @@ public class LibraryFragment extends Fragment {
 		if( item.getItemId() == 0 ) { // Edit source ID
 			U.editId(getContext(), source, getActivity()::recreate);
 		} else if( item.getItemId() == 1 ) { // Delete source
-			Object[] objects = eliminaFonte(source);
+			Object[] objects = deleteSource(source);
 			U.save(false, objects);
 			getActivity().recreate();
 		} else {

@@ -25,59 +25,57 @@ public class SourceActivity extends DetailActivity {
 		setTitle(R.string.source);
 		f = (Source)cast(Source.class);
 		placeSlug("SOUR", f.getId());
-		ListOfSourceCitations citazioni = new ListOfSourceCitations(gc, f.getId());
-		f.putExtension("citaz", citazioni.lista.size());    // per la Biblioteca
+		ListOfSourceCitations citations = new ListOfSourceCitations(gc, f.getId());
+		f.putExtension("citaz", citations.lista.size());    // for the LibraryFragment
 		place(getString(R.string.abbreviation), "Abbreviation");
 		place(getString(R.string.title), "Title", true, true);
 		place(getString(R.string.type), "Type", false, true);    // _type
 		place(getString(R.string.author), "Author", true, true);
 		place(getString(R.string.publication_facts), "PublicationFacts", true, true);
-		place(getString(R.string.date), "Date");    // sempre null nel mio Gedcom
+		place(getString(R.string.date), "Date");    // always null in my Gedcom
 		place(getString(R.string.text), "Text", true, true);
-		place(getString(R.string.call_number), "CallNumber", false, false); // CALN deve stare nel SOURCE_REPOSITORY_CITATION
+		place(getString(R.string.call_number), "CallNumber", false, false); // CALN it must be in the SOURCE_REPOSITORY_CITATION
 		place(getString(R.string.italic), "Italic", false, false);    // _italic indicates source title to be in italics ???
-		place(getString(R.string.media_type), "MediaType", false, false);    // MEDI, sarebbe in SOURCE_REPOSITORY_CITATION
+		place(getString(R.string.media_type), "MediaType", false, false);    //MEDI, would be in SOURCE REPOSITORY CITATION // MEDI, sarebbe in SOURCE_REPOSITORY_CITATION
 		place(getString(R.string.parentheses), "Paren", false, false);    // _PAREN indicates source facts are to be enclosed in parentheses
-		place(getString(R.string.reference_number), "ReferenceNumber");    // refn false???
+		place(getString(R.string.reference_number), "ReferenceNumber");    // ref num false???
 		place(getString(R.string.rin), "Rin", false, false);
 		place(getString(R.string.user_id), "Uid", false, false);
 		placeExtensions(f);
-		// Mette la citazione all'archivio
+		// Put the quote to the archive //Mette la citazione all'archivio TODO improve translation
 		if( f.getRepositoryRef() != null ) {
-			View vistaRef = LayoutInflater.from(this).inflate(R.layout.pezzo_citazione_fonte, box, false);
-			box.addView(vistaRef);
-			vistaRef.setBackgroundColor(getResources().getColor(R.color.archivioCitazione));
-			final RepositoryRef refArchivio = f.getRepositoryRef();
-			if( refArchivio.getRepository(gc) != null ) {
-				((TextView)vistaRef.findViewById(R.id.fonte_testo)).setText(refArchivio.getRepository(gc).getName());
-				((CardView)vistaRef.findViewById(R.id.citazione_fonte)).setCardBackgroundColor(getResources().getColor(R.color.archivio));
-			} else vistaRef.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
+			View refView = LayoutInflater.from(this).inflate(R.layout.pezzo_citazione_fonte, box, false);
+			box.addView(refView);
+			refView.setBackgroundColor(getResources().getColor(R.color.archivioCitazione));
+			final RepositoryRef repositoryRef = f.getRepositoryRef();
+			if( repositoryRef.getRepository(gc) != null ) {
+				((TextView)refView.findViewById(R.id.fonte_testo)).setText(repositoryRef.getRepository(gc).getName());
+				((CardView)refView.findViewById(R.id.citazione_fonte)).setCardBackgroundColor(getResources().getColor(R.color.archivio));
+			} else refView.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
 			String t = "";
-			if( refArchivio.getValue() != null ) t += refArchivio.getValue() + "\n";
-			if( refArchivio.getCallNumber() != null ) t += refArchivio.getCallNumber() + "\n";
-			if( refArchivio.getMediaType() != null ) t += refArchivio.getMediaType() + "\n";
-			TextView vistaTesto = vistaRef.findViewById(R.id.citazione_testo);
-			if( t.isEmpty() ) vistaTesto.setVisibility(View.GONE);
-			else vistaTesto.setText(t.substring(0, t.length() - 1));
-			U.placeNotes((LinearLayout)vistaRef.findViewById(R.id.citazione_note), refArchivio, false);
-			vistaRef.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					Memory.add(refArchivio);
-					startActivity(new Intent(SourceActivity.this, RepositoryRefActivity.class));
-				}
+			if( repositoryRef.getValue() != null ) t += repositoryRef.getValue() + "\n";
+			if( repositoryRef.getCallNumber() != null ) t += repositoryRef.getCallNumber() + "\n";
+			if( repositoryRef.getMediaType() != null ) t += repositoryRef.getMediaType() + "\n";
+			TextView textView = refView.findViewById(R.id.citazione_testo);
+			if( t.isEmpty() ) textView.setVisibility(View.GONE);
+			else textView.setText(t.substring(0, t.length() - 1));
+			U.placeNotes((LinearLayout)refView.findViewById(R.id.citazione_note), repositoryRef, false);
+			refView.setOnClickListener(v -> {
+				Memory.add(repositoryRef);
+				startActivity(new Intent(SourceActivity.this, RepositoryRefActivity.class));
 			});
-			registerForContextMenu(vistaRef);
-			vistaRef.setTag(R.id.tag_oggetto, refArchivio); // per il menu contestuale
+			registerForContextMenu(refView);
+			refView.setTag(R.id.tag_oggetto, repositoryRef); // for the context menu
 		}
 		U.placeNotes(box, f, true);
 		U.placeMedia(box, f, true);
 		U.placeChangeDate(box, f.getChange());
-		if( !citazioni.lista.isEmpty() )
-			U.putContainer(box, citazioni.getCapi(), R.string.cited_by);
+		if( !citations.lista.isEmpty() )
+			U.putContainer(box, citations.getCapi(), R.string.cited_by);
 	}
 
 	@Override
 	public void delete() {
-		U.updateChangeDate(LibraryFragment.eliminaFonte(f));
+		U.updateChangeDate(LibraryFragment.deleteSource(f));
 	}
 }
