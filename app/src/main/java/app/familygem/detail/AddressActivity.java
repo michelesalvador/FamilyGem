@@ -15,7 +15,7 @@ public class AddressActivity extends DetailActivity {
 		setTitle(R.string.address);
 		placeSlug("ADDR");
 		a = (Address)cast(Address.class);
-		place(getString(R.string.value), "Value", false, true); // Fortemente deprecato in favore dell'indirizzo frammentato
+		place(getString(R.string.value), "Value", false, true); // Strongly deprecated in favor of the fragmented address //Fortemente deprecato in favore dell'indirizzo frammentato
 		place(getString(R.string.name), "Name", false, false); // _name non standard
 		place(getString(R.string.line_1), "AddressLine1");
 		place(getString(R.string.line_2), "AddressLine2");
@@ -29,7 +29,7 @@ public class AddressActivity extends DetailActivity {
 
 	@Override
 	public void delete() {
-		deleteAddress(Memory.oggettoContenitore());
+		deleteAddress(Memory.getSecondToLastObject());
 		U.updateChangeDate(Memory.firstObject());
 		Memory.setInstanceAndAllSubsequentToNull(a);
 	}

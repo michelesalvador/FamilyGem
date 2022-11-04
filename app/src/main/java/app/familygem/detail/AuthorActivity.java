@@ -15,7 +15,7 @@ public class AuthorActivity extends DetailActivity {
 		setTitle(R.string.submitter);
 		a = (Submitter)cast(Submitter.class);
 		placeSlug("SUBM", a.getId());
-		place(getString(R.string.value), "Value", false, true);   // Value de che?
+		place(getString(R.string.value), "Value", false, true);   // Value of what? //Value de che?
 		place(getString(R.string.name), "Name");
 		place(getString(R.string.address), a.getAddress());
 		place(getString(R.string.www), "Www");
@@ -30,8 +30,8 @@ public class AuthorActivity extends DetailActivity {
 
 	@Override
 	public void delete() {
-		// Ricordiamo che almeno un autore deve essere specificato
-		// non aggiorna la data di nessun record
-		ListOfAuthorsFragment.eliminaAutore( a );
+		// Remember that at least one author must be specified // Ricordiamo che almeno un autore deve essere specificato
+		// don't update the date of any record // non aggiorna la data di nessun record
+		ListOfAuthorsFragment.deleteAuthor( a );
 	}
 }

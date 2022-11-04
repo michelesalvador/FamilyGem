@@ -700,7 +700,7 @@ public class U {
 				Global.gc.setNotes(null);
 		} else { // LOCAL note
 			new FindStack(Global.gc, note);
-			NoteContainer nc = (NoteContainer) Memory.oggettoContenitore();
+			NoteContainer nc = (NoteContainer) Memory.getSecondToLastObject();
 			nc.getNotes().remove(note); // rimuove solo se è una nota locale, non se object note
 			if( nc.getNotes().isEmpty() )
 				nc.setNotes(null);

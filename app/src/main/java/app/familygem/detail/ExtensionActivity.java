@@ -29,7 +29,7 @@ public class ExtensionActivity extends DetailActivity {
 
 	@Override
 	public void delete() {
-		U.deleteExtension(e, Memory.oggettoContenitore(), null);
+		U.deleteExtension(e, Memory.getSecondToLastObject(), null);
 		U.updateChangeDate(Memory.firstObject());
 	}
 }

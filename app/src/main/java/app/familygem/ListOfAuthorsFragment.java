@@ -51,7 +51,7 @@ public class ListOfAuthorsFragment extends Fragment {
 
 	// Elimina un autore
 	// Todo mi sa che andrebbe cercato eventuale SubmitterRef in tutti i record
-	public static void eliminaAutore(Submitter aut) {
+	public static void deleteAuthor(Submitter aut) {
 		Header testa = gc.getHeader();
 		if( testa != null && testa.getSubmitterRef() != null
 				&& testa.getSubmitterRef().equals(aut.getId()) ) {
@@ -106,7 +106,7 @@ public class ListOfAuthorsFragment extends Fragment {
 				return true;
 			case 1:
 				// Todo conferma elimina
-				eliminaAutore(subm);
+				deleteAuthor(subm);
 				U.save(false);
 				getActivity().recreate();
 				return true;

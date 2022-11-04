@@ -120,7 +120,7 @@ public class GalleryFragment extends Fragment {
 			capi = eliminaMedia.capostipiti;
 		} else { // media LOCALE
 			new FindStack(gc, media); // trova temporaneamente la pila del media per individuare il container
-			MediaContainer container = (MediaContainer) Memory.oggettoContenitore();
+			MediaContainer container = (MediaContainer) Memory.getSecondToLastObject();
 			container.getMedia().remove(media);
 			if( container.getMedia().isEmpty() )
 				container.setMedia(null);

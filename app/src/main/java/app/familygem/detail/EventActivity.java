@@ -56,7 +56,7 @@ public class EventActivity extends DetailActivity {
 
 	@Override
 	public void delete() {
-		((PersonFamilyCommonContainer) Memory.oggettoContenitore()).getEventsFacts().remove(e);
+		((PersonFamilyCommonContainer) Memory.getSecondToLastObject()).getEventsFacts().remove(e);
 		U.updateChangeDate(Memory.firstObject());
 		Memory.setInstanceAndAllSubsequentToNull(e);
 	}

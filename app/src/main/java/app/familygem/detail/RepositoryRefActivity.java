@@ -57,7 +57,7 @@ public class RepositoryRefActivity extends DetailActivity {
 	@Override
 	public void delete() {
 		// Elimina la citazione all'archivio a aggiorna la data della fonte che la conteneva
-		Source contenitore = (Source) Memory.oggettoContenitore();
+		Source contenitore = (Source) Memory.getSecondToLastObject();
 		contenitore.setRepositoryRef(null);
 		U.updateChangeDate(contenitore);
 		Memory.setInstanceAndAllSubsequentToNull(r);

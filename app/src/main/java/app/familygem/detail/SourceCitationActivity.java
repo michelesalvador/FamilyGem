@@ -41,7 +41,7 @@ public class SourceCitationActivity extends DetailActivity {
 
 	@Override
 	public void delete() {
-		Object contenitore = Memory.oggettoContenitore();
+		Object contenitore = Memory.getSecondToLastObject();
 		if( contenitore instanceof Note )	// Note non extende SourceCitationContainer
 			((Note)contenitore).getSourceCitations().remove( c );
 		else

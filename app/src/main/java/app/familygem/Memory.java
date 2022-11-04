@@ -123,10 +123,14 @@ public class Memory {
 			return null;
 	}
 
-	// L'oggetto nel passo precedente all'ultimo
-	public static Object oggettoContenitore() {
-		if( getStepStack().size() > 1 )
-			return getStepStack().get( getStepStack().size() - 2 ).object;
+	/**
+	 * If the stack has more than one object, get the second to last object, otherwise return null
+	 * The object in the previous step to the last - L'oggetto nel passo precedente all'ultimo
+	 * */
+	public static Object getSecondToLastObject() {
+		StepStack stepStack = getStepStack();
+		if( stepStack.size() > 1 )
+			return stepStack.get( stepStack.size() - 2 ).object;
 		else
 			return null;
 	}
