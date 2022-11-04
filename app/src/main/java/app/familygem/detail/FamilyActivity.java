@@ -40,12 +40,12 @@ public class FamilyActivity extends DetailActivity {
 		setTitle(R.string.family);
 		f = (Family)cast(Family.class);
 		placeSlug("FAM", f.getId());
-		for( SpouseRef refMarito : f.getHusbandRefs() )
-			member(refMarito, Relation.PARTNER);
-		for( SpouseRef refMoglie : f.getWifeRefs() )
-			member(refMoglie, Relation.PARTNER);
-		for( ChildRef refFiglio : f.getChildRefs() )
-			member(refFiglio, Relation.CHILD);
+		for( SpouseRef husbandRef : f.getHusbandRefs() )
+			addMember(husbandRef, Relation.PARTNER);
+		for( SpouseRef wifeRef : f.getWifeRefs() )
+			addMember(wifeRef, Relation.PARTNER);
+		for( ChildRef childRef : f.getChildRefs() )
+			addMember(childRef, Relation.CHILD);
 		for( EventFact ef : f.getEventsFacts() ) {
 			place(writeEventTitle(f, ef), ef);
 		}
@@ -56,57 +56,59 @@ public class FamilyActivity extends DetailActivity {
 		U.placeChangeDate(box, f.getChange());
 	}
 
-	// Add a member to the family
-	void member(SpouseRef sr, Relation relation) {
+	/**
+	 * Add a member to the family
+	 * */
+	void addMember(SpouseRef sr, Relation relation) {
 		Person p = sr.getPerson(gc);
 		if( p == null ) return;
-		View vistaPersona = U.mettiIndividuo(box, p, getRole(p, f, relation, true) + writeLineage(p, f));
-		vistaPersona.setTag(R.id.tag_oggetto, p); // per il menu contestuale in Dettaglio
-		/*  Ref nell'individuo verso la famiglia
-			Se la stessa persona è presente più volte con lo stesso ruolo (parent/child) nella stessa famiglia
-			i 2 loop seguenti individuano nella person il *primo* FamilyRef (INDI.FAMS / INDI.FAMC) che rimanda a quella famiglia
-			Non prendono quello con lo stesso indice del corrispondente Ref nella famiglia  (FAM.HUSB / FAM.WIFE)
-			Poteva essere un problema in caso di 'Scollega', ma non più perché tutto il contenuto di Famiglia viene ricaricato
+		View personView = U.placeIndividual(box, p, getRole(p, f, relation, true) + writeLineage(p, f));
+		personView.setTag(R.id.tag_oggetto, p); // for the context menu in DetailActivity
+		/*  Ref in the individual towards the family //Ref nell'individuo verso la famiglia
+			If the same person is present several times with the same role (parent / child) in the same family // Se la stessa persona è presente più volte con lo stesso ruolo (parent/child) nella stessa famiglia
+			the 2 following loops identify in the person the * first * FamilyRef (INDI.FAMS / INDI.FAMC) that refers to that family // i 2 loop seguenti individuano nella person il *primo* FamilyRef (INDI.FAMS / INDI.FAMC) che rimanda a quella famiglia
+			They do not take the one with the same index as the corresponding Ref in the family (FAM.HUSB / FAM.WIFE) //Non prendono quello con lo stesso indice del corrispondente Ref nella famiglia  (FAM.HUSB / FAM.WIFE)
+			It could be a problem in case of 'Unlink', but not anymore because all the Family content is reloaded //Poteva essere un problema in caso di 'Scollega', ma non più perché tutto il contenuto di Famiglia viene ricaricato
 		 */
 		if( relation == Relation.PARTNER ) {
 			for( SpouseFamilyRef sfr : p.getSpouseFamilyRefs() )
 				if( f.getId().equals(sfr.getRef()) ) {
-					vistaPersona.setTag(R.id.tag_spouse_family_ref, sfr);
+					personView.setTag(R.id.tag_spouse_family_ref, sfr);
 					break;
 				}
 		} else if( relation == Relation.CHILD ) {
 			for( ParentFamilyRef pfr : p.getParentFamilyRefs() )
 				if( f.getId().equals(pfr.getRef()) ) {
-					vistaPersona.setTag(R.id.tag_spouse_family_ref, pfr);
+					personView.setTag(R.id.tag_spouse_family_ref, pfr);
 					break;
 				}
 		}
-		vistaPersona.setTag(R.id.tag_spouse_ref, sr);
-		registerForContextMenu(vistaPersona);
-		vistaPersona.setOnClickListener(v -> {
+		personView.setTag(R.id.tag_spouse_ref, sr);
+		registerForContextMenu(personView);
+		personView.setOnClickListener(v -> {
 			List<Family> parentFam = p.getParentFamilies(gc);
 			List<Family> spouseFam = p.getSpouseFamilies(gc);
-			// un coniuge con una o più famiglie in cui è figlio
+			// a spouse with one or more families in which he is a child
 			if( relation == Relation.PARTNER && !parentFam.isEmpty() ) {
 				U.askWhichParentsToShow(this, p, 2);
-			} // un figlio con una o più famiglie in cui è coniuge
+			} // a child with one or more families in which he is a spouse
 			else if( relation == Relation.CHILD && !p.getSpouseFamilies(gc).isEmpty() ) {
 				U.askWhichSpouceToShow(this, p, null);
-			} // un figlio non sposato che ha più famiglie genitoriali
+			} // an unmarried child who has multiple parental families
 			else if( parentFam.size() > 1 ) {
-				if( parentFam.size() == 2 ) { // Swappa tra le 2 famiglie genitoriali
+				if( parentFam.size() == 2 ) { // Swap between the 2 parental families //Swappa tra le 2 famiglie genitoriali
 					Global.indi = p.getId();
 					Global.familyNum = parentFam.indexOf(f) == 0 ? 1 : 0;
-					Memory.replacePrimo(parentFam.get(Global.familyNum));
+					Memory.replaceFirst(parentFam.get(Global.familyNum));
 					recreate();
-				} else // Più di due famiglie
+				} else //More than two families
 					U.askWhichParentsToShow( this, p, 2 );
-			} // un coniuge senza genitori ma con più famiglie coniugali
+			} // a spouse without parents but with multiple marital families //un coniuge senza genitori ma con più famiglie coniugali
 			else if( spouseFam.size() > 1 ) {
-				if( spouseFam.size() == 2 ) { // Swappa tra le 2 famiglie coniugali
+				if( spouseFam.size() == 2 ) { // Swap between the 2 marital families //Swappa tra le 2 famiglie coniugali
 					Global.indi = p.getId();
-					Family altraFamiglia = spouseFam.get(spouseFam.indexOf(f) == 0 ? 1 : 0);
-					Memory.replacePrimo(altraFamiglia);
+					Family otherFamily = spouseFam.get(spouseFam.indexOf(f) == 0 ? 1 : 0);
+					Memory.replaceFirst(otherFamily);
 					recreate();
 				} else
 					U.askWhichSpouceToShow(this, p, null);
@@ -120,9 +122,7 @@ public class FamilyActivity extends DetailActivity {
 	}
 
 	/** Find the role of a person from their relation with a family
-	 * @param person
 	 * @param family Can be null
-	 * @param relation
 	 * @param respectFamily The role to find is relative to the family (it becomes 'parent' with children)
 	 * @return A descriptor text of the person's role
 	 */
@@ -180,7 +180,9 @@ public class FamilyActivity extends DetailActivity {
 		return Global.context.getString(role);
 	}
 
-	// Find the ParentFamilyRef of a child person in a family
+	/**
+	 * Find the ParentFamilyRef of a child person in a family
+	 * */
 	public static ParentFamilyRef findParentFamilyRef(Person person, Family family) {
 		for( ParentFamilyRef parentFamilyRef : person.getParentFamilyRefs() ) {
 			if( parentFamilyRef.getRef().equals(family.getId()) ) {
@@ -190,7 +192,9 @@ public class FamilyActivity extends DetailActivity {
 		return null;
 	}
 
-	// Compose the lineage definition to be added to the role
+	/**
+	 * Compose the lineage definition to be added to the role
+	 * */
 	public static String writeLineage(Person person, Family family) {
 		ParentFamilyRef parentFamilyRef = findParentFamilyRef(person, family);
 		if( parentFamilyRef != null ) {
@@ -201,7 +205,9 @@ public class FamilyActivity extends DetailActivity {
 		return "";
 	}
 
-	// Display the alert dialog to choose the lineage of one person
+	/**
+	 * Display the alert dialog to choose the lineage of one person
+	 * */
 	public static void chooseLineage(Context context, Person person, Family family) {
 		ParentFamilyRef parentFamilyRef = findParentFamilyRef(person, family);
 		if( parentFamilyRef != null ) {
@@ -233,14 +239,14 @@ public class FamilyActivity extends DetailActivity {
 				// the family ref in the indi //il ref della famiglia nell'indi
 				SpouseFamilyRef sfr = new SpouseFamilyRef();
 				sfr.setRef( fam.getId() );
-				//tizio.getSpouseFamilyRefs().add( sfr );	// no: con lista vuota UnsupportedOperationException
-				//List<SpouseFamilyRef> listaSfr = tizio.getSpouseFamilyRefs();	// Non va bene:
-				// quando la lista è inesistente, anzichè restituire una ArrayList restituisce una Collections$EmptyList che è IMMUTABILE cioè non ammette add()
-				List<SpouseFamilyRef> listaSfr = new ArrayList<>( person.getSpouseFamilyRefs() );	// ok
-				listaSfr.add( sfr );	// ok
-				person.setSpouseFamilyRefs( listaSfr );
+				//tizio.getSpouseFamilyRefs().add( sfr );	// no: with empty list UnsupportedOperationException //no: con lista vuota UnsupportedOperationException
+				//List<SpouseFamilyRef> listOfRefs = tizio.getSpouseFamilyRefs();	// That's no good://Non va bene:
+				// when the list is non-existent, instead of returning an ArrayList it returns a Collections$EmptyList which is IMMUTABLE i.e. it does not allow add ()
+				List<SpouseFamilyRef> listOfRefs = new ArrayList<>( person.getSpouseFamilyRefs() );	// ok
+				listOfRefs.add( sfr );	// ok
+				person.setSpouseFamilyRefs( listOfRefs );
 				break;
-			case 6:	// Figlio
+			case 6:	// Child
 				ChildRef cr = new ChildRef();
 				cr.setRef( person.getId() );
 				fam.addChild( cr );
@@ -253,17 +259,19 @@ public class FamilyActivity extends DetailActivity {
 		}
 	}
 
-	// Rimuove il singolo SpouseFamilyRef dall'individuo e il corrispondente SpouseRef dalla famiglia
+	/**
+	 * Removes the single SpouseFamilyRef from the individual and the corresponding SpouseRef from the family
+	 * */
 	public static void disconnect(SpouseFamilyRef sfr, SpouseRef sr) {
-		// Dalla persona alla famiglia
+		// From person to family //Dalla persona alla famiglia
 		Person person = sr.getPerson(gc);
 		person.getSpouseFamilyRefs().remove(sfr);
 		if( person.getSpouseFamilyRefs().isEmpty() )
-			person.setSpouseFamilyRefs(null); // Eventuale lista vuota viene eliminata
+			person.setSpouseFamilyRefs(null); // Any empty list is deleted //Eventuale lista vuota viene eliminata
 		person.getParentFamilyRefs().remove(sfr);
 		if( person.getParentFamilyRefs().isEmpty() )
 			person.setParentFamilyRefs(null);
-		// Dalla famiglia alla persona
+		// From family to person //Dalla famiglia alla persona
 		Family fam = sfr.getFamily(gc);
 		fam.getHusbandRefs().remove(sr);
 		if( fam.getHusbandRefs().isEmpty() )
@@ -276,15 +284,17 @@ public class FamilyActivity extends DetailActivity {
 			fam.setChildRefs(null);
 	}
 
-	// Rimuove TUTTI i ref di un individuo in una famiglia
+	/**
+	 * Removes ALL refs from an individual in a family
+	 * */
 	public static void disconnect(String indiId, Family family) {
-		// Rimuove i ref dell'indi nella famiglia
+		// Removes the refs of the indi in the family //Rimuove i ref dell'indi nella famiglia
 		Iterator<SpouseRef> spouseRefs = family.getHusbandRefs().iterator();
 		while( spouseRefs.hasNext() )
 			if( spouseRefs.next().getRef().equals(indiId) )
 				spouseRefs.remove();
 		if( family.getHusbandRefs().isEmpty() )
-			family.setHusbandRefs(null); // Elimina eventuale lista vuota
+			family.setHusbandRefs(null); // Delete any empty list //Elimina eventuale lista vuota
 
 		spouseRefs = family.getWifeRefs().iterator();
 		while( spouseRefs.hasNext() )
@@ -300,7 +310,7 @@ public class FamilyActivity extends DetailActivity {
 		if( family.getChildRefs().isEmpty() )
 			family.setChildRefs(null);
 
-		// Rimuove i ref della famiglia nell'indi
+		// Removes family refs in the indi //Rimuove i ref della famiglia nell'indi
 		Person person = gc.getPerson(indiId);
 		Iterator<SpouseFamilyRef> iterSfr = person.getSpouseFamilyRefs().iterator();
 		while( iterSfr.hasNext() )

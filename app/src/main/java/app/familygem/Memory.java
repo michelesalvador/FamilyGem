@@ -99,15 +99,17 @@ public class Memory {
 		return step;
 	}
 
-	// Mette il primo oggetto se non ci sono pile oppure sostituisce il primo oggetto nell'ultima pila esistente
-	// In altre parole mette il primo oggetto senza aggiungere ulteriori pile
-	public static void replacePrimo( Object oggetto ) {
-		String tag = oggetto instanceof Family ? "FAM" : "INDI";
+	/**
+	 * Put the first item if there are no stacks or replace the first item in the last existing stack.
+	 * In other words, it puts the first object without adding any more stacks
+	 * */
+	public static void replaceFirst(Object object ) {
+		String tag = object instanceof Family ? "FAM" : "INDI";
 		if( memory.lista.size() == 0 ) {
-			setFirst( oggetto, tag );
+			setFirst( object, tag );
 		} else {
 			getStepStack().clear();
-			Step step = add( oggetto );
+			Step step = add( object );
 			step.tag = tag;
 		}
 		//stampa("replacePrimo");

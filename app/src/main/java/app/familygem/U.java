@@ -611,7 +611,7 @@ public class U {
 		return dates.trim();
 	}
 
-	public static View mettiIndividuo(LinearLayout scatola, Person persona, String ruolo) {
+	public static View placeIndividual(LinearLayout scatola, Person persona, String ruolo) {
 		View vistaIndi = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo, scatola, false);
 		scatola.addView(vistaIndi);
 		TextView vistaRuolo = vistaIndi.findViewById(R.id.indi_ruolo);
@@ -1153,7 +1153,7 @@ public class U {
 		} else { // Viene mostrata la famiglia
 			Family family = perno.getParentFamilies(Global.gc).get(qualeFamiglia);
 			if( contesto instanceof FamilyActivity) { // Passando di Famiglia in Famiglia non accumula attività nello stack
-				Memory.replacePrimo(family);
+				Memory.replaceFirst(family);
 				((Activity)contesto).recreate();
 			} else {
 				Memory.setFirst(family);
@@ -1179,7 +1179,7 @@ public class U {
 		Global.indi = perno.getId();
 		famiglia = famiglia == null ? perno.getSpouseFamilies(Global.gc).get(quale) : famiglia;
 		if( contesto instanceof FamilyActivity) {
-			Memory.replacePrimo(famiglia);
+			Memory.replaceFirst(famiglia);
 			((Activity)contesto).recreate(); // Non accumula activity nello stack
 		} else {
 			Memory.setFirst(famiglia);

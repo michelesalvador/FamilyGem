@@ -87,11 +87,11 @@ public class IndividualFamilyFragment extends Fragment {
 
 	void createCard(final Person person, Relation relation, Family family) {
 		LinearLayout scatola = vistaFamiglia.findViewById(R.id.contenuto_scheda);
-		View vistaPersona = U.mettiIndividuo(scatola, person,
+		View vistaPersona = U.placeIndividual(scatola, person,
 				FamilyActivity.getRole(person, family, relation, false) + FamilyActivity.writeLineage(person, family));
 		vistaPersona.setOnClickListener(v -> {
 			getActivity().finish(); // Rimuove l'attività attale dallo stack
-			Memory.replacePrimo(person);
+			Memory.replaceFirst(person);
 			Intent intent = new Intent(getContext(), IndividualPersonActivity.class);
 			intent.putExtra("scheda", 2); // apre la scheda famiglia
 			startActivity(intent);
