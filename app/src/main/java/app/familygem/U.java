@@ -573,9 +573,10 @@ public class U {
 
 	// Metodi di creazione di elementi di lista
 
-	// aggiunge a un Layout una generica voce titolo-testo
-	// Usato seriamente solo da dettaglio.Cambiamenti
-	public static void metti(LinearLayout scatola, String tit, String testo) {
+	/**
+	 * Add a generic title-text entry to a Layout. Used seriously only by [ChangesActivity]
+	 * */
+	public static void place(LinearLayout scatola, String tit, String testo) {
 		View vistaPezzo = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_fatto, scatola, false);
 		scatola.addView(vistaPezzo);
 		((TextView)vistaPezzo.findViewById(R.id.fatto_titolo)).setText(tit);
@@ -938,7 +939,7 @@ public class U {
 			}
 			LinearLayout scatolaNote = changeView.findViewById(R.id.cambi_note);
 			for( Extension altroTag : findExtensions(change) )
-				metti(scatolaNote, altroTag.nome, altroTag.testo);
+				place(scatolaNote, altroTag.nome, altroTag.testo);
 			// Grazie al mio contributo la data cambiamento può avere delle note
 			placeNotes(scatolaNote, change, false);
 			changeView.setOnClickListener(v -> {

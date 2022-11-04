@@ -181,7 +181,7 @@ public class TreeInfoActivity extends BaseActivity {
 			}
 			// Estensioni del Gedcom, ovvero tag non standard di livello 0 zero
 			for( Extension est : U.findExtensions(gc) ) {
-				U.metti( scatola, est.nome, est.testo );
+				U.place( scatola, est.nome, est.testo );
 			}
 		} else
 			bottoneHeader.setVisibility(View.GONE);

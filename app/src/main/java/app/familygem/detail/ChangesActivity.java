@@ -19,15 +19,15 @@ public class ChangesActivity extends DetailActivity {
 		DateTime dateTime = c.getDateTime();
 		if( dateTime != null ) {
 			if( dateTime.getValue() != null )
-				U.metti(box, getString(R.string.value), dateTime.getValue());
+				U.place(box, getString(R.string.value), dateTime.getValue());
 			if( dateTime.getTime() != null )
-				U.metti(box, getString(R.string.time), dateTime.getTime());
+				U.place(box, getString(R.string.time), dateTime.getTime());
 		}
 		placeExtensions(c);
 		U.placeNotes(box, c, true);
 	}
 
-	// Qui non c'è bisogno di un menu
+	// You don't need a menu here
 	@Override
 	public boolean onCreateOptionsMenu(Menu m) {
 		return false;
