@@ -21,16 +21,16 @@ public class NameActivity extends DetailActivity {
 		if( Global.settings.expert )
 			place(getString(R.string.value), "Value");
 		else {
-			String nome = "";
-			String cognome = "";
-			String epiteto = n.getValue();
-			if( epiteto != null ) {
-				nome = epiteto.replaceAll("/.*?/", "").trim(); // Rimuove il cognome
-				if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
-					cognome = epiteto.substring(epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/')).trim();
+			String firstName = "";
+			String lastName = "";
+			String epithet = n.getValue();
+			if( epithet != null ) {
+				firstName = epithet.replaceAll("/.*?/", "").trim(); // Remove the lastName
+				if( epithet.indexOf('/') < epithet.lastIndexOf('/') )
+					lastName = epithet.substring(epithet.indexOf('/') + 1, epithet.lastIndexOf('/')).trim();
 			}
-			placePiece(getString(R.string.given), nome, 4043, false);
-			placePiece(getString(R.string.surname), cognome, 6064, false);
+			placePiece(getString(R.string.given), firstName, 4043, false);
+			placePiece(getString(R.string.surname), lastName, 6064, false);
 		}
 		place(getString(R.string.nickname), "Nickname");
 		place(getString(R.string.type), "Type", true, false); // _TYPE in GEDCOM 5.5, TYPE in GEDCOM 5.5.1
@@ -45,15 +45,15 @@ public class NameActivity extends DetailActivity {
 		place(getString(R.string.phonetic), "Fone", Global.settings.expert, false);
 		placeExtensions(n);
 		U.placeNotes(box, n, true);
-		U.placeMedia(box, n, true); // Mi sembra strano che un Name abbia Media.. comunque..
+		U.placeMedia(box, n, true); // It seems strange to me that a Name has Media .. anyway .. //Mi sembra strano che un Name abbia Media.. comunque..
 		U.placeSourceCitations(box, n);
 	}
 
 	@Override
 	public void delete() {
-		Person costui = gc.getPerson(Global.indi);
-		costui.getNames().remove(n);
-		U.updateChangeDate(costui);
+		Person currentPerson = gc.getPerson(Global.indi);
+		currentPerson.getNames().remove(n);
+		U.updateChangeDate(currentPerson);
 		Memory.setInstanceAndAllSubsequentToNull(n);
 	}
 }
