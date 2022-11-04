@@ -24,7 +24,7 @@ public class ListOfSourceCitations extends TotalVisitor {
 	}
 
 	@Override
-	boolean visita( Object oggetto, boolean capostipite ) {
+	boolean visit(Object oggetto, boolean capostipite ) {
 		if( capostipite )
 			capo = oggetto;
 		if( oggetto instanceof SourceCitationContainer ) {

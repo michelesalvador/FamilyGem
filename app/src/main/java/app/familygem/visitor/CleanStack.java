@@ -1,20 +1,20 @@
-// Strettamente connesso a TrovaPila, individua gli oggetti da tenere nella pila
-
 package app.familygem.visitor;
-
+/**
+ * Closely connected to [FindStack, locate objects to keep in the stack
+ * */
 class CleanStack extends TotalVisitor {
 
-	private Object scopo;
-	boolean daEliminare = true;
+	private Object scope; //scopo: scope, object, goal, aim, etc.
+	boolean toDelete = true;
 
 	CleanStack(Object scopo ) {
-		this.scopo = scopo;
+		this.scope = scopo;
 	}
 
 	@Override
-	boolean visita( Object oggetto, boolean capo ) { // il boolean qui è inutilizzato
-		if( oggetto.equals(scopo) )
-			daEliminare = false;
+	boolean visit(Object object, boolean head) { // the boolean is unused here
+		if( object.equals(scope) )
+			toDelete = false;
 		return true;
 	}
 }

@@ -52,7 +52,7 @@ public class FindStack extends Visitor {
 			while( passi.hasNext() ) {
 				CleanStack pulitore = new CleanStack( scopo );
 				((Visitable)passi.next().object).accept( pulitore );
-				if( pulitore.daEliminare )
+				if( pulitore.toDelete)
 					passi.remove();
 			}
 			trovato = true;

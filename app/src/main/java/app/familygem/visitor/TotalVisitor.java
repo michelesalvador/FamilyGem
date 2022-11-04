@@ -20,44 +20,44 @@ import org.folg.gedcom.model.Visitor;
 public class TotalVisitor extends Visitor {
 
 	private boolean visita( Object oggetto ) {
-		return visita( oggetto, false );
+		return visit( oggetto, false );
 	}
 
-	boolean visita( Object oggetto, boolean capostipite ) {
+	boolean visit(Object oggetto, boolean capostipite ) {
 		return true;
 	}
 
 	@Override
 	public boolean visit( Header h ) {
-		return visita( h, true );
+		return visit( h, true );
 	}
 	@Override
 	public boolean visit( Person p ) {
-		return visita( p, true );
+		return visit( p, true );
 	}
 	@Override
 	public boolean visit( Family f ) {
-		return visita( f, true );
+		return visit( f, true );
 	}
 	@Override
 	public boolean visit( Source s ) {
-		return visita( s, true );
+		return visit( s, true );
 	}
 	@Override
 	public boolean visit( Repository r ) {
-		return visita( r, true );
+		return visit( r, true );
 	}
 	@Override
 	public boolean visit( Submitter s ) {
-		return visita( s, true );
+		return visit( s, true );
 	}
 	@Override
 	public boolean visit( Media m ) {
-		return visita( m, m.getId()!=null );
+		return visit( m, m.getId()!=null );
 	}
 	@Override
 	public boolean visit( Note n ) {
-		return visita( n, n.getId()!=null );
+		return visit( n, n.getId()!=null );
 	}
 	@Override
 	public boolean visit( Name n ) {

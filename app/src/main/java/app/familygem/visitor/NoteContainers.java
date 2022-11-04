@@ -25,7 +25,7 @@ public class NoteContainers extends TotalVisitor {
 	}
 
 	@Override
-	boolean visita(Object object, boolean capostipite) {
+	boolean visit(Object object, boolean capostipite) {
 		if( object instanceof NoteContainer ) {
 			for( NoteRef noteRef : ((NoteContainer)object).getNoteRefs() ) {
 				if( noteRef.getRef().equals(note.getId()) ) {

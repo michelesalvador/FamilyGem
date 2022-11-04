@@ -15,7 +15,7 @@ public class NoteList extends TotalVisitor {
 	public List<Note> listaNote = new ArrayList<>();
 
 	@Override
-	boolean visita( Object object, boolean capo ) {
+	boolean visit(Object object, boolean capo ) {
 		if( object instanceof NoteContainer
 				&& !(!Global.settings.expert && (object instanceof Source || object instanceof Repository)) ) {
 			NoteContainer blocco = (NoteContainer)object;
