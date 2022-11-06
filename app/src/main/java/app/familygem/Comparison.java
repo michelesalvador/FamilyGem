@@ -9,43 +9,43 @@ import java.util.List;
 public class Comparison {
 
 	private static final Comparison comparison = new Comparison();
-	private List<Fronte> lista = new ArrayList<>();
+	private List<Fronte> list = new ArrayList<>();
 	boolean autoProsegui; // stabilisce se accettare automaticamente tutti gli aggiornamenti
-	int quanteScelte; // Scelte totali in caso di autoProsegui
+	int numChoices; // Scelte totali in caso di autoProsegui
 	int scelteFatte; // Posizione in caso di autoProsegui
 
 	static Comparison get() {
 		return comparison;
 	}
 
-	public static List<Fronte> getLista() {
-		return get().lista;
+	public static List<Fronte> getList() {
+		return get().list;
 	}
 
 	static Fronte addFronte( Object object, Object object2, int tipo ) {
 		Fronte fronte = new Fronte();
 		fronte.object = object;
 		fronte.object2 = object2;
-		fronte.tipo = tipo;
-		getLista().add( fronte );
+		fronte.type = tipo;
+		getList().add( fronte );
 		return fronte;
 	}
 
 	// Restituisce il fronte attualmente attivo
 	static Fronte getFronte(Activity attivita) {
-		return getLista().get( attivita.getIntent().getIntExtra("posizione",0) - 1 );
+		return getList().get( attivita.getIntent().getIntExtra("posizione",0) - 1 );
 	}
 
 	// Da chiamare quando si esce dal processo di confronto
 	static void reset() {
-		getLista().clear();
+		getList().clear();
 		get().autoProsegui = false;
 	}
 
 	static class Fronte {
 		Object object;
 		Object object2;
-		int tipo; // numero da 1 a 7 che definisce il tipo: 1 Nota -> 7 Famiglia
+		int type; // numero da 1 a 7 che definisce il tipo: 1 Nota -> 7 Famiglia
 		boolean doppiaOpzione; // ha la possibilità di aggiungi + sostituisci
 		/*
 		che fare di questa coppia di oggetti:

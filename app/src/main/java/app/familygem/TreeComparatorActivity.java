@@ -35,15 +35,15 @@ public class TreeComparatorActivity extends BaseActivity {
 		super.onCreate( bandolo );
 		setContentView( R.layout.confronto );
 
-		if( Comparison.getLista().size() > 0 ) {
+		if( Comparison.getList().size() > 0 ) {
 
 			int max;
 			int posizione;
 			if( Comparison.get().autoProsegui ) {
-				max = Comparison.get().quanteScelte;
+				max = Comparison.get().numChoices;
 				posizione = Comparison.get().scelteFatte;
 			} else {
-				max = Comparison.getLista().size();
+				max = Comparison.getList().size();
 				posizione = getIntent().getIntExtra("posizione",0);
 			}
 			ProgressBar barra = findViewById( R.id.confronto_progresso );
@@ -215,7 +215,7 @@ public class TreeComparatorActivity extends BaseActivity {
 
 	void vaiAvanti() {
 		Intent intent = new Intent();
-		if( getIntent().getIntExtra("posizione",0) == Comparison.getLista().size() ) {
+		if( getIntent().getIntExtra("posizione",0) == Comparison.getList().size() ) {
 			// Terminati i confronti
 			intent.setClass( this, ConfirmationActivity.class );
 		} else {

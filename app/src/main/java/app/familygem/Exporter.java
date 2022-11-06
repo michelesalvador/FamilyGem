@@ -41,7 +41,7 @@ public class Exporter {
 	// Apre l'albero Json e restituisce true se c'è riuscito
 	public boolean apriAlbero(int idAlbero) {
 		this.idAlbero = idAlbero;
-		gc = TreesActivity.apriGedcomTemporaneo(idAlbero, true);
+		gc = TreesActivity.openGedcomTemporarily(idAlbero, true);
 		if( gc == null ) {
 			return errore(R.string.no_useful_data);
 		}

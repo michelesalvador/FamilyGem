@@ -381,13 +381,13 @@ public class TreesActivity extends AppCompatActivity {
 			// Se Gedcom già aperto aggiorna i dati
 			if( Global.gc != null && Global.settings.openTree == alb.id && alb.persons < 100 )
 				TreeInfoActivity.refreshData(Global.gc, alb);
-			dato.put("dati", scriviDati(this, alb));
+			dato.put("dati", writeData(this, alb));
 			elencoAlberi.add(dato);
 		}
 		adapter.notifyDataSetChanged();
 	}
 
-	static String scriviDati(Context contesto, Settings.Tree alb) {
+	static String writeData(Context contesto, Settings.Tree alb) {
 		String dati = alb.persons + " " +
 				contesto.getString(alb.persons == 1 ? R.string.person : R.string.persons).toLowerCase();
 		if( alb.persons > 1 && alb.generations > 0 )
@@ -399,7 +399,7 @@ public class TreesActivity extends AppCompatActivity {
 	}
 
 	// Apertura del Gedcom temporaneo per estrarne info in Alberi
-	static Gedcom apriGedcomTemporaneo(int idAlbero, boolean mettiInGlobale) {
+	static Gedcom openGedcomTemporarily(int idAlbero, boolean mettiInGlobale) {
 		Gedcom gc;
 		if( Global.gc != null && Global.settings.openTree == idAlbero )
 			gc = Global.gc;

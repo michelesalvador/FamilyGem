@@ -35,20 +35,20 @@ public class ConfirmationActivity extends BaseActivity {
 	protected void onCreate( Bundle bandolo ) {
 		super.onCreate( bandolo );
 		setContentView( R.layout.conferma );
-		if( !Comparison.getLista().isEmpty() ) {
+		if( !Comparison.getList().isEmpty() ) {
 
 			// Albero vecchio
 			CardView carta = findViewById( R.id.conferma_vecchio );
 			Settings.Tree tree = Global.settings.getTree( Global.settings.openTree);
 			((TextView)carta.findViewById(R.id.confronto_titolo )).setText( tree.title);
-			String txt = TreesActivity.scriviDati( this, tree);
+			String txt = TreesActivity.writeData( this, tree);
 			((TextView)carta.findViewById(R.id.confronto_testo )).setText( txt );
 			carta.findViewById( R.id.confronto_data ).setVisibility( View.GONE );
 
 			int aggiungi = 0;
 			int sostitui = 0;
 			int elimina = 0;
-			for( Comparison.Fronte fronte : Comparison.getLista() ) {
+			for( Comparison.Fronte fronte : Comparison.getList() ) {
 				switch( fronte.destino ) {
 					case 1: aggiungi++;
 						break;
@@ -68,11 +68,11 @@ public class ConfirmationActivity extends BaseActivity {
 			findViewById(R.id.conferma_ok ).setOnClickListener( v -> {
 				// Modifica l'id e tutti i ref agli oggetti con doppiaOpzione e destino da aggiungere
 				boolean fattoQualcosa = false;
-				for( Comparison.Fronte fronte : Comparison.getLista() ) {
+				for( Comparison.Fronte fronte : Comparison.getList() ) {
 					if( fronte.doppiaOpzione && fronte.destino == 1 ) {
 						String idNuovo;
 						fattoQualcosa = true;
-						switch( fronte.tipo ) {
+						switch( fronte.type) {
 							case 1: // Note
 								idNuovo = idMassimo( Note.class );
 								Note n2 = (Note) fronte.object2;
@@ -140,8 +140,8 @@ public class ConfirmationActivity extends BaseActivity {
 					U.saveJson( Global.gc2, Global.treeId2);
 
 				// La regolare aggiunta/sostituzione/eliminazione dei record da albero2 ad albero
-				for( Comparison.Fronte fronte : Comparison.getLista() ) {
-					switch( fronte.tipo ) {
+				for( Comparison.Fronte fronte : Comparison.getList() ) {
+					switch( fronte.type) {
 						case 1: // Nota
 							if( fronte.destino > 1 )
 								Global.gc.getNotes().remove( fronte.object );
@@ -201,7 +201,7 @@ public class ConfirmationActivity extends BaseActivity {
 
 				// Se ha fatto tutto propone di eliminare l'albero importato
 				boolean tuttiOk = true;
-				for( Comparison.Fronte fron : Comparison.getLista() )
+				for( Comparison.Fronte fron : Comparison.getList() )
 					if( fron.destino == 0 ) {
 						tuttiOk = false;
 						break;

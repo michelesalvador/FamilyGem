@@ -40,7 +40,7 @@ public class TreeInfoActivity extends BaseActivity {
 			i += "\n\n" + getText(R.string.item_exists_but_file) + "\n" + file.getAbsolutePath();
 		} else  {
 			i += "\n" + getText(R.string.file) + ": " + file.getAbsolutePath();
-			gc = TreesActivity.apriGedcomTemporaneo(treeId, false);
+			gc = TreesActivity.openGedcomTemporarily(treeId, false);
 			if( gc == null )
 				i += "\n\n" + getString(R.string.no_useful_data);
 			else {
