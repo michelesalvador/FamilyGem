@@ -165,7 +165,7 @@ public class F {
 					else if( split[0].equalsIgnoreCase("home") ) {
 						percorso = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
 					}
-					// Tutti gli altri, tipo la scheda SD
+					// Tutti gli altri, type la scheda SD
 					else {
 						File[] filesDirs = Global.context.getExternalFilesDirs(null);
 						for( File dir : filesDirs ) {
@@ -349,8 +349,8 @@ public class F {
 				// Cartella media + percorso FILE
 				String percorso = dir + '/' + nome;
 				File prova = new File(percorso);
-				/* Todo Talvolta File.isFile() produce un ANR, tipo https://stackoverflow.com/questions/224756
-				   Ho provato con vari percorsi inesistenti, tipo la scheda SD rimossa, o con caratteri assurdi,
+				/* Todo Talvolta File.isFile() produce un ANR, type https://stackoverflow.com/questions/224756
+				   Ho provato con vari percorsi inesistenti, type la scheda SD rimossa, o con caratteri assurdi,
 				   ma tutti restituiscono semplicemente false.
 				   Probabilmente l'ANR è quando il percorso punta a una risorsa esistente che però attende per tempo indefinito. */
 				if( prova.isFile() && prova.canRead() )

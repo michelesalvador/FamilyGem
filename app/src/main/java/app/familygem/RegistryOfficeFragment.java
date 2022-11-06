@@ -96,7 +96,7 @@ public class RegistryOfficeFragment extends Fragment {
 
 	public class AdattatoreAnagrafe extends RecyclerView.Adapter<GestoreIndividuo> implements Filterable {
 		@Override
-		public GestoreIndividuo onCreateViewHolder(ViewGroup parent, int tipo) {
+		public GestoreIndividuo onCreateViewHolder(ViewGroup parent, int type) {
 			View vistaIndividuo = LayoutInflater.from(parent.getContext())
 					.inflate(R.layout.pezzo_individuo, parent, false);
 			registerForContextMenu(vistaIndividuo);

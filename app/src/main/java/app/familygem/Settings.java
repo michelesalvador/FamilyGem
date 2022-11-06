@@ -18,7 +18,7 @@ import java.util.Set;
 public class Settings {
 
 	String referrer; // È 'start' appena installata l'app (cioè quando non esiste 'files/settings.json')
-	                 // Se l'installazione proviene da una condivisione accoglie un dateId tipo '20191003215337'
+	                 // Se l'installazione proviene da una condivisione accoglie un dateId type '20191003215337'
 	                 // Ben presto diventa null e rimane tale, a meno di cancellare tutti i dati
 	List<Tree> trees;
 	public int openTree; // Number of the tree currently opened. 0 means not a particular tree.

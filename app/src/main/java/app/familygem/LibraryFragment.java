@@ -61,7 +61,7 @@ public class LibraryFragment extends Fragment {
 
 	public class BibliotecAdapter extends RecyclerView.Adapter<GestoreFonte> implements Filterable {
 		@Override
-		public GestoreFonte onCreateViewHolder( ViewGroup parent, int tipo ) {
+		public GestoreFonte onCreateViewHolder( ViewGroup parent, int type ) {
 			View vistaFonte = LayoutInflater.from( parent.getContext() )
 					.inflate(R.layout.biblioteca_pezzo, parent, false);
 			registerForContextMenu( vistaFonte );

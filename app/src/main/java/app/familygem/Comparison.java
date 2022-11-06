@@ -1,58 +1,72 @@
-// Singleton che gestisce gli oggetti dei 2 Gedcom durante l'importazione degli aggiornamenti
-
 package app.familygem;
 
 import android.app.Activity;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Singleton that manages the objects of the 2 Gedcoms during the import of updates
+ * Singleton che gestisce gli oggetti dei 2 Gedcom durante l'importazione degli aggiornamenti
+ */
 public class Comparison {
 
-	private static final Comparison comparison = new Comparison();
-	private List<Fronte> list = new ArrayList<>();
-	boolean autoProsegui; // stabilisce se accettare automaticamente tutti gli aggiornamenti
-	int numChoices; // Scelte totali in caso di autoProsegui
-	int scelteFatte; // Posizione in caso di autoProsegui
+    private static final Comparison comparison = new Comparison();
+    private List<Front> list = new ArrayList<>();
+    boolean autoContinue; // determines whether to automatically accept all updates
+    int numChoices; // Total choices in case of autoContinue
+    int choicesMade; // Position in case of autoContinue //Posizione in caso di autoProsegui
 
-	static Comparison get() {
-		return comparison;
-	}
+    static Comparison get() {
+        return comparison;
+    }
 
-	public static List<Fronte> getList() {
-		return get().list;
-	}
+    public static List<Front> getList() {
+        return get().list;
+    }
 
-	static Fronte addFronte( Object object, Object object2, int tipo ) {
-		Fronte fronte = new Fronte();
-		fronte.object = object;
-		fronte.object2 = object2;
-		fronte.type = tipo;
-		getList().add( fronte );
-		return fronte;
-	}
+    static Front addFront(Object object, Object object2, int type) {
+        Front front = new Front();
+        front.object = object;
+        front.object2 = object2;
+        front.type = type;
+        getList().add(front);
+        return front;
+    }
 
-	// Restituisce il fronte attualmente attivo
-	static Fronte getFronte(Activity attivita) {
-		return getList().get( attivita.getIntent().getIntExtra("posizione",0) - 1 );
-	}
+    /**
+     * Returns the currently active front
+     * */
+    static Front getFronte(Activity activity) {
+        return getList().get(activity.getIntent().getIntExtra("posizione", 0) - 1);
+    }
 
-	// Da chiamare quando si esce dal processo di confronto
-	static void reset() {
-		getList().clear();
-		get().autoProsegui = false;
-	}
+    /**
+     * To call when exiting the comparison process
+     * */
+    static void reset() {
+        getList().clear();
+        get().autoContinue = false;
+    }
 
-	static class Fronte {
-		Object object;
-		Object object2;
-		int type; // numero da 1 a 7 che definisce il tipo: 1 Nota -> 7 Famiglia
-		boolean doppiaOpzione; // ha la possibilità di aggiungi + sostituisci
-		/*
-		che fare di questa coppia di oggetti:
-		0 niente
-		1 object2 viene aggiunto ad albero
-		2 object2 sostituisce object
-		3 object viene eliminato */
-		int destino;
-	}
+    static class Front {
+        Object object;
+        Object object2;
+        int type; // number from 1 to 7 that defines the type: 1 Note -> 7 Family
+        boolean canBothAddAndReplace; // has the option to add + replace
+        /**
+         * what to do with this pair of objects:
+         * 0 nothing
+         * 1 object2 is added to the tree
+         * 2 object2 replaces object
+         * 3 object is deleted
+         *
+         * che fare di questa coppia di oggetti:
+         * 0 niente
+         * 1 object2 viene aggiunto ad albero
+         * 2 object2 sostituisce object
+         * 3 object viene eliminato
+         */
+        int destiny;
+    }
 }

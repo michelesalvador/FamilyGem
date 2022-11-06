@@ -125,8 +125,8 @@ public class CompareActivity extends BaseActivity {
             button2.setOnClickListener(v -> {
                 v.setEnabled(false);
                 Comparison.get().numChoices = 0;
-                for (Comparison.Fronte fronte : Comparison.getList()) {
-                    if (fronte.doppiaOpzione)
+                for (Comparison.Front front : Comparison.getList()) {
+                    if (front.canBothAddAndReplace)
                         Comparison.get().numChoices++;
                 }
                 Intent intent = new Intent(CompareActivity.this, TreeComparatorActivity.class);
@@ -137,13 +137,13 @@ public class CompareActivity extends BaseActivity {
                                     : getString(R.string.many_updates_choice, Comparison.get().numChoices))
                             .setMessage(R.string.updates_replace_add)
                             .setPositiveButton(android.R.string.ok, (dialog, id) -> {
-                                Comparison.get().autoProsegui = true;
-                                Comparison.get().scelteFatte = 1;
+                                Comparison.get().autoContinue = true;
+                                Comparison.get().choicesMade = 1;
                                 startActivity(intent);
                             }).setNeutralButton(android.R.string.cancel, (dialog, id) -> button2.setEnabled(true))
                             .setOnCancelListener(dialog -> button2.setEnabled(true)).show();
                 } else { // Start automatically //Avvio in automatico
-                    Comparison.get().autoProsegui = true;
+                    Comparison.get().autoContinue = true;
                     startActivity(intent);
                 }
             });
@@ -161,7 +161,7 @@ public class CompareActivity extends BaseActivity {
     protected void onRestart() {
         super.onRestart();
         findViewById(R.id.compara_bottone2).setEnabled(true); // if possibly(?) //se eventualmente
-        Comparison.get().autoProsegui = false; // It resets it if the automatism(?) was eventually chosen //Lo resetta se eventualmente era stato scelto l'automatismo
+        Comparison.get().autoContinue = false; // It resets it if the automatism(?) was eventually chosen //Lo resetta se eventualmente era stato scelto l'automatismo
     }
 
     /**
@@ -187,9 +187,9 @@ public class CompareActivity extends BaseActivity {
             }
         }
         if (modification > 0) {
-            Comparison.Fronte fronte = Comparison.addFronte(o, o2, type);
+            Comparison.Front front = Comparison.addFront(o, o2, type);
             if (modification == 2)
-                fronte.doppiaOpzione = true;
+                front.canBothAddAndReplace = true;
         }
     }
 
@@ -197,9 +197,9 @@ public class CompareActivity extends BaseActivity {
      * Ditto for the remaining objects deleted in the old tree
      * Idem per i rimanenti oggetti eliminati nell'albero vecchio
      */
-    private void reconcile(Object o, Object o2, int tipo) {
+    private void reconcile(Object o, Object o2, int type) {
         if (o2 == null && !isRecent(getChange(o)))
-            Comparison.addFronte(o, null, tipo);
+            Comparison.addFront(o, null, type);
     }
 
     /**
@@ -276,8 +276,8 @@ public class CompareActivity extends BaseActivity {
 
     String writeDifferences(int type) {
         int changes = 0;
-        for (Comparison.Fronte fronte : Comparison.getList()) {
-            if (fronte.type == type) {
+        for (Comparison.Front front : Comparison.getList()) {
+            if (front.type == type) {
                 changes++;
             }
         }

@@ -334,7 +334,7 @@ public class TreesActivity extends AppCompatActivity {
 					case InstallReferrerClient.InstallReferrerResponse.OK:
 						try {
 							ReferrerDetails dettagli = irc.getInstallReferrer();
-							// Normalmente 'referrer' è una stringa tipo 'utm_source=google-play&utm_medium=organic'
+							// Normalmente 'referrer' è una stringa type 'utm_source=google-play&utm_medium=organic'
 							// Ma se l'app è stata installata dal link nella pagina di condivisione sarà un data-id come '20191003215337'
 							String referrer = dettagli.getInstallReferrer();
 							if( referrer != null && referrer.matches("[0-9]{14}") ) { // It's a dateId

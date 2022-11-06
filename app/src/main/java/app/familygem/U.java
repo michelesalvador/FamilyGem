@@ -420,7 +420,7 @@ public class U {
 
 	// riceve un luogo stile Gedcom e restituisce il primo nome tra le virgole
 	private static String stripCommas(String place) {
-		// salta le virgole iniziali per luoghi tipo ',,,England'
+		// salta le virgole iniziali per luoghi type ',,,England'
 		int start = 0;
 		for( char c : place.toCharArray() ) {
 			if( c != ',' && c != ' ' )
@@ -917,7 +917,7 @@ public class U {
 			mettiQualsiasi(dispensa, cosa);
 	}
 
-	// Riconosce il tipo di record e aggiunge il link appropriato alla scatola
+	// Riconosce il type di record e aggiunge il link appropriato alla scatola
 	static void mettiQualsiasi(LinearLayout scatola, Object record) {
 		if( record instanceof Person )
 			linkaPersona(scatola, (Person)record, 1);
@@ -1007,7 +1007,7 @@ public class U {
 					change = new Change();
 				change.setDateTime(actualDateTime());
 				object.getClass().getMethod("setChange", Change.class).invoke(object, change);
-				// Estensione con l'id della zona, una stringa tipo 'America/Sao_Paulo'
+				// Estensione con l'id della zona, una stringa type 'America/Sao_Paulo'
 				change.putExtension("zone", TimeZone.getDefault().getID());
 			} catch( Exception e ) {
 			}

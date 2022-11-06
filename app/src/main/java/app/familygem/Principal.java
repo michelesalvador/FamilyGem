@@ -131,7 +131,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 		}
 	}
 
-	// Riceve una classe tipo 'Diagram.class' e dice se è il fragment attualmente visibile sulla scena
+	// Riceve una classe type 'Diagram.class' e dice se è il fragment attualmente visibile sulla scena
 	private boolean frammentoAttuale(Class classe) {
 		Fragment attuale = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
 		return classe.isInstance(attuale);

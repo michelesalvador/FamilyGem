@@ -62,7 +62,7 @@ class GedcomDateConverter {
 			}
 			dataGc = dataGc.replaceAll("[\\\\_\\-|.,;:?'\"#^&*°+=~()\\[\\]{}]", " "); // tutti tranne '/'
 			
-			// Distingue una data con anno doppio 1712/1713 da una data tipo 17/12/1713
+			// Distingue una data con anno doppio 1712/1713 da una data type 17/12/1713
 			doppia = false; // reset
 			if( dataGc.indexOf('/') > 0 ) {
 				String[] tata = dataGc.split("[/ ]");
@@ -114,7 +114,7 @@ class GedcomDateConverter {
 		}
 	}
 	
-	// Riconosce il tipo di data e crea la classe Data
+	// Riconosce il type di data e crea la classe Data
 	void analizza(String dataGc) {
 
 		// Reset the important values
@@ -153,7 +153,7 @@ class GedcomDateConverter {
 				break;
 			}
 		}
-		// Rimane da provare il tipo EXACT, altrimenti diventa una frase
+		// Rimane da provare il type EXACT, altrimenti diventa una frase
 		if( kind == null ) {
 			data1.scanna(dataGc);
 			if( data1.date != null ) {

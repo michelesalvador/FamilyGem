@@ -31,7 +31,7 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 	}
 
 	@Override
-	public gestoreVistaMedia onCreateViewHolder( ViewGroup parent, int tipo ) {
+	public gestoreVistaMedia onCreateViewHolder( ViewGroup parent, int type ) {
 		View vista = LayoutInflater.from(parent.getContext()).inflate( R.layout.pezzo_media, parent, false );
 		return new gestoreVistaMedia( vista, dettagli );
 	}
