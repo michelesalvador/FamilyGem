@@ -125,8 +125,8 @@ public class Exporter {
 		MediaList visitaMedia = new MediaList( gc, 0 );
 		gc.accept( visitaMedia );
 		int quantiFile = 0;
-		for( Media med : visitaMedia.lista ) {
-			if( F.percorsoMedia(idAlbero, med) != null || F.uriMedia( idAlbero, med ) != null )
+		for( Media med : visitaMedia.list) {
+			if( F.mediaPath(idAlbero, med) != null || F.uriMedia( idAlbero, med ) != null )
 				quantiFile++;
 		}
 		return quantiFile;
@@ -143,7 +143,7 @@ public class Exporter {
 		*   Questo loop crea una lista di percorsi con nome file univoci */
 		Set<String> paths = new HashSet<>();
 		Set<String> onlyFileNames = new HashSet<>(); // Nomi file di controllo
-		for( Media med : visitaMedia.lista ) {
+		for( Media med : visitaMedia.list) {
 			String path = med.getFile();
 			if( path != null && !path.isEmpty() ) {
 				String fileName = path.replace('\\', '/');
@@ -159,7 +159,7 @@ public class Exporter {
 			Media med = new Media();
 			med.setFile(path);
 			// Paths
-			String percorsoMedia = F.percorsoMedia(idAlbero, med);
+			String percorsoMedia = F.mediaPath(idAlbero, med);
 			if( percorsoMedia != null )
 				collezione.put(DocumentFile.fromFile(new File(percorsoMedia)), 2); // todo canRead() ?
 			else { // URIs

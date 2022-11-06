@@ -243,12 +243,12 @@ public class ConfirmationActivity extends BaseActivity {
 	void copiaTuttiFile( Object oggetto ) {
 		MediaList cercaMedia = new MediaList( Global.gc2, 2 );
 		((Visitable)oggetto).accept( cercaMedia );
-		for( Media media : cercaMedia.lista ) {
+		for( Media media : cercaMedia.list) {
 			vediSeCopiareFile( media );
 		}
 	}
 	void vediSeCopiareFile( Media media ) {
-		String origine = F.percorsoMedia( Global.treeId2, media );
+		String origine = F.mediaPath( Global.treeId2, media );
 		if( origine != null ) {
 			File fileOrigine = new File( origine );
 			File dirMemoria = getExternalFilesDir( String.valueOf(Global.settings.openTree) ); // dovrebbe stare fuori dal loop ma vabè

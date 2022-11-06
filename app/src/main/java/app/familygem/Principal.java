@@ -148,9 +148,9 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 		if( Global.gc != null ) {
 			MediaList cercaMedia = new MediaList( Global.gc, 3 );
 			Global.gc.accept( cercaMedia );
-			if( cercaMedia.lista.size() > 0 ) {
-				int caso = new Random().nextInt( cercaMedia.lista.size() );
-				for( Media med : cercaMedia.lista )
+			if( cercaMedia.list.size() > 0 ) {
+				int caso = new Random().nextInt( cercaMedia.list.size() );
+				for( Media med : cercaMedia.list)
 					if( --caso < 0 ) { // arriva a -1
 						F.showImage( med, imageView, null );
 						imageView.setVisibility( ImageView.VISIBLE );
@@ -173,7 +173,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 					case 3:
 						MediaList mediaList = new MediaList(gc, 0);
 						gc.accept(mediaList);
-						count = mediaList.lista.size();
+						count = mediaList.list.size();
 						break;
 					case 4:
 						NoteList notesList = new NoteList();

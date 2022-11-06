@@ -216,7 +216,7 @@ public class F {
 		MediaList visita = new MediaList( gc, 0 );
 		p.accept( visita );
 		boolean trovatoQualcosa = false;
-		for( Media med : visita.lista ) { // Cerca un media contrassegnato Primario Y
+		for( Media med : visita.list) { // Cerca un media contrassegnato Primario Y
 			if( med.getPrimary() != null && med.getPrimary().equals("Y") ) {
 				showImage( med, img, null );
 				trovatoQualcosa = true;
@@ -224,7 +224,7 @@ public class F {
 			}
 		}
 		if( !trovatoQualcosa ) { // In alternativa restituisce il primo che trova
-			for( Media med : visita.lista ) {
+			for( Media med : visita.list) {
 				showImage( med, img, null );
 				trovatoQualcosa = true;
 				break;
@@ -245,7 +245,7 @@ public class F {
 		if( probabile != null && probabile.getId() == R.id.confronto_nuovo )
 			idAlbero = Global.treeId2;
 		else idAlbero = Global.settings.openTree;
-		String percorso = percorsoMedia(idAlbero, media);
+		String percorso = mediaPath(idAlbero, media);
 		Uri[] uri = new Uri[1];
 		if( percorso == null )
 			uri[0] = uriMedia(idAlbero, media);
@@ -338,7 +338,7 @@ public class F {
 	}
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
-	public static String percorsoMedia( int idAlbero, Media m ) {
+	public static String mediaPath(int idAlbero, Media m ) {
 		String file = m.getFile();
 		if( file != null && !file.isEmpty() ) {
 			String nome = file.replace("\\", "/");
@@ -419,7 +419,7 @@ public class F {
 					// Elimina extension "cache" da tutti i Media
 					MediaList visitaMedia = new MediaList( Global.gc, 0 );
 					Global.gc.accept( visitaMedia );
-					for( Media media : visitaMedia.lista )
+					for( Media media : visitaMedia.list)
 						if( media.getExtension("cache") != null )
 							media.putExtension( "cache", null );
 					cartellaCache.mkdir();

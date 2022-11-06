@@ -208,7 +208,7 @@ public class TreeInfoActivity extends BaseActivity {
 		treeItem.generations = quanteGenerazioni(gedcom, U.getRootId(gedcom, treeItem));
 		MediaList visitaMedia = new MediaList(gedcom, 0);
 		gedcom.accept(visitaMedia);
-		treeItem.media = visitaMedia.lista.size();
+		treeItem.media = visitaMedia.list.size();
 		Global.settings.save();
 	}
 

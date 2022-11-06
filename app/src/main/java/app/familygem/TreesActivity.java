@@ -794,7 +794,7 @@ public class TreesActivity extends AppCompatActivity {
 		// Aggiunge un tag 'FILE' ai Media che non l'hanno
 		MediaList visitaMedia = new MediaList(gc, 0);
 		gc.accept(visitaMedia);
-		for( Media med : visitaMedia.lista ) {
+		for( Media med : visitaMedia.list) {
 			if( med.getFileTag() == null ) {
 				if( correct ) med.setFileTag("FILE");
 				else errors++;
