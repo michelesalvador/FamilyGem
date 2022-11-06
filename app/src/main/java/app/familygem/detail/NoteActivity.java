@@ -30,7 +30,7 @@ public class NoteActivity extends DetailActivity {
 		U.placeChangeDate(box, n.getChange());
 		if( n.getId() != null ) {
 			NoteReferences noteRef = new NoteReferences(Global.gc, n.getId(), false);
-			if( noteRef.tot > 0 )
+			if( noteRef.count > 0 )
 				U.putContainer(box, noteRef.founders.toArray(), R.string.shared_by);
 		} else if( ((Activity)box.getContext()).getIntent().getBooleanExtra("daQuaderno", false) ) {
 			U.putContainer(box, Memory.firstObject(), R.string.written_in);

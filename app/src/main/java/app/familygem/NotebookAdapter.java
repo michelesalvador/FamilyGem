@@ -42,7 +42,7 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.ViewHo
 		else {
 			holder.countView.setVisibility(View.VISIBLE);
 			NoteReferences contaUso = new NoteReferences(Global.gc, note.getId(), false);
-			holder.countView.setText(String.valueOf(contaUso.tot));
+			holder.countView.setText(String.valueOf(contaUso.count));
 		}
 		holder.itemView.setTag(note); // per il menu contestuale Elimina
 		holder.textView.setText(note.getValue());

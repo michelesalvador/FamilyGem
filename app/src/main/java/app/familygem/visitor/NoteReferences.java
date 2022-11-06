@@ -1,9 +1,3 @@
-/* Visitatore per nota condivisa con una triplice funzione:
- - Contare in tutti gli elementi del Gedcom i riferimenti alla nota condivisa
- - Eliminare i riferimenti alla nota
- - Nel frattempo raccogliere tutti i capostipiti
-*/
-
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.Gedcom;
@@ -12,37 +6,47 @@ import org.folg.gedcom.model.NoteRef;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
+/**
+ * Visitor per shared note with a triple function:
+ *  - To count in all the elements of the Gedcom the references to the shared note
+ *  - Delete references to the note
+ *  - In the meantime, collect all the founders
+ *
+ * Visitatore per nota condivisa con una triplice funzione:
+ *  - Contare in tutti gli elementi del Gedcom i riferimenti alla nota condivisa
+ *  - Eliminare i riferimenti alla nota
+ *  - Nel frattempo raccogliere tutti i capostipiti
+ * */
 public class NoteReferences extends TotalVisitor {
 
-	private String id;  // Id della nota condivisa
-	private boolean elimina; // bandierina per eliminare i ref alla nota piuttosto che contarli
-	private Object capo;
-	public int tot = 0; // i riferimenti alla nota condivisa
+	private String id;  // Id of the shared note
+	private boolean deleteRefs; // flag to eliminate the refs to the note rather than counting them //bandierina per eliminare i ref alla nota piuttosto che contarli
+	private Object head;
+	public int count = 0; // references to the shared note
 	public Set<Object> founders = new LinkedHashSet<>();
 
-	public NoteReferences(Gedcom gc, String id, boolean elimina ) {
+	public NoteReferences(Gedcom gc, String id, boolean deleteRegs ) {
 		this.id = id;
-		this.elimina = elimina;
+		this.deleteRefs = deleteRegs;
 		gc.accept( this );
 	}
 
 	@Override
-	boolean visit(Object object, boolean capostipite ) {
-		if( capostipite )
-			capo = object;
+	boolean visit(Object object, boolean isHead ) {
+		if( isHead )
+			head = object;
 		if( object instanceof NoteContainer ) {
-			NoteContainer blocco = (NoteContainer) object;
-			Iterator<NoteRef> refi = blocco.getNoteRefs().iterator();
-			while( refi.hasNext() ) {
-				NoteRef nr = refi.next();
+			NoteContainer container = (NoteContainer) object;
+			Iterator<NoteRef> refs = container.getNoteRefs().iterator();
+			while( refs.hasNext() ) {
+				NoteRef nr = refs.next();
 				if( nr.getRef().equals(id) ) {
-					founders.add( capo );
-					if(elimina) refi.remove();
-					else tot++;
+					founders.add(head);
+					if(deleteRefs) refs.remove();
+					else count++;
 				}
 			}
-			if( blocco.getNoteRefs().isEmpty() ) blocco.setNoteRefs( null );
+			if( container.getNoteRefs().isEmpty() ) container.setNoteRefs( null );
 		}
 		return true;
 	}
