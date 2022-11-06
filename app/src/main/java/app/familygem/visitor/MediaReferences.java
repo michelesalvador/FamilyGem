@@ -17,35 +17,35 @@ import java.util.Set;
 
 public class MediaReferences extends TotalVisitor {
 
-	private Media media; // il media condiviso
-	private boolean elimina; // eliminare i Ref o no
-	private Object capo; // il capostipite della pila
-	public int num = 0; // il conto dei riferimenti a un Media
+	private Media media; // the shared media
+	private boolean shouldEliminateRef;
+	private Object progenitor; // the progenitor of the stack
+	public int num = 0; // the number of references to a Media
 	public Set<Object> founders = new LinkedHashSet<>(); // the list of the founding objects containing a Media//l'elenco degli oggetti capostipiti contenti un Media
 
-	public MediaReferences(Gedcom gc, Media media, boolean elimina ) {
+	public MediaReferences(Gedcom gc, Media media, boolean eliminate ) {
 		this.media = media;
-		this.elimina = elimina;
+		this.shouldEliminateRef = eliminate;
 		gc.accept( this );
 	}
 
 	@Override
-	boolean visit(Object object, boolean capostipite ) {
-		if( capostipite )
-			capo = object;
+	boolean visit(Object object, boolean isProgenitor ) {
+		if( isProgenitor )
+			progenitor = object;
 		if( object instanceof MediaContainer ) {
-			MediaContainer contenitore = (MediaContainer)object;
-			Iterator<MediaRef> refiMedia = contenitore.getMediaRefs().iterator();
-			while( refiMedia.hasNext() )
-				if( refiMedia.next().getRef().equals(media.getId()) ) {
-					founders.add( capo );
-					if( elimina )
-						refiMedia.remove();
+			MediaContainer container = (MediaContainer)object;
+			Iterator<MediaRef> mediaRefs = container.getMediaRefs().iterator();
+			while( mediaRefs.hasNext() )
+				if( mediaRefs.next().getRef().equals(media.getId()) ) {
+					founders.add(progenitor);
+					if(shouldEliminateRef)
+						mediaRefs.remove();
 					else
 						num++;
 				}
-			if( contenitore.getMediaRefs().isEmpty() )
-				contenitore.setMediaRefs( null );
+			if( container.getMediaRefs().isEmpty() )
+				container.setMediaRefs( null );
 		}
 		return true;
 	}
