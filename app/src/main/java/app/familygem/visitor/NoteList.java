@@ -1,5 +1,3 @@
-// Visitatore che produce una Mappa ordinata delle note INLINE
-
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.Note;
@@ -10,16 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import app.familygem.Global;
 
+/**
+ * Visitor producing an ordered map of INLINE notes
+ * */
 public class NoteList extends TotalVisitor {
 
-	public List<Note> listaNote = new ArrayList<>();
+	public List<Note> noteList = new ArrayList<>();
 
 	@Override
 	boolean visit(Object object, boolean capo ) {
 		if( object instanceof NoteContainer
 				&& !(!Global.settings.expert && (object instanceof Source || object instanceof Repository)) ) {
-			NoteContainer blocco = (NoteContainer)object;
-			listaNote.addAll(blocco.getNotes());
+			NoteContainer container = (NoteContainer)object;
+			noteList.addAll(container.getNotes());
 		}
 		return true;
 	}

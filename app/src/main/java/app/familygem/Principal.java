@@ -178,7 +178,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 					case 4:
 						NoteList notesList = new NoteList();
 						gc.accept(notesList);
-						count = notesList.listaNote.size() + gc.getNotes().size();
+						count = notesList.noteList.size() + gc.getNotes().size();
 						break;
 					case 5: count = gc.getSources().size(); break;
 					case 6: count = gc.getRepositories().size(); break;

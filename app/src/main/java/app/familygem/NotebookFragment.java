@@ -37,7 +37,7 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 		if( !sharedOnly ) {
 			NoteList noteVisitor = new NoteList();
 			gc.accept(noteVisitor);
-			noteList.addAll(noteVisitor.listaNote);
+			noteList.addAll(noteVisitor.noteList);
 		}
 		return noteList;
 	}
