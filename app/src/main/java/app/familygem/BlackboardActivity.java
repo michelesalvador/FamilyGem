@@ -13,20 +13,20 @@ import java.io.File;
 public class BlackboardActivity extends AppCompatActivity {
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
+	protected void onCreate( Bundle bundle ) {
+		super.onCreate( bundle );
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView( R.layout.lavagna );
 		// Show the file in full resolution
-		String percorso = getIntent().getStringExtra( "percorso" );
+		String path = getIntent().getStringExtra( "path" );
 		Picasso picasso = Picasso.get();
-		RequestCreator creatore;
-		if( percorso != null ) {
-			creatore = picasso.load( new File(percorso) );
+		RequestCreator creator;
+		if( path != null ) {
+			creator = picasso.load( new File(path) );
 		} else {
 			Uri uri = Uri.parse( getIntent().getStringExtra("uri") );
-			creatore = picasso.load( uri );
+			creator = picasso.load( uri );
 		}
-		creatore.into( (ImageView)findViewById(R.id.lavagna_immagine) );
+		creator.into( (ImageView)findViewById(R.id.lavagna_immagine) );
 	}
 }
