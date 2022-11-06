@@ -223,11 +223,11 @@ public class TreesActivity extends AppCompatActivity {
 										ext = "zip";
 										code = 6219;
 									}
-									F.salvaDocumento(TreesActivity.this, null, treeId, mime, ext, code);
+									F.saveDocument(TreesActivity.this, null, treeId, mime, ext, code);
 								}
 							} else if( id == 8 ) { // Fai backup
 								if( exporter.apriAlbero(treeId) )
-									F.salvaDocumento(TreesActivity.this, null, treeId, "application/zip", "zip", 327);
+									F.saveDocument(TreesActivity.this, null, treeId, "application/zip", "zip", 327);
 							} else if( id == 9 ) {	// Elimina albero
 								new AlertDialog.Builder(TreesActivity.this).setMessage(R.string.really_delete_tree)
 										.setPositiveButton(R.string.delete, (dialog, id1) -> {

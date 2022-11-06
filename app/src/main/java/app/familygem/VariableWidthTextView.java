@@ -1,5 +1,3 @@
-// TextView che adatta la larghezza anche a molteplici linee
-
 package app.familygem;
 
 import android.content.Context;
@@ -7,9 +5,13 @@ import androidx.appcompat.widget.AppCompatTextView;
 import android.text.Layout;
 import android.util.AttributeSet;
 
-public class TestView extends AppCompatTextView {
+/**
+ * TextView that adapts the width even to multiple lines
+ * TextView che adatta la larghezza anche a molteplici linee
+ * */
+public class VariableWidthTextView extends AppCompatTextView {
 
-	public TestView(Context context, AttributeSet attrs ) {
+	public VariableWidthTextView(Context context, AttributeSet attrs ) {
 		super( context, attrs );
 	}
 

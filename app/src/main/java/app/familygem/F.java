@@ -193,7 +193,7 @@ public class F {
 	}
 
 	// Fa salvare un documento (PDF, GEDCOM, ZIP) con SAF
-	static void salvaDocumento( Activity attivita, Fragment frammento, int idAlbero, String mime, String ext, int requestCode ) {
+	static void saveDocument(Activity attivita, Fragment frammento, int idAlbero, String mime, String ext, int requestCode ) {
 		String nome = Global.settings.getTree(idAlbero).title;
 		// GEDCOM deve esplicitare l'estensione, gli altri la mettono in base al mime type
 		ext = ext.equals("ged") ? ".ged" : "";

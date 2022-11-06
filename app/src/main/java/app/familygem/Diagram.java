@@ -83,26 +83,26 @@ public class Diagram extends Fragment {
 		DASH = toPx(4);
 		GLOW_SPACE = toPx(35);
 
-		getActivity().findViewById(R.id.toolbar).setVisibility(View.GONE); // Necessario in caso di backPressed dopo onActivityresult
+		getActivity().findViewById(R.id.toolbar).setVisibility(View.GONE); // Necessary in case of backPressed after onActivityresult
 		final View view = inflater.inflate(R.layout.diagram, container, false);
 		view.findViewById(R.id.diagram_hamburger).setOnClickListener(v -> {
-			DrawerLayout scatolissima = getActivity().findViewById(R.id.scatolissima);
-			scatolissima.openDrawer(GravityCompat.START);
+			DrawerLayout drawer = getActivity().findViewById(R.id.scatolissima);
+			drawer.openDrawer(GravityCompat.START);
 		});
 		view.findViewById(R.id.diagram_options).setOnClickListener(vista -> {
-			PopupMenu opzioni = new PopupMenu(getContext(), vista);
-			Menu menu = opzioni.getMenu();
+			PopupMenu options = new PopupMenu(getContext(), vista);
+			Menu menu = options.getMenu();
 			menu.add(0, 0, 0, R.string.diagram_settings);
 			if( gc.getPeople().size() > 0 )
 				menu.add(0, 1, 0, R.string.export_pdf);
-			opzioni.show();
-			opzioni.setOnMenuItemClickListener(item -> {
+			options.show();
+			options.setOnMenuItemClickListener(item -> {
 				switch( item.getItemId() ) {
 					case 0: // Diagram settings
 						startActivity(new Intent(getContext(), DiagramSettings.class));
 						break;
 					case 1: // Export PDF
-						F.salvaDocumento(null, this, Global.settings.openTree, "application/pdf", "pdf", 903);
+						F.saveDocument(null, this, Global.settings.openTree, "application/pdf", "pdf", 903);
 						break;
 					default:
 						return false;
@@ -128,12 +128,15 @@ public class Diagram extends Fragment {
 		return view;
 	}
 
-	// Individua il fulcro da cui partire, mostra eventuale bottone 'Crea la prima persona' oppure avvia il diagramma
+	/**
+	 * Identify the hub to start from, show any button 'Create the first person' or start the diagram
+	 * Individua il fulcro da cui partire, mostra eventuale bottone 'Crea la prima persona' oppure avvia il diagramma
+	 * */
 	@Override
 	public void onStart() {
 		super.onStart();
-		// Ragioni per cui bisogna proseguire, in particolare cose che sono cambiate
-		if( forceDraw || (fulcrum != null && !fulcrum.getId().equals(Global.indi)) // TODO andrebbe testato
+		// Reasons why we must continue, especially things that have changed// Ragioni per cui bisogna proseguire, in particolare cose che sono cambiate
+		if( forceDraw || (fulcrum != null && !fulcrum.getId().equals(Global.indi)) // TODO should be tested
 				|| (graph != null && graph.whichFamily != Global.familyNum) ) {
 			forceDraw = false;
 			box.removeAllViews();
@@ -157,7 +160,7 @@ public class Diagram extends Fragment {
 				if( !Global.settings.expert )
 					((View)moveLayout.getParent()).findViewById(R.id.diagram_options).setVisibility(View.GONE);
 			} else {
-				Global.indi = fulcrum.getId(); // Casomai lo ribadisce
+				Global.indi = fulcrum.getId(); // If anything, he reiterates it //Casomai lo ribadisce
 				graph.maxAncestors(Global.settings.diagram.ancestors)
 						.maxGreatUncles(Global.settings.diagram.uncles)
 						.displaySpouses(Global.settings.diagram.spouses)
@@ -171,7 +174,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Put a view under the suggestion balloon
+	/**
+	 * Put a view under the suggestion balloon
+	 * */
 	class SuggestionBalloon extends ConstraintLayout {
 		SuggestionBalloon(Context context, View childView, int suggestion) {
 			super(context);
@@ -187,6 +192,7 @@ public class Diagram extends Fragment {
 			((TextView)popup.findViewById(R.id.popup_testo)).setText(suggestion);
 			popup.setVisibility(INVISIBLE);
 			popup.setOnTouchListener((v, e) -> {
+				//v.performClick(); //TODO Android Studio says to call this
 				if( e.getAction() == MotionEvent.ACTION_DOWN ) {
 					v.setVisibility(INVISIBLE);
 					return true;
@@ -210,7 +216,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Diagram initialized the first time and clicking on a card
+	/**
+	 * Diagram initialized the first time and clicking on a card
+	 * */
 	void drawDiagram() {
 
 		// Place various type of graphic nodes in the box taking them from the list of nodes
@@ -255,7 +263,7 @@ public class Diagram extends Fragment {
 					View nodeView = box.getChildAt(i);
 					if( nodeView instanceof GraphicMetric ) { // To avoid ClassCastException that mysteriously happens sometimes
 						GraphicMetric graphic = (GraphicMetric)nodeView;
-						// GraphicPerson can be larger because of VistaTesto, the child has the correct width
+						// GraphicPerson can be larger because of TextView, the child has the correct width
 						graphic.metric.width = toDp(graphic.getChildAt(0).getWidth());
 						graphic.metric.height = toDp(graphic.getChildAt(0).getHeight());
 					}
@@ -294,7 +302,9 @@ public class Diagram extends Fragment {
 		return getContext() != null ? getContext() : Global.context;
 	}
 
-	// Update visible position of nodes and lines
+	/**
+	 * Update visible position of nodes and lines
+	 * */
 	void displaceDiagram() {
 		if( moveLayout.scaleDetector.isInProgress() )
 			return;
@@ -330,7 +340,9 @@ public class Diagram extends Fragment {
 				(int)(toPx(fulcrumView.metric.centerY()) * scale - moveLayout.height / 2 + padding));
 	}
 
-	// The glow around fulcrum card
+	/**
+	 * The glow around fulcrum card
+	 * */
 	class FulcrumGlow extends View {
 		Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		BlurMaskFilter bmf = new BlurMaskFilter(toPx(25), BlurMaskFilter.Blur.NORMAL);
@@ -356,7 +368,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Node with one person or one bond
+	/**
+	 * Node with one person or one bond
+	 * */
 	abstract class GraphicMetric extends RelativeLayout {
 		Metric metric;
 		GraphicMetric(Context context, Metric metric) {
@@ -366,7 +380,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Card of a person
+	/**
+	 * Card of a person
+	 * */
 	class GraphicPerson extends GraphicMetric {
 		ImageView background;
 		GraphicPerson(Context context, PersonNode personNode) {
@@ -420,7 +436,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Marriage with eventual year and vertical line
+	/**
+	 * Marriage with eventual year and vertical line
+	 * */
 	class GraphicBond extends GraphicMetric {
 		View hearth;
 		GraphicBond(Context context, Bond bond) {
@@ -460,7 +478,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Little ancestry or progeny card
+	/**
+	 * Little ancestry or progeny card
+	 * */
 	class GraphicMiniCard extends GraphicMetric {
 		RelativeLayout layout;
 		GraphicMiniCard(Context context, PersonNode personNode) {
@@ -487,7 +507,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Replacement for another person who is actually fulcrum
+	/**
+	 * Replacement for another person who is actually fulcrum
+	 * */
 	class Asterisk extends GraphicMetric {
 		Asterisk(Context context, PersonNode personNode) {
 			super(context, personNode);
@@ -500,7 +522,9 @@ public class Diagram extends Fragment {
 		}
 	}
 
-	// Generate the view of lines connecting the cards
+	/**
+	 * Generate the view of lines connecting the cards
+	 * */
 	class Lines extends View {
 		List<Set<Line>> lineGroups;
 		boolean dashed;
@@ -588,7 +612,9 @@ public class Diagram extends Fragment {
 		selectParentFamily(person);
 	}
 
-	// Ask which family to display in the diagram if fulcrum has many parent families
+	/**
+	 * Ask which family to display in the diagram if fulcrum has many parent families
+	 * */
 	private void selectParentFamily(Person fulcrum) {
 		List<Family> families = fulcrum.getParentFamilies(gc);
 		if( families.size() > 1 ) {
@@ -600,7 +626,9 @@ public class Diagram extends Fragment {
 			completeSelect(fulcrum, 0);
 		}
 	}
-	// Complete above function
+	/**
+	 * Complete above function
+	 * */
 	private void completeSelect(Person fulcrum, int whichFamily) {
 		Global.indi = fulcrum.getId();
 		Global.familyNum = whichFamily;
@@ -619,7 +647,9 @@ public class Diagram extends Fragment {
 		return (int) (dips * density + 0.5f);
 	}
 
-	// Generate the 2 family (as child and as partner) labels for contextual menu
+	/**
+	 * Generate the 2 family (as child and as partner) labels for contextual menu
+	 * */
 	static String[] getFamilyLabels(Context context, Person person, Family family) {
 		String[] labels = { null, null };
 		List<Family> parentFams = person.getParentFamilies(gc);
