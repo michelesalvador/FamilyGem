@@ -126,13 +126,16 @@ public class U {
 		return null;
 	}
 
-	// riceve una Person e restituisce stringa con nome e cognome principale
-	static String epiteto(Person person) {
-		return epiteto(person, false);
+	/**
+	 * receives a Person and returns string with primary first and last name
+	 * riceve una Person e restituisce stringa con nome e cognome principale
+	 * */
+	static String properName(Person person) {
+		return properName(person, false);
 	}
-	static String epiteto(Person person, boolean twoLines) {
+	static String properName(Person person, boolean twoLines) {
 		if( person != null && !person.getNames().isEmpty() )
-			return nomeCognome(person.getNames().get(0), twoLines ? "\n" : " ");
+			return firstAndLastName(person.getNames().get(0), twoLines ? "\n" : " ");
 		return "[" + s(R.string.no_name) + "]";
 	}
 
@@ -176,8 +179,11 @@ public class U {
 		return "";
 	}
 
-	// Restituisce il nome e cognome addobbato di un Name
-	static String nomeCognome(Name n, String divider) {
+	/**
+	 * Returns the first and last name decorated with a Name
+	 * Restituisce il nome e cognome addobbato di un Name
+	 * */
+	static String firstAndLastName(Name n, String divider) {
 		String completo = "";
 		if( n.getValue() != null ) {
 			String grezzo = n.getValue().trim();
@@ -427,16 +433,19 @@ public class U {
 		return place;
 	}
 
-	// Estrae i soli numeri da una stringa che può contenere anche lettere
-	static int soloNumeri(String id) {
-		//return Integer.parseInt( id.replaceAll("\\D+","") );	// sintetico ma lento
+	/**
+	 * Extracts only numbers from a string that can also contain letters
+	 * Estrae i soli numeri da una stringa che può contenere anche lettere
+	 * */
+	static int extractNum(String id) {
+		//return Integer.parseInt( id.replaceAll("\\D+","") );	// synthetic but slow //sintetico ma lento
 		int num = 0;
 		int x = 1;
 		for( int i = id.length() - 1; i >= 0; --i ) {
 			int c = id.charAt(i);
 			if( c > 47 && c < 58 ) {
 				num += (c - 48) * x;
-				x *= 10;
+				x *= 10; //to convert positional notation into a base-10 representation
 			}
 		}
 		return num;
@@ -444,7 +453,7 @@ public class U {
 
 	// Genera il nuovo id seguente a quelli già esistenti
 	static int max;
-	public static String nuovoId(Gedcom gc, Class classe) {
+	public static String newID(Gedcom gc, Class classe) {
 		max = 0;
 		String pre = "";
 		if( classe == Note.class ) {
@@ -482,7 +491,7 @@ public class U {
 	private static void calcolaMax(Object object) {
 		try {
 			String idStringa = (String)object.getClass().getMethod("getId").invoke(object);
-			int num = soloNumeri(idStringa);
+			int num = extractNum(idStringa);
 			if( num > max ) max = num;
 		} catch( Exception e ) {
 			e.printStackTrace();
@@ -618,7 +627,7 @@ public class U {
 		if( ruolo == null ) vistaRuolo.setVisibility(View.GONE);
 		else vistaRuolo.setText(ruolo);
 		TextView vistaNome = vistaIndi.findViewById(R.id.indi_nome);
-		String nome = epiteto(persona);
+		String nome = properName(persona);
 		if( nome.isEmpty() && ruolo != null ) vistaNome.setVisibility(View.GONE);
 		else vistaNome.setText(nome);
 		TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
@@ -814,7 +823,7 @@ public class U {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo_piccolo, scatola, false);
 		scatola.addView(vistaPersona);
 		F.unaFoto(Global.gc, p, vistaPersona.findViewById(R.id.collega_foto));
-		((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(epiteto(p));
+		((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(properName(p));
 		String dati = twoDates(p, false);
 		TextView vistaDettagli = vistaPersona.findViewById(R.id.collega_dati);
 		if( dati.isEmpty() ) vistaDettagli.setVisibility(View.GONE);
@@ -837,11 +846,11 @@ public class U {
 	static String testoFamiglia(Context contesto, Gedcom gc, Family fam, boolean unaLinea) {
 		String testo = "";
 		for( Person marito : fam.getHusbands(gc) )
-			testo += epiteto(marito) + "\n";
+			testo += properName(marito) + "\n";
 		for( Person moglie : fam.getWives(gc) )
-			testo += epiteto(moglie) + "\n";
+			testo += properName(moglie) + "\n";
 		if( fam.getChildren(gc).size() == 1 ) {
-			testo += epiteto(fam.getChildren(gc).get(0));
+			testo += properName(fam.getChildren(gc).get(0));
 		} else if( fam.getChildren(gc).size() > 1 )
 			testo += contesto.getString(R.string.num_children, fam.getChildren(gc).size());
 		if( testo.endsWith("\n") ) testo = testo.substring(0, testo.length() - 1);

@@ -66,7 +66,7 @@ public class ListOfAuthorsFragment extends Fragment {
 	// Crea un Autore nuovo, se riceve un contesto lo apre in modalità editore
 	static Submitter nuovoAutore(Context contesto) {
 		Submitter subm = new Submitter();
-		subm.setId(U.nuovoId(gc, Submitter.class));
+		subm.setId(U.newID(gc, Submitter.class));
 		subm.setName("");
 		U.updateChangeDate(subm);
 		gc.addSubmitter(subm);

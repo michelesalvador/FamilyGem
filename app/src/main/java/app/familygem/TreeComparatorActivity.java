@@ -159,7 +159,7 @@ public class TreeComparatorActivity extends BaseActivity {
 		else if( o instanceof Person ) {
 			tipoRecord( R.string.person );
 			Person p = (Person) o;
-			tit = U.epiteto( p );
+			tit = U.properName( p );
 			txt = U.details( p, null );
 			data = dataOra( p.getChange() );
 			vistaFoto.setVisibility( View.VISIBLE );

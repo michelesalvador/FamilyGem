@@ -44,7 +44,7 @@ public class RepositoryFragment extends Fragment {
 			Collections.sort(repos, (r1, r2) -> {
 				switch( Global.ordineMagazzino ) {
 					case 1: // Ordina per id
-						return U.soloNumeri(r1.getId()) - U.soloNumeri(r2.getId());
+						return U.extractNum(r1.getId()) - U.extractNum(r2.getId());
 					case 2: // Ordine alfabetico
 						return r1.getName().compareToIgnoreCase(r2.getName());
 					case 3: // Ordina per numero di fonti
@@ -104,7 +104,7 @@ public class RepositoryFragment extends Fragment {
 	// Create a new repository, optionally linking a source to it
 	static void newRepository(Context context, Source source) {
 		Repository repo = new Repository();
-		repo.setId(U.nuovoId(gc, Repository.class));
+		repo.setId(U.newID(gc, Repository.class));
 		repo.setName("");
 		gc.addRepository(repo);
 		if( source != null ) {

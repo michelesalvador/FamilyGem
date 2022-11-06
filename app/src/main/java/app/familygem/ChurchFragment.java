@@ -44,11 +44,11 @@ public class ChurchFragment extends Fragment {
 			refresh(What.RELOAD);
 			if( familyList.size() > 1 )
 				setHasOptionsMenu(true);
-			idsAreNumeric = verificaIdNumerici();
+			idsAreNumeric = verifyIdsAreNumeric();
 			view.findViewById(R.id.fab).setOnClickListener(v -> {
-				Family newFamily = nuovaFamiglia(true);
+				Family newFamily = newFamily(true);
 				U.save(true, newFamily);
-				// Se torna subito indietro in Chiesa rinfresca la lista con la famiglia vuota
+				// If he(user?) goes straight back to the church he refreshes the list with the empty family //Se torna subito indietro in Chiesa rinfresca la lista con la famiglia vuota
 				Memory.setFirst(newFamily);
 				startActivity(new Intent(getContext(), FamilyActivity.class));
 			});
@@ -79,82 +79,82 @@ public class ChurchFragment extends Fragment {
 			default:
 				infoView.setVisibility(View.GONE);
 		}
-		String parents = "";
+		StringBuilder parents = new StringBuilder();
 		for( Person husband : wrapper.family.getHusbands(gc) )
-			parents += U.epiteto(husband) + "\n";
+			parents.append(U.properName(husband)).append("\n");
 		for( Person wife : wrapper.family.getWives(gc) )
-			parents += U.epiteto(wife) + "\n";
-		if( !parents.isEmpty() )
-			parents = parents.substring(0, parents.length() - 1);
-		((TextView)familyView.findViewById(R.id.family_parents)).setText(parents);
-		String children = "";
+			parents.append(U.properName(wife)).append("\n");
+		if(parents.length() > 0)
+			parents = new StringBuilder(parents.substring(0, parents.length() - 1));
+		((TextView)familyView.findViewById(R.id.family_parents)).setText(parents.toString());
+		StringBuilder children = new StringBuilder();
 		for( Person child : wrapper.family.getChildren(gc) )
-			children += U.epiteto(child) + "\n";
-		if( !children.isEmpty() )
-			children = children.substring(0, children.length() - 1);
+			children.append(U.properName(child)).append("\n");
+		if(children.length() > 0)
+			children = new StringBuilder(children.substring(0, children.length() - 1));
 		TextView childrenView = familyView.findViewById(R.id.family_children);
-		if( children.isEmpty() ) {
+		if(children.length() == 0) {
 			familyView.findViewById(R.id.family_strut).setVisibility(View.GONE);
 			childrenView.setVisibility(View.GONE);
 		} else
-			childrenView.setText(children);
+			childrenView.setText(children.toString());
 		registerForContextMenu(familyView);
 		familyView.setOnClickListener(v -> {
 			Memory.setFirst(wrapper.family);
 			layout.getContext().startActivity(new Intent(layout.getContext(), FamilyActivity.class));
 		});
-		familyView.setTag(wrapper.id); // solo per il menu contestuale Elimina qui in Chiesa
+		familyView.setTag(wrapper.id); // only for the context menu Delete here in the Church //solo per il menu contestuale Elimina qui in Chiesa
 	}
 
 	// Delete a family, removing the refs from members
 	static void deleteFamily(Family family) {
 		if( family == null ) return;
-		Set<Person> membri = new HashSet<>();
+		Set<Person> members = new HashSet<>();
 		// Remove references to the family from family members
-		for( Person marito : family.getHusbands(gc) ) {
-			Iterator<SpouseFamilyRef> refi = marito.getSpouseFamilyRefs().iterator();
-			while( refi.hasNext() ) {
-				SpouseFamilyRef sfr = refi.next();
+		for( Person husband : family.getHusbands(gc) ) {
+			Iterator<SpouseFamilyRef> refs = husband.getSpouseFamilyRefs().iterator();
+			while( refs.hasNext() ) {
+				SpouseFamilyRef sfr = refs.next();
 				if( sfr.getRef().equals(family.getId()) ) {
-					refi.remove();
-					membri.add( marito );
+					refs.remove();
+					members.add( husband );
 				}
 			}
 		}
-		for( Person moglie : family.getWives(gc) ) {
-			Iterator<SpouseFamilyRef> refi = moglie.getSpouseFamilyRefs().iterator();
-			while( refi.hasNext() ) {
-				SpouseFamilyRef sfr = refi.next();
+		for( Person wife : family.getWives(gc) ) {
+			Iterator<SpouseFamilyRef> refs = wife.getSpouseFamilyRefs().iterator();
+			while( refs.hasNext() ) {
+				SpouseFamilyRef sfr = refs.next();
 				if( sfr.getRef().equals(family.getId()) ) {
-					refi.remove();
-					membri.add( moglie );
+					refs.remove();
+					members.add( wife );
 				}
 			}
 		}
-		for( Person figlio : family.getChildren(gc) ) {
-			Iterator<ParentFamilyRef> refi = figlio.getParentFamilyRefs().iterator();
+		for( Person children : family.getChildren(gc) ) {
+			Iterator<ParentFamilyRef> refi = children.getParentFamilyRefs().iterator();
 			while( refi.hasNext() ) {
 				ParentFamilyRef pfr = refi.next();
 				if( pfr.getRef().equals(family.getId()) ) {
 					refi.remove();
-					membri.add( figlio );
+					members.add( children );
 				}
 			}
 		}
 		// The family is deleted
 		gc.getFamilies().remove(family);
-		gc.createIndexes();	// necessario per aggiornare gli individui
+		gc.createIndexes();	// necessary to update individuals
 		Memory.setInstanceAndAllSubsequentToNull(family);
-		Global.familyNum = 0; // Nel caso fortuito che sia stata eliminata proprio questa famiglia
-		U.save(true, membri.toArray(new Object[0]));
+		Global.familyNum = 0; // In the unlikely event that this family was eliminated //Nel caso fortuito che sia stata eliminata proprio questa famiglia
+		U.save(true, members.toArray(new Object[0]));
 	}
 
-	static Family nuovaFamiglia(boolean aggiungi) {
-		Family nuova = new Family();
-		nuova.setId(U.nuovoId(gc, Family.class));
-		if( aggiungi )
-			gc.addFamily(nuova);
-		return nuova;
+	static Family newFamily(boolean add) {
+		Family newFamily = new Family();
+		newFamily.setId(U.newID(gc, Family.class));
+		if( add )
+			gc.addFamily(newFamily);
+		return newFamily;
 	}
 
 	private Family selected;
@@ -169,7 +169,7 @@ public class ChurchFragment extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		if( item.getItemId() == 0 ) { // Edit ID
 			U.editId(getContext(), selected, () -> this.refresh(What.UPDATE));
-		} else if( item.getItemId() == 1 ) { // Elimina
+		} else if( item.getItemId() == 1 ) { // Delete
 			if( selected.getHusbandRefs().size() + selected.getWifeRefs().size() + selected.getChildRefs().size() > 0 ) {
 				new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_family)
 						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
@@ -186,14 +186,16 @@ public class ChurchFragment extends Fragment {
 		return true;
 	}
 
-	// Verifica se tutti gli id delle famiglie contengono numeri
-	// Appena un id contiene solo lettere restituisce false
-	boolean verificaIdNumerici() {
-		esterno:
+	/**
+	 * Check if all family ids contain numbers
+	 * As soon as an id contains only letters it returns false
+	 * */
+	boolean verifyIdsAreNumeric() {
+		outer:
 		for( Family f : gc.getFamilies() ) {
 			for( char c : f.getId().toCharArray() ) {
 				if (Character.isDigit(c))
-					continue esterno;
+					continue outer;
 			}
 			return false;
 		}
@@ -204,18 +206,18 @@ public class ChurchFragment extends Fragment {
 		if( order > 0 ) {  // 0 keeps actual sorting
 			Collections.sort(familyList, (f1, f2 ) -> {
 				switch( order ) {
-					case 1: // Ordina per ID
+					case 1: // Sort by ID
 						if( idsAreNumeric )
-							return U.soloNumeri(f1.id) - U.soloNumeri(f2.id);
+							return U.extractNum(f1.id) - U.extractNum(f2.id);
 						else
 							return f1.id.compareToIgnoreCase(f2.id);
 					case 2:
 						if( idsAreNumeric )
-							return U.soloNumeri(f2.id) - U.soloNumeri(f1.id);
+							return U.extractNum(f2.id) - U.extractNum(f1.id);
 						else
 							return f2.id.compareToIgnoreCase(f1.id);
-					case 3: // Ordina per cognome
-						if (f1.lowerSurname == null) // i nomi null vanno in fondo
+					case 3: // Sort by surname
+						if (f1.lowerSurname == null) // null names go to the bottom
 							return f2.lowerSurname == null ? 0 : 1;
 						if (f2.lowerSurname == null)
 							return -1;
@@ -226,7 +228,7 @@ public class ChurchFragment extends Fragment {
 						if (f2.lowerSurname == null)
 							return -1;
 						return f2.lowerSurname.compareTo(f1.lowerSurname);
-					case 5:	// Ordina per numero di familiari
+					case 5:	// Sort by number of family members
 						return f1.members - f2.members;
 					case 6:
 						return f2.members - f1.members;
@@ -271,7 +273,9 @@ public class ChurchFragment extends Fragment {
 			members = countMembers();
 		}
 
-		// Main surname of the family
+		/**
+		 * Main surname of the family
+		 * */
 		private String familySurname(boolean lowerCase) {
 			if( !family.getHusbands(gc).isEmpty() )
 				return U.surname(family.getHusbands(gc).get(0), lowerCase);
@@ -282,7 +286,9 @@ public class ChurchFragment extends Fragment {
 			return null;
 		}
 
-		// Count how many family members
+		/**
+		 * Count how many family members
+		 * */
 		private int countMembers() {
 			return family.getHusbandRefs().size() + family.getWifeRefs().size() + family.getChildRefs().size();
 		}
@@ -308,7 +314,7 @@ public class ChurchFragment extends Fragment {
 				order = id * 2 - 1;
 			sortFamilies();
 			refresh(What.BASIC);
-			//U.salvaJson( false ); // dubbio se metterlo per salvare subito il riordino delle famiglie
+			//U.salvaJson( false ); // doubt whether to put it to immediately save the reorganization of families //dubbio se metterlo per salvare subito il riordino delle famiglie
 			return true;
 		}
 		return false;

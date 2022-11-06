@@ -62,7 +62,7 @@ public class TreeInfoActivity extends BaseActivity {
 					+ "\n" + getText(R.string.sources) + ": "+ gc.getSources().size()
 					+ "\n" + getText(R.string.repositories) + ": "+ gc.getRepositories().size();
 				if( tree.root != null ) {
-					i += "\n" + getText(R.string.root) + ": " + U.epiteto(gc.getPerson(tree.root));
+					i += "\n" + getText(R.string.root) + ": " + U.properName(gc.getPerson(tree.root));
 				}
 				if( tree.shares != null && !tree.shares.isEmpty() ) {
 					i += "\n\n" + getText(R.string.shares) + ":";

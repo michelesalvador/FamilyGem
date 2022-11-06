@@ -322,7 +322,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 		// Finalizzazione individuo nuovo
 		Object[] modificati = { p, null }; // il null serve per accogliere una eventuale Family
 		if( idIndi.equals("TIZIO_NUOVO") || relazione > 0 ) {
-			String nuovoId = U.nuovoId( gc, Person.class );
+			String nuovoId = U.newID( gc, Person.class );
 			p.setId( nuovoId );
 			gc.addPerson( p );
 			if( Global.settings.getCurrentTree().root == null )
@@ -360,7 +360,7 @@ public class IndividualEditorActivity extends AppCompatActivity {
 		else if( idFamiglia != null ) {
 			idPerno = null; // perno è già presente nella sua famiglia e non va riaggiunto
 		}
-		Family famiglia = idFamiglia != null ? gc.getFamily(idFamiglia) : ChurchFragment.nuovaFamiglia(true);;
+		Family famiglia = idFamiglia != null ? gc.getFamily(idFamiglia) : ChurchFragment.newFamily(true);;
 		Person perno = gc.getPerson( idPerno );
 		SpouseRef refSposo1 = new SpouseRef(), refSposo2 = new SpouseRef();
 		ChildRef refFiglio1 = new ChildRef(), refFiglio2 = new ChildRef();

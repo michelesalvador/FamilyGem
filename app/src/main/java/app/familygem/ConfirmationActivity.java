@@ -230,8 +230,8 @@ public class ConfirmationActivity extends BaseActivity {
 
 	// Calcola l'id più alto per una certa classe confrontando albero nuovo e vecchio
 	String idMassimo( Class classe ) {
-		String id = U.nuovoId( Global.gc, classe ); // id nuovo rispetto ai record dell'albero vecchio
-		String id2 = U.nuovoId( Global.gc2, classe ); // e dell'albero nuovo
+		String id = U.newID( Global.gc, classe ); // id nuovo rispetto ai record dell'albero vecchio
+		String id2 = U.newID( Global.gc2, classe ); // e dell'albero nuovo
 		if( Integer.valueOf( id.substring(1) ) > Integer.valueOf( id2.substring(1) ) ) // toglie la lettera iniziale
 			return id;
 		else

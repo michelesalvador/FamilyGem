@@ -52,7 +52,7 @@ public class IndividualEventsFragment extends Fragment {
 					if( nome.getType() != null && !nome.getType().isEmpty() ) {
 						tit += " (" + TypeView.getTranslatedType(nome.getType(), TypeView.Combo.NAME) + ")";
 					}
-					placeEvent(layout, tit, U.nomeCognome(nome, " "), nome);
+					placeEvent(layout, tit, U.firstAndLastName(nome, " "), nome);
 				}
 				for (EventFact fatto : one.getEventsFacts() ) {
 					String txt = "";
@@ -382,7 +382,7 @@ public class IndividualEventsFragment extends Fragment {
 			fragmentManager.beginTransaction().attach(this).commit();
 			if( what == 2 ) { // Also update person name in toolbar
 				CollapsingToolbarLayout toolbarLayout = requireActivity().findViewById(R.id.toolbar_layout);
-				toolbarLayout.setTitle(U.epiteto(one));
+				toolbarLayout.setTitle(U.properName(one));
 			}
 		}
 	}

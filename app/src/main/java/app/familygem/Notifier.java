@@ -73,7 +73,7 @@ class Notifier {
 				int years = findAge(birth);
 				if( years >= 0 ) {
 					tree.birthdays.add(new Settings.Birthday(person.getId(), U.givenName(person),
-							U.epiteto(person), nextBirthday(birth), years));
+							U.properName(person), nextBirthday(birth), years));
 				}
 			}
 		}

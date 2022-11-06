@@ -124,7 +124,7 @@ public class RegistryOfficeFragment extends Fragment {
 			}
 
 			TextView vistaNome = vistaIndi.findViewById(R.id.indi_nome);
-			String nome = U.epiteto(person);
+			String nome = U.properName(person);
 			vistaNome.setText(nome);
 			vistaNome.setVisibility((nome.isEmpty() && label != null) ? View.GONE : View.VISIBLE);
 
@@ -161,7 +161,7 @@ public class RegistryOfficeFragment extends Fragment {
 					} else {
 						List<Person> filteredList = new ArrayList<>();
 						for( Person pers : gc.getPeople() ) {
-							if( U.epiteto(pers).toLowerCase().contains(query.toLowerCase()) ) {
+							if( U.properName(pers).toLowerCase().contains(query.toLowerCase()) ) {
 								filteredList.add(pers);
 							}
 						}
@@ -270,12 +270,12 @@ public class RegistryOfficeFragment extends Fragment {
 			switch( order ) {
 				case ID_ASC: // Sort for GEDCOM ID
 					if( gliIdsonoNumerici )
-						return U.soloNumeri(p1.getId()) - U.soloNumeri(p2.getId());
+						return U.extractNum(p1.getId()) - U.extractNum(p2.getId());
 					else
 						return p1.getId().compareToIgnoreCase(p2.getId());
 				case ID_DESC:
 					if( gliIdsonoNumerici )
-						return U.soloNumeri(p2.getId()) - U.soloNumeri(p1.getId());
+						return U.extractNum(p2.getId()) - U.extractNum(p1.getId());
 					else
 						return p2.getId().compareToIgnoreCase(p1.getId());
 				case SURNAME_ASC: // Sort for surname

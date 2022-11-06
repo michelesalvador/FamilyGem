@@ -124,7 +124,7 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 	// Crea una nuova nota condivisa, attaccata a un contenitore oppure slegata
 	static void newNote(Context context, Object container) {
 		Note note = new Note();
-		String id = U.nuovoId(gc, Note.class);
+		String id = U.newID(gc, Note.class);
 		note.setId(id);
 		note.setValue("");
 		gc.addNote(note);

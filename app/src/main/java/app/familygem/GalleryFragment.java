@@ -85,7 +85,7 @@ public class GalleryFragment extends Fragment {
 
 	static Media newMedia(Object contenitore ){
 		Media media = new Media();
-		media.setId( U.nuovoId(gc,Media.class) );
+		media.setId( U.newID(gc,Media.class) );
 		media.setFileTag("FILE"); // Necessario per poi esportare il Gedcom
 		gc.addMedia( media );
 		if( contenitore != null ) {

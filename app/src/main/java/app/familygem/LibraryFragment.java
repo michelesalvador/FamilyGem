@@ -162,9 +162,9 @@ public class LibraryFragment extends Fragment {
 			Collections.sort( listaFonti, (f1, f2) -> {
 				switch( ordine ) {
 					case 1:	// Ordina per id numerico
-						return U.soloNumeri(f1.getId()) - U.soloNumeri(f2.getId());
+						return U.extractNum(f1.getId()) - U.extractNum(f2.getId());
 					case 2:
-						return U.soloNumeri(f2.getId()) - U.soloNumeri(f1.getId());
+						return U.extractNum(f2.getId()) - U.extractNum(f1.getId());
 					case 3:	// Ordine alfabeto dei titoli
 						return titoloFonte(f1).compareToIgnoreCase( titoloFonte(f2) );
 					case 4:
@@ -237,7 +237,7 @@ public class LibraryFragment extends Fragment {
 
 	static void newSource(Context contesto, Object contenitore ){
 		Source fonte = new Source();
-		fonte.setId( U.nuovoId( gc, Source.class ) );
+		fonte.setId( U.newID( gc, Source.class ) );
 		fonte.setTitle( "" );
 		gc.addSource( fonte );
 		if( contenitore != null ) {

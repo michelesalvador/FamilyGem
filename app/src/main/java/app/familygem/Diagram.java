@@ -387,7 +387,7 @@ public class Diagram extends Fragment {
 			}
 			F.unaFoto(Global.gc, person, view.findViewById(R.id.card_photo));
 			TextView vistaNome = view.findViewById(R.id.card_name);
-			String nome = U.epiteto(person, true);
+			String nome = U.properName(person, true);
 			if( nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility()==View.VISIBLE )
 				vistaNome.setVisibility( View.GONE );
 			else vistaNome.setText( nome );

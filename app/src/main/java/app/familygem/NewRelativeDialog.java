@@ -237,7 +237,7 @@ public class NewRelativeDialog extends DialogFragment {
 			if( famiglia != null)
 				return U.testoFamiglia(contesto, Global.gc, famiglia, true);
 			else if( genitore != null )
-				return contesto.getString(R.string.new_family_of, U.epiteto(genitore));
+				return contesto.getString(R.string.new_family_of, U.properName(genitore));
 			else if( esistente )
 				return contesto.getString(R.string.existing_family);
 			else

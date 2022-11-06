@@ -161,7 +161,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 			});
 		} else idView.setVisibility(View.GONE);
 		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
-		barraCollasso.setTitle(U.epiteto(one)); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
+		barraCollasso.setTitle(U.properName(one)); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
 		F.unaFoto(Global.gc, one, findViewById(R.id.persona_foto));
 		F.unaFoto(Global.gc, one, findViewById(R.id.persona_sfondo));
 		if( Global.edited ) {
@@ -468,7 +468,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 			case 3: // Set as root
 				Global.settings.getCurrentTree().root = one.getId();
 				Global.settings.save();
-				Toast.makeText(this, getString(R.string.this_is_root, U.epiteto(one)), Toast.LENGTH_LONG).show();
+				Toast.makeText(this, getString(R.string.this_is_root, U.properName(one)), Toast.LENGTH_LONG).show();
 				return true;
 			case 4: // Edit
 				Intent intent1 = new Intent(this, IndividualEditorActivity.class);
