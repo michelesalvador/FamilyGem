@@ -37,7 +37,7 @@ public class Comparison {
     /**
      * Returns the currently active front
      * */
-    static Front getFronte(Activity activity) {
+    static Front getFront(Activity activity) {
         return getList().get(activity.getIntent().getIntExtra("posizione", 0) - 1);
     }
 

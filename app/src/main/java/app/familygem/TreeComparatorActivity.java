@@ -51,8 +51,8 @@ public class TreeComparatorActivity extends BaseActivity {
 			barra.setProgress( posizione );
 			((TextView)findViewById( R.id.confronto_stato )).setText( posizione+"/"+max );
 
-			final Object o = Comparison.getFronte(this).object;
-			final Object o2 = Comparison.getFronte(this).object2;
+			final Object o = Comparison.getFront(this).object;
+			final Object o2 = Comparison.getFront(this).object2;
 			if( o != null ) classe = o.getClass();
 			else classe = o2.getClass();
 			arredaScheda( Global.gc, R.id.confronto_vecchio, o );
@@ -71,7 +71,7 @@ public class TreeComparatorActivity extends BaseActivity {
 				destino = 3;
 				bottoneOk.setText( R.string.delete );
 				bottoneOk.setBackgroundColor( 0xffff0000 );
-			} else if( Comparison.getFronte(this).canBothAddAndReplace) {
+			} else if( Comparison.getFront(this).canBothAddAndReplace) {
 				// Altro bottone Aggiungi
 				Button bottoneAggiungi = new Button( this );
 				bottoneAggiungi.setTextSize( TypedValue.COMPLEX_UNIT_SP,16 );
@@ -83,26 +83,26 @@ public class TreeComparatorActivity extends BaseActivity {
 				bottoneAggiungi.setText( R.string.add );
 				bottoneAggiungi.setBackgroundColor( 0xff00dd00 );
 				bottoneAggiungi.setOnClickListener( v -> {
-					Comparison.getFronte(this).destiny = 1;
+					Comparison.getFront(this).destiny = 1;
 					vaiAvanti();
 				});
 				(( LinearLayout)findViewById( R.id.confronto_bottoni )).addView( bottoneAggiungi, 1 );
 			}
 
 			// Prosegue in automatico se non c'è una doppia azione da scegliere
-			if( Comparison.get().autoContinue && !Comparison.getFronte(this).canBothAddAndReplace) {
-				Comparison.getFronte(this).destiny = destino;
+			if( Comparison.get().autoContinue && !Comparison.getFront(this).canBothAddAndReplace) {
+				Comparison.getFront(this).destiny = destino;
 				vaiAvanti();
 			}
 
 			// Bottone per accettare la novità
 			bottoneOk.setOnClickListener( vista -> {
-				Comparison.getFronte(this).destiny = destino;
+				Comparison.getFront(this).destiny = destino;
 				vaiAvanti();
 			});
 
 			findViewById(R.id.confronto_bottone_ignora ).setOnClickListener( v -> {
-				Comparison.getFronte(this).destiny = 0;
+				Comparison.getFront(this).destiny = 0;
 				vaiAvanti();
 			});
 		} else
@@ -224,7 +224,7 @@ public class TreeComparatorActivity extends BaseActivity {
 			intent.putExtra( "posizione", getIntent().getIntExtra("posizione",0) + 1 );
 		}
 		if( Comparison.get().autoContinue) {
-			if( Comparison.getFronte(this).canBothAddAndReplace)
+			if( Comparison.getFront(this).canBothAddAndReplace)
 				Comparison.get().choicesMade++;
 			else
 				finish(); // rimuove il front attuale dallo stack
