@@ -443,7 +443,7 @@ public class F {
 					default:
 						ext = "jpg";
 				}
-				File cache = fileNomeProgressivo( cartellaCache.getPath(), "img." + ext );
+				File cache = nextAvailableFileName( cartellaCache.getPath(), "img." + ext );
 				FileUtils.copyURLToFile( url[0], cache );
 				return cache.getPath();
 			} catch( Exception e ) {
@@ -611,7 +611,7 @@ public class F {
 						File dir = contesto.getExternalFilesDir( String.valueOf(Global.settings.openTree) );
 						if( !dir.exists() )
 							dir.mkdir();
-						File fotoFile = fileNomeProgressivo( dir.getAbsolutePath(), "image.jpg" );
+						File fotoFile = nextAvailableFileName( dir.getAbsolutePath(), "image.jpg" );
 						Global.fotoCamera = fotoFile.getAbsolutePath(); // Lo salva per riprenderlo dopo che la foto è stata scattata
 						Uri fotoUri;
 						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
@@ -700,7 +700,7 @@ public class F {
 					percorso = type.substring(0, type.indexOf('/')) + "."
 							+ MimeTypeMap.getSingleton().getExtensionFromMimeType(type);
 				}
-				fileMedia[0] = fileNomeProgressivo( dirMemoria.getAbsolutePath(), percorso );
+				fileMedia[0] = nextAvailableFileName( dirMemoria.getAbsolutePath(), percorso );
 				FileUtils.copyInputStreamToFile( input, fileMedia[0] ); // Crea la cartella se non esiste
 			} catch( Exception e ) {
 				String msg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : contesto.getString(R.string.something_wrong);
@@ -768,7 +768,7 @@ public class F {
 				nome = fileMedia.getName();
 			else // Uri
 				nome = DocumentFile.fromSingleUri( contesto, uriMedia ).getName();
-			fileDestinazione = fileNomeProgressivo( dirMemoria.getAbsolutePath(), nome );
+			fileDestinazione = nextAvailableFileName( dirMemoria.getAbsolutePath(), nome );
 		}
 		Intent intent = CropImage.activity( uriMedia )
 				.setOutputUri( Uri.fromFile(fileDestinazione) ) // cartella in memoria esterna
@@ -784,14 +784,17 @@ public class F {
 			((AppCompatActivity)contesto).startActivityForResult( intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE );
 	}
 
-	// Se in quella cartella esiste già un file con quel nome lo incrementa con 1 2 3...
-	static File fileNomeProgressivo( String dir, String nome ) {
+	/**
+	 * If a file with that name already exists in that folder, increment it with 1 2 3 ...
+	 * Se in quella cartella esiste già un file con quel nome lo incrementa con 1 2 3...
+	 * */
+	static File nextAvailableFileName(String dir, String nome ) {
 		File file = new File( dir, nome );
-		int incremento = 0;
+		int increment = 0;
 		while( file.exists() ) {
-			incremento++;
+			increment++;
 			file = new File( dir, nome.substring(0,nome.lastIndexOf('.'))
-					+ incremento + nome.substring(nome.lastIndexOf('.')) );
+					+ increment + nome.substring(nome.lastIndexOf('.')) );
 		}
 		return file;
 	}

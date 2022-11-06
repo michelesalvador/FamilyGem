@@ -1,5 +1,3 @@
-// Attività finale all'importazione delle novità in un albero già esistente
-
 package app.familygem;
 
 import android.content.Intent;
@@ -29,36 +27,39 @@ import app.familygem.visitor.NoteContainers;
 import app.familygem.visitor.ListOfSourceCitations;
 import app.familygem.visitor.MediaList;
 
+/**
+ * Final activity when importing news in an existing tree
+ * */
 public class ConfirmationActivity extends BaseActivity {
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
+	protected void onCreate( Bundle bundle ) {
+		super.onCreate( bundle );
 		setContentView( R.layout.conferma );
 		if( !Comparison.getList().isEmpty() ) {
 
-			// Albero vecchio
-			CardView carta = findViewById( R.id.conferma_vecchio );
+			// Old tree
+			CardView card = findViewById( R.id.conferma_vecchio );
 			Settings.Tree tree = Global.settings.getTree( Global.settings.openTree);
-			((TextView)carta.findViewById(R.id.confronto_titolo )).setText( tree.title);
+			((TextView)card.findViewById(R.id.confronto_titolo )).setText( tree.title);
 			String txt = TreesActivity.writeData( this, tree);
-			((TextView)carta.findViewById(R.id.confronto_testo )).setText( txt );
-			carta.findViewById( R.id.confronto_data ).setVisibility( View.GONE );
+			((TextView)card.findViewById(R.id.confronto_testo )).setText( txt );
+			card.findViewById( R.id.confronto_data ).setVisibility( View.GONE );
 
-			int aggiungi = 0;
-			int sostitui = 0;
-			int elimina = 0;
+			int add = 0;
+			int replace = 0;
+			int delete = 0;
 			for( Comparison.Front front : Comparison.getList() ) {
 				switch( front.destiny) {
-					case 1: aggiungi++;
+					case 1: add++;
 						break;
-					case 2: sostitui++;
+					case 2: replace++;
 						break;
-					case 3: elimina++;
+					case 3: delete++;
 				}
 			}
-			String testo = getString( R.string.accepted_news, aggiungi+sostitui+elimina, aggiungi, sostitui, elimina );
-			((TextView)findViewById(R.id.conferma_testo )).setText( testo );
+			String text = getString( R.string.accepted_news, add+replace+delete, add, replace, delete );
+			((TextView)findViewById(R.id.conferma_testo )).setText( text );
 
 			findViewById(R.id.conferma_annulla ).setOnClickListener( v -> {
 				Comparison.reset();
@@ -66,88 +67,88 @@ public class ConfirmationActivity extends BaseActivity {
 			});
 
 			findViewById(R.id.conferma_ok ).setOnClickListener( v -> {
-				// Modifica l'id e tutti i ref agli oggetti con doppiaOpzione e destino da aggiungere
-				boolean fattoQualcosa = false;
+				//Change the id and all refs to objects with canBothAddAndReplace and destiny to add // Modifica l'id e tutti i ref agli oggetti con doppiaOpzione e destino da aggiungere
+				boolean changed = false;
 				for( Comparison.Front front : Comparison.getList() ) {
 					if( front.canBothAddAndReplace && front.destiny == 1 ) {
-						String idNuovo;
-						fattoQualcosa = true;
+						String newID;
+						changed = true;
 						switch( front.type) {
 							case 1: // Note
-								idNuovo = idMassimo( Note.class );
+								newID = maxID( Note.class );
 								Note n2 = (Note) front.object2;
-								new NoteContainers( Global.gc2, n2, idNuovo ); // aggiorna tutti i ref alla nota
-								n2.setId( idNuovo ); // poi aggiorna l'id della nota
+								new NoteContainers( Global.gc2, n2, newID ); // updates all refs to the note
+								n2.setId( newID ); // then update the note id
 								break;
 							case 2: // Submitter
-								idNuovo = idMassimo( Submitter.class );
-								((Submitter)front.object2).setId( idNuovo );
+								newID = maxID( Submitter.class );
+								((Submitter)front.object2).setId( newID );
 								break;
 							case 3: // Repository
-								idNuovo = idMassimo( Repository.class );
+								newID = maxID( Repository.class );
 								Repository repo2 = (Repository)front.object2;
 								for( Source fon : Global.gc2.getSources() )
 									if( fon.getRepositoryRef() != null && fon.getRepositoryRef().getRef().equals(repo2.getId()) )
-										fon.getRepositoryRef().setRef( idNuovo );
-								repo2.setId( idNuovo );
+										fon.getRepositoryRef().setRef( newID );
+								repo2.setId( newID );
 								break;
 							case 4: // Media
-								idNuovo = idMassimo( Media.class );
+								newID = maxID( Media.class );
 								Media m2 = (Media) front.object2;
-								new MediaContainers( Global.gc2, m2, idNuovo );
-								m2.setId( idNuovo );
+								new MediaContainers( Global.gc2, m2, newID );
+								m2.setId( newID );
 								break;
 							case 5: // Source
-								idNuovo = idMassimo( Source.class );
+								newID = maxID( Source.class );
 								Source s2 = (Source) front.object2;
-								ListOfSourceCitations citaFonte = new ListOfSourceCitations( Global.gc2, s2.getId() );
-								for( ListOfSourceCitations.Triplet tri : citaFonte.list)
-									tri.citation.setRef( idNuovo );
-								s2.setId( idNuovo );
+								ListOfSourceCitations sourceCitations = new ListOfSourceCitations( Global.gc2, s2.getId() );
+								for( ListOfSourceCitations.Triplet tri : sourceCitations.list)
+									tri.citation.setRef( newID );
+								s2.setId( newID );
 								break;
 							case 6: // Person
-								idNuovo = idMassimo( Person.class );
+								newID = maxID( Person.class );
 								Person p2 = (Person) front.object2;
 								for( Family fam : Global.gc2.getFamilies() ) {
 									for( SpouseRef sr : fam.getHusbandRefs() )
 										if( sr.getRef().equals(p2.getId()) )
-											sr.setRef( idNuovo );
+											sr.setRef( newID );
 									for( SpouseRef sr : fam.getWifeRefs() )
 										if( sr.getRef().equals(p2.getId()) )
-											sr.setRef( idNuovo );
+											sr.setRef( newID );
 									for( ChildRef cr : fam.getChildRefs() )
 										if( cr.getRef().equals(p2.getId()) )
-											cr.setRef( idNuovo );
+											cr.setRef( newID );
 								}
-								p2.setId( idNuovo );
+								p2.setId( newID );
 								break;
 							case 7: // Family
-								idNuovo = idMassimo( Family.class );
+								newID = maxID( Family.class );
 								Family f2 = (Family) front.object2;
 								for( Person per : Global.gc2.getPeople() ) {
 									for( ParentFamilyRef pfr : per.getParentFamilyRefs() )
 										if( pfr.getRef().equals(f2.getId()) )
-											pfr.setRef( idNuovo );
+											pfr.setRef( newID );
 									for( SpouseFamilyRef sfr : per.getSpouseFamilyRefs() )
 										if( sfr.getRef().equals(f2.getId()) )
-											sfr.setRef( idNuovo );
+											sfr.setRef( newID );
 								}
-								f2.setId( idNuovo );
+								f2.setId( newID );
 						}
 					}
 				}
-				if( fattoQualcosa )
+				if( changed )
 					U.saveJson( Global.gc2, Global.treeId2);
 
-				// La regolare aggiunta/sostituzione/eliminazione dei record da albero2 ad albero
+				// Regular addition / replacement / deletion of records from tree2 to tree
 				for( Comparison.Front front : Comparison.getList() ) {
 					switch( front.type) {
-						case 1: // Nota
+						case 1: // Note
 							if( front.destiny > 1 )
 								Global.gc.getNotes().remove( front.object );
 							if( front.destiny > 0 && front.destiny < 3 ) {
 								Global.gc.addNote( (Note) front.object2 );
-								copiaTuttiFile( front.object2 );
+								copyAllFiles( front.object2 );
 							}
 							break;
 						case 2: // Submitter
@@ -161,7 +162,7 @@ public class ConfirmationActivity extends BaseActivity {
 								Global.gc.getRepositories().remove( front.object );
 							if( front.destiny > 0 && front.destiny < 3 ) {
 								Global.gc.addRepository( (Repository) front.object2 );
-								copiaTuttiFile( front.object2 );
+								copyAllFiles( front.object2 );
 							}
 							break;
 						case 4: // Media
@@ -169,7 +170,7 @@ public class ConfirmationActivity extends BaseActivity {
 								Global.gc.getMedia().remove( front.object );
 							if( front.destiny > 0 && front.destiny < 3 ) {
 								Global.gc.addMedia( (Media) front.object2 );
-								vediSeCopiareFile( (Media)front.object2 );
+								checkIfShouldCopyFiles( (Media)front.object2 );
 							}
 							break;
 						case 5: // Source
@@ -177,7 +178,7 @@ public class ConfirmationActivity extends BaseActivity {
 								Global.gc.getSources().remove( front.object );
 							if( front.destiny > 0 && front.destiny < 3 ) {
 								Global.gc.addSource( (Source) front.object2 );
-								copiaTuttiFile( front.object2 );
+								copyAllFiles( front.object2 );
 							}
 							break;
 						case 6: // Person
@@ -185,7 +186,7 @@ public class ConfirmationActivity extends BaseActivity {
 								Global.gc.getPeople().remove( front.object );
 							if( front.destiny > 0 && front.destiny < 3 ) {
 								Global.gc.addPerson( (Person) front.object2 );
-								copiaTuttiFile( front.object2 );
+								copyAllFiles( front.object2 );
 							}
 							break;
 						case 7: // Family
@@ -193,80 +194,91 @@ public class ConfirmationActivity extends BaseActivity {
 								Global.gc.getFamilies().remove( front.object );
 							if( front.destiny > 0 && front.destiny < 3 ) {
 								Global.gc.addFamily( (Family) front.object2 );
-								copiaTuttiFile( front.object2 );
+								copyAllFiles( front.object2 );
 							}
 					}
 				}
 				U.saveJson( Global.gc, Global.settings.openTree);
 
-				// Se ha fatto tutto propone di eliminare l'albero importato
-				boolean tuttiOk = true;
-				for( Comparison.Front fron : Comparison.getList() )
-					if( fron.destiny == 0 ) {
-						tuttiOk = false;
+				// If he has done everything he proposes to delete the imported tree (?)//Se ha fatto tutto propone di eliminare l'albero importato
+				boolean allOK = true;
+				for( Comparison.Front front : Comparison.getList() )
+					if( front.destiny == 0 ) {
+						allOK = false;
 						break;
 					}
-				if( tuttiOk ) {
+				if( allOK ) {
 					Global.settings.getTree( Global.treeId2).grade = 30;
 					Global.settings.save();
 					new AlertDialog.Builder( ConfirmationActivity.this )
 							.setMessage( R.string.all_imported_delete )
 							.setPositiveButton( android.R.string.ok, (d, i) -> {
 								TreesActivity.deleteTree( this, Global.treeId2);
-								concludi();
-							}).setNegativeButton( R.string.no, (d, i) -> concludi() )
-							.setOnCancelListener( dialog -> concludi() ).show();
+								done();
+							}).setNegativeButton( R.string.no, (d, i) -> done() )
+							.setOnCancelListener( dialog -> done() ).show();
 				} else
-					concludi();
+					done();
 			});
 		} else onBackPressed();
 	}
 
-	// Apre l'elenco degli alberi
-	void concludi() {
+	/**
+	 * Opens the tree list
+	 * */
+	void done() {
 		Comparison.reset();
 		startActivity( new Intent( this, TreesActivity.class ) );
 	}
 
-	// Calcola l'id più alto per una certa classe confrontando albero nuovo e vecchio
-	String idMassimo( Class classe ) {
-		String id = U.newID( Global.gc, classe ); // id nuovo rispetto ai record dell'albero vecchio
-		String id2 = U.newID( Global.gc2, classe ); // e dell'albero nuovo
-		if( Integer.valueOf( id.substring(1) ) > Integer.valueOf( id2.substring(1) ) ) // toglie la lettera iniziale
+	/**
+	 * Calculate the highest id for a certain class by comparing new and old tree
+	 * Calcola l'id più alto per una certa classe confrontando albero nuovo e vecchio
+	 * */
+	String maxID(Class classe ) {
+		String id = U.newID( Global.gc, classe ); // new id against old tree records
+		String id2 = U.newID( Global.gc2, classe ); // and of the new tree
+		if( Integer.parseInt( id.substring(1) ) > Integer.parseInt( id2.substring(1) ) ) // removes the initial letter
 			return id;
 		else
 			return id2;
 	}
 
-	// Se un object nuovo ha dei media, valuta se copiare i file nella cartella immagini dell'albero vecchio
-	// comunque  aggiorna il collegamento nel Media
-	void copiaTuttiFile( Object object ) {
-		MediaList cercaMedia = new MediaList( Global.gc2, 2 );
-		((Visitable)object).accept( cercaMedia );
-		for( Media media : cercaMedia.list) {
-			vediSeCopiareFile( media );
+	/**
+	 * If a new object has media, consider copying the files to the old tree image folder
+	 * still update the link in the Media
+	 *
+	 * Se un object nuovo ha dei media, valuta se copiare i file nella cartella immagini dell'albero vecchio
+	 * comunque
+	 * aggiorna il collegamento nel Media
+	 * */
+	void copyAllFiles(Object object ) {
+		MediaList searchMedia = new MediaList( Global.gc2, 2 );
+		((Visitable)object).accept( searchMedia );
+		for( Media media : searchMedia.list) {
+			checkIfShouldCopyFiles( media );
 		}
 	}
-	void vediSeCopiareFile( Media media ) {
-		String origine = F.mediaPath( Global.treeId2, media );
-		if( origine != null ) {
-			File fileOrigine = new File( origine );
-			File dirMemoria = getExternalFilesDir( String.valueOf(Global.settings.openTree) ); // dovrebbe stare fuori dal loop ma vabè
-			String nomeFile = origine.substring( origine.lastIndexOf('/') + 1 );
-			File fileGemello = new File( dirMemoria.getAbsolutePath(), nomeFile );
-			if( fileGemello.isFile()	// se il file corrispondente esiste già
-					&& fileGemello.lastModified() == fileOrigine.lastModified() // e hanno la stessa data
-					&& fileGemello.length() == fileOrigine.length() ) { // e la stessa dimensione
-				// Allora utilizza il file già esistente
-				media.setFile( fileGemello.getAbsolutePath() );
-			} else { // Altrimenti copia il file nuovo
-				File fileDestinazione = F.fileNomeProgressivo( dirMemoria.getAbsolutePath(), nomeFile );
+	void checkIfShouldCopyFiles(Media media ) {
+		String path = F.mediaPath( Global.treeId2, media );
+		if( path != null ) {
+			File filePath = new File( path );
+			File memoryDir = getExternalFilesDir( String.valueOf(Global.settings.openTree) ); // it should stay out of the loop but oh well //dovrebbe stare fuori dal loop ma vabè
+			String nameFile = path.substring( path.lastIndexOf('/') + 1 );
+			File twinFile = new File( memoryDir.getAbsolutePath(), nameFile );
+			if( twinFile.isFile()	// if the corresponding file already exists
+					&& twinFile.lastModified() == filePath.lastModified() // and have the same date
+					&& twinFile.length() == filePath.length() ) { // and the same size
+				// Then use the already existing file
+				media.setFile( twinFile.getAbsolutePath() );
+			} else { // Otherwise copy the new file
+				File destinationFile = F.nextAvailableFileName( memoryDir.getAbsolutePath(), nameFile );
 				try {
-					FileUtils.copyFile( fileOrigine, fileDestinazione );
+					FileUtils.copyFile( filePath, destinationFile );
 				} catch( IOException e ) {
 					e.printStackTrace();
 				}
-				media.setFile( fileDestinazione.getAbsolutePath() );
+				media.setFile( destinationFile.getAbsolutePath() );
 			}
 		}
 	}
