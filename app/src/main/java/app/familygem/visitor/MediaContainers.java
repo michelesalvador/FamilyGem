@@ -28,7 +28,7 @@ public class MediaContainers extends TotalVisitor {
 	}
 
 	@Override
-	boolean visit(Object object, boolean capostipite) {
+	boolean visit(Object object, boolean isProgenitor) {
 		if( object instanceof MediaContainer ) {
 			for( MediaRef mediaRef : ((MediaContainer)object).getMediaRefs() ) {
 				if( mediaRef.getRef().equals(media.getId()) ) {

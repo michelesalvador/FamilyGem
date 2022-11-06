@@ -36,8 +36,8 @@ public class MediaReferences extends TotalVisitor {
 	}
 
 	@Override
-	boolean visit(Object object, boolean isProgenitor ) {
-		if( isProgenitor )
+	boolean visit(Object object, boolean isProgenitor) {
+		if(isProgenitor)
 			progenitor = object;
 		if( object instanceof MediaContainer ) {
 			MediaContainer container = (MediaContainer)object;

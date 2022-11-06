@@ -13,7 +13,7 @@ class CleanStack extends TotalVisitor {
 	}
 
 	@Override
-	boolean visit(Object object, boolean head) { // the boolean is unused here
+	boolean visit(Object object, boolean isProgenitor) { // the boolean is unused here
 		if( object.equals(scope) )
 			toDelete = false;
 		return true;

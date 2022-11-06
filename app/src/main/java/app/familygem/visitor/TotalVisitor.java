@@ -1,5 +1,3 @@
-// Modello di Visitor che visita tutti i possibili contenitori del Gedcom distinguendo i capostipiti
-
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.Change;
@@ -17,13 +15,17 @@ import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.model.Visitor;
 
+/**
+ * Visitor model that visits all the possible Gedcom containers distinguishing the progenitors
+ * Modello di Visitor che visita tutti i possibili contenitori del Gedcom distinguendo i capostipiti
+ * */
 public class TotalVisitor extends Visitor {
 
-	private boolean visita( Object object ) {
+	private boolean visitInternal(Object object ) {
 		return visit( object, false );
 	}
 
-	boolean visit(Object object, boolean capostipite ) {
+	boolean visit(Object object, boolean isProgenitor ) {
 		return true;
 	}
 
@@ -61,22 +63,22 @@ public class TotalVisitor extends Visitor {
 	}
 	@Override
 	public boolean visit( Name n ) {
-		return visita( n );
+		return visitInternal( n );
 	}
 	@Override
 	public boolean visit( EventFact e ) {
-		return visita( e );
+		return visitInternal( e );
 	}
 	@Override
 	public boolean visit( SourceCitation s ) {
-		return visita( s );
+		return visitInternal( s );
 	}
 	@Override
 	public boolean visit( RepositoryRef r ) {
-		return visita( r );
+		return visitInternal( r );
 	}
 	@Override
 	public boolean visit( Change c ) {
-		return visita( c );
+		return visitInternal( c );
 	}
 }

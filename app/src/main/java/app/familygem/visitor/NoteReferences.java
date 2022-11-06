@@ -32,8 +32,8 @@ public class NoteReferences extends TotalVisitor {
 	}
 
 	@Override
-	boolean visit(Object object, boolean isHead ) {
-		if( isHead )
+	boolean visit(Object object, boolean isProgenitor) {
+		if(isProgenitor)
 			head = object;
 		if( object instanceof NoteContainer ) {
 			NoteContainer container = (NoteContainer) object;

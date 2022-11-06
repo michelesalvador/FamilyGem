@@ -28,8 +28,8 @@ public class ListOfSourceCitations extends TotalVisitor {
 	}
 
 	@Override
-	boolean visit(Object object, boolean progenitor ) {
-		if( progenitor )
+	boolean visit(Object object, boolean isProgenitor) {
+		if(isProgenitor)
 			capo = object;
 		if( object instanceof SourceCitationContainer ) {
 			analyze( object, ((SourceCitationContainer)object).getSourceCitations() );
