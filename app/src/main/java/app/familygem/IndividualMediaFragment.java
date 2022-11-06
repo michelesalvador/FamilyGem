@@ -36,7 +36,7 @@ public class IndividualMediaFragment extends Fragment {
 				griglia.setHasFixedSize(true);
 				RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(getContext(), 2);
 				griglia.setLayoutManager(gestoreLayout);
-				MediaGalleryAdapter adattatore = new MediaGalleryAdapter(visitaMedia.listaMedia, true);
+				MediaGalleryAdapter adattatore = new MediaGalleryAdapter(visitaMedia.mediaList, true);
 				griglia.setAdapter(adattatore);
 				scatola.addView(griglia);
 			}
@@ -49,9 +49,9 @@ public class IndividualMediaFragment extends Fragment {
 	Object container; // Le immagini non sono solo di 'uno', ma anche dei suoi subordinati EventFact, SourceCitation...
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
-		media = (Media)view.getTag(R.id.tag_oggetto);
+		media = (Media)view.getTag(R.id.tag_object);
 		container = view.getTag(R.id.tag_contenitore);
-		if( visitaMedia.listaMedia.size() > 1 && media.getPrimary() == null )
+		if( visitaMedia.mediaList.size() > 1 && media.getPrimary() == null )
 			menu.add(0, 0, 0, R.string.primary_media);
 		if( media.getId() != null )
 			menu.add(0, 1, 0, R.string.unlink);
@@ -61,7 +61,7 @@ public class IndividualMediaFragment extends Fragment {
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id == 0 ) { // Principale
-			for( MediaListContainer.MedCont medCont : visitaMedia.listaMedia ) // Li resetta tutti poi ne contrassegna uno
+			for( MediaListContainer.MedCont medCont : visitaMedia.mediaList) // Li resetta tutti poi ne contrassegna uno
 				medCont.media.setPrimary(null);
 			media.setPrimary("Y");
 			if( media.getId() != null ) // Per aggiornare la data cambiamento nel Media record piuttosto che nella Person

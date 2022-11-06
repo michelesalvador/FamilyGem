@@ -108,7 +108,7 @@ public class ImageActivity extends DetailActivity {
 				startActivity( intent );
 			}
 		});
-		this.imageView.setTag( R.id.tag_oggetto, 43614 /*TODO Magic Number*/);	// for its context menu //per il suo menu contestuale
+		this.imageView.setTag( R.id.tag_object, 43614 /*TODO Magic Number*/);	// for its context menu //per il suo menu contestuale
 		registerForContextMenu(this.imageView);
 	}
 

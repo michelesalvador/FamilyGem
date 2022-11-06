@@ -479,9 +479,9 @@ public class U {
 		return pre + (max + 1);
 	}
 
-	private static void calcolaMax(Object oggetto) {
+	private static void calcolaMax(Object object) {
 		try {
-			String idStringa = (String)oggetto.getClass().getMethod("getId").invoke(oggetto);
+			String idStringa = (String)object.getClass().getMethod("getId").invoke(object);
 			int num = soloNumeri(idStringa);
 			if( num > max ) max = num;
 		} catch( Exception e ) {
@@ -658,7 +658,7 @@ public class U {
 		textView.setEllipsize(TextUtils.TruncateAt.END);
 		if( detailed ) {
 			textView.setMaxLines(10);
-			noteView.setTag(R.id.tag_oggetto, note);
+			noteView.setTag(R.id.tag_object, note);
 			if( context instanceof IndividualPersonActivity) { // Fragment individuoEventi
 				((AppCompatActivity)context).getSupportFragmentManager()
 						.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1") // non garantito in futuro
@@ -717,7 +717,7 @@ public class U {
 		return capi.toArray();
 	}
 
-	// Elenca tutti i media di un oggetto contenitore
+	// Elenca tutti i media di un object contenitore
 	public static void placeMedia(LinearLayout layout, Object container, boolean detailed) {
 		RecyclerView griglia = new MediaGalleryAdapter.RiciclaVista(layout.getContext(), detailed);
 		griglia.setHasFixedSize(true);
@@ -731,7 +731,7 @@ public class U {
 		layout.addView(griglia);
 	}
 
-	// Di un oggetto inserisce le citazioni alle fonti
+	// Di un object inserisce le citazioni alle fonti
 	public static void placeSourceCitations(LinearLayout layout, Object container) {
 		if( Global.settings.expert ) {
 			List<SourceCitation> listaCitaFonti;
@@ -757,7 +757,7 @@ public class U {
 				LinearLayout scatolaAltro = vistaCita.findViewById(R.id.citazione_note);
 				placeNotes(scatolaAltro, citaz, false);
 				placeMedia(scatolaAltro, citaz, false);
-				vistaCita.setTag(R.id.tag_oggetto, citaz);
+				vistaCita.setTag(R.id.tag_object, citaz);
 				if( layout.getContext() instanceof IndividualPersonActivity) { // Fragment individuoEventi
 					((AppCompatActivity)layout.getContext()).getSupportFragmentManager()
 							.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1")
@@ -796,7 +796,7 @@ public class U {
 			LinearLayout scatolaAltro = vistaFonte.findViewById(R.id.fonte_scatola);
 			placeNotes(scatolaAltro, source, false);
 			placeMedia(scatolaAltro, source, false);
-			vistaFonte.setTag(R.id.tag_oggetto, source);
+			vistaFonte.setTag(R.id.tag_object, source);
 			((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaFonte);
 		} else {
 			vistaTesto.setMaxLines(2);

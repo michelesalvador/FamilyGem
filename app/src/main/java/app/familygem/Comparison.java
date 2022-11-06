@@ -22,10 +22,10 @@ public class Comparison {
 		return get().lista;
 	}
 
-	static Fronte addFronte( Object oggetto, Object oggetto2, int tipo ) {
+	static Fronte addFronte( Object object, Object object2, int tipo ) {
 		Fronte fronte = new Fronte();
-		fronte.oggetto = oggetto;
-		fronte.oggetto2 = oggetto2;
+		fronte.object = object;
+		fronte.object2 = object2;
 		fronte.tipo = tipo;
 		getLista().add( fronte );
 		return fronte;
@@ -43,16 +43,16 @@ public class Comparison {
 	}
 
 	static class Fronte {
-		Object oggetto;
-		Object oggetto2;
+		Object object;
+		Object object2;
 		int tipo; // numero da 1 a 7 che definisce il tipo: 1 Nota -> 7 Famiglia
 		boolean doppiaOpzione; // ha la possibilità di aggiungi + sostituisci
 		/*
 		che fare di questa coppia di oggetti:
 		0 niente
-		1 oggetto2 viene aggiunto ad albero
-		2 oggetto2 sostituisce oggetto
-		3 oggetto viene eliminato */
+		1 object2 viene aggiunto ad albero
+		2 object2 sostituisce object
+		3 object viene eliminato */
 		int destino;
 	}
 }

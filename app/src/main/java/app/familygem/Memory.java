@@ -80,20 +80,20 @@ public class Memory {
 		setFirst( object, null );
 	}
 
-	public static void setFirst(Object oggetto, String tag ) {
+	public static void setFirst(Object object, String tag ) {
 		addStack();
-		Step step = add( oggetto );
+		Step step = add( object );
 		if( tag != null )
 			step.tag = tag;
-		else if( oggetto instanceof Person )
+		else if( object instanceof Person )
 			step.tag = "INDI";
 		//stampa("setPrimo");
 	}
 
-	// Aggiunge un oggetto alla fine dell'ultima pila esistente
-	public static Step add(Object oggetto ) {
+	// Aggiunge un object alla fine dell'ultima pila esistente
+	public static Step add(Object object ) {
 		Step step = new Step();
-		step.object = oggetto;
+		step.object = object;
 		getStepStack().add(step);
 		//stampa("aggiungi");
 		return step;
@@ -127,7 +127,7 @@ public class Memory {
 
 	/**
 	 * If the stack has more than one object, get the second to last object, otherwise return null
-	 * The object in the previous step to the last - L'oggetto nel passo precedente all'ultimo
+	 * The object in the previous step to the last - L'object nel passo precedente all'ultimo
 	 * I think it was called containerObject()?
 	 * */
 	public static Object getSecondToLastObject() {
@@ -138,7 +138,7 @@ public class Memory {
 			return null;
 	}
 
-	// L'oggetto nell'ultimo passo
+	// L'object nell'ultimo passo
 	public static Object getObject() {
 		if( getStepStack().size() == 0 )
 			return null;

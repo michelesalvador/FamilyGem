@@ -25,7 +25,7 @@ import app.familygem.Memory;
  * // e.g. Person> Simple media
  * // or Family> Note> SourceCitation> Simple Note
  *
- * // Visitatore che produce in Memoria la pila gerarchica degli oggetti tra il record capostipite e un oggetto dato
+ * // Visitatore che produce in Memoria la pila gerarchica degli oggetti tra il record capostipite e un object dato
  * // ad es. Person > Media semplice
  * // oppure Family > Note > SourceCitation > Note semplice
  * */

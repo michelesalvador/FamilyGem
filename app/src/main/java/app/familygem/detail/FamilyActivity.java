@@ -63,7 +63,7 @@ public class FamilyActivity extends DetailActivity {
 		Person p = sr.getPerson(gc);
 		if( p == null ) return;
 		View personView = U.placeIndividual(box, p, getRole(p, f, relation, true) + writeLineage(p, f));
-		personView.setTag(R.id.tag_oggetto, p); // for the context menu in DetailActivity
+		personView.setTag(R.id.tag_object, p); // for the context menu in DetailActivity
 		/*  Ref in the individual towards the family //Ref nell'individuo verso la famiglia
 			If the same person is present several times with the same role (parent / child) in the same family // Se la stessa persona è presente più volte con lo stesso ruolo (parent/child) nella stessa famiglia
 			the 2 following loops identify in the person the * first * FamilyRef (INDI.FAMS / INDI.FAMC) that refers to that family // i 2 loop seguenti individuano nella person il *primo* FamilyRef (INDI.FAMS / INDI.FAMC) che rimanda a quella famiglia

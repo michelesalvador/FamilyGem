@@ -51,8 +51,8 @@ public class TreeComparatorActivity extends BaseActivity {
 			barra.setProgress( posizione );
 			((TextView)findViewById( R.id.confronto_stato )).setText( posizione+"/"+max );
 
-			final Object o = Comparison.getFronte(this).oggetto;
-			final Object o2 = Comparison.getFronte(this).oggetto2;
+			final Object o = Comparison.getFronte(this).object;
+			final Object o2 = Comparison.getFronte(this).object2;
 			if( o != null ) classe = o.getClass();
 			else classe = o2.getClass();
 			arredaScheda( Global.gc, R.id.confronto_vecchio, o );
@@ -196,7 +196,7 @@ public class TreeComparatorActivity extends BaseActivity {
 			carta.setCardBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
 		}
 
-		if( tit.isEmpty() && txt.isEmpty() && data.isEmpty() ) // todo intendi oggetto null?
+		if( tit.isEmpty() && txt.isEmpty() && data.isEmpty() ) // todo intendi object null?
 			carta.setVisibility( View.GONE );
 	}
 

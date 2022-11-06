@@ -240,7 +240,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 					case 10: // Cerca media locale
 						F.displayImageCaptureDialog(IndividualPersonActivity.this, null, 2173, one);
 						break;
-					case 11: // Cerca oggetto media
+					case 11: // Cerca object media
 						F.displayImageCaptureDialog(IndividualPersonActivity.this, null, 2174, one);
 						break;
 					case 12: // Collega media in Galleria

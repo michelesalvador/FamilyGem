@@ -207,8 +207,8 @@ public class CompareActivity extends BaseActivity {
 				changeDateFormat.setTimeZone(timeZone);
 				Date recordDate = changeDateFormat.parse(change.getDateTime().getValue() + change.getDateTime().getTime());
 				itIs = recordDate.after(sharingDate);
-				//long oreSfaso = TimeUnit.MILLISECONDS.toMinutes( timeZone.getOffset(dataOggetto.getTime()) );
-				//s.l( dataOggetto+"\t"+ ok +"\t"+ (oreSfaso>0?"+":"")+oreSfaso +"\t"+ timeZone.getID() );
+				//long oreSfaso = TimeUnit.MILLISECONDS.toMinutes( timeZone.getOffset(dataobject.getTime()) );
+				//s.l( dataobject+"\t"+ ok +"\t"+ (oreSfaso>0?"+":"")+oreSfaso +"\t"+ timeZone.getID() );
 			} catch( ParseException e ) {}
 		}
 		return itIs;

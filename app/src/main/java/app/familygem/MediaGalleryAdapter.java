@@ -70,12 +70,12 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 		}
 		void setta( int posizione ) {
 			media = listaMedia.get( posizione ).media;
-			contenitore = listaMedia.get( posizione ).contenitore;
+			contenitore = listaMedia.get( posizione ).container;
 			if( dettagli ) {
 				arredaMedia( media, vistaTesto, vistaNumero );
 				vista.setOnClickListener( this );
 				((Activity)vista.getContext()).registerForContextMenu( vista );
-				vista.setTag( R.id.tag_oggetto, media );
+				vista.setTag( R.id.tag_object, media );
 				vista.setTag( R.id.tag_contenitore, contenitore );
 				// Registra menu contestuale
 				final AppCompatActivity attiva = (AppCompatActivity) vista.getContext();
@@ -100,8 +100,8 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 		@Override
 		public void onClick( View v ) {
 			AppCompatActivity attiva = (AppCompatActivity) v.getContext();
-			// Galleria in modalità scelta dell'oggetto media
-			// Restituisce l'id di un oggetto media a IndividuoMedia
+			// Galleria in modalità scelta dell'object media
+			// Restituisce l'id di un object media a IndividuoMedia
 			if( attiva.getIntent().getBooleanExtra( "galleriaScegliMedia", false ) ) {
 				Intent intent = new Intent();
 				intent.putExtra( "idMedia", media.getId() );

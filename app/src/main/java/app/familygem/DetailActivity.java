@@ -243,7 +243,7 @@ public class DetailActivity extends AppCompatActivity {
 			boolean giaMesso = false;
 			boolean indirizzoPresente = false;
 			for( int i = 0; i < box.getChildCount(); i++ ) {
-				Object ogg = box.getChildAt(i).getTag(R.id.tag_oggetto);
+				Object ogg = box.getChildAt(i).getTag(R.id.tag_object);
 				if( ogg != null && ogg.equals(egg.yolk) )
 					giaMesso = true;
 				if( ogg instanceof Address )
@@ -582,7 +582,7 @@ public class DetailActivity extends AppCompatActivity {
 		}
 		pieceView.setOnClickListener(click);
 		registerForContextMenu(pieceView);
-		pieceView.setTag(R.id.tag_oggetto, object); // It serves various processes to recognize the piece //Serve a vari processi per riconoscere il pezzo
+		pieceView.setTag(R.id.tag_object, object); // It serves various processes to recognize the piece //Serve a vari processi per riconoscere il pezzo
 		return pieceView;
 	}
 
@@ -686,7 +686,7 @@ public class DetailActivity extends AppCompatActivity {
 		TextView textView = pieceView.findViewById(R.id.fatto_testo);
 		textView.setVisibility(View.GONE);
 		fab.hide();
-		Object pieceObject = pieceView.getTag(R.id.tag_oggetto);
+		Object pieceObject = pieceView.getTag(R.id.tag_object);
 		boolean showInput = false;
 		editText = pieceView.findViewById(R.id.fatto_edita);
 		// Place
@@ -747,7 +747,7 @@ public class DetailActivity extends AppCompatActivity {
 				else
 					restore(pieceView);
 				View nextPiece = box.getChildAt(box.indexOfChild(pieceView) + 1);
-				if( nextPiece != null && nextPiece.getTag(R.id.tag_oggetto) instanceof String )
+				if( nextPiece != null && nextPiece.getTag(R.id.tag_object) instanceof String )
 					edit(nextPiece);
 			}
 			return false;
@@ -770,7 +770,7 @@ public class DetailActivity extends AppCompatActivity {
 	void save(View pieceView) {
 		if( publisherDateLinearLayout != null ) publisherDateLinearLayout.encloseInParentheses(); // Basically just to add parentheses to the given sentence
 		String text = editText.getText().toString().trim();
-		Object pieceObject = pieceView.getTag(R.id.tag_oggetto);
+		Object pieceObject = pieceView.getTag(R.id.tag_object);
 		if( pieceObject instanceof Integer ) { // Save first and last name for inexperienced (non-expert mode?)
 			String firstName = ((EditText)box.getChildAt(0).findViewById(R.id.fatto_edita)).getText().toString();
 			String lastName = ((EditText)box.getChildAt(1).findViewById(R.id.fatto_edita)).getText().toString();
@@ -890,7 +890,7 @@ public class DetailActivity extends AppCompatActivity {
 	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) { // info is null
 		if( whichMenu != 0 ) { // If we are in edit mode show the editor menus
 			pieceView = view;
-			pieceObject = view.getTag(R.id.tag_oggetto);
+			pieceObject = view.getTag(R.id.tag_object);
 			if( pieceObject instanceof Person ) {
 				person = (Person)pieceObject;
 				Family fam = (Family)object;

@@ -75,17 +75,17 @@ public class ConfirmationActivity extends BaseActivity {
 						switch( fronte.tipo ) {
 							case 1: // Note
 								idNuovo = idMassimo( Note.class );
-								Note n2 = (Note) fronte.oggetto2;
+								Note n2 = (Note) fronte.object2;
 								new NoteContainers( Global.gc2, n2, idNuovo ); // aggiorna tutti i ref alla nota
 								n2.setId( idNuovo ); // poi aggiorna l'id della nota
 								break;
 							case 2: // Submitter
 								idNuovo = idMassimo( Submitter.class );
-								((Submitter)fronte.oggetto2).setId( idNuovo );
+								((Submitter)fronte.object2).setId( idNuovo );
 								break;
 							case 3: // Repository
 								idNuovo = idMassimo( Repository.class );
-								Repository repo2 = (Repository)fronte.oggetto2;
+								Repository repo2 = (Repository)fronte.object2;
 								for( Source fon : Global.gc2.getSources() )
 									if( fon.getRepositoryRef() != null && fon.getRepositoryRef().getRef().equals(repo2.getId()) )
 										fon.getRepositoryRef().setRef( idNuovo );
@@ -93,13 +93,13 @@ public class ConfirmationActivity extends BaseActivity {
 								break;
 							case 4: // Media
 								idNuovo = idMassimo( Media.class );
-								Media m2 = (Media) fronte.oggetto2;
+								Media m2 = (Media) fronte.object2;
 								new MediaContainers( Global.gc2, m2, idNuovo );
 								m2.setId( idNuovo );
 								break;
 							case 5: // Source
 								idNuovo = idMassimo( Source.class );
-								Source s2 = (Source) fronte.oggetto2;
+								Source s2 = (Source) fronte.object2;
 								ListOfSourceCitations citaFonte = new ListOfSourceCitations( Global.gc2, s2.getId() );
 								for( ListOfSourceCitations.Triplet tri : citaFonte.list)
 									tri.citation.setRef( idNuovo );
@@ -107,7 +107,7 @@ public class ConfirmationActivity extends BaseActivity {
 								break;
 							case 6: // Person
 								idNuovo = idMassimo( Person.class );
-								Person p2 = (Person) fronte.oggetto2;
+								Person p2 = (Person) fronte.object2;
 								for( Family fam : Global.gc2.getFamilies() ) {
 									for( SpouseRef sr : fam.getHusbandRefs() )
 										if( sr.getRef().equals(p2.getId()) )
@@ -123,7 +123,7 @@ public class ConfirmationActivity extends BaseActivity {
 								break;
 							case 7: // Family
 								idNuovo = idMassimo( Family.class );
-								Family f2 = (Family) fronte.oggetto2;
+								Family f2 = (Family) fronte.object2;
 								for( Person per : Global.gc2.getPeople() ) {
 									for( ParentFamilyRef pfr : per.getParentFamilyRefs() )
 										if( pfr.getRef().equals(f2.getId()) )
@@ -144,56 +144,56 @@ public class ConfirmationActivity extends BaseActivity {
 					switch( fronte.tipo ) {
 						case 1: // Nota
 							if( fronte.destino > 1 )
-								Global.gc.getNotes().remove( fronte.oggetto );
+								Global.gc.getNotes().remove( fronte.object );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Global.gc.addNote( (Note) fronte.oggetto2 );
-								copiaTuttiFile( fronte.oggetto2 );
+								Global.gc.addNote( (Note) fronte.object2 );
+								copiaTuttiFile( fronte.object2 );
 							}
 							break;
 						case 2: // Submitter
 							if( fronte.destino > 1 )
-								Global.gc.getSubmitters().remove( fronte.oggetto );
+								Global.gc.getSubmitters().remove( fronte.object );
 							if( fronte.destino > 0 && fronte.destino < 3 )
-								Global.gc.addSubmitter( (Submitter) fronte.oggetto2 );
+								Global.gc.addSubmitter( (Submitter) fronte.object2 );
 							break;
 						case 3: // Repository
 							if( fronte.destino > 1 )
-								Global.gc.getRepositories().remove( fronte.oggetto );
+								Global.gc.getRepositories().remove( fronte.object );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Global.gc.addRepository( (Repository) fronte.oggetto2 );
-								copiaTuttiFile( fronte.oggetto2 );
+								Global.gc.addRepository( (Repository) fronte.object2 );
+								copiaTuttiFile( fronte.object2 );
 							}
 							break;
 						case 4: // Media
 							if( fronte.destino > 1 )
-								Global.gc.getMedia().remove( fronte.oggetto );
+								Global.gc.getMedia().remove( fronte.object );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Global.gc.addMedia( (Media) fronte.oggetto2 );
-								vediSeCopiareFile( (Media)fronte.oggetto2 );
+								Global.gc.addMedia( (Media) fronte.object2 );
+								vediSeCopiareFile( (Media)fronte.object2 );
 							}
 							break;
 						case 5: // Source
 							if( fronte.destino > 1 )
-								Global.gc.getSources().remove( fronte.oggetto );
+								Global.gc.getSources().remove( fronte.object );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Global.gc.addSource( (Source) fronte.oggetto2 );
-								copiaTuttiFile( fronte.oggetto2 );
+								Global.gc.addSource( (Source) fronte.object2 );
+								copiaTuttiFile( fronte.object2 );
 							}
 							break;
 						case 6: // Person
 							if( fronte.destino > 1 )
-								Global.gc.getPeople().remove( fronte.oggetto );
+								Global.gc.getPeople().remove( fronte.object );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Global.gc.addPerson( (Person) fronte.oggetto2 );
-								copiaTuttiFile( fronte.oggetto2 );
+								Global.gc.addPerson( (Person) fronte.object2 );
+								copiaTuttiFile( fronte.object2 );
 							}
 							break;
 						case 7: // Family
 							if( fronte.destino > 1 )
-								Global.gc.getFamilies().remove( fronte.oggetto );
+								Global.gc.getFamilies().remove( fronte.object );
 							if( fronte.destino > 0 && fronte.destino < 3 ) {
-								Global.gc.addFamily( (Family) fronte.oggetto2 );
-								copiaTuttiFile( fronte.oggetto2 );
+								Global.gc.addFamily( (Family) fronte.object2 );
+								copiaTuttiFile( fronte.object2 );
 							}
 					}
 				}
@@ -238,11 +238,11 @@ public class ConfirmationActivity extends BaseActivity {
 			return id2;
 	}
 
-	// Se un oggetto nuovo ha dei media, valuta se copiare i file nella cartella immagini dell'albero vecchio
+	// Se un object nuovo ha dei media, valuta se copiare i file nella cartella immagini dell'albero vecchio
 	// comunque  aggiorna il collegamento nel Media
-	void copiaTuttiFile( Object oggetto ) {
+	void copiaTuttiFile( Object object ) {
 		MediaList cercaMedia = new MediaList( Global.gc2, 2 );
-		((Visitable)oggetto).accept( cercaMedia );
+		((Visitable)object).accept( cercaMedia );
 		for( Media media : cercaMedia.list) {
 			vediSeCopiareFile( media );
 		}

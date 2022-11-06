@@ -28,11 +28,11 @@ public class NoteReferences extends TotalVisitor {
 	}
 
 	@Override
-	boolean visit(Object oggetto, boolean capostipite ) {
+	boolean visit(Object object, boolean capostipite ) {
 		if( capostipite )
-			capo = oggetto;
-		if( oggetto instanceof NoteContainer ) {
-			NoteContainer blocco = (NoteContainer) oggetto;
+			capo = object;
+		if( object instanceof NoteContainer ) {
+			NoteContainer blocco = (NoteContainer) object;
 			Iterator<NoteRef> refi = blocco.getNoteRefs().iterator();
 			while( refi.hasNext() ) {
 				NoteRef nr = refi.next();

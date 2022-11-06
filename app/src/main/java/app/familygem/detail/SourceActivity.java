@@ -65,7 +65,7 @@ public class SourceActivity extends DetailActivity {
 				startActivity(new Intent(SourceActivity.this, RepositoryRefActivity.class));
 			});
 			registerForContextMenu(refView);
-			refView.setTag(R.id.tag_oggetto, repositoryRef); // for the context menu
+			refView.setTag(R.id.tag_object, repositoryRef); // for the context menu
 		}
 		U.placeNotes(box, f, true);
 		U.placeMedia(box, f, true);

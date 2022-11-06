@@ -142,7 +142,7 @@ public class IndividualEventsFragment extends Fragment {
 		LinearLayout otherLayout = eventView.findViewById(R.id.evento_altro);
 		if( object instanceof NoteContainer )
 			U.placeNotes(otherLayout, object, false);
-		eventView.setTag(R.id.tag_oggetto, object);
+		eventView.setTag(R.id.tag_object, object);
 		registerForContextMenu(eventView);
 		if( object instanceof Name ) {
 			U.placeMedia(otherLayout, object, false);
@@ -248,7 +248,7 @@ public class IndividualEventsFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
 		// menuInfo come al solito è null
 		pieceView = view;
-		pieceObject = view.getTag(R.id.tag_oggetto);
+		pieceObject = view.getTag(R.id.tag_object);
 		if( pieceObject instanceof Name ) {
 			menu.add(0, 200, 0, R.string.copy);
 			if( one.getNames().indexOf(pieceObject) > 0 )

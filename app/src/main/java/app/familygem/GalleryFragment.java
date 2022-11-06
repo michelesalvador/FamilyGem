@@ -45,7 +45,7 @@ public class GalleryFragment extends Fragment {
 			arredaBarra();
 			RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager( getContext(), 2 );
 			griglia.setLayoutManager( gestoreLayout );
-			adattatore = new MediaGalleryAdapter( visitaMedia.listaMedia, true );
+			adattatore = new MediaGalleryAdapter( visitaMedia.mediaList, true );
 			griglia.setAdapter( adattatore );
 			vista.findViewById( R.id.fab ).setOnClickListener( v ->
 					F.displayImageCaptureDialog( getContext(), GalleryFragment.this, 4546, null )
@@ -63,7 +63,7 @@ public class GalleryFragment extends Fragment {
 
 	// Scrive il titolo nella barra
 	void arredaBarra() {
-		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.listaMedia.size()
+		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle( visitaMedia.mediaList.size()
 				+ " " + getString(R.string.media).toLowerCase() );
 	}
 
@@ -71,7 +71,7 @@ public class GalleryFragment extends Fragment {
 	 * Update the contents of the gallery
 	 * */
 	void ricrea() {
-		visitaMedia.listaMedia.clear();
+		visitaMedia.mediaList.clear();
 		gc.accept( visitaMedia );
 		adattatore.notifyDataSetChanged();
 		arredaBarra();
@@ -157,7 +157,7 @@ public class GalleryFragment extends Fragment {
 	private Media media;
 	@Override
 	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		media = (Media) vista.getTag( R.id.tag_oggetto );
+		media = (Media) vista.getTag( R.id.tag_object );
 		menu.add(0, 0, 0, R.string.delete );
 	}
 	@Override

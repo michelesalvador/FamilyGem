@@ -19,11 +19,11 @@ import org.folg.gedcom.model.Visitor;
 
 public class TotalVisitor extends Visitor {
 
-	private boolean visita( Object oggetto ) {
-		return visit( oggetto, false );
+	private boolean visita( Object object ) {
+		return visit( object, false );
 	}
 
-	boolean visit(Object oggetto, boolean capostipite ) {
+	boolean visit(Object object, boolean capostipite ) {
 		return true;
 	}
 

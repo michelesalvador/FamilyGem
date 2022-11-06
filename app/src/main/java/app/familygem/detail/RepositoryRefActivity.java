@@ -27,7 +27,7 @@ public class RepositoryRefActivity extends DetailActivity {
 		if( r.getRepository(gc) != null ) { // valid
 			setTitle(R.string.repository_citation);
 			View repositoryCard = putRepository(box, r.getRepository(gc));
-			repositoryCard.setTag(R.id.tag_oggetto, r.getRepository(gc)); //for the context menu TODO still needed?
+			repositoryCard.setTag(R.id.tag_object, r.getRepository(gc)); //for the context menu TODO still needed?
 			registerForContextMenu(repositoryCard);
 		} else if( r.getRef() != null ) { // of a non-existent archive (perhaps deleted) //di un archivio inesistente (magari eliminato)
 			setTitle(R.string.inexistent_repository_citation);
