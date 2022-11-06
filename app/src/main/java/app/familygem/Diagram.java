@@ -662,7 +662,7 @@ public class Diagram extends Fragment {
 		if( familyLabels[1] != null )
 			menu.add(0, 2, 0, familyLabels[1]);
 		menu.add(0, 3, 0, R.string.new_relative);
-		if( U.ciSonoIndividuiCollegabili(pers) )
+		if( U.containsConnectableIndividuals(pers) )
 			menu.add(0, 4, 0, R.string.link_person);
 		menu.add(0, 5, 0, R.string.modify);
 		if( !pers.getParentFamilies(gc).isEmpty() || !pers.getSpouseFamilies(gc).isEmpty() )

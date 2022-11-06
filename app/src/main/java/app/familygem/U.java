@@ -1068,7 +1068,7 @@ public class U {
 
 	// Valuta se ci sono individui collegabili rispetto a un individuo.
 	// Usato per decidere se far comparire 'Collega persona esistente' nel menu
-	static boolean ciSonoIndividuiCollegabili(Person person) {
+	static boolean containsConnectableIndividuals(Person person) {
 		int total = Global.gc.getPeople().size();
 		if( total > 0 && (Global.settings.expert // gli esperti possono sempre
 				|| person == null) ) // in una famiglia vuota unRappresentanteDellaFamiglia è null

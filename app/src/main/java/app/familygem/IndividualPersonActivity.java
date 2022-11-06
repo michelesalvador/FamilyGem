@@ -225,7 +225,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 					break;
 				case 2: // Individuo Familiari
 					menu.add(0, 30, 0, R.string.new_relative);
-					if( U.ciSonoIndividuiCollegabili(one) )
+					if( U.containsConnectableIndividuals(one) )
 						menu.add(0, 31, 0, R.string.link_person);
 			}
 			popup.show();

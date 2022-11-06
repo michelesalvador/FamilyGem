@@ -234,38 +234,38 @@ public class DetailActivity extends AppCompatActivity {
 	/**
 	 * FAB menu: only with methods that are not already present in the box
 	 * */
-	PopupMenu menuFAB(View vista) {
-		PopupMenu popup = new PopupMenu(this, vista);
+	PopupMenu menuFAB(View view) {
+		PopupMenu popup = new PopupMenu(this, view);
 		Menu menu = popup.getMenu();
-		String[] conIndirizzo = {"Www", "Email", "Phone", "Fax"}; // questi oggetti compaiono nel FAB di Evento se esiste un Indirizzo
-		int u = 0;
+		String[] withAddress = {"Www", "Email", "Phone", "Fax"}; // these objects appear in the Event FAB if an Address exists
+		int counter = 0;
 		for( Egg egg : eggs ) {
-			boolean giaMesso = false;
-			boolean indirizzoPresente = false;
+			boolean alreadyPut = false;
+			boolean addressPresent = false;
 			for( int i = 0; i < box.getChildCount(); i++ ) {
-				Object ogg = box.getChildAt(i).getTag(R.id.tag_object);
-				if( ogg != null && ogg.equals(egg.yolk) )
-					giaMesso = true;
-				if( ogg instanceof Address )
-					indirizzoPresente = true;
+				Object object = box.getChildAt(i).getTag(R.id.tag_object);
+				if( object != null && object.equals(egg.yolk) )
+					alreadyPut = true;
+				if( object instanceof Address )
+					addressPresent = true;
 			}
-			if( !giaMesso ) {
-				if( egg.common || (indirizzoPresente && Arrays.asList(conIndirizzo).contains(egg.yolk)) )
-					menu.add(0, u, 0, egg.title);
+			if( !alreadyPut ) {
+				if( egg.common || (addressPresent && Arrays.asList(withAddress).contains(egg.yolk)) )
+					menu.add(0, counter, 0, egg.title);
 			}
-			u++;
+			counter++;
 		}
 		if( object instanceof Family ) {
-			boolean ciSonoFigli = !((Family)object).getChildRefs().isEmpty();
+			boolean hasChildren = !((Family)object).getChildRefs().isEmpty();
 			SubMenu newMemberMenu = menu.addSubMenu(0, 100, 0, R.string.new_relative);
-			// Not-expert can add maximum two parents // todo: expert too??
+			// Non-expert can add maximum two parents // todo: expert too??
 			if( !(!Global.settings.expert && ((Family)object).getHusbandRefs().size() + ((Family)object).getWifeRefs().size() >= 2) )
-				newMemberMenu.add(0, 120, 0, ciSonoFigli ? R.string.parent : R.string.partner);
+				newMemberMenu.add(0, 120, 0, hasChildren ? R.string.parent : R.string.partner);
 			newMemberMenu.add(0, 121, 0, R.string.child);
-			if( U.ciSonoIndividuiCollegabili(aRepresentativeOfTheFamily) ) {
+			if( U.containsConnectableIndividuals(aRepresentativeOfTheFamily) ) {
 				SubMenu linkMemberMenu = menu.addSubMenu(0, 100, 0, R.string.link_person);
 				if( !(!Global.settings.expert && ((Family)object).getHusbandRefs().size() + ((Family)object).getWifeRefs().size() >= 2) )
-					linkMemberMenu.add(0, 122, 0, ciSonoFigli ? R.string.parent : R.string.partner);
+					linkMemberMenu.add(0, 122, 0, hasChildren ? R.string.parent : R.string.partner);
 				linkMemberMenu.add(0, 123, 0, R.string.child);
 			}
 			SubMenu eventSubMenu = menu.addSubMenu(0, 100, 0, R.string.event);
@@ -278,26 +278,26 @@ public class DetailActivity extends AppCompatActivity {
 			eventSubMenu.add(0, 124, 0, marriageLabel);
 			eventSubMenu.add(0, 125, 0, divorceLabel);
 
-			// Gli altri eventi che si possono inserire
-			SubMenu subAltri = eventSubMenu.addSubMenu(0, 100, 0, R.string.other);
+			// The other events that can be entered
+			SubMenu otherSubMenu = eventSubMenu.addSubMenu(0, 100, 0, R.string.other);
 			int i = 0;
 			for( Pair<String, String> event : otherEvents ) {
-				subAltri.add(0, 200 + i, 0, event.second);
+				otherSubMenu.add(0, 200 + i, 0, event.second);
 				i++;
 			}
 		}
-		if( object instanceof Source && findViewById(R.id.citazione_fonte) == null ) { // todo dubbio: non dovrebbe essere citazione_ARCHIVIO ?
-			SubMenu subArchivio = menu.addSubMenu(0, 100, 0, R.string.repository);
-			subArchivio.add(0, 101, 0, R.string.new_repository);
+		if( object instanceof Source && findViewById(R.id.citazione_fonte) == null ) { // todo doubt: shouldn't it be citation_REPOSITORY?
+			SubMenu subRepository = menu.addSubMenu(0, 100, 0, R.string.repository);
+			subRepository.add(0, 101, 0, R.string.new_repository);
 			if( !gc.getRepositories().isEmpty() )
-				subArchivio.add(0, 102, 0, R.string.link_repository);
+				subRepository.add(0, 102, 0, R.string.link_repository);
 		}
 		if( object instanceof NoteContainer ) {
-			SubMenu subNota = menu.addSubMenu(0, 100, 0, R.string.note);
-			subNota.add(0, 103, 0, R.string.new_note);
-			subNota.add(0, 104, 0, R.string.new_shared_note);
+			SubMenu subNote = menu.addSubMenu(0, 100, 0, R.string.note);
+			subNote.add(0, 103, 0, R.string.new_note);
+			subNote.add(0, 104, 0, R.string.new_shared_note);
 			if( !gc.getNotes().isEmpty() )
-				subNota.add(0, 105, 0, R.string.link_shared_note);
+				subNote.add(0, 105, 0, R.string.link_shared_note);
 		}
 		if( object instanceof MediaContainer ) {
 			SubMenu subMedia = menu.addSubMenu(0, 100, 0, R.string.media);
@@ -307,11 +307,11 @@ public class DetailActivity extends AppCompatActivity {
 				subMedia.add(0, 108, 0, R.string.link_shared_media);
 		}
 		if( (object instanceof SourceCitationContainer || object instanceof Note) && Global.settings.expert ) {
-			SubMenu subFonte = menu.addSubMenu(0, 100, 0, R.string.source);
-			subFonte.add(0, 109, 0, R.string.new_source_note);
-			subFonte.add(0, 110, 0, R.string.new_source);
+			SubMenu subSource = menu.addSubMenu(0, 100, 0, R.string.source);
+			subSource.add(0, 109, 0, R.string.new_source_note);
+			subSource.add(0, 110, 0, R.string.new_source);
 			if( !gc.getSources().isEmpty() )
-				subFonte.add(0, 111, 0, R.string.link_source);
+				subSource.add(0, 111, 0, R.string.link_source);
 		}
 		return popup;
 	}
@@ -510,7 +510,7 @@ public class DetailActivity extends AppCompatActivity {
 		} catch( Exception e ) {
 			text = "ERROR: " + e.getMessage();
 		}
-		// Value 'Y' is hidden for not-experts
+		// Value 'Y' is hidden for non-experts
 		if( !Global.settings.expert && object instanceof EventFact && method.equals("Value")
 				&& text != null && text.equals("Y") ) {
 			String tag = ((EventFact)object).getTag();
@@ -628,7 +628,9 @@ public class DetailActivity extends AppCompatActivity {
 			((Submitter)container).setAddress( null );
 	}
 
-	// Compose the title of family events
+	/**
+	 * Compose the title of family events
+	 * */
 	public String writeEventTitle(Family family, EventFact event) {
 		String tit;
 		switch( event.getTag() ) {
