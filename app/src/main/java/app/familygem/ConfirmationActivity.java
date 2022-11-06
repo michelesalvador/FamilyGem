@@ -101,8 +101,8 @@ public class ConfirmationActivity extends BaseActivity {
 								idNuovo = idMassimo( Source.class );
 								Source s2 = (Source) fronte.oggetto2;
 								ListOfSourceCitations citaFonte = new ListOfSourceCitations( Global.gc2, s2.getId() );
-								for( ListOfSourceCitations.Tripletta tri : citaFonte.lista )
-									tri.citazione.setRef( idNuovo );
+								for( ListOfSourceCitations.Triplet tri : citaFonte.list)
+									tri.citation.setRef( idNuovo );
 								s2.setId( idNuovo );
 								break;
 							case 6: // Person

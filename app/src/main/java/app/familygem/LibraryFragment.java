@@ -256,8 +256,8 @@ public class LibraryFragment extends Fragment {
 	// Todo le citazioni alla Source eliminata diventano Fonte-nota a cui bisognerebbe poter riattaccare una Source
 	public static Object[] deleteSource(Source fon ) {
 		ListOfSourceCitations citazioni = new ListOfSourceCitations( gc, fon.getId() );
-		for( ListOfSourceCitations.Tripletta cita : citazioni.lista ) {
-			SourceCitation sc = cita.citazione;
+		for( ListOfSourceCitations.Triplet cita : citazioni.list) {
+			SourceCitation sc = cita.citation;
 			sc.setRef( null );
 			// Se la SourceCitation non contiene altro si può eliminare
 			boolean eliminabile = true;
@@ -265,7 +265,7 @@ public class LibraryFragment extends Fragment {
 					|| !sc.getAllNotes(gc).isEmpty() || !sc.getAllMedia(gc).isEmpty() || !sc.getExtensions().isEmpty() )
 				eliminabile = false;
 			if( eliminabile ) {
-				Object contenitore = cita.contenitore;
+				Object contenitore = cita.container;
 				List<SourceCitation> lista;
 				if( contenitore instanceof Note )
 					lista = ((Note)contenitore).getSourceCitations();
@@ -285,7 +285,7 @@ public class LibraryFragment extends Fragment {
 			gc.setSources( null );
 		gc.createIndexes();	// necessario
 		Memory.setInstanceAndAllSubsequentToNull( fon );
-		return citazioni.getCapi();
+		return citazioni.getProgenitors();
 	}
 
 	// menu opzioni nella toolbar

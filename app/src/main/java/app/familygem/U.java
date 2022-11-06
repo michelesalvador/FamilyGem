@@ -1386,12 +1386,12 @@ public class U {
 							U.save(true, noteContainers.containers.toArray());
 						} else if( record instanceof Source ) {
 							ListOfSourceCitations citations = new ListOfSourceCitations(Global.gc, oldId);
-							for( ListOfSourceCitations.Tripletta triple : citations.lista )
-								triple.citazione.setRef(newId);
+							for( ListOfSourceCitations.Triplet triple : citations.list)
+								triple.citation.setRef(newId);
 							Source source = (Source)record;
 							source.setId(newId);
 							U.updateChangeDate(source);
-							U.save(true, citations.getCapi());
+							U.save(true, citations.getProgenitors());
 						} else if( record instanceof Repository ) {
 							Set<Source> modified = new HashSet<>();
 							for( Source source : Global.gc.getSources() ) {

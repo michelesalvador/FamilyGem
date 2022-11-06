@@ -18,8 +18,8 @@ import java.util.Set;
  * */
 public class ListOfSourceCitations extends TotalVisitor {
 
-	public List<Tripletta> lista = new ArrayList<>();
-	private String id; // id della fonte
+	public List<Triplet> list = new ArrayList<>();
+	private String id; // id of the source
 	private Object capo;
 
 	public ListOfSourceCitations(Gedcom gc, String id ) {
@@ -28,42 +28,45 @@ public class ListOfSourceCitations extends TotalVisitor {
 	}
 
 	@Override
-	boolean visit(Object oggetto, boolean capostipite ) {
-		if( capostipite )
-			capo = oggetto;
-		if( oggetto instanceof SourceCitationContainer ) {
-			analizza( oggetto, ((SourceCitationContainer)oggetto).getSourceCitations() );
-		} // Note non estende SourceCitationContainer, ma implementa i suoi propri metodi
-		else if( oggetto instanceof Note ) {
-			analizza( oggetto, ((Note)oggetto).getSourceCitations() );
+	boolean visit(Object object, boolean progenitor ) {
+		if( progenitor )
+			capo = object;
+		if( object instanceof SourceCitationContainer ) {
+			analyze( object, ((SourceCitationContainer)object).getSourceCitations() );
+		} // Note does not extend SourceCitationContainer, but implements its own methods
+		else if( object instanceof Note ) {
+			analyze( object, ((Note)object).getSourceCitations() );
 		}
 		return true;
 	}
 
-	private void analizza( Object contenitore, List<SourceCitation> citazioni ) {
-		for( SourceCitation citaz : citazioni )
-			// Le fonti-note non hanno Ref ad una fonte
-			if( citaz.getRef() != null && citaz.getRef().equals(id) ) {
-				Tripletta tris = new Tripletta();
-				tris.capostipite = capo;
-				tris.contenitore = contenitore;
-				tris.citazione = citaz;
-				lista.add( tris );
+	private void analyze(Object container, List<SourceCitation> citations ) {
+		for( SourceCitation citation : citations )
+			// (Known sources?)[SourceCitations?] have no Ref to a source //Le fonti-note non hanno Ref ad una fonte
+			if( citation.getRef() != null && citation.getRef().equals(id) ) {
+				Triplet triplet = new Triplet();
+				triplet.progenitor = capo;
+				triplet.container = container;
+				triplet.citation = citation;
+				list.add( triplet );
 			}
 	}
 
-	public Object[] getCapi() {
-		Set<Object> capi = new LinkedHashSet<>(); // unifica i duplicati
-		for( Tripletta tri : lista ) {
-			capi.add(tri.capostipite);
+	public Object[] getProgenitors() {
+		Set<Object> heads = new LinkedHashSet<>(); // merge duplicates
+		for( Triplet tri : list) {
+			heads.add(tri.progenitor);
 		}
-		return capi.toArray();
+		return heads.toArray();
 	}
 
-	// Classe per stoccare insieme i tre elementi capostipite - contenitore - citazione
-	public static class Tripletta {
-		public Object capostipite;
-		public Object contenitore; // Sarebbe un SourceCitationContainer ma Note fa eccezione
-		public SourceCitation citazione;
+	/**
+	 * Class for storing together the three parent elements - container - quote
+	 * Classe per stoccare insieme i tre elementi capostipite - contenitore - citazione
+	 * */
+	public static class Triplet {
+		public Object progenitor;
+		public Object container; // It would be a SourceCitationContainer but Note is an exception //Sarebbe un SourceCitationContainer ma Note fa eccezione
+		public SourceCitation citation;
 	}
 }

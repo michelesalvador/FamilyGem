@@ -26,7 +26,7 @@ public class SourceActivity extends DetailActivity {
 		f = (Source)cast(Source.class);
 		placeSlug("SOUR", f.getId());
 		ListOfSourceCitations citations = new ListOfSourceCitations(gc, f.getId());
-		f.putExtension("citaz", citations.lista.size());    // for the LibraryFragment
+		f.putExtension("citaz", citations.list.size());    // for the LibraryFragment
 		place(getString(R.string.abbreviation), "Abbreviation");
 		place(getString(R.string.title), "Title", true, true);
 		place(getString(R.string.type), "Type", false, true);    // _type
@@ -70,8 +70,8 @@ public class SourceActivity extends DetailActivity {
 		U.placeNotes(box, f, true);
 		U.placeMedia(box, f, true);
 		U.placeChangeDate(box, f.getChange());
-		if( !citations.lista.isEmpty() )
-			U.putContainer(box, citations.getCapi(), R.string.cited_by);
+		if( !citations.list.isEmpty() )
+			U.putContainer(box, citations.getProgenitors(), R.string.cited_by);
 	}
 
 	@Override
