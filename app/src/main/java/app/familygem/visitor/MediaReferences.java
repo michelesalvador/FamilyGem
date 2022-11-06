@@ -1,10 +1,3 @@
-/*
-Visitatore che rispetto a un media condiviso ha una triplice funzione:
-- Contare i riferimenti al media in tutti i MediaContainer
-- Oppure elimina gli stessi riferimenti al media
-- Nel frattempo elenca gli oggetti capostipite delle pile che contengono il media
-*/
-
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.Gedcom;
@@ -15,6 +8,19 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ *
+ * Visitor who, compared to a shared media, has a triple function:
+ *   * - Count media references in all MediaContainers
+ *   * - Or delete the same media references
+ *   * - In the meantime, list the parent objects of the stacks that contain the media
+ *
+ *
+ * Visitatore che rispetto a un media condiviso ha una triplice funzione:
+ * - Contare i riferimenti al media in tutti i MediaContainer
+ * - Oppure elimina gli stessi riferimenti al media
+ * - Nel frattempo elenca gli oggetti capostipite delle pile che contengono il media
+ * */
 public class MediaReferences extends TotalVisitor {
 
 	private Media media; // the shared media
