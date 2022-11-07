@@ -214,11 +214,11 @@ public class TreesActivity extends AppCompatActivity {
 								} else
 									Toast.makeText(TreesActivity.this, R.string.no_results, Toast.LENGTH_LONG).show();
 							} else if( id == 7 ) { // Esporta Gedcom
-								if( exporter.apriAlbero(treeId) ) {
+								if( exporter.openTree(treeId) ) {
 									String mime = "application/octet-stream";
 									String ext = "ged";
 									int code = 636;
-									if( exporter.quantiFileMedia() > 0 ) {
+									if( exporter.numMediaFilesToAttach() > 0 ) {
 										mime = "application/zip";
 										ext = "zip";
 										code = 6219;
@@ -226,7 +226,7 @@ public class TreesActivity extends AppCompatActivity {
 									F.saveDocument(TreesActivity.this, null, treeId, mime, ext, code);
 								}
 							} else if( id == 8 ) { // Fai backup
-								if( exporter.apriAlbero(treeId) )
+								if( exporter.openTree(treeId) )
 									F.saveDocument(TreesActivity.this, null, treeId, "application/zip", "zip", 327);
 							} else if( id == 9 ) {	// Elimina albero
 								new AlertDialog.Builder(TreesActivity.this).setMessage(R.string.really_delete_tree)
@@ -497,17 +497,17 @@ public class TreesActivity extends AppCompatActivity {
 			Uri uri = data.getData();
 			boolean result = false;
 			if( requestCode == 636 ) { // Esporta il GEDCOM
-				result = exporter.esportaGedcom( uri );
+				result = exporter.exportGedcom( uri );
 			} else if( requestCode == 6219 ) { // Esporta il GEDCOM zippato coi media
-				result = exporter.esportaGedcomZippato( uri );
+				result = exporter.exportGedcomToZip( uri );
 			} // Esporta il backup ZIP
 			else if( requestCode == 327 ) {
-				result = exporter.esportaBackupZip( null, -1, uri );
+				result = exporter.exportBackupZip( null, -1, uri );
 			}
 			if( result )
-				Toast.makeText( TreesActivity.this, exporter.messaggioSuccesso, Toast.LENGTH_SHORT ).show();
+				Toast.makeText( TreesActivity.this, exporter.successMessage, Toast.LENGTH_SHORT ).show();
 			else
-				Toast.makeText( TreesActivity.this, exporter.messaggioErrore, Toast.LENGTH_LONG ).show();
+				Toast.makeText( TreesActivity.this, exporter.errorMessage, Toast.LENGTH_LONG ).show();
 		}
 	}
 

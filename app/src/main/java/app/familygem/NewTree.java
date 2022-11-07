@@ -131,7 +131,7 @@ public class NewTree extends BaseActivity {
 		int num = Global.settings.max() + 1;
 		File jsonFile = new File(getFilesDir(), num + ".json");
 		Global.gc = new Gedcom();
-		Global.gc.setHeader(creaTestata(jsonFile.getName()));
+		Global.gc.setHeader(createHeader(jsonFile.getName()));
 		Global.gc.createIndexes();
 		JsonParser jp = new JsonParser();
 		try {
@@ -394,7 +394,7 @@ public class NewTree extends BaseActivity {
 	}
 
 	// Crea l'intestazione standard per questa app
-	public static Header creaTestata(String nomeFile) {
+	public static Header createHeader(String nomeFile) {
 		Header testa = new Header();
 		Generator app = new Generator();
 		app.setValue("FAMILY_GEM");

@@ -82,7 +82,7 @@ public class TreeInfoActivity extends BaseActivity {
 			if( h == null) {
 				bottoneHeader.setText( R.string.create_header );
 				bottoneHeader.setOnClickListener( view -> {
-					gc.setHeader( NewTree.creaTestata( file.getName() ) );
+					gc.setHeader( NewTree.createHeader( file.getName() ) );
 					U.saveJson(gc, treeId);
 					recreate();
 				});

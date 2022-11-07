@@ -1084,7 +1084,7 @@ public class U {
 			new AlertDialog.Builder(contesto).setMessage(R.string.make_main_submitter)
 					.setPositiveButton(android.R.string.yes, (dialog, id) -> {
 						if( testa[0] == null ) {
-							testa[0] = NewTree.creaTestata(Global.settings.openTree + ".json");
+							testa[0] = NewTree.createHeader(Global.settings.openTree + ".json");
 							Global.gc.setHeader(testa[0]);
 						}
 						testa[0].setSubmitterRef(idAutore);

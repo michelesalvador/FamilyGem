@@ -232,7 +232,7 @@ public class Settings {
 			this.grade = grade;
 		}
 
-		File salva() {
+		File save() {
 			File fileSettaggi = new File(Global.context.getCacheDir(), "settings.json");
 			Gson gson = new Gson();
 			String salvando = gson.toJson(this);

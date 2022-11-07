@@ -80,7 +80,7 @@ public class ListOfAuthorsFragment extends Fragment {
 	static void mainAuthor(Submitter subm) {
 		Header testa = gc.getHeader();
 		if( testa == null ) {
-			testa = NewTree.creaTestata(Global.settings.openTree + ".json");
+			testa = NewTree.createHeader(Global.settings.openTree + ".json");
 			gc.setHeader(testa);
 		}
 		testa.setSubmitterRef(subm.getId());

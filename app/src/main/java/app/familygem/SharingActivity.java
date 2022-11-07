@@ -61,7 +61,7 @@ public class SharingActivity extends BaseActivity {
 			((TextView)findViewById( R.id.condividi_tit_autore )).setText( R.string.changes_submitter );
 
 		esporter = new Exporter( this );
-		esporter.apriAlbero( treeId );
+		esporter.openTree( treeId );
 		gc = Global.gc;
 		if( gc != null ) {
 			displayShareRoot();
@@ -111,7 +111,7 @@ public class SharingActivity extends BaseActivity {
 					// Aggiornamento del submitter
 					Header header = gc.getHeader();
 					if( header == null ) {
-						header = NewTree.creaTestata(tree.id + ".json");
+						header = NewTree.createHeader(tree.id + ".json");
 						gc.setHeader(header);
 					} else
 						header.setDateTime(U.actualDateTime());
@@ -225,11 +225,11 @@ public class SharingActivity extends BaseActivity {
 		protected void onPostExecute(SharingActivity questo) {
 			if( questo.dataId != null && questo.dataId.startsWith("20") ) {
 				File fileTree = new File( questo.getCacheDir(), questo.dataId + ".zip" );
-				if( questo.esporter.esportaBackupZip(questo.tree.shareRoot, 9, Uri.fromFile(fileTree)) ) {
+				if( questo.esporter.exportBackupZip(questo.tree.shareRoot, 9, Uri.fromFile(fileTree)) ) {
 					new InvioFTP().execute( questo );
 					return;
 				} else
-					Toast.makeText( questo, questo.esporter.messaggioErrore, Toast.LENGTH_LONG ).show();
+					Toast.makeText( questo, questo.esporter.errorMessage, Toast.LENGTH_LONG ).show();
 			}
 			// Un Toast di errore qui sostituirebbe il messaggio di tosta() in catch()
 			questo.findViewById( R.id.bottone_condividi ).setEnabled(true);
