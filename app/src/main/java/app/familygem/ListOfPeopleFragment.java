@@ -40,10 +40,10 @@ import app.familygem.constant.Gender;
 import static app.familygem.Global.gc;
 import com.lb.fast_scroller_and_recycler_view_fixes_library.FastScrollerEx;
 
-public class RegistryOfficeFragment extends Fragment {
+public class ListOfPeopleFragment extends Fragment {
 
 	List<Person> people;
-	AdattatoreAnagrafe adapter;
+	PeopleAdapter adapter;
 	private Order order;
 	private boolean gliIdsonoNumerici;
 
@@ -70,7 +70,7 @@ public class RegistryOfficeFragment extends Fragment {
 			arredaBarra();
 			RecyclerView vistaLista = view.findViewById(R.id.riciclatore);
 			vistaLista.setPadding(12, 12, 12, vistaLista.getPaddingBottom());
-			adapter = new AdattatoreAnagrafe();
+			adapter = new PeopleAdapter();
 			vistaLista.setAdapter(adapter);
 			gliIdsonoNumerici = verificaIdNumerici();
 			view.findViewById(R.id.fab).setOnClickListener(v -> {
@@ -94,7 +94,7 @@ public class RegistryOfficeFragment extends Fragment {
 		setHasOptionsMenu(people.size() > 1);
 	}
 
-	public class AdattatoreAnagrafe extends RecyclerView.Adapter<GestoreIndividuo> implements Filterable {
+	public class PeopleAdapter extends RecyclerView.Adapter<GestoreIndividuo> implements Filterable {
 		@Override
 		public GestoreIndividuo onCreateViewHolder(ViewGroup parent, int type) {
 			View vistaIndividuo = LayoutInflater.from(parent.getContext())

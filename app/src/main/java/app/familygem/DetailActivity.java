@@ -1031,7 +1031,7 @@ public class DetailActivity extends AppCompatActivity {
 			case 19: // Delete member
 				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
 						.setPositiveButton(R.string.delete, (dialog, id) -> {
-							RegistryOfficeFragment.deletePerson(this, person.getId());
+							ListOfPeopleFragment.deletePerson(this, person.getId());
 							box.removeView(pieceView);
 							findAnotherRepresentativeOfTheFamily(person);
 						}).setNeutralButton(R.string.cancel, null).show();

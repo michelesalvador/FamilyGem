@@ -1073,7 +1073,7 @@ public class U {
 		if( total > 0 && (Global.settings.expert // gli esperti possono sempre
 				|| person == null) ) // in una famiglia vuota unRappresentanteDellaFamiglia è null
 			return true;
-		int kin = RegistryOfficeFragment.countRelatives(person);
+		int kin = ListOfPeopleFragment.countRelatives(person);
 		return total > kin + 1;
 	}
 

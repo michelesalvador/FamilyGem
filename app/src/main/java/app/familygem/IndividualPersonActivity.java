@@ -478,7 +478,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 			case 5:	// Delete
 				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
 						.setPositiveButton(R.string.delete, (dialog, i) -> {
-							Family[] famiglie = RegistryOfficeFragment.deletePerson(this, one.getId());
+							Family[] famiglie = ListOfPeopleFragment.deletePerson(this, one.getId());
 							if( !U.controllaFamiglieVuote(this, this::onBackPressed, true, famiglie) )
 								onBackPressed();
 						}).setNeutralButton(R.string.cancel, null).show();

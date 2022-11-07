@@ -777,7 +777,7 @@ public class Diagram extends Fragment {
 		} else if( id == 7 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
-						Family[] famiglie = RegistryOfficeFragment.deletePerson(getContext(), idPersona);
+						Family[] famiglie = ListOfPeopleFragment.deletePerson(getContext(), idPersona);
 						ripristina();
 						U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
 					}).setNeutralButton(R.string.cancel, null).show();

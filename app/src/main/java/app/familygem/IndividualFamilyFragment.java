@@ -170,7 +170,7 @@ public class IndividualFamilyFragment extends Fragment {
 		} else if( id == 308 ) { // Elimina
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
-						RegistryOfficeFragment.deletePerson(getContext(), indiId);
+						ListOfPeopleFragment.deletePerson(getContext(), indiId);
 						refresh();
 						U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
 					}).setNeutralButton(R.string.cancel, null).show();

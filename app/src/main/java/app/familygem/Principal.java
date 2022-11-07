@@ -35,7 +35,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 	NavigationView menuPrincipe;
 	List<Integer> idMenu = Arrays.asList( R.id.nav_diagramma, R.id.nav_persone, R.id.nav_famiglie,
 			R.id.nav_media, R.id.nav_note, R.id.nav_fonti, R.id.nav_archivi, R.id.nav_autore );
-	List<Class> frammenti = Arrays.asList( Diagram.class, RegistryOfficeFragment.class, ChurchFragment.class,
+	List<Class> frammenti = Arrays.asList( Diagram.class, ListOfPeopleFragment.class, ChurchFragment.class,
 			GalleryFragment.class, NotebookFragment.class, LibraryFragment.class, RepositoryFragment.class, ListOfAuthorsFragment.class );
 
 	@Override
@@ -62,7 +62,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 			Fragment fragment;
 			String backName = null; // Etichetta per individuare diagramma nel backstack dei frammenti
 			if( getIntent().getBooleanExtra("anagrafeScegliParente",false) )
-				fragment = new RegistryOfficeFragment();
+				fragment = new ListOfPeopleFragment();
 			else if( getIntent().getBooleanExtra("galleriaScegliMedia",false) )
 				fragment = new GalleryFragment();
 			else if( getIntent().getBooleanExtra("bibliotecaScegliFonte",false) )
@@ -109,13 +109,13 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 			Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
 			if( fragment instanceof Diagram ) {
 				((Diagram)fragment).forceDraw = true; // Così ridisegna il diagramma
-			} else if( fragment instanceof RegistryOfficeFragment) {
+			} else if( fragment instanceof ListOfPeopleFragment) {
 				// Update persons list
-				RegistryOfficeFragment registryOfficeFragment = (RegistryOfficeFragment)fragment;
-				if( registryOfficeFragment.people.size() == 0 ) // Probably it's a Collections.EmptyList
-					registryOfficeFragment.people = gc.getPeople(); // replace it with the real ArrayList
-				registryOfficeFragment.adapter.notifyDataSetChanged();
-				registryOfficeFragment.arredaBarra();
+				ListOfPeopleFragment listOfPeopleFragment = (ListOfPeopleFragment)fragment;
+				if( listOfPeopleFragment.people.size() == 0 ) // Probably it's a Collections.EmptyList
+					listOfPeopleFragment.people = gc.getPeople(); // replace it with the real ArrayList
+				listOfPeopleFragment.adapter.notifyDataSetChanged();
+				listOfPeopleFragment.arredaBarra();
 			} else if( fragment instanceof ChurchFragment) {
 				((ChurchFragment)fragment).refresh(ChurchFragment.What.RELOAD);
 			} else if( fragment instanceof GalleryFragment) {
