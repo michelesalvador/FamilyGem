@@ -952,7 +952,7 @@ public class U {
 			}
 			LinearLayout scatolaNote = changeView.findViewById(R.id.cambi_note);
 			for( Extension altroTag : findExtensions(change) )
-				place(scatolaNote, altroTag.nome, altroTag.testo);
+				place(scatolaNote, altroTag.name, altroTag.text);
 			// Grazie al mio contributo la data cambiamento può avere delle note
 			placeNotes(scatolaNote, change, false);
 			changeView.setOnClickListener(v -> {

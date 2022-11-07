@@ -588,7 +588,7 @@ public class DetailActivity extends AppCompatActivity {
 
 	public void placeExtensions(ExtensionContainer container) {
 		for( Extension ext : U.findExtensions(container) ) {
-			placePiece(ext.nome, ext.testo, ext.gedcomTag, false);
+			placePiece(ext.name, ext.text, ext.gedcomTag, false);
 		}
 	}
 

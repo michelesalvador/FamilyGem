@@ -73,7 +73,7 @@ public class IndividualEventsFragment extends Fragment {
 					placeEvent(layout, writeEventTitle(fatto), txt, fatto);
 				}
 				for( Extension est : U.findExtensions(one) ) {
-					placeEvent(layout, est.nome, est.testo, est.gedcomTag);
+					placeEvent(layout, est.name, est.text, est.gedcomTag);
 				}
 				U.placeNotes(layout, one, true);
 				U.placeSourceCitations(layout, one);

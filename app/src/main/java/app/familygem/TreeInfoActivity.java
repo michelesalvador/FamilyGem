@@ -134,7 +134,7 @@ public class TreeInfoActivity extends BaseActivity {
 				}
 				spazio();
 				for( Extension est : U.findExtensions(h) ) {	// ogni estensione nella sua riga
-					poni( est.nome, est.testo );
+					poni( est.name, est.text);
 				}
 				spazio();
 				if( righetta != null )
@@ -181,7 +181,7 @@ public class TreeInfoActivity extends BaseActivity {
 			}
 			// Estensioni del Gedcom, ovvero tag non standard di livello 0 zero
 			for( Extension est : U.findExtensions(gc) ) {
-				U.place( scatola, est.nome, est.testo );
+				U.place( scatola, est.name, est.text);
 			}
 		} else
 			bottoneHeader.setVisibility(View.GONE);

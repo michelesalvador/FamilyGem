@@ -3,12 +3,12 @@ package app.familygem;
 import org.folg.gedcom.model.GedcomTag;
 
 public class Extension {
-	String nome;
-	String testo;
+	String name;
+	String text;
 	GedcomTag gedcomTag;
-	public Extension(String nome, String testo, GedcomTag gedcomTag ) {
-		this.nome = nome;
-		this.testo = testo;
+	public Extension(String name, String text, GedcomTag gedcomTag ) {
+		this.name = name;
+		this.text = text;
 		this.gedcomTag = gedcomTag;
 	}
 }
