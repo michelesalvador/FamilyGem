@@ -990,9 +990,9 @@ public class U {
 		if( Global.settings.autoSave )
 			saveJson(Global.gc, Global.settings.openTree);
 		else { // mostra il tasto Salva
-			Global.daSalvare = true;
-			if( Global.principalView != null ) {
-				NavigationView menu = Global.principalView.findViewById(R.id.menu);
+			Global.shouldSave = true;
+			if( Global.mainView != null ) {
+				NavigationView menu = Global.mainView.findViewById(R.id.menu);
 				menu.getHeaderView(0).findViewById(R.id.menu_salva).setVisibility(View.VISIBLE);
 			}
 		}

@@ -42,7 +42,7 @@ public class RepositoryFragment extends Fragment {
 			if( repos.size() > 1 )
 				setHasOptionsMenu(true);
 			Collections.sort(repos, (r1, r2) -> {
-				switch( Global.ordineMagazzino ) {
+				switch( Global.repositoryOrder) {
 					case 1: // Ordina per id
 						return U.extractNum(r1.getId()) - U.extractNum(r2.getId());
 					case 2: // Ordine alfabetico
@@ -146,13 +146,13 @@ public class RepositoryFragment extends Fragment {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		switch( item.getItemId() ) {
 			case 1:
-				Global.ordineMagazzino = 1;
+				Global.repositoryOrder = 1;
 				break;
 			case 2:
-				Global.ordineMagazzino = 2;
+				Global.repositoryOrder = 2;
 				break;
 			case 3:
-				Global.ordineMagazzino = 3;
+				Global.repositoryOrder = 3;
 				break;
 			default:
 				return false;

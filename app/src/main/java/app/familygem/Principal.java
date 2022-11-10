@@ -54,7 +54,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 
 		menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
-		Global.principalView = scatolissima;
+		Global.mainView = scatolissima;
 		U.ensureGlobalGedcomNotNull( gc );
 		furnishMenu();
 
@@ -197,7 +197,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 			view.setVisibility(View.GONE);
 			U.saveJson(Global.gc, Global.settings.openTree);
 			scatolissima.closeDrawer(GravityCompat.START);
-			Global.daSalvare = false;
+			Global.shouldSave = false;
 			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
 		});
 		saveButton.setOnLongClickListener( vista -> {
@@ -210,13 +210,13 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 					U.askWhichParentsToShow(this, null, 0); // Semplicemente ricarica il diagramma
 					scatolissima.closeDrawer(GravityCompat.START);
 					saveButton.setVisibility(View.GONE);
-					Global.daSalvare = false;
+					Global.shouldSave = false;
 				}
 				return true;
 			});
 			return true;
 		});
-		if( Global.daSalvare )
+		if( Global.shouldSave)
 			saveButton.setVisibility( View.VISIBLE );
 	}
 

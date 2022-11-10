@@ -140,7 +140,7 @@ public class TreesActivity extends AppCompatActivity {
 						boolean esiste = new File( getFilesDir(), treeId + ".json" ).exists();
 						PopupMenu popup = new PopupMenu( TreesActivity.this, vista );
 						Menu menu = popup.getMenu();
-						if( treeId == Global.settings.openTree && Global.daSalvare )
+						if( treeId == Global.settings.openTree && Global.shouldSave)
 							menu.add(0, -1, 0, R.string.save);
 						if( (Global.settings.expert && derivato) || (Global.settings.expert && esaurito) )
 							menu.add(0, 0, 0, R.string.open);
@@ -167,7 +167,7 @@ public class TreesActivity extends AppCompatActivity {
 							int id = item.getItemId();
 							if( id == -1 ) { // Salva
 								U.saveJson(Global.gc, treeId);
-								Global.daSalvare = false;
+								Global.shouldSave = false;
 							} else if( id == 0 ) { // Apre un albero derivato
 								openGedcom(treeId, true);
 								startActivity(new Intent(TreesActivity.this, Principal.class));
@@ -424,7 +424,7 @@ public class TreesActivity extends AppCompatActivity {
 		}
 		Global.indi = Global.settings.getCurrentTree().root;
 		Global.familyNum = 0; // eventualmente lo resetta se era > 0
-		Global.daSalvare = false; // eventualmente lo resetta se era true
+		Global.shouldSave = false; // eventualmente lo resetta se era true
 		return true;
 	}
 
