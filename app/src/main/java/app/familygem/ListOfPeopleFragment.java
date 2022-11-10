@@ -364,7 +364,7 @@ public class ListOfPeopleFragment extends Fragment {
 	private int findDate(Person person) {
 		for( EventFact event : person.getEventsFacts() ) {
 			if( event.getDate() != null ) {
-				gedcomDateConverter.analizza(event.getDate());
+				gedcomDateConverter.analyze(event.getDate());
 				return gedcomDateConverter.getDateNumber();
 			}
 		}

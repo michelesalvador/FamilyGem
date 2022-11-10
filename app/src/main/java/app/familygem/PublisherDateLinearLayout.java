@@ -16,7 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import androidx.appcompat.widget.PopupMenu;
-import java.lang.reflect.Field;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -94,22 +94,22 @@ public class PublisherDateLinearLayout extends LinearLayout {
 				});
 			});
 			findViewById(R.id.editadata_negativa1).setOnClickListener(vista -> {
-				data1.negativa = ((CompoundButton)vista).isChecked();
+				data1.negative = ((CompoundButton)vista).isChecked();
 				veroImputTesto = false;
 				genera();
 			});
 			findViewById(R.id.editadata_doppia1).setOnClickListener(vista -> {
-				data1.doppia = ((CompoundButton)vista).isChecked();
+				data1.doubleYear = ((CompoundButton)vista).isChecked();
 				veroImputTesto = false;
 				genera();
 			});
 			findViewById(R.id.editadata_negativa2).setOnClickListener(vista -> {
-				data2.negativa = ((CompoundButton)vista).isChecked();
+				data2.negative = ((CompoundButton)vista).isChecked();
 				veroImputTesto = false;
 				genera();
 			});
 			findViewById(R.id.editadata_doppia2).setOnClickListener(vista -> {
-				data2.doppia = ((CompoundButton)vista).isChecked();
+				data2.doubleYear = ((CompoundButton)vista).isChecked();
 				veroImputTesto = false;
 				genera();
 			});
@@ -136,7 +136,7 @@ public class PublisherDateLinearLayout extends LinearLayout {
 			if( ciapaFocus ) {
 				if( gedcomDateConverter.kind == Kind.PHRASE ) {
 					//genera(); // Toglie le parentesi alla frase
-					editaTesto.setText(gedcomDateConverter.frase);
+					editaTesto.setText(gedcomDateConverter.phrase);
 				} else {
 					tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
 					/*Window finestra = ((Activity)getContext()).getWindow(); non aiuta la scomparsa della tastiera
@@ -216,7 +216,7 @@ public class PublisherDateLinearLayout extends LinearLayout {
 	// Prende la stringa data, aggiorna le Date e ci modifica tutto l'editore data
 	// Chiamato quando clicco sul campo editabile, e dopo ogni editazione del testo
 	void impostaTutto() {
-		gedcomDateConverter.analizza( editaTesto.getText().toString() );
+		gedcomDateConverter.analyze( editaTesto.getText().toString() );
 		((CheckBox)findViewById( R.id.editadata_circa )).setChecked( gedcomDateConverter.kind == Kind.APPROXIMATE );
 		((TextView)findViewById( R.id.editadata_tipi )).setText( dateKinds[gedcomDateConverter.kind.ordinal()] );
 
@@ -279,9 +279,9 @@ public class PublisherDateLinearLayout extends LinearLayout {
 			ceccoBC.setVisibility(INVISIBLE);
 			ceccoDoppia.setVisibility(INVISIBLE);
 		} else {
-			ceccoBC.setChecked(data.negativa);
+			ceccoBC.setChecked(data.negative);
 			ceccoBC.setVisibility(VISIBLE);
-			ceccoDoppia.setChecked(data.doppia);
+			ceccoDoppia.setChecked(data.doubleYear);
 			ceccoDoppia.setVisibility(VISIBLE);
 		}
 	}
@@ -342,7 +342,7 @@ public class PublisherDateLinearLayout extends LinearLayout {
 		String fatta = "";
 		if( data.date != null ) {
 			// Date con l'anno doppio
-			if( data.doppia && !(data.isFormat(Format.EMPTY) || data.isFormat(Format.D_M)) ) {
+			if( data.doubleYear && !(data.isFormat(Format.EMPTY) || data.isFormat(Format.D_M)) ) {
 				Date unAnnoDopo = new Date();
 				unAnnoDopo.setYear( data.date.getYear() + 1 );
 				String secondoAnno = String.format( Locale.ENGLISH, "%tY", unAnnoDopo );
@@ -350,7 +350,7 @@ public class PublisherDateLinearLayout extends LinearLayout {
 			} else // Le altre date normali
 				fatta = data.format.format( data.date );
 		}
-		if( data.negativa )
+		if( data.negative)
 			fatta += " B.C.";
 		return fatta;
 	}

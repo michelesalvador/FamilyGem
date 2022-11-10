@@ -1,5 +1,3 @@
-// Questa classe riceve una data Gedcom, la analizza e la traduce in una classe Data
-
 package app.familygem;
 
 import java.text.DateFormat;
@@ -11,23 +9,30 @@ import java.util.Locale;
 import app.familygem.constant.Format;
 import app.familygem.constant.Kind;
 
+/**
+ * This class receives a Gedcom date, parses it and translates it into a Data class
+ * */
 class GedcomDateConverter {
 
 	Data data1;
 	Data data2;
-	String frase; // Quella che andrà tra parentesi
+	String phrase; //The one that will go in parentheses // Quella che andrà tra parentesi
 	Kind kind;
-	static final String[] mesiGedcom = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
-	static final String[] suffissi = { "B.C.", "BC", "BCE" };
+	static final String[] gedcomMonths = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
+	static final String[] suffixes = { "B.C.", "BC", "BCE" };
 
-	// With a string date in GEDCOM style
+	/**
+	 * With a string date in GEDCOM style
+	 * */
 	GedcomDateConverter(String gedcomDate) {
 		data1 = new Data();
 		data2 = new Data();
-		analizza(gedcomDate);
+		analyze(gedcomDate);
 	}
 
-	// With one single complete Date
+	/**
+	 * With one single complete Date
+	 * */
 	GedcomDateConverter(Date date) {
 		data1 = new Data();
 		data1.date = date;
@@ -38,38 +43,41 @@ class GedcomDateConverter {
 	class Data {
 		Date date;
 		SimpleDateFormat format;
-		boolean negativa;
-		boolean doppia;
+		boolean negative;
+		boolean doubleYear;
 
 		Data() {
 			DateFormatSymbols simboliFormato = new DateFormatSymbols();
-			simboliFormato.setShortMonths( mesiGedcom );
+			simboliFormato.setShortMonths(gedcomMonths);
 			format = new SimpleDateFormat();
 			format.setDateFormatSymbols( simboliFormato );
 		}
 
-		// Prende una data Gedcom esatta e ci farcisce gli attributi della classe Data
-		void scanna( String dataGc ) {
+		/**
+		 * It takes an exact Gedcom date and stuffs the attributes of the Date class into it
+		 * // Prende una data Gedcom esatta e ci farcisce gli attributi della classe Data
+		 * */
+		void scan(String dataGc ) {
 
-			// Riconosce se la data è B.C. e rimuove il suffisso
-			negativa = false; // resetta eventuale true
-			for( String suffix : suffissi ) {
+			// Recognize if the date is B.C. and remove the suffix
+			negative = false; //eventually reset to true // resetta eventuale true
+			for( String suffix : suffixes) {
 				if( dataGc.endsWith(suffix) ) {
-					negativa = true;
+					negative = true;
 					dataGc = dataGc.substring(0, dataGc.indexOf(suffix)).trim();
 					break;
 				}
 			}
 			dataGc = dataGc.replaceAll("[\\\\_\\-|.,;:?'\"#^&*°+=~()\\[\\]{}]", " "); // tutti tranne '/'
 			
-			// Distingue una data con anno doppio 1712/1713 da una data type 17/12/1713
-			doppia = false; // reset
+			// Distinguishes a date with a double year 1712/1713 from a date type 17/12/1713
+			doubleYear = false; // reset
 			if( dataGc.indexOf('/') > 0 ) {
 				String[] tata = dataGc.split("[/ ]");
 				if( tata.length > 1 && tata[tata.length-2].length() < 3 && U.extractNum( tata[tata.length-2] ) <= 12 )
 					dataGc = dataGc.replace( '/', ' ' );
 				else
-					doppia = true;
+					doubleYear = true;
 			}
 			for( String dateFormat : Format.PATTERNS ) {
 				format.applyPattern( dateFormat );
@@ -83,17 +91,19 @@ class GedcomDateConverter {
 			if( isFormat(Format.m_Y) )
 				format.applyPattern(Format.M_Y);
 
-			// Rende la data effettivamente negativa (per il calcolo delle età)
-			if( negativa ) cambiaEra();
+			// Makes date effectively negative (for age calculation)
+			if(negative) changeEra();
 		}
 
-		// Rende la data BC oppure AD coerentemente con il boolean 'negativa'
-		void cambiaEra() {
+		/**
+		 * Makes the date BC or AD consistent with the 'negative' boolean
+		 * */
+		void changeEra() {
 			if( date != null ) {
-				// La data viene riparsata cambiandogli l'era
+				// The date is repaired by changing the era
 				SimpleDateFormat sdf = new SimpleDateFormat(Format.D_M_Y + " G", Locale.US);
 				String data = sdf.format(date);
-				if( negativa )
+				if(negative)
 					data = data.replace("AD", "BC");
 				else
 					data = data.replace("BC", "AD");
@@ -114,8 +124,10 @@ class GedcomDateConverter {
 		}
 	}
 	
-	// Riconosce il type di data e crea la classe Data
-	void analizza(String dataGc) {
+	/**
+	 * It recognizes the type of data and creates the Data class
+	 * */
+	void analyze(String dataGc) {
 
 		// Reset the important values
 		kind = null;
@@ -126,7 +138,7 @@ class GedcomDateConverter {
 			kind = Kind.EXACT;
 			return;
 		}
-		// Riconosce i tipi diversi da EXACT e converte la stringa in Data
+		// It recognizes types other than EXACT and converts the string to Data
 		String dataGcMaiusc = dataGc.toUpperCase();
 		for( int i = 1; i < Kind.values().length; i++ ) {
 			Kind k = Kind.values()[i];
@@ -134,32 +146,32 @@ class GedcomDateConverter {
 				kind = k;
 				if( k == Kind.BETWEEN_AND && dataGcMaiusc.contains("AND") ) {
 					if( dataGcMaiusc.indexOf("AND") > dataGcMaiusc.indexOf("BET") + 4 )
-						data1.scanna(dataGcMaiusc.substring(4, dataGcMaiusc.indexOf("AND") - 1));
+						data1.scan(dataGcMaiusc.substring(4, dataGcMaiusc.indexOf("AND") - 1));
 					if( dataGcMaiusc.length() > dataGcMaiusc.indexOf("AND") + 3 )
-						data2.scanna(dataGcMaiusc.substring(dataGcMaiusc.indexOf("AND") + 4));
+						data2.scan(dataGcMaiusc.substring(dataGcMaiusc.indexOf("AND") + 4));
 				} else if( k == Kind.FROM && dataGcMaiusc.contains("TO") ) {
 					kind = Kind.FROM_TO;
 					if( dataGcMaiusc.indexOf("TO") > dataGcMaiusc.indexOf("FROM") + 5 )
-						data1.scanna(dataGcMaiusc.substring(5, dataGcMaiusc.indexOf("TO") - 1));
+						data1.scan(dataGcMaiusc.substring(5, dataGcMaiusc.indexOf("TO") - 1));
 					if( dataGcMaiusc.length() > dataGcMaiusc.indexOf("TO") + 2 )
-						data2.scanna(dataGcMaiusc.substring(dataGcMaiusc.indexOf("TO") + 3));
+						data2.scan(dataGcMaiusc.substring(dataGcMaiusc.indexOf("TO") + 3));
 				} else if( k == Kind.PHRASE ) { // Phrase date between parenthesis
 					if( dataGc.endsWith(")") )
-						frase = dataGc.substring(1, dataGc.indexOf(")"));
+						phrase = dataGc.substring(1, dataGc.indexOf(")"));
 					else
-						frase = dataGc;
-				} else if( dataGcMaiusc.length() > k.prefix.length() ) // Altri prefissi seguiti da qualcosa
-					data1.scanna(dataGcMaiusc.substring(k.prefix.length() + 1));
+						phrase = dataGc;
+				} else if( dataGcMaiusc.length() > k.prefix.length() ) // Other prefixes followed by something
+					data1.scan(dataGcMaiusc.substring(k.prefix.length() + 1));
 				break;
 			}
 		}
-		// Rimane da provare il type EXACT, altrimenti diventa una frase
+		//It remains to prove the type EXACT, otherwise it becomes a sentence // Rimane da provare il type EXACT, altrimenti diventa una frase
 		if( kind == null ) {
-			data1.scanna(dataGc);
+			data1.scan(dataGc);
 			if( data1.date != null ) {
 				kind = Kind.EXACT;
 			} else {
-				frase = dataGc;
+				phrase = dataGc;
 				kind = Kind.PHRASE;
 			}
 		}
@@ -175,10 +187,10 @@ class GedcomDateConverter {
 			Locale locale = Locale.getDefault();
 			DateFormat dateFormat = new SimpleDateFormat(yearOnly ? Format.Y : data1.format.toPattern(), locale);
 			Date dateOne = (Date)data1.date.clone(); // Cloned so the year of a double date can be modified without consequences
-			if( data1.doppia )
+			if( data1.doubleYear)
 				dateOne.setYear(data1.date.getYear() + 1);
 			text = dateFormat.format(dateOne);
-			if( data1.negativa )
+			if( data1.negative)
 				text = "-" + text;
 			if( kind == Kind.APPROXIMATE || kind == Kind.CALCULATED || kind == Kind.ESTIMATED )
 				text += "?";
@@ -190,14 +202,14 @@ class GedcomDateConverter {
 				text = "→" + text;
 			else if( (kind == Kind.BETWEEN_AND || kind == Kind.FROM_TO) && data2.date != null ) {
 				Date dateTwo = (Date)data2.date.clone();
-				if( data2.doppia )
+				if( data2.doubleYear)
 					dateTwo.setYear(data2.date.getYear() + 1);
 				dateFormat = new SimpleDateFormat(yearOnly ? Format.Y : data2.format.toPattern(), locale);
 				String second = dateFormat.format(dateTwo);
-				if( data2.negativa )
+				if( data2.negative)
 					second = "-" + second;
 				if( !second.equals(text) ) {
-					if( !data1.negativa && !data2.negativa ) {
+					if( !data1.negative && !data2.negative) {
 						if( !yearOnly && data1.isFormat(Format.D_M_Y) && data1.format.equals(data2.format)
 								&& dateOne.getMonth() == dateTwo.getMonth() && dateOne.getYear() == dateTwo.getYear() ) { // Same month and year
 							text = text.substring(0, text.indexOf(' '));
@@ -220,7 +232,9 @@ class GedcomDateConverter {
 		return text;
 	}
 
-	// Plain text of the date in local language
+	/**
+	 * Plain text of the date in local language
+	 * */
 	public String writeDateLong() {
 		String txt = "";
 		int pre = 0;
@@ -248,8 +262,8 @@ class GedcomDateConverter {
 				if( data2.date != null )
 					txt += writePiece(data2);
 			}
-		} else if( frase != null ) {
-			txt = frase;
+		} else if( phrase != null ) {
+			txt = phrase;
 		}
 		return txt.trim();
 	}
@@ -257,19 +271,21 @@ class GedcomDateConverter {
 	String writePiece(Data date) {
 		DateFormat dateFormat = new SimpleDateFormat(date.format.toPattern().replace("MMM", "MMMM"), Locale.getDefault());
 		String txt = " " + dateFormat.format(date.date);
-		if( date.doppia ) {
+		if( date.doubleYear) {
 			String year = String.valueOf(date.date.getYear() + 1901);
 			if( year.length() > 1 ) // Two or more digits
 				txt += "/" + year.substring(year.length() - 2);
 			else // One digit
 				txt += "/0" + year;
 		}
-		if( date.negativa )
+		if( date.negative)
 			txt += " B.C.";
 		return txt;
 	}
 
-	// Return an integer representing the main date in the format YYYYMMDD, otherwise MAX_VALUE
+	/**
+	 * Return an integer representing the main date in the format YYYYMMDD, otherwise MAX_VALUE
+	 * */
 	public int getDateNumber() {
 		if( data1.date != null && !data1.isFormat(Format.D_M) ) {
 			return (data1.date.getYear() + 1900) * 10000 + (data1.date.getMonth() + 1) * 100 + data1.date.getDate();
@@ -277,7 +293,9 @@ class GedcomDateConverter {
 		return Integer.MAX_VALUE;
 	}
 
-	// Kinds of date that represent a single event in time
+	/**
+	 * Kinds of date that represent a single event in time
+	 * */
 	boolean isSingleKind() {
 		return kind == Kind.EXACT || kind == Kind.APPROXIMATE || kind == Kind.CALCULATED || kind == Kind.ESTIMATED;
 	}
