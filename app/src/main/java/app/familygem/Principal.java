@@ -119,7 +119,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 			} else if( fragment instanceof ChurchFragment) {
 				((ChurchFragment)fragment).refresh(ChurchFragment.What.RELOAD);
 			} else if( fragment instanceof GalleryFragment) {
-				((GalleryFragment)fragment).ricrea();
+				((GalleryFragment)fragment).recreate();
 			/*} else if( fragment instanceof Quaderno ) {
 				// Doesn't work to update Quaderno when a note is deleted
 				((Quaderno)fragment).adapter.notifyDataSetChanged();*/

@@ -147,7 +147,7 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 			vistaTesto.setText( testo );
 		}
 		if( media.getId() != null ) {
-			vistaNumero.setText( String.valueOf(GalleryFragment.popolarita(media)) );
+			vistaNumero.setText( String.valueOf(GalleryFragment.popularity(media)) );
 			vistaNumero.setVisibility( View.VISIBLE );
 		} else
 			vistaNumero.setVisibility( View.GONE );

@@ -794,7 +794,7 @@ public class F {
      * */
     static void finishProposeCropping(Context context, Fragment fragment) {
         if (fragment instanceof GalleryFragment)
-            ((GalleryFragment) fragment).ricrea();
+            ((GalleryFragment) fragment).recreate();
         else if (context instanceof DetailActivity)
             ((DetailActivity) context).refresh();
         else if (context instanceof IndividualPersonActivity) {
@@ -875,8 +875,8 @@ public class F {
      * Answering all permission requests for Android 6+
      * Risposta a tutte le richieste di permessi per Android 6+
      */
-    static void permissionsResult(Context context, Fragment fragment, int code, String[] permissions, int[] granted, MediaContainer container) {
-        if (granted.length > 0 && granted[0] == PackageManager.PERMISSION_GRANTED) {
+    static void permissionsResult(Context context, Fragment fragment, int code, String[] permissions, int[] grantResults, MediaContainer container) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             displayImageCaptureDialog(context, fragment, code, container);
         } else {
             String permission = permissions[0].substring(permissions[0].lastIndexOf('.') + 1);
