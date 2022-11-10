@@ -158,13 +158,13 @@ public class MediaFolders extends BaseActivity {
 			if( uri != null ) {
 				// in KitKat è stato selezionato un file e ne ricaviamo il percorso della cartella
 				if( requestCode == 456 ) {
-					String percorso = F.uriPercorsoCartellaKitKat( this, uri );
+					String percorso = F.uriPathFolderKitKat( this, uri );
 					if( percorso != null ) {
 						cartelle.add( percorso );
 						salva();
 					}
 				} else if( requestCode == 123 ) {
-					String percorso = F.uriPercorsoCartella( uri );
+					String percorso = F.uriFolderPath( uri );
 					if( percorso != null ) {
 						cartelle.add( percorso );
 						salva();

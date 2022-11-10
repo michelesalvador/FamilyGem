@@ -163,7 +163,7 @@ public class TreeComparatorActivity extends BaseActivity {
 			txt = U.details( p, null );
 			data = dataOra( p.getChange() );
 			vistaFoto.setVisibility( View.VISIBLE );
-			F.unaFoto( gc, p, vistaFoto );
+			F.showMainImageForPerson( gc, p, vistaFoto );
 		}
 		else if( o instanceof Family ) {
 			tipoRecord( R.string.family );

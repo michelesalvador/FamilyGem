@@ -401,7 +401,7 @@ public class Diagram extends Fragment {
 			} else if( personNode.acquired ) {
 				background.setBackgroundResource(R.drawable.casella_sfondo_sposo);
 			}
-			F.unaFoto(Global.gc, person, view.findViewById(R.id.card_photo));
+			F.showMainImageForPerson(Global.gc, person, view.findViewById(R.id.card_photo));
 			TextView vistaNome = view.findViewById(R.id.card_name);
 			String nome = U.properName(person, true);
 			if( nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility()==View.VISIBLE )

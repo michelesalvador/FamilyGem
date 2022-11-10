@@ -142,7 +142,7 @@ public class Exporter {
         gc.accept(mediaList);
         int numFiles = 0;
         for (Media med : mediaList.list) {
-            if (F.mediaPath(treeId, med) != null || F.uriMedia(treeId, med) != null)
+            if (F.mediaPath(treeId, med) != null || F.mediaUri(treeId, med) != null)
                 numFiles++;
         }
         return numFiles;
@@ -191,7 +191,7 @@ public class Exporter {
             if (mediaPath != null)
                 collection.put(DocumentFile.fromFile(new File(mediaPath)), 2); // todo canRead() ?
             else { // URIs
-                Uri uriMedia = F.uriMedia(treeId, med);
+                Uri uriMedia = F.mediaUri(treeId, med);
                 if (uriMedia != null)
                     collection.put(DocumentFile.fromSingleUri(context, uriMedia), 2);
             }

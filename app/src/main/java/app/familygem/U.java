@@ -635,7 +635,7 @@ public class U {
 		if( titolo.isEmpty() ) vistaTitolo.setVisibility(View.GONE);
 		else vistaTitolo.setText(titolo);
 		details(persona, vistaIndi.findViewById(R.id.indi_dettagli));
-		F.unaFoto(Global.gc, persona, vistaIndi.findViewById(R.id.indi_foto));
+		F.showMainImageForPerson(Global.gc, persona, vistaIndi.findViewById(R.id.indi_foto));
 		if( !isDead(persona) )
 			vistaIndi.findViewById(R.id.indi_lutto).setVisibility(View.GONE);
 		if( Gender.isMale(persona) )
@@ -822,7 +822,7 @@ public class U {
 	public static View linkaPersona(LinearLayout scatola, Person p, int scheda) {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo_piccolo, scatola, false);
 		scatola.addView(vistaPersona);
-		F.unaFoto(Global.gc, p, vistaPersona.findViewById(R.id.collega_foto));
+		F.showMainImageForPerson(Global.gc, p, vistaPersona.findViewById(R.id.collega_foto));
 		((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(properName(p));
 		String dati = twoDates(p, false);
 		TextView vistaDettagli = vistaPersona.findViewById(R.id.collega_dati);

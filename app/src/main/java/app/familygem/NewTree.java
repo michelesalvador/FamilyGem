@@ -297,7 +297,7 @@ public class NewTree extends BaseActivity {
 				printWriter.print(jsonParser.toJson(gedcom));
 				printWriter.close();
 				// Nome albero e percorso della cartella
-				String percorso = F.uriPercorsoFile(uri);
+				String percorso = F.uriFilePath(uri);
 				String nomeAlbero;
 				String percorsoCartella = null;
 				if( percorso != null && percorso.lastIndexOf('/') > 0 ) { // è un percorso completo del file gedcom

@@ -162,8 +162,8 @@ public class IndividualPersonActivity extends AppCompatActivity {
 		} else idView.setVisibility(View.GONE);
 		CollapsingToolbarLayout barraCollasso = findViewById(R.id.toolbar_layout);
 		barraCollasso.setTitle(U.properName(one)); // aggiorna il titolo se il nome viene modificato, ma non lo setta se è una stringa vuota
-		F.unaFoto(Global.gc, one, findViewById(R.id.persona_foto));
-		F.unaFoto(Global.gc, one, findViewById(R.id.persona_sfondo));
+		F.showMainImageForPerson(Global.gc, one, findViewById(R.id.persona_foto));
+		F.showMainImageForPerson(Global.gc, one, findViewById(R.id.persona_sfondo));
 		if( Global.edited ) {
 			// Ricostruisce le tre schede ritornando alla pagina
 			for( int i = 0; i < 3; i++ ) {
