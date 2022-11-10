@@ -32,20 +32,20 @@ public class IndividualEditorActivity extends AppCompatActivity {
 
 	Person p;
 	String idIndi;
-	String idFamiglia;
-	int relazione;
+	String familyId;
+	int relationship;
 	RadioButton sexMale;
 	RadioButton sexFemale;
 	RadioButton sexUnknown;
 	int lastChecked;
-	EditText dataNascita;
-	PublisherDateLinearLayout publisherDateLinearLayoutNascita;
-	EditText luogoNascita;
-	SwitchCompat bottonMorte;
-	EditText dataMorte;
-	PublisherDateLinearLayout publisherDateLinearLayoutMorte;
-	EditText luogoMorte;
-	boolean nomeDaPieces; // Se il nome/cognome vengono dai pieces Given e Surname, lì devono tornare
+	EditText dateOfBirth;
+	PublisherDateLinearLayout publisherDateLinearLayoutDOB; //DOB = Date of Birth
+	EditText birthplaceEditText;
+	SwitchCompat isDeadSwitch;
+	EditText dateOfDeath;
+	PublisherDateLinearLayout publisherDateLinearLayoutDOD; //DOD = Date of Death
+	EditText deathPlace;
+	boolean nameFromPieces; //If the name / surname comes from the Given and Surname pieces, they must return there // Se il nome/cognome vengono dai pieces Given e Surname, lì devono tornare
 
 	@Override
 	protected void onCreate(Bundle bandolo) {
@@ -54,19 +54,19 @@ public class IndividualEditorActivity extends AppCompatActivity {
 		setContentView( R.layout.edita_individuo );
 		Bundle bundle = getIntent().getExtras();
 		idIndi = bundle.getString("idIndividuo");
-		idFamiglia = bundle.getString("idFamiglia");
-		relazione = bundle.getInt("relazione", 0 );
+		familyId = bundle.getString("idFamiglia");
+		relationship = bundle.getInt("relazione", 0 );
 
 		sexMale = findViewById(R.id.sesso1);
 		sexFemale = findViewById(R.id.sesso2);
 		sexUnknown = findViewById(R.id.sesso3);
-		dataNascita = findViewById( R.id.data_nascita );
-		publisherDateLinearLayoutNascita = findViewById(R.id.editore_data_nascita);
-		luogoNascita = findViewById(R.id.luogo_nascita);
-		bottonMorte = findViewById( R.id.defunto );
-		dataMorte = findViewById( R.id.data_morte );
-		publisherDateLinearLayoutMorte = findViewById( R.id.editore_data_morte );
-		luogoMorte = findViewById( R.id.luogo_morte );
+		dateOfBirth = findViewById( R.id.data_nascita );
+		publisherDateLinearLayoutDOB = findViewById(R.id.editore_data_nascita);
+		birthplaceEditText = findViewById(R.id.luogo_nascita);
+		isDeadSwitch = findViewById( R.id.defunto );
+		dateOfDeath = findViewById( R.id.data_morte );
+		publisherDateLinearLayoutDOD = findViewById( R.id.editore_data_morte );
+		deathPlace = findViewById( R.id.luogo_morte );
 
 		// Toggle sex radio buttons
 		RadioGroup radioGroup = findViewById(R.id.radioGroup);
@@ -84,61 +84,61 @@ public class IndividualEditorActivity extends AppCompatActivity {
 			});
 		});
 
-		disattivaMorte();
+		disableDeath();
 
-		// Nuovo individuo in relazione di parentela
-		if( relazione > 0 ) {
+		// New individual in kinship relationship
+		if( relationship > 0 ) {
 			p = new Person();
 			Person pivot = gc.getPerson(idIndi);
 			String surname = null;
-			// Cognome del fratello
-			if( relazione == 2 ) { // = fratello
+			// Brother's surname
+			if( relationship == 2 ) { // = brother
 				surname = U.surname(pivot);
-			// Cognome del padre
-			} else if( relazione == 4 ) { // = figlio da Diagramma o Individuo
+			// Father's surname
+			} else if( relationship == 4 ) { // = child from Diagram or Individual // = figlio da Diagramma o Individuo
 				if( Gender.isMale(pivot) )
 					surname = U.surname(pivot);
-				else if( idFamiglia != null ) {
-					Family fam = gc.getFamily(idFamiglia);
+				else if( familyId != null ) {
+					Family fam = gc.getFamily(familyId);
 					if( fam != null && !fam.getHusbands(gc).isEmpty() )
 						surname = U.surname(fam.getHusbands(gc).get(0));
 				}
-			} else if( relazione == 6 ) { // = figlio da Famiglia
-				Family fam = gc.getFamily(idFamiglia);
+			} else if( relationship == 6 ) { // = child of Family(Activity?) // = figlio da Famiglia
+				Family fam = gc.getFamily(familyId);
 				if( !fam.getHusbands(gc).isEmpty() )
 					surname = U.surname(fam.getHusbands(gc).get(0));
 				else if( !fam.getChildren(gc).isEmpty() )
 					surname = U.surname(fam.getChildren(gc).get(0));
 			}
 			((EditText)findViewById(R.id.cognome)).setText(surname);
-		// Nuovo individuo scollegato
+		// New disconnected individual
 		} else if( idIndi.equals("TIZIO_NUOVO") ) {
 			p = new Person();
-		// Carica i dati di un individuo esistente da modificare
+		// Upload the data of an existing individual to modify
 		} else {
 			p = gc.getPerson(idIndi);
-			// Nome e cognome
+			// Name and surname
 			if( !p.getNames().isEmpty() ) {
-				String nome = "";
-				String cognome = "";
+				String name = "";
+				String surname = "";
 				Name n = p.getNames().get(0);
-				String epiteto = n.getValue();
-				if( epiteto != null ) {
-					nome = epiteto.replaceAll( "/.*?/", "" ).trim(); // rimuove il cognome '/.../'
-					if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
-						cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
+				String epithet = n.getValue();
+				if( epithet != null ) {
+					name = epithet.replaceAll( "/.*?/", "" ).trim(); //removes surname '/.../' // rimuove il cognome '/.../'
+					if( epithet.indexOf('/') < epithet.lastIndexOf('/') )
+						surname = epithet.substring( epithet.indexOf('/') + 1, epithet.lastIndexOf('/') ).trim();
 				} else {
 					if( n.getGiven() != null ) {
-						nome = n.getGiven();
-						nomeDaPieces = true;
+						name = n.getGiven();
+						nameFromPieces = true;
 					}
 					if( n.getSurname() != null ) {
-						cognome = n.getSurname();
-						nomeDaPieces = true;
+						surname = n.getSurname();
+						nameFromPieces = true;
 					}
 				}
-				((EditText)findViewById( R.id.nome )).setText( nome );
-				((EditText)findViewById( R.id.cognome )).setText( cognome );
+				((EditText)findViewById( R.id.nome )).setText( name );
+				((EditText)findViewById( R.id.cognome )).setText( surname );
 			}
 			// Sex
 			switch( Gender.getGender(p) ) {
@@ -152,111 +152,111 @@ public class IndividualEditorActivity extends AppCompatActivity {
 					sexUnknown.setChecked(true);
 			}
 			lastChecked = radioGroup.getCheckedRadioButtonId();
-			// Nascita e morte
-			for( EventFact fatto : p.getEventsFacts() ) {
-				if( fatto.getTag().equals("BIRT") ) {
-					if( fatto.getDate() != null )
-						dataNascita.setText( fatto.getDate().trim() );
-					if( fatto.getPlace() != null )
-						luogoNascita.setText(fatto.getPlace().trim());
+			// Birth and death
+			for( EventFact fact : p.getEventsFacts() ) {
+				if( fact.getTag().equals("BIRT") ) {
+					if( fact.getDate() != null )
+						dateOfBirth.setText( fact.getDate().trim() );
+					if( fact.getPlace() != null )
+						birthplaceEditText.setText(fact.getPlace().trim());
 				}
-				if( fatto.getTag().equals("DEAT") ) {
-					bottonMorte.setChecked(true);
-					attivaMorte();
-					if( fatto.getDate() != null )
-						dataMorte.setText( fatto.getDate().trim() );
-					if( fatto.getPlace() != null )
-						luogoMorte.setText(fatto.getPlace().trim());
+				if( fact.getTag().equals("DEAT") ) {
+					isDeadSwitch.setChecked(true);
+					activateDeathSwitch();
+					if( fact.getDate() != null )
+						dateOfDeath.setText( fact.getDate().trim() );
+					if( fact.getPlace() != null )
+						deathPlace.setText(fact.getPlace().trim());
 				}
 			}
 		}
-		publisherDateLinearLayoutNascita.initialize( dataNascita );
-		bottonMorte.setOnCheckedChangeListener( (coso, attivo) -> {
-			if (attivo)
-				attivaMorte();
+		publisherDateLinearLayoutDOB.initialize(dateOfBirth);
+		isDeadSwitch.setOnCheckedChangeListener( (button, checked) -> {
+			if (checked)
+				activateDeathSwitch();
 			else
-				disattivaMorte();
+				disableDeath();
 		});
-		publisherDateLinearLayoutMorte.initialize( dataMorte );
-		luogoMorte.setOnEditorActionListener( (vista, actionId, keyEvent) -> {
+		publisherDateLinearLayoutDOD.initialize(dateOfDeath);
+		deathPlace.setOnEditorActionListener( (vista, actionId, keyEvent) -> {
 			if( actionId == EditorInfo.IME_ACTION_DONE )
-				salva();
+				save();
 			return false;
 		});
 
-		// Barra
-		ActionBar barra = getSupportActionBar();
-		View barraAzione = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
-		barraAzione.findViewById( R.id.edita_annulla ).setOnClickListener( v -> onBackPressed() );
-		barraAzione.findViewById(R.id.edita_salva).setOnClickListener( v -> salva() );
-		barra.setCustomView( barraAzione );
-		barra.setDisplayShowCustomEnabled( true );
+		// Toolbar
+		ActionBar toolbar = getSupportActionBar();
+		View toolbarAction = getLayoutInflater().inflate( R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
+		toolbarAction.findViewById( R.id.edita_annulla ).setOnClickListener( v -> onBackPressed() );
+		toolbarAction.findViewById(R.id.edita_salva).setOnClickListener( v -> save() );
+		toolbar.setCustomView( toolbarAction );
+		toolbar.setDisplayShowCustomEnabled( true );
 	}
 
-	void disattivaMorte() {
+	void disableDeath() {
 		findViewById(R.id.morte).setVisibility(View.GONE);
-		luogoNascita.setImeOptions(EditorInfo.IME_ACTION_DONE);
-		luogoNascita.setNextFocusForwardId(0);
-		// Intercetta il 'Done' sulla tastiera
-		luogoNascita.setOnEditorActionListener((view, action, event) -> {
+		birthplaceEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+		birthplaceEditText.setNextFocusForwardId(0);
+		// Intercept the 'Done' on the keyboard
+		birthplaceEditText.setOnEditorActionListener((view, action, event) -> {
 			if( action == EditorInfo.IME_ACTION_DONE )
-				salva();
+				save();
 			return false;
 		});
 	}
 
-	void attivaMorte() {
-		luogoNascita.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-		luogoNascita.setNextFocusForwardId(R.id.data_morte);
-		luogoNascita.setOnEditorActionListener(null);
+	void activateDeathSwitch() {
+		birthplaceEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+		birthplaceEditText.setNextFocusForwardId(R.id.data_morte);
+		birthplaceEditText.setOnEditorActionListener(null);
 		findViewById(R.id.morte).setVisibility(View.VISIBLE);
 	}
 
-	void salva() {
-		U.ensureGlobalGedcomNotNull(gc); // È capitato un crash perché qui gc era null
+	void save() {
+		U.ensureGlobalGedcomNotNull(gc); //A crash occurred because gc was null here
 
-		// Nome
-		String nome = ((EditText)findViewById(R.id.nome)).getText().toString().trim();
-		String cognome = ((EditText)findViewById(R.id.cognome)).getText().toString().trim();
+		// Name
+		String nameString = ((EditText)findViewById(R.id.nome)).getText().toString().trim();
+		String surname = ((EditText)findViewById(R.id.cognome)).getText().toString().trim();
 		Name name;
 		if( p.getNames().isEmpty() ) {
-			List<Name> nomi = new ArrayList<>();
+			List<Name> names = new ArrayList<>();
 			name = new Name();
-			nomi.add(name);
-			p.setNames(nomi);
+			names.add(name);
+			p.setNames(names);
 		} else
 			name = p.getNames().get(0);
 
-		if( nomeDaPieces ) {
-			name.setGiven(nome);
-			name.setSurname(cognome);
+		if(nameFromPieces) {
+			name.setGiven(nameString);
+			name.setSurname(surname);
 		} else {
-			name.setValue(nome + " /" + cognome + "/".trim());
+			name.setValue(nameString + " /" + surname + "/".trim());
 		}
 
-		// Sesso
-		String sessoScelto = null;
+		// Sex
+		String chosenGender = null;
 		if( sexMale.isChecked() )
-			sessoScelto = "M";
+			chosenGender = "M";
 		else if( sexFemale.isChecked() )
-			sessoScelto = "F";
+			chosenGender = "F";
 		else if( sexUnknown.isChecked() )
-			sessoScelto = "U";
-		if( sessoScelto != null ) {
-			boolean mancaSesso = true;
+			chosenGender = "U";
+		if( chosenGender != null ) {
+			boolean missingSex = true;
 			for( EventFact fact : p.getEventsFacts() ) {
 				if( fact.getTag().equals("SEX") ) {
-					fact.setValue(sessoScelto);
-					mancaSesso = false;
+					fact.setValue(chosenGender);
+					missingSex = false;
 				}
 			}
-			if( mancaSesso ) {
-				EventFact sesso = new EventFact();
-				sesso.setTag("SEX");
-				sesso.setValue(sessoScelto);
-				p.addEventFact(sesso);
+			if( missingSex ) {
+				EventFact sex = new EventFact();
+				sex.setTag("SEX");
+				sex.setValue(chosenGender);
+				p.addEventFact(sex);
 			}
-			IndividualEventsFragment.aggiornaRuoliConiugali(p);
+			IndividualEventsFragment.updateMaritalRoles(p);
 		} else { // Remove existing sex tag
 			for( EventFact fact : p.getEventsFacts() ) {
 				if( fact.getTag().equals("SEX") ) {
@@ -266,161 +266,174 @@ public class IndividualEditorActivity extends AppCompatActivity {
 			}
 		}
 
-		// Nascita
-		publisherDateLinearLayoutNascita.encloseInParentheses();
-		String data = dataNascita.getText().toString().trim();
-		String luogo = luogoNascita.getText().toString().trim();
-		boolean trovato = false;
-		for (EventFact fatto : p.getEventsFacts()) {
-			if( fatto.getTag().equals("BIRT") ) {
-					/* TODO: if( data.isEmpty() && luogo.isEmpty() && tagTuttoVuoto(fatto) )
-					    p.getEventsFacts().remove(fatto);
+		// Birth
+		publisherDateLinearLayoutDOB.encloseInParentheses();
+		String data = dateOfBirth.getText().toString().trim();
+		String location = birthplaceEditText.getText().toString().trim();
+		boolean found = false;
+		for (EventFact fact : p.getEventsFacts()) {
+			if( fact.getTag().equals("BIRT") ) {
+					/* TODO:
+					    if (data.isEmpty () && place.isEmpty () && tagAllEmpty (done))
+							p.getEventsFacts (). remove (done);
+						more generally, delete a tag when it is empty
+
+					    if( data.isEmpty() && luogo.isEmpty() && tagTuttoVuoto(fatto) )
+					    	p.getEventsFacts().remove(fatto);
 					    più in generale, eliminare un tag quando è vuoto */
-				fatto.setDate( data );
-				fatto.setPlace( luogo );
-				EventActivity.cleanUpTag( fatto );
-				trovato = true;
+				fact.setDate( data );
+				fact.setPlace( location );
+				EventActivity.cleanUpTag( fact );
+				found = true;
 			}
 		}
-		// Se c'è qualche dato da salvare crea il tag
-		if( !trovato && ( !data.isEmpty() || !luogo.isEmpty() ) ) {
-			EventFact nascita = new EventFact();
-			nascita.setTag( "BIRT" );
-			nascita.setDate( data );
-			nascita.setPlace( luogo );
-			EventActivity.cleanUpTag( nascita );
-			p.addEventFact( nascita );
+		// If there is any data to save, create the tag
+		if( !found && ( !data.isEmpty() || !location.isEmpty() ) ) {
+			EventFact birth = new EventFact();
+			birth.setTag( "BIRT" );
+			birth.setDate( data );
+			birth.setPlace( location );
+			EventActivity.cleanUpTag( birth );
+			p.addEventFact( birth );
 		}
 
-		// Morte
-		publisherDateLinearLayoutMorte.encloseInParentheses();
-		data = dataMorte.getText().toString().trim();
-		luogo = luogoMorte.getText().toString().trim();
-		trovato = false;
-		for( EventFact fatto : p.getEventsFacts() ) {
-			if( fatto.getTag().equals("DEAT") ) {
-				if( !bottonMorte.isChecked() ) {
-					p.getEventsFacts().remove(fatto);
+		// Death
+		publisherDateLinearLayoutDOD.encloseInParentheses();
+		data = dateOfDeath.getText().toString().trim();
+		location = deathPlace.getText().toString().trim();
+		found = false;
+		for( EventFact fact : p.getEventsFacts() ) {
+			if( fact.getTag().equals("DEAT") ) {
+				if( !isDeadSwitch.isChecked() ) {
+					p.getEventsFacts().remove(fact);
 				} else {
-					fatto.setDate( data );
-					fatto.setPlace( luogo );
-					EventActivity.cleanUpTag( fatto );
+					fact.setDate( data );
+					fact.setPlace( location );
+					EventActivity.cleanUpTag( fact );
 				}
-				trovato = true;
+				found = true;
 				break;
 			}
 		}
-		if( !trovato && bottonMorte.isChecked() ) {
+		if( !found && isDeadSwitch.isChecked() ) {
 			EventFact morte = new EventFact();
 			morte.setTag( "DEAT" );
 			morte.setDate( data );
-			morte.setPlace( luogo );
+			morte.setPlace( location );
 			EventActivity.cleanUpTag( morte );
 			p.addEventFact( morte );
 		}
 
-		// Finalizzazione individuo nuovo
-		Object[] modificati = { p, null }; // il null serve per accogliere una eventuale Family
-		if( idIndi.equals("TIZIO_NUOVO") || relazione > 0 ) {
-			String nuovoId = U.newID( gc, Person.class );
-			p.setId( nuovoId );
+		// Finalization of new individual
+		Object[] modifications = { p, null }; // the null is used to accommodate a possible Family
+		if( idIndi.equals("TIZIO_NUOVO") || relationship > 0 ) {
+			String newId = U.newID( gc, Person.class );
+			p.setId( newId );
 			gc.addPerson( p );
 			if( Global.settings.getCurrentTree().root == null )
-				Global.settings.getCurrentTree().root = nuovoId;
+				Global.settings.getCurrentTree().root = newId;
 			Global.settings.save();
-			if( relazione >= 5 ) { // viene da Famiglia
-				FamilyActivity.connect( p, gc.getFamily(idFamiglia), relazione );
-				modificati[1] = gc.getFamily(idFamiglia);
-			} else if( relazione > 0 ) // viene da Diagramma o IndividuoFamiliari
-				modificati = aggiungiParente( idIndi, nuovoId, idFamiglia, relazione, getIntent().getStringExtra("collocazione") );
+			if( relationship >= 5 ) { // comes from Family(Activity)
+				FamilyActivity.connect( p, gc.getFamily(familyId), relationship);
+				modifications[1] = gc.getFamily(familyId);
+			} else if( relationship > 0 ) // comes from Family Diagram or Individual
+				modifications = addParent( idIndi, newId, familyId, relationship, getIntent().getStringExtra("collocazione") );
 		} else
-			Global.indi = p.getId(); // per mostrarlo orgogliosi in Diagramma
-		U.save(true, modificati);
+			Global.indi = p.getId(); //to proudly (prominently?) show it in Diagram // per mostrarlo orgogliosi in Diagramma
+		U.save(true, modifications);
 		onBackPressed();
 	}
 
-	/** Aggiunge un nuovo individuo in relazione di parentela con 'perno', eventualmente all'interno della famiglia fornita.
-	 * @param idFamiglia Id della famiglia di destinazione. Se è null si crea una nuova famiglia
-	 * @param collocazione Sintetizza come è stata individuata la famiglia e quindi cosa fare delle persone coinvolte
+	/**
+	 * Aggiunge un nuovo individuo in relazione di parentela con 'perno', eventualmente all'interno della famiglia fornita.
+	 * @param familyId Id della famiglia di destinazione. Se è null si crea una nuova famiglia
+	 * @param collection Sintetizza come è stata individuata la famiglia e quindi cosa fare delle persone coinvolte
+	 *
+	 *
+	 * Adds a new kinship individual with 'pivot', possibly within the given family.
+	 * @param familyId Id of the target family. If it is null, a new family is created
+	 * @param collection Summarizes how the family was identified and therefore what to do with the people involved
  	 */
-	static Object[] aggiungiParente(String idPerno, String nuovoId, String idFamiglia, int relazione, String collocazione) {
-		Global.indi = idPerno;
-		Person nuovo = gc.getPerson( nuovoId );
-		// Si crea una nuova famiglia in cui finiscono sia Perno che Nuovo
-		if( collocazione != null && collocazione.startsWith("NUOVA_FAMIGLIA_DI") ) { // Contiene l'id del genitore di cui creare una nuova famiglia
-			idPerno = collocazione.substring(17); // il genitore diventa effettivamente il perno
-			relazione = relazione == 2 ? 4 : relazione; // anziché un fratello a perno, è come se mettessimo un figlio al genitore
+	static Object[] addParent(String pivotId, String newId, String familyId, int relationship, String collection) {
+		Global.indi = pivotId;
+		Person newPerson = gc.getPerson( newId );
+		// A new family is created in which both Pin and New end up
+			if( collection != null && collection.startsWith("NUOVA_FAMIGLIA_DI") ) { // Contains the id of the parent to create a new family for
+				pivotId = collection.substring(17); // the parent effectively becomes the pivot
+			relationship = relationship == 2 ? 4 : relationship; //instead of a pivotal sibling, it is as if we were putting a child to the parent // anziché un fratello a perno, è come se mettessimo un figlio al genitore
 		}
-		// In Anagrafe è stata individuata la famiglia in cui finirà perno
-		else if( collocazione != null && collocazione.equals("FAMIGLIA_ESISTENTE") ) {
-			nuovoId = null;
-			nuovo = null;
+		//The family in which the pivot will end up has been identified in ListOfPeopleActivity // In Anagrafe è stata individuata la famiglia in cui finirà perno
+		else if( collection != null && collection.equals("FAMIGLIA_ESISTENTE") ) {
+			newId = null;
+			newPerson = null;
 		}
-		// Nuovo è accolto nella famiglia di Perno
-		else if( idFamiglia != null ) {
-			idPerno = null; // perno è già presente nella sua famiglia e non va riaggiunto
+		// New is welcomed into the pivot family
+		else if( familyId != null ) {
+			pivotId = null; // pivot is already present in his family and should not be added again
 		}
-		Family famiglia = idFamiglia != null ? gc.getFamily(idFamiglia) : ChurchFragment.newFamily(true);;
-		Person perno = gc.getPerson( idPerno );
-		SpouseRef refSposo1 = new SpouseRef(), refSposo2 = new SpouseRef();
-		ChildRef refFiglio1 = new ChildRef(), refFiglio2 = new ChildRef();
-		ParentFamilyRef refFamGenitori = new ParentFamilyRef();
-		SpouseFamilyRef refFamSposi = new SpouseFamilyRef();
-		refFamGenitori.setRef( famiglia.getId() );
-		refFamSposi.setRef( famiglia.getId() );
+		Family family = familyId != null ? gc.getFamily(familyId) : ChurchFragment.newFamily(true);;
+		Person pivot = gc.getPerson( pivotId );
+		SpouseRef refSpouse1 = new SpouseRef(), refSposo2 = new SpouseRef();
+		ChildRef refChild1 = new ChildRef(), refFiglio2 = new ChildRef();
+		ParentFamilyRef parentFamilyRef = new ParentFamilyRef();
+		SpouseFamilyRef spouseFamilyRef = new SpouseFamilyRef();
+		parentFamilyRef.setRef( family.getId() );
+		spouseFamilyRef.setRef( family.getId() );
 
-		// Popolamento dei ref
-		switch (relazione) {
-			case 1: // Genitore
-				refSposo1.setRef(nuovoId);
-				refFiglio1.setRef(idPerno);
-				if (nuovo != null) nuovo.addSpouseFamilyRef( refFamSposi );
-				if (perno != null) perno.addParentFamilyRef( refFamGenitori );
+		// Population of refs
+		switch (relationship) {
+			case 1: // Parent
+				refSpouse1.setRef(newId);
+				refChild1.setRef(pivotId);
+				if (newPerson != null) newPerson.addSpouseFamilyRef( spouseFamilyRef );
+				if (pivot != null) pivot.addParentFamilyRef( parentFamilyRef );
 				break;
-			case 2: // Fratello
-				refFiglio1.setRef(idPerno);
-				refFiglio2.setRef(nuovoId);
-				if (perno != null) perno.addParentFamilyRef( refFamGenitori );
-				if (nuovo != null) nuovo.addParentFamilyRef( refFamGenitori );
+			case 2: // Brother
+				refChild1.setRef(pivotId);
+				refFiglio2.setRef(newId);
+				if (pivot != null) pivot.addParentFamilyRef( parentFamilyRef );
+				if (newPerson != null) newPerson.addParentFamilyRef( parentFamilyRef );
 				break;
-			case 3: // Compagno
-				refSposo1.setRef(idPerno);
-				refSposo2.setRef(nuovoId);
-				if (perno != null) perno.addSpouseFamilyRef( refFamSposi );
-				if (nuovo != null) nuovo.addSpouseFamilyRef( refFamSposi );
+			case 3: // Spouse
+				refSpouse1.setRef(pivotId);
+				refSposo2.setRef(newId);
+				if (pivot != null) pivot.addSpouseFamilyRef( spouseFamilyRef );
+				if (newPerson != null) newPerson.addSpouseFamilyRef( spouseFamilyRef );
 				break;
-			case 4: // Figlio
-				refSposo1.setRef(idPerno);
-				refFiglio1.setRef(nuovoId);
-				if (perno != null) perno.addSpouseFamilyRef( refFamSposi );
-				if (nuovo != null) nuovo.addParentFamilyRef( refFamGenitori );
+			case 4: // Child
+				refSpouse1.setRef(pivotId);
+				refChild1.setRef(newId);
+				if (pivot != null) pivot.addSpouseFamilyRef( spouseFamilyRef );
+				if (newPerson != null) newPerson.addParentFamilyRef( parentFamilyRef );
 		}
 
-		if( refSposo1.getRef() != null )
-			addSpouse(famiglia, refSposo1);
+		if( refSpouse1.getRef() != null )
+			addSpouse(family, refSpouse1);
 		if( refSposo2.getRef() != null )
-			addSpouse(famiglia, refSposo2);
-		if( refFiglio1.getRef() != null )
-			famiglia.addChild(refFiglio1);
+			addSpouse(family, refSposo2);
+		if( refChild1.getRef() != null )
+			family.addChild(refChild1);
 		if( refFiglio2.getRef() != null )
-			famiglia.addChild(refFiglio2);
+			family.addChild(refFiglio2);
 
-		if( relazione == 1 || relazione == 2 ) // Farà comparire la famiglia selezionata
-			Global.familyNum = gc.getPerson(Global.indi).getParentFamilies(gc).indexOf(famiglia);
+		if( relationship == 1 || relationship == 2 ) // It will bring up the selected family
+			Global.familyNum = gc.getPerson(Global.indi).getParentFamilies(gc).indexOf(family);
 		else
-			Global.familyNum = 0; // eventuale reset
+			Global.familyNum = 0; // eventually reset
 
-		Set<Object> cambiati = new HashSet<>();
-		if( perno != null && nuovo != null )
-			Collections.addAll(cambiati, famiglia, perno, nuovo);
-		else if( perno != null )
-			Collections.addAll(cambiati, famiglia, perno);
-		else if( nuovo != null )
-			Collections.addAll(cambiati, famiglia, nuovo);
-		return cambiati.toArray();
+		Set<Object> transformed = new HashSet<>();
+		if( pivot != null && newPerson != null )
+			Collections.addAll(transformed, family, pivot, newPerson);
+		else if( pivot != null )
+			Collections.addAll(transformed, family, pivot);
+		else if( newPerson != null )
+			Collections.addAll(transformed, family, newPerson);
+		return transformed.toArray();
 	}
 
-	// Aggiunge il coniuge in una famiglia: sempre e solo in base al sesso
+	/**
+	 * Adds the spouse in a family: always and only on the basis of sex
+	 * */
 	public static void addSpouse(Family family, SpouseRef sr) {
 		Person person = Global.gc.getPerson(sr.getRef());
 		if( Gender.isFemale(person) ) family.addWife(sr);

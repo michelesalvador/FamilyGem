@@ -184,7 +184,7 @@ public class IndividualEventsFragment extends Fragment {
 				eventView.setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
 						.setSingleChoiceItems(sexes.values().toArray(new String[0]), chosenSex, (dialog, item) -> {
 							((EventFact)object).setValue(new ArrayList<>(sexes.keySet()).get(item));
-							aggiornaRuoliConiugali(one);
+							updateMaritalRoles(one);
 							dialog.dismiss();
 							refresh(1);
 							U.save(true, one);
@@ -206,7 +206,7 @@ public class IndividualEventsFragment extends Fragment {
 
 	// In tutte le famiglie coniugali rimuove gli spouse ref di 'person' e ne aggiunge uno corrispondente al sesso
 	// Serve soprattutto in caso di esportazione del Gedcom per avere allineati gli HUSB e WIFE con il sesso
-	static void aggiornaRuoliConiugali(Person person) {
+	static void updateMaritalRoles(Person person) {
 		SpouseRef spouseRef = new SpouseRef();
 		spouseRef.setRef(person.getId());
 		boolean removed = false;

@@ -266,7 +266,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 									gender.setValue(sexValues[i]);
 									one.addEventFact(gender);
 									dialog.dismiss();
-									IndividualEventsFragment.aggiornaRuoliConiugali(one);
+									IndividualEventsFragment.updateMaritalRoles(one);
 									IndividualEventsFragment factsTab = (IndividualEventsFragment)getTab(1);
 									factsTab.refresh(1);
 									U.save(true, one);
@@ -418,7 +418,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 				citaz.setRef( data.getStringExtra("idFonte") );
 				one.addSourceCitation( citaz );
 			} else if( requestCode == 1401  ) { // Parente
-				Object[] modificati = IndividualEditorActivity.aggiungiParente(
+				Object[] modificati = IndividualEditorActivity.addParent(
 						data.getStringExtra("idIndividuo"), // corrisponde a uno.getId()
 						data.getStringExtra("idParente"),
 						data.getStringExtra("idFamiglia"),
