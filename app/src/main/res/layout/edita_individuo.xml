@@ -96,7 +96,7 @@
 
 	</com.google.android.material.textfield.TextInputLayout>
 
-	<app.familygem.EditoreData
+	<app.familygem.PublisherDateLinearLayout
 		android:id="@+id/editore_data_nascita"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -114,7 +114,7 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@+id/editore_data_nascita">
 
-		<app.familygem.TrovaLuogo
+		<app.familygem.PlaceFinderTextView
 			android:id="@+id/luogo_nascita"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"/>
@@ -158,7 +158,7 @@
 				android:nextFocusForward="@id/luogo_morte"/>
 		</com.google.android.material.textfield.TextInputLayout>
 
-		<app.familygem.EditoreData
+		<app.familygem.PublisherDateLinearLayout
 			android:id="@+id/editore_data_morte"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -175,7 +175,7 @@
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/editore_data_morte">
 
-			<app.familygem.TrovaLuogo
+			<app.familygem.PlaceFinderTextView
 				android:id="@+id/luogo_morte"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

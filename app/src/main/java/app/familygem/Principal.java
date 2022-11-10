@@ -24,19 +24,19 @@ import org.folg.gedcom.model.Media;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import app.familygem.visitor.ListaMedia;
-import app.familygem.visitor.ListaNote;
+import app.familygem.visitor.MediaList;
+import app.familygem.visitor.NoteList;
 import static app.familygem.Global.gc;
 
-public class Principal extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class Principal /*TODO Main?*/extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	DrawerLayout scatolissima;
 	Toolbar toolbar;
 	NavigationView menuPrincipe;
 	List<Integer> idMenu = Arrays.asList( R.id.nav_diagramma, R.id.nav_persone, R.id.nav_famiglie,
 			R.id.nav_media, R.id.nav_note, R.id.nav_fonti, R.id.nav_archivi, R.id.nav_autore );
-	List<Class> frammenti = Arrays.asList( Diagram.class, Anagrafe.class, Chiesa.class,
-			Galleria.class, Quaderno.class, Biblioteca.class, Magazzino.class, Podio.class );
+	List<Class> frammenti = Arrays.asList( Diagram.class, ListOfPeopleFragment.class, ChurchFragment.class,
+			GalleryFragment.class, NotebookFragment.class, LibraryFragment.class, RepositoryFragment.class, ListOfAuthorsFragment.class );
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,23 +54,23 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 
 		menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
-		Global.principalView = scatolissima;
-		U.gedcomSicuro( gc );
+		Global.mainView = scatolissima;
+		U.ensureGlobalGedcomNotNull( gc );
 		furnishMenu();
 
 		if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
 			Fragment fragment;
 			String backName = null; // Etichetta per individuare diagramma nel backstack dei frammenti
 			if( getIntent().getBooleanExtra("anagrafeScegliParente",false) )
-				fragment = new Anagrafe();
+				fragment = new ListOfPeopleFragment();
 			else if( getIntent().getBooleanExtra("galleriaScegliMedia",false) )
-				fragment = new Galleria();
+				fragment = new GalleryFragment();
 			else if( getIntent().getBooleanExtra("bibliotecaScegliFonte",false) )
-				fragment = new Biblioteca();
+				fragment = new LibraryFragment();
 			else if( getIntent().getBooleanExtra("quadernoScegliNota",false) )
-				fragment = new Quaderno();
+				fragment = new NotebookFragment();
 			else if( getIntent().getBooleanExtra("magazzinoScegliArchivio",false) )
-				fragment = new Magazzino();
+				fragment = new RepositoryFragment();
 			else { // la normale apertura
 				fragment = new Diagram();
 				backName = "diagram";
@@ -81,7 +81,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 
 		menuPrincipe.getHeaderView(0).findViewById(R.id.menu_alberi).setOnClickListener(v -> {
 			scatolissima.closeDrawer(GravityCompat.START);
-			startActivity(new Intent(Principal.this, Alberi.class));
+			startActivity(new Intent(Principal.this, TreesActivity.class));
 		});
 
 		// Nasconde le voci del menu più ostiche
@@ -97,7 +97,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 	@Override
 	public void onAttachFragment(@NonNull Fragment fragment) {
 		super.onAttachFragment(fragment);
-		if( !(fragment instanceof NuovoParente) )
+		if( !(fragment instanceof NewRelativeDialog) )
 			aggiornaInterfaccia(fragment);
 	}
 
@@ -109,17 +109,17 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
 			if( fragment instanceof Diagram ) {
 				((Diagram)fragment).forceDraw = true; // Così ridisegna il diagramma
-			} else if( fragment instanceof Anagrafe ) {
+			} else if( fragment instanceof ListOfPeopleFragment) {
 				// Update persons list
-				Anagrafe anagrafe = (Anagrafe)fragment;
-				if( anagrafe.people.size() == 0 ) // Probably it's a Collections.EmptyList
-					anagrafe.people = gc.getPeople(); // replace it with the real ArrayList
-				anagrafe.adapter.notifyDataSetChanged();
-				anagrafe.arredaBarra();
-			} else if( fragment instanceof Chiesa ) {
-				((Chiesa)fragment).refresh(Chiesa.What.RELOAD);
-			} else if( fragment instanceof Galleria ) {
-				((Galleria)fragment).ricrea();
+				ListOfPeopleFragment listOfPeopleFragment = (ListOfPeopleFragment)fragment;
+				if( listOfPeopleFragment.people.size() == 0 ) // Probably it's a Collections.EmptyList
+					listOfPeopleFragment.people = gc.getPeople(); // replace it with the real ArrayList
+				listOfPeopleFragment.adapter.notifyDataSetChanged();
+				listOfPeopleFragment.arredaBarra();
+			} else if( fragment instanceof ChurchFragment) {
+				((ChurchFragment)fragment).refresh(ChurchFragment.What.RELOAD);
+			} else if( fragment instanceof GalleryFragment) {
+				((GalleryFragment)fragment).recreate();
 			/*} else if( fragment instanceof Quaderno ) {
 				// Doesn't work to update Quaderno when a note is deleted
 				((Quaderno)fragment).adapter.notifyDataSetChanged();*/
@@ -131,7 +131,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 		}
 	}
 
-	// Riceve una classe tipo 'Diagram.class' e dice se è il fragment attualmente visibile sulla scena
+	// Riceve una classe type 'Diagram.class' e dice se è il fragment attualmente visibile sulla scena
 	private boolean frammentoAttuale(Class classe) {
 		Fragment attuale = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
 		return classe.isInstance(attuale);
@@ -146,13 +146,13 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 		imageView.setVisibility( ImageView.GONE );
 		mainTitle.setText( "" );
 		if( Global.gc != null ) {
-			ListaMedia cercaMedia = new ListaMedia( Global.gc, 3 );
+			MediaList cercaMedia = new MediaList( Global.gc, 3 );
 			Global.gc.accept( cercaMedia );
-			if( cercaMedia.lista.size() > 0 ) {
-				int caso = new Random().nextInt( cercaMedia.lista.size() );
-				for( Media med : cercaMedia.lista )
+			if( cercaMedia.list.size() > 0 ) {
+				int caso = new Random().nextInt( cercaMedia.list.size() );
+				for( Media med : cercaMedia.list)
 					if( --caso < 0 ) { // arriva a -1
-						F.dipingiMedia( med, imageView, null );
+						F.showImage( med, imageView, null );
 						imageView.setVisibility( ImageView.VISIBLE );
 						break;
 					}
@@ -171,14 +171,14 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 					case 1: count = gc.getPeople().size(); break;
 					case 2: count = gc.getFamilies().size(); break;
 					case 3:
-						ListaMedia mediaList = new ListaMedia(gc, 0);
+						MediaList mediaList = new MediaList(gc, 0);
 						gc.accept(mediaList);
-						count = mediaList.lista.size();
+						count = mediaList.list.size();
 						break;
 					case 4:
-						ListaNote notesList = new ListaNote();
+						NoteList notesList = new NoteList();
 						gc.accept(notesList);
-						count = notesList.listaNote.size() + gc.getNotes().size();
+						count = notesList.noteList.size() + gc.getNotes().size();
 						break;
 					case 5: count = gc.getSources().size(); break;
 					case 6: count = gc.getRepositories().size(); break;
@@ -197,7 +197,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			view.setVisibility(View.GONE);
 			U.saveJson(Global.gc, Global.settings.openTree);
 			scatolissima.closeDrawer(GravityCompat.START);
-			Global.daSalvare = false;
+			Global.shouldSave = false;
 			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
 		});
 		saveButton.setOnLongClickListener( vista -> {
@@ -206,17 +206,17 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			popup.show();
 			popup.setOnMenuItemClickListener( item -> {
 				if( item.getItemId() == 0 ) {
-					Alberi.openGedcom(Global.settings.openTree, false);
-					U.qualiGenitoriMostrare(this, null, 0); // Semplicemente ricarica il diagramma
+					TreesActivity.openGedcom(Global.settings.openTree, false);
+					U.askWhichParentsToShow(this, null, 0); // Semplicemente ricarica il diagramma
 					scatolissima.closeDrawer(GravityCompat.START);
 					saveButton.setVisibility(View.GONE);
-					Global.daSalvare = false;
+					Global.shouldSave = false;
 				}
 				return true;
 			});
 			return true;
 		});
-		if( Global.daSalvare )
+		if( Global.shouldSave)
 			saveButton.setVisibility( View.VISIBLE );
 	}
 
@@ -263,7 +263,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 					Global.indi = Global.settings.getCurrentTree().root;
 					cosaAprire = 1; // Eventualmente chiede dei molteplici genitori
 				}
-				U.qualiGenitoriMostrare( this, Global.gc.getPerson(Global.indi), cosaAprire );
+				U.askWhichParentsToShow( this, Global.gc.getPerson(Global.indi), cosaAprire );
 			} else {
 				FragmentManager fm = getSupportFragmentManager();
 				// Rimuove frammento precedente dalla storia se è lo stesso che stiamo per vedere

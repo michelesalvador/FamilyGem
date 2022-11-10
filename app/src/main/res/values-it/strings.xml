@@ -248,7 +248,7 @@
     <string name="make_main_submitter">Vuoi che questo sia l\'autore principale dell\'albero?</string>
     <!-- Nome -->
     <string name="value">Valore</string>
-    <string name="type">Tipo</string>
+    <string name="type">type</string>
     <string name="prefix">Prefisso</string>
     <string name="given">Prenome</string>
     <string name="nickname">Soprannome</string>
@@ -282,7 +282,7 @@
     <string name="publication_facts">Pubblicazione</string>
     <string name="call_number">Numero di identificazione</string>
     <string name="italic">Italico</string>
-    <string name="media_type">Tipo media</string>
+    <string name="media_type">type media</string>
     <string name="parentheses">Parentesi</string>
     <string name="reference_number">Numero di riferimento</string>
     <string name="cited_by">Citata in</string>

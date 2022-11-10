@@ -130,24 +130,24 @@ public class ExportTest {
 		if( !documentsDir.exists() ) documentsDir.mkdir();
 
 		File fileGedcom = new File( documentsDir, "Küçük ağaç.ged" );
-		Esportatore esp = new Esportatore( appContext );
-		assertTrue( esp.apriAlbero( idAlbero ) );
-		assertNull( esp.messaggioSuccesso );
-		assertNull( esp.messaggioErrore );
-		assertTrue( esp.esportaGedcom(Uri.fromFile(fileGedcom)) );
+		Exporter esp = new Exporter( appContext );
+		assertTrue( esp.openTree( idAlbero ) );
+		assertNull( esp.successMessage);
+		assertNull( esp.errorMessage);
+		assertTrue( esp.exportGedcom(Uri.fromFile(fileGedcom)) );
 		assertTrue( fileGedcom.isFile() );
-		assertEquals( esp.messaggioSuccesso, appContext.getString(R.string.gedcom_exported_ok) );
-		s.l( esp.messaggioSuccesso );
+		assertEquals( esp.successMessage, appContext.getString(R.string.gedcom_exported_ok) );
+		s.l( esp.successMessage);
 
 		File fileGedcomZip = new File( documentsDir, "ਸੰਕੁਚਿਤ.zip" );
-		Esportatore esp2 = new Esportatore( appContext );
-		assertTrue( esp2.apriAlbero( idAlbero ) );
-		boolean result = esp2.esportaGedcomZippato(Uri.fromFile(fileGedcomZip));
-		s.l( esp2.messaggioErrore );
+		Exporter esp2 = new Exporter( appContext );
+		assertTrue( esp2.openTree( idAlbero ) );
+		boolean result = esp2.exportGedcomToZip(Uri.fromFile(fileGedcomZip));
+		s.l( esp2.errorMessage);
 		assertTrue( result );
-		assertEquals( esp2.messaggioSuccesso, appContext.getString(R.string.zip_exported_ok) );
+		assertEquals( esp2.successMessage, appContext.getString(R.string.zip_exported_ok) );
 		assertTrue( fileGedcomZip.isFile() );
-		s.l( esp2.messaggioSuccesso );
+		s.l( esp2.successMessage);
 	}
 
 	// Esporta in /Documents l'ultimo albero come backup ZIP
@@ -155,14 +155,14 @@ public class ExportTest {
 		File documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
 		if( !documentsDir.exists() ) documentsDir.mkdir();
 		File fileBackup = new File( documentsDir, "Becàp olè.zip" );
-		Esportatore esp = new Esportatore( appContext );
+		Exporter esp = new Exporter( appContext );
 		Settings.Tree ultimoAlb = Global.settings.trees.get(Global.settings.trees.size()-1);
-		assertTrue( esp.apriAlbero( ultimoAlb.id ) );
-		boolean result = esp.esportaBackupZip( null, -1, Uri.fromFile(fileBackup) );
-		s.l( esp.messaggioErrore );
+		assertTrue( esp.openTree( ultimoAlb.id ) );
+		boolean result = esp.exportBackupZip( null, -1, Uri.fromFile(fileBackup) );
+		s.l( esp.errorMessage);
 		assertTrue( result );
-		assertEquals( esp.messaggioSuccesso, appContext.getString(R.string.zip_exported_ok) );
+		assertEquals( esp.successMessage, appContext.getString(R.string.zip_exported_ok) );
 		assertTrue( fileBackup.isFile() );
-		s.l( esp.messaggioSuccesso );
+		s.l( esp.successMessage);
 	}
 }

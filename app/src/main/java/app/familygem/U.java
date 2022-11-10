@@ -76,20 +76,20 @@ import org.joda.time.Months;
 import org.joda.time.Years;
 import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
-import app.familygem.detail.ArchivioRef;
-import app.familygem.detail.Autore;
-import app.familygem.detail.Cambiamenti;
-import app.familygem.detail.CitazioneFonte;
-import app.familygem.detail.Famiglia;
-import app.familygem.detail.Fonte;
-import app.familygem.detail.Immagine;
-import app.familygem.detail.Nota;
-import app.familygem.visitor.ContenitoriMedia;
-import app.familygem.visitor.ContenitoriNota;
-import app.familygem.visitor.ListaCitazioniFonte;
-import app.familygem.visitor.ListaMediaContenitore;
-import app.familygem.visitor.RiferimentiNota;
-import app.familygem.visitor.TrovaPila;
+import app.familygem.detail.RepositoryRefActivity;
+import app.familygem.detail.AuthorActivity;
+import app.familygem.detail.ChangesActivity;
+import app.familygem.detail.SourceCitationActivity;
+import app.familygem.detail.FamilyActivity;
+import app.familygem.detail.SourceActivity;
+import app.familygem.detail.ImageActivity;
+import app.familygem.detail.NoteActivity;
+import app.familygem.visitor.MediaContainers;
+import app.familygem.visitor.NoteContainers;
+import app.familygem.visitor.ListOfSourceCitations;
+import app.familygem.visitor.MediaListContainer;
+import app.familygem.visitor.NoteReferences;
+import app.familygem.visitor.FindStack;
 
 public class U {
 
@@ -97,10 +97,12 @@ public class U {
 		return Global.context.getString(id);
 	}
 
-	// Da usare dove capita che 'Global.gc' possa essere null per ricaricarlo
-	static void gedcomSicuro(Gedcom gc) {
+	/**
+	 * To use where it happens that 'Global.gc' could be null to reload it
+	 * */
+	static void ensureGlobalGedcomNotNull(Gedcom gc) {
 		if( gc == null )
-			Global.gc = Alberi.readJson(Global.settings.openTree);
+			Global.gc = TreesActivity.readJson(Global.settings.openTree);
 	}
 
 	// Id of the main person of a GEDCOM or null
@@ -124,13 +126,16 @@ public class U {
 		return null;
 	}
 
-	// riceve una Person e restituisce stringa con nome e cognome principale
-	static String epiteto(Person person) {
-		return epiteto(person, false);
+	/**
+	 * receives a Person and returns string with primary first and last name
+	 * riceve una Person e restituisce stringa con nome e cognome principale
+	 * */
+	static String properName(Person person) {
+		return properName(person, false);
 	}
-	static String epiteto(Person person, boolean twoLines) {
+	static String properName(Person person, boolean twoLines) {
 		if( person != null && !person.getNames().isEmpty() )
-			return nomeCognome(person.getNames().get(0), twoLines ? "\n" : " ");
+			return firstAndLastName(person.getNames().get(0), twoLines ? "\n" : " ");
 		return "[" + s(R.string.no_name) + "]";
 	}
 
@@ -174,8 +179,11 @@ public class U {
 		return "";
 	}
 
-	// Restituisce il nome e cognome addobbato di un Name
-	static String nomeCognome(Name n, String divider) {
+	/**
+	 * Returns the first and last name decorated with a Name
+	 * Restituisce il nome e cognome addobbato di un Name
+	 * */
+	static String firstAndLastName(Name n, String divider) {
 		String completo = "";
 		if( n.getValue() != null ) {
 			String grezzo = n.getValue().trim();
@@ -260,13 +268,13 @@ public class U {
 	static String twoDates(Person person, boolean vertical) {
 		String text = "";
 		String endYear = "";
-		Datatore start = null, end = null;
+		GedcomDateConverter start = null, end = null;
 		boolean ageBelow = false;
 		List<EventFact> facts = person.getEventsFacts();
 		// Birth date
 		for( EventFact fact : facts ) {
 			if( fact.getTag() != null && fact.getTag().equals("BIRT") && fact.getDate() != null ) {
-				start = new Datatore(fact.getDate());
+				start = new GedcomDateConverter(fact.getDate());
 				text = start.writeDate(false);
 				break;
 			}
@@ -274,7 +282,7 @@ public class U {
 		// Death date
 		for( EventFact fact : facts ) {
 			if( fact.getTag() != null && fact.getTag().equals("DEAT") && fact.getDate() != null ) {
-				end = new Datatore(fact.getDate());
+				end = new GedcomDateConverter(fact.getDate());
 				endYear = end.writeDate(false);
 				if( !text.isEmpty() && !endYear.isEmpty() ) {
 					if( vertical && (text.length() > 7 || endYear.length() > 7) ) {
@@ -292,7 +300,7 @@ public class U {
 		if( text.isEmpty() ) {
 			for( EventFact fact : facts ) {
 				if( fact.getDate() != null ) {
-					return new Datatore(fact.getDate()).writeDate(false);
+					return new GedcomDateConverter(fact.getDate()).writeDate(false);
 				}
 			}
 		}
@@ -303,7 +311,7 @@ public class U {
 			LocalDate now = LocalDate.now();
 			if( end == null && (startDate.isBefore(now) || startDate.isEqual(now))
 					&& Years.yearsBetween(startDate, now).getYears() <= 120 && !isDead(person) ) {
-				end = new Datatore(now.toDate());
+				end = new GedcomDateConverter(now.toDate());
 				endYear = end.writeDate(false);
 			}
 			if( end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M) && !endYear.isEmpty() ) { // Plausible dates
@@ -412,7 +420,7 @@ public class U {
 
 	// riceve un luogo stile Gedcom e restituisce il primo nome tra le virgole
 	private static String stripCommas(String place) {
-		// salta le virgole iniziali per luoghi tipo ',,,England'
+		// salta le virgole iniziali per luoghi type ',,,England'
 		int start = 0;
 		for( char c : place.toCharArray() ) {
 			if( c != ',' && c != ' ' )
@@ -425,16 +433,19 @@ public class U {
 		return place;
 	}
 
-	// Estrae i soli numeri da una stringa che può contenere anche lettere
-	static int soloNumeri(String id) {
-		//return Integer.parseInt( id.replaceAll("\\D+","") );	// sintetico ma lento
+	/**
+	 * Extracts only numbers from a string that can also contain letters
+	 * Estrae i soli numeri da una stringa che può contenere anche lettere
+	 * */
+	static int extractNum(String id) {
+		//return Integer.parseInt( id.replaceAll("\\D+","") );	// synthetic but slow //sintetico ma lento
 		int num = 0;
 		int x = 1;
 		for( int i = id.length() - 1; i >= 0; --i ) {
 			int c = id.charAt(i);
 			if( c > 47 && c < 58 ) {
 				num += (c - 48) * x;
-				x *= 10;
+				x *= 10; //to convert positional notation into a base-10 representation
 			}
 		}
 		return num;
@@ -442,7 +453,7 @@ public class U {
 
 	// Genera il nuovo id seguente a quelli già esistenti
 	static int max;
-	public static String nuovoId(Gedcom gc, Class classe) {
+	public static String newID(Gedcom gc, Class classe) {
 		max = 0;
 		String pre = "";
 		if( classe == Note.class ) {
@@ -477,18 +488,20 @@ public class U {
 		return pre + (max + 1);
 	}
 
-	private static void calcolaMax(Object oggetto) {
+	private static void calcolaMax(Object object) {
 		try {
-			String idStringa = (String)oggetto.getClass().getMethod("getId").invoke(oggetto);
-			int num = soloNumeri(idStringa);
+			String idStringa = (String)object.getClass().getMethod("getId").invoke(object);
+			int num = extractNum(idStringa);
 			if( num > max ) max = num;
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
 	}
 
-	// Copia testo negli appunti
-	static void copiaNegliAppunti(CharSequence label, CharSequence text) {
+	/**
+	* Copy text to clipboard
+	* */
+	static void copyToClipboard(CharSequence label, CharSequence text) {
 		ClipboardManager clipboard = (ClipboardManager)Global.context.getSystemService(Context.CLIPBOARD_SERVICE);
 		ClipData clip = ClipData.newPlainText(label, text);
 		if( clipboard != null ) clipboard.setPrimaryClip(clip);
@@ -496,37 +509,39 @@ public class U {
 
 	// Restituisce la lista di estensioni
 	@SuppressWarnings("unchecked")
-	public static List<Estensione> trovaEstensioni(ExtensionContainer contenitore) {
+	public static List<Extension> findExtensions(ExtensionContainer contenitore) {
 		if( contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) != null ) {
-			List<Estensione> lista = new ArrayList<>();
+			List<Extension> lista = new ArrayList<>();
 			for( GedcomTag est : (List<GedcomTag>)contenitore.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) ) {
-				String testo = scavaEstensione(est, 0);
+				String testo = traverseExtension(est, 0);
 				if( testo.endsWith("\n") )
 					testo = testo.substring(0, testo.length() - 1);
-				lista.add(new Estensione(est.getTag(), testo, est));
+				lista.add(new Extension(est.getTag(), testo, est));
 			}
 			return lista;
 		}
 		return Collections.emptyList();
 	}
 
-	// Costruisce un testo con il contenuto ricorsivo dell'estensione
-	public static String scavaEstensione(GedcomTag pacco, int grado) {
-		String testo = "";
+	/**
+	 * Constructs a text with the recursive content of the extension
+	 * */
+	public static String traverseExtension(GedcomTag pacco, int grado) {
+		StringBuilder testo = new StringBuilder();
 		if( grado > 0 )
-			testo += pacco.getTag() + " ";
+			testo.append(pacco.getTag()).append(" ");
 		if( pacco.getValue() != null )
-			testo += pacco.getValue() + "\n";
+			testo.append(pacco.getValue()).append("\n");
 		else if( pacco.getId() != null )
-			testo += pacco.getId() + "\n";
+			testo.append(pacco.getId()).append("\n");
 		else if( pacco.getRef() != null )
-			testo += pacco.getRef() + "\n";
+			testo.append(pacco.getRef()).append("\n");
 		for( GedcomTag unPezzo : pacco.getChildren() )
-			testo += scavaEstensione(unPezzo, ++grado);
-		return testo;
+			testo.append(traverseExtension(unPezzo, ++grado));
+		return testo.toString();
 	}
 
-	public static void eliminaEstensione(GedcomTag estensione, Object contenitore, View vista) {
+	public static void deleteExtension(GedcomTag estensione, Object contenitore, View vista) {
 		if( contenitore instanceof ExtensionContainer ) { // IndividuoEventi
 			ExtensionContainer exc = (ExtensionContainer)contenitore;
 			@SuppressWarnings("unchecked")
@@ -542,7 +557,7 @@ public class U {
 			if( gt.getChildren().isEmpty() )
 				gt.setChildren(null);
 		}
-		Memoria.annullaIstanze(estensione);
+		Memory.setInstanceAndAllSubsequentToNull(estensione);
 		if( vista != null )
 			vista.setVisibility(View.GONE);
 	}
@@ -569,9 +584,10 @@ public class U {
 
 	// Metodi di creazione di elementi di lista
 
-	// aggiunge a un Layout una generica voce titolo-testo
-	// Usato seriamente solo da dettaglio.Cambiamenti
-	public static void metti(LinearLayout scatola, String tit, String testo) {
+	/**
+	 * Add a generic title-text entry to a Layout. Used seriously only by [ChangesActivity]
+	 * */
+	public static void place(LinearLayout scatola, String tit, String testo) {
 		View vistaPezzo = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_fatto, scatola, false);
 		scatola.addView(vistaPezzo);
 		((TextView)vistaPezzo.findViewById(R.id.fatto_titolo)).setText(tit);
@@ -604,14 +620,14 @@ public class U {
 		return dates.trim();
 	}
 
-	public static View mettiIndividuo(LinearLayout scatola, Person persona, String ruolo) {
+	public static View placeIndividual(LinearLayout scatola, Person persona, String ruolo) {
 		View vistaIndi = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo, scatola, false);
 		scatola.addView(vistaIndi);
 		TextView vistaRuolo = vistaIndi.findViewById(R.id.indi_ruolo);
 		if( ruolo == null ) vistaRuolo.setVisibility(View.GONE);
 		else vistaRuolo.setText(ruolo);
 		TextView vistaNome = vistaIndi.findViewById(R.id.indi_nome);
-		String nome = epiteto(persona);
+		String nome = properName(persona);
 		if( nome.isEmpty() && ruolo != null ) vistaNome.setVisibility(View.GONE);
 		else vistaNome.setText(nome);
 		TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
@@ -619,7 +635,7 @@ public class U {
 		if( titolo.isEmpty() ) vistaTitolo.setVisibility(View.GONE);
 		else vistaTitolo.setText(titolo);
 		details(persona, vistaIndi.findViewById(R.id.indi_dettagli));
-		F.unaFoto(Global.gc, persona, vistaIndi.findViewById(R.id.indi_foto));
+		F.showMainImageForPerson(Global.gc, persona, vistaIndi.findViewById(R.id.indi_foto));
 		if( !isDead(persona) )
 			vistaIndi.findViewById(R.id.indi_lutto).setVisibility(View.GONE);
 		if( Gender.isMale(persona) )
@@ -651,8 +667,8 @@ public class U {
 		textView.setEllipsize(TextUtils.TruncateAt.END);
 		if( detailed ) {
 			textView.setMaxLines(10);
-			noteView.setTag(R.id.tag_oggetto, note);
-			if( context instanceof Individuo ) { // Fragment individuoEventi
+			noteView.setTag(R.id.tag_object, note);
+			if( context instanceof IndividualPersonActivity) { // Fragment individuoEventi
 				((AppCompatActivity)context).getSupportFragmentManager()
 						.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1") // non garantito in futuro
 						.registerForContextMenu(noteView);
@@ -660,17 +676,17 @@ public class U {
 				((AppCompatActivity)context).registerForContextMenu(noteView);
 			noteView.setOnClickListener(v -> {
 				if( note.getId() != null )
-					Memoria.setPrimo(note);
+					Memory.setFirst(note);
 				else
-					Memoria.aggiungi(note);
-				context.startActivity(new Intent(context, Nota.class));
+					Memory.add(note);
+				context.startActivity(new Intent(context, NoteActivity.class));
 			});
 		} else {
 			textView.setMaxLines(3);
 		}
 	}
 
-	static void scollegaNota(Note nota, Object contenitore, View vista) {
+	static void disconnectNote(Note nota, Object contenitore, View vista) {
 		List<NoteRef> lista = ((NoteContainer)contenitore).getNoteRefs();
 		for( NoteRef ref : lista )
 			if( ref.getNote(Global.gc).equals(nota) ) {
@@ -684,47 +700,47 @@ public class U {
 
 	// Elimina una Nota inlinea o condivisa
 	// Restituisce un array dei capostipiti modificati
-	public static Object[] eliminaNota(Note note, View view) {
+	public static Object[] deleteNote(Note note, View view) {
 		Set<Object> capi;
 		if( note.getId() != null ) { // OBJECT note
 			// Prima rimuove i ref alla nota con un bel Visitor
-			RiferimentiNota eliminatoreNote = new RiferimentiNota(Global.gc, note.getId(), true);
+			NoteReferences eliminatoreNote = new NoteReferences(Global.gc, note.getId(), true);
 			Global.gc.accept(eliminatoreNote);
 			Global.gc.getNotes().remove(note); // ok la rimuove se è un'object note
-			capi = eliminatoreNote.capostipiti;
+			capi = eliminatoreNote.founders;
 			if( Global.gc.getNotes().isEmpty() )
 				Global.gc.setNotes(null);
 		} else { // LOCAL note
-			new TrovaPila(Global.gc, note);
-			NoteContainer nc = (NoteContainer)Memoria.oggettoContenitore();
+			new FindStack(Global.gc, note);
+			NoteContainer nc = (NoteContainer) Memory.getSecondToLastObject();
 			nc.getNotes().remove(note); // rimuove solo se è una nota locale, non se object note
 			if( nc.getNotes().isEmpty() )
 				nc.setNotes(null);
 			capi = new HashSet<>();
-			capi.add(Memoria.oggettoCapo());
-			Memoria.arretra();
+			capi.add(Memory.firstObject());
+			Memory.clearStackAndRemove();
 		}
-		Memoria.annullaIstanze(note);
+		Memory.setInstanceAndAllSubsequentToNull(note);
 		if( view != null )
 			view.setVisibility(View.GONE);
 		return capi.toArray();
 	}
 
-	// Elenca tutti i media di un oggetto contenitore
+	// Elenca tutti i media di un object contenitore
 	public static void placeMedia(LinearLayout layout, Object container, boolean detailed) {
-		RecyclerView griglia = new AdattatoreGalleriaMedia.RiciclaVista(layout.getContext(), detailed);
+		RecyclerView griglia = new MediaGalleryAdapter.RiciclaVista(layout.getContext(), detailed);
 		griglia.setHasFixedSize(true);
 		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(layout.getContext(), detailed ? 2 : 3);
 		griglia.setLayoutManager(gestoreLayout);
-		List<ListaMediaContenitore.MedCont> listaMedia = new ArrayList<>();
+		List<MediaListContainer.MedCont> listaMedia = new ArrayList<>();
 		for( Media med : ((MediaContainer)container).getAllMedia(Global.gc) )
-			listaMedia.add(new ListaMediaContenitore.MedCont(med, container));
-		AdattatoreGalleriaMedia adattatore = new AdattatoreGalleriaMedia(listaMedia, detailed);
+			listaMedia.add(new MediaListContainer.MedCont(med, container));
+		MediaGalleryAdapter adattatore = new MediaGalleryAdapter(listaMedia, detailed);
 		griglia.setAdapter(adattatore);
 		layout.addView(griglia);
 	}
 
-	// Di un oggetto inserisce le citazioni alle fonti
+	// Di un object inserisce le citazioni alle fonti
 	public static void placeSourceCitations(LinearLayout layout, Object container) {
 		if( Global.settings.expert ) {
 			List<SourceCitation> listaCitaFonti;
@@ -735,7 +751,7 @@ public class U {
 				View vistaCita = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_citazione_fonte, layout, false);
 				layout.addView(vistaCita);
 				if( citaz.getSource(Global.gc) != null ) // source CITATION
-					((TextView)vistaCita.findViewById(R.id.fonte_testo)).setText(Biblioteca.titoloFonte(citaz.getSource(Global.gc)));
+					((TextView)vistaCita.findViewById(R.id.fonte_testo)).setText(LibraryFragment.titoloFonte(citaz.getSource(Global.gc)));
 				else // source NOTE, oppure Citazione di fonte che è stata eliminata
 					vistaCita.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
 				String t = "";
@@ -750,8 +766,8 @@ public class U {
 				LinearLayout scatolaAltro = vistaCita.findViewById(R.id.citazione_note);
 				placeNotes(scatolaAltro, citaz, false);
 				placeMedia(scatolaAltro, citaz, false);
-				vistaCita.setTag(R.id.tag_oggetto, citaz);
-				if( layout.getContext() instanceof Individuo ) { // Fragment individuoEventi
+				vistaCita.setTag(R.id.tag_object, citaz);
+				if( layout.getContext() instanceof IndividualPersonActivity) { // Fragment individuoEventi
 					((AppCompatActivity)layout.getContext()).getSupportFragmentManager()
 							.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1")
 							.registerForContextMenu(vistaCita);
@@ -759,9 +775,9 @@ public class U {
 					((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaCita);
 
 				vistaCita.setOnClickListener(v -> {
-					Intent intento = new Intent(layout.getContext(), CitazioneFonte.class);
-					Memoria.aggiungi(citaz);
-					layout.getContext().startActivity(intento);
+					Intent intent = new Intent(layout.getContext(), SourceCitationActivity.class);
+					Memory.add(citaz);
+					layout.getContext().startActivity(intent);
 				});
 			}
 		}
@@ -789,16 +805,16 @@ public class U {
 			LinearLayout scatolaAltro = vistaFonte.findViewById(R.id.fonte_scatola);
 			placeNotes(scatolaAltro, source, false);
 			placeMedia(scatolaAltro, source, false);
-			vistaFonte.setTag(R.id.tag_oggetto, source);
+			vistaFonte.setTag(R.id.tag_object, source);
 			((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaFonte);
 		} else {
 			vistaTesto.setMaxLines(2);
-			txt = Biblioteca.titoloFonte(source);
+			txt = LibraryFragment.titoloFonte(source);
 		}
 		vistaTesto.setText(txt);
 		vistaFonte.setOnClickListener(v -> {
-			Memoria.setPrimo(source);
-			layout.getContext().startActivity(new Intent(layout.getContext(), Fonte.class));
+			Memory.setFirst(source);
+			layout.getContext().startActivity(new Intent(layout.getContext(), SourceActivity.class));
 		});
 	}
 
@@ -806,8 +822,8 @@ public class U {
 	public static View linkaPersona(LinearLayout scatola, Person p, int scheda) {
 		View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo_piccolo, scatola, false);
 		scatola.addView(vistaPersona);
-		F.unaFoto(Global.gc, p, vistaPersona.findViewById(R.id.collega_foto));
-		((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(epiteto(p));
+		F.showMainImageForPerson(Global.gc, p, vistaPersona.findViewById(R.id.collega_foto));
+		((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(properName(p));
 		String dati = twoDates(p, false);
 		TextView vistaDettagli = vistaPersona.findViewById(R.id.collega_dati);
 		if( dati.isEmpty() ) vistaDettagli.setVisibility(View.GONE);
@@ -819,10 +835,10 @@ public class U {
 		else if( Gender.isFemale(p) )
 			vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_femmina);
 		vistaPersona.setOnClickListener(v -> {
-			Memoria.setPrimo(p);
-			Intent intento = new Intent(scatola.getContext(), Individuo.class);
-			intento.putExtra("scheda", scheda);
-			scatola.getContext().startActivity(intento);
+			Memory.setFirst(p);
+			Intent intent = new Intent(scatola.getContext(), IndividualPersonActivity.class);
+			intent.putExtra("scheda", scheda);
+			scatola.getContext().startActivity(intent);
 		});
 		return vistaPersona;
 	}
@@ -830,11 +846,11 @@ public class U {
 	static String testoFamiglia(Context contesto, Gedcom gc, Family fam, boolean unaLinea) {
 		String testo = "";
 		for( Person marito : fam.getHusbands(gc) )
-			testo += epiteto(marito) + "\n";
+			testo += properName(marito) + "\n";
 		for( Person moglie : fam.getWives(gc) )
-			testo += epiteto(moglie) + "\n";
+			testo += properName(moglie) + "\n";
 		if( fam.getChildren(gc).size() == 1 ) {
-			testo += epiteto(fam.getChildren(gc).get(0));
+			testo += properName(fam.getChildren(gc).get(0));
 		} else if( fam.getChildren(gc).size() > 1 )
 			testo += contesto.getString(R.string.num_children, fam.getChildren(gc).size());
 		if( testo.endsWith("\n") ) testo = testo.substring(0, testo.length() - 1);
@@ -851,8 +867,8 @@ public class U {
 		scatola.addView(vistaFamiglia);
 		((TextView)vistaFamiglia.findViewById(R.id.famiglia_testo)).setText(testoFamiglia(scatola.getContext(), Global.gc, fam, false));
 		vistaFamiglia.setOnClickListener(v -> {
-			Memoria.setPrimo(fam);
-			scatola.getContext().startActivity(new Intent(scatola.getContext(), Famiglia.class));
+			Memory.setFirst(fam);
+			scatola.getContext().startActivity(new Intent(scatola.getContext(), FamilyActivity.class));
 		});
 	}
 
@@ -860,13 +876,13 @@ public class U {
 	static void linkaMedia(LinearLayout scatola, Media media) {
 		View vistaMedia = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_media, scatola, false);
 		scatola.addView(vistaMedia);
-		AdattatoreGalleriaMedia.arredaMedia(media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num));
+		MediaGalleryAdapter.arredaMedia(media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num));
 		LinearLayout.LayoutParams parami = (LinearLayout.LayoutParams)vistaMedia.getLayoutParams();
 		parami.height = dpToPx(80);
-		F.dipingiMedia(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));
+		F.showImage(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));
 		vistaMedia.setOnClickListener(v -> {
-			Memoria.setPrimo(media);
-			scatola.getContext().startActivity(new Intent(scatola.getContext(), Immagine.class));
+			Memory.setFirst(media);
+			scatola.getContext().startActivity(new Intent(scatola.getContext(), ImageActivity.class));
 		});
 	}
 
@@ -879,13 +895,15 @@ public class U {
 		testoNota.setText(autor.getName());
 		vista.findViewById(R.id.nota_fonti).setVisibility(View.GONE);
 		vista.setOnClickListener(v -> {
-			Memoria.setPrimo(autor);
-			contesto.startActivity(new Intent(contesto, Autore.class));
+			Memory.setFirst(autor);
+			contesto.startActivity(new Intent(contesto, AuthorActivity.class));
 		});
 	}
 
-	// Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipiti
-	public static void mettiDispensa(LinearLayout scatola, Object cosa, int tit) {
+	/**
+	 * Adds a generic container with one or more links to parent records to the layout // Aggiunge al layout un contenitore generico con uno o più collegamenti a record capostipiti
+	 * */
+	public static void putContainer(LinearLayout scatola, Object cosa, int tit) {
 		View vista = LayoutInflater.from(scatola.getContext()).inflate(R.layout.dispensa, scatola, false);
 		TextView vistaTit = vista.findViewById(R.id.dispensa_titolo);
 		vistaTit.setText(tit);
@@ -899,7 +917,7 @@ public class U {
 			mettiQualsiasi(dispensa, cosa);
 	}
 
-	// Riconosce il tipo di record e aggiunge il link appropriato alla scatola
+	// Riconosce il type di record e aggiunge il link appropriato alla scatola
 	static void mettiQualsiasi(LinearLayout scatola, Object record) {
 		if( record instanceof Person )
 			linkaPersona(scatola, (Person)record, 1);
@@ -908,7 +926,7 @@ public class U {
 		else if( record instanceof Family )
 			linkaFamiglia(scatola, (Family)record);
 		else if( record instanceof Repository )
-			ArchivioRef.mettiArchivio(scatola, (Repository)record);
+			RepositoryRefActivity.putRepository(scatola, (Repository)record);
 		else if( record instanceof Note )
 			placeNote(scatola, (Note)record, true);
 		else if( record instanceof Media )
@@ -927,19 +945,19 @@ public class U {
 			if( change.getDateTime() != null ) {
 				String txt = "";
 				if( change.getDateTime().getValue() != null )
-					txt = new Datatore(change.getDateTime().getValue()).writeDateLong();
+					txt = new GedcomDateConverter(change.getDateTime().getValue()).writeDateLong();
 				if( change.getDateTime().getTime() != null )
 					txt += " - " + change.getDateTime().getTime();
 				textView.setText(txt);
 			}
 			LinearLayout scatolaNote = changeView.findViewById(R.id.cambi_note);
-			for( Estensione altroTag : trovaEstensioni(change) )
-				metti(scatolaNote, altroTag.nome, altroTag.testo);
+			for( Extension altroTag : findExtensions(change) )
+				place(scatolaNote, altroTag.name, altroTag.text);
 			// Grazie al mio contributo la data cambiamento può avere delle note
 			placeNotes(scatolaNote, change, false);
 			changeView.setOnClickListener(v -> {
-				Memoria.aggiungi(change);
-				layout.getContext().startActivity(new Intent(layout.getContext(), Cambiamenti.class));
+				Memory.add(change);
+				layout.getContext().startActivity(new Intent(layout.getContext(), ChangesActivity.class));
 			});
 		}
 		return changeView;
@@ -972,9 +990,9 @@ public class U {
 		if( Global.settings.autoSave )
 			saveJson(Global.gc, Global.settings.openTree);
 		else { // mostra il tasto Salva
-			Global.daSalvare = true;
-			if( Global.principalView != null ) {
-				NavigationView menu = Global.principalView.findViewById(R.id.menu);
+			Global.shouldSave = true;
+			if( Global.mainView != null ) {
+				NavigationView menu = Global.mainView.findViewById(R.id.menu);
 				menu.getHeaderView(0).findViewById(R.id.menu_salva).setVisibility(View.VISIBLE);
 			}
 		}
@@ -989,7 +1007,7 @@ public class U {
 					change = new Change();
 				change.setDateTime(actualDateTime());
 				object.getClass().getMethod("setChange", Change.class).invoke(object, change);
-				// Estensione con l'id della zona, una stringa tipo 'America/Sao_Paulo'
+				// Estensione con l'id della zona, una stringa type 'America/Sao_Paulo'
 				change.putExtension("zone", TimeZone.getDefault().getID());
 			} catch( Exception e ) {
 			}
@@ -1050,12 +1068,12 @@ public class U {
 
 	// Valuta se ci sono individui collegabili rispetto a un individuo.
 	// Usato per decidere se far comparire 'Collega persona esistente' nel menu
-	static boolean ciSonoIndividuiCollegabili(Person person) {
+	static boolean containsConnectableIndividuals(Person person) {
 		int total = Global.gc.getPeople().size();
 		if( total > 0 && (Global.settings.expert // gli esperti possono sempre
 				|| person == null) ) // in una famiglia vuota unRappresentanteDellaFamiglia è null
 			return true;
-		int kin = Anagrafe.countRelatives(person);
+		int kin = ListOfPeopleFragment.countRelatives(person);
 		return total > kin + 1;
 	}
 
@@ -1066,7 +1084,7 @@ public class U {
 			new AlertDialog.Builder(contesto).setMessage(R.string.make_main_submitter)
 					.setPositiveButton(android.R.string.yes, (dialog, id) -> {
 						if( testa[0] == null ) {
-							testa[0] = AlberoNuovo.creaTestata(Global.settings.openTree + ".json");
+							testa[0] = NewTree.createHeader(Global.settings.openTree + ".json");
 							Global.gc.setHeader(testa[0]);
 						}
 						testa[0].setSubmitterRef(idAutore);
@@ -1084,8 +1102,10 @@ public class U {
 		return null;
 	}
 
-	// Verifica se un autore ha partecipato alle condivisioni, per non farlo eliminare
-	static boolean autoreHaCondiviso(Submitter autore) {
+	/**
+	 * Check if an author has participated in the shares, so as not to have them deleted
+	 * */
+	static boolean submitterHasShared(Submitter autore) {
 		List<Settings.Share> condivisioni = Global.settings.getCurrentTree().shares;
 		boolean inviatore = false;
 		if( condivisioni != null )
@@ -1104,29 +1124,28 @@ public class U {
 		}
 		return famigliePerno.toArray(new String[0]);
 	}
-
-	/* Per un perno che è figlio in più di una famiglia chiede quale famiglia mostrare
-	cosaAprire:
-		0 diagramma della famiglia precedente, senza chiedere quale famiglia (primo click su Diagram)
-		1 diagramma chiedendo eventualmente quale famiglia
-		2 famiglia chiedendo eventualmente quale famiglia
-	 */
-	public static void qualiGenitoriMostrare(Context contesto, Person perno, int cosaAprire) {
-		if( perno == null )
-			concludiSceltaGenitori(contesto, null, 1, 0);
+	/** For a stud? anchor? reference? ("perno") who is a child in more than one family, ask which family to show
+		@param thingToOpen what to open:
+				0 diagram of the previous family, without asking which family (first click on Diagram)
+				1 diagram possibly asking which family
+				2 family possibly asking which family
+	*/
+	public static void askWhichParentsToShow(Context context, Person person, int thingToOpen) {
+		if( person == null )
+			finishParentSelection(context, null, 1, 0);
 		else {
-			List<Family> famiglie = perno.getParentFamilies(Global.gc);
-			if( famiglie.size() > 1 && cosaAprire > 0 ) {
-				new AlertDialog.Builder(contesto).setTitle(R.string.which_family)
+			List<Family> famiglie = person.getParentFamilies(Global.gc);
+			if( famiglie.size() > 1 && thingToOpen > 0 ) {
+				new AlertDialog.Builder(context).setTitle(R.string.which_family)
 						.setItems(elencoFamiglie(famiglie), (dialog, quale) -> {
-							concludiSceltaGenitori(contesto, perno, cosaAprire, quale);
+							finishParentSelection(context, person, thingToOpen, quale);
 						}).show();
 			} else
-				concludiSceltaGenitori(contesto, perno, cosaAprire, 0);
+				finishParentSelection(context, person, thingToOpen, 0);
 		}
 
 	}
-	private static void concludiSceltaGenitori(Context contesto, Person perno, int cosaAprire, int qualeFamiglia) {
+	private static void finishParentSelection(Context contesto, Person perno, int cosaAprire, int qualeFamiglia) {
 		if( perno != null )
 			Global.indi = perno.getId();
 		if( cosaAprire > 0 ) // Viene impostata la famiglia da mostrare
@@ -1144,18 +1163,20 @@ public class U {
 			}
 		} else { // Viene mostrata la famiglia
 			Family family = perno.getParentFamilies(Global.gc).get(qualeFamiglia);
-			if( contesto instanceof Famiglia ) { // Passando di Famiglia in Famiglia non accumula attività nello stack
-				Memoria.replacePrimo(family);
+			if( contesto instanceof FamilyActivity) { // Passando di Famiglia in Famiglia non accumula attività nello stack
+				Memory.replaceFirst(family);
 				((Activity)contesto).recreate();
 			} else {
-				Memoria.setPrimo(family);
-				contesto.startActivity(new Intent(contesto, Famiglia.class));
+				Memory.setFirst(family);
+				contesto.startActivity(new Intent(contesto, FamilyActivity.class));
 			}
 		}
 	}
 
-	// Per un perno che ha molteplici matrimoni chiede quale mostrare
-	public static void qualiConiugiMostrare(Context contesto, Person perno, Family famiglia) {
+	/**
+	 * For an anchor ("perno") who has multiple marriages it asks which one to show
+	 * */
+	public static void askWhichSpouceToShow(Context contesto, Person perno, Family famiglia) {
 		if( perno.getSpouseFamilies(Global.gc).size() > 1 && famiglia == null ) {
 			new AlertDialog.Builder(contesto).setTitle(R.string.which_family)
 					.setItems(elencoFamiglie(perno.getSpouseFamilies(Global.gc)), (dialog, quale) -> {
@@ -1168,30 +1189,30 @@ public class U {
 	private static void concludiSceltaConiugi(Context contesto, Person perno, Family famiglia, int quale) {
 		Global.indi = perno.getId();
 		famiglia = famiglia == null ? perno.getSpouseFamilies(Global.gc).get(quale) : famiglia;
-		if( contesto instanceof Famiglia ) {
-			Memoria.replacePrimo(famiglia);
+		if( contesto instanceof FamilyActivity) {
+			Memory.replaceFirst(famiglia);
 			((Activity)contesto).recreate(); // Non accumula activity nello stack
 		} else {
-			Memoria.setPrimo(famiglia);
-			contesto.startActivity(new Intent(contesto, Famiglia.class));
+			Memory.setFirst(famiglia);
+			contesto.startActivity(new Intent(contesto, FamilyActivity.class));
 		}
 	}
 
 	// Usato per collegare una persona ad un'altra, solo in modalità inesperto
 	// Verifica se il perno potrebbe avere o ha molteplici matrimoni e chiede a quale attaccare un coniuge o un figlio
 	// È anche responsabile di settare 'idFamiglia' oppure 'collocazione'
-	static boolean controllaMultiMatrimoni(Intent intento, Context contesto, Fragment frammento) {
-		String idPerno = intento.getStringExtra("idIndividuo");
+	static boolean controllaMultiMatrimoni(Intent intent, Context contesto, Fragment frammento) {
+		String idPerno = intent.getStringExtra("idIndividuo");
 		Person perno = Global.gc.getPerson(idPerno);
 		List<Family> famGenitori = perno.getParentFamilies(Global.gc);
 		List<Family> famSposi = perno.getSpouseFamilies(Global.gc);
-		int relazione = intento.getIntExtra("relazione", 0);
-		ArrayAdapter<NuovoParente.VoceFamiglia> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
+		int relazione = intent.getIntExtra("relazione", 0);
+		ArrayAdapter<NewRelativeDialog.VoceFamiglia> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
 
 		// Genitori: esiste già una famiglia che abbia almeno uno spazio vuoto
 		if( relazione == 1 && famGenitori.size() == 1
 				&& (famGenitori.get(0).getHusbandRefs().isEmpty() || famGenitori.get(0).getWifeRefs().isEmpty()) )
-			intento.putExtra("idFamiglia", famGenitori.get(0).getId()); // aggiunge 'idFamiglia' all'intent esistente
+			intent.putExtra("idFamiglia", famGenitori.get(0).getId()); // aggiunge 'idFamiglia' all'intent esistente
 		// se questa famiglia è già piena di genitori, 'idFamiglia' rimane null
 		// quindi verrà cercata la famiglia esistente del destinatario oppure si crearà una famiglia nuova
 
@@ -1199,79 +1220,79 @@ public class U {
 		if( relazione == 1 && famGenitori.size() > 1 ) {
 			for( Family fam : famGenitori )
 				if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() )
-					adapter.add(new NuovoParente.VoceFamiglia(contesto, fam));
+					adapter.add(new NewRelativeDialog.VoceFamiglia(contesto, fam));
 			if( adapter.getCount() == 1 )
-				intento.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+				intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
 			else if( adapter.getCount() > 1 ) {
 				new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_parent)
 						.setAdapter(adapter, (dialog, quale) -> {
-							intento.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
-							concludiMultiMatrimoni(contesto, intento, frammento);
+							intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+							concludiMultiMatrimoni(contesto, intent, frammento);
 						}).show();
 				return true;
 			}
 		}
 		// Fratello
 		else if( relazione == 2 && famGenitori.size() == 1 ) {
-			intento.putExtra("idFamiglia", famGenitori.get(0).getId());
+			intent.putExtra("idFamiglia", famGenitori.get(0).getId());
 		} else if( relazione == 2 && famGenitori.size() > 1 ) {
 			new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_sibling)
 					.setItems(elencoFamiglie(famGenitori), (dialog, quale) -> {
-						intento.putExtra("idFamiglia", famGenitori.get(quale).getId());
-						concludiMultiMatrimoni(contesto, intento, frammento);
+						intent.putExtra("idFamiglia", famGenitori.get(quale).getId());
+						concludiMultiMatrimoni(contesto, intent, frammento);
 					}).show();
 			return true;
 		}
 		// Coniuge
 		else if( relazione == 3 && famSposi.size() == 1 ) {
 			if( famSposi.get(0).getHusbandRefs().isEmpty() || famSposi.get(0).getWifeRefs().isEmpty() ) // Se c'è uno slot libero
-				intento.putExtra("idFamiglia", famSposi.get(0).getId());
+				intent.putExtra("idFamiglia", famSposi.get(0).getId());
 		} else if( relazione == 3 && famSposi.size() > 1 ) {
 			for( Family fam : famSposi ) {
 				if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() )
-					adapter.add(new NuovoParente.VoceFamiglia(contesto, fam));
+					adapter.add(new NewRelativeDialog.VoceFamiglia(contesto, fam));
 			}
 			// Nel caso di zero famiglie papabili, idFamiglia rimane null
 			if( adapter.getCount() == 1 ) {
-				intento.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+				intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
 			} else if( adapter.getCount() > 1 ) {
 				//adapter.add(new NuovoParente.VoceFamiglia(contesto,perno) );
 				new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_spouse)
 						.setAdapter(adapter, (dialog, quale) -> {
-							intento.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
-							concludiMultiMatrimoni(contesto, intento, frammento);
+							intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+							concludiMultiMatrimoni(contesto, intent, frammento);
 						}).show();
 				return true;
 			}
 		}
 		// Figlio: esiste già una famiglia con o senza figli
 		else if( relazione == 4 && famSposi.size() == 1 ) {
-			intento.putExtra("idFamiglia", famSposi.get(0).getId());
+			intent.putExtra("idFamiglia", famSposi.get(0).getId());
 		} // Figlio: esistono molteplici famiglie coniugali
 		else if( relazione == 4 && famSposi.size() > 1 ) {
 			new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_child)
 					.setItems(elencoFamiglie(famSposi), (dialog, quale) -> {
-						intento.putExtra("idFamiglia", famSposi.get(quale).getId());
-						concludiMultiMatrimoni(contesto, intento, frammento);
+						intent.putExtra("idFamiglia", famSposi.get(quale).getId());
+						concludiMultiMatrimoni(contesto, intent, frammento);
 					}).show();
 			return true;
 		}
 		// Non avendo trovato una famiglia di perno, dice ad Anagrafe di cercare di collocare perno nella famiglia del destinatario
-		if( intento.getStringExtra("idFamiglia") == null && intento.getBooleanExtra("anagrafeScegliParente", false) )
-			intento.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
+		if( intent.getStringExtra("idFamiglia") == null && intent.getBooleanExtra("anagrafeScegliParente", false) )
+			intent.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
 		return false;
 	}
 
 	// Conclusione della funzione precedente
-	static void concludiMultiMatrimoni(Context contesto, Intent intento, Fragment frammento) {
-		if( intento.getBooleanExtra("anagrafeScegliParente", false) ) {
+	static void concludiMultiMatrimoni(Context contesto, Intent intent, Fragment frammento) {
+		if( intent.getBooleanExtra("anagrafeScegliParente", false) ) {
 			// apre Anagrafe
 			if( frammento != null )
-				frammento.startActivityForResult(intento, 1401);
+				frammento.startActivityForResult(intent, 1401);
 			else
-				((Activity)contesto).startActivityForResult(intento, 1401);
+				((Activity)contesto).startActivityForResult(intent, 1401);
 		} else // apre EditaIndividuo
-			contesto.startActivity(intento);
+			contesto.startActivity(intent);
 	}
 
 	// Controlla che una o più famiglie siano vuote e propone di eliminarle
@@ -1289,7 +1310,7 @@ public class U {
 			new AlertDialog.Builder(contesto).setMessage(R.string.empty_family_delete)
 					.setPositiveButton(android.R.string.yes, (dialog, i) -> {
 						for( Family fam : vuote )
-							Chiesa.deleteFamily(fam); // Così capita di salvare più volte insieme... ma vabè
+							ChurchFragment.deleteFamily(fam); // Così capita di salvare più volte insieme... ma vabè
 						if( cheFare != null ) cheFare.run();
 					}).setNeutralButton(android.R.string.cancel, (dialog, i) -> {
 						if( ancheKo ) cheFare.run();
@@ -1362,24 +1383,24 @@ public class U {
 							U.save(true, modified.toArray());
 						} else if( record instanceof Media ) {
 							Media media = (Media)record;
-							ContenitoriMedia mediaContainers = new ContenitoriMedia(Global.gc, media, newId);
+							MediaContainers mediaContainers = new MediaContainers(Global.gc, media, newId);
 							media.setId(newId);
 							U.updateChangeDate(media);
 							U.save(true, mediaContainers.containers.toArray());
 						} else if( record instanceof Note ) {
 							Note note = (Note)record;
-							ContenitoriNota noteContainers = new ContenitoriNota(Global.gc, note, newId);
+							NoteContainers noteContainers = new NoteContainers(Global.gc, note, newId);
 							note.setId(newId);
 							U.updateChangeDate(note);
 							U.save(true, noteContainers.containers.toArray());
 						} else if( record instanceof Source ) {
-							ListaCitazioniFonte citations = new ListaCitazioniFonte(Global.gc, oldId);
-							for( ListaCitazioniFonte.Tripletta triple : citations.lista )
-								triple.citazione.setRef(newId);
+							ListOfSourceCitations citations = new ListOfSourceCitations(Global.gc, oldId);
+							for( ListOfSourceCitations.Triplet triple : citations.list)
+								triple.citation.setRef(newId);
 							Source source = (Source)record;
 							source.setId(newId);
 							U.updateChangeDate(source);
-							U.save(true, citations.getCapi());
+							U.save(true, citations.getProgenitors());
 						} else if( record instanceof Repository ) {
 							Set<Source> modified = new HashSet<>();
 							for( Source source : Global.gc.getSources() ) {

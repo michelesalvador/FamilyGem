@@ -191,7 +191,7 @@
     <string name="cited_by">Citado em</string>
     <string name="reference_number">Número de referência</string>
     <string name="parentheses">Parênteses</string>
-    <string name="media_type">Tipo de mídia</string>
+    <string name="media_type">type de mídia</string>
     <string name="italic">Itálico</string>
     <string name="call_number">Número de telefone</string>
     <string name="publication_facts">Fatos de publicação</string>
@@ -221,7 +221,7 @@
     <string name="surname_prefix">Prefixo do sobrenome</string>
     <string name="nickname">Apelido</string>
     <string name="prefix">Prefixo</string>
-    <string name="type">Tipo</string>
+    <string name="type">type</string>
     <string name="value">Valor</string>
     <string name="make_main_submitter">Você quer que este apresentador seja o principal da árvore\?</string>
     <string name="crop">Cortar</string>
