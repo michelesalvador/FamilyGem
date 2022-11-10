@@ -60,7 +60,7 @@ public class NewTree extends BaseActivity {
 		Button scaricaCondiviso = findViewById( R.id.bottone_scarica_condiviso );
 		if( esisteDataId )
 			// Non ha bisogno di permessi perché scarica e decomprime solo nello storage esterno dell'app
-			scaricaCondiviso.setOnClickListener( v -> FacadeActivity.scaricaCondiviso(this, referrer, rotella) );
+			scaricaCondiviso.setOnClickListener( v -> FacadeActivity.downloadShared(this, referrer, rotella) );
 		else
 			scaricaCondiviso.setVisibility( View.GONE );
 

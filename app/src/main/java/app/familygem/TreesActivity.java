@@ -72,7 +72,7 @@ public class TreesActivity extends AppCompatActivity {
 			new AlertDialog.Builder(this).setTitle(R.string.a_new_tree)
 					.setMessage(R.string.you_can_download)
 					.setPositiveButton(R.string.download, (dialog, id) -> {
-						FacadeActivity.scaricaCondiviso(this, referrer, rotella);
+						FacadeActivity.downloadShared(this, referrer, rotella);
 					}).setNeutralButton(R.string.cancel, null).show();
 		} // Se non c'è nessun albero
 		else if( Global.settings.trees.isEmpty() )
@@ -342,7 +342,7 @@ public class TreesActivity extends AppCompatActivity {
 								new AlertDialog.Builder( TreesActivity.this ).setTitle( R.string.a_new_tree )
 										.setMessage( R.string.you_can_download )
 										.setPositiveButton( R.string.download, (dialog, id) -> {
-											FacadeActivity.scaricaCondiviso( TreesActivity.this, referrer, rotella );
+											FacadeActivity.downloadShared( TreesActivity.this, referrer, rotella );
 										}).setNeutralButton( R.string.cancel, (di, id) -> welcome.show() )
 										.setOnCancelListener( d -> welcome.show() ).show();
 							} else { // È qualunque altra cosa
