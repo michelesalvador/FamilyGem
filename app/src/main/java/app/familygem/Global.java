@@ -90,28 +90,32 @@ public class Global extends MultiDexApplication {
 		}
 	}
 
-	// Modifications to the text coming from files/settings.json
-	private static String updateSettings(String json) {
-		// Version 0.8 added new settings for the diagram
-		json = json.replace("\"siblings\":true", "siblings:2,cousins:2,spouses:true");
-		json = json.replace("\"siblings\":false", "siblings:0,cousins:0,spouses:true");
-		// Italian translated to English (version 0.8)
-		json = json.replace("\"alberi\":", "\"trees\":");
-		json = json.replace("\"idAprendo\":", "\"openTree\":");
-		json = json.replace("\"autoSalva\":", "\"autoSave\":");
-		json = json.replace("\"caricaAlbero\":", "\"loadTree\":");
-		json = json.replace("\"esperto\":", "\"expert\":");
-		json = json.replace("\"nome\":", "\"title\":");
-		json = json.replace("\"cartelle\":", "\"dirs\":");
-		json = json.replace("\"individui\":", "\"persons\":");
-		json = json.replace("\"generazioni\":", "\"generations\":");
-		json = json.replace("\"radice\":", "\"root\":");
-		json = json.replace("\"condivisioni\":", "\"shares\":");
-		json = json.replace("\"radiceCondivisione\":", "\"shareRoot\":");
-		json = json.replace("\"grado\":", "\"grade\":");
-		json = json.replace("\"data\":", "\"dateId\":");
-		return json;
-	}
+    /**
+     * Modifications to the text coming from files/settings.json
+     */
+    private static String updateSettings(String json) {
+        // Version 0.8 added new settings for the diagram
+        return json
+                .replace("\"siblings\":true", "siblings:2,cousins:2,spouses:true")
+                .replace("\"siblings\":false", "siblings:0,cousins:0,spouses:true")
+
+                // Italian translated to English (version 0.8)
+                .replace("\"alberi\":", "\"trees\":")
+                .replace("\"alberi\":", "\"trees\":")
+                .replace("\"idAprendo\":", "\"openTree\":")
+                .replace("\"autoSalva\":", "\"autoSave\":")
+                .replace("\"caricaAlbero\":", "\"loadTree\":")
+                .replace("\"esperto\":", "\"expert\":")
+                .replace("\"nome\":", "\"title\":")
+                .replace("\"cartelle\":", "\"dirs\":")
+                .replace("\"individui\":", "\"persons\":")
+                .replace("\"generazioni\":", "\"generations\":")
+                .replace("\"radice\":", "\"root\":")
+                .replace("\"condivisioni\":", "\"shares\":")
+                .replace("\"radiceCondivisione\":", "\"shareRoot\":")
+                .replace("\"grado\":", "\"grade\":")
+                .replace("\"data\":", "\"dateId\":");
+    }
 
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
