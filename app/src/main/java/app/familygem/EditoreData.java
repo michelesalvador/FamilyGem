@@ -1,6 +1,7 @@
 package app.familygem;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -15,6 +16,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.widget.PopupMenu;
 import java.lang.reflect.Field;
 import java.util.Calendar;
@@ -47,17 +49,17 @@ public class EditoreData extends LinearLayout {
 		super( contesto, as );
 	}
 
-	// Azioni da fare una sola volta all'inizio
-	void inizia( final EditText editaTesto ) {
+	// Actions to be done only once at the beginning
+	void initialize(final EditText editaTesto) {
 
-		addView( inflate( getContext(), R.layout.editore_data, null ), this.getLayoutParams() );
+		addView(inflate(getContext(), R.layout.editore_data, null), this.getLayoutParams());
 		this.editaTesto = editaTesto;
 
 		for( int i = 0; i < anniRuota.length - 1; i++ )
 			anniRuota[i] = i < 10 ? "0" + i : "" + i;
 		anniRuota[100] = "-";
 
-		datatore = new Datatore( editaTesto.getText().toString() );
+		datatore = new Datatore(editaTesto.getText().toString());
 		data1 = datatore.data1;
 		data2 = datatore.data2;
 
@@ -177,45 +179,47 @@ public class EditoreData extends LinearLayout {
 	}
 
 	// Prepara le quattro ruote di un carro con le impostazioni iniziali
-	void arredaCarro( final int quale, final NumberPicker ruotaGiorno, final NumberPicker ruotaMese, final NumberPicker ruotaSecolo, final NumberPicker ruotaAnno ) {
+	void arredaCarro(final int quale, final NumberPicker ruotaGiorno, final NumberPicker ruotaMese, final NumberPicker ruotaSecolo, final NumberPicker ruotaAnno) {
 		ruotaGiorno.setMinValue(0);
 		ruotaGiorno.setMaxValue(31);
-		ruotaGiorno.setDisplayedValues( giorniRuota );
-		stilizza(ruotaGiorno);
-		ruotaGiorno.setOnValueChangedListener( (picker, vecchio, nuovo) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		ruotaGiorno.setDisplayedValues(giorniRuota);
+		prepare(ruotaGiorno);
+		ruotaGiorno.setOnValueChangedListener((picker, vecchio, nuovo) ->
+				aggiorna(quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno)
 		);
 		ruotaMese.setMinValue(0);
 		ruotaMese.setMaxValue(12);
-		ruotaMese.setDisplayedValues( mesiRuota );
-		stilizza(ruotaMese);
-		ruotaMese.setOnValueChangedListener( (picker, vecchio, nuovo) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		ruotaMese.setDisplayedValues(mesiRuota);
+		prepare(ruotaMese);
+		ruotaMese.setOnValueChangedListener((picker, vecchio, nuovo) ->
+				aggiorna(quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno)
 		);
 		ruotaSecolo.setMinValue(0);
 		ruotaSecolo.setMaxValue(20);
-		stilizza(ruotaSecolo);
-		ruotaSecolo.setOnValueChangedListener( (picker, vecchio, nuovo) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		prepare(ruotaSecolo);
+		ruotaSecolo.setOnValueChangedListener((picker, vecchio, nuovo) ->
+				aggiorna(quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno)
 		);
 		ruotaAnno.setMinValue(0);
 		ruotaAnno.setMaxValue(100);
-		ruotaAnno.setDisplayedValues( anniRuota );
-		stilizza(ruotaAnno);
-		ruotaAnno.setOnValueChangedListener( ( picker, vecchio, nuovo ) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		ruotaAnno.setDisplayedValues(anniRuota);
+		prepare(ruotaAnno);
+		ruotaAnno.setOnValueChangedListener((picker, vecchio, nuovo) ->
+				aggiorna(quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno)
 		);
 	}
 
-	void stilizza( NumberPicker ruota ) {
-		// Toglie le famigerate linee divisorie azzurre
-		try {
-			Field campo = NumberPicker.class.getDeclaredField( "mSelectionDivider" );
-			campo.setAccessible( true );
-			campo.set( ruota, null );
-		} catch( Exception e ) {}
-		// Risolve il bug https://issuetracker.google.com/issues/37055335
-		ruota.setSaveFromParentEnabled(false);
+	void prepare(NumberPicker wheel) {
+		// Remove the dividing blue lines on API <= 22
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1 ) {
+			try {
+				Field field = NumberPicker.class.getDeclaredField("mSelectionDivider");
+				field.setAccessible(true);
+				field.set(wheel, null);
+			} catch( Exception e ) {}
+		}
+		// Fix the bug https://issuetracker.google.com/issues/37055335
+		wheel.setSaveFromParentEnabled(false);
 	}
 
 	// Prende la stringa data, aggiorna le Date e ci modifica tutto l'editore data

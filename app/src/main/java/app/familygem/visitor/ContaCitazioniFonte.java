@@ -1,5 +1,5 @@
 // Contatore delle citazioni di una fonte
-// Servirebbe per sostituire U.quanteCitazioni(Source) in Biblioteca
+// Servirebbe per sostituire U.quanteCitazioni(Source) in SourcesFragment
 // è più preciso nella conta cioè non gli sfugge nulla, ma è quattro volte più lento
 
 package app.familygem.visitor;

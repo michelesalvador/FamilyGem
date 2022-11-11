@@ -7,7 +7,7 @@
 	android:layout_marginRight="-3dp"
 	android:clipToPadding="false"
 	android:foreground="?android:attr/selectableItemBackground"
-	app:cardBackgroundColor="@color/fonte"
+	app:cardBackgroundColor="@color/source"
 	app:cardCornerRadius="0dp"
 	app:cardElevation="3dp"
 	app:cardUseCompatPadding="true"

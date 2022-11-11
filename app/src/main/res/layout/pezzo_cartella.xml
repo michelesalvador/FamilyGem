@@ -25,7 +25,7 @@
 		android:ellipsize="middle"
 		android:layout_toStartOf="@id/cartella_elimina"
 		android:textSize="14sp"
-		android:textColor="@color/grayText"/>
+		android:textColor="@color/gray_text"/>
 
 	<ImageButton
 		android:id="@+id/cartella_elimina"

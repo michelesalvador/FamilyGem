@@ -24,6 +24,12 @@ import org.folg.gedcom.model.Media;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import app.familygem.constant.Choice;
+import app.familygem.list.FamiliesFragment;
+import app.familygem.list.GalleryFragment;
+import app.familygem.list.NotesFragment;
+import app.familygem.list.RepositoriesFragment;
+import app.familygem.list.SourcesFragment;
 import app.familygem.visitor.ListaMedia;
 import app.familygem.visitor.ListaNote;
 import static app.familygem.Global.gc;
@@ -35,8 +41,8 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 	NavigationView menuPrincipe;
 	List<Integer> idMenu = Arrays.asList( R.id.nav_diagramma, R.id.nav_persone, R.id.nav_famiglie,
 			R.id.nav_media, R.id.nav_note, R.id.nav_fonti, R.id.nav_archivi, R.id.nav_autore );
-	List<Class> frammenti = Arrays.asList( Diagram.class, Anagrafe.class, Chiesa.class,
-			Galleria.class, Quaderno.class, Biblioteca.class, Magazzino.class, Podio.class );
+	List<Class> frammenti = Arrays.asList( Diagram.class, Anagrafe.class, FamiliesFragment.class,
+			GalleryFragment.class, NotesFragment.class, SourcesFragment.class, RepositoriesFragment.class, Podio.class );
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,29 +54,29 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 
 		scatolissima = findViewById(R.id.scatolissima);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-				this, scatolissima, toolbar, R.string.drawer_open, R.string.drawer_close );
+				this, scatolissima, toolbar, R.string.drawer_open, R.string.drawer_close);
 		scatolissima.addDrawerListener(toggle);
 		toggle.syncState();
 
 		menuPrincipe = findViewById(R.id.menu);
 		menuPrincipe.setNavigationItemSelectedListener(this);
 		Global.principalView = scatolissima;
-		U.gedcomSicuro( gc );
+		U.gedcomSicuro(gc);
 		furnishMenu();
 
 		if( savedInstanceState == null ) {  // carica la home solo la prima volta, non ruotando lo schermo
 			Fragment fragment;
 			String backName = null; // Etichetta per individuare diagramma nel backstack dei frammenti
-			if( getIntent().getBooleanExtra("anagrafeScegliParente",false) )
+			if( getIntent().getBooleanExtra(Choice.PERSON, false) )
 				fragment = new Anagrafe();
-			else if( getIntent().getBooleanExtra("galleriaScegliMedia",false) )
-				fragment = new Galleria();
-			else if( getIntent().getBooleanExtra("bibliotecaScegliFonte",false) )
-				fragment = new Biblioteca();
-			else if( getIntent().getBooleanExtra("quadernoScegliNota",false) )
-				fragment = new Quaderno();
-			else if( getIntent().getBooleanExtra("magazzinoScegliArchivio",false) )
-				fragment = new Magazzino();
+			else if( getIntent().getBooleanExtra(Choice.MEDIA, false) )
+				fragment = new GalleryFragment();
+			else if( getIntent().getBooleanExtra(Choice.SOURCE, false) )
+				fragment = new SourcesFragment();
+			else if( getIntent().getBooleanExtra(Choice.NOTE, false) )
+				fragment = new NotesFragment();
+			else if( getIntent().getBooleanExtra(Choice.REPOSITORY, false) )
+				fragment = new RepositoriesFragment();
 			else { // la normale apertura
 				fragment = new Diagram();
 				backName = "diagram";
@@ -81,7 +87,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 
 		menuPrincipe.getHeaderView(0).findViewById(R.id.menu_alberi).setOnClickListener(v -> {
 			scatolissima.closeDrawer(GravityCompat.START);
-			startActivity(new Intent(Principal.this, Alberi.class));
+			startActivity(new Intent(Principal.this, TreesActivity.class));
 		});
 
 		// Nasconde le voci del menu più ostiche
@@ -110,24 +116,19 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			if( fragment instanceof Diagram ) {
 				((Diagram)fragment).forceDraw = true; // Così ridisegna il diagramma
 			} else if( fragment instanceof Anagrafe ) {
-				// Update persons list
-				Anagrafe anagrafe = (Anagrafe)fragment;
-				if( anagrafe.people.size() == 0 ) // Probably it's a Collections.EmptyList
-					anagrafe.people = gc.getPeople(); // replace it with the real ArrayList
-				anagrafe.adapter.notifyDataSetChanged();
-				anagrafe.arredaBarra();
-			} else if( fragment instanceof Chiesa ) {
-				((Chiesa)fragment).refresh(Chiesa.What.RELOAD);
-			} else if( fragment instanceof Galleria ) {
-				((Galleria)fragment).ricrea();
-			/*} else if( fragment instanceof Quaderno ) {
-				// Doesn't work to update Quaderno when a note is deleted
-				((Quaderno)fragment).adapter.notifyDataSetChanged();*/
+				((Anagrafe)fragment).restart();
+			} else if( fragment instanceof FamiliesFragment ) {
+				((FamiliesFragment)fragment).refresh(FamiliesFragment.What.RELOAD);
+			} else if( fragment instanceof GalleryFragment ) {
+				((GalleryFragment)fragment).ricrea();
+			/*} else if( fragment instanceof NotesFragment ) {
+				// Doesn't work to update NotesFragment when a note is deleted
+				((NotesFragment)fragment).adapter.notifyDataSetChanged();*/
 			} else {
 				recreate(); // questo dovrebbe andare a scomparire man mano
 			}
+			furnishMenu(); // To display the Save button and update items count
 			Global.edited = false;
-			furnishMenu(); // praticamente solo per mostrare il bottone Salva
 		}
 	}
 
@@ -152,7 +153,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 				int caso = new Random().nextInt( cercaMedia.lista.size() );
 				for( Media med : cercaMedia.lista )
 					if( --caso < 0 ) { // arriva a -1
-						F.dipingiMedia( med, imageView, null );
+						F.paintMedia( med, imageView, null );
 						imageView.setVisibility( ImageView.VISIBLE );
 						break;
 					}
@@ -200,24 +201,25 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 			Global.daSalvare = false;
 			Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();
 		});
-		saveButton.setOnLongClickListener( vista -> {
-			PopupMenu popup = new PopupMenu(this, vista);
+		saveButton.setOnLongClickListener(view -> {
+			PopupMenu popup = new PopupMenu(this, view);
 			popup.getMenu().add(0, 0, 0, R.string.revert);
 			popup.show();
-			popup.setOnMenuItemClickListener( item -> {
+			popup.setOnMenuItemClickListener(item -> {
 				if( item.getItemId() == 0 ) {
-					Alberi.openGedcom(Global.settings.openTree, false);
+					TreesActivity.openGedcom(Global.settings.openTree, false);
 					U.qualiGenitoriMostrare(this, null, 0); // Semplicemente ricarica il diagramma
 					scatolissima.closeDrawer(GravityCompat.START);
-					saveButton.setVisibility(View.GONE);
+					//saveButton.setVisibility(View.GONE);
+					Global.edited = false;
 					Global.daSalvare = false;
+					furnishMenu();
 				}
 				return true;
 			});
 			return true;
 		});
-		if( Global.daSalvare )
-			saveButton.setVisibility( View.VISIBLE );
+		saveButton.setVisibility(Global.daSalvare ? View.VISIBLE : View.GONE);
 	}
 
 	// Evidenzia voce del menu e mostra/nasconde toolbar
@@ -242,7 +244,7 @@ public class Principal extends AppCompatActivity implements NavigationView.OnNav
 		} else {
 			super.onBackPressed();
 			if( getSupportFragmentManager().getBackStackEntryCount() == 0 ) {
-				// Fa tornare ad Alberi invece di rivedere il primo diagramma del backstack
+				// Fa tornare a TreesActivity invece di rivedere il primo diagramma del backstack
 				super.onBackPressed();
 			} else
 				aggiornaInterfaccia(null);

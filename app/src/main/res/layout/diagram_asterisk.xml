@@ -5,7 +5,7 @@
 	android:paddingLeft="6dp"
 	android:paddingRight="6dp"
 	android:text="*"
-	android:textColor="@color/evidenzia"
+	android:textColor="@color/accent"
 	android:textSize="60sp"
 	android:height="55dp"
 	android:layout_marginTop="-10dp"/>

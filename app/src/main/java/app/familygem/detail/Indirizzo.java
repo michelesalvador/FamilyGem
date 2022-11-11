@@ -2,7 +2,7 @@ package app.familygem.detail;
 
 import org.folg.gedcom.model.Address;
 import app.familygem.Dettaglio;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 
@@ -29,8 +29,8 @@ public class Indirizzo extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		eliminaIndirizzo(Memoria.oggettoContenitore());
-		U.updateChangeDate(Memoria.oggettoCapo());
-		Memoria.annullaIstanze(a);
+		eliminaIndirizzo(Memory.oggettoContenitore());
+		U.updateChangeDate(Memory.oggettoCapo());
+		Memory.annullaIstanze(a);
 	}
 }

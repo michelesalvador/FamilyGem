@@ -11,9 +11,9 @@ import java.util.Locale;
 import app.familygem.constant.Format;
 import app.familygem.constant.Kind;
 
-class Datatore {
+public class Datatore {
 
-	Data data1;
+	public Data data1;
 	Data data2;
 	String frase; // Quella che andrà tra parentesi
 	Kind kind;
@@ -21,22 +21,22 @@ class Datatore {
 	static final String[] suffissi = { "B.C.", "BC", "BCE" };
 
 	// With a string date in GEDCOM style
-	Datatore(String gedcomDate) {
+	public Datatore(String gedcomDate) {
 		data1 = new Data();
 		data2 = new Data();
 		analizza(gedcomDate);
 	}
 
 	// With one single complete Date
-	Datatore(Date date) {
+	public Datatore(Date date) {
 		data1 = new Data();
 		data1.date = date;
 		data1.format.applyPattern(Format.D_M_Y);
 		kind = Kind.EXACT;
 	}
 
-	class Data {
-		Date date;
+	public class Data {
+		public Date date;
 		SimpleDateFormat format;
 		boolean negativa;
 		boolean doppia;
@@ -66,8 +66,8 @@ class Datatore {
 			doppia = false; // reset
 			if( dataGc.indexOf('/') > 0 ) {
 				String[] tata = dataGc.split("[/ ]");
-				if( tata.length > 1 && tata[tata.length-2].length() < 3 && U.soloNumeri( tata[tata.length-2] ) <= 12 )
-					dataGc = dataGc.replace( '/', ' ' );
+				if( tata.length > 1 && tata[tata.length - 2].length() < 3 && U.getNumberOnly(tata[tata.length - 2]) <= 12 )
+					dataGc = dataGc.replace('/', ' ');
 				else
 					doppia = true;
 			}
@@ -103,7 +103,7 @@ class Datatore {
 			}
 		}
 
-		boolean isFormat(String format) {
+		public boolean isFormat(String format) {
 			return this.format.toPattern().equals(format);
 		}
 
@@ -115,7 +115,7 @@ class Datatore {
 	}
 	
 	// Riconosce il tipo di data e crea la classe Data
-	void analizza(String dataGc) {
+	public void analizza(String dataGc) {
 
 		// Reset the important values
 		kind = null;
@@ -278,7 +278,7 @@ class Datatore {
 	}
 
 	// Kinds of date that represent a single event in time
-	boolean isSingleKind() {
+	public boolean isSingleKind() {
 		return kind == Kind.EXACT || kind == Kind.APPROXIMATE || kind == Kind.CALCULATED || kind == Kind.ESTIMATED;
 	}
 }

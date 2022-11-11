@@ -32,21 +32,21 @@ public class Compara extends BaseActivity {
 	SimpleDateFormat changeDateFormat;
 
 	@Override
-	protected void onCreate( Bundle bandolo ) {
-		super.onCreate( bandolo );
-		setContentView( R.layout.compara );
-		int idAlbero = getIntent().getIntExtra("idAlbero",1); // Albero vecchio
-		int idAlbero2 = getIntent().getIntExtra("idAlbero2",1); // Albero nuovo ricevuto in condivisione
+	protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		setContentView(R.layout.compara);
+		int idAlbero = getIntent().getIntExtra("idAlbero", 1); // Albero vecchio
+		int idAlbero2 = getIntent().getIntExtra("idAlbero2", 1); // Albero nuovo ricevuto in condivisione
 		Global.treeId2 = idAlbero2; // servirà alle immagini di Confrontatore e a Conferma
-		Global.gc = Alberi.apriGedcomTemporaneo( idAlbero, true );
-		Global.gc2 = Alberi.apriGedcomTemporaneo( idAlbero2, false );
+		Global.gc = TreesActivity.openTemporaryGedcom(idAlbero, true);
+		Global.gc2 = TreesActivity.openTemporaryGedcom(idAlbero2, false);
 		if( Global.gc == null || Global.gc2 == null ) {
-			Toast.makeText( this, R.string.no_useful_data, Toast.LENGTH_LONG ).show();
+			Toast.makeText(this, R.string.no_useful_data, Toast.LENGTH_LONG).show();
 			onBackPressed();
 			return;
 		}
 
-		TimeZone.setDefault( TimeZone.getTimeZone("Europe/Rome") ); // riconduce tutte le date al fuso orario di Aruba
+		TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome")); // riconduce tutte le date al fuso orario di Aruba
 		try {
 			SimpleDateFormat formatoDataId = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
 			sharingDate = formatoDataId.parse(getIntent().getStringExtra("idData"));
@@ -54,44 +54,44 @@ public class Compara extends BaseActivity {
 			e.printStackTrace();
 		}
 
-		changeDateFormat = new SimpleDateFormat( "d MMM yyyyHH:mm:ss", Locale.ENGLISH );
+		changeDateFormat = new SimpleDateFormat("d MMM yyyyHH:mm:ss", Locale.ENGLISH);
 		Confronto.reset(); // Necessario svuotarlo, ad esempio dopo un cambio di configurazione
 
 		// Confronta tutti i record dei due Gedcom
 		for( Family o2 : Global.gc2.getFamilies() )
-			confronta( Global.gc.getFamily(o2.getId()), o2, 7 );
+			confronta(Global.gc.getFamily(o2.getId()), o2, 7);
 		for( Family o : Global.gc.getFamilies() )
-			riconfronta( o, Global.gc2.getFamily(o.getId()), 7 );
+			riconfronta(o, Global.gc2.getFamily(o.getId()), 7);
 
 		for( Person o2 : Global.gc2.getPeople() )
-			confronta( Global.gc.getPerson(o2.getId()), o2, 6 );
+			confronta(Global.gc.getPerson(o2.getId()), o2, 6);
 		for( Person o : Global.gc.getPeople() )
-			riconfronta( o, Global.gc2.getPerson(o.getId()), 6 );
+			riconfronta(o, Global.gc2.getPerson(o.getId()), 6);
 
 		for( Source o2 : Global.gc2.getSources() )
-			confronta( Global.gc.getSource(o2.getId()), o2, 5 );
+			confronta(Global.gc.getSource(o2.getId()), o2, 5);
 		for( Source o : Global.gc.getSources() )
-			riconfronta( o, Global.gc2.getSource(o.getId()), 5 );
+			riconfronta(o, Global.gc2.getSource(o.getId()), 5);
 
 		for( Media o2 : Global.gc2.getMedia() )
-			confronta( Global.gc.getMedia(o2.getId()), o2, 4 );
+			confronta(Global.gc.getMedia(o2.getId()), o2, 4);
 		for( Media o : Global.gc.getMedia() )
-			riconfronta( o, Global.gc2.getMedia(o.getId()), 4 );
+			riconfronta(o, Global.gc2.getMedia(o.getId()), 4);
 
 		for( Repository o2 : Global.gc2.getRepositories() )
-			confronta( Global.gc.getRepository(o2.getId()), o2, 3 );
+			confronta(Global.gc.getRepository(o2.getId()), o2, 3);
 		for( Repository o : Global.gc.getRepositories() )
-			riconfronta( o, Global.gc2.getRepository(o.getId()), 3 );
+			riconfronta(o, Global.gc2.getRepository(o.getId()), 3);
 
 		for( Submitter o2 : Global.gc2.getSubmitters() )
-			confronta( Global.gc.getSubmitter(o2.getId()), o2, 2 );
+			confronta(Global.gc.getSubmitter(o2.getId()), o2, 2);
 		for( Submitter o : Global.gc.getSubmitters() )
-			riconfronta( o, Global.gc2.getSubmitter(o.getId()), 2 );
+			riconfronta(o, Global.gc2.getSubmitter(o.getId()), 2);
 
 		for( Note o2 : Global.gc2.getNotes() )
-			confronta( Global.gc.getNote(o2.getId()), o2, 1 );
+			confronta(Global.gc.getNote(o2.getId()), o2, 1);
 		for( Note o : Global.gc.getNotes() )
-			riconfronta( o, Global.gc2.getNote(o.getId()), 1 );
+			riconfronta(o, Global.gc2.getNote(o.getId()), 1);
 
 		Settings.Tree tree2 = Global.settings.getTree(idAlbero2);
 		if( Confronto.getLista().isEmpty() ) {
@@ -129,24 +129,24 @@ public class Compara extends BaseActivity {
 				intent.putExtra("posizione", 1);
 				if( Confronto.get().quanteScelte > 0 ) { // Dialogo di richiesta revisione
 					new AlertDialog.Builder(this)
-							.setTitle( Confronto.get().quanteScelte == 1 ? getString(R.string.one_update_choice)
-									: getString(R.string.many_updates_choice, Confronto.get().quanteScelte) )
+							.setTitle(Confronto.get().quanteScelte == 1 ? getString(R.string.one_update_choice)
+									: getString(R.string.many_updates_choice, Confronto.get().quanteScelte))
 							.setMessage(R.string.updates_replace_add)
-							.setPositiveButton( android.R.string.ok, (dialog,id) -> {
+							.setPositiveButton(android.R.string.ok, (dialog, id) -> {
 								Confronto.get().autoProsegui = true;
 								Confronto.get().scelteFatte = 1;
-								startActivity( intent );
-							}).setNeutralButton( android.R.string.cancel, (dialog,id) -> botton2.setEnabled(true) )
-							.setOnCancelListener( dialog -> botton2.setEnabled(true) ).show();
+								startActivity(intent);
+							}).setNeutralButton(android.R.string.cancel, (dialog, id) -> botton2.setEnabled(true))
+							.setOnCancelListener(dialog -> botton2.setEnabled(true)).show();
 				} else { // Avvio in automatico
 					Confronto.get().autoProsegui = true;
-					startActivity( intent );
+					startActivity(intent);
 				}
 			});
 		} else {
 			botton1.setText(R.string.delete_imported_tree);
 			botton1.setOnClickListener(v -> {
-				Alberi.deleteTree(Compara.this, idAlbero2);
+				TreesActivity.deleteTree(Compara.this, idAlbero2);
 				onBackPressed();
 			});
 			botton2.setVisibility(View.GONE);
@@ -228,14 +228,14 @@ public class Compara extends BaseActivity {
 		TextView title = carta.findViewById(R.id.confronto_titolo);
 		TextView data = carta.findViewById(R.id.confronto_testo);
 		title.setText(tree.title);
-		data.setText(Alberi.scriviDati(this, tree));
+		data.setText(TreesActivity.scriviDati(this, tree));
 		if( idScheda == R.id.compara_nuovo ) {
 			if( tree.grade == 30 ) {
 				carta.setCardBackgroundColor(getResources().getColor(R.color.consumed));
-				title.setTextColor(getResources().getColor(R.color.grayText));
-				data.setTextColor(getResources().getColor(R.color.grayText));
+				title.setTextColor(getResources().getColor(R.color.gray_text));
+				data.setTextColor(getResources().getColor(R.color.gray_text));
 			} else
-				carta.setCardBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
+				carta.setCardBackgroundColor(getResources().getColor(R.color.accent_medium));
 			Submitter autore = gc.getSubmitter(tree.shares.get(tree.shares.size() - 1).submitter);
 			String txt = "";
 			if( autore != null ) {

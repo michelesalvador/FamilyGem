@@ -11,7 +11,7 @@ import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import app.familygem.Dettaglio;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import static app.familygem.Global.gc;
@@ -46,9 +46,9 @@ public class ArchivioRef extends Dettaglio {
 		View cartaRepo = LayoutInflater.from(contesto).inflate(R.layout.pezzo_fonte, scatola, false);
 		scatola.addView(cartaRepo);
 		((TextView)cartaRepo.findViewById(R.id.fonte_testo)).setText(repo.getName());
-		((CardView)cartaRepo).setCardBackgroundColor(contesto.getResources().getColor(R.color.archivio));
+		((CardView)cartaRepo).setCardBackgroundColor(contesto.getResources().getColor(R.color.repository));
 		cartaRepo.setOnClickListener(v -> {
-			Memoria.setPrimo(repo);
+			Memory.setPrimo(repo);
 			contesto.startActivity(new Intent(contesto, Archivio.class));
 		});
 		return cartaRepo;
@@ -57,9 +57,9 @@ public class ArchivioRef extends Dettaglio {
 	@Override
 	public void elimina() {
 		// Elimina la citazione all'archivio a aggiorna la data della fonte che la conteneva
-		Source contenitore = (Source)Memoria.oggettoContenitore();
+		Source contenitore = (Source)Memory.oggettoContenitore();
 		contenitore.setRepositoryRef(null);
 		U.updateChangeDate(contenitore);
-		Memoria.annullaIstanze(r);
+		Memory.annullaIstanze(r);
 	}
 }

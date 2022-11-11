@@ -60,7 +60,7 @@ public class Facciata extends AppCompatActivity {
 				scaricaCondiviso( this, dataId, null );
 			}
 		} else {
-			Intent treesIntent = new Intent(this, Alberi.class);
+			Intent treesIntent = new Intent(this, TreesActivity.class);
 			// Open last tree at startup
 			if( Global.settings.loadTree ) {
 				treesIntent.putExtra("apriAlberoAutomaticamente", true);
@@ -93,7 +93,7 @@ public class Facciata extends AppCompatActivity {
 						fos.write(data, 0, count);
 					}
 					fos.close();
-					if( client.completePendingCommand() && AlberoNuovo.unZip(contesto, percorsoZip, null) ) {
+					if( client.completePendingCommand() && NewTreeActivity.unZip(contesto, percorsoZip, null) ) {
 						// Se l'albero è stato scaricato con l'install referrer
 						if( Global.settings.referrer != null && Global.settings.referrer.equals(idData) ) {
 							Global.settings.referrer = null;
@@ -118,6 +118,6 @@ public class Facciata extends AppCompatActivity {
 		if( rotella != null )
 			((Activity)contesto).runOnUiThread( () -> rotella.setVisibility( View.GONE ) );
 		else
-			contesto.startActivity( new Intent(contesto, Alberi.class) );
+			contesto.startActivity( new Intent(contesto, TreesActivity.class) );
 	}
 }

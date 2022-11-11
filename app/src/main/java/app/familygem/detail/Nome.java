@@ -4,7 +4,7 @@ import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
 import app.familygem.Dettaglio;
 import app.familygem.Global;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import static app.familygem.Global.gc;
@@ -54,6 +54,6 @@ public class Nome extends Dettaglio {
 		Person costui = gc.getPerson(Global.indi);
 		costui.getNames().remove(n);
 		U.updateChangeDate(costui);
-		Memoria.annullaIstanze(n);
+		Memory.annullaIstanze(n);
 	}
 }

@@ -63,15 +63,16 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import app.familygem.detail.Immagine;
+import app.familygem.list.GalleryFragment;
 import app.familygem.visitor.ListaMedia;
 
 public class F {
 
 	// Impacchettamento per ricavare una cartella in KitKat
-	static String uriPercorsoCartellaKitKat( Context contesto, Uri uri ) {
-		String percorso = uriPercorsoFile( uri );
+	static String uriPercorsoCartellaKitKat(Context contesto, Uri uri) {
+		String percorso = uriPercorsoFile(uri);
 		if( percorso != null && percorso.lastIndexOf('/') > 0 ) {
-			return percorso.substring( 0, percorso.lastIndexOf('/') );
+			return percorso.substring(0, percorso.lastIndexOf('/'));
 		} else {
 			Toast.makeText(contesto, "Could not get this position.", Toast.LENGTH_SHORT).show();
 			return null;
@@ -149,10 +150,10 @@ public class F {
 
 	// Riceve un tree Uri ricavato con ACTION_OPEN_DOCUMENT_TREE e cerca di restituire il percorso della cartella
 	// altrimenti tranquillamente restituisce null
-	public static String uriPercorsoCartella( Uri uri ) {
+	public static String uriPercorsoCartella(Uri uri) {
 		if( uri == null ) return null;
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-			String treeDocId = DocumentsContract.getTreeDocumentId( uri );
+			String treeDocId = DocumentsContract.getTreeDocumentId(uri);
 			switch( uri.getAuthority() ) {
 				case "com.android.externalstorage.documents": // memoria interna e scheda SD
 					String[] split = treeDocId.split(":");
@@ -170,8 +171,8 @@ public class F {
 						File[] filesDirs = Global.context.getExternalFilesDirs(null);
 						for( File dir : filesDirs ) {
 							String altro = dir.getAbsolutePath();
-							if( altro.contains(split[0])) {
-								percorso = altro.substring( 0, altro.indexOf("/Android") );
+							if( altro.contains(split[0]) ) {
+								percorso = altro.substring(0, altro.indexOf("/Android"));
 								break;
 							}
 						}
@@ -211,59 +212,58 @@ public class F {
 
 	// Metodi per mostrare immagini:
 
-	// Riceve una Person e sceglie il Media principale da cui ricavare l'immagine
-	static void unaFoto( Gedcom gc, Person p, ImageView img ) {
-		ListaMedia visita = new ListaMedia( gc, 0 );
-		p.accept( visita );
-		boolean trovatoQualcosa = false;
-		for( Media med : visita.lista ) { // Cerca un media contrassegnato Primario Y
+	// Receive a Person and choose the main Media from which to obtain the image
+	public static Media oneImage(Gedcom gedcom, Person person, ImageView imageView) {
+		ListaMedia visitor = new ListaMedia(gedcom, 0);
+		person.accept(visitor);
+		Media media = null;
+		for( Media med : visitor.lista ) { // Look for a media with Primary 'Y'
 			if( med.getPrimary() != null && med.getPrimary().equals("Y") ) {
-				dipingiMedia( med, img, null );
-				trovatoQualcosa = true;
+				paintMedia(med, imageView, null);
+				media = med;
 				break;
 			}
 		}
-		if( !trovatoQualcosa ) { // In alternativa restituisce il primo che trova
-			for( Media med : visita.lista ) {
-				dipingiMedia( med, img, null );
-				trovatoQualcosa = true;
+		if( media == null ) { // Alternatively return the first one available
+			for( Media med : visitor.lista ) {
+				paintMedia(med, imageView, null);
+				media = med;
 				break;
 			}
 		}
-		img.setVisibility( trovatoQualcosa ? View.VISIBLE : View.GONE );
+		imageView.setVisibility(media != null ? View.VISIBLE : View.GONE);
+		return media;
 	}
 
-	// Mostra le immagini con Picasso
-	public static void dipingiMedia( Media media, ImageView imageView, ProgressBar circo ) {
-		int idAlbero;
-		// Confrontatore ha bisogno dell'id dell'albero nuovo per cercare nella sua cartella
+	// Display an image with Picasso
+	public static void paintMedia(Media media, ImageView imageView, ProgressBar progress) {
+		int treeId;
+		// Confrontatore needs the new tree id to search inside its folder
 		View probabile = null;
 		if( imageView.getParent() != null && imageView.getParent().getParent() != null )
-			probabile = (View) imageView.getParent().getParent().getParent();
+			probabile = (View)imageView.getParent().getParent().getParent();
 		if( probabile != null && probabile.getId() == R.id.confronto_nuovo )
-			idAlbero = Global.treeId2;
-		else idAlbero = Global.settings.openTree;
-		String percorso = percorsoMedia(idAlbero, media);
+			treeId = Global.treeId2;
+		else treeId = Global.settings.openTree;
+		String path = percorsoMedia(treeId, media);
 		Uri[] uri = new Uri[1];
-		if( percorso == null )
-			uri[0] = uriMedia(idAlbero, media);
-		if( circo != null ) circo.setVisibility(View.VISIBLE);
-		imageView.setTag(R.id.tag_tipo_file, 0);
-		if( percorso != null || uri[0] != null ) {
+		if( path == null )
+			uri[0] = uriMedia(treeId, media);
+		if( progress != null ) progress.setVisibility(View.VISIBLE);
+		imageView.setTag(R.id.tag_file_type, 0);
+		if( path != null || uri[0] != null ) {
 			RequestCreator creator;
-			if( percorso != null )
-				creator = Picasso.get().load("file://" + percorso);
+			if( path != null )
+				creator = Picasso.get().load("file://" + path);
 			else
 				creator = Picasso.get().load(uri[0]);
-			creator.placeholder(R.drawable.image)
-					.fit()
-					.centerInside()
+			creator.placeholder(R.drawable.image).fit().centerInside()
 					.into(imageView, new Callback() {
 						@Override
 						public void onSuccess() {
-							if( circo != null ) circo.setVisibility(View.GONE);
-							imageView.setTag(R.id.tag_tipo_file, 1);
-							imageView.setTag(R.id.tag_percorso, percorso); // 'percorso' o 'uri' uno dei 2 è valido, l'altro è null
+							if( progress != null ) progress.setVisibility(View.GONE);
+							imageView.setTag(R.id.tag_file_type, 1);
+							imageView.setTag(R.id.tag_percorso, path); // 'percorso' o 'uri' uno dei 2 è valido, l'altro è null
 							imageView.setTag(R.id.tag_uri, uri[0]);
 							// Nella pagina Dettaglio Immagine ricarica il menu opzioni per mostrare il comando Crop
 							if( imageView.getId() == R.id.immagine_foto ) {
@@ -272,78 +272,78 @@ public class F {
 							}
 						}
 						@Override
-						public void onError( Exception e ) {
-							// Magari è un video da cui ricavare una thumbnail
+						public void onError(Exception e) {
+							// Maybe it's a video to make a thumbnail from
 							Bitmap bitmap = null;
 							try { // Ultimamente questi generatori di thumbnail inchiodano, quindi meglio pararsi il culo
-								bitmap = ThumbnailUtils.createVideoThumbnail( percorso, MediaStore.Video.Thumbnails.MINI_KIND );
-								// Tramite l'URI
+								bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MINI_KIND);
+								// Via the URI
 								if( bitmap == null && uri[0] != null ) {
-									MediaMetadataRetriever mMR = new MediaMetadataRetriever();
-									mMR.setDataSource( Global.context, uri[0] );
-									bitmap = mMR.getFrameAtTime();
+									MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+									retriever.setDataSource(Global.context, uri[0]);
+									bitmap = retriever.getFrameAtTime();
 								}
-							} catch( Exception excpt ) {}
-							imageView.setTag(R.id.tag_tipo_file, 2);
+							} catch( Exception exception ) {}
+							imageView.setTag(R.id.tag_file_type, 2);
 							if( bitmap == null ) {
-								// un File locale senza anteprima
-								String formato = media.getFormat();
-								if( formato == null )
-									formato = percorso != null ? MimeTypeMap.getFileExtensionFromUrl(percorso.replaceAll("[^a-zA-Z0-9./]", "_")) : "";
-									// Rimuove gli spazi bianchi che non fanno trovare l'estensione
-								if( formato.isEmpty() && uri[0] != null )
-									formato = MimeTypeMap.getFileExtensionFromUrl( uri[0].getLastPathSegment() );
-								bitmap = generaIcona( imageView, R.layout.media_file, formato );
-								imageView.setScaleType( ImageView.ScaleType.FIT_CENTER );
-								if( imageView.getParent() instanceof RelativeLayout && // brutto ma efficace
+								// A local file with no preview
+								String format = media.getFormat();
+								if( format == null )
+									format = path != null ? MimeTypeMap.getFileExtensionFromUrl(path.replaceAll("[^a-zA-Z0-9./]", "_")) : "";
+								// Rimuove gli spazi bianchi che non fanno trovare l'estensione
+								if( format.isEmpty() && uri[0] != null )
+									format = MimeTypeMap.getFileExtensionFromUrl(uri[0].getLastPathSegment());
+								bitmap = generaIcona(imageView, R.layout.media_file, format);
+								imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+								if( imageView.getParent() instanceof RelativeLayout && // Ugly but effective
 										((RelativeLayout)imageView.getParent()).findViewById(R.id.media_testo) != null ) {
-									RelativeLayout.LayoutParams parami = new RelativeLayout.LayoutParams(
-											RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT );
-									parami.addRule( RelativeLayout.ABOVE, R.id.media_testo );
-									imageView.setLayoutParams( parami );
+									RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+											RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+									params.addRule(RelativeLayout.ABOVE, R.id.media_testo);
+									imageView.setLayoutParams(params);
 								}
-								imageView.setTag( R.id.tag_tipo_file, 3 );
+								imageView.setTag(R.id.tag_file_type, 3);
 							}
 							imageView.setImageBitmap(bitmap);
-							imageView.setTag( R.id.tag_percorso, percorso );
-							imageView.setTag( R.id.tag_uri, uri[0] );
-							if( circo!=null ) circo.setVisibility( View.GONE );
+							imageView.setTag(R.id.tag_percorso, path);
+							imageView.setTag(R.id.tag_uri, uri[0]);
+							if( progress != null ) progress.setVisibility(View.GONE);
 						}
 					});
-		} else if( media.getFile() != null && !media.getFile().isEmpty() ) { // magari è un'immagine in internet
-			String percorsoFile = media.getFile();
-			Picasso.get().load(percorsoFile).fit()
+		} else if( media.getFile() != null && !media.getFile().isEmpty() ) { // Maybe it's an image on the internet
+			String filePath = media.getFile();
+			Picasso.get().load(filePath).fit()
 					.placeholder(R.drawable.image).centerInside()
 					.into(imageView, new Callback() {
 						@Override
 						public void onSuccess() {
-							if( circo != null ) circo.setVisibility(View.GONE);
-							imageView.setTag(R.id.tag_tipo_file, 1);
+							if( progress != null ) progress.setVisibility(View.GONE);
+							imageView.setTag(R.id.tag_file_type, 1);
 							try {
-								new ImboscaImmagine(media).execute(new URL(percorsoFile));
+								new ImboscaImmagine(media).execute(new URL(filePath));
 							} catch( Exception e ) {}
 						}
 						@Override
-						public void onError( Exception e ) {
+						public void onError(Exception e) {
 							// Proviamo con una pagina web
-							new ZuppaMedia(imageView, circo, media).execute(percorsoFile);
+							new ZuppaMedia(imageView, progress, media).execute(filePath);
 						}
 					});
 		} else { // Media privo di collegamento a un file
-			if( circo != null ) circo.setVisibility(View.GONE);
+			if( progress != null ) progress.setVisibility(View.GONE);
 			imageView.setImageResource(R.drawable.image);
 		}
 	}
 
 	// Riceve un Media, cerca il file in locale con diverse combinazioni di percorso e restituisce l'indirizzo
-	public static String percorsoMedia( int idAlbero, Media m ) {
+	public static String percorsoMedia(int idAlbero, Media m) {
 		String file = m.getFile();
 		if( file != null && !file.isEmpty() ) {
 			String nome = file.replace("\\", "/");
 			// Percorso FILE (quello nel gedcom)
 			if( new File(nome).canRead() )
 				return nome;
-			for( String dir : Global.settings.getTree( idAlbero ).dirs ) {
+			for( String dir : Global.settings.getTree(idAlbero).dirs ) {
 				// Cartella media + percorso FILE
 				String percorso = dir + '/' + nome;
 				File prova = new File(percorso);
@@ -364,7 +364,7 @@ public class F {
 			if( stringa != null ) {
 				String percorsoCache;
 				if( stringa instanceof String )
-					percorsoCache = (String) stringa;
+					percorsoCache = (String)stringa;
 				else
 					percorsoCache = ((JsonPrimitive)stringa).getAsString();
 				if( new File(percorsoCache).isFile() )
@@ -410,21 +410,22 @@ public class F {
 		ImboscaImmagine( Media media ) {
 			this.media = media;
 		}
-		protected String doInBackground( URL... url ) {
+		@Override
+		protected String doInBackground(URL... url) {
 			try {
-				File cartellaCache = new File( Global.context.getCacheDir().getPath() + "/" + Global.settings.openTree);
-				if( !cartellaCache.exists() ) {
+				File cacheDir = new File(Global.context.getCacheDir().getPath() + "/" + Global.settings.openTree);
+				if( !cacheDir.exists() ) {
 					// Elimina extension "cache" da tutti i Media
-					ListaMedia visitaMedia = new ListaMedia( Global.gc, 0 );
-					Global.gc.accept( visitaMedia );
+					ListaMedia visitaMedia = new ListaMedia(Global.gc, 0);
+					Global.gc.accept(visitaMedia);
 					for( Media media : visitaMedia.lista )
 						if( media.getExtension("cache") != null )
-							media.putExtension( "cache", null );
-					cartellaCache.mkdir();
+							media.putExtension("cache", null);
+					cacheDir.mkdir();
 				}
-				String estensione = FilenameUtils.getName( url[0].getPath() );
+				String estensione = FilenameUtils.getName(url[0].getPath());
 				if( estensione.lastIndexOf('.') > 0 )
-					estensione = estensione.substring( estensione.lastIndexOf('.')+1 );
+					estensione = estensione.substring(estensione.lastIndexOf('.') + 1);
 				String ext;
 				switch( estensione ) {
 					case "png":
@@ -441,14 +442,15 @@ public class F {
 					default:
 						ext = "jpg";
 				}
-				File cache = fileNomeProgressivo( cartellaCache.getPath(), "img." + ext );
-				FileUtils.copyURLToFile( url[0], cache );
+				File cache = fileNomeProgressivo(cacheDir.getPath(), "img." + ext);
+				FileUtils.copyURLToFile(url[0], cache);
 				return cache.getPath();
 			} catch( Exception e ) {
 				e.printStackTrace();
 			}
 			return null;
 		}
+		@Override
 		protected void onPostExecute( String percorso) {
 			if( percorso != null )
 				media.putExtension( "cache", percorso );
@@ -457,30 +459,30 @@ public class F {
 
 	// Scarica asincronicamente un'immagine da una pagina internet
 	static class ZuppaMedia extends AsyncTask<String, Integer, Bitmap> {
-		ImageView vistaImmagine;
-		ProgressBar circo;
+		ImageView imageView;
+		ProgressBar progress;
 		Media media;
 		URL url;
-		int tagTipoFile = 0; // setTag deve stare nel thread principale, non nel doInBackground
-		int vistaImmagineWidth; // idem
-		ZuppaMedia( ImageView vistaImmagine, ProgressBar circo, Media media ) {
-			this.vistaImmagine = vistaImmagine;
-			this.circo = circo;
+		int tagFileType = 0; // setTag deve stare nel thread principale, non nel doInBackground
+		int imageViewWidth; // idem
+		ZuppaMedia(ImageView imageView, ProgressBar progress, Media media ) {
+			this.imageView = imageView;
+			this.progress = progress;
 			this.media = media;
-			vistaImmagineWidth = vistaImmagine.getWidth();
+			imageViewWidth = imageView.getWidth();
 		}
 		@Override
-		protected Bitmap doInBackground(String... parametri) {
+		protected Bitmap doInBackground(String... params) {
 			Bitmap bitmap;
 			try {
-				Connection connessione = Jsoup.connect(parametri[0]);
+				Connection connessione = Jsoup.connect(params[0]);
 				//if (connessione.equals(bitmap)) {	// TODO: verifica che un address sia associato all'hostname
 				Document doc = connessione.get();
 				List<Element> lista = doc.select("img");
 				if( lista.isEmpty() ) { // Pagina web trovata ma senza immagini
-					tagTipoFile = 3;
-					url = new URL( parametri[0] );
-					return generaIcona( vistaImmagine, R.layout.media_mondo, url.getProtocol() );	// ritorna una bitmap
+					tagFileType = 3;
+					url = new URL( params[0] );
+					return generaIcona(imageView, R.layout.media_mondo, url.getProtocol() );	// ritorna una bitmap
 				}
 				int maxDimensioniConAlt = 1;
 				int maxDimensioni = 1;
@@ -528,12 +530,12 @@ public class F {
 				opzioni.inJustDecodeBounds = true; // prende solo le info dell'immagine senza scaricarla
 				BitmapFactory.decodeStream(inputStream, null, opzioni);
 				// Infine cerca di caricare l'immagine vera e propria ridimensionandola
-				if( opzioni.outWidth > vistaImmagineWidth )
-					opzioni.inSampleSize = opzioni.outWidth / (vistaImmagineWidth+1);
+				if( opzioni.outWidth > imageViewWidth )
+					opzioni.inSampleSize = opzioni.outWidth / (imageViewWidth +1);
 				inputStream = url.openConnection().getInputStream();
 				opzioni.inJustDecodeBounds = false;	// Scarica l'immagine
 				bitmap = BitmapFactory.decodeStream( inputStream, null, opzioni );
-				tagTipoFile = 1;
+				tagFileType = 1;
 			} catch( Exception e ) {
 				return null;
 			}
@@ -541,126 +543,126 @@ public class F {
 		}
 		@Override
 		protected void onPostExecute(Bitmap bitmap) {
-			vistaImmagine.setTag(R.id.tag_tipo_file, tagTipoFile);
+			imageView.setTag(R.id.tag_file_type, tagFileType);
 			if( bitmap != null ) {
-				vistaImmagine.setImageBitmap(bitmap);
-				vistaImmagine.setTag(R.id.tag_percorso, url.toString());    // usato da Immagine
-				if( tagTipoFile == 1 )
+				imageView.setImageBitmap(bitmap);
+				imageView.setTag(R.id.tag_percorso, url.toString()); // usato da Immagine
+				if( tagFileType == 1 )
 					new ImboscaImmagine(media).execute(url);
 			}
-			if( circo != null ) // può arrivare molto in ritardo quando la pagina non esiste più
-				circo.setVisibility(View.GONE);
+			if( progress != null ) // può arrivare molto in ritardo quando la pagina non esiste più
+				progress.setVisibility(View.GONE);
 		}
 	}
 
-	// Metodi per acquisizione immagini:
+	// Methods to get images:
 
-	// Propone una bella lista di app per acquisire immagini
-	public static void appAcquisizioneImmagine(Context contesto, Fragment frammento, int codice, MediaContainer contenitore) {
-		// Richiesta permesso accesso memoria device
-		int perm = ContextCompat.checkSelfPermission(contesto, Manifest.permission.READ_EXTERNAL_STORAGE);
+	// Display a list of apps to get images
+	public static void mediaAppList(Context context, Fragment fragment, int code, MediaContainer container) {
+		// Request permission to access device memory
+		int perm = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE);
 		if( perm == PackageManager.PERMISSION_DENIED ) {
-			if( frammento != null ) { // Galleria
-				frammento.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, codice);
+			if( fragment != null ) { // GalleryFragment
+				fragment.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, code);
 			} else
-				ActivityCompat.requestPermissions((AppCompatActivity)contesto,
-						new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, codice);
+				ActivityCompat.requestPermissions((AppCompatActivity)context,
+						new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, code);
 			return;
 		}
 		// Colleziona gli intenti utili per acquisire immagini
-		List<ResolveInfo> listaRisolvi = new ArrayList<>();
-		final List<Intent> listaIntenti = new ArrayList<>();
-		// Camere
-		Intent intentoCamera = new Intent( MediaStore.ACTION_IMAGE_CAPTURE );
-		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoCamera,0) ) {
-			Intent finalIntent = new Intent( intentoCamera );
-			finalIntent.setComponent( new ComponentName(info.activityInfo.packageName, info.activityInfo.name) );
-			listaIntenti.add(finalIntent);
-			listaRisolvi.add( info );
-		}
-		// Gallerie
-		Intent intentoGalleria = new Intent( Intent.ACTION_GET_CONTENT );
-		intentoGalleria.setType("image/*");
-		String[] mimeTypes = { "image/*", "audio/*", "video/*", "application/*", "text/*" };
-		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT )
-			mimeTypes[0] = "*/*"; // Altrimenti KitKat non vede gli 'application/*' in Downloads
-		intentoGalleria.putExtra( Intent.EXTRA_MIME_TYPES, mimeTypes );
-		for( ResolveInfo info : contesto.getPackageManager().queryIntentActivities(intentoGalleria,0) ) {
-			Intent finalIntent = new Intent( intentoGalleria );
+		List<ResolveInfo> resolveList = new ArrayList<>();
+		final List<Intent> intentList = new ArrayList<>();
+		// Cameras
+		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		for( ResolveInfo info : context.getPackageManager().queryIntentActivities(cameraIntent, 0) ) {
+			Intent finalIntent = new Intent(cameraIntent);
 			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
-			listaIntenti.add( finalIntent );
-			listaRisolvi.add( info );
+			intentList.add(finalIntent);
+			resolveList.add(info);
 		}
-		// Media vuoto
-		if( Global.settings.expert && codice != 5173 ) { // tranne che per la scelta di file in Immagine
-			Intent intento = new Intent( contesto, Immagine.class );
-			ResolveInfo info = contesto.getPackageManager().resolveActivity( intento, 0 );
-			intento.setComponent(new ComponentName(info.activityInfo.packageName,info.activityInfo.name));
-			listaIntenti.add( intento );
-			listaRisolvi.add( info );
+		// Galleries
+		Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+		galleryIntent.setType("image/*");
+		String[] mimeTypes = {"image/*", "audio/*", "video/*", "application/*", "text/*"};
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT )
+			mimeTypes[0] = "*/*"; // Otherwise KitKat does not see the 'application/*' in Downloads
+		galleryIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+		for( ResolveInfo info : context.getPackageManager().queryIntentActivities(galleryIntent, 0) ) {
+			Intent finalIntent = new Intent(galleryIntent);
+			finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
+			intentList.add(finalIntent);
+			resolveList.add(info);
 		}
-		new AlertDialog.Builder( contesto ).setAdapter( faiAdattatore( contesto, listaRisolvi ),
+		// Empty media
+		if( Global.settings.expert && code != 5173 ) { // tranne che per la scelta di file in Immagine
+			Intent intento = new Intent(context, Immagine.class);
+			ResolveInfo info = context.getPackageManager().resolveActivity(intento, 0);
+			intento.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
+			intentList.add(intento);
+			resolveList.add(info);
+		}
+		new AlertDialog.Builder(context).setAdapter(faiAdattatore(context, resolveList),
 				(dialog, id) -> {
-					Intent intento = listaIntenti.get(id);
+					Intent intento = intentList.get(id);
 					// Predispone un Uri in cui mettere la foto scattata dall'app fotocamera
 					if( intento.getAction() != null && intento.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE) ) {
-						File dir = contesto.getExternalFilesDir( String.valueOf(Global.settings.openTree) );
+						File dir = context.getExternalFilesDir(String.valueOf(Global.settings.openTree));
 						if( !dir.exists() )
 							dir.mkdir();
-						File fotoFile = fileNomeProgressivo( dir.getAbsolutePath(), "image.jpg" );
+						File fotoFile = fileNomeProgressivo(dir.getAbsolutePath(), "image.jpg");
 						Global.fotoCamera = fotoFile.getAbsolutePath(); // Lo salva per riprenderlo dopo che la foto è stata scattata
 						Uri fotoUri;
 						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
-							fotoUri = FileProvider.getUriForFile( contesto, BuildConfig.APPLICATION_ID + ".provider", fotoFile );
+							fotoUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", fotoFile);
 						else // KitKat
-							fotoUri = Uri.fromFile( fotoFile );
-						intento.putExtra( MediaStore.EXTRA_OUTPUT, fotoUri );
+							fotoUri = Uri.fromFile(fotoFile);
+						intento.putExtra(MediaStore.EXTRA_OUTPUT, fotoUri);
 					}
 					if( intento.getComponent().getPackageName().equals("app.familygem") ) {
-						// Crea un Media vuoto
-						Media med;
-						if( codice==4173 || codice==2173 ) { // Media semplice
-							med = new Media();
-							med.setFileTag( "FILE" );
-							contenitore.addMedia( med );
-							Memoria.aggiungi( med );
+						// Create an empty Media
+						Media media;
+						if( code == 4173 || code == 2173 ) { // Media semplice
+							media = new Media();
+							media.setFileTag("FILE");
+							container.addMedia(media);
+							Memory.aggiungi(media);
 						} else { // Media condiviso
-							med = Galleria.nuovoMedia( contenitore );
-							Memoria.setPrimo( med );
+							media = GalleryFragment.nuovoMedia(container);
+							Memory.setPrimo(media);
 						}
-						med.setFile( "" );
-						contesto.startActivity( intento );
-						U.save( true, Memoria.oggettoCapo() );
-					} else if( frammento != null )
-						frammento.startActivityForResult( intento, codice ); // Così il risultato ritorna al frammento
+						media.setFile("");
+						context.startActivity(intento);
+						U.save(true, Memory.oggettoCapo());
+					} else if( fragment != null )
+						fragment.startActivityForResult( intento, code ); // Così il risultato ritorna al frammento
 					else
-						((AppCompatActivity)contesto).startActivityForResult( intento, codice );
+						((AppCompatActivity)context).startActivityForResult( intento, code );
 				}).show();
 	}
-	// Strettamente legato a quello qui sopra
-	private static ArrayAdapter<ResolveInfo> faiAdattatore(final Context contesto, final List<ResolveInfo> listaRisolvi) {
-		return new ArrayAdapter<ResolveInfo>(contesto, R.layout.pezzo_app, R.id.intento_titolo, listaRisolvi) {
+	// Closely related to the method above
+	private static ArrayAdapter<ResolveInfo> faiAdattatore(final Context context, final List<ResolveInfo> resolveList) {
+		return new ArrayAdapter<ResolveInfo>(context, R.layout.piece_app, R.id.app_title, resolveList) {
 			@Override
-			public View getView(int posizione, View vista, ViewGroup genitore) {
-				View view = super.getView(posizione, vista, genitore);
-				ResolveInfo info = listaRisolvi.get(posizione);
-				ImageView image = view.findViewById(R.id.intento_icona);
-				TextView textview = view.findViewById(R.id.intento_titolo);
+			public View getView(int position, View view, ViewGroup parent) {
+				View appView = super.getView(position, view, parent);
+				ResolveInfo info = resolveList.get(position);
+				ImageView imageView = appView.findViewById(R.id.app_icon);
+				TextView textview = appView.findViewById(R.id.app_title);
 				if( info.activityInfo.packageName.equals("app.familygem") ) {
-					image.setImageResource(R.drawable.image);
+					imageView.setImageResource(R.drawable.image);
 					textview.setText(R.string.empty_media);
 				} else {
-					image.setImageDrawable(info.loadIcon(contesto.getPackageManager()));
-					textview.setText(info.loadLabel(contesto.getPackageManager()).toString());
+					imageView.setImageDrawable(info.loadIcon(context.getPackageManager()));
+					textview.setText(info.loadLabel(context.getPackageManager()).toString());
 				}
-				return view;
+				return appView;
 			}
 		};
 	}
 
 	// Salva il file acquisito e propone di ritagliarlo se è un'immagine
 	// ritorna true se apre il dialogo e quindi bisogna bloccare l'aggiornamento dell'attività
-	static boolean proponiRitaglio( Context contesto, Fragment frammento, Intent data, Media media ) {
+	public static boolean proponiRitaglio( Context contesto, Fragment frammento, Intent data, Media media ) {
 		// Trova il percorso dell'immagine
 		Uri uri = null;
 		String percorso;
@@ -702,45 +704,42 @@ public class F {
 			}
 		}
 		// Aggiunge il percorso della cartella nel Tree in preferenze
-		if( Global.settings.getCurrentTree().dirs.add( fileMedia[0].getParent() ) ) // true se ha aggiunto la cartella
+		if( Global.settings.getCurrentTree().dirs.add(fileMedia[0].getParent()) ) // true se ha aggiunto la cartella
 			Global.settings.save();
 		// Imposta nel Media il percorso trovato
-		media.setFile( fileMedia[0].getAbsolutePath() );
+		media.setFile(fileMedia[0].getAbsolutePath());
 
 		// Se si tratta di un'immagine apre il diaogo di proposta ritaglio
-		String tipoMime = URLConnection.guessContentTypeFromName( fileMedia[0].getName() );
+		String tipoMime = URLConnection.guessContentTypeFromName(fileMedia[0].getName());
 		if( tipoMime != null && tipoMime.startsWith("image/") ) {
-			ImageView vistaImmagine = new ImageView( contesto );
-			dipingiMedia( media, vistaImmagine, null );
+			ImageView vistaImmagine = new ImageView(contesto);
+			paintMedia(media, vistaImmagine, null);
 			Global.mediaCroppato = media; // Media parcheggiato in attesa di essere aggiornato col nuovo percorso file
 			Global.edited = false; // per non innescare il recreate() che negli Android nuovi non fa comparire l'AlertDialog
-			new AlertDialog.Builder( contesto )
+			new AlertDialog.Builder(contesto)
 					.setView(vistaImmagine)
-					.setMessage( R.string.want_crop_image )
-					.setPositiveButton( R.string.yes, (dialog, id) -> tagliaImmagine( contesto, fileMedia[0], null, frammento ) )
-					.setNeutralButton( R.string.no, (dialog, which) -> {
-						concludiProponiRitaglio( contesto, frammento );
-					}).setOnCancelListener( dialog -> { // click fuori dal dialogo
-						concludiProponiRitaglio( contesto, frammento );
+					.setMessage(R.string.want_crop_image)
+					.setPositiveButton(R.string.yes, (dialog, id) -> tagliaImmagine(contesto, fileMedia[0], null, frammento))
+					.setNeutralButton(R.string.no, (dialog, which) -> {
+						concludiProponiRitaglio(contesto, frammento);
+					}).setOnCancelListener(dialog -> { // click fuori dal dialogo
+						concludiProponiRitaglio(contesto, frammento);
 					}).show();
-			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams( FrameLayout.LayoutParams.MATCH_PARENT, U.dpToPx(320) );
-			vistaImmagine.setLayoutParams( params ); // l'assegnazione delle dimensioni deve venire DOPO la creazione del dialogo
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, U.dpToPx(320));
+			vistaImmagine.setLayoutParams(params); // l'assegnazione delle dimensioni deve venire DOPO la creazione del dialogo
 			return true;
 		}
 		return false;
 	}
-	// Conclusione negativa della proposta di ritaglio dell'immagine: aggiorna semplicemente la pagina per mostrare l'immagine
-	static void concludiProponiRitaglio( Context contesto, Fragment frammento ) {
-		if( frammento instanceof Galleria )
-			((Galleria)frammento).ricrea();
-		else if( contesto instanceof Dettaglio )
-			((Dettaglio)contesto).refresh();
-		else if( contesto instanceof Individuo ) {
-			IndividuoMedia indiMedia = (IndividuoMedia) ((AppCompatActivity)contesto).getSupportFragmentManager()
-					.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" );
-			indiMedia.refresh();
-		}
-		Global.edited = true; // per rinfrescare le pagine precedenti
+	// Negative conclusion of the image cropping proposal: simply refresh the view to show the image
+	static void concludiProponiRitaglio(Context context, Fragment fragment) {
+		if( fragment instanceof GalleryFragment )
+			((GalleryFragment)fragment).ricrea();
+		else if( context instanceof Dettaglio )
+			((Dettaglio)context).refresh();
+		else if( context instanceof ProfileActivity )
+			((ProfileActivity)context).refresh();
+		Global.edited = true; // To update previous pages
 	}
 
 	// Avvia il ritaglio di un'immagine con CropImage
@@ -791,18 +790,18 @@ public class F {
 	}
 
 	// Conclude la procedura di ritaglio di un'immagine
-	static void fineRitaglioImmagine( Intent data ) {
+	public static void fineRitaglioImmagine(Intent data) {
 		CropImage.ActivityResult risultato = CropImage.getActivityResult(data);
-		Uri uri = risultato.getUri(); // ad es. 'file:///storage/emulated/0/Android/data/app.familygem/files/5/anna.webp'
-		Picasso.get().invalidate( uri ); // cancella dalla cache l'eventuale immagine prima del ritaglio che ha lo stesso percorso
-		String percorso = uriPercorsoFile( uri );
-		Global.mediaCroppato.setFile( percorso );
+		Uri uri = risultato.getUri(); // E.g. 'file:///storage/emulated/0/Android/data/app.familygem/files/5/anna.webp'
+		Picasso.get().invalidate(uri); // cancella dalla cache l'eventuale immagine prima del ritaglio che ha lo stesso percorso
+		String percorso = uriPercorsoFile(uri);
+		Global.mediaCroppato.setFile(percorso);
 	}
 
 	// Risposta a tutte le richieste di permessi per Android 6+
-	static void risultatoPermessi( Context contesto, Fragment frammento, int codice, String[] permessi, int[] accordi, MediaContainer contenitore ) {
+	public static void risultatoPermessi(Context contesto, Fragment frammento, int codice, String[] permessi, int[] accordi, MediaContainer contenitore) {
 		if( accordi.length > 0 && accordi[0] == PackageManager.PERMISSION_GRANTED ) {
-			appAcquisizioneImmagine( contesto, frammento, codice, contenitore );
+			mediaAppList( contesto, frammento, codice, contenitore );
 		} else {
 			String permesso = permessi[0].substring(permessi[0].lastIndexOf('.') + 1);
 			Toast.makeText( contesto, contesto.getString(R.string.not_granted,permesso), Toast.LENGTH_LONG ).show();

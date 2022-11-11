@@ -41,7 +41,7 @@ public class Conferma extends BaseActivity {
 			CardView carta = findViewById( R.id.conferma_vecchio );
 			Settings.Tree tree = Global.settings.getTree( Global.settings.openTree);
 			((TextView)carta.findViewById(R.id.confronto_titolo )).setText( tree.title);
-			String txt = Alberi.scriviDati( this, tree);
+			String txt = TreesActivity.scriviDati( this, tree);
 			((TextView)carta.findViewById(R.id.confronto_testo )).setText( txt );
 			carta.findViewById( R.id.confronto_data ).setVisibility( View.GONE );
 
@@ -62,7 +62,7 @@ public class Conferma extends BaseActivity {
 
 			findViewById(R.id.conferma_annulla ).setOnClickListener( v -> {
 				Confronto.reset();
-				startActivity( new Intent( Conferma.this, Alberi.class ) );
+				startActivity( new Intent( Conferma.this, TreesActivity.class ) );
 			});
 
 			findViewById(R.id.conferma_ok ).setOnClickListener( v -> {
@@ -212,7 +212,7 @@ public class Conferma extends BaseActivity {
 					new AlertDialog.Builder( Conferma.this )
 							.setMessage( R.string.all_imported_delete )
 							.setPositiveButton( android.R.string.ok, (d, i) -> {
-								Alberi.deleteTree( this, Global.treeId2);
+								TreesActivity.deleteTree( this, Global.treeId2);
 								concludi();
 							}).setNegativeButton( R.string.no, (d, i) -> concludi() )
 							.setOnCancelListener( dialog -> concludi() ).show();
@@ -225,7 +225,7 @@ public class Conferma extends BaseActivity {
 	// Apre l'elenco degli alberi
 	void concludi() {
 		Confronto.reset();
-		startActivity( new Intent( this, Alberi.class ) );
+		startActivity( new Intent( this, TreesActivity.class ) );
 	}
 
 	// Calcola l'id più alto per una certa classe confrontando albero nuovo e vecchio

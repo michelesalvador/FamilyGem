@@ -17,9 +17,8 @@ import java.util.List;
 import app.familygem.Dettaglio;
 import app.familygem.EditaIndividuo;
 import app.familygem.Global;
-import app.familygem.Individuo;
-import app.familygem.IndividuoFamiliari;
-import app.familygem.Memoria;
+import app.familygem.ProfileActivity;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Gender;
@@ -97,7 +96,7 @@ public class Famiglia extends Dettaglio {
 				if( parentFam.size() == 2 ) { // Swappa tra le 2 famiglie genitoriali
 					Global.indi = p.getId();
 					Global.familyNum = parentFam.indexOf(f) == 0 ? 1 : 0;
-					Memoria.replacePrimo(parentFam.get(Global.familyNum));
+					Memory.replacePrimo(parentFam.get(Global.familyNum));
 					recreate();
 				} else // Più di due famiglie
 					U.qualiGenitoriMostrare( this, p, 2 );
@@ -106,13 +105,13 @@ public class Famiglia extends Dettaglio {
 				if( spouseFam.size() == 2 ) { // Swappa tra le 2 famiglie coniugali
 					Global.indi = p.getId();
 					Family altraFamiglia = spouseFam.get(spouseFam.indexOf(f) == 0 ? 1 : 0);
-					Memoria.replacePrimo(altraFamiglia);
+					Memory.replacePrimo(altraFamiglia);
 					recreate();
 				} else
 					U.qualiConiugiMostrare(this, p, null);
 			} else {
-				Memoria.setPrimo(p);
-				startActivity(new Intent(this, Individuo.class));
+				Memory.setPrimo(p);
+				startActivity(new Intent(this, ProfileActivity.class));
 			}
 		});
 		if( unRappresentanteDellaFamiglia == null )
@@ -209,9 +208,8 @@ public class Famiglia extends Dettaglio {
 			new AlertDialog.Builder(context).setSingleChoiceItems(pediTexts, actual, (dialog, i) -> {
 				parentFamilyRef.setRelationshipType(pediTypes[i]);
 				dialog.dismiss();
-				if( context instanceof Individuo )
-					((IndividuoFamiliari)((Individuo)context).getSupportFragmentManager()
-							.findFragmentByTag("android:switcher:" + R.id.schede_persona + ":2")).refresh();
+				if( context instanceof ProfileActivity )
+					((ProfileActivity)context).refresh();
 				else if( context instanceof Famiglia )
 					((Famiglia)context).refresh();
 				U.save(true, person);

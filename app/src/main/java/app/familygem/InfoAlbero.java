@@ -40,7 +40,7 @@ public class InfoAlbero extends BaseActivity {
 			i += "\n\n" + getText(R.string.item_exists_but_file) + "\n" + file.getAbsolutePath();
 		} else  {
 			i += "\n" + getText(R.string.file) + ": " + file.getAbsolutePath();
-			gc = Alberi.apriGedcomTemporaneo(treeId, false);
+			gc = TreesActivity.openTemporaryGedcom(treeId, false);
 			if( gc == null )
 				i += "\n\n" + getString(R.string.no_useful_data);
 			else {
@@ -69,109 +69,109 @@ public class InfoAlbero extends BaseActivity {
 					for( Settings.Share share : tree.shares ) {
 						i += "\n" + dataIdVersoData(share.dateId);
 						if( gc.getSubmitter(share.submitter) != null )
-							i += " - " + nomeAutore( gc.getSubmitter(share.submitter) );
+							i += " - " + submitterName( gc.getSubmitter(share.submitter) );
 					}
 				}
 			}
 		}
-		((TextView)findViewById(R.id.info_statistiche)).setText( i );
+		((TextView)findViewById(R.id.info_statistiche)).setText(i);
 
-		Button bottoneHeader = scatola.findViewById( R.id.info_gestisci_testata );
+		Button bottoneHeader = scatola.findViewById(R.id.info_gestisci_testata);
 		if( gc != null ) {
 			Header h = gc.getHeader();
-			if( h == null) {
-				bottoneHeader.setText( R.string.create_header );
-				bottoneHeader.setOnClickListener( view -> {
-					gc.setHeader( AlberoNuovo.creaTestata( file.getName() ) );
+			if( h == null ) {
+				bottoneHeader.setText(R.string.create_header);
+				bottoneHeader.setOnClickListener(view -> {
+					gc.setHeader(NewTreeActivity.creaTestata(file.getName()));
 					U.saveJson(gc, treeId);
 					recreate();
 				});
 			} else {
-				scatola.findViewById( R.id.info_testata ).setVisibility( View.VISIBLE );
+				scatola.findViewById(R.id.info_testata).setVisibility(View.VISIBLE);
 				if( h.getFile() != null )
-					poni( getText(R.string.file),  h.getFile() );
+					poni(getText(R.string.file), h.getFile());
 				if( h.getCharacterSet() != null ) {
-					poni( getText(R.string.characrter_set), h.getCharacterSet().getValue() );
-					poni( getText(R.string.version), h.getCharacterSet().getVersion() );
+					poni(getText(R.string.characrter_set), h.getCharacterSet().getValue());
+					poni(getText(R.string.version), h.getCharacterSet().getVersion());
 				}
-				spazio();   // uno spazietto
-				poni( getText(R.string.language), h.getLanguage() );
+				spazio(); // uno spazietto
+				poni(getText(R.string.language), h.getLanguage());
 				spazio();
-				poni( getText(R.string.copyright), h.getCopyright() );
+				poni(getText(R.string.copyright), h.getCopyright());
 				spazio();
-				if (h.getGenerator() != null) {
-					poni( getText(R.string.software), h.getGenerator().getName() != null ? h.getGenerator().getName() : h.getGenerator().getValue() );
-					poni( getText(R.string.version), h.getGenerator().getVersion() );
+				if( h.getGenerator() != null ) {
+					poni(getText(R.string.software), h.getGenerator().getName() != null ? h.getGenerator().getName() : h.getGenerator().getValue());
+					poni(getText(R.string.version), h.getGenerator().getVersion());
 					if( h.getGenerator().getGeneratorCorporation() != null ) {
-						poni( getText(R.string.corporation), h.getGenerator().getGeneratorCorporation().getValue() );
+						poni(getText(R.string.corporation), h.getGenerator().getGeneratorCorporation().getValue());
 						if( h.getGenerator().getGeneratorCorporation().getAddress() != null )
-							poni( getText(R.string.address), h.getGenerator().getGeneratorCorporation().getAddress().getDisplayValue() ); // non è male
-						poni( getText(R.string.telephone), h.getGenerator().getGeneratorCorporation().getPhone() );
-						poni( getText(R.string.fax), h.getGenerator().getGeneratorCorporation().getFax() );
+							poni(getText(R.string.address), h.getGenerator().getGeneratorCorporation().getAddress().getDisplayValue()); // non è male
+						poni(getText(R.string.telephone), h.getGenerator().getGeneratorCorporation().getPhone());
+						poni(getText(R.string.fax), h.getGenerator().getGeneratorCorporation().getFax());
 					}
 					spazio();
 					if( h.getGenerator().getGeneratorData() != null ) {
-						poni( getText(R.string.source), h.getGenerator().getGeneratorData().getValue() );
-						poni( getText(R.string.date), h.getGenerator().getGeneratorData().getDate() );
-						poni( getText(R.string.copyright), h.getGenerator().getGeneratorData().getCopyright() );
+						poni(getText(R.string.source), h.getGenerator().getGeneratorData().getValue());
+						poni(getText(R.string.date), h.getGenerator().getGeneratorData().getDate());
+						poni(getText(R.string.copyright), h.getGenerator().getGeneratorData().getCopyright());
 					}
 				}
 				spazio();
 				if( h.getSubmitter(gc) != null )
-					poni( getText( R.string.submitter ), nomeAutore(h.getSubmitter(gc)) ); // todo: renderlo cliccabile?
+					poni(getText(R.string.submitter), submitterName(h.getSubmitter(gc))); // todo: renderlo cliccabile?
 				if( gc.getSubmission() != null )
-					poni( getText(R.string.submission), gc.getSubmission().getDescription() ); // todo: cliccabile
+					poni(getText(R.string.submission), gc.getSubmission().getDescription()); // todo: cliccabile
 				spazio();
 				if( h.getGedcomVersion() != null ) {
-					poni( getText(R.string.gedcom), h.getGedcomVersion().getVersion() );
-					poni( getText(R.string.form), h.getGedcomVersion().getForm() );
+					poni(getText(R.string.gedcom), h.getGedcomVersion().getVersion());
+					poni(getText(R.string.form), h.getGedcomVersion().getForm());
 				}
-				poni( getText(R.string.destination), h.getDestination() );
+				poni(getText(R.string.destination), h.getDestination());
 				spazio();
 				if( h.getDateTime() != null ) {
-					poni( getText(R.string.date), h.getDateTime().getValue() );
-					poni( getText(R.string.time), h.getDateTime().getTime() );
+					poni(getText(R.string.date), h.getDateTime().getValue());
+					poni(getText(R.string.time), h.getDateTime().getTime());
 				}
 				spazio();
-				for( Estensione est : U.trovaEstensioni(h) ) {	// ogni estensione nella sua riga
+				for( Estensione est : U.trovaEstensioni(h) ) {    // ogni estensione nella sua riga
 					poni( est.nome, est.testo );
 				}
 				spazio();
-				if( righetta != null )
-					((TableLayout)findViewById( R.id.info_tabella ) ).removeView( righetta );
+				if( row != null )
+					((TableLayout)findViewById(R.id.info_tabella)).removeView(row);
 
 				// Bottone per aggiorna l'header GEDCOM coi parametri di Family Gem
-				bottoneHeader.setOnClickListener( view -> {
+				bottoneHeader.setOnClickListener(view -> {
 					h.setFile(treeId + ".json");
 					CharacterSet caratteri = h.getCharacterSet();
 					if( caratteri == null ) {
 						caratteri = new CharacterSet();
-						h.setCharacterSet( caratteri );
+						h.setCharacterSet(caratteri);
 					}
-					caratteri.setValue( "UTF-8" );
-					caratteri.setVersion( null );
+					caratteri.setValue("UTF-8");
+					caratteri.setVersion(null);
 
-					Locale loc = new Locale( Locale.getDefault().getLanguage() );
-					h.setLanguage( loc.getDisplayLanguage(Locale.ENGLISH) );
+					Locale loc = new Locale(Locale.getDefault().getLanguage());
+					h.setLanguage(loc.getDisplayLanguage(Locale.ENGLISH));
 
 					Generator programma = h.getGenerator();
 					if( programma == null ) {
 						programma = new Generator();
-						h.setGenerator( programma );
+						h.setGenerator(programma);
 					}
-					programma.setValue( "FAMILY_GEM" );
-					programma.setName( getString(R.string.app_name) );
+					programma.setValue("FAMILY_GEM");
+					programma.setName(getString(R.string.app_name));
 					//programma.setVersion( BuildConfig.VERSION_NAME ); // lo farà salvaJson()
-					programma.setGeneratorCorporation( null );
+					programma.setGeneratorCorporation(null);
 
 					GedcomVersion versioneGc = h.getGedcomVersion();
 					if( versioneGc == null ) {
 						versioneGc = new GedcomVersion();
-						h.setGedcomVersion( versioneGc );
+						h.setGedcomVersion(versioneGc);
 					}
-					versioneGc.setVersion( "5.5.1" );
-					versioneGc.setForm( "LINEAGE-LINKED" );
-					h.setDestination( null );
+					versioneGc.setVersion("5.5.1");
+					versioneGc.setForm("LINEAGE-LINKED");
+					h.setDestination(null);
 
 					U.saveJson(gc, treeId);
 					recreate();
@@ -181,7 +181,7 @@ public class InfoAlbero extends BaseActivity {
 			}
 			// Estensioni del Gedcom, ovvero tag non standard di livello 0 zero
 			for( Estensione est : U.trovaEstensioni(gc) ) {
-				U.metti( scatola, est.nome, est.testo );
+				U.metti(scatola, est.nome, est.testo);
 			}
 		} else
 			bottoneHeader.setVisibility(View.GONE);
@@ -193,8 +193,8 @@ public class InfoAlbero extends BaseActivity {
 				+ id.substring(8, 10) + ":" + id.substring(10, 12) + ":" + id.substring(12);
 	}
 
-	static String nomeAutore( Submitter autor ) {
-		String nome = autor.getName();
+	public static String submitterName(Submitter submitter) {
+		String nome = submitter.getName();
 		if( nome == null )
 			nome = "[" + Global.context.getString(R.string.no_name) + "]";
 		else if( nome.isEmpty() )
@@ -202,7 +202,7 @@ public class InfoAlbero extends BaseActivity {
 		return nome;
 	}
 
-	// Refresh the data displayed below the tree title in Alberi list
+	// Refresh the data displayed below the tree title in TreesActivity list
 	static void refreshData(Gedcom gedcom, Settings.Tree treeItem) {
 		treeItem.persons = gedcom.getPeople().size();
 		treeItem.generations = quanteGenerazioni(gedcom, U.getRootId(gedcom, treeItem));
@@ -234,13 +234,13 @@ public class InfoAlbero extends BaseActivity {
 		}
 	}
 
-	TableRow righetta;
+	TableRow row;
 	void spazio() {
 		if( testoMesso ) {
-			righetta = new TableRow(getApplicationContext());
-			View cella = new View(getApplicationContext());
-			cella.setBackgroundResource(R.color.primario);
-			righetta.addView(cella);
+			row = new TableRow(this);
+			View cella = new View(this);
+			cella.setBackgroundResource(R.color.primary);
+			row.addView(cella);
 			TableRow.LayoutParams param = (TableRow.LayoutParams)cella.getLayoutParams();
 			param.weight = 1;
 			param.span = 2;
@@ -248,7 +248,7 @@ public class InfoAlbero extends BaseActivity {
 			param.topMargin = 5;
 			param.bottomMargin = 5;
 			cella.setLayoutParams(param);
-			((TableLayout)findViewById(R.id.info_tabella)).addView(righetta);
+			((TableLayout)findViewById(R.id.info_tabella)).addView(row);
 			testoMesso = false;
 		}
 	}

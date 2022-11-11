@@ -109,81 +109,81 @@ public class Confrontatore extends BaseActivity {
 			onBackPressed(); // Ritorna a Compara
 	}
 
-	void arredaScheda( Gedcom gc, int idScheda, Object o ) {
+	void arredaScheda(Gedcom gc, int idScheda, Object o) {
 		String tit = "";
 		String txt = "";
 		String data = "";
 		CardView carta = findViewById(idScheda);
-		ImageView vistaFoto = carta.findViewById( R.id.confronto_foto );
+		ImageView vistaFoto = carta.findViewById(R.id.confronto_foto);
 		if( o instanceof Note ) {
-			tipoRecord( R.string.shared_note );
-			Note n = (Note) o;
+			tipoRecord(R.string.shared_note);
+			Note n = (Note)o;
 			txt = n.getValue();
-			data = dataOra( n.getChange() );
+			data = dataOra(n.getChange());
 		}
 		else if( o instanceof Submitter ) {
-			tipoRecord( R.string.submitter );
-			Submitter s = (Submitter) o;
+			tipoRecord(R.string.submitter);
+			Submitter s = (Submitter)o;
 			tit = s.getName();
 			if( s.getEmail() != null ) txt += s.getEmail() + "\n";
 			if( s.getAddress() != null ) txt += Dettaglio.writeAddress(s.getAddress(), true);
 			data = dataOra(s.getChange());
 		}
 		else if( o instanceof Repository ) {
-			tipoRecord( R.string.repository );
-			Repository r = (Repository) o;
+			tipoRecord(R.string.repository);
+			Repository r = (Repository)o;
 			tit = r.getName();
 			if( r.getAddress() != null ) txt += Dettaglio.writeAddress(r.getAddress(), true) + "\n";
 			if( r.getEmail() != null ) txt += r.getEmail();
 			data = dataOra(r.getChange());
 		}
 		else if( o instanceof Media ) {
-			tipoRecord( R.string.shared_media );
-			Media m = (Media) o;
-			if(m.getTitle()!=null) tit = m.getTitle();
+			tipoRecord(R.string.shared_media);
+			Media m = (Media)o;
+			if( m.getTitle() != null ) tit = m.getTitle();
 			txt = m.getFile();
-			data = dataOra( m.getChange() );
-			vistaFoto.setVisibility( View.VISIBLE );
-			F.dipingiMedia( m, vistaFoto, null );
+			data = dataOra(m.getChange());
+			vistaFoto.setVisibility(View.VISIBLE);
+			F.paintMedia(m, vistaFoto, null);
 		}
 		else if( o instanceof Source ) {
-			tipoRecord( R.string.source );
-			Source f = (Source) o;
-			if(f.getTitle()!=null) tit = f.getTitle();
-			else if(f.getAbbreviation()!=null) tit = f.getAbbreviation();
-			if(f.getAuthor()!=null) txt = f.getAuthor()+"\n";
-			if(f.getPublicationFacts()!=null) txt += f.getPublicationFacts()+"\n";
-			if(f.getText()!=null) txt += f.getText();
-			data = dataOra( f.getChange() );
+			tipoRecord(R.string.source);
+			Source s = (Source)o;
+			if( s.getTitle() != null ) tit = s.getTitle();
+			else if( s.getAbbreviation() != null ) tit = s.getAbbreviation();
+			if( s.getAuthor() != null ) txt = s.getAuthor() + "\n";
+			if( s.getPublicationFacts() != null ) txt += s.getPublicationFacts() + "\n";
+			if( s.getText() != null ) txt += s.getText();
+			data = dataOra(s.getChange());
 		}
 		else if( o instanceof Person ) {
-			tipoRecord( R.string.person );
-			Person p = (Person) o;
-			tit = U.epiteto( p );
-			txt = U.details( p, null );
-			data = dataOra( p.getChange() );
-			vistaFoto.setVisibility( View.VISIBLE );
-			F.unaFoto( gc, p, vistaFoto );
+			tipoRecord(R.string.person);
+			Person p = (Person)o;
+			tit = U.epiteto(p);
+			txt = U.details(p, null);
+			data = dataOra(p.getChange());
+			vistaFoto.setVisibility(View.VISIBLE);
+			F.oneImage(gc, p, vistaFoto);
 		}
 		else if( o instanceof Family ) {
-			tipoRecord( R.string.family );
-			Family f = (Family) o;
-			txt = U.testoFamiglia( this, gc, f, false );
-			data = dataOra( f.getChange() );
+			tipoRecord(R.string.family);
+			Family f = (Family)o;
+			txt = U.testoFamiglia(this, gc, f, false);
+			data = dataOra(f.getChange());
 		}
-		TextView testoTitolo = carta.findViewById( R.id.confronto_titolo );
+		TextView testoTitolo = carta.findViewById(R.id.confronto_titolo);
 		if( tit == null || tit.isEmpty() )
-			testoTitolo.setVisibility( View.GONE );
+			testoTitolo.setVisibility(View.GONE);
 		else
-			testoTitolo.setText( tit );
+			testoTitolo.setText(tit);
 
-		TextView testoTesto = carta.findViewById( R.id.confronto_testo );
+		TextView testoTesto = carta.findViewById(R.id.confronto_testo);
 		if( txt.isEmpty() )
-			testoTesto.setVisibility( View.GONE );
+			testoTesto.setVisibility(View.GONE);
 		else {
-			if( txt.endsWith( "\n" ) )
-				txt = txt.substring( 0, txt.length() - 1 );
-			testoTesto.setText( txt );
+			if( txt.endsWith("\n") )
+				txt = txt.substring(0, txt.length() - 1);
+			testoTesto.setText(txt);
 		}
 
 		View vistaCambi = carta.findViewById(R.id.confronto_data);
@@ -193,20 +193,20 @@ public class Confrontatore extends BaseActivity {
 			((TextView)vistaCambi.findViewById(R.id.cambi_testo)).setText(data);
 
 		if( idScheda == R.id.confronto_nuovo ) {
-			carta.setCardBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
+			carta.setCardBackgroundColor(getResources().getColor(R.color.accent_medium));
 		}
 
 		if( tit.isEmpty() && txt.isEmpty() && data.isEmpty() ) // todo intendi oggetto null?
-			carta.setVisibility( View.GONE );
+			carta.setVisibility(View.GONE);
 	}
 
 	// Titolo della pagina
-	void tipoRecord( int string ) {
-		TextView testoTipo = findViewById( R.id.confronto_tipo );
-		testoTipo.setText( getString(string) );
+	void tipoRecord(int string) {
+		TextView testoTipo = findViewById(R.id.confronto_tipo);
+		testoTipo.setText(getString(string));
 	}
 
-	String dataOra( Change cambi ) {
+	String dataOra(Change cambi) {
 		String dataOra = "";
 		if( cambi != null )
 			dataOra = cambi.getDateTime().getValue() + " - " + cambi.getDateTime().getTime();
@@ -215,13 +215,13 @@ public class Confrontatore extends BaseActivity {
 
 	void vaiAvanti() {
 		Intent intent = new Intent();
-		if( getIntent().getIntExtra("posizione",0) == Confronto.getLista().size() ) {
+		if( getIntent().getIntExtra("posizione", 0) == Confronto.getLista().size() ) {
 			// Terminati i confronti
-			intent.setClass( this, Conferma.class );
+			intent.setClass(this, Conferma.class);
 		} else {
 			// Prossimo confronto
-			intent.setClass( this, Confrontatore.class );
-			intent.putExtra( "posizione", getIntent().getIntExtra("posizione",0) + 1 );
+			intent.setClass(this, Confrontatore.class);
+			intent.putExtra("posizione", getIntent().getIntExtra("posizione", 0) + 1);
 		}
 		if( Confronto.get().autoProsegui ) {
 			if( Confronto.getFronte(this).doppiaOpzione )
@@ -229,11 +229,11 @@ public class Confrontatore extends BaseActivity {
 			else
 				finish(); // rimuove il fronte attuale dallo stack
 		}
-		startActivity( intent );
+		startActivity(intent);
 	}
 
 	@Override
-	public boolean onOptionsItemSelected( MenuItem i ) {
+	public boolean onOptionsItemSelected(MenuItem i) {
 		onBackPressed();
 		return true;
 	}

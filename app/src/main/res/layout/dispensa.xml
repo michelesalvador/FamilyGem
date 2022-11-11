@@ -21,7 +21,7 @@
 		android:id="@+id/dispensa_scatola"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:background="@color/primarioChiaro"
+		android:background="@color/primary_light"
 		android:orientation="vertical"
 		android:paddingLeft="8dp"
 		android:paddingRight="8dp"

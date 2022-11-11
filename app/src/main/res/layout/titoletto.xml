@@ -4,7 +4,7 @@
 	android:layout_height="wrap_content"
 	android:layout_marginTop="12dp"
 	android:layout_marginBottom="6dp"
-	android:background="@color/primarioChiaro"
+	android:background="@color/primary_light"
 	android:paddingLeft="12dp"
 	android:paddingTop="2dp"
 	android:paddingRight="12dp"

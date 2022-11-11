@@ -4,7 +4,7 @@ import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
 import app.familygem.Dettaglio;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import static app.familygem.Global.gc;
@@ -41,12 +41,12 @@ public class CitazioneFonte extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		Object contenitore = Memoria.oggettoContenitore();
-		if( contenitore instanceof Note )	// Note non extende SourceCitationContainer
-			((Note)contenitore).getSourceCitations().remove( c );
+		Object contenitore = Memory.oggettoContenitore();
+		if( contenitore instanceof Note ) // Note doesn't extend SourceCitationContainer
+			((Note)contenitore).getSourceCitations().remove(c);
 		else
-			((SourceCitationContainer)contenitore).getSourceCitations().remove( c );
-		U.updateChangeDate( Memoria.oggettoCapo() );
-		Memoria.annullaIstanze(c);
+			((SourceCitationContainer)contenitore).getSourceCitations().remove(c);
+		U.updateChangeDate(Memory.oggettoCapo());
+		Memory.annullaIstanze(c);
 	}
 }

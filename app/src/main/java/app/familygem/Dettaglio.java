@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import app.familygem.constant.Choice;
 import app.familygem.detail.CitazioneFonte;
 import app.familygem.detail.Estensione;
 import app.familygem.detail.Evento;
@@ -63,6 +64,11 @@ import app.familygem.detail.Famiglia;
 import app.familygem.detail.Immagine;
 import app.familygem.detail.Indirizzo;
 import app.familygem.detail.Nota;
+import app.familygem.list.FamiliesFragment;
+import app.familygem.list.GalleryFragment;
+import app.familygem.list.NotesFragment;
+import app.familygem.list.RepositoriesFragment;
+import app.familygem.list.SourcesFragment;
 import app.familygem.visitor.TrovaPila;
 import static app.familygem.Global.gc;
 
@@ -87,7 +93,7 @@ public class Dettaglio extends AppCompatActivity {
 		actionBar = getSupportActionBar();
 		U.gedcomSicuro(gc);
 
-		object = Memoria.getOggetto();
+		object = Memory.getOggetto();
 		if( object == null ) {
 			onBackPressed(); // salta tutti gli altri dettagli senza oggetto
 		} else
@@ -108,7 +114,7 @@ public class Dettaglio extends AppCompatActivity {
 
 		FloatingActionButton fab = findViewById(R.id.fab);
 		fab.setOnClickListener(view -> {
-			PopupMenu popup = menuFAB(view);
+			PopupMenu popup = fabMenu(view);
 			popup.show();
 			popup.setOnMenuItemClickListener(item -> {
 				// FAB + mette un nuovo uovo e lo rende subito editabile
@@ -143,45 +149,45 @@ public class Dettaglio extends AppCompatActivity {
 						edit(pezzo);
 					// todo : aprire Address nuovo per editarlo
 				} else if( id == 101 ) {
-					Magazzino.newRepository(this, (Source)object);
+					RepositoriesFragment.newRepository(this, (Source)object);
 				} else if( id == 102 ) {
 					Intent intento = new Intent(this, Principal.class);
-					intento.putExtra("magazzinoScegliArchivio", true);
+					intento.putExtra(Choice.REPOSITORY, true);
 					startActivityForResult(intento, 4562);
 				} else if( id == 103 ) { // Nuova nota
 					Note note = new Note();
 					note.setValue("");
 					((NoteContainer)object).addNote(note);
-					Memoria.aggiungi(note);
+					Memory.aggiungi(note);
 					startActivity(new Intent(this, Nota.class));
 					toBeSaved = true;
 				} else if( id == 104 ) { // Nuova nota condivisa
-					Quaderno.newNote(this, object);
+					NotesFragment.newNote(this, object);
 				} else if( id == 105 ) { // Collega nota condivisa
 					Intent intento = new Intent(this, Principal.class);
-					intento.putExtra("quadernoScegliNota", true);
+					intento.putExtra(Choice.NOTE, true);
 					startActivityForResult(intento, 7074);
 				} else if( id == 106 ) { // Cerca media locale
-					F.appAcquisizioneImmagine(this, null, 4173, (MediaContainer)object);
+					F.mediaAppList(this, null, 4173, (MediaContainer)object);
 				} else if( id == 107 ) { // Cerca media condiviso
-					F.appAcquisizioneImmagine(this, null, 4174, (MediaContainer)object);
+					F.mediaAppList(this, null, 4174, (MediaContainer)object);
 				} else if( id == 108 ) { // Collega media condiviso
 					Intent inten = new Intent(this, Principal.class);
-					inten.putExtra("galleriaScegliMedia", true);
+					inten.putExtra(Choice.MEDIA, true);
 					startActivityForResult(inten, 43616);
 				} else if( id == 109 ) { // Nuova fonte-nota
 					SourceCitation citaz = new SourceCitation();
 					citaz.setValue("");
 					if( object instanceof Note ) ((Note)object).addSourceCitation(citaz);
 					else ((SourceCitationContainer)object).addSourceCitation(citaz);
-					Memoria.aggiungi(citaz);
+					Memory.aggiungi(citaz);
 					startActivity(new Intent(this, CitazioneFonte.class));
 					toBeSaved = true;
 				} else if( id == 110 ) {  // Nuova fonte
-					Biblioteca.nuovaFonte(this, object);
+					SourcesFragment.createNewSource(this, object);
 				} else if( id == 111 ) { // Collega fonte
 					Intent intent = new Intent(this, Principal.class);
-					intent.putExtra("bibliotecaScegliFonte", true);
+					intent.putExtra(Choice.SOURCE, true);
 					startActivityForResult(intent, 5065);
 				} else if( id == 120 || id == 121 ) { // Crea nuovo familiare
 					Intent intent = new Intent(this, EditaIndividuo.class);
@@ -191,7 +197,7 @@ public class Dettaglio extends AppCompatActivity {
 					startActivity(intent);
 				} else if( id == 122 || id == 123 ) { // Collega persona esistente
 					Intent intent = new Intent(this, Principal.class);
-					intent.putExtra("anagrafeScegliParente", true);
+					intent.putExtra(Choice.PERSON, true);
 					intent.putExtra("relazione", id - 117);
 					startActivityForResult(intent, 34417);
 				} else if( id == 124 ) { // Metti matrimonio
@@ -201,7 +207,7 @@ public class Dettaglio extends AppCompatActivity {
 					marriage.setPlace("");
 					marriage.setType("");
 					((Family)object).addEventFact(marriage);
-					Memoria.aggiungi(marriage);
+					Memory.aggiungi(marriage);
 					startActivity(new Intent(this, Evento.class));
 					toBeSaved = true;
 				} else if( id == 125 ) { // Metti divorzio
@@ -209,7 +215,7 @@ public class Dettaglio extends AppCompatActivity {
 					divorce.setTag("DIV");
 					divorce.setDate("");
 					((Family)object).addEventFact(divorce);
-					Memoria.aggiungi(divorce);
+					Memory.aggiungi(divorce);
 					startActivity(new Intent(this, Evento.class));
 					toBeSaved = true;
 				} else if( id >= 200 ) { // Metti altro evento
@@ -225,13 +231,14 @@ public class Dettaglio extends AppCompatActivity {
 			});
 		});
 		// Prova del menu: se è vuoto nasconde il fab
-		if( !menuFAB(null).getMenu().hasVisibleItems() ) // todo ok?
+		// Todo If the FAB is hidden, deleting one piece the FAB should reappear
+		if( !fabMenu(null).getMenu().hasVisibleItems() )
 			fab.hide();
 	}
 
 	// Menu del FAB: solo coi metodi che non sono già presenti in box
-	PopupMenu menuFAB(View vista) {
-		PopupMenu popup = new PopupMenu(this, vista);
+	PopupMenu fabMenu(View fabView) {
+		PopupMenu popup = new PopupMenu(this, fabView);
 		Menu menu = popup.getMenu();
 		String[] conIndirizzo = {"Www", "Email", "Phone", "Fax"}; // questi oggetti compaiono nel FAB di Evento se esiste un Indirizzo
 		int u = 0;
@@ -318,58 +325,58 @@ public class Dettaglio extends AppCompatActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if( resultCode == RESULT_OK ) {
 			// Dal submenu 'Collega...' in FAB
-			if( requestCode == 34417 ) { // Familiare scelto in Anagrafe
+			if( requestCode == 34417 ) { // Relative chosen from Anagrafe
 				Person aggiungendo = gc.getPerson(data.getStringExtra("idParente"));
 				Famiglia.aggrega(aggiungendo, (Family)object, data.getIntExtra("relazione", 0));
-				U.save(true, Memoria.oggettoCapo());
+				U.save(true, Memory.oggettoCapo());
 				return;
-			} else if( requestCode == 5065 ) { // Fonte scelta in Biblioteca
+			} else if( requestCode == 5065 ) { // Source selected in SourcesFragment
 				SourceCitation citaFonte = new SourceCitation();
-				citaFonte.setRef(data.getStringExtra("idFonte"));
+				citaFonte.setRef(data.getStringExtra("sourceId"));
 				if( object instanceof Note ) ((Note)object).addSourceCitation(citaFonte);
 				else ((SourceCitationContainer)object).addSourceCitation(citaFonte);
 			} else if( requestCode == 7074 ) { // Nota condivisa
 				NoteRef rifNota = new NoteRef();
-				rifNota.setRef(data.getStringExtra("idNota"));
+				rifNota.setRef(data.getStringExtra("noteId"));
 				((NoteContainer)object).addNoteRef(rifNota);
 			} else if( requestCode == 4173 ) { // File preso dal file manager o altra app diventa media locale
 				Media media = new Media();
 				media.setFileTag("FILE");
 				((MediaContainer)object).addMedia(media);
 				if( F.proponiRitaglio(this, null, data, media) ) {
-					U.save(false, Memoria.oggettoCapo());
+					U.save(false, Memory.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == 4174 ) { // File preso dal file manager diventa media condiviso
-				Media media = Galleria.nuovoMedia(object);
+				Media media = GalleryFragment.nuovoMedia(object);
 				if( F.proponiRitaglio(this, null, data, media) ) {
-					U.save(false, media, Memoria.oggettoCapo());
+					U.save(false, media, Memory.oggettoCapo());
 					return;
 				}
-			} else if( requestCode == 43616 ) { // Media da Galleria
+			} else if( requestCode == 43616 ) { // Media from GalleryFragment
 				MediaRef rifMedia = new MediaRef();
-				rifMedia.setRef(data.getStringExtra("idMedia"));
+				rifMedia.setRef(data.getStringExtra("mediaId"));
 				((MediaContainer)object).addMediaRef(rifMedia);
-			} else if( requestCode == 4562 ) { // Archivio scelto in Magazzino da Fonte
+			} else if( requestCode == 4562 ) { // Archivio scelto in RepositoriesFragment da Fonte
 				RepositoryRef archRef = new RepositoryRef();
-				archRef.setRef(data.getStringExtra("idArchivio"));
+				archRef.setRef(data.getStringExtra("repoId"));
 				((Source)object).setRepositoryRef(archRef);
 			} else if( requestCode == 5173 ) { // Salva in Media un file scelto con le app da Immagine
 				if( F.proponiRitaglio(this, null, data, (Media)object) ) {
-					U.save(false, Memoria.oggettoCapo());
+					U.save(false, Memory.oggettoCapo());
 					return;
 				}
 			} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE ) {
 				F.fineRitaglioImmagine(data);
 			}
 			//  da menu contestuale 'Scegli...'
-			if( requestCode == 5390 ) { // Imposta l'archivio che è stato scelto in Magazzino da ArchivioRef
-				((RepositoryRef)object).setRef(data.getStringExtra("idArchivio"));
-			} else if( requestCode == 7047 ) { // Imposta la fonte che è stata scelta in Biblioteca da CitazioneFonte
-				((SourceCitation)object).setRef(data.getStringExtra("idFonte"));
+			if( requestCode == 5390 ) { // Imposta l'archivio che è stato scelto in RepositoriesFragment da ArchivioRef
+				((RepositoryRef)object).setRef(data.getStringExtra("repoId"));
+			} else if( requestCode == 7047 ) { // Set the source that has been chosen in SourcesFragment by CitazioneFonte
+				((SourceCitation)object).setRef(data.getStringExtra("sourceId"));
 			}
-			U.save(true, Memoria.oggettoCapo());
-				// 'true' indica di ricaricare sia questo Dettaglio grazie al seguente onRestart(), sia Individuo o Famiglia
+			U.save(true, Memory.oggettoCapo());
+				// 'true' indica di ricaricare sia questo Dettaglio grazie al seguente onRestart(), sia ProfileActivity o Famiglia
 		} else if( requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE )
 			Global.edited = true;
 	}
@@ -401,14 +408,14 @@ public class Dettaglio extends AppCompatActivity {
 		FlexboxLayout slugLayout = findViewById(R.id.dettaglio_bava);
 		if( Global.settings.expert ) {
 			slugLayout.removeAllViews();
-			for( final Memoria.Passo step : Memoria.getPila() ) {
+			for( final Memory.Passo step : Memory.getPila() ) {
 				View stepView = LayoutInflater.from(this).inflate(R.layout.pezzo_bava, box, false);
 				TextView stepText = stepView.findViewById(R.id.bava_goccia);
-				if( Memoria.getPila().indexOf(step) < Memoria.getPila().size() - 1 ) {
+				if( Memory.getPila().indexOf(step) < Memory.getPila().size() - 1 ) {
 					if( step.oggetto instanceof Visitable ) // le estensioni GedcomTag non sono Visitable ed è impossibile trovargli la pila
 						stepView.setOnClickListener(v -> {
 							new TrovaPila(gc, step.oggetto);
-							startActivity(new Intent(this, Memoria.classi.get(step.oggetto.getClass())));
+							startActivity(new Intent(this, Memory.classes.get(step.oggetto.getClass())));
 						});
 				} else {
 					step.tag = tag;
@@ -533,16 +540,16 @@ public class Dettaglio extends AppCompatActivity {
 			// Se si tratta di una data
 			if( object.equals("Date") ) {
 				editoreData = pieceView.findViewById(R.id.fatto_data);
-				editoreData.inizia(editText);
+				editoreData.initialize(editText);
 			}
 		} else if( object instanceof Address ) { // Indirizzo
 			click = v -> {
-				Memoria.aggiungi(object);
+				Memory.aggiungi(object);
 				startActivity(new Intent(this, Indirizzo.class));
 			};
 		} else if( object instanceof EventFact ) { // Evento
 			click = v -> {
-				Memoria.aggiungi(object);
+				Memory.aggiungi(object);
 				startActivity(new Intent(this, Evento.class));
 			};
 			// Gli EventFact della famiglia possono avere delle note e dei media
@@ -551,7 +558,7 @@ public class Dettaglio extends AppCompatActivity {
 			U.placeMedia(scatolaNote, object, false);
 		} else if( object instanceof GedcomTag ) { // Estensione
 			click = v -> {
-				Memoria.aggiungi(object);
+				Memory.aggiungi(object);
 				startActivity(new Intent(this, Estensione.class));
 			};
 		}
@@ -753,8 +760,8 @@ public class Dettaglio extends AppCompatActivity {
 		}
 		((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
 		restore(pieceView);
-		U.save(true, Memoria.oggettoCapo());
-		/*if( Memoria.getPila().size() == 1 ) {
+		U.save(true, Memory.oggettoCapo());
+		/*if( Memory.getPila().size() == 1 ) {
 			ricrea(); // Todo Bisognerebbe aggiornare la data Cambiamento del record, però magari senza ricaricare tutto.
 		}*/
 		// In immagine modificato il percorso aggiorna l'immagine
@@ -791,13 +798,13 @@ public class Dettaglio extends AppCompatActivity {
 					gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(object)) )
 				menu.add(0, 1, 0, R.string.make_default);
 			if( object instanceof Media ) {
-				if( box.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
+				if( box.findViewById(R.id.immagine_foto).getTag(R.id.tag_file_type).equals(1) )
 					menu.add(0, 2, 0, R.string.crop);
 				menu.add(0, 3, 0, R.string.choose_file);
 			}
 			if( object instanceof Family )
 				menu.add(0, 4, 0, R.string.delete);
-			else if( !(object instanceof Submitter && U.autoreHaCondiviso((Submitter)object)) ) // autore che ha condiviso non può essere eliminato
+			else if( !(object instanceof Submitter && U.submitterHasShared((Submitter)object)) ) // autore che ha condiviso non può essere eliminato
 				menu.add(0, 5, 0, R.string.delete);
 		}
 		return true;
@@ -806,21 +813,21 @@ public class Dettaglio extends AppCompatActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if( id == 1 ) { // Autore principale
-			Podio.autorePrincipale((Submitter)object);
+			Podio.setMainSubmitter((Submitter)object);
 		} else if( id == 2 ) { // Immagine: ritaglia
 			croppaImmagine(box);
 		} else if( id == 3 ) { // Immagine: scegli
-			F.appAcquisizioneImmagine(this, null, 5173, null);
+			F.mediaAppList(this, null, 5173, null);
 		} else if( id == 4 ) { // Famiglia
 			Family fam = (Family)object;
 			if( fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0 ) {
 				new AlertDialog.Builder(this).setMessage(R.string.really_delete_family)
 						.setPositiveButton(android.R.string.yes, (dialog, i) -> {
-							Chiesa.deleteFamily(fam);
+							FamiliesFragment.deleteFamily(fam);
 							onBackPressed();
 						}).setNeutralButton(android.R.string.cancel, null).show();
 			} else {
-				Chiesa.deleteFamily(fam);
+				FamiliesFragment.deleteFamily(fam);
 				onBackPressed();
 			}
 		} else if( id == 5 ) { // Tutti gli altri
@@ -839,7 +846,7 @@ public class Dettaglio extends AppCompatActivity {
 		super.onBackPressed();
 		if( object instanceof EventFact )
 			Evento.ripulisciTag((EventFact)object);
-		Memoria.arretra();
+		Memory.arretra();
 	}
 
 	public void elimina() {}
@@ -917,7 +924,7 @@ public class Dettaglio extends AppCompatActivity {
 			} else if( pieceObject instanceof Integer ) {
 				if( pieceObject.equals(43614) ) { // Immaginona
 					// è un'immagine ritagliabile
-					if( pieceView.findViewById(R.id.immagine_foto).getTag(R.id.tag_tipo_file).equals(1) )
+					if( pieceView.findViewById(R.id.immagine_foto).getTag(R.id.tag_file_type).equals(1) )
 						menu.add(0, 100, 0, R.string.crop);
 					menu.add(0, 101, 0, R.string.choose_file);
 				} else if( pieceObject.equals(4043) || pieceObject.equals(6064) ) // Nome e cognome per inesperti
@@ -953,8 +960,8 @@ public class Dettaglio extends AppCompatActivity {
 				U.qualiGenitoriMostrare(this, person, 1);
 				return true;
 			case 11: // Scheda persona
-				Memoria.setPrimo(person);
-				startActivity(new Intent(this, Individuo.class));
+				Memory.setPrimo(person);
+				startActivity(new Intent(this, ProfileActivity.class));
 				return true;
 			case 12: // Famiglia come figlio
 				U.qualiGenitoriMostrare(this, person, 2);
@@ -997,7 +1004,7 @@ public class Dettaglio extends AppCompatActivity {
 						}).setNeutralButton(R.string.cancel, null).show();
 				return true;
 			case 20: // Nota
-				U.copiaNegliAppunti(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.nota_testo)).getText());
+				U.copiaNegliAppunti(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.note_text)).getText());
 				return true;
 			case 21:
 				U.scollegaNota((Note)pieceObject, object, null);
@@ -1016,13 +1023,13 @@ public class Dettaglio extends AppCompatActivity {
 					((Note)object).getSourceCitations().remove(pieceObject);
 				else
 					((SourceCitationContainer)object).getSourceCitations().remove(pieceObject);
-				Memoria.annullaIstanze(pieceObject);
+				Memory.annullaIstanze(pieceObject);
 				break;
 			case 40: // Media
-				Galleria.scollegaMedia(((Media)pieceObject).getId(), (MediaContainer)object);
+				GalleryFragment.scollegaMedia(((Media)pieceObject).getId(), (MediaContainer)object);
 				break;
 			case 41:
-				Object[] capiMedia = Galleria.eliminaMedia((Media)pieceObject, null);
+				Object[] capiMedia = GalleryFragment.eliminaMedia((Media)pieceObject, null);
 				U.save(true, capiMedia); // un media condiviso può dover aggiornare le date di più capi
 				refresh();
 				return true;
@@ -1039,18 +1046,18 @@ public class Dettaglio extends AppCompatActivity {
 				break;
 			case 58:
 				((Family)object).getEventsFacts().remove(pieceObject);
-				Memoria.annullaIstanze(pieceObject);
+				Memory.annullaIstanze(pieceObject);
 				break;
 			case 61: // Estensione
 				U.eliminaEstensione((GedcomTag)pieceObject, object, null);
 				break;
 			// Fonte
-			case 70: // Copia
+			case 70: // Copy text
 				U.copiaNegliAppunti(getText(R.string.source), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
 				return true;
-			case 71: // Scegli in Biblioteca
+			case 71: // Chose in SourcesFragment
 				Intent inte = new Intent(this, Principal.class);
-				inte.putExtra("bibliotecaScegliFonte", true);
+				inte.putExtra(Choice.SOURCE, true);
 				startActivityForResult(inte, 7047);
 				return true;
 			// Citazione archivio
@@ -1061,22 +1068,22 @@ public class Dettaglio extends AppCompatActivity {
 				return true;
 			case 81: // Elimina
 				((Source)object).setRepositoryRef(null);
-				Memoria.annullaIstanze(pieceObject);
+				Memory.annullaIstanze(pieceObject);
 				break;
 			// Archivio
 			case 90: // Copia
 				U.copiaNegliAppunti(getText(R.string.repository), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
 				return true;
-			case 91: // Scegli in Magazzino
+			case 91: // Scegli in RepositoriesFragment
 				Intent intn = new Intent(this, Principal.class);
-				intn.putExtra("magazzinoScegliArchivio", true);
+				intn.putExtra(Choice.REPOSITORY, true);
 				startActivityForResult(intn, 5390);
 				return true;
 			case 100: // Immaginona ritaglia
 				croppaImmagine(pieceView);
 				return true;
 			case 101: // scegli immagine
-				F.appAcquisizioneImmagine(this, null, 5173, null);
+				F.mediaAppList(this, null, 5173, null);
 				return true;
 			default:
 				return false;
@@ -1084,7 +1091,7 @@ public class Dettaglio extends AppCompatActivity {
 		// Prima ricrea la pagina e poi salva, che per alberi grossi può metterci alcuni secondi
 		//closeContextMenu(); // Inutile. La chiusura del menu aspetta la fine del salvataggio,
 		// a meno di mettere salvaJson() dentro un postDelayed() di almeno 500 ms
-		U.updateChangeDate(Memoria.oggettoCapo());
+		U.updateChangeDate(Memory.oggettoCapo());
 		refresh();
 		U.save(true, (Object[])null);
 		return true;

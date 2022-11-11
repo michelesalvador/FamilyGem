@@ -1,9 +1,9 @@
 <resources>
 
 	<style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
-		<item name="colorPrimary">@color/primario</item>
-		<item name="colorPrimaryDark">@color/primarioScuro</item>
-		<item name="colorAccent">@color/evidenzia</item>
+		<item name="colorPrimary">@color/primary</item>
+		<item name="colorPrimaryDark">@color/primary_dark</item>
+		<item name="colorAccent">@color/accent</item>
 		<item name="android:windowBackground">@color/background</item>
 		<item name="android:textAppearanceSmall">@style/AppTheme.BasicText</item> <!-- Textviews -->
 		<item name="android:textAppearance">@style/AppTheme.BasicText</item> <!-- Radio buttons, switches, checkboxes -->
@@ -17,12 +17,12 @@
 	</style>
 
 	<style name="AppTheme.Title">
-		<item name="android:textColor">@color/grayText</item>
+		<item name="android:textColor">@color/gray_text</item>
 		<item name="android:textSize">20sp</item>
 	</style>
 
 	<style name="AppTheme.LittleTitle">
-		<item name="android:textColor">@color/grayText</item>
+		<item name="android:textColor">@color/gray_text</item>
 		<item name="android:textSize">15sp</item>
 		<item name="android:textStyle">bold</item>
 	</style>
@@ -32,8 +32,17 @@
 		<item name="android:textSize">15sp</item>
 	</style>
 
+	<style name="AppTheme.ExpandedAppBar">
+		<item name="android:textSize">24sp</item>
+	</style>
+
+	<style name="AppTheme.CollapsedAppBar">
+		<item name="android:textSize">20sp</item>
+	</style>
+
+
 	<style name="AppTheme.Slug">
-		<item name="android:textColor">@color/grayText</item>
+		<item name="android:textColor">@color/gray_text</item>
 		<item name="android:textSize">13sp</item>
 		<item name="android:typeface">monospace</item>
 		<item name="android:background">@drawable/slug_background</item>
@@ -44,8 +53,8 @@
 	</style>
 
 	<style name="AppTheme.Navigator" parent="ThemeOverlay.AppCompat">
-		<item name="colorPrimary">@color/primario</item><!-- Selected text and icon -->
-		<item name="colorControlHighlight">@color/evidenzia</item><!-- Selected background -->
+		<item name="colorPrimary">@color/primary</item><!-- Selected text and icon -->
+		<item name="colorControlHighlight">@color/accent</item><!-- Selected background -->
 	</style>
 
 	<style name="AppTheme.NoActionBar">
@@ -62,28 +71,28 @@
 		<item name="android:tint">@android:color/white</item>
 	</style>
 
-	<style name="Ruota" parent="AppTheme">
-		<item name="android:layout_height">100dp</item>
+	<style name="AppTheme.Wheel">
 		<item name="android:background">@drawable/ruota_sfondo</item>
 		<item name="android:descendantFocusability">blocksDescendants</item>
+		<item name="colorControlNormal">@android:color/transparent</item><!-- Hide the dividing lines from API 23 -->
 	</style>
 
 	<style name="AppTheme.BottoneColorato" parent="Widget.AppCompat.Button.Colored">
 		<item name="android:textColor">#FFF</item>
 	</style>
 	<style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
-		<item name="android:backgroundTint">@color/primarioChiaro</item>
+		<item name="android:backgroundTint">@color/primary_light</item>
 	</style>
 
 	<attr name="spouseColor" format="reference|color"/>
 	<attr name="linesColor" format="reference|color"/>
 	<style name="diagramScreen" parent="AppTheme">
-		<item name="spouseColor">@color/consorteSchermo</item>
-		<item name="linesColor">@color/lineeDiagrammaSchermo</item>
+		<item name="spouseColor">@color/partner_screen</item>
+		<item name="linesColor">@color/diagram_lines_screen</item>
 	</style>
 	<style name="diagramPrint" parent="AppTheme">
-		<item name="spouseColor">@color/consorteStampa</item>
-		<item name="linesColor">@color/lineeDiagrammaStampa</item>
+		<item name="spouseColor">@color/partner_print</item>
+		<item name="linesColor">@color/diagram_lines_print</item>
 	</style>
 
 </resources>

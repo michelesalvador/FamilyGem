@@ -53,6 +53,6 @@ For questions, bugs, suggestions you can:
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
 
 ## About
-Family Gem is written in Java within Eclipse and Android Studio.
-Project started on beginning of 2018.
-Author is Michele Salvador, an Italian self-taught programmer and genealogy enthusiast.
+Family Gem is written in Java within Eclipse and Android Studio.  
+Project started on beginning of 2018.  
+Author is Michele Salvador, an Italian programmer and genealogy enthusiast.

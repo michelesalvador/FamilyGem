@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="primario">#720426</color>
-	<color name="primarioScuro">#4C0219</color>
-	<color name="primarioChiaro">#960f3e</color>
-	<color name="evidenzia">#DD7803</color>
-	<color name="evidenziaMedio">#AA6009</color>
-	<color name="evidenziaChiaro">#7C4901</color>
+	<color name="primary">#720426</color>
+	<color name="primary_dark">#4C0219</color>
+	<color name="primary_light">#960f3e</color>
+	<color name="accent">#DD7803</color>
+	<color name="accent_medium">#AA6009</color>
+	<color name="accent_light">#7C4901</color>
 	<color name="background">#000</color>
 	<color name="back_element">#222</color>
 	<color name="back_veiled">#BB000000</color>
 	<color name="text">#FFF</color>
-	<color name="grayText">#AAA</color>
+	<color name="gray_text">#AAA</color>
 	<color name="text_veiled">#AAFFFFFF</color>
 	<color name="consumed">#555</color>
-	<color name="consorteSchermo">#66000000</color>
-	<color name="consorteStampa">#111</color>
-	<color name="lineeDiagrammaSchermo">#DDD</color>
-	<color name="fonte">#884B00</color>
-	<color name="citazioneFonte">#B17000</color>
-	<color name="archivio">#49423B</color>
-	<color name="archivioCitazione">#7C7369</color>
+	<color name="partner_screen">#66000000</color>
+	<color name="partner_print">#111</color>
+	<color name="diagram_lines_screen">#DDD</color>
+	<color name="source">#884B00</color>
+	<color name="source_citation">#B17000</color>
+	<color name="repository">#49423B</color>
+	<color name="repository_citation">#7C7369</color>
 </resources>

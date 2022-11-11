@@ -25,7 +25,7 @@ public class Settings {
 		// Must be consistent with the 'Global.gc' opened tree.
 		// It is not reset by closing the tree, to be reused by 'Load last opened tree at startup'.
 	boolean autoSave;
-	boolean loadTree;
+	boolean loadTree; // At startup load last opened tree
 	public boolean expert;
 	boolean shareAgreement;
 	Diagram diagram;
@@ -86,7 +86,7 @@ public class Settings {
 	}
 
 	// The tree currently open
-	Tree getCurrentTree() {
+	public Tree getCurrentTree() {
 		for( Tree alb : trees ) {
 			if( alb.id == openTree )
 				return alb;
@@ -146,7 +146,7 @@ public class Settings {
 30	albero derivato da cui sono state estratte tutte le novità OPPURE privo di novità già all'arrivo (grigio). Eliminabile
 */
 
-	static class Tree {
+	public static class Tree {
 		int id;
 		String title;
 		Set<String> dirs;
@@ -154,7 +154,7 @@ public class Settings {
 		int persons;
 		int generations;
 		int media;
-		String root;
+		public String root;
 		List<Share> shares; // dati identificativi delle condivisioni attraverso il tempo e lo spazio
 		String shareRoot; // id della Person radice dell'albero in Condivisione
 		int grade; // grado della condivisione

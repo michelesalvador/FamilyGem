@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import app.familygem.constant.Choice;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.detail.Famiglia;
@@ -341,7 +342,7 @@ public class Diagram extends Fragment {
 		}
 		@Override
 		protected void onDraw(Canvas canvas) {
-			paint.setColor(getResources().getColor(R.color.evidenzia));
+			paint.setColor(getResources().getColor(R.color.accent));
 			paint.setMaskFilter(bmf);
 			setLayerType(View.LAYER_TYPE_SOFTWARE, paint);
 			canvas.drawRect(GLOW_SPACE - extend, GLOW_SPACE - extend,
@@ -385,7 +386,7 @@ public class Diagram extends Fragment {
 			} else if( personNode.acquired ) {
 				background.setBackgroundResource(R.drawable.casella_sfondo_sposo);
 			}
-			F.unaFoto(Global.gc, person, view.findViewById(R.id.card_photo));
+			F.oneImage(Global.gc, person, view.findViewById(R.id.card_photo));
 			TextView vistaNome = view.findViewById(R.id.card_name);
 			String nome = U.epiteto(person, true);
 			if( nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility()==View.VISIBLE )
@@ -402,12 +403,12 @@ public class Diagram extends Fragment {
 			if( !U.isDead(person) )
 				view.findViewById(R.id.card_mourn).setVisibility(View.GONE);
 			registerForContextMenu(this);
-			setOnClickListener( v -> {
+			setOnClickListener(v -> {
 				if( person.getId().equals(Global.indi) ) {
-					Memoria.setPrimo( person );
-					startActivity( new Intent(getContext(), Individuo.class) );
+					Memory.setPrimo(person);
+					startActivity(new Intent(getContext(), ProfileActivity.class));
 				} else {
-					clickCard( person );
+					clickCard(person);
 				}
 			});
 		}
@@ -448,7 +449,7 @@ public class Diagram extends Fragment {
 				bondLayout.addView(year, yearParams);
 			}
 			setOnClickListener( view -> {
-				Memoria.setPrimo( familyNode.spouseFamily );
+				Memory.setPrimo( familyNode.spouseFamily );
 				startActivity( new Intent( context, Famiglia.class ) );
 			});
 		}
@@ -494,8 +495,8 @@ public class Diagram extends Fragment {
 			getLayoutInflater().inflate(R.layout.diagram_asterisk, this, true);
 			registerForContextMenu(this);
 			setOnClickListener( v -> {
-				Memoria.setPrimo(personNode.person);
-				startActivity(new Intent(getContext(), Individuo.class));
+				Memory.setPrimo(personNode.person);
+				startActivity(new Intent(getContext(), ProfileActivity.class));
 			});
 		}
 	}
@@ -519,7 +520,7 @@ public class Diagram extends Fragment {
 		}
 		@Override
 		public void invalidate() {
-			paint.setColor(getResources().getColor(printPDF ? R.color.lineeDiagrammaStampa : R.color.lineeDiagrammaSchermo));
+			paint.setColor(getResources().getColor(printPDF ? R.color.diagram_lines_print : R.color.diagram_lines_screen));
 			paths.clear(); // In case of PDF print
 			float width = toPx(graph.getWidth());
 			int pathNum = 0; // index of paths
@@ -620,7 +621,7 @@ public class Diagram extends Fragment {
 	}
 
 	// Generate the 2 family (as child and as partner) labels for contextual menu
-	static String[] getFamilyLabels(Context context, Person person, Family family) {
+	public static String[] getFamilyLabels(Context context, Person person, Family family) {
 		String[] labels = { null, null };
 		List<Family> parentFams = person.getParentFamilies(gc);
 		List<Family> spouseFams = person.getSpouseFamilies(gc);
@@ -683,11 +684,11 @@ public class Diagram extends Fragment {
 			else // Due famiglie
 				completeSelect(pers, Global.familyNum == 0 ? 1 : 0);
 		} else if( id == 0 ) { // Apri scheda individuo
-			Memoria.setPrimo(pers);
-			startActivity(new Intent(getContext(), Individuo.class));
+			Memory.setPrimo(pers);
+			startActivity(new Intent(getContext(), ProfileActivity.class));
 		} else if( id == 1 ) { // Famiglia come figlio
 			if( idPersona.equals(Global.indi) ) { // Se è fulcro apre direttamente la famiglia
-				Memoria.setPrimo(parentFam);
+				Memory.setPrimo(parentFam);
 				startActivity(new Intent(getContext(), Famiglia.class));
 			} else
 				U.qualiGenitoriMostrare(getContext(), pers, 2);
@@ -715,7 +716,7 @@ public class Diagram extends Fragment {
 				new AlertDialog.Builder(getContext()).setItems(parenti, (dialog, quale) -> {
 					Intent intento = new Intent(getContext(), Principal.class);
 					intento.putExtra("idIndividuo", idPersona);
-					intento.putExtra("anagrafeScegliParente", true);
+					intento.putExtra(Choice.PERSON, true);
 					intento.putExtra("relazione", quale + 1);
 					if( U.controllaMultiMatrimoni(intento, getContext(), Diagram.this) )
 						return;
@@ -764,7 +765,7 @@ public class Diagram extends Fragment {
 	@Override
 	public void onActivityResult( int requestCode, int resultCode, Intent data ) {
 		if( resultCode == AppCompatActivity.RESULT_OK ) {
-			// Aggiunge il parente che è stata scelto in Anagrafe
+			// Add the relative who has been chosen in Anagrafe
 			if( requestCode == 1401 ) {
 				Object[] modificati = EditaIndividuo.aggiungiParente(
 						data.getStringExtra("idIndividuo"), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione

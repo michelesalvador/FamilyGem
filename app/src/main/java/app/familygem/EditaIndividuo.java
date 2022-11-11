@@ -26,6 +26,8 @@ import java.util.Set;
 import app.familygem.constant.Gender;
 import app.familygem.detail.Evento;
 import app.familygem.detail.Famiglia;
+import app.familygem.list.FamiliesFragment;
+
 import static app.familygem.Global.gc;
 
 public class EditaIndividuo extends AppCompatActivity {
@@ -92,10 +94,10 @@ public class EditaIndividuo extends AppCompatActivity {
 			Person pivot = gc.getPerson(idIndi);
 			String surname = null;
 			// Cognome del fratello
-			if( relazione == 2 ) { // = fratello
+			if( relazione == 2 ) { // Sibling
 				surname = U.surname(pivot);
 			// Cognome del padre
-			} else if( relazione == 4 ) { // = figlio da Diagramma o Individuo
+			} else if( relazione == 4 ) { // Child from Diagram or ProfileActivity
 				if( Gender.isMale(pivot) )
 					surname = U.surname(pivot);
 				else if( idFamiglia != null ) {
@@ -103,7 +105,7 @@ public class EditaIndividuo extends AppCompatActivity {
 					if( fam != null && !fam.getHusbands(gc).isEmpty() )
 						surname = U.surname(fam.getHusbands(gc).get(0));
 				}
-			} else if( relazione == 6 ) { // = figlio da Famiglia
+			} else if( relazione == 6 ) { // Child from Famiglia
 				Family fam = gc.getFamily(idFamiglia);
 				if( !fam.getHusbands(gc).isEmpty() )
 					surname = U.surname(fam.getHusbands(gc).get(0));
@@ -124,9 +126,9 @@ public class EditaIndividuo extends AppCompatActivity {
 				Name n = p.getNames().get(0);
 				String epiteto = n.getValue();
 				if( epiteto != null ) {
-					nome = epiteto.replaceAll( "/.*?/", "" ).trim(); // rimuove il cognome '/.../'
+					nome = epiteto.replaceAll("/.*?/", "").trim(); // rimuove il cognome '/.../'
 					if( epiteto.indexOf('/') < epiteto.lastIndexOf('/') )
-						cognome = epiteto.substring( epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/') ).trim();
+						cognome = epiteto.substring(epiteto.indexOf('/') + 1, epiteto.lastIndexOf('/')).trim();
 				} else {
 					if( n.getGiven() != null ) {
 						nome = n.getGiven();
@@ -137,8 +139,8 @@ public class EditaIndividuo extends AppCompatActivity {
 						nomeDaPieces = true;
 					}
 				}
-				((EditText)findViewById( R.id.nome )).setText( nome );
-				((EditText)findViewById( R.id.cognome )).setText( cognome );
+				((EditText)findViewById(R.id.nome)).setText(nome);
+				((EditText)findViewById(R.id.cognome)).setText(cognome);
 			}
 			// Sex
 			switch( Gender.getGender(p) ) {
@@ -156,7 +158,7 @@ public class EditaIndividuo extends AppCompatActivity {
 			for( EventFact fatto : p.getEventsFacts() ) {
 				if( fatto.getTag().equals("BIRT") ) {
 					if( fatto.getDate() != null )
-						dataNascita.setText( fatto.getDate().trim() );
+						dataNascita.setText(fatto.getDate().trim());
 					if( fatto.getPlace() != null )
 						luogoNascita.setText(fatto.getPlace().trim());
 				}
@@ -164,21 +166,21 @@ public class EditaIndividuo extends AppCompatActivity {
 					bottonMorte.setChecked(true);
 					attivaMorte();
 					if( fatto.getDate() != null )
-						dataMorte.setText( fatto.getDate().trim() );
+						dataMorte.setText(fatto.getDate().trim());
 					if( fatto.getPlace() != null )
 						luogoMorte.setText(fatto.getPlace().trim());
 				}
 			}
 		}
-		editoreDataNascita.inizia( dataNascita );
-		bottonMorte.setOnCheckedChangeListener( (coso, attivo) -> {
-			if (attivo)
+		editoreDataNascita.initialize(dataNascita);
+		bottonMorte.setOnCheckedChangeListener((coso, attivo) -> {
+			if( attivo )
 				attivaMorte();
 			else
 				disattivaMorte();
 		});
-		editoreDataMorte.inizia( dataMorte );
-		luogoMorte.setOnEditorActionListener( (vista, actionId, keyEvent) -> {
+		editoreDataMorte.initialize(dataMorte);
+		luogoMorte.setOnEditorActionListener((vista, actionId, keyEvent) -> {
 			if( actionId == EditorInfo.IME_ACTION_DONE )
 				salva();
 			return false;
@@ -256,7 +258,7 @@ public class EditaIndividuo extends AppCompatActivity {
 				sesso.setValue(sessoScelto);
 				p.addEventFact(sesso);
 			}
-			IndividuoEventi.aggiornaRuoliConiugali(p);
+			ProfileFactsFragment.aggiornaRuoliConiugali(p);
 		} else { // Remove existing sex tag
 			for( EventFact fact : p.getEventsFacts() ) {
 				if( fact.getTag().equals("SEX") ) {
@@ -331,7 +333,7 @@ public class EditaIndividuo extends AppCompatActivity {
 			if( relazione >= 5 ) { // viene da Famiglia
 				Famiglia.aggrega( p, gc.getFamily(idFamiglia), relazione );
 				modificati[1] = gc.getFamily(idFamiglia);
-			} else if( relazione > 0 ) // viene da Diagramma o IndividuoFamiliari
+			} else if( relazione > 0 ) // viene da Diagram o ProfileRelativesFragment
 				modificati = aggiungiParente( idIndi, nuovoId, idFamiglia, relazione, getIntent().getStringExtra("collocazione") );
 		} else
 			Global.indi = p.getId(); // per mostrarlo orgogliosi in Diagramma
@@ -351,7 +353,7 @@ public class EditaIndividuo extends AppCompatActivity {
 			idPerno = collocazione.substring(17); // il genitore diventa effettivamente il perno
 			relazione = relazione == 2 ? 4 : relazione; // anziché un fratello a perno, è come se mettessimo un figlio al genitore
 		}
-		// In Anagrafe è stata individuata la famiglia in cui finirà perno
+		// In Anagrafe has been identified the family in which will end the pivot
 		else if( collocazione != null && collocazione.equals("FAMIGLIA_ESISTENTE") ) {
 			nuovoId = null;
 			nuovo = null;
@@ -360,7 +362,7 @@ public class EditaIndividuo extends AppCompatActivity {
 		else if( idFamiglia != null ) {
 			idPerno = null; // perno è già presente nella sua famiglia e non va riaggiunto
 		}
-		Family famiglia = idFamiglia != null ? gc.getFamily(idFamiglia) : Chiesa.nuovaFamiglia(true);;
+		Family famiglia = idFamiglia != null ? gc.getFamily(idFamiglia) : FamiliesFragment.newFamily(true);
 		Person perno = gc.getPerson( idPerno );
 		SpouseRef refSposo1 = new SpouseRef(), refSposo2 = new SpouseRef();
 		ChildRef refFiglio1 = new ChildRef(), refFiglio2 = new ChildRef();

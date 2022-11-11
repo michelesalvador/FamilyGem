@@ -1,7 +1,3 @@
-// Visitatore che produce in Memoria la pila gerarchica degli oggetti tra il record capostipite e un oggetto dato
-// ad es. Person > Media semplice
-// oppure Family > Note > SourceCitation > Note semplice
-
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.Change;
@@ -22,41 +18,46 @@ import org.folg.gedcom.model.Visitable;
 import org.folg.gedcom.model.Visitor;
 import java.util.Iterator;
 import java.util.List;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 
+/**
+ * Visitor that generates in Memory a hierarchic stack of objects from a leader record to a given object (target)
+ * E.g. Person > inline Media
+ * or Family > inline Note > SourceCitation > inline Note
+ */
 public class TrovaPila extends Visitor {
 
-	private List<Memoria.Passo> pila;
-	private Object scopo;
-	private boolean trovato;
+	private List<Memory.Passo> stack;
+	private Object target;
+	private boolean found;
 
-	public TrovaPila( Gedcom gc, Object scopo ) {
-		pila = Memoria.addPila(); // in una nuova pila apposta
-		this.scopo = scopo;
-		gc.accept( this );
+	public TrovaPila(Gedcom gc, Object target) {
+		stack = Memory.addPila(); // In a new dedicated stack
+		this.target = target;
+		gc.accept(this);
 	}
 
-	private boolean opera( Object oggetto, String tag, boolean capostipite ) {
-		if( !trovato ) {
-			if( capostipite )
-				pila.clear(); // ogni capostipite fa ricominciare da capo una pila
-			Memoria.Passo passo = new Memoria.Passo();
-			passo.oggetto = oggetto;
+	private boolean opera(Object object, String tag, boolean isLeader) {
+		if( !found ) {
+			if( isLeader )
+				stack.clear(); // A leader restarts the stack from the beginning
+			Memory.Passo passo = new Memory.Passo();
+			passo.oggetto = object;
 			passo.tag = tag;
-			if( !capostipite )
+			if( !isLeader )
 				passo.filotto = true; // li marchia per eliminarli poi in blocco onBackPressed
-			pila.add(passo);
+			stack.add(passo);
 		}
-		if( oggetto.equals(scopo) ) {
-			Iterator<Memoria.Passo> passi = pila.iterator();
+		if( object.equals(target) ) {
+			Iterator<Memory.Passo> passi = stack.iterator();
 			while( passi.hasNext() ) {
-				PulisciPila pulitore = new PulisciPila( scopo );
-				((Visitable)passi.next().oggetto).accept( pulitore );
+				PulisciPila pulitore = new PulisciPila(target);
+				((Visitable)passi.next().oggetto).accept(pulitore);
 				if( pulitore.daEliminare )
 					passi.remove();
 			}
-			trovato = true;
-			//Memoria.stampa("TrovaPila");
+			found = true;
+			//Memory.stampa("TrovaPila");
 		}
 		return true;
 	}

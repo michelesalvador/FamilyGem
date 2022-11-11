@@ -21,7 +21,7 @@
 		android:layout_marginBottom="8dp"
 		android:layout_toStartOf="@id/albero_menu"
 		android:textSize="14sp"
-		android:textColor="@color/grayText"/>
+		android:textColor="@color/gray_text"/>
 
 	<ImageButton
 		android:id="@+id/albero_menu"

@@ -37,7 +37,7 @@
 			android:layout_height="wrap_content"
 			android:layout_below="@+id/collega_nome"
 			android:textSize="13sp"
-			android:textColor="@color/grayText"/>
+			android:textColor="@color/gray_text"/>
 		<ImageView
 			android:id="@+id/collega_lutto"
 			android:layout_width="wrap_content"

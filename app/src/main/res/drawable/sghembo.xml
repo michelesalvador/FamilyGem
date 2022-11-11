@@ -6,6 +6,6 @@
 	android:viewportHeight="5.0"
 	android:autoMirrored="true">
 	<path
-		android:fillColor="@color/primarioChiaro"
+		android:fillColor="@color/primary_light"
 		android:pathData="M0,0 h20 l5,5 h-25 z"/>
 </vector>

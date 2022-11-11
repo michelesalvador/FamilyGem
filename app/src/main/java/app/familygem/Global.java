@@ -21,7 +21,6 @@ public class Global extends MultiDexApplication {
 	public static String indi; // Id of the selected person displayed across the app
 	public static int familyNum; // Quale famiglia dei genitori mostrare in diagramma, normalmente la 0
 	static View principalView;
-	static int ordineMagazzino;
 	public static boolean edited; // C'è stata un'editazione in EditaIndividuo o in Dettaglio e quindi il contenuto delle attività precedenti va aggiornato
 	static boolean daSalvare; // Il contenuto del Gedcom è stato modificato e deve essere salvato
 	public static String fotoCamera; // percorso in cui l'app fotocamera mette la foto scattata
@@ -38,6 +37,15 @@ public class Global extends MultiDexApplication {
 	}
 
 	public static void start(Context context) {
+		// Handle all uncaught exceptions
+		Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
+			if( settings.loadTree ) {
+				settings.loadTree = false;
+				settings.save();
+			}
+			Toast.makeText(context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+		});
+		// Settings
 		File settingsFile = new File(context.getFilesDir(), "settings.json");
 		// Rename "preferenze.json" to "settings.json" (introduced in version 0.8)
 		File preferenzeFile = new File(context.getFilesDir(), "preferenze.json");

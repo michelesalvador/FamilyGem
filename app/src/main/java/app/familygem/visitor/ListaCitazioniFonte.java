@@ -1,5 +1,5 @@
 // Partendo dall'id di una fonte genera una lista di triplette: capostipite / contenitore / citazioni della fonte
-// Usato da Biblioteca, da Fonte e da Conferma
+// Usato da SourcesFragment, da Fonte e da Conferma
 
 package app.familygem.visitor;
 

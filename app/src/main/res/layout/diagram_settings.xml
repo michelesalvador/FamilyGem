@@ -4,106 +4,97 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
-
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		android:padding="20dp">
-
+		<TextView
+			style="@style/AppTheme.Suggestion"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/generations_display_diagram"/>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/generations_display_diagram"
-			style="@style/AppTheme.Suggestion"/>
-
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/ancestors"
-			android:layout_marginTop="20dp"/>
+			android:layout_marginTop="20dp"
+			android:text="@string/ancestors"/>
 		<SeekBar
 			android:id="@+id/settings_ancestors"
+			style="@style/Widget.AppCompat.SeekBar.Discrete"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="9"
 			android:layout_marginTop="15dp"
-			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
-
+			android:max="9"/>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/uncles_great_uncles"
-			android:layout_marginTop="40dp"/>
+			android:layout_marginTop="40dp"
+			android:text="@string/uncles_great_uncles"/>
 		<SeekBar
 			android:id="@+id/settings_great_uncles"
+			style="@style/Widget.AppCompat.SeekBar.Discrete"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="9"
 			android:layout_marginTop="15dp"
-			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
-
+			android:max="9"/>
 		<androidx.appcompat.widget.SwitchCompat
 			android:id="@+id/settings_spouses"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="@string/partners"
-			android:layout_marginTop="40dp"/>
-
+			android:layout_marginTop="40dp"
+			android:text="@string/partners"/>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/descendants"
-			android:layout_marginTop="40dp"/>
+			android:layout_marginTop="40dp"
+			android:text="@string/descendants"/>
 		<SeekBar
 			android:id="@+id/settings_descendants"
+			style="@style/Widget.AppCompat.SeekBar.Discrete"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="9"
 			android:layout_marginTop="15dp"
-			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
-
+			android:max="9"/>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/siblings_nephews"
-			android:layout_marginTop="40dp"/>
+			android:layout_marginTop="40dp"
+			android:text="@string/siblings_nephews"/>
 		<SeekBar
 			android:id="@+id/settings_siblings_nephews"
+			style="@style/Widget.AppCompat.SeekBar.Discrete"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="9"
 			android:layout_marginTop="15dp"
-			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
-
+			android:max="9"/>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/uncles_cousins"
-			android:layout_marginTop="40dp"/>
+			android:layout_marginTop="40dp"
+			android:text="@string/uncles_cousins"/>
 		<SeekBar
 			android:id="@+id/settings_uncles_cousins"
+			style="@style/Widget.AppCompat.SeekBar.Discrete"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:max="9"
 			android:layout_marginTop="15dp"
-			style="@style/Widget.AppCompat.SeekBar.Discrete"/>
-
+			android:max="9"/>
 		<LinearLayout
 			android:id="@+id/settings_indicator"
 			android:layout_width="50dp"
 			android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:gravity="center_horizontal">
+			android:gravity="center_horizontal"
+			android:orientation="vertical">
 			<TextView
 				android:id="@+id/settings_indicator_text"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:background="@color/accent"
 				android:paddingStart="5dp"
-				android:paddingEnd="5dp"
 				android:paddingTop="2dp"
+				android:paddingEnd="5dp"
 				android:paddingBottom="2dp"
-				android:background="@color/evidenzia"
 				android:textColor="#FFFFFFFF"
 				android:textSize="18sp"/>
 			<ImageView

@@ -14,7 +14,7 @@ public enum Gender {
 	// Find the gender of a Person
 	public static Gender getGender(Person person) {
 		for( EventFact fact : person.getEventsFacts() ) {
-			if( fact.getTag() != null && fact.getTag().equals("SEX") ) {
+			if( "SEX".equals(fact.getTag()) ) {
 				if( fact.getValue() == null )
 					return OTHER;  // There is 'SEX' tag but the value is empty
 				else {

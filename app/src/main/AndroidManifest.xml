@@ -56,19 +56,19 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".Alberi"
+			android:name=".TreesActivity"
 			android:launchMode="singleTask" />
 		<activity
-			android:name=".AlberoNuovo"
+			android:name=".NewTreeActivity"
 			android:label="@string/new_tree"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
 			android:name=".Principal"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
 			android:name=".Opzioni"
 			android:label="@string/settings"
-			android:parentActivityName=".Alberi"/>
+			android:parentActivityName=".TreesActivity"/>
 		<activity
 			android:name=".Lapide"
 			android:label="@string/about"
@@ -76,18 +76,18 @@
 		<activity
 			android:name=".InfoAlbero"
 			android:label="@string/tree_info"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
 			android:name=".CartelleMedia"
 			android:label="@string/media_folders" />
 		<activity
 			android:name=".Condivisione"
 			android:label="@string/share_tree"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
 			android:name=".Compara"
 			android:label="@string/tree_with_news"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
 			android:name=".Confrontatore"
 			android:label="@string/import_news"
@@ -101,7 +101,7 @@
 			android:label="@string/diagram_settings"
 			android:parentActivityName=".Principal" />
 		<activity
-			android:name=".Individuo"
+			android:name=".ProfileActivity"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity
 			android:name=".detail.Famiglia" />

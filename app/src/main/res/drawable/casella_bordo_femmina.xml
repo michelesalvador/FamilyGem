@@ -2,6 +2,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 	<stroke
 		android:width="2dp"
-		android:color="@color/femmina" />
+		android:color="@color/female" />
 	<corners android:radius="3dp"/>
 </shape>

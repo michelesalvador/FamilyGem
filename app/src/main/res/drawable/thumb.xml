@@ -4,7 +4,7 @@
 		<!--android:width="12dp" -->
 		<shape>
 			<corners android:radius="6dp" />
-			<solid android:color="@color/evidenzia" />
+			<solid android:color="@color/accent" />
 		</shape>
 	</item>
 </layer-list>

@@ -7,8 +7,10 @@
 	<item name="tag_contenitore" type="id"/>
 	<item name="tag_percorso" type="id"/>
 	<item name="tag_uri" type="id"/>
-	<item name="tag_tipo_file" type="id"/> <!--	0 manichino, 1 immagine croppabile, 2 anteprima non croppabile (video), 3 icona file -->
+	<item name="tag_file_type" type="id"/> <!--	0: placeholder, 1: croppable image, 2: not croppable preview (video), 3: file icon -->
 	<item name="tag_famiglia" type="id"/>
 	<item name="tag_spouse_family_ref" type="id"/>
 	<item name="tag_spouse_ref" type="id"/>
+	<item name="tag_id" type="id"/>
+	<item name="tag_position" type="id"/>
 </resources>

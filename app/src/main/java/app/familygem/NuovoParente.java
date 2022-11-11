@@ -18,6 +18,7 @@ import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
 import java.util.ArrayList;
 import java.util.List;
+import app.familygem.constant.Choice;
 
 public class NuovoParente extends DialogFragment {
 
@@ -96,7 +97,7 @@ public class NuovoParente extends DialogFragment {
 				intento.setClass(getContext(), EditaIndividuo.class);
 				startActivity(intento);
 			} else { // Collega persona esistente
-				intento.putExtra("anagrafeScegliParente", true);
+				intento.putExtra(Choice.PERSON, true);
 				intento.setClass(getContext(), Principal.class);
 				if( frammento != null )
 					frammento.startActivityForResult(intento, 1401);

@@ -16,10 +16,10 @@ import java.util.List;
 import app.familygem.BuildConfig;
 import app.familygem.Dettaglio;
 import app.familygem.F;
-import app.familygem.Galleria;
+import app.familygem.list.GalleryFragment;
 import app.familygem.Global;
 import app.familygem.Lavagna;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.visitor.RiferimentiMedia;
@@ -59,39 +59,39 @@ public class Immagine extends Dettaglio {
 		if( riferiMedia.capostipiti.size() > 0 )
 			U.mettiDispensa(box, riferiMedia.capostipiti.toArray(), R.string.used_by);
 		else if( ((Activity)box.getContext()).getIntent().getBooleanExtra("daSolo", false) )
-			U.mettiDispensa(box, Memoria.oggettoCapo(), R.string.into);
+			U.mettiDispensa(box, Memory.oggettoCapo(), R.string.into);
 	}
 
-	void immaginona(Media m, int posizione) {
+	void immaginona(Media media, int position) {
 		vistaMedia = LayoutInflater.from(this).inflate(R.layout.immagine_immagine, box, false);
-		box.addView(vistaMedia, posizione);
+		box.addView(vistaMedia, position);
 		ImageView vistaImg = vistaMedia.findViewById(R.id.immagine_foto);
-		F.dipingiMedia(m, vistaImg, vistaMedia.findViewById(R.id.immagine_circolo));
+		F.paintMedia(media, vistaImg, vistaMedia.findViewById(R.id.immagine_circolo));
 		vistaMedia.setOnClickListener(vista -> {
-			String percorso = (String)vistaImg.getTag(R.id.tag_percorso);
+			String path = (String)vistaImg.getTag(R.id.tag_percorso);
 			Uri uri = (Uri)vistaImg.getTag(R.id.tag_uri);
-			int tipoFile = (int)vistaImg.getTag(R.id.tag_tipo_file);
-			if( tipoFile == 0 ) {    // Il file è da trovare
-				F.appAcquisizioneImmagine(this, null, 5173, null);
+			int tipoFile = (int)vistaImg.getTag(R.id.tag_file_type);
+			if( tipoFile == 0 ) { // Il file è da trovare
+				F.mediaAppList(this, null, 5173, null);
 			} else if( tipoFile == 2 || tipoFile == 3 ) { // Apre file con altra app
 				// todo se il tipo è 3 ma è un url (pagina web senza immagini) cerca di aprirlo come un file://
-				if( percorso != null ) {
-					File file = new File(percorso);
+				if( path != null ) {
+					File file = new File(path);
 					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-							&& percorso.startsWith(getExternalFilesDir(null).getPath()) )
-							// Un'app può essere file provider solo delle SUE cartelle
+							&& path.startsWith(getExternalFilesDir(null).getPath()) )
+							// An app can be a file provider only of its folders
 						uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file);
-					else // KitKat e tutte le altre cartelle
+					else // KitKat and all other folders
 						uri = Uri.fromFile(file);
 				}
 				String mimeType = getContentResolver().getType(uri);
-				Intent intento = new Intent(Intent.ACTION_VIEW);
-				intento.setDataAndType(uri, mimeType);
-				intento.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // Serve per le cartelle di proprietà dell'app (provider)
-				List<ResolveInfo> resolvers = getPackageManager().queryIntentActivities(intento, 0);
-					// per un'estensione come .tex di cui ha trovato il tipo mime, non c'è nessuna app predefinita
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setDataAndType(uri, mimeType);
+				intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // Serve per le cartelle di proprietà dell'app (provider)
+				List<ResolveInfo> resolvers = getPackageManager().queryIntentActivities(intent, 0);
+				// per un'estensione come .tex di cui ha trovato il tipo mime, non c'è nessuna app predefinita
 				if( mimeType == null || resolvers.isEmpty() ) {
-					intento.setDataAndType(uri, "*/*");    // Brutta lista di app generiche
+					intent.setDataAndType(uri, "*/*"); // Brutta lista di app generiche
 				}
 				// Da android 7 (Nougat api 24) gli uri file:// sono banditi in favore di uri content:// perciò non riesce ad aprire i file
 				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) { // ok funziona nell'emulatore con Android 9
@@ -99,17 +99,17 @@ public class Immagine extends Dettaglio {
 						StrictMode.class.getMethod("disableDeathOnFileUriExposure").invoke(null);
 					} catch( Exception e ) {}
 				}
-				startActivity( intento );
+				startActivity(intent);
 			} else { // Immagine vera e propria
-				Intent intento = new Intent( Immagine.this, Lavagna.class );
-				intento.putExtra( "percorso", percorso );
+				Intent intento = new Intent(Immagine.this, Lavagna.class);
+				intento.putExtra("path", path);
 				if( uri != null )
-					intento.putExtra( "uri", uri.toString() );
-				startActivity( intento );
+					intento.putExtra("uri", uri.toString());
+				startActivity(intento);
 			}
 		});
-		vistaMedia.setTag( R.id.tag_oggetto, 43614 );	// per il suo menu contestuale
-		registerForContextMenu( vistaMedia );
+		vistaMedia.setTag(R.id.tag_oggetto, 43614);    // per il suo menu contestuale
+		registerForContextMenu(vistaMedia);
 	}
 
 	public void aggiornaImmagine() {
@@ -120,6 +120,6 @@ public class Immagine extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		U.updateChangeDate(Galleria.eliminaMedia(m, null));
+		U.updateChangeDate(GalleryFragment.eliminaMedia(m, null));
 	}
 }

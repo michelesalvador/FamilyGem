@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import app.familygem.Dettaglio;
 import app.familygem.Global;
-import app.familygem.Magazzino;
+import app.familygem.list.RepositoriesFragment;
 import app.familygem.R;
 import app.familygem.U;
 
@@ -43,6 +43,6 @@ public class Archivio extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		U.updateChangeDate((Object[])Magazzino.delete(a));
+		U.updateChangeDate((Object[])RepositoriesFragment.delete(a));
 	}
 }

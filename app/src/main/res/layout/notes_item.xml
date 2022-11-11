@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="?android:attr/selectableItemBackground"
+	android:paddingStart="10dp"
+	android:paddingEnd="8dp"
+	android:paddingTop="8dp">
+	<TextView
+		android:id="@+id/note_text"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_toStartOf="@+id/note_citations"
+		android:ellipsize="end"
+		android:maxLines="4"/>
+	<TextView
+		android:id="@+id/note_citations"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_marginStart="4dp"
+		android:background="@drawable/cerchietto"
+		android:paddingLeft="5dp"
+		android:paddingTop="2dp"
+		android:paddingRight="5dp"
+		android:paddingBottom="2dp"
+		android:textColor="#fff"
+		android:textSize="14sp"/>
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:layout_below="@+id/note_text"
+		android:layout_marginTop="8dp"
+		android:background="?android:attr/listDivider"/>
+</RelativeLayout>

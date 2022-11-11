@@ -5,8 +5,8 @@ import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.PersonFamilyCommonContainer;
 import java.util.Arrays;
 import app.familygem.Dettaglio;
-import app.familygem.IndividuoEventi;
-import app.familygem.Memoria;
+import app.familygem.ProfileFactsFragment;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 
@@ -21,10 +21,10 @@ public class Evento extends Dettaglio {
 	@Override
 	public void impagina() {
 		e = (EventFact)cast(EventFact.class);
-		if( Memoria.oggettoCapo() instanceof Family )
-			setTitle(writeEventTitle((Family)Memoria.oggettoCapo(), e));
+		if( Memory.oggettoCapo() instanceof Family )
+			setTitle(writeEventTitle((Family)Memory.oggettoCapo(), e));
 		else
-			setTitle(IndividuoEventi.writeEventTitle(e)); // It includes e.getDisplayType()
+			setTitle(ProfileFactsFragment.writeEventTitle(e)); // It includes e.getDisplayType()
 		placeSlug(e.getTag());
 		if( Arrays.asList(eventTags).contains(e.getTag()) ) // è un evento (senza Value)
 			place(getString(R.string.value), "Value", false, true);
@@ -56,9 +56,9 @@ public class Evento extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		((PersonFamilyCommonContainer)Memoria.oggettoContenitore()).getEventsFacts().remove(e);
-		U.updateChangeDate(Memoria.oggettoCapo());
-		Memoria.annullaIstanze(e);
+		((PersonFamilyCommonContainer)Memory.oggettoContenitore()).getEventsFacts().remove(e);
+		U.updateChangeDate(Memory.oggettoCapo());
+		Memory.annullaIstanze(e);
 	}
 
 	// Elimina i principali tag vuoti e eventualmente aggiunge la 'Y'

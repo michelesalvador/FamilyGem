@@ -1,5 +1,5 @@
 // Mappa ordinata dei media ciascuno col suo oggetto contenitore
-// Il contenitore serve praticamente solo a scollegaMedia in IndividuoMedia
+// Il contenitore serve praticamente solo a scollegaMedia in ProfileMediaFragment
 
 package app.familygem.visitor;
 

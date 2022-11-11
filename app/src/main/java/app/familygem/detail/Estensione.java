@@ -2,7 +2,7 @@ package app.familygem.detail;
 
 import org.folg.gedcom.model.GedcomTag;
 import app.familygem.Dettaglio;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 
@@ -29,7 +29,7 @@ public class Estensione extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		U.eliminaEstensione(e, Memoria.oggettoContenitore(), null);
-		U.updateChangeDate(Memoria.oggettoCapo());
+		U.eliminaEstensione(e, Memory.oggettoContenitore(), null);
+		U.updateChangeDate(Memory.oggettoCapo());
 	}
 }

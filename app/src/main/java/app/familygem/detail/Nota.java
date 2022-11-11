@@ -4,7 +4,7 @@ import android.app.Activity;
 import org.folg.gedcom.model.Note;
 import app.familygem.Dettaglio;
 import app.familygem.Global;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.visitor.RiferimentiNota;
@@ -32,8 +32,8 @@ public class Nota extends Dettaglio {
 			RiferimentiNota rifNota = new RiferimentiNota(Global.gc, n.getId(), false);
 			if( rifNota.tot > 0 )
 				U.mettiDispensa(box, rifNota.capostipiti.toArray(), R.string.shared_by);
-		} else if( ((Activity)box.getContext()).getIntent().getBooleanExtra("daQuaderno", false) ) {
-			U.mettiDispensa(box, Memoria.oggettoCapo(), R.string.written_in);
+		} else if( ((Activity)box.getContext()).getIntent().getBooleanExtra("fromNotes", false) ) {
+			U.mettiDispensa(box, Memory.oggettoCapo(), R.string.written_in);
 		}
 	}
 

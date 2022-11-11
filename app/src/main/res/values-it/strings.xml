@@ -27,7 +27,7 @@
     <string name="families">Famiglie</string>
     <string name="repositories">Archivi</string>
     <string name="submitters">Autori</string>
-    <!-- AlberoNuovo -->
+    <!-- NewTreeActivity -->
     <string name="new_tree">Nuovo albero</string>
     <string name="download_shared_tree">Scarica l\'albero condiviso</string>
     <string name="empty_tree">Crea un albero vuoto</string>
@@ -45,7 +45,7 @@
     <string name="tree">Albero</string>
     <string name="simpsons_tree">Albero dei Simpson</string>
     <string name="family_gem_example">Un esempio per Family Gem</string>
-    <!-- Alberi -->
+    <!-- TreesActivity -->
     <string name="a_new_tree">Un nuovo albero genealogico</string>
     <string name="you_can_download">Ora puoi scaricare l\'albero condiviso con te.</string>
     <string name="download">Scarica</string>
@@ -181,7 +181,7 @@
     <string name="number_relatives">Numero di familiari</string>
     <string name="really_delete_person">Vuoi davvero eliminare questa persona?</string>
     <string name="person_deleted">Persona eliminata.</string>
-    <!-- Individuo -->
+    <!-- ProfileActivity -->
     <string name="events">Fatti</string>
     <string name="relatives">Familiari</string>
     <string name="make_root">Imposta come radice</string>

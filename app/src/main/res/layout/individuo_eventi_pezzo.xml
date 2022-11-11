@@ -33,7 +33,7 @@
 		android:layout_alignParentBottom="true"
 		android:layout_alignParentEnd="true"
 		android:layout_marginBottom="8dp"
-		android:background="@color/citazioneFonte"
+		android:background="@color/source_citation"
 		android:padding="4dp"
 		android:visibility="gone" />
 
@@ -42,5 +42,5 @@
 		android:layout_height="1dp"
 		android:layout_below="@+id/evento_altro"
 		android:layout_marginTop="8dp"
-		android:background="@color/primario" />
+		android:background="@color/primary" />
 </RelativeLayout>

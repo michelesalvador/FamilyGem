@@ -8,9 +8,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
-import app.familygem.Biblioteca;
+import app.familygem.list.SourcesFragment;
 import app.familygem.Dettaglio;
-import app.familygem.Memoria;
+import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.visitor.ListaCitazioniFonte;
@@ -26,7 +26,7 @@ public class Fonte extends Dettaglio {
 		f = (Source)cast(Source.class);
 		placeSlug("SOUR", f.getId());
 		ListaCitazioniFonte citazioni = new ListaCitazioniFonte(gc, f.getId());
-		f.putExtension("citaz", citazioni.lista.size());    // per la Biblioteca
+		f.putExtension("citaz", citazioni.lista.size()); // For SourcesFragment
 		place(getString(R.string.abbreviation), "Abbreviation");
 		place(getString(R.string.title), "Title", true, true);
 		place(getString(R.string.type), "Type", false, true);    // _type
@@ -46,11 +46,11 @@ public class Fonte extends Dettaglio {
 		if( f.getRepositoryRef() != null ) {
 			View vistaRef = LayoutInflater.from(this).inflate(R.layout.pezzo_citazione_fonte, box, false);
 			box.addView(vistaRef);
-			vistaRef.setBackgroundColor(getResources().getColor(R.color.archivioCitazione));
+			vistaRef.setBackgroundColor(getResources().getColor(R.color.repository_citation));
 			final RepositoryRef refArchivio = f.getRepositoryRef();
 			if( refArchivio.getRepository(gc) != null ) {
 				((TextView)vistaRef.findViewById(R.id.fonte_testo)).setText(refArchivio.getRepository(gc).getName());
-				((CardView)vistaRef.findViewById(R.id.citazione_fonte)).setCardBackgroundColor(getResources().getColor(R.color.archivio));
+				((CardView)vistaRef.findViewById(R.id.citazione_fonte)).setCardBackgroundColor(getResources().getColor(R.color.repository));
 			} else vistaRef.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
 			String t = "";
 			if( refArchivio.getValue() != null ) t += refArchivio.getValue() + "\n";
@@ -62,7 +62,7 @@ public class Fonte extends Dettaglio {
 			U.placeNotes((LinearLayout)vistaRef.findViewById(R.id.citazione_note), refArchivio, false);
 			vistaRef.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					Memoria.aggiungi(refArchivio);
+					Memory.aggiungi(refArchivio);
 					startActivity(new Intent(Fonte.this, ArchivioRef.class));
 				}
 			});
@@ -78,6 +78,6 @@ public class Fonte extends Dettaglio {
 
 	@Override
 	public void elimina() {
-		U.updateChangeDate(Biblioteca.eliminaFonte(f));
+		U.updateChangeDate(SourcesFragment.eliminaFonte(f));
 	}
 }
