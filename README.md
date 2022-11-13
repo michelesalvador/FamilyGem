@@ -27,7 +27,7 @@ Here is a summary of what is being worked on, and a roadmap for what needs to be
  
 #### General enhancements
  - Add feature to merge/import other trees from GEDCOM files (such as from Ancestry.com) into Geni
- - Ability to filter tree search results by whether they are related to a specific person
+ - Ability to filter tree search results by whether they are related to a specific person, to search within the relatives of a specific person.
  - Automatically periodically backup tree to cloud storage (e.g. Google Drive, Dropbox, OneDrive, etc.)
 ### Undecided (please share your input!)
  - [Tools to help keep trees on multiple platforms (e.g. Ancestry.com) in sync with Geni](../../discussions/5)
