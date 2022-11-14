@@ -1,5 +1,3 @@
-// Lista dei Submitter (autori)
-
 package app.familygem;
 
 import android.content.Context;
@@ -20,37 +18,42 @@ import java.util.List;
 import app.familygem.detail.AuthorActivity;
 import static app.familygem.Global.gc;
 
+/**
+ * List of Submitters (authors)
+ * */
 public class ListOfAuthorsFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle stato) {
-		List<Submitter> listAutori = gc.getSubmitters();
-		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(listAutori.size() + " " +
-				getString(listAutori.size() == 1 ? R.string.submitter : R.string.submitters).toLowerCase());
+		List<Submitter> authors = gc.getSubmitters();
+		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(authors.size() + " " +
+				getString(authors.size() == 1 ? R.string.submitter : R.string.submitters).toLowerCase());
 		setHasOptionsMenu(true);
-		View vista = inflater.inflate(R.layout.magazzino, container, false);
-		LinearLayout scatola = vista.findViewById(R.id.magazzino_scatola);
-		for( final Submitter autor : listAutori ) {
-			View vistaPezzo = inflater.inflate(R.layout.magazzino_pezzo, scatola, false);
-			scatola.addView(vistaPezzo);
-			((TextView)vistaPezzo.findViewById(R.id.magazzino_nome)).setText(TreeInfoActivity.nomeAutore(autor));
-			vistaPezzo.findViewById(R.id.magazzino_archivi).setVisibility(View.GONE);
-			vistaPezzo.setOnClickListener(v -> {
-				Memory.setFirst(autor);
+		View view = inflater.inflate(R.layout.magazzino, container, false);
+		LinearLayout layout = view.findViewById(R.id.magazzino_scatola);
+		for( final Submitter author : authors ) {
+			View pieceView = inflater.inflate(R.layout.magazzino_pezzo, layout, false);
+			layout.addView(pieceView);
+			((TextView)pieceView.findViewById(R.id.magazzino_nome)).setText(TreeInfoActivity.nomeAutore(author));
+			pieceView.findViewById(R.id.magazzino_archivi).setVisibility(View.GONE);
+			pieceView.setOnClickListener(v -> {
+				Memory.setFirst(author);
 				startActivity(new Intent(getContext(), AuthorActivity.class));
 			});
-			registerForContextMenu(vistaPezzo);
-			vistaPezzo.setTag(autor);
+			registerForContextMenu(pieceView);
+			pieceView.setTag(author);
 		}
-		vista.findViewById(R.id.fab).setOnClickListener(v -> {
-			nuovoAutore(getContext());
+		view.findViewById(R.id.fab).setOnClickListener(v -> {
+			newAuthor(getContext());
 			U.save(true);
 		});
-		return vista;
+		return view;
 	}
 
-	// Elimina un autore
-	// Todo mi sa che andrebbe cercato eventuale SubmitterRef in tutti i record
+	/**
+	 * Remove an author
+	 * All I know is that any SubmitterRef should be searched for in all records
+	 * */
 	public static void deleteAuthor(Submitter aut) {
 		Header testa = gc.getHeader();
 		if( testa != null && testa.getSubmitterRef() != null
@@ -63,18 +66,20 @@ public class ListOfAuthorsFragment extends Fragment {
 		Memory.setInstanceAndAllSubsequentToNull(aut);
 	}
 
-	// Crea un Autore nuovo, se riceve un contesto lo apre in modalità editore
-	static Submitter nuovoAutore(Context contesto) {
-		Submitter subm = new Submitter();
-		subm.setId(U.newID(gc, Submitter.class));
-		subm.setName("");
-		U.updateChangeDate(subm);
-		gc.addSubmitter(subm);
-		if( contesto != null ) {
-			Memory.setFirst(subm);
-			contesto.startActivity(new Intent(contesto, AuthorActivity.class));
+	/**
+	 * Create a new Author, if it receives a context it opens it in editor mode
+	 * */
+	static Submitter newAuthor(Context context) {
+		Submitter submitter = new Submitter();
+		submitter.setId(U.newID(gc, Submitter.class));
+		submitter.setName("");
+		U.updateChangeDate(submitter);
+		gc.addSubmitter(submitter);
+		if( context != null ) {
+			Memory.setFirst(submitter);
+			context.startActivity(new Intent(context, AuthorActivity.class));
 		}
-		return subm;
+		return submitter;
 	}
 
 	static void mainAuthor(Submitter subm) {
@@ -87,16 +92,16 @@ public class ListOfAuthorsFragment extends Fragment {
 		U.save(false, subm);
 	}
 
-	// Menu contestuale
+	// context Menu
 	Submitter subm;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
 		subm = (Submitter)vista.getTag();
 		if( gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(subm) )
 			menu.add(0, 0, 0, R.string.make_default);
-		if( !U.submitterHasShared(subm) ) // può essere eliminato solo se non ha mai condiviso
+		if( !U.submitterHasShared(subm) ) // it can only be deleted if it has never been shared
 			menu.add(0, 1, 0, R.string.delete);
-		// todo spiegare perché non può essere eliminato?
+		// todo explain why it can't be deleted?
 	}
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
@@ -105,7 +110,7 @@ public class ListOfAuthorsFragment extends Fragment {
 				mainAuthor(subm);
 				return true;
 			case 1:
-				// Todo conferma elimina
+				// Todo confirm deletion
 				deleteAuthor(subm);
 				U.save(false);
 				getActivity().recreate();

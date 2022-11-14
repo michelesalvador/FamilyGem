@@ -116,7 +116,7 @@ public class SharingActivity extends BaseActivity {
 					} else
 						header.setDateTime(U.actualDateTime());
 					if( autore[0] == null ) {
-						autore[0] = ListOfAuthorsFragment.nuovoAutore(null);
+						autore[0] = ListOfAuthorsFragment.newAuthor(null);
 					}
 					if( header.getSubmitterRef() == null ) {
 						header.setSubmitterRef(autore[0].getId());
