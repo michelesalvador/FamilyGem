@@ -198,7 +198,7 @@ public class TreesActivity extends AppCompatActivity {
 									inputMethodManager.showSoftInput(editaNome, InputMethodManager.SHOW_IMPLICIT);
 								}, 300);
 							} else if( id == 3 ) { // Media folders
-								startActivity(new Intent(TreesActivity.this, MediaFolders.class)
+								startActivity(new Intent(TreesActivity.this, MediaFoldersActivity.class)
 										.putExtra("idAlbero", treeId)
 								);
 							} else if( id == 4 ) { // Correggi errori

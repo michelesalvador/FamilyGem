@@ -193,7 +193,7 @@ public class GalleryFragment extends Fragment {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if( item.getItemId() == 0 ) {
-			startActivity(new Intent(getContext(), MediaFolders.class)
+			startActivity(new Intent(getContext(), MediaFoldersActivity.class)
 					.putExtra("idAlbero", Global.settings.openTree)
 			);
 			return true;

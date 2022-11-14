@@ -78,7 +78,7 @@
 			android:label="@string/tree_info"
 			android:parentActivityName=".TreesActivity" />
 		<activity
-			android:name=".MediaFolders"
+			android:name=".MediaFoldersActivity"
 			android:label="@string/media_folders" />
 		<activity
 			android:name=".SharingActivity"
