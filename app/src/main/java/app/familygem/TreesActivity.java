@@ -105,7 +105,7 @@ public class TreesActivity extends AppCompatActivity {
 						treeView.setBackgroundColor(getResources().getColor(R.color.evidenziaMedio));
 						((TextView)treeView.findViewById(R.id.albero_dati)).setTextColor(getResources().getColor(R.color.text));
 						treeView.setOnClickListener(v -> {
-							if( !NewTree.confronta(TreesActivity.this, tree, true) ) {
+							if( !NewTree.compare(TreesActivity.this, tree, true) ) {
 								tree.grade = 10; // viene retrocesso
 								Global.settings.save();
 								aggiornaLista();
@@ -116,7 +116,7 @@ public class TreesActivity extends AppCompatActivity {
 						treeView.setBackgroundColor(getResources().getColor(R.color.consumed));
 						((TextView)treeView.findViewById(R.id.albero_titolo)).setTextColor(getResources().getColor(R.color.grayText));
 						treeView.setOnClickListener(v -> {
-							if( !NewTree.confronta(TreesActivity.this, tree, true) ) {
+							if( !NewTree.compare(TreesActivity.this, tree, true) ) {
 								tree.grade = 10; // viene retrocesso
 								Global.settings.save();
 								aggiornaLista();
@@ -208,7 +208,7 @@ public class TreesActivity extends AppCompatActivity {
 										.putExtra("idAlbero", treeId)
 								);
 							} else if( id == 6 ) { // Confronta con alberi esistenti
-								if( NewTree.confronta(TreesActivity.this, tree, false) ) {
+								if( NewTree.compare(TreesActivity.this, tree, false) ) {
 									tree.grade = 20;
 									aggiornaLista();
 								} else

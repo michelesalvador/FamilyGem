@@ -48,7 +48,7 @@ public class Settings {
 		return num;
 	}
 
-	void aggiungi(Tree tree) {
+	void add(Tree tree) {
 		trees.add(tree);
 	}
 
