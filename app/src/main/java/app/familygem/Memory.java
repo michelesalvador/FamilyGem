@@ -1,5 +1,3 @@
-// Gestisce le pile di oggetti gerarchici per scrivere la bava in Dettaglio
-
 package app.familygem;
 
 import org.folg.gedcom.model.Address;
@@ -35,11 +33,14 @@ import app.familygem.detail.AddressActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 
+/**
+ * Manage stacks of hierarchical objects for writing a breadcrumb trail in {@link DetailActivity}
+ * */
 public class Memory {
 
 	static Map<Class,Class> classes = new HashMap<>();
 	private static final Memory memory = new Memory();
-	List<StepStack> lista = new ArrayList<>();
+	List<StepStack> list = new ArrayList<>();
 
 	Memory() {
 		classes.put( Person.class, IndividualPersonActivity.class );
@@ -58,18 +59,20 @@ public class Memory {
 		classes.put( Note.class, NoteActivity.class );
 	}
 
-	// Restituisce l'ultima pila creata se ce n'è almeno una
-	// oppure ne restituisce una vuota giusto per non restituire null
+	/**
+	 * Return the last created stack if there is at least one
+	 * or return an empty one just to not return null
+	 * */
 	static StepStack getStepStack() {
-		if( memory.lista.size() > 0 )
-			return memory.lista.get( memory.lista.size() - 1 );
+		if( memory.list.size() > 0 )
+			return memory.list.get( memory.list.size() - 1 );
 		else
-			return new StepStack(); // una pila vuota che non viene aggiunta alla lista
+			return new StepStack(); // an empty stack that is not added to the list
 	}
 
 	public static StepStack addStack() {
 		StepStack stepStack = new StepStack();
-		memory.lista.add(stepStack);
+		memory.list.add(stepStack);
 		return stepStack;
 	}
 
@@ -87,15 +90,17 @@ public class Memory {
 			step.tag = tag;
 		else if( object instanceof Person )
 			step.tag = "INDI";
-		//stampa("setPrimo");
+		//log("setPrimo");
 	}
 
-	// Aggiunge un object alla fine dell'ultima pila esistente
+	/**
+	 * Adds an object to the end of the last existing stack
+	 * */
 	public static Step add(Object object ) {
 		Step step = new Step();
 		step.object = object;
 		getStepStack().add(step);
-		//stampa("aggiungi");
+		//log("aggiungi");
 		return step;
 	}
 
@@ -105,14 +110,14 @@ public class Memory {
 	 * */
 	public static void replaceFirst(Object object ) {
 		String tag = object instanceof Family ? "FAM" : "INDI";
-		if( memory.lista.size() == 0 ) {
+		if( memory.list.size() == 0 ) {
 			setFirst( object, tag );
 		} else {
 			getStepStack().clear();
 			Step step = add( object );
 			step.tag = tag;
 		}
-		//stampa("replacePrimo");
+		//log("replacePrimo");
 	}
 
 	/**
@@ -138,7 +143,9 @@ public class Memory {
 			return null;
 	}
 
-	// L'object nell'ultimo passo
+	/**
+	 * The object in the last step
+	 * */
 	public static Object getObject() {
 		if( getStepStack().size() == 0 )
 			return null;
@@ -152,38 +159,60 @@ public class Memory {
 		if( getStepStack().size() > 0 )
 			getStepStack().pop();
 		if( getStepStack().isEmpty() )
-			memory.lista.remove( getStepStack() );
-		//stampa("arretra");
+			memory.list.remove( getStepStack() );
+		//log("arretra");
 	}
 
 	/**
 	 * When an object is deleted, make it null in all steps,
 	 * and the objects in any subsequent steps are also canceled.
 	 * */
-	public static void setInstanceAndAllSubsequentToNull(Object oggio ) {
-		for( StepStack stepStack : memory.lista ) {
-			boolean seguente = false;
+	public static void setInstanceAndAllSubsequentToNull(Object subject ) {
+		for( StepStack stepStack : memory.list) {
+			boolean shouldSetSubsequentToNull = false;
+			/*TODO consider using index instead, to avoid needless reassignment
+			    and boolean expression evaluation ("|| shouldSetSubsequentToNull")
+			*
+			* int index = -1;
+			* for (int i = 0; i < stepStack.size(); i++) {
+            *     if (step.object != null && step.object.equals(subject)) {
+            *         index = i;
+            * 		  break;
+            *     }
+            * }
+			* if(index >= 0) {
+			*     for(Step step : stepStack.subList(index, stepStack.size) {
+			*         step.object = null
+			*     }
+			* }
+			*
+			* in Kotlin this would be:
+			* val index = stepStack.indexOf { it.object != null && it.object == subject }
+			* if(index >= 0) for(step in stepStack.subList(index, stepStack.size) {
+			*     step.object = null
+			* }
+			* */
 			for( Step step : stepStack) {
-				if( step.object != null && (step.object.equals(oggio) || seguente) ) {
+				if( step.object != null && (step.object.equals(subject) || shouldSetSubsequentToNull) ) {
 					step.object = null;
-					seguente = true;
+					shouldSetSubsequentToNull = true;
 				}
 			}
 		}
 	}
 
-	public static void stampa( String intro ) {
+	public static void log( String intro ) {
 		if( intro != null )
 			s.l( intro );
-		for( StepStack stepStack : memory.lista ) {
+		for( StepStack stepStack : memory.list) {
 			for( Step step : stepStack) {
-				String filotto = step.clearStackOnBackPressed ? "< " : "";
+				String triplet = step.clearStackOnBackPressed ? "< " : "";
 				if( step.tag != null )
-					s.p( filotto + step.tag + " " );
+					s.p( triplet + step.tag + " " );
 				else if( step.object != null )
-					s.p( filotto + step.object.getClass().getSimpleName() + " " );
+					s.p( triplet + step.object.getClass().getSimpleName() + " " );
 				else
-					s.p( filotto + "Null" ); // capita in rarissimi casi
+					s.p( triplet + "Null" ); // it happens in very rare cases
 			}
 			s.l( "" );
 		}
