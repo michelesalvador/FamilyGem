@@ -728,7 +728,7 @@ public class U {
 
 	// Elenca tutti i media di un object contenitore
 	public static void placeMedia(LinearLayout layout, Object container, boolean detailed) {
-		RecyclerView griglia = new MediaGalleryAdapter.RiciclaVista(layout.getContext(), detailed);
+		RecyclerView griglia = new MediaGalleryAdapter.MediaIconsRecyclerView(layout.getContext(), detailed);
 		griglia.setHasFixedSize(true);
 		RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(layout.getContext(), detailed ? 2 : 3);
 		griglia.setLayoutManager(gestoreLayout);
@@ -876,7 +876,7 @@ public class U {
 	static void linkaMedia(LinearLayout scatola, Media media) {
 		View vistaMedia = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_media, scatola, false);
 		scatola.addView(vistaMedia);
-		MediaGalleryAdapter.arredaMedia(media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num));
+		MediaGalleryAdapter.setupMedia(media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num));
 		LinearLayout.LayoutParams parami = (LinearLayout.LayoutParams)vistaMedia.getLayoutParams();
 		parami.height = dpToPx(80);
 		F.showImage(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));

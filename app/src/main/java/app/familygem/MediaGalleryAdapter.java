@@ -1,5 +1,3 @@
-// Adattatore per RecyclerView con lista dei media
-
 package app.familygem;
 
 import android.app.Activity;
@@ -7,6 +5,7 @@ import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,28 +19,31 @@ import app.familygem.detail.ImageActivity;
 import app.familygem.visitor.MediaListContainer;
 import app.familygem.visitor.FindStack;
 
-class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gestoreVistaMedia> {
+/**
+ * Adapter for RecyclerView with media list
+ * */
+class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.MediaViewHolder> {
 
-	private List<MediaListContainer.MedCont> listaMedia;
-	private boolean dettagli;
+	private List<MediaListContainer.MedCont> mediaList;
+	private boolean details;
 
-	MediaGalleryAdapter(List<MediaListContainer.MedCont> listaMedia, boolean dettagli ) {
-		this.listaMedia = listaMedia;
-		this.dettagli = dettagli;
+	MediaGalleryAdapter(List<MediaListContainer.MedCont> mediaList, boolean details) {
+		this.mediaList = mediaList;
+		this.details = details;
 	}
 
 	@Override
-	public gestoreVistaMedia onCreateViewHolder( ViewGroup parent, int type ) {
-		View vista = LayoutInflater.from(parent.getContext()).inflate( R.layout.pezzo_media, parent, false );
-		return new gestoreVistaMedia( vista, dettagli );
+	public MediaViewHolder onCreateViewHolder(ViewGroup parent, int type ) {
+		View view = LayoutInflater.from(parent.getContext()).inflate( R.layout.pezzo_media, parent, false );
+		return new MediaViewHolder( view, details);
 	}
 	@Override
-	public void onBindViewHolder( final gestoreVistaMedia gestore, int posizione ) {
-		gestore.setta( posizione );
+	public void onBindViewHolder(final MediaViewHolder holder, int position ) {
+		holder.bind( position );
 	}
 	@Override
 	public int getItemCount() {
-		return listaMedia.size();
+		return mediaList.size();
 	}
 	@Override
 	public long getItemId(int position) {
@@ -52,99 +54,99 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 		return position;
 	}
 
-	class gestoreVistaMedia extends RecyclerView.ViewHolder implements View.OnClickListener {
-		View vista;
-		boolean dettagli;
+	class MediaViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+		View view;
+		boolean details;
 		Media media;
-		Object contenitore;
-		ImageView vistaImmagine;
-		TextView vistaTesto;
-		TextView vistaNumero;
-		gestoreVistaMedia( View vista, boolean dettagli ) {
-			super(vista);
-			this.vista = vista;
-			this.dettagli = dettagli;
-			vistaImmagine = vista.findViewById( R.id.media_img );
-			vistaTesto = vista.findViewById( R.id.media_testo );
-			vistaNumero = vista.findViewById( R.id.media_num );
+		Object container;
+		ImageView imageView;
+		TextView textView;
+		TextView numberView;
+		MediaViewHolder(View view, boolean details) {
+			super(view);
+			this.view = view;
+			this.details = details;
+			imageView = view.findViewById( R.id.media_img );
+			textView = view.findViewById( R.id.media_testo );
+			numberView = view.findViewById( R.id.media_num );
 		}
-		void setta( int posizione ) {
-			media = listaMedia.get( posizione ).media;
-			contenitore = listaMedia.get( posizione ).container;
-			if( dettagli ) {
-				arredaMedia( media, vistaTesto, vistaNumero );
-				vista.setOnClickListener( this );
-				((Activity)vista.getContext()).registerForContextMenu( vista );
-				vista.setTag( R.id.tag_object, media );
-				vista.setTag( R.id.tag_contenitore, contenitore );
-				// Registra menu contestuale
-				final AppCompatActivity attiva = (AppCompatActivity) vista.getContext();
-				if( vista.getContext() instanceof IndividualPersonActivity) { // Fragment individuoMedia
-					attiva.getSupportFragmentManager()
-							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" )	// non garantito in futuro
-							.registerForContextMenu( vista );
-				} else if( vista.getContext() instanceof Principal ) // Fragment Galleria
-					attiva.getSupportFragmentManager().findFragmentById( R.id.contenitore_fragment ).registerForContextMenu( vista );
-				else	// nelle AppCompatActivity
-					attiva.registerForContextMenu( vista );
+		void bind(int position ) {
+			media = mediaList.get( position ).media;
+			container = mediaList.get( position ).container;
+			if(details) {
+				setupMedia( media, textView, numberView);
+				view.setOnClickListener( this );
+				((Activity) view.getContext()).registerForContextMenu(view);
+				view.setTag( R.id.tag_object, media );
+				view.setTag( R.id.tag_contenitore, container);
+				// Register context menu
+				final AppCompatActivity activity = (AppCompatActivity) view.getContext();
+				if( view.getContext() instanceof IndividualPersonActivity) { // IndividualMediaFragment
+					activity.getSupportFragmentManager()
+							.findFragmentByTag( "android:switcher:" + R.id.schede_persona + ":0" )	// not guaranteed in the future
+							.registerForContextMenu(view);
+				} else if( view.getContext() instanceof Principal ) // GalleryFragment
+					activity.getSupportFragmentManager().findFragmentById( R.id.contenitore_fragment ).registerForContextMenu(view);
+				else	// in AppCompatActivity
+					activity.registerForContextMenu(view);
 			} else {
-				RecyclerView.LayoutParams parami = new RecyclerView.LayoutParams( RecyclerView.LayoutParams.WRAP_CONTENT, U.dpToPx(110) );
+				RecyclerView.LayoutParams params = new RecyclerView.LayoutParams( RecyclerView.LayoutParams.WRAP_CONTENT, U.dpToPx(110) );
 				int margin = U.dpToPx(5);
-				parami.setMargins( margin, margin, margin, margin );
-				vista.setLayoutParams( parami );
-				vistaTesto.setVisibility( View.GONE );
-				vistaNumero.setVisibility( View.GONE );
+				params.setMargins( margin, margin, margin, margin );
+				view.setLayoutParams( params );
+				textView.setVisibility( View.GONE );
+				numberView.setVisibility( View.GONE );
 			}
-			F.showImage( media, vistaImmagine, vista.findViewById(R.id.media_circolo) );
+			F.showImage( media, imageView, view.findViewById(R.id.media_circolo) );
 		}
 		@Override
 		public void onClick( View v ) {
-			AppCompatActivity attiva = (AppCompatActivity) v.getContext();
-			// Galleria in modalità scelta dell'object media
-			// Restituisce l'id di un object media a IndividuoMedia
-			if( attiva.getIntent().getBooleanExtra( "galleriaScegliMedia", false ) ) {
+			AppCompatActivity activity = (AppCompatActivity) v.getContext();
+			// Gallery in choose mode of the media object
+			// Return the id of a media object to IndividualMediaFragment
+			if( activity.getIntent().getBooleanExtra( "galleriaScegliMedia", false ) ) {
 				Intent intent = new Intent();
 				intent.putExtra( "idMedia", media.getId() );
-				attiva.setResult( Activity.RESULT_OK, intent );
-				attiva.finish();
-			// Galleria in modalità normale apre Immagine
+				activity.setResult( Activity.RESULT_OK, intent );
+				activity.finish();
+			// Gallery in normal mode opens ImageActivity
 			} else {
 				Intent intent = new Intent( v.getContext(), ImageActivity.class );
-				if( media.getId() != null ) { // tutti i Media record
+				if( media.getId() != null ) { // all Media records
 					Memory.setFirst( media );
-				} else if( (attiva instanceof IndividualPersonActivity && contenitore instanceof Person) // media di primo livello nell'Indi
-						|| attiva instanceof DetailActivity) { // normale apertura nei Dettagli
+				} else if( (activity instanceof IndividualPersonActivity && container instanceof Person) // top tier media in indi
+						|| activity instanceof DetailActivity) { // normal opening in the DetailActivity
 					Memory.add( media );
-				} else { // da Galleria tutti i media semplici, o da IndividuoMedia i media sotto molteplici livelli
+				} else { // from Gallery all the simple media, or from IndividualMediaFragment the media under multiple levels
 					new FindStack( Global.gc, media );
-					if( attiva instanceof Principal ) // Solo in Galleria
-						intent.putExtra( "daSolo", true ); // così poi Immagine mostra la dispensa
+					if( activity instanceof Principal ) // Only in the Gallery
+						intent.putExtra( "daSolo", true ); // so then ImageActivity shows the pantry (?)
 				}
 				v.getContext().startActivity( intent );
 			}
 		}
 	}
 
-	static void arredaMedia( Media media, TextView vistaTesto, TextView vistaNumero ) {
-		String testo = "";
+	static void setupMedia(Media media, TextView textView, TextView vistaNumero ) {
+		String text = "";
 		if( media.getTitle() != null )
-			testo = media.getTitle() + "\n";
+			text = media.getTitle() + "\n";
 		if( Global.settings.expert && media.getFile() != null ) {
 			String file = media.getFile();
 			file = file.replace( '\\', '/' );
 			if( file.lastIndexOf('/') > -1 ) {
-				if( file.length() > 1 && file.endsWith("/") ) // rimuove l'ultima barra
+				if( file.length() > 1 && file.endsWith("/") ) // removes the last slash
 					file = file.substring( 0, file.length()-1 );
 				file = file.substring( file.lastIndexOf('/') + 1 );
 			}
-			testo += file;
+			text += file;
 		}
-		if( testo.isEmpty() )
-			vistaTesto.setVisibility( View.GONE );
+		if( text.isEmpty() )
+			textView.setVisibility( View.GONE );
 		else {
-			if( testo.endsWith("\n") )
-				testo = testo.substring( 0, testo.length()-1 );
-			vistaTesto.setText( testo );
+			if( text.endsWith("\n") )
+				text = text.substring( 0, text.length()-1 );
+			textView.setText( text );
 		}
 		if( media.getId() != null ) {
 			vistaNumero.setText( String.valueOf(GalleryFragment.popularity(media)) );
@@ -153,18 +155,29 @@ class MediaGalleryAdapter extends RecyclerView.Adapter<MediaGalleryAdapter.gesto
 			vistaNumero.setVisibility( View.GONE );
 	}
 
-	// Questa serve solo per creare una RecyclerView con le iconcine dei media che risulti trasparente ai click
-	// todo però impedisce lo scroll in Dettaglio
-	static class RiciclaVista extends RecyclerView {
-		boolean dettagli;
-		public RiciclaVista( Context context, boolean dettagli) {
+	/**
+	 * This is just to create a RecyclerView with media icons that is transparent to clicks
+	 * TODO prevents scrolling in Detail though
+	 * */
+	static class MediaIconsRecyclerView extends RecyclerView {
+		public MediaIconsRecyclerView(Context context) {
 			super(context);
-			this.dettagli = dettagli;
+		}
+		public MediaIconsRecyclerView(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+		public MediaIconsRecyclerView(Context context,AttributeSet attrs, int defStyleAttr) {
+			super(context, attrs, defStyleAttr);
+		}
+		boolean details;
+		public MediaIconsRecyclerView(Context context, boolean details) {
+			super(context);
+			this.details = details;
 		}
 		@Override
 		public boolean onTouchEvent( MotionEvent e ) {
 			super.onTouchEvent( e );
-			return dettagli; // quando è false la griglia non intercetta il click
+			return details; // when false the grid does not intercept the click
 		}
 	}
 }
