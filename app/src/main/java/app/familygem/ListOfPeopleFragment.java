@@ -45,7 +45,7 @@ public class ListOfPeopleFragment extends Fragment {
 	List<Person> people;
 	PeopleAdapter adapter;
 	private Order order;
-	private boolean gliIdsonoNumerici;
+	private boolean idsAreNumeric;
 
 	private enum Order {
 		NONE,
@@ -67,12 +67,12 @@ public class ListOfPeopleFragment extends Fragment {
 		View view = inflater.inflate(R.layout.ricicla_vista, container, false);
 		if( gc != null ) {
 			people = gc.getPeople();
-			arredaBarra();
-			RecyclerView vistaLista = view.findViewById(R.id.riciclatore);
-			vistaLista.setPadding(12, 12, 12, vistaLista.getPaddingBottom());
+			setupToolbar();
+			RecyclerView recyclerView = view.findViewById(R.id.riciclatore);
+			recyclerView.setPadding(12, 12, 12, recyclerView.getPaddingBottom());
 			adapter = new PeopleAdapter();
-			vistaLista.setAdapter(adapter);
-			gliIdsonoNumerici = verificaIdNumerici();
+			recyclerView.setAdapter(adapter);
+			idsAreNumeric = verifyIdsAreNumeric();
 			view.findViewById(R.id.fab).setOnClickListener(v -> {
 				Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
 				intent.putExtra("idIndividuo", "TIZIO_NUOVO");
@@ -82,30 +82,30 @@ public class ListOfPeopleFragment extends Fragment {
 			// Fast scroller
 			StateListDrawable thumbDrawable = (StateListDrawable)ContextCompat.getDrawable(getContext(), R.drawable.scroll_thumb);
 			Drawable lineDrawable = ContextCompat.getDrawable(getContext(), R.drawable.empty);
-			new FastScrollerEx(vistaLista, thumbDrawable, lineDrawable, thumbDrawable, lineDrawable,
+			new FastScrollerEx(recyclerView, thumbDrawable, lineDrawable, thumbDrawable, lineDrawable,
 					 U.dpToPx(40), U.dpToPx(100), 0, true, U.dpToPx(80));
 		}
 		return view;
 	}
 
-	void arredaBarra() {
+	void setupToolbar() {
 		((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(people.size() + " "
 				+ getString(people.size() == 1 ? R.string.person : R.string.persons).toLowerCase());
 		setHasOptionsMenu(people.size() > 1);
 	}
 
-	public class PeopleAdapter extends RecyclerView.Adapter<GestoreIndividuo> implements Filterable {
+	public class PeopleAdapter extends RecyclerView.Adapter<IndividualViewHolder> implements Filterable {
 		@Override
-		public GestoreIndividuo onCreateViewHolder(ViewGroup parent, int type) {
-			View vistaIndividuo = LayoutInflater.from(parent.getContext())
+		public IndividualViewHolder onCreateViewHolder(ViewGroup parent, int type) {
+			View individualView = LayoutInflater.from(parent.getContext())
 					.inflate(R.layout.pezzo_individuo, parent, false);
-			registerForContextMenu(vistaIndividuo);
-			return new GestoreIndividuo(vistaIndividuo);
+			registerForContextMenu(individualView);
+			return new IndividualViewHolder(individualView);
 		}
 		@Override
-		public void onBindViewHolder(GestoreIndividuo gestore, int posizione) {
-			Person person = people.get(posizione);
-			View vistaIndi = gestore.vista;
+		public void onBindViewHolder(IndividualViewHolder holder, int position) {
+			Person person = people.get(position);
+			View indiView = holder.view;
 
 			String label = null;
 			if( order == Order.ID_ASC || order == Order.ID_DESC )
@@ -114,7 +114,7 @@ public class ListOfPeopleFragment extends Fragment {
 				label = U.surname(person);
 			else if( order == Order.KIN_ASC || order == Order.KIN_DESC )
 				label = String.valueOf(person.getExtension("kin"));
-			TextView infoView = vistaIndi.findViewById(R.id.indi_ruolo);
+			TextView infoView = indiView.findViewById(R.id.indi_ruolo);
 			if( label == null )
 				infoView.setVisibility(View.GONE);
 			else {
@@ -123,32 +123,32 @@ public class ListOfPeopleFragment extends Fragment {
 				infoView.setVisibility(View.VISIBLE);
 			}
 
-			TextView vistaNome = vistaIndi.findViewById(R.id.indi_nome);
-			String nome = U.properName(person);
-			vistaNome.setText(nome);
-			vistaNome.setVisibility((nome.isEmpty() && label != null) ? View.GONE : View.VISIBLE);
+			TextView nameView = indiView.findViewById(R.id.indi_nome);
+			String name = U.properName(person);
+			nameView.setText(name);
+			nameView.setVisibility((name.isEmpty() && label != null) ? View.GONE : View.VISIBLE);
 
-			TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
-			String titolo = U.titolo(person);
-			if( titolo.isEmpty() )
-				vistaTitolo.setVisibility(View.GONE);
+			TextView titleView = indiView.findViewById(R.id.indi_titolo);
+			String title = U.title(person);
+			if( title.isEmpty() )
+				titleView.setVisibility(View.GONE);
 			else {
-				vistaTitolo.setText(titolo);
-				vistaTitolo.setVisibility(View.VISIBLE);
+				titleView.setText(title);
+				titleView.setVisibility(View.VISIBLE);
 			}
 
-			int bordo;
+			int border;
 			switch( Gender.getGender(person) ) {
-				case MALE: bordo = R.drawable.casella_bordo_maschio; break;
-				case FEMALE: bordo = R.drawable.casella_bordo_femmina; break;
-				default: bordo = R.drawable.casella_bordo_neutro;
+				case MALE: border = R.drawable.casella_bordo_maschio; break;
+				case FEMALE: border = R.drawable.casella_bordo_femmina; break;
+				default: border = R.drawable.casella_bordo_neutro;
 			}
-			vistaIndi.findViewById(R.id.indi_bordo).setBackgroundResource(bordo);
+			indiView.findViewById(R.id.indi_bordo).setBackgroundResource(border);
 
-			U.details(person, vistaIndi.findViewById(R.id.indi_dettagli));
-			F.showMainImageForPerson(Global.gc, person, vistaIndi.findViewById(R.id.indi_foto));
-			vistaIndi.findViewById(R.id.indi_lutto).setVisibility(U.isDead(person) ? View.VISIBLE : View.GONE);
-			vistaIndi.setTag(person.getId());
+			U.details(person, indiView.findViewById(R.id.indi_dettagli));
+			F.showMainImageForPerson(Global.gc, person, indiView.findViewById(R.id.indi_foto));
+			indiView.findViewById(R.id.indi_lutto).setVisibility(U.isDead(person) ? View.VISIBLE : View.GONE);
+			indiView.setTag(person.getId());
 		}
 		@Override
 		public Filter getFilter() {
@@ -160,9 +160,9 @@ public class ListOfPeopleFragment extends Fragment {
 						people = gc.getPeople();
 					} else {
 						List<Person> filteredList = new ArrayList<>();
-						for( Person pers : gc.getPeople() ) {
-							if( U.properName(pers).toLowerCase().contains(query.toLowerCase()) ) {
-								filteredList.add(pers);
+						for( Person person : gc.getPeople() ) {
+							if( U.properName(person).toLowerCase().contains(query.toLowerCase()) ) {
+								filteredList.add(person);
 							}
 						}
 						people = filteredList;
@@ -184,81 +184,85 @@ public class ListOfPeopleFragment extends Fragment {
 		}
 	}
 
-	class GestoreIndividuo extends RecyclerView.ViewHolder implements View.OnClickListener {
-		View vista;
-		GestoreIndividuo( View vista ) {
-			super( vista );
-			this.vista = vista;
-			vista.setOnClickListener(this);
+	class IndividualViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+		View view;
+		IndividualViewHolder(View view) {
+			super(view);
+			this.view = view;
+			view.setOnClickListener(this);
 		}
 		@Override
 		public void onClick( View vista ) {
-			// Anagrafe per scegliere il parente e restituire i valori a Diagramma, Individuo, Famiglia o Condivisione
-			Person parente = gc.getPerson((String)vista.getTag());
+			// Registry to choose the relative and return the values to Diagram, IndividualActivity, FamilyActivity or SharingActivity
+			Person relative = gc.getPerson((String)vista.getTag());
 			Intent intent = getActivity().getIntent();
 			if( intent.getBooleanExtra("anagrafeScegliParente", false) ) {
-				intent.putExtra( "idParente", parente.getId() );
-				// Cerca una eventuale famiglia esistente che possa ospitare perno
-				String collocazione = intent.getStringExtra("collocazione");
-				if( collocazione != null && collocazione.equals("FAMIGLIA_ESISTENTE") ) {
-					String idFamiglia = null;
+				intent.putExtra( "idParente", relative.getId() );
+				// Look for any existing family that can host the pivot
+				String placement = intent.getStringExtra("collocazione");
+				if( placement != null && placement.equals("FAMIGLIA_ESISTENTE") ) {
+					String familyId = null;
 					switch( intent.getIntExtra("relazione",0) ) {
-						case 1: // Genitore
-							if( parente.getSpouseFamilyRefs().size() > 0 )
-								idFamiglia = parente.getSpouseFamilyRefs().get(0).getRef();
+						case 1: // Parent
+							if( relative.getSpouseFamilyRefs().size() > 0 )
+								familyId = relative.getSpouseFamilyRefs().get(0).getRef();
 							break;
 						case 2:
-							if( parente.getParentFamilyRefs().size() > 0 )
-								idFamiglia = parente.getParentFamilyRefs().get(0).getRef();
+							if( relative.getParentFamilyRefs().size() > 0 )
+								familyId = relative.getParentFamilyRefs().get(0).getRef();
 							break;
 						case 3:
-							for( Family fam : parente.getSpouseFamilies(gc) ) {
+							for( Family fam : relative.getSpouseFamilies(gc) ) {
 								if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() ) {
-									idFamiglia = fam.getId();
+									familyId = fam.getId();
 									break;
 								}
 							}
 							break;
 						case 4:
-							for( Family fam : parente.getParentFamilies(gc) ) {
+							for( Family fam : relative.getParentFamilies(gc) ) {
 								if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() ) {
-									idFamiglia = fam.getId();
+									familyId = fam.getId();
 									break;
 								}
 							}
 							break;
 					}
-					if( idFamiglia != null ) // aggiungiParente() userà la famiglia trovata
-						intent.putExtra( "idFamiglia", idFamiglia );
-					else // aggiungiParente() creerà una nuova famiglia
+					if( familyId != null ) // addRelative() will use the found family
+						intent.putExtra( "idFamiglia", familyId );
+					else // addRelative() will create a new family
 						intent.removeExtra( "collocazione" );
 				}
 				getActivity().setResult( AppCompatActivity.RESULT_OK, intent );
 				getActivity().finish();
-			} else { // Normale collegamento alla scheda individuo
-				// todo Click sulla foto apre la scheda media..
+			} else { // Normal link to the individual file
+				// todo Click on the photo opens the media tab..
 				// intent.putExtra( "scheda", 0 );
-				Memory.setFirst( parente );
+				Memory.setFirst( relative );
 				startActivity( new Intent(getContext(), IndividualPersonActivity.class) );
 			}
 		}
 	}
 
-	// Andandosene dall'attività senza aver scelto un parente resetta l'extra
+	/**
+	 * Leaving the activity without having chosen a relative resets the extra
+	 * */
 	@Override
 	public void onPause() {
 		super.onPause();
 		getActivity().getIntent().removeExtra("anagrafeScegliParente");
 	}
 
-	// Verifica se tutti gli id delle persone contengono numeri
-	// Appena un id contiene solo lettere restituisce falso
-	boolean verificaIdNumerici() {
-		esterno:
+	/**
+	 * Check if all people's ids contain numbers
+	 * As soon as an id contains only letters it returns false
+	 * */
+	boolean verifyIdsAreNumeric() {
+		external:
 		for( Person p : gc.getPeople() ) {
 			for( char c : p.getId().toCharArray() ) {
 				if (Character.isDigit(c))
-					continue esterno;
+					continue external;
 			}
 			return false;
 		}
@@ -269,28 +273,28 @@ public class ListOfPeopleFragment extends Fragment {
 		Collections.sort(people, (p1, p2) -> {
 			switch( order ) {
 				case ID_ASC: // Sort for GEDCOM ID
-					if( gliIdsonoNumerici )
+					if(idsAreNumeric)
 						return U.extractNum(p1.getId()) - U.extractNum(p2.getId());
 					else
 						return p1.getId().compareToIgnoreCase(p2.getId());
 				case ID_DESC:
-					if( gliIdsonoNumerici )
+					if(idsAreNumeric)
 						return U.extractNum(p2.getId()) - U.extractNum(p1.getId());
 					else
 						return p2.getId().compareToIgnoreCase(p1.getId());
 				case SURNAME_ASC: // Sort for surname
-					if (p1.getNames().size() == 0) // i nomi null vanno in fondo
+					if (p1.getNames().size() == 0) // null names go to the bottom
 						return (p2.getNames().size() == 0) ? 0 : 1;
 					if (p2.getNames().size() == 0)
 						return -1;
 					Name n1 = p1.getNames().get(0);
 					Name n2 = p2.getNames().get(0);
-					// anche i nomi con value, given e surname null vanno in fondo
+					// names with value, given, and surname null also go to the bottom
 					if (n1.getValue() == null && n1.getGiven() == null && n1.getSurname() == null)
 						return (n2.getValue() == null) ? 0 : 1;
 					if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
 						return -1;
-					return cognomeNome(p1).compareToIgnoreCase(cognomeNome(p2));
+					return surnameName(p1).compareToIgnoreCase(surnameName(p2));
 				case SURNAME_DESC:
 					if (p1.getNames().size() == 0)
 						return p2.getNames().size() == 0 ? 0 : 1;
@@ -302,7 +306,7 @@ public class ListOfPeopleFragment extends Fragment {
 						return (n2.getValue() == null) ? 0 : 1;
 					if (n2.getValue() == null && n2.getGiven() == null && n2.getSurname() == null)
 						return -1;
-					return cognomeNome(p2).compareToIgnoreCase(cognomeNome(p1));
+					return surnameName(p2).compareToIgnoreCase(surnameName(p1));
 				case DATE_ASC: // Sort for person's main year
 					return getDate(p1) - getDate(p2);
 				case DATE_DESC:
@@ -332,34 +336,38 @@ public class ListOfPeopleFragment extends Fragment {
 		});
 	}
 
-	// Restituisce una stringa con cognome e nome attaccati:
-	// 'SalvadorMichele ' oppure 'ValleFrancesco Maria ' oppure ' Donatella '
-	private static String cognomeNome(Person person) {
+	/**
+	 * Returns a string with surname and firstname attached:
+	 * 'SalvadorMichele ' or 'ValleFrancesco Maria ' or ' Donatella '
+	 * */
+	private static String surnameName(Person person) {
 		Name name = person.getNames().get(0);
-		String epiteto = name.getValue();
-		String nomeDato = "";
-		String cognome = " "; // deve esserci uno spazio per ordinare i nomi senza cognome
-		if( epiteto != null ) {
-			if( epiteto.indexOf('/') > 0 )
-				nomeDato = epiteto.substring( 0, epiteto.indexOf('/') );	// prende il nome prima di '/'
-			if( epiteto.lastIndexOf('/') - epiteto.indexOf('/') > 1 )	// se c'è un cognome tra i due '/'
-				cognome = epiteto.substring( epiteto.indexOf('/')+1, epiteto.lastIndexOf("/") );
-			String prefix = name.getPrefix(); // Solo il nomeDato proveniente dal value potrebbe avere un prefisso, dal given no perché già di suo è solo il nomeDato
-			if( prefix != null && nomeDato.startsWith(prefix) )
-				nomeDato = nomeDato.substring( prefix.length() ).trim();
+		String epithet = name.getValue();
+		String givenName = "";
+		String surname = " "; // there must be a space to sort first names without last names
+		if( epithet != null ) {
+			if( epithet.indexOf('/') > 0 )
+				givenName = epithet.substring( 0, epithet.indexOf('/') );	// takes name before '/'
+			if( epithet.lastIndexOf('/') - epithet.indexOf('/') > 1 )	// if there is a last name between the two '/'
+				surname = epithet.substring( epithet.indexOf('/')+1, epithet.lastIndexOf("/") );
+			String prefix = name.getPrefix(); // Only the givenname coming from value could have a prefix, from given no because it is already only the givenname
+			if( prefix != null && givenName.startsWith(prefix) )
+				givenName = givenName.substring( prefix.length() ).trim();
 		} else {
 			if( name.getGiven() != null )
-				nomeDato = name.getGiven();
+				givenName = name.getGiven();
 			if( name.getSurname() != null )
-				cognome = name.getSurname();
+				surname = name.getSurname();
 		}
 		String surPrefix = name.getSurnamePrefix();
-		if( surPrefix != null && cognome.startsWith(surPrefix) )
-			cognome = cognome.substring( surPrefix.length() ).trim();
-		return cognome.concat( nomeDato );
+		if( surPrefix != null && surname.startsWith(surPrefix) )
+			surname = surname.substring( surPrefix.length() ).trim();
+		return surname.concat( givenName );
 	}
 
-	// riceve una Person e restituisce il primo anno della sua esistenza
+	/**
+	 * receives a Person and returns the first year of its existence
+	 * */
 	GedcomDateConverter gedcomDateConverter = new GedcomDateConverter("");
 	private int findDate(Person person) {
 		for( EventFact event : person.getEventsFacts() ) {
@@ -376,7 +384,9 @@ public class ListOfPeopleFragment extends Fragment {
 		return date == null ? Integer.MAX_VALUE : (int)date;
 	}
 
-	// Calculate the age of a person in days or MAX_VALUE
+	/**
+	 * Calculate the age of a person in days or MAX_VALUE
+	 * */
 	private int calcAge(Person person) {
 		int days = Integer.MAX_VALUE;
 		GedcomDateConverter start = null, end = null;
@@ -415,7 +425,8 @@ public class ListOfPeopleFragment extends Fragment {
 		return age == null ? Integer.MAX_VALUE : (int)age;
 	}
 
-	/** Count how many near relatives a person has: parents, siblings, step-siblings, spouses and children.
+	/**
+	 * Count how many near relatives a person has: parents, siblings, step-siblings, spouses and children.
 	 * Save also the result in the 'kin' extension.
 	 * @param person The person to start from
 	 * @return Number of near relatives (person excluded)
@@ -423,43 +434,43 @@ public class ListOfPeopleFragment extends Fragment {
 	static int countRelatives(Person person) {
 		int count = 0;
 		if( person != null ) {
-			// Famiglie di origine: genitori e fratelli
-			List<Family> listaFamiglie = person.getParentFamilies(gc);
-			for( Family famiglia : listaFamiglie ) {
-				count += famiglia.getHusbandRefs().size();
-				count += famiglia.getWifeRefs().size();
-				for( Person fratello : famiglia.getChildren(gc) ) // solo i figli degli stessi due genitori, non i fratellastri
-					if( !fratello.equals(person) )
+			// Families of origin: parents and siblings
+			List<Family> families = person.getParentFamilies(gc);
+			for( Family family : families ) {
+				count += family.getHusbandRefs().size();
+				count += family.getWifeRefs().size();
+				for( Person sibling : family.getChildren(gc) ) // only children of the same two parents, not half-siblings
+					if( !sibling.equals(person) )
 						count++;
 			}
-			// Fratellastri e sorellastre
-			for( Family famiglia : person.getParentFamilies(gc) ) {
-				for( Person padre : famiglia.getHusbands(gc) ) {
-					List<Family> famigliePadre = padre.getSpouseFamilies(gc);
-					famigliePadre.removeAll(listaFamiglie);
-					for( Family fam : famigliePadre )
+			// Stepbrothers and stepsisters
+			for( Family family : person.getParentFamilies(gc) ) {
+				for( Person father : family.getHusbands(gc) ) {
+					List<Family> fatherFamily = father.getSpouseFamilies(gc);
+					fatherFamily.removeAll(families);
+					for( Family fam : fatherFamily )
 						count += fam.getChildRefs().size();
 				}
-				for( Person madre : famiglia.getWives(gc) ) {
-					List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
-					famiglieMadre.removeAll(listaFamiglie);
-					for( Family fam : famiglieMadre )
+				for( Person mother : family.getWives(gc) ) {
+					List<Family> motherFamily = mother.getSpouseFamilies(gc);
+					motherFamily.removeAll(families);
+					for( Family fam : motherFamily )
 						count += fam.getChildRefs().size();
 				}
 			}
-			// Coniugi e figli
-			for( Family famiglia : person.getSpouseFamilies(gc) ) {
-				count += famiglia.getWifeRefs().size();
-				count += famiglia.getHusbandRefs().size();
+			// Spouses and children
+			for( Family family : person.getSpouseFamilies(gc) ) {
+				count += family.getWifeRefs().size();
+				count += family.getHusbandRefs().size();
 				count--; // Minus their self
-				count += famiglia.getChildRefs().size();
+				count += family.getChildRefs().size();
 			}
 			person.putExtension("kin", count);
 		}
 		return count;
 	}
 
-	// menu opzioni nella toolbar
+	// option menu in the toolbar
 	@Override
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
 
@@ -471,10 +482,10 @@ public class ListOfPeopleFragment extends Fragment {
 		subMenu.add(0, 4, 0, R.string.age);
 		subMenu.add(0, 5, 0, R.string.number_relatives);
 
-		// Ricerca nell'Anagrafe
-		inflater.inflate( R.menu.cerca, menu );	// già questo basta a far comparire la lente con il campo di ricerca
-		final SearchView vistaCerca = (SearchView) menu.findItem(R.id.ricerca).getActionView();
-		vistaCerca.setOnQueryTextListener( new SearchView.OnQueryTextListener() {
+		//Search in the ListOfPeopleActivity
+		inflater.inflate( R.menu.cerca, menu );	// this is already enough to bring up the lens with the search field
+		final SearchView searchView = (SearchView) menu.findItem(R.id.ricerca).getActionView();
+		searchView.setOnQueryTextListener( new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextChange( String query ) {
 				adapter.getFilter().filter(query);
@@ -482,7 +493,7 @@ public class ListOfPeopleFragment extends Fragment {
 			}
 			@Override
 			public boolean onQueryTextSubmit( String q ) {
-				vistaCerca.clearFocus();
+				searchView.clearFocus();
 				return false;
 			}
 		});
@@ -518,17 +529,17 @@ public class ListOfPeopleFragment extends Fragment {
 			}
 			sortPeople();
 			adapter.notifyDataSetChanged();
-			//U.salvaJson( false ); // dubbio se metterlo per salvare subito il riordino delle persone...
+			//U.saveJson( false ); // doubt whether to put it to immediately save the tidying up of people...
 			return true;
 		}
 		return false;
 	}
 
-	// Menu contestuale
+	// contextual Menu
 	private String idIndi;
 	@Override
-	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
-		idIndi = (String)vista.getTag();
+	public void onCreateContextMenu( ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
+		idIndi = (String)view.getTag();
 		menu.add(0, 0, 0, R.string.diagram);
 		String[] familyLabels = Diagram.getFamilyLabels(getContext(), gc.getPerson(idIndi), null);
 		if( familyLabels[0] != null )
@@ -543,25 +554,25 @@ public class ListOfPeopleFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
-		if( id == 0 ) {	// Apri Diagramma
+		if( id == 0 ) {	// Open Diagram
 			U.askWhichParentsToShow(getContext(), gc.getPerson(idIndi), 1);
-		} else if( id == 1 ) { // Famiglia come figlio
+		} else if( id == 1 ) { // Family as child
 			U.askWhichParentsToShow(getContext(), gc.getPerson(idIndi), 2);
-		} else if( id == 2 ) { // Famiglia come coniuge
+		} else if( id == 2 ) { // Family as spouse
 			U.askWhichSpouceToShow(getContext(), gc.getPerson(idIndi), null);
-		} else if( id == 3 ) { // Modifica
+		} else if( id == 3 ) { // Edit
 			Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
 			intent.putExtra("idIndividuo", idIndi);
 			startActivity(intent);
 		} else if( id == 4 ) { // Edit ID
 			U.editId(getContext(), gc.getPerson(idIndi), adapter::notifyDataSetChanged);
-		} else if( id == 5 ) { // Elimina
+		} else if( id == 5 ) { // Delete
 			new AlertDialog.Builder(getContext()).setMessage( R.string.really_delete_person )
 					.setPositiveButton( R.string.delete, (dialog, i) -> {
-						Family[] famiglie = deletePerson(getContext(), idIndi);
+						Family[] families = deletePerson(getContext(), idIndi);
 						adapter.notifyDataSetChanged();
-						arredaBarra();
-						U.controllaFamiglieVuote(getContext(), null, false, famiglie);
+						setupToolbar();
+						U.controllaFamiglieVuote(getContext(), null, false, families);
 					}).setNeutralButton( R.string.cancel, null ).show();
 		} else {
 			return false;
@@ -569,42 +580,45 @@ public class ListOfPeopleFragment extends Fragment {
 		return true;
 	}
 
-	// Cancella tutti i ref nelle famiglie della tal persona
-	// Restituisce l'elenco delle famiglie affette
-	static Family[] scollega( String idScollegando ) {
-		Person egli = gc.getPerson( idScollegando );
-		Set<Family> famiglie = new HashSet<>();
-		for( Family f : egli.getParentFamilies(gc) ) {	// scollega i suoi ref nelle famiglie
-			f.getChildRefs().remove( f.getChildren(gc).indexOf(egli) );
-			famiglie.add( f );
+	/**
+	 * Delete all refs in that person's families
+	 * @return the list of affected families
+	 * */
+	static Family[] disconnect(String idToDisconnect ) {
+		Person personToDisconnect = gc.getPerson( idToDisconnect );
+		Set<Family> families = new HashSet<>();
+		for( Family f : personToDisconnect.getParentFamilies(gc) ) {	// unlink its refs in families
+			f.getChildRefs().remove( f.getChildren(gc).indexOf(personToDisconnect) );
+			families.add( f );
 		}
-		for( Family f : egli.getSpouseFamilies(gc) ) {
-			if( f.getHusbands(gc).contains(egli) ) {
-				f.getHusbandRefs().remove( f.getHusbands(gc).indexOf(egli) );
-				famiglie.add( f );
+		for( Family f : personToDisconnect.getSpouseFamilies(gc) ) {
+			if( f.getHusbands(gc).contains(personToDisconnect) ) {
+				f.getHusbandRefs().remove( f.getHusbands(gc).indexOf(personToDisconnect) );
+				families.add( f );
 			}
-			if( f.getWives(gc).contains(egli) ) {
-				f.getWifeRefs().remove( f.getWives(gc).indexOf(egli) );
-				famiglie.add( f );
+			if( f.getWives(gc).contains(personToDisconnect) ) {
+				f.getWifeRefs().remove( f.getWives(gc).indexOf(personToDisconnect) );
+				families.add( f );
 			}
 		}
-		egli.setParentFamilyRefs( null );	// nell'indi scollega i ref delle famiglie a cui appartiene
-		egli.setSpouseFamilyRefs( null );
-		return famiglie.toArray( new Family[0] );
+		personToDisconnect.setParentFamilyRefs( null );	// in the indi it unlinks the refs of the families it belongs to
+		personToDisconnect.setSpouseFamilyRefs( null );
+		return families.toArray( new Family[0] );
 	}
 
-	/** Delete a person from the tree, possibly find the new root.
+	/**
+	 * Delete a person from the tree, possibly find the new root.
 	 * @param context
 	 * @param personId Id of the person to be deleted
 	 * @return Array of modified families
 	 */
 	static Family[] deletePerson(Context context, String personId) {
-		Family[] families = scollega(personId);
+		Family[] families = disconnect(personId);
 		Person person = gc.getPerson(personId);
 		Memory.setInstanceAndAllSubsequentToNull(person);
 		gc.getPeople().remove(person);
 		gc.createIndexes(); // Necessary
-		String newRootId = U.trovaRadice(gc); // Todo dovrebbe essere: trovaParentePiuProssimo
+		String newRootId = U.trovaRadice(gc); // Todo should read: findNearestRelative
 		if( Global.settings.getCurrentTree().root != null && Global.settings.getCurrentTree().root.equals(personId) ) {
 			Global.settings.getCurrentTree().root = newRootId;
 		}

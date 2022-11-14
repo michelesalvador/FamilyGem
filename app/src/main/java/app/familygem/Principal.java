@@ -115,7 +115,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 				if( listOfPeopleFragment.people.size() == 0 ) // Probably it's a Collections.EmptyList
 					listOfPeopleFragment.people = gc.getPeople(); // replace it with the real ArrayList
 				listOfPeopleFragment.adapter.notifyDataSetChanged();
-				listOfPeopleFragment.arredaBarra();
+				listOfPeopleFragment.setupToolbar();
 			} else if( fragment instanceof ChurchFragment) {
 				((ChurchFragment)fragment).refresh(ChurchFragment.What.RELOAD);
 			} else if( fragment instanceof GalleryFragment) {

@@ -408,7 +408,7 @@ public class Diagram extends Fragment {
 				vistaNome.setVisibility( View.GONE );
 			else vistaNome.setText( nome );
 			TextView vistaTitolo = view.findViewById(R.id.card_title);
-			String titolo = U.titolo( person );
+			String titolo = U.title( person );
 			if( titolo.isEmpty() ) vistaTitolo.setVisibility(View.GONE);
 			else vistaTitolo.setText(titolo);
 			TextView vistaDati = view.findViewById(R.id.card_data);

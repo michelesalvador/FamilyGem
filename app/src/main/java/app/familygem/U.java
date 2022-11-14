@@ -167,7 +167,7 @@ public class U {
 	}
 
 	// riceve una Person e restituisce il titolo nobiliare
-	static String titolo(Person p) {
+	static String title(Person p) {
 		// GEDCOM standard INDI.TITL
 		for( EventFact ef : p.getEventsFacts() )
 			if( ef.getTag() != null && ef.getTag().equals("TITL") && ef.getValue() != null )
@@ -631,7 +631,7 @@ public class U {
 		if( nome.isEmpty() && ruolo != null ) vistaNome.setVisibility(View.GONE);
 		else vistaNome.setText(nome);
 		TextView vistaTitolo = vistaIndi.findViewById(R.id.indi_titolo);
-		String titolo = titolo(persona);
+		String titolo = title(persona);
 		if( titolo.isEmpty() ) vistaTitolo.setVisibility(View.GONE);
 		else vistaTitolo.setText(titolo);
 		details(persona, vistaIndi.findViewById(R.id.indi_dettagli));
