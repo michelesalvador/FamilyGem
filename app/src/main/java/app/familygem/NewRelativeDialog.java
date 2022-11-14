@@ -1,5 +1,3 @@
-// DialogFragment che crea il dialogo per collegare un parente in modalità esperto
-
 package app.familygem;
 
 import android.app.Dialog;
@@ -11,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -19,87 +18,91 @@ import org.folg.gedcom.model.Person;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DialogFragment which creates the dialog to connect a relative in expert mode
+ * */
 public class NewRelativeDialog extends DialogFragment {
 
-	private Person perno;
-	private Family famPrefFiglio; // Famiglia come figlio da mostrare eventualmente per prima nello spinner
-	private Family famPrefSposo; // Famiglia come coniuge da mostrare eventualmente per prima nello spinner
-	private boolean parenteNuovo;
-	private Fragment frammento;
+	private Person pivot;
+	private Family childFamPref; // Family as a child to possibly show first in the spinner
+	private Family spouseFamPref; // Family as a spouse to possibly show first in the spinner
+	private boolean newRelative;
+	private Fragment fragment;
 	private AlertDialog dialog;
 	private Spinner spinner;
-	private List<VoceFamiglia> voci = new ArrayList<>();
-	private int relazione;
+	private List<FamilyItem> items = new ArrayList<>();
+	private int relationship;
 
-	public NewRelativeDialog(Person perno, Family preferitaFiglio, Family preferitaSposo, boolean nuovo, Fragment frammento) {
-		this.perno = perno;
-		famPrefFiglio = preferitaFiglio;
-		famPrefSposo = preferitaSposo;
-		parenteNuovo = nuovo;
-		this.frammento = frammento;
+	public NewRelativeDialog(Person pivot, Family favoriteChild, Family favoriteSpouse, boolean newRelative, Fragment fragment) {
+		this.pivot = pivot;
+		childFamPref = favoriteChild;
+		spouseFamPref = favoriteSpouse;
+		this.newRelative = newRelative;
+		this.fragment = fragment;
 	}
 
 	// Zero-argument constructor: nececessary to re-instantiate this fragment (e.g. rotating the device screen)
 	@Keep // Request to don't remove when minify
 	public NewRelativeDialog() {}
 
+	@NonNull
 	@Override
 	public Dialog onCreateDialog(Bundle bundle) {
 		// Recreate dialog
 		if( bundle != null ) {
-			perno = Global.gc.getPerson(bundle.getString("idPerno"));
-			famPrefFiglio = Global.gc.getFamily(bundle.getString("idFamFiglio"));
-			famPrefSposo = Global.gc.getFamily(bundle.getString("idFamSposo"));
-			parenteNuovo = bundle.getBoolean("nuovo");
-			frammento = getActivity().getSupportFragmentManager().getFragment(bundle, "frammento");
+			pivot = Global.gc.getPerson(bundle.getString("idPerno"));
+			childFamPref = Global.gc.getFamily(bundle.getString("idFamFiglio"));
+			spouseFamPref = Global.gc.getFamily(bundle.getString("idFamSposo"));
+			newRelative = bundle.getBoolean("nuovo");
+			fragment = getActivity().getSupportFragmentManager().getFragment(bundle, "frammento");
 		}
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-		//builder.setTitle( nuovo ? R.string.new_relative : R.string.link_person );
+		//builder.setTitle( newRelative ? R.string.new_relative : R.string.link_person );
 		View vista = requireActivity().getLayoutInflater().inflate(R.layout.nuovo_parente, null);
-		// Spinner per scegliere la famiglia
+		// Spinner to choose the family
 		spinner = vista.findViewById(R.id.nuovoparente_famiglie);
-		ArrayAdapter<VoceFamiglia> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item);
+		ArrayAdapter<FamilyItem> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
-		((View)spinner.getParent()).setVisibility( View.GONE ); // inizialmente lo spinner è nascosto
+		((View)spinner.getParent()).setVisibility( View.GONE ); //initially the spinner is hidden
 
-		RadioButton ruolo1 = vista.findViewById(R.id.nuovoparente_1);
-		ruolo1.setOnCheckedChangeListener((r, selected) -> {
-			if( selected ) popolaSpinner(1);
+		RadioButton radioButton1 = vista.findViewById(R.id.nuovoparente_1);
+		radioButton1.setOnCheckedChangeListener((r, selected) -> {
+			if( selected ) populateSpinner(1);
 		});
-		RadioButton ruolo2 = vista.findViewById(R.id.nuovoparente_2);
-		ruolo2.setOnCheckedChangeListener((r, selected) -> {
-			if( selected ) popolaSpinner(2);
+		RadioButton radioButton2 = vista.findViewById(R.id.nuovoparente_2);
+		radioButton2.setOnCheckedChangeListener((r, selected) -> {
+			if( selected ) populateSpinner(2);
 		});
-		RadioButton ruolo3 = vista.findViewById(R.id.nuovoparente_3);
-		ruolo3.setOnCheckedChangeListener((r, selected) -> {
-			if( selected ) popolaSpinner(3);
+		RadioButton radioButton3 = vista.findViewById(R.id.nuovoparente_3);
+		radioButton3.setOnCheckedChangeListener((r, selected) -> {
+			if( selected ) populateSpinner(3);
 		});
-		RadioButton ruolo4 = vista.findViewById(R.id.nuovoparente_4);
-		ruolo4.setOnCheckedChangeListener((r, selected) -> {
-			if( selected ) popolaSpinner(4);
+		RadioButton radioButton4 = vista.findViewById(R.id.nuovoparente_4);
+		radioButton4.setOnCheckedChangeListener((r, selected) -> {
+			if( selected ) populateSpinner(4);
 		});
 
 		builder.setView(vista).setPositiveButton(android.R.string.ok, (dialog, id) -> {
-			// Setta alcuni valori che verranno passati a EditaIndividuo o ad Anagrafe e arriveranno ad aggiungiParente()
+			// Set some values that will be passed to IndividualEditorActivity or to ListOfPeopleFragment and will arrive at addRelative()
 			Intent intent = new Intent();
-			intent.putExtra("idIndividuo", perno.getId());
-			intent.putExtra("relazione", relazione);
-			VoceFamiglia voceFamiglia = (VoceFamiglia)spinner.getSelectedItem();
-			if( voceFamiglia.famiglia != null )
-				intent.putExtra("idFamiglia", voceFamiglia.famiglia.getId());
-			else if( voceFamiglia.genitore != null ) // Uso 'collocazione' per veicolare l'id del genitore (il terzo attore della scena)
-				intent.putExtra("collocazione", "NUOVA_FAMIGLIA_DI" + voceFamiglia.genitore.getId());
-			else if( voceFamiglia.esistente ) // veicola ad Anagrafe l'intenzione di congiungersi a famiglia esistente
+			intent.putExtra("idIndividuo", pivot.getId());
+			intent.putExtra("relazione", relationship);
+			FamilyItem familyItem = (FamilyItem)spinner.getSelectedItem();
+			if( familyItem.family != null )
+				intent.putExtra("idFamiglia", familyItem.family.getId());
+			else if( familyItem.parent != null ) // Using 'location' to convey the id of the parent (the third actor in the scene)
+				intent.putExtra("collocazione", "NUOVA_FAMIGLIA_DI" + familyItem.parent.getId());
+			else if( familyItem.existing) // conveys to the ListOfPeopleFragment the intention to join an existing family
 				intent.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
-			if( parenteNuovo ) { // Collega persona nuova
+			if(newRelative) { // Collega persona nuova
 				intent.setClass(getContext(), IndividualEditorActivity.class);
 				startActivity(intent);
-			} else { // Collega persona esistente
+			} else { // Connect existing person
 				intent.putExtra("anagrafeScegliParente", true);
 				intent.setClass(getContext(), Principal.class);
-				if( frammento != null )
-					frammento.startActivityForResult(intent, 1401);
+				if( fragment != null )
+					fragment.startActivityForResult(intent, 1401);
 				else
 					getActivity().startActivityForResult(intent, 1401);
 			}
@@ -116,132 +119,141 @@ public class NewRelativeDialog extends DialogFragment {
 
 	@Override
 	public void onSaveInstanceState(Bundle bandolo) {
-		bandolo.putString("idPerno", perno.getId());
-		if( famPrefFiglio != null )
-			bandolo.putString("idFamFiglio", famPrefFiglio.getId());
-		if( famPrefSposo != null )
-			bandolo.putString("idFamSposo", famPrefSposo.getId());
-		bandolo.putBoolean("nuovo", parenteNuovo);
+		bandolo.putString("idPerno", pivot.getId());
+		if( childFamPref != null )
+			bandolo.putString("idFamFiglio", childFamPref.getId());
+		if( spouseFamPref != null )
+			bandolo.putString("idFamSposo", spouseFamPref.getId());
+		bandolo.putBoolean("nuovo", newRelative);
 		//Save the fragment's instance
-		if( frammento != null )
-			getActivity().getSupportFragmentManager().putFragment(bandolo, "frammento", frammento);
+		if( fragment != null )
+			getActivity().getSupportFragmentManager().putFragment(bandolo, "frammento", fragment);
 	}
 
-	// Dice se in una famiglia c'è spazio vuoto per aggiungere uno dei due genitori
-	boolean carenzaConiugi(Family fam) {
+	/**
+	 * Tells if there is empty space in a family to add one of the two parents
+	 * */
+	boolean containsSpouseShortage(Family fam) {
 		return fam.getHusbandRefs().size() + fam.getWifeRefs().size() < 2;
 	}
 
-	private void popolaSpinner( int relazione) {
-		this.relazione = relazione;
-		voci.clear();
-		int select = -1; // Indice della voce da selezionare nello spinner
-		                 // Se rimane -1 seleziona la prima voce dello spinner
-		switch( relazione ) {
-			case 1: // Genitore
-				for( Family fam : perno.getParentFamilies(Global.gc) ) {
-					voci.add( new VoceFamiglia(getContext(),fam) );
-					if( (fam.equals(famPrefFiglio)   // Seleziona la famiglia preferenziale in cui è figlio
-							|| select < 0)           // oppure la prima disponibile
-							&& carenzaConiugi(fam) ) // se hanno spazio genitoriale vuoto
-						select = voci.size() - 1;
+	private void populateSpinner(int relationship) {
+		this.relationship = relationship;
+		items.clear();
+		int select = -1; // Index of the item to select in the spinner. If -1 remains select the first entry of the spinner
+		switch( relationship ) {
+			case 1: // Parent
+				for( Family fam : pivot.getParentFamilies(Global.gc) ) {
+					items.add( new FamilyItem(getContext(),fam) );
+					if( (fam.equals(childFamPref)   // Select the preferred family in which he is a child
+							|| select < 0)           // or the first one available
+							&& containsSpouseShortage(fam) ) // if they have empty parent space
+						select = items.size() - 1;
 				}
-				voci.add( new VoceFamiglia(getContext(),false) );
+				items.add( new FamilyItem(getContext(),false) );
 				if( select < 0 )
-					select = voci.size() - 1; // Seleziona "Nuova famiglia"
+					select = items.size() - 1; // Select "New family"
 				break;
-			case 2: // Fratello
-				for( Family fam : perno.getParentFamilies(Global.gc) ) {
-					voci.add( new VoceFamiglia(getContext(),fam) );
+			case 2: // Sibling
+				for( Family fam : pivot.getParentFamilies(Global.gc) ) {
+					items.add( new FamilyItem(getContext(),fam) );
 					for( Person padre : fam.getHusbands(Global.gc) ) {
 						for( Family fam2 : padre.getSpouseFamilies(Global.gc) )
 							if( !fam2.equals(fam) )
-								voci.add( new VoceFamiglia(getContext(),fam2) );
-						voci.add( new VoceFamiglia(getContext(),padre) );
+								items.add( new FamilyItem(getContext(),fam2) );
+						items.add( new FamilyItem(getContext(),padre) );
 					}
 					for( Person madre : fam.getWives(Global.gc) ) {
 						for( Family fam2 : madre.getSpouseFamilies(Global.gc) )
 							if( !fam2.equals(fam) )
-								voci.add( new VoceFamiglia(getContext(),fam2) );
-						voci.add( new VoceFamiglia(getContext(),madre) );
+								items.add( new FamilyItem(getContext(),fam2) );
+						items.add( new FamilyItem(getContext(),madre) );
 					}
 				}
-				voci.add( new VoceFamiglia(getContext(),false) );
-				// Seleziona la famiglia preferenziale come figlio
+				items.add( new FamilyItem(getContext(),false) );
+				// Select the preferred family as a child
 				select = 0;
-				for( VoceFamiglia voce : voci )
-					if( voce.famiglia != null && voce.famiglia.equals(famPrefFiglio) ) {
-						select = voci.indexOf(voce);
+				for( FamilyItem voce : items)
+					if( voce.family != null && voce.family.equals(childFamPref) ) {
+						select = items.indexOf(voce);
 						break;
 					}
 				break;
-			case 3: // Coniuge
-			case 4: // Figlio
-				for( Family fam : perno.getSpouseFamilies(Global.gc) ) {
-					voci.add( new VoceFamiglia(getContext(),fam) );
-					if( (voci.size() > 1 && fam.equals(famPrefSposo)) // Seleziona la famiglia preferita come coniuge (tranne la prima)
-							|| (carenzaConiugi(fam) && select < 0) ) // Seleziona la prima famiglia dove mancano coniugi
-						select = voci.size() - 1;
+			case 3: // Spouse
+			case 4: // Child
+				for( Family fam : pivot.getSpouseFamilies(Global.gc) ) {
+					items.add( new FamilyItem(getContext(),fam) );
+					if( (items.size() > 1 && fam.equals(spouseFamPref)) // Select your favorite family as a spouse (except the first one)
+							|| (containsSpouseShortage(fam) && select < 0) ) // Select the first family where there are no spouses
+						select = items.size() - 1;
 				}
-				voci.add( new VoceFamiglia(getContext(),perno) );
+				items.add( new FamilyItem(getContext(), pivot) );
 				if( select < 0 )
-					select = voci.size() - 1; // Seleziona "Nuova famiglia di..."
-				// Per un figlio seleziona la famiglia preferenziale (se esiste) altrimenti la prima
-				if( relazione == 4 ) {
+					select = items.size() - 1; // Select "New family of..."
+				// For a child, select the preferred family (if any), otherwise the first
+				if( relationship == 4 ) {
 					select = 0;
-					for( VoceFamiglia voce : voci )
-						if( voce.famiglia != null && voce.famiglia.equals(famPrefSposo) ) {
-							select = voci.indexOf(voce);
+					for( FamilyItem voce : items)
+						if( voce.family != null && voce.family.equals(spouseFamPref) ) {
+							select = items.indexOf(voce);
 							break;
 						}
 				}
 		}
-		if( !parenteNuovo ) {
-			voci.add( new VoceFamiglia(getContext(), true) );
+		if( !newRelative) {
+			items.add( new FamilyItem(getContext(), true) );
 		}
-		ArrayAdapter<VoceFamiglia> adapter = (ArrayAdapter) spinner.getAdapter();
+		ArrayAdapter<FamilyItem> adapter = (ArrayAdapter) spinner.getAdapter();
 		adapter.clear();
-		adapter.addAll(voci);
+		adapter.addAll(items);
 		((View)spinner.getParent()).setVisibility( View.VISIBLE );
 		spinner.setSelection(select);
 		dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
 	}
 
-	// Classe per le voci degli elenchi di famiglie nei dialoghi "A quale famiglia vuoi aggiungere...?"
-	static class VoceFamiglia {
-		Context contesto;
-		Family famiglia;
-		Person genitore;
-		boolean esistente; // perno cercerà di inseririrsi in famiglia già esistente
+	/**
+	 * Class for family list entries in dialogs "Which family do you want to add...?"
+	 * */
+	static class FamilyItem {
+		Context context;
+		Family family;
+		Person parent;
+		boolean existing; // pivot try to fit into the already existing family
 
-		// Famiglia esistente
-		VoceFamiglia(Context contesto, Family famiglia) {
-			this.contesto = contesto;
-			this.famiglia = famiglia;
+		/**
+		 * Existing family
+		 * */
+		FamilyItem(Context context, Family family) {
+			this.context = context;
+			this.family = family;
 		}
 
-		// Nuova famiglia di un genitore
-		VoceFamiglia(Context contesto, Person genitore) {
-			this.contesto = contesto;
-			this.genitore = genitore;
+		/**
+		 * New family of a parent
+		 * */
+		FamilyItem(Context context, Person parent) {
+			this.context = context;
+			this.parent = parent;
 		}
 
-		// Nuova famiglia vuota (false) OPPURE famiglia acquisita dal destinatario (true)
-		VoceFamiglia(Context contesto, boolean esistente) {
-			this.contesto = contesto;
-			this.esistente = esistente;
+		/**
+		 * Empty new family (false) OR recipient-acquired family (true)
+		 * */
+		FamilyItem(Context context, boolean existing) {
+			this.context = context;
+			this.existing = existing;
 		}
 
 		@Override
 		public String toString() {
-			if( famiglia != null)
-				return U.testoFamiglia(contesto, Global.gc, famiglia, true);
-			else if( genitore != null )
-				return contesto.getString(R.string.new_family_of, U.properName(genitore));
-			else if( esistente )
-				return contesto.getString(R.string.existing_family);
+			if( family != null)
+				return U.testoFamiglia(context, Global.gc, family, true);
+			else if( parent != null )
+				return context.getString(R.string.new_family_of, U.properName(parent));
+			else if(existing)
+				return context.getString(R.string.existing_family);
 			else
-				return contesto.getString(R.string.new_family);
+				return context.getString(R.string.new_family);
 		}
 	}
 }

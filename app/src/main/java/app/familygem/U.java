@@ -1207,7 +1207,7 @@ public class U {
 		List<Family> famGenitori = perno.getParentFamilies(Global.gc);
 		List<Family> famSposi = perno.getSpouseFamilies(Global.gc);
 		int relazione = intent.getIntExtra("relazione", 0);
-		ArrayAdapter<NewRelativeDialog.VoceFamiglia> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
+		ArrayAdapter<NewRelativeDialog.FamilyItem> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
 
 		// Genitori: esiste già una famiglia che abbia almeno uno spazio vuoto
 		if( relazione == 1 && famGenitori.size() == 1
@@ -1220,13 +1220,13 @@ public class U {
 		if( relazione == 1 && famGenitori.size() > 1 ) {
 			for( Family fam : famGenitori )
 				if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() )
-					adapter.add(new NewRelativeDialog.VoceFamiglia(contesto, fam));
+					adapter.add(new NewRelativeDialog.FamilyItem(contesto, fam));
 			if( adapter.getCount() == 1 )
-				intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+				intent.putExtra("idFamiglia", adapter.getItem(0).family.getId());
 			else if( adapter.getCount() > 1 ) {
 				new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_parent)
 						.setAdapter(adapter, (dialog, quale) -> {
-							intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+							intent.putExtra("idFamiglia", adapter.getItem(quale).family.getId());
 							concludiMultiMatrimoni(contesto, intent, frammento);
 						}).show();
 				return true;
@@ -1250,16 +1250,16 @@ public class U {
 		} else if( relazione == 3 && famSposi.size() > 1 ) {
 			for( Family fam : famSposi ) {
 				if( fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty() )
-					adapter.add(new NewRelativeDialog.VoceFamiglia(contesto, fam));
+					adapter.add(new NewRelativeDialog.FamilyItem(contesto, fam));
 			}
 			// Nel caso di zero famiglie papabili, idFamiglia rimane null
 			if( adapter.getCount() == 1 ) {
-				intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+				intent.putExtra("idFamiglia", adapter.getItem(0).family.getId());
 			} else if( adapter.getCount() > 1 ) {
 				//adapter.add(new NuovoParente.VoceFamiglia(contesto,perno) );
 				new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_spouse)
 						.setAdapter(adapter, (dialog, quale) -> {
-							intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+							intent.putExtra("idFamiglia", adapter.getItem(quale).family.getId());
 							concludiMultiMatrimoni(contesto, intent, frammento);
 						}).show();
 				return true;
