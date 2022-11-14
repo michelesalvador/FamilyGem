@@ -2,6 +2,8 @@ package app.familygem;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -22,152 +24,154 @@ import static app.familygem.Global.gc;
 
 public class IndividualFamilyFragment extends Fragment {
 
-	private View vistaFamiglia;
-	Person uno;
+	private View familyView;
+	Person person1;
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
-		vistaFamiglia = inflater.inflate(R.layout.individuo_scheda, container, false);
+		familyView = inflater.inflate(R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
-			uno = gc.getPerson( Global.indi);
-			if( uno != null ) {
-				/* ToDo Mostrare/poter settare nelle famiglie geniotriali il pedigree, in particolare 'adopted'
-				LinearLayout scatola = vistaFamiglia.findViewById( R.id.contenuto_scheda );
-				for( ParentFamilyRef pfr : uno.getParentFamilyRefs() ) {
-					U.metti( scatola, "Ref", pfr.getRef() );
-					U.metti( scatola, "Primary", pfr.getPrimary() ); // Custom tag _PRIM _PRIMARY
-					U.metti( scatola, "Relationship Type", pfr.getRelationshipType() ); // Tag PEDI (pedigree)
-					for( Estensione altroTag : U.trovaEstensioni( pfr ) )
-						U.metti( scatola, altroTag.nome, altroTag.testo );
+			person1 = gc.getPerson( Global.indi);
+			if( person1 != null ) {
+				/* TODO Show / be able to set the pedigree in the geniotrial families, in particular 'adopted' // Mostrare/poter settare nelle famiglie geniotriali il pedigree, in particolare 'adopted'
+				LinearLayout container = vistaFamiglia.findViewById( R.id.contenuto_scheda );
+				for( ParentFamilyRef pfr : person1.getParentFamilyRefs() ) {
+					U.place( container, "Ref", pfr.getRef() );
+					U.place( container, "Primary", pfr.getPrimary() ); // Custom tag _PRIM _PRIMARY
+					U.place( container, "Relationship Type", pfr.getRelationshipType() ); // Tag PEDI (pedigree)
+					for( Extension otherTag : U.findExtensions( pfr ) )
+						U.place( container, otherTag.name, otherTag.text );
 				} */
-				// Famiglie di origine: genitori e fratelli
-				List<Family> listaFamiglie = uno.getParentFamilies(gc);
-				for( Family famiglia : listaFamiglie ) {
-					for( Person padre : famiglia.getHusbands(gc) )
-						createCard(padre, Relation.PARENT, famiglia);
-					for( Person madre : famiglia.getWives(gc) )
-						createCard(madre, Relation.PARENT, famiglia);
-					for( Person fratello : famiglia.getChildren(gc) ) // solo i figli degli stessi due genitori, non i fratellastri
-						if( !fratello.equals(uno) )
-							createCard(fratello, Relation.SIBLING, famiglia);
+				// Families of origin: parents and siblings
+				List<Family> listOfFamilies = person1.getParentFamilies(gc);
+				for( Family family : listOfFamilies ) {
+					for( Person father : family.getHusbands(gc) )
+						createCard(father, Relation.PARENT, family);
+					for( Person mother : family.getWives(gc) )
+						createCard(mother, Relation.PARENT, family);
+					for( Person sibling : family.getChildren(gc) ) // only children of the same two parents, not half-siblings
+						if( !sibling.equals(person1) )
+							createCard(sibling, Relation.SIBLING, family);
 				}
-				// Fratellastri e sorellastre
-				for( Family famiglia : uno.getParentFamilies(gc) ) {
-					for( Person padre : famiglia.getHusbands(gc) ) {
-						List<Family> famigliePadre = padre.getSpouseFamilies(gc);
-						famigliePadre.removeAll(listaFamiglie);
-						for( Family fam : famigliePadre )
-							for( Person fratellastro : fam.getChildren(gc) )
-								createCard(fratellastro, Relation.HALF_SIBLING, fam);
+				// Step (half?) brothers and sisters
+				for( Family family : person1.getParentFamilies(gc) ) {
+					for( Person husband : family.getHusbands(gc) ) {
+						List<Family> fatherFamilies = husband.getSpouseFamilies(gc);
+						fatherFamilies.removeAll(listOfFamilies);
+						for( Family fam : fatherFamilies )
+							for( Person stepSibling : fam.getChildren(gc) )
+								createCard(stepSibling, Relation.HALF_SIBLING, fam);
 					}
-					for( Person madre : famiglia.getWives(gc) ) {
-						List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
-						famiglieMadre.removeAll(listaFamiglie);
-						for( Family fam : famiglieMadre )
-							for( Person fratellastro : fam.getChildren(gc) )
-								createCard(fratellastro, Relation.HALF_SIBLING, fam);
+					for( Person wife : family.getWives(gc) ) {
+						List<Family> wifeFamilies = wife.getSpouseFamilies(gc);
+						wifeFamilies.removeAll(listOfFamilies);
+						for( Family fam : wifeFamilies )
+							for( Person stepSibling : fam.getChildren(gc) )
+								createCard(stepSibling, Relation.HALF_SIBLING, fam);
 					}
 				}
-				// Coniugi e figli
-				for( Family family : uno.getSpouseFamilies(gc) ) {
-					for( Person marito : family.getHusbands(gc) )
-						if( !marito.equals(uno) )
-							createCard(marito, Relation.PARTNER, family);
-					for( Person moglie : family.getWives(gc) )
-						if( !moglie.equals(uno) )
-							createCard(moglie, Relation.PARTNER, family);
-					for( Person figlio : family.getChildren(gc) ) {
-						createCard(figlio, Relation.CHILD, family);
+				// Spouses and children
+				for( Family family : person1.getSpouseFamilies(gc) ) {
+					for( Person husband : family.getHusbands(gc) )
+						if( !husband.equals(person1) )
+							createCard(husband, Relation.PARTNER, family);
+					for( Person wife : family.getWives(gc) )
+						if( !wife.equals(person1) )
+							createCard(wife, Relation.PARTNER, family);
+					for( Person child : family.getChildren(gc) ) {
+						createCard(child, Relation.CHILD, family);
 					}
 				}
 			}
 		}
-		return vistaFamiglia;
+		return familyView;
 	}
 
 	void createCard(final Person person, Relation relation, Family family) {
-		LinearLayout scatola = vistaFamiglia.findViewById(R.id.contenuto_scheda);
-		View vistaPersona = U.placeIndividual(scatola, person,
+		LinearLayout container = familyView.findViewById(R.id.contenuto_scheda);
+		View personView = U.placeIndividual(container, person,
 				FamilyActivity.getRole(person, family, relation, false) + FamilyActivity.writeLineage(person, family));
-		vistaPersona.setOnClickListener(v -> {
-			getActivity().finish(); // Rimuove l'attività attale dallo stack
+		personView.setOnClickListener(v -> {
+			getActivity().finish(); // Removes the current activity from the stack
 			Memory.replaceFirst(person);
 			Intent intent = new Intent(getContext(), IndividualPersonActivity.class);
 			intent.putExtra("scheda", 2); // apre la scheda famiglia
 			startActivity(intent);
 		});
-		registerForContextMenu(vistaPersona);
-		vistaPersona.setTag(R.id.tag_famiglia, family); // Il principale scopo di questo tag è poter scollegare l'individuo dalla famiglia
-		                                               // ma è usato anche qui sotto per spostare i molteplici matrimoni
+		registerForContextMenu(personView);
+
+		// The main purpose of this tag is to be able to disconnect the individual from the family
+		// but it is also used below to move multiple marriages:
+		personView.setTag(R.id.tag_famiglia, family);
 	}
 
-	private void spostaRiferimentoFamiglia(int direzione) {
-		Collections.swap(uno.getSpouseFamilyRefs(), posFam, posFam + direzione);
-		U.save(true, uno);
+	private void moveFamilyReference(int direction) {
+		Collections.swap(person1.getSpouseFamilyRefs(), familyPos, familyPos + direction);
+		U.save(true, person1);
 		refresh();
 	}
 
-	// Menu contestuale
+	// context Menu
 	private String indiId;
 	private Person person;
 	private Family family;
-	private int posFam; // posizione della famiglia coniugale per chi ne ha più di una
+	private int familyPos; // position of the marital family for those who have more than one
 	@Override
-	public void onCreateContextMenu( ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info ) {
-		indiId = (String)vista.getTag();
+	public void onCreateContextMenu(@NonNull ContextMenu menu, View view, ContextMenu.ContextMenuInfo info ) {
+		indiId = (String)view.getTag();
 		person = gc.getPerson(indiId);
-		family = (Family)vista.getTag(R.id.tag_famiglia);
-		posFam = -1;
-		if( uno.getSpouseFamilyRefs().size() > 1 && !family.getChildren(gc).contains(person) ) { // solo i coniugi, non i figli
-			List<SpouseFamilyRef> refi = uno.getSpouseFamilyRefs();
-			for( SpouseFamilyRef sfr : refi )
+		family = (Family)view.getTag(R.id.tag_famiglia);
+		familyPos = -1;
+		if( person1.getSpouseFamilyRefs().size() > 1 && !family.getChildren(gc).contains(person) ) { // only spouses, not children
+			List<SpouseFamilyRef> refs = person1.getSpouseFamilyRefs();
+			for( SpouseFamilyRef sfr : refs )
 				if( sfr.getRef().equals(family.getId()) )
-					posFam = refi.indexOf(sfr);
+					familyPos = refs.indexOf(sfr);
 		}
-		// Meglio usare numeri che non confliggano con i menu contestuali delle altre schede individuo
+		// Better to use numbers that do not conflict with the context menus of the other individual tabs
 		menu.add(0, 300, 0, R.string.diagram);
 		String[] familyLabels = Diagram.getFamilyLabels(getContext(), person, family);
 		if( familyLabels[0] != null )
 			menu.add(0, 301, 0, familyLabels[0]);
 		if( familyLabels[1] != null )
 			menu.add(0, 302, 0, familyLabels[1]);
-		if( posFam > 0 )
+		if( familyPos > 0 )
 			menu.add(0, 303, 0, R.string.move_before);
-		if( posFam >= 0 && posFam < uno.getSpouseFamilyRefs().size() - 1 )
+		if( familyPos >= 0 && familyPos < person1.getSpouseFamilyRefs().size() - 1 )
 			menu.add(0, 304, 0, R.string.move_after);
 		menu.add(0, 305, 0, R.string.modify);
 		if( FamilyActivity.findParentFamilyRef(person, family) != null )
 			menu.add(0, 306, 0, R.string.lineage);
 		menu.add(0, 307, 0, R.string.unlink);
-		if( !person.equals(uno) ) // Qui non può eliminare sè stesso
+		if( !person.equals(person1) ) // Here he cannot eliminate himself
 			menu.add(0, 308, 0, R.string.delete);
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if( id == 300 ) { // Diagramma
+		if( id == 300 ) { // Diagram
 			U.askWhichParentsToShow(getContext(), person, 1);
-		} else if( id == 301 ) { // Famiglia come figlio
+		} else if( id == 301 ) { // Family as a son
 			U.askWhichParentsToShow(getContext(), person, 2);
-		} else if( id == 302 ) { // Famiglia come coniuge
+		} else if( id == 302 ) { // Family as a spouse
 			U.askWhichSpouceToShow(getContext(), person, family);
-		} else if( id == 303 ) { // Sposta su
-			spostaRiferimentoFamiglia(-1);
-		} else if( id == 304 ) { // Sposta giù
-			spostaRiferimentoFamiglia(1);
-		} else if( id == 305 ) { // Modifica
+		} else if( id == 303 ) { // Move up
+			moveFamilyReference(-1);
+		} else if( id == 304 ) { // Move down
+			moveFamilyReference(1);
+		} else if( id == 305 ) { // Modify
 			Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
 			intent.putExtra("idIndividuo", indiId);
 			startActivity(intent);
 		} else if( id == 306 ) { // Lineage
 			FamilyActivity.chooseLineage(getContext(), person, family);
-		} else if( id == 307 ) { // Scollega da questa famiglia
+		} else if( id == 307 ) { // Disconnect from this family
 			FamilyActivity.disconnect(indiId, family);
 			refresh();
 			U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
 			U.save(true, family, person);
-		} else if( id == 308 ) { // Elimina
+		} else if( id == 308 ) { // Delete
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
 						ListOfPeopleFragment.deletePerson(getContext(), indiId);
@@ -180,12 +184,14 @@ public class IndividualFamilyFragment extends Fragment {
 		return true;
 	}
 
-	// Rinfresca il contenuto del frammento Familiari
+	/**
+	 * Refresh the contents of the Family Fragment
+	 * */
 	public void refresh() {
 		FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
 		fragmentManager.beginTransaction().detach(this).commit();
 		fragmentManager.beginTransaction().attach(this).commit();
 		requireActivity().invalidateOptionsMenu();
-		// todo aggiorna la data cambiamento nella scheda Fatti
+		// todo update the change date in the Facts tab
 	}
 }
