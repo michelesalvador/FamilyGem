@@ -1,4 +1,3 @@
-// Scheda Foto
 package app.familygem;
 
 import android.os.Bundle;
@@ -18,40 +17,46 @@ import org.folg.gedcom.model.Person;
 import app.familygem.visitor.MediaListContainer;
 import static app.familygem.Global.gc;
 
+/**
+ * Photo tab
+ * */
 public class IndividualMediaFragment extends Fragment {
 
-	Person uno;
-	MediaListContainer visitaMedia;
+	Person person;
+	MediaListContainer mediaListContainer;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View vistaMedia = inflater.inflate(R.layout.individuo_scheda, container, false);
 		if( gc != null ) {
-			final LinearLayout scatola = vistaMedia.findViewById(R.id.contenuto_scheda);
-			uno = gc.getPerson(Global.indi);
-			if( uno != null ) {
-				visitaMedia = new MediaListContainer(gc, true);
-				uno.accept(visitaMedia);
-				RecyclerView griglia = new RecyclerView(scatola.getContext());
-				griglia.setHasFixedSize(true);
-				RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(getContext(), 2);
-				griglia.setLayoutManager(gestoreLayout);
-				MediaGalleryAdapter adattatore = new MediaGalleryAdapter(visitaMedia.mediaList, true);
-				griglia.setAdapter(adattatore);
-				scatola.addView(griglia);
+			final LinearLayout layout = vistaMedia.findViewById(R.id.contenuto_scheda);
+			person = gc.getPerson(Global.indi);
+			if( person != null ) {
+				mediaListContainer = new MediaListContainer(gc, true);
+				person.accept(mediaListContainer);
+				RecyclerView recyclerView = new RecyclerView(layout.getContext());
+				recyclerView.setHasFixedSize(true);
+				RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+				recyclerView.setLayoutManager(layoutManager);
+				MediaGalleryAdapter adapter = new MediaGalleryAdapter(mediaListContainer.mediaList, true);
+				recyclerView.setAdapter(adapter);
+				layout.addView(recyclerView);
 			}
 		}
 		return vistaMedia;
 	}
 
-	// Menu contestuale
+	// context Menu
 	Media media;
-	Object container; // Le immagini non sono solo di 'uno', ma anche dei suoi subordinati EventFact, SourceCitation...
+	/**
+	 * The images are not only of {@link #person}, but also of its subordinates {@link org.folg.gedcom.model.EventFact}, {@link org.folg.gedcom.model.SourceCitation} ...
+	 * */
+	Object container;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
 		media = (Media)view.getTag(R.id.tag_object);
 		container = view.getTag(R.id.tag_contenitore);
-		if( visitaMedia.mediaList.size() > 1 && media.getPrimary() == null )
+		if( mediaListContainer.mediaList.size() > 1 && media.getPrimary() == null )
 			menu.add(0, 0, 0, R.string.primary_media);
 		if( media.getId() != null )
 			menu.add(0, 1, 0, R.string.unlink);
@@ -60,22 +65,22 @@ public class IndividualMediaFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected( MenuItem item ) {
 		int id = item.getItemId();
-		if( id == 0 ) { // Principale
-			for( MediaListContainer.MedCont medCont : visitaMedia.mediaList) // Li resetta tutti poi ne contrassegna uno
+		if( id == 0 ) { // Principal
+			for( MediaListContainer.MedCont medCont : mediaListContainer.mediaList) // It resets them all then marks this.person
 				medCont.media.setPrimary(null);
 			media.setPrimary("Y");
-			if( media.getId() != null ) // Per aggiornare la data cambiamento nel Media record piuttosto che nella Person
+			if( media.getId() != null ) // To update the change date in the Media record rather than in the Person
 				U.save(true, media);
 			else
-				U.save(true, uno);
+				U.save(true, person);
 			refresh();
 			return true;
 		} else if( id == 1 ) { // Scollega
 			GalleryFragment.disconnectMedia(media.getId(), (MediaContainer)container);
-			U.save(true, uno);
+			U.save(true, person);
 			refresh();
 			return true;
-		} else if( id == 2 ) { // Elimina
+		} else if( id == 2 ) { // Delete
 			Object[] capi = GalleryFragment.deleteMedia(media, null);
 			U.save(true, capi);
 			refresh();
@@ -84,16 +89,18 @@ public class IndividualMediaFragment extends Fragment {
 		return false;
 	}
 
-	// Rinfresca il contenuto del frammento Media
+	/**
+	 * Refresh the contents of the Media snippet
+	 * */
 	void refresh() {
-		// ricarica il fragment
+		// refill the fragment
 		FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
 		fragmentManager.beginTransaction().detach(this).commit();
 		fragmentManager.beginTransaction().attach(this).commit();
-		F.showMainImageForPerson(Global.gc, uno, requireActivity().findViewById(R.id.persona_foto));
-		F.showMainImageForPerson(Global.gc, uno, requireActivity().findViewById(R.id.persona_sfondo));
-		// Scheda eventi
-		IndividualEventsFragment tabEventi = (IndividualEventsFragment)requireActivity().getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1");
-		tabEventi.refresh(1);
+		F.showMainImageForPerson(Global.gc, person, requireActivity().findViewById(R.id.persona_foto));
+		F.showMainImageForPerson(Global.gc, person, requireActivity().findViewById(R.id.persona_sfondo));
+		// Events tab
+		IndividualEventsFragment eventsTab = (IndividualEventsFragment)requireActivity().getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.schede_persona + ":1");
+		eventsTab.refresh(1);
 	}
 }
