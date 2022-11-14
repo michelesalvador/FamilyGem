@@ -1,12 +1,11 @@
-// Lista delle Fonti (Sources)
-// A differenza di Chiesa utilizza un adapter per il RecyclerView
-
 package app.familygem;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,50 +37,54 @@ import app.familygem.detail.SourceActivity;
 import app.familygem.visitor.ListOfSourceCitations;
 import static app.familygem.Global.gc;
 
+/**
+ * List of Sources (Sources)
+ * Unlike {@link ChurchFragment} it uses an adapter for the RecyclerView
+ * */
 public class LibraryFragment extends Fragment {
 
-	private List<Source> listaFonti;
-	private BibliotecAdapter adattatore;
-	private int ordine;
+	private List<Source> listOfSources;
+	private LibraryAdapter adapter;
+	private int order;
 
 	@Override
-	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
-		listaFonti = gc.getSources();
-		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listaFonti.size() + " " +
-				getString(listaFonti.size()==1 ? R.string.source : R.string.sources).toLowerCase() );
-		if( listaFonti.size() > 1 )
+	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle bandolo ) {
+		listOfSources = gc.getSources();
+		((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( listOfSources.size() + " " +
+				getString(listOfSources.size()==1 ? R.string.source : R.string.sources).toLowerCase() );
+		if( listOfSources.size() > 1 )
 			setHasOptionsMenu(true);
-		View vista = inflater.inflate(R.layout.biblioteca, container, false);
-		RecyclerView vistaFonti = vista.findViewById( R.id.riciclatore );
-		adattatore = new BibliotecAdapter();
-		vistaFonti.setAdapter( adattatore );
-		vista.findViewById( R.id.fab ).setOnClickListener( v -> newSource( getContext(), null ) );
-		return vista;
+		View view = inflater.inflate(R.layout.biblioteca, container, false);
+		RecyclerView sources = view.findViewById( R.id.riciclatore );
+		adapter = new LibraryAdapter();
+		sources.setAdapter(adapter);
+		view.findViewById( R.id.fab ).setOnClickListener( v -> newSource( getContext(), null ) );
+		return view;
 	}
 
-	public class BibliotecAdapter extends RecyclerView.Adapter<GestoreFonte> implements Filterable {
+	public class LibraryAdapter extends RecyclerView.Adapter<SourceViewHolder> implements Filterable {
 		@Override
-		public GestoreFonte onCreateViewHolder( ViewGroup parent, int type ) {
-			View vistaFonte = LayoutInflater.from( parent.getContext() )
+		public SourceViewHolder onCreateViewHolder(ViewGroup parent, int type ) {
+			View sourceView = LayoutInflater.from( parent.getContext() )
 					.inflate(R.layout.biblioteca_pezzo, parent, false);
-			registerForContextMenu( vistaFonte );
-			return new GestoreFonte( vistaFonte );
+			registerForContextMenu( sourceView );
+			return new SourceViewHolder( sourceView );
 		}
 		@Override
-		public void onBindViewHolder( GestoreFonte gestore, int posizione ) {
-			Source fonte = listaFonti.get(posizione);
-			gestore.vistaId.setText( fonte.getId() );
-			gestore.vistaId.setVisibility( ordine == 1 || ordine == 2 ? View.VISIBLE : View.GONE  );
-			gestore.vistaTitolo.setText( titoloFonte(fonte) );
-			Object volte = fonte.getExtension("citaz");
-			// Conta delle citazioni con il mio metodo
-			if( volte == null ) {
-				volte = quanteCitazioni( fonte );
-				fonte.putExtension("citaz", volte );
+		public void onBindViewHolder(SourceViewHolder holder, int position ) {
+			Source source = listOfSources.get(position);
+			holder.id.setText( source.getId() );
+			holder.id.setVisibility( order == 1 || order == 2 ? View.VISIBLE : View.GONE  );
+			holder.title.setText( sourceTitle(source) );
+			Object times = source.getExtension("citaz");
+			// Count citations with my method
+			if( times == null ) {
+				times = countCitations( source );
+				source.putExtension("citaz", times );
 			}
-			gestore.vistaVolte.setText( String.valueOf(volte) );
+			holder.times.setText( String.valueOf(times) );
 		}
-		// Filtra i titoli delle fonti in base alle parole cercate
+		// Filter source titles based on search words
 		@Override
 		public Filter getFilter() {
 			return new Filter() {
@@ -89,19 +92,19 @@ public class LibraryFragment extends Fragment {
 				protected FilterResults performFiltering(CharSequence charSequence) {
 					String query = charSequence.toString();
 					if (query.isEmpty()) {
-						listaFonti = gc.getSources();
+						listOfSources = gc.getSources();
 					} else {
 						List<Source> filteredList = new ArrayList<>();
-						for (Source font : gc.getSources()) {
-							if( titoloFonte(font).toLowerCase().contains(query.toLowerCase()) ) {
-								filteredList.add(font);
+						for (Source source : gc.getSources()) {
+							if( sourceTitle(source).toLowerCase().contains(query.toLowerCase()) ) {
+								filteredList.add(source);
 							}
 						}
-						listaFonti = filteredList;
+						listOfSources = filteredList;
 					}
-					ordinaFonti(); // Riducendo la query riordina quelli che appaiono
+					sortSources(); // Sorting the query reorders those that appear
 					FilterResults filterResults = new FilterResults();
-					filterResults.values = listaFonti;
+					filterResults.values = listOfSources;
 					return filterResults;
 				}
 				@Override
@@ -112,32 +115,32 @@ public class LibraryFragment extends Fragment {
 		}
 		@Override
 		public int getItemCount() {
-			return listaFonti.size();
+			return listOfSources.size();
 		}
 	}
 
-	class GestoreFonte extends RecyclerView.ViewHolder implements View.OnClickListener {
-		TextView vistaId;
-		TextView vistaTitolo;
-		TextView vistaVolte;
-		GestoreFonte( View vista ) {
-			super( vista );
-			vistaId = vista.findViewById( R.id.biblioteca_id );
-			vistaTitolo = vista.findViewById( R.id.biblioteca_titolo );
-			vistaVolte = vista.findViewById( R.id.biblioteca_volte );
-			vista.setOnClickListener(this);
+	class SourceViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+		TextView id;
+		TextView title;
+		TextView times;
+		SourceViewHolder(View view ) {
+			super( view );
+			id = view.findViewById( R.id.biblioteca_id );
+			title = view.findViewById( R.id.biblioteca_titolo );
+			times = view.findViewById( R.id.biblioteca_volte );
+			view.setOnClickListener(this);
 		}
 		@Override
 		public void onClick( View v ) {
-			// Restituisce l'id di una fonte a Individuo e Dettaglio
+			// Returns the id of a source to IndividualPersonActivity and DetailActivity
 			if( getActivity().getIntent().getBooleanExtra("bibliotecaScegliFonte",false) ) {
 				Intent intent = new Intent();
-				intent.putExtra("idFonte", vistaId.getText().toString() );
+				intent.putExtra("idFonte", id.getText().toString() );
 				getActivity().setResult( Activity.RESULT_OK, intent );
 				getActivity().finish();
 			} else {
-				Source fonte = gc.getSource( vistaId.getText().toString() );
-				Memory.setFirst( fonte );
+				Source source = gc.getSource( id.getText().toString() );
+				Memory.setFirst( source );
 				startActivity( new Intent( getContext(), SourceActivity.class ) );
 			}
 		}
@@ -149,27 +152,29 @@ public class LibraryFragment extends Fragment {
 		getActivity().getIntent().removeExtra("bibliotecaScegliFonte");
 	}
 
-	// Mette in ordine le fonti secondo uno dei criteri
-	// L'ordine poi diventa permanente nel Json
-	private void ordinaFonti() {
-		if( ordine > 0 ) {
-			if( ordine == 5 || ordine == 6 ) {
-				for( Source fonte : listaFonti ) {
-					if( fonte.getExtension("citaz") == null )
-						fonte.putExtension( "citaz", quanteCitazioni(fonte) );
+	/**
+	 * Sort the sources according to one of the criteria.
+	 * The order then becomes permanent in the Json.
+	 * */
+	private void sortSources() {
+		if( order > 0 ) {
+			if( order == 5 || order == 6 ) {
+				for( Source source : listOfSources) {
+					if( source.getExtension("citaz") == null )
+						source.putExtension( "citaz", countCitations(source) );
 				}
 			}
-			Collections.sort( listaFonti, (f1, f2) -> {
-				switch( ordine ) {
-					case 1:	// Ordina per id numerico
+			Collections.sort(listOfSources, (f1, f2) -> {
+				switch(order) {
+					case 1:	// Sort by numeric id
 						return U.extractNum(f1.getId()) - U.extractNum(f2.getId());
 					case 2:
 						return U.extractNum(f2.getId()) - U.extractNum(f1.getId());
-					case 3:	// Ordine alfabeto dei titoli
-						return titoloFonte(f1).compareToIgnoreCase( titoloFonte(f2) );
+					case 3:	// Alphabetical order of titles
+						return sourceTitle(f1).compareToIgnoreCase( sourceTitle(f2) );
 					case 4:
-						return titoloFonte(f2).compareToIgnoreCase( titoloFonte(f1) );
-					case 5:	// Ordina per numero di citazioni
+						return sourceTitle(f2).compareToIgnoreCase( sourceTitle(f1) );
+					case 5:	// Sort by number of citations
 						return U.castJsonInt(f1.getExtension("citaz")) - U.castJsonInt(f2.getExtension("citaz"));
 					case 6:
 						return U.castJsonInt(f2.getExtension("citaz")) - U.castJsonInt(f1.getExtension("citaz"));
@@ -179,8 +184,10 @@ public class LibraryFragment extends Fragment {
 		}
 	}
 
-	// Restituisce il titolo della fonte
-	static String titoloFonte( Source fon ) {
+	/**
+	 * Returns the title of the source
+	 * */
+	static String sourceTitle(Source fon ) {
 		String tit = "";
 		if( fon != null )
 			if( fon.getAbbreviation() != null )
@@ -196,99 +203,105 @@ public class LibraryFragment extends Fragment {
 		return tit;
 	}
 
-	// Restituisce quante volte una fonte viene citata nel Gedcom
-	// Ho provato a riscriverlo come Visitor, che però è molto più lento
-	private int quante;
-	private int quanteCitazioni( Source fon ) {
-		quante = 0;
+	private int count;
+	/**
+	 * Returns how many times a source is cited in Gedcom
+	 * I tried to rewrite it as Visitor, but it's much slower
+	 * */
+	private int countCitations(Source source ) {
+		count = 0;
 		for( Person p : Global.gc.getPeople() ) {
-			cita( p, fon );
+			countCitations( p, source );
 			for( Name n : p.getNames() )
-				cita( n, fon );
+				countCitations( n, source );
 			for( EventFact ef : p.getEventsFacts() )
-				cita( ef, fon );
+				countCitations( ef, source );
 		}
 		for( Family f : Global.gc.getFamilies() ) {
-			cita( f, fon );
+			countCitations( f, source );
 			for( EventFact ef : f.getEventsFacts() )
-				cita( ef, fon );
+				countCitations( ef, source );
 		}
 		for( Note n : Global.gc.getNotes() )
-			cita( n, fon );
-		return quante;
+			countCitations( n, source );
+		return count;
 	}
 
-	// riceve un Object (Person, Name, EventFact...) e conta quante volte è citata la fonte
-	private void cita( Object ogg, Source fonte ) {
-		List<SourceCitation> listaSc;
-		if( ogg instanceof Note )	// se è una Nota
-			listaSc = ((Note) ogg).getSourceCitations();
+	/**
+	 * receives an Object (Person, Name, EventFact...) and counts how many times the source is cited
+	 * */
+	private void countCitations(Object object, Source source ) {
+		List<SourceCitation> sourceCitations;
+		if( object instanceof Note )	// if it is a Note
+			sourceCitations = ((Note) object).getSourceCitations();
 		else {
-			for( Note n : ((NoteContainer) ogg).getNotes() )
-				cita( n, fonte );
-			listaSc = ((SourceCitationContainer) ogg).getSourceCitations();
+			for( Note n : ((NoteContainer) object).getNotes() )
+				countCitations( n, source );
+			sourceCitations = ((SourceCitationContainer) object).getSourceCitations();
 		}
-		for( SourceCitation sc : listaSc ) {
+		for( SourceCitation sc : sourceCitations ) {
 			if( sc.getRef() != null )
-				if( sc.getRef().equals(fonte.getId()) )
-					quante++;
+				if( sc.getRef().equals(source.getId()) )
+					count++;
 		}
 	}
 
-	static void newSource(Context contesto, Object contenitore ){
-		Source fonte = new Source();
-		fonte.setId( U.newID( gc, Source.class ) );
-		fonte.setTitle( "" );
-		gc.addSource( fonte );
-		if( contenitore != null ) {
-			SourceCitation citaFonte = new SourceCitation();
-			citaFonte.setRef( fonte.getId() );
-			if( contenitore instanceof Note ) ((Note)contenitore).addSourceCitation( citaFonte );
-			else ((SourceCitationContainer)contenitore).addSourceCitation( citaFonte );
+	static void newSource(Context context, Object container ){
+		Source source = new Source();
+		source.setId( U.newID( gc, Source.class ) );
+		source.setTitle( "" );
+		gc.addSource( source );
+		if( container != null ) {
+			SourceCitation sourceCitation = new SourceCitation();
+			sourceCitation.setRef( source.getId() );
+			if( container instanceof Note ) ((Note)container).addSourceCitation( sourceCitation );
+			else ((SourceCitationContainer)container).addSourceCitation( sourceCitation );
 		}
-		U.save( true, fonte );
-		Memory.setFirst( fonte );
-		contesto.startActivity( new Intent( contesto, SourceActivity.class ) );
+		U.save( true, source );
+		Memory.setFirst( source );
+		context.startActivity( new Intent( context, SourceActivity.class ) );
 	}
 
-	// Elimina la fonte, i Ref in tutte le SourceCitation che puntano ad essa, e le SourceCitation vuote
-	// Restituisce un array dei capostipiti modificati
-	// Todo le citazioni alla Source eliminata diventano Fonte-nota a cui bisognerebbe poter riattaccare una Source
-	public static Object[] deleteSource(Source fon ) {
-		ListOfSourceCitations citazioni = new ListOfSourceCitations( gc, fon.getId() );
-		for( ListOfSourceCitations.Triplet cita : citazioni.list) {
-			SourceCitation sc = cita.citation;
+	/**
+	 * // Remove the source, the Refs in all SourceCitations pointing to it, and empty SourceCitations
+	 * All citations to the deleted Source become [{@link Source}]s to which a Source should be able to be reattached
+	 * @return an array of modified parents
+	 *  */
+	public static Object[] deleteSource(Source source ) {
+		ListOfSourceCitations citations = new ListOfSourceCitations( gc, source.getId() );
+		for( ListOfSourceCitations.Triplet citation : citations.list) {
+			SourceCitation sc = citation.citation;
 			sc.setRef( null );
-			// Se la SourceCitation non contiene altro si può eliminare
-			boolean eliminabile = true;
+			// If the SourceCitation contains nothing else, it can be deleted
+			boolean deletable = true;
 			if( sc.getPage()!=null || sc.getDate()!=null || sc.getText()!=null || sc.getQuality()!=null
 					|| !sc.getAllNotes(gc).isEmpty() || !sc.getAllMedia(gc).isEmpty() || !sc.getExtensions().isEmpty() )
-				eliminabile = false;
-			if( eliminabile ) {
-				Object contenitore = cita.container;
-				List<SourceCitation> lista;
-				if( contenitore instanceof Note )
-					lista = ((Note)contenitore).getSourceCitations();
+				deletable = false;
+			if( deletable ) {
+				Object container = citation.container;
+				List<SourceCitation> list;
+				if( container instanceof Note )
+					list = ((Note)container).getSourceCitations();
 				else
-					lista = ((SourceCitationContainer)contenitore).getSourceCitations();
-				lista.remove( sc );
-				if( lista.isEmpty() ) {
-					if( contenitore instanceof Note )
-						((Note)contenitore).setSourceCitations( null );
+					list = ((SourceCitationContainer)container).getSourceCitations();
+				list.remove( sc );
+				if( list.isEmpty() ) {
+					if( container instanceof Note )
+						((Note)container).setSourceCitations( null );
 					else
-						((SourceCitationContainer)contenitore).setSourceCitations( null );
+						((SourceCitationContainer)container).setSourceCitations( null );
 				}
 			}
 		}
-		gc.getSources().remove( fon );
+		gc.getSources().remove( source );
 		if( gc.getSources().isEmpty() )
 			gc.setSources( null );
-		gc.createIndexes();	// necessario
-		Memory.setInstanceAndAllSubsequentToNull( fon );
-		return citazioni.getProgenitors();
+		gc.createIndexes();	// necessary
+		Memory.setInstanceAndAllSubsequentToNull( source );
+		return citations.getProgenitors();
 	}
 
-	// menu opzioni nella toolbar
+	// options menu in the toolbar
 	@Override
 	public void onCreateOptionsMenu( Menu menu, MenuInflater inflater ) {
 		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
@@ -297,18 +310,18 @@ public class LibraryFragment extends Fragment {
 		subMenu.add(0, 2, 0, R.string.title);
 		subMenu.add(0, 3, 0, R.string.citations);
 
-		// Ricerca nella Biblioteca
+		// Search in the Library
 		inflater.inflate(R.menu.cerca, menu);
-		final SearchView vistaCerca = (SearchView)menu.findItem(R.id.ricerca).getActionView();
-		vistaCerca.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+		final SearchView searchView = (SearchView)menu.findItem(R.id.ricerca).getActionView();
+		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextChange(String query) {
-				adattatore.getFilter().filter(query);
+				adapter.getFilter().filter(query);
 				return true;
 			}
 			@Override
 			public boolean onQueryTextSubmit(String q) {
-				vistaCerca.clearFocus();
+				searchView.clearFocus();
 				return false;
 			}
 		});
@@ -318,14 +331,14 @@ public class LibraryFragment extends Fragment {
 	public boolean onOptionsItemSelected( MenuItem item ) {
 		int id = item.getItemId();
 		if( id > 0 && id <= 3 ) {
-			if( ordine == id*2-1 )
-				ordine++;
-			else if( ordine == id*2 )
-				ordine--;
+			if( order == id*2-1 )
+				order++;
+			else if( order == id*2 )
+				order--;
 			else
-				ordine = id*2-1;
-			ordinaFonti();
-			adattatore.notifyDataSetChanged();
+				order = id*2-1;
+			sortSources();
+			adapter.notifyDataSetChanged();
 			return true;
 		}
 		return false;

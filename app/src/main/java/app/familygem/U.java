@@ -751,7 +751,7 @@ public class U {
 				View vistaCita = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_citazione_fonte, layout, false);
 				layout.addView(vistaCita);
 				if( citaz.getSource(Global.gc) != null ) // source CITATION
-					((TextView)vistaCita.findViewById(R.id.fonte_testo)).setText(LibraryFragment.titoloFonte(citaz.getSource(Global.gc)));
+					((TextView)vistaCita.findViewById(R.id.fonte_testo)).setText(LibraryFragment.sourceTitle(citaz.getSource(Global.gc)));
 				else // source NOTE, oppure Citazione di fonte che è stata eliminata
 					vistaCita.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
 				String t = "";
@@ -809,7 +809,7 @@ public class U {
 			((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaFonte);
 		} else {
 			vistaTesto.setMaxLines(2);
-			txt = LibraryFragment.titoloFonte(source);
+			txt = LibraryFragment.sourceTitle(source);
 		}
 		vistaTesto.setText(txt);
 		vistaFonte.setOnClickListener(v -> {
