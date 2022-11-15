@@ -61,7 +61,9 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 		return view;
 	}
 
-	// Andandosene dall'attività senza aver scelto una nota condivisa resetta l'extra
+	/**
+	 * Leaving the activity without choosing a shared note resets the extra
+	 * */
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -71,17 +73,17 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 	@Override
 	public void onItemClick(View view, int position) {
 		Note note = adapter.getItem(position);
-		// Restituisce l'id di una nota a Individuo e Dettaglio
+		// Returns the id of a note to IndividualPersonActivity and DetailActivity
 		if( getActivity().getIntent().getBooleanExtra("quadernoScegliNota", false) ) {
 			Intent intent = new Intent();
 			intent.putExtra("idNota", note.getId());
 			getActivity().setResult(AppCompatActivity.RESULT_OK, intent);
 			getActivity().finish();
-		} else { // Apre il dettaglio della nota
+		} else { // Opens the detail of the note
 			Intent intent = new Intent(getContext(), NoteActivity.class);
-			if( note.getId() != null ) { // Nota condivisa
+			if( note.getId() != null ) { // Shared note
 				Memory.setFirst(note);
-			} else { // Nota semplice
+			} else { // Simple note
 				new FindStack(gc, note);
 				intent.putExtra("daQuaderno", true);
 			}
@@ -91,9 +93,9 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		if( item.getItemId() == 0 ) { // Elimina
-			Object[] capi = U.deleteNote(adapter.selectedNote, null);
-			U.save(false, capi);
+		if( item.getItemId() == 0 ) { // Delete
+			Object[] heads = U.deleteNote(adapter.selectedNote, null);
+			U.save(false, heads);
 			getActivity().recreate();
 		} else {
 			return false;
@@ -101,7 +103,6 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 		return true;
 	}
 
-	// menu opzioni nella toolbar
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		// Search inside notes
@@ -121,7 +122,9 @@ public class NotebookFragment extends Fragment implements NotebookAdapter.ItemCl
 		});
 	}
 
-	// Crea una nuova nota condivisa, attaccata a un contenitore oppure slegata
+	/**
+	 * Create a new shared note, attached to a container or unlinked
+	 * */
 	static void newNote(Context context, Object container) {
 		Note note = new Note();
 		String id = U.newID(gc, Note.class);
