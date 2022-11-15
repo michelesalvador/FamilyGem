@@ -52,24 +52,24 @@ public class OptionsActivity extends BaseActivity {
 		// Auto save
 		SwitchCompat save = findViewById(R.id.opzioni_salva);
 		save.setChecked(Global.settings.autoSave);
-		save.setOnCheckedChangeListener((coso, attivo) -> {
-			Global.settings.autoSave = attivo;
+		save.setOnCheckedChangeListener((button, isChecked) -> {
+			Global.settings.autoSave = isChecked;
 			Global.settings.save();
 		});
 
 		// Load tree at startup
 		SwitchCompat load = findViewById(R.id.opzioni_carica);
 		load.setChecked(Global.settings.loadTree);
-		load.setOnCheckedChangeListener((coso, attivo) -> {
-			Global.settings.loadTree = attivo;
+		load.setOnCheckedChangeListener((button, isChecked) -> {
+			Global.settings.loadTree = isChecked;
 			Global.settings.save();
 		});
 
 		// Expert mode
 		SwitchCompat expert = findViewById(R.id.opzioni_esperto);
 		expert.setChecked(Global.settings.expert);
-		expert.setOnCheckedChangeListener((coso, attivo) -> {
-			Global.settings.expert = attivo;
+		expert.setOnCheckedChangeListener((button, isChecked) -> {
+			Global.settings.expert = isChecked;
 			Global.settings.save();
 		});
 
@@ -126,7 +126,9 @@ public class OptionsActivity extends BaseActivity {
 		));
 	}
 
-	// Return the actual Language of the app, otherwise the "system language"
+	/**
+	 * Return the actual Language of the app, otherwise the "system language"
+	 */
 	private Language getActualLanguage() {
 		Locale firstLocale = AppCompatDelegate.getApplicationLocales().get(0);
 		if( firstLocale != null ) {
