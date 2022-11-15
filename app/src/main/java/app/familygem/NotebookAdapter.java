@@ -41,10 +41,10 @@ public class NotebookAdapter extends RecyclerView.Adapter<NotebookAdapter.ViewHo
 			holder.countView.setVisibility(View.GONE);
 		else {
 			holder.countView.setVisibility(View.VISIBLE);
-			NoteReferences contaUso = new NoteReferences(Global.gc, note.getId(), false);
-			holder.countView.setText(String.valueOf(contaUso.count));
+			NoteReferences useCount = new NoteReferences(Global.gc, note.getId(), false);
+			holder.countView.setText(String.valueOf(useCount.count));
 		}
-		holder.itemView.setTag(note); // per il menu contestuale Elimina
+		holder.itemView.setTag(note); // for the Delete context menu
 		holder.textView.setText(note.getValue());
 	}
 
