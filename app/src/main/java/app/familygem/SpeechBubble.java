@@ -1,5 +1,3 @@
-// Fumetto con un suggerimento che compare sopra al FAB
-
 package app.familygem;
 
 import android.app.Activity;
@@ -10,39 +8,42 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+/**
+ * Speech bubble with a hint appearing above the FAB
+ * */
 public class SpeechBubble {
 
-	private final View baloon;
+	private final View bubble;
 
 	public SpeechBubble(Context context, int textId) {
 		this(context, context.getString(textId));
 	}
 
 	public SpeechBubble(Context context, String testo) {
-		Activity attivita = (Activity)context;
-		baloon = attivita.getLayoutInflater().inflate(R.layout.fabuloso, null);
-		baloon.setVisibility(View.INVISIBLE);
-		((LinearLayout)attivita.findViewById(R.id.fab_box)).addView(baloon, 0,
+		Activity activity = (Activity)context;
+		bubble = activity.getLayoutInflater().inflate(R.layout.fabuloso, null);
+		bubble.setVisibility(View.INVISIBLE);
+		((LinearLayout)activity.findViewById(R.id.fab_box)).addView(bubble, 0,
 				new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-		((TextView)baloon.findViewById(R.id.fabuloso_text)).setText(testo);
-		baloon.setOnTouchListener((vista, evento) -> {
+		((TextView) bubble.findViewById(R.id.fabuloso_text)).setText(testo);
+		bubble.setOnTouchListener((view, event) -> {
 			hide();
 			return true;
 		});
-		attivita.findViewById(R.id.fab).setOnTouchListener((vista, evento) -> {
+		activity.findViewById(R.id.fab).setOnTouchListener((view, event) -> {
 			hide();
-			//vista.performClick();
-			return false; // Per eseguire il click dopo
+			//view.performClick();
+			return false; // To execute click later
 		});
 	}
 
 	public void show() {
-		new Handler( Looper.myLooper()).postDelayed( () -> { // compare dopo un secondo
-			baloon.setVisibility( View.VISIBLE );
+		new Handler( Looper.myLooper()).postDelayed( () -> { // appears after one second
+			bubble.setVisibility( View.VISIBLE );
 		}, 1000);
 	}
 
 	public void hide() {
-		baloon.setVisibility( View.INVISIBLE );
+		bubble.setVisibility( View.INVISIBLE );
 	}
 }
