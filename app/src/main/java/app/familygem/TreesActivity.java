@@ -182,7 +182,7 @@ public class TreesActivity extends AppCompatActivity {
 								EditText editaNome = vistaMessaggio.findViewById(R.id.nuovo_nome_albero);
 								editaNome.setText(elencoAlberi.get(position).get("titolo"));
 								AlertDialog dialogo = builder.setPositiveButton(R.string.rename, (dialog, i1) -> {
-									Global.settings.rinomina(treeId, editaNome.getText().toString());
+									Global.settings.rename(treeId, editaNome.getText().toString());
 									aggiornaLista();
 								}).setNeutralButton(R.string.cancel, null).create();
 								editaNome.setOnEditorActionListener((view, action, event) -> {

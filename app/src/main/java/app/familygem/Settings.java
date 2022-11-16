@@ -1,10 +1,11 @@
-// Class that represents the preferences saved in 'settings.json'
-
 package app.familygem;
 
 import android.widget.Toast;
+
 import com.google.gson.Gson;
+
 import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -15,231 +16,265 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Class that represents the preferences saved in 'settings.json'
+ */
 public class Settings {
 
-	String referrer; // È 'start' appena installata l'app (cioè quando non esiste 'files/settings.json')
-	                 // Se l'installazione proviene da una condivisione accoglie un dateId type '20191003215337'
-	                 // Ben presto diventa null e rimane tale, a meno di cancellare tutti i dati
-	List<Tree> trees;
-	public int openTree; // Number of the tree currently opened. 0 means not a particular tree.
-		// Must be consistent with the 'Global.gc' opened tree.
-		// It is not reset by closing the tree, to be reused by 'Load last opened tree at startup'.
-	boolean autoSave;
-	boolean loadTree;
-	public boolean expert;
-	boolean shareAgreement;
-	Diagram diagram;
+    /**
+     * It's 'start' as soon as the app is installed (i.e. when 'files/settings.json' doesn't exist)
+     * If the installation comes from a share it welcomes (accepts/receives/contains) a dateId type '20191003215337'
+     * Soon becomes null and stays null unless all data is deleted
+     */
+    String referrer;
+    List<Tree> trees;
+    /**
+     * Number of the tree currently opened. 0 means not a particular tree.
+     * Must be consistent with the 'Global.gc' opened tree.
+     * It is not reset by closing the tree, to be reused by 'Load last opened tree at startup'.
+     */
+    public int openTree;
+    boolean autoSave;
+    boolean loadTree;
+    public boolean expert;
+    boolean shareAgreement;
+    Diagram diagram;
 
-	// Firt boot values
-	// False booleans don't need to be initialized
-	void init() {
-		referrer = "start";
-		trees = new ArrayList<>();
-		autoSave = true;
-		diagram = new Diagram().init();
-	}
+    /**
+     * First boot values
+     * False booleans don't need to be initialized
+     */
+    void init() {
+        referrer = "start";
+        trees = new ArrayList<>();
+        autoSave = true;
+        diagram = new Diagram().init();
+    }
 
-	int max() {
-		int num = 0;
-		for( Tree tree : trees ) {
-			if( tree.id > num )
-				num = tree.id;
-		}
-		return num;
-	}
+    int max() {
+        int num = 0;
+        for (Tree tree : trees) {
+            if (tree.id > num)
+                num = tree.id;
+        }
+        return num;
+    }
 
-	void add(Tree tree) {
-		trees.add(tree);
-	}
+    void add(Tree tree) {
+        trees.add(tree);
+    }
 
-	void rinomina(int id, String nuovoNome) {
-		for( Tree tree : trees ) {
-			if( tree.id == id ) {
-				tree.title = nuovoNome;
-				break;
-			}
-		}
-		save();
-	}
+    void rename(int id, String newName) {
+        for (Tree tree : trees) {
+            if (tree.id == id) {
+                tree.title = newName;
+                break;
+            }
+        }
+        save();
+    }
 
-	void deleteTree(int id) {
-		for( Tree tree : trees ) {
-			if( tree.id == id ) {
-				trees.remove(tree);
-				break;
-			}
-		}
-		if( id == openTree ) {
-			openTree = 0;
-		}
-		save();
-	}
+    void deleteTree(int id) {
+        for (Tree tree : trees) {
+            if (tree.id == id) {
+                trees.remove(tree);
+                break;
+            }
+        }
+        if (id == openTree) {
+            openTree = 0;
+        }
+        save();
+    }
 
-	public void save() {
-		try {
-			Gson gson = new Gson();
-			String json = gson.toJson(this);
-			FileUtils.writeStringToFile(new File(Global.context.getFilesDir(), "settings.json"), json, "UTF-8");
-		} catch( Exception e ) {
-			Toast.makeText(Global.context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-		}
-	}
+    public void save() {
+        try {
+            FileUtils.writeStringToFile(new File(Global.context.getFilesDir(), "settings.json"), new Gson().toJson(this), "UTF-8"); //TODO extract all uses/new instances of Gson to global
+        } catch (Exception e) {
+            Toast.makeText(Global.context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
 
-	// The tree currently open
-	Tree getCurrentTree() {
-		for( Tree alb : trees ) {
-			if( alb.id == openTree )
-				return alb;
-		}
-		return null;
-	}
+    /**
+     * The tree currently open
+     */
+    Tree getCurrentTree() {
+        for (Tree alb : trees) {
+            if (alb.id == openTree)
+                return alb;
+        }
+        return null;
+    }
 
-	Tree getTree(int treeId) {
-		/* Da quando ho installato Android Studio 4.0, quando compilo con minifyEnabled true
-		   misteriosamente 'alberi' qui è null.
-		   Però non è null se DOPO c'è 'trees = Global.settings.trees'
-		   Davvero incomprensibile!
+    Tree getTree(int treeId) {
+		/* 	Since I installed Android Studio 4.0, when I compile with minifyEnabled true
+			mysteriously 'trees' here is null.
+			But it is not null if AFTER there is 'trees = Global.settings.trees'
+			Really incomprehensible!
 		*/
-		if( trees == null ) {
-			trees = Global.settings.trees;
-		}
-		if( trees != null )
-			for( Tree tree : trees ) {
-				if( tree.id == treeId ) {
-					if( tree.uris == null ) // traghettatore inserito in Family Gem 0.7.15
-						tree.uris = new LinkedHashSet<>();
-					return tree;
-				}
-			}
-		return null;
-	}
+        if (trees == null) {
+            trees = Global.settings.trees;
+        }
+        if (trees != null)
+            for (Tree tree : trees) {
+                if (tree.id == treeId) {
+                    if (tree.uris == null) // ferryman ( ?? "traghettatore") added to Family Gem 0.7.15
+                        tree.uris = new LinkedHashSet<>();
+                    return tree;
+                }
+            }
+        return null;
+    }
 
-	static class Diagram {
-		int ancestors;
-		int uncles;
-		int descendants;
-		int siblings;
-		int cousins;
-		boolean spouses;
+    static class Diagram {
+        int ancestors;
+        int uncles;
+        int descendants;
+        int siblings;
+        int cousins;
+        boolean spouses;
 
-		// Default values
-		Diagram init() {
-			ancestors = 3;
-			uncles = 2;
-			descendants = 3;
-			siblings = 2;
-			cousins = 1;
-			spouses = true;
-			return this;
-		}
-	}
+        /**
+         * Default values
+         */
+        Diagram init() {
+            ancestors = 3;
+            uncles = 2;
+            descendants = 3;
+            siblings = 2;
+            cousins = 1;
+            spouses = true;
+            return this;
+        }
+    }
 
-/*
-"grado":
-0	albero creato da zero in Italia
-	rimane 0 anche aggiungendo il submitter principale, condividendolo e ricevendo novità
-9	albero spedito per la condivisione in attesa di marchiare con 'passato' tutti i submitter
-10	albero ricevuto tramite condivisione in Australia
-	non potrà mai più ritornare 0
-20	albero ritornato in Italia dimostratosi un derivato da uno zero (o da uno 10).
-	solo se è 10 può diventare 20. Se per caso perde lo status di derivato ritorna 10 (mai 0)
-30	albero derivato da cui sono state estratte tutte le novità OPPURE privo di novità già all'arrivo (grigio). Eliminabile
-*/
+    static class Tree {
+        int id;
+        String title;
+        Set<String> dirs;
+        Set<String> uris;
+        int persons;
+        int generations;
+        int media;
+        String root;
+        /**
+         * identification data of shares across time and space
+         */
+        List<Share> shares;
+        /**
+         * id of the Person root of the Sharing tree
+         */
+        String shareRoot;
 
-	static class Tree {
-		int id;
-		String title;
-		Set<String> dirs;
-		Set<String> uris;
-		int persons;
-		int generations;
-		int media;
-		String root;
-		List<Share> shares; // dati identificativi delle condivisioni attraverso il tempo e lo spazio
-		String shareRoot; // id della Person radice dell'albero in Condivisione
-		int grade; // grado della condivisione
-		Set<Birthday> birthdays;
+        /**
+         * "grade" (degree?) of sharing
+         * 0 tree created from scratch in Italy
+         * it stays 0 even adding main submitter, sharing it and getting news
+         * 9 tree sent for sharing waiting to mark all submitters with 'passed'
+         * 10 tree received via sharing in Australia
+         * can never return to 0
+         * 20 tree returned to Italy proved to be a derivative of a zero (or a 10).
+         * only if it is 10 can it become 20. If by chance it loses the status of derivative it returns 10 (never 0)
+         * 30 derived tree from which all novelties have been extracted OR with no novelties already upon arrival (gray). Disposable
+         */
+        int grade;
 
-		Tree(int id, String title, String dir, int persons, int generations, String root, List<Share> shares, int grade) {
-			this.id = id;
-			this.title = title;
-			dirs = new LinkedHashSet<>();
-			if( dir != null )
-				dirs.add(dir);
-			uris = new LinkedHashSet<>();
-			this.persons = persons;
-			this.generations = generations;
-			this.root = root;
-			this.shares = shares;
-			this.grade = grade;
-			birthdays = new HashSet<>();
-		}
+        Set<Birthday> birthdays;
 
-		void aggiungiCondivisione(Share share) {
-			if( shares == null )
-				shares = new ArrayList<>();
-			shares.add(share);
-		}
-	}
+        Tree(int id, String title, String dir, int persons, int generations, String root, List<Share> shares, int grade) {
+            this.id = id;
+            this.title = title;
+            dirs = new LinkedHashSet<>();
+            if (dir != null)
+                dirs.add(dir);
+            uris = new LinkedHashSet<>();
+            this.persons = persons;
+            this.generations = generations;
+            this.root = root;
+            this.shares = shares;
+            this.grade = grade;
+            birthdays = new HashSet<>();
+        }
 
-	// The essential data of a share
-	static class Share {
-		String dateId; // on compressed date and time format: YYYYMMDDhhmmss
-		String submitter; // Submitter id
-		Share(String dateId, String submitter) {
-			this.dateId = dateId;
-			this.submitter = submitter;
-		}
-	}
+        void aggiungiCondivisione(Share share) {
+            if (shares == null)
+                shares = new ArrayList<>();
+            shares.add(share);
+        }
+    }
 
-	// Birthday of one person
-	static class Birthday {
-		String id; // E.g. 'I123'
-		String given; // 'John'
-		String name; // 'John Doe III'
-		long date; // Date of next birthday in Unix time
-		int age; // Turned years
-		public Birthday(String id, String given, String name, long date, int age) {
-			this.id = id;
-			this.given = given;
-			this.name = name;
-			this.date = date;
-			this.age = age;
-		}
-		@Override
-		public String toString() {
-			DateFormat sdf = new SimpleDateFormat("d MMM y", Locale.US);
-			return "[" + name + ": " + age + " (" + sdf.format(date) + ")]";
-		}
-	}
+    /**
+     * The essential data of a share
+     */
+    static class Share {
+        /**
+         * on compressed date and time format: YYYYMMDDhhmmss
+         */
+        String dateId;
+        /**
+         * Submitter id
+         */
+        String submitter;
 
-	// Blueprint of the file 'settings.json' inside a backup, share or example ZIP file
-	// It contains basic info of the zipped tree
-	static class ZippedTree {
-		String title;
-		int persons;
-		int generations;
-		String root;
-		List<Share> shares;
-		int grade; // il grado di destinazione dell'albero zippato
+        Share(String dateId, String submitter) {
+            this.dateId = dateId;
+            this.submitter = submitter;
+        }
+    }
 
-		ZippedTree(String title, int persons, int generations, String root, List<Share> shares, int grade) {
-			this.title = title;
-			this.persons = persons;
-			this.generations = generations;
-			this.root = root;
-			this.shares = shares;
-			this.grade = grade;
-		}
+    /**
+     * Birthday of one person
+     */
+    static class Birthday {
+        String id; // E.g. 'I123'
+        String given; // 'John'
+        String name; // 'John Doe III'
+        long date; // Date of next birthday in Unix time
+        int age; // Turned years
 
-		File save() {
-			File fileSettaggi = new File(Global.context.getCacheDir(), "settings.json");
-			Gson gson = new Gson();
-			String salvando = gson.toJson(this);
-			try {
-				FileUtils.writeStringToFile(fileSettaggi, salvando, "UTF-8");
-			} catch( Exception e ) {}
-			return fileSettaggi;
-		}
-	}
+        public Birthday(String id, String given, String name, long date, int age) {
+            this.id = id;
+            this.given = given;
+            this.name = name;
+            this.date = date;
+            this.age = age;
+        }
+
+        @Override
+        public String toString() {
+            DateFormat sdf = new SimpleDateFormat("d MMM y", Locale.US);
+            return "[" + name + ": " + age + " (" + sdf.format(date) + ")]";
+        }
+    }
+
+    /**
+     * Blueprint of the file 'settings.json' inside a backup, share or example ZIP file
+     * It contains basic info of the zipped tree
+     */
+    static class ZippedTree {
+        String title;
+        int persons;
+        int generations;
+        String root;
+        List<Share> shares;
+        int grade; // the destination "grade" (degree?) of the zipped tree
+
+        ZippedTree(String title, int persons, int generations, String root, List<Share> shares, int grade) {
+            this.title = title;
+            this.persons = persons;
+            this.generations = generations;
+            this.root = root;
+            this.shares = shares;
+            this.grade = grade;
+        }
+
+        File save() {
+            File settingsFile = new File(Global.context.getCacheDir(), "settings.json");
+            try {
+                FileUtils.writeStringToFile(settingsFile, new Gson().toJson(this), "UTF-8");
+            } catch (Exception e) {
+            }
+            return settingsFile;
+        }
+    }
 }
