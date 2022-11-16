@@ -1094,7 +1094,7 @@ public class U {
 	}
 
 	// Restituisce il primo autore non passato
-	static Submitter autoreFresco(Gedcom gc) {
+	static Submitter newSubmitter(Gedcom gc) {
 		for( Submitter autore : gc.getSubmitters() ) {
 			if( autore.getExtension("passed") == null )
 				return autore;
