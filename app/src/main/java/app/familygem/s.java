@@ -1,22 +1,23 @@
 package app.familygem;
 
-// Scrivi in breve
-
+/**
+ * Shorthand wrapper for logging
+ * */
 public class s {
 
 	public static void l(Object... objects) {
-		String str = "";
+		StringBuilder str = new StringBuilder();
 		if( objects != null ) {
 			for( Object obj : objects )
-				str += obj + " ";
+				str.append(obj).append(" ");
 		} else
-			str += objects;
+			str.append((String) null);
 		System.out.println(".\t" + str);
 		//android.util.Log.v("v", str);
 	}
 	
-	public static void p( Object parola ) {
-		System.out.print( parola );
+	public static void p( Object word ) {
+		System.out.print( word );
 	}
 	
 }
