@@ -249,8 +249,8 @@ public class NewTree extends BaseActivity {
             if (context instanceof TreesActivity) {
                 TreesActivity treesPage = (TreesActivity) context;
                 treesPage.runOnUiThread(() -> {
-                    treesPage.rotella.setVisibility(View.GONE);
-                    treesPage.aggiornaLista();
+                    treesPage.wheel.setVisibility(View.GONE);
+                    treesPage.updateList();
                 });
             } else // Example tree (Simpson) or backup (from FacadeActivity or NewTree)
                 context.startActivity(new Intent(context, TreesActivity.class));
@@ -326,7 +326,7 @@ public class NewTree extends BaseActivity {
                 if (treeName.lastIndexOf('.') > 0) // Remove the extension
                     treeName = treeName.substring(0, treeName.lastIndexOf('.'));
                 // Save the settings in preferences
-                String idRadice = U.trovaRadice(gedcom);
+                String idRadice = U.findRoot(gedcom);
                 Global.settings.add(new Settings.Tree(newNumber, treeName, folderPath,
                         gedcom.getPeople().size(), TreeInfoActivity.countGenerations(gedcom, idRadice), idRadice, null, 0));
                 new Notifier(this, gedcom, newNumber, Notifier.What.CREATE);

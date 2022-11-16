@@ -618,7 +618,7 @@ public class ListOfPeopleFragment extends Fragment {
 		Memory.setInstanceAndAllSubsequentToNull(person);
 		gc.getPeople().remove(person);
 		gc.createIndexes(); // Necessary
-		String newRootId = U.trovaRadice(gc); // Todo should read: findNearestRelative
+		String newRootId = U.findRoot(gc); // Todo should read: findNearestRelative
 		if( Global.settings.getCurrentTree().root != null && Global.settings.getCurrentTree().root.equals(personId) ) {
 			Global.settings.getCurrentTree().root = newRootId;
 		}

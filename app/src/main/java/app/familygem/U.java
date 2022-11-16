@@ -112,12 +112,12 @@ public class U {
 			if( root != null )
 				return root.getId();
 		}
-		return trovaRadice(gedcom);
+		return findRoot(gedcom);
 	}
 
 	// restituisce l'id della Person iniziale di un Gedcom
 	// Todo Integrate into getRootId(Gedcom,Tree) ???
-	static String trovaRadice(Gedcom gc) {
+	static String findRoot(Gedcom gc) {
 		if( gc.getHeader() != null )
 			if( valoreTag(gc.getHeader().getExtensions(), "_ROOT") != null )
 				return valoreTag(gc.getHeader().getExtensions(), "_ROOT");

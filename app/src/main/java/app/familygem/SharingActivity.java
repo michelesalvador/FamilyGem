@@ -155,7 +155,7 @@ public class SharingActivity extends BaseActivity {
 			rootId = tree.root;
 			tree.shareRoot = rootId; // to be able to share the tree immediately without changing the root
 		} else {
-			rootId = U.trovaRadice(gc);
+			rootId = U.findRoot(gc);
 			tree.shareRoot = rootId;
 		}
 		Person person = gc.getPerson(rootId);

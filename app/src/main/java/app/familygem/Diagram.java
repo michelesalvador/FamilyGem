@@ -142,7 +142,7 @@ public class Diagram extends Fragment {
 			box.removeAllViews();
 			box.setAlpha(0);
 
-			String[] ids = {Global.indi, Global.settings.getCurrentTree().root, U.trovaRadice(gc)};
+			String[] ids = {Global.indi, Global.settings.getCurrentTree().root, U.findRoot(gc)};
 			for( String id : ids ) {
 				fulcrum = gc.getPerson(id);
 				if( fulcrum != null )

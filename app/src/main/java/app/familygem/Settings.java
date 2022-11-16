@@ -168,14 +168,13 @@ public class Settings {
 
         /**
          * "grade" (degree?) of sharing
-         * 0 tree created from scratch in Italy
-         * it stays 0 even adding main submitter, sharing it and getting news
-         * 9 tree sent for sharing waiting to mark all submitters with 'passed'
-         * 10 tree received via sharing in Australia
-         * can never return to 0
-         * 20 tree returned to Italy proved to be a derivative of a zero (or a 10).
-         * only if it is 10 can it become 20. If by chance it loses the status of derivative it returns 10 (never 0)
-         * 30 derived tree from which all novelties have been extracted OR with no novelties already upon arrival (gray). Disposable
+         * <ul>
+         * <li>0 tree created from scratch in Italy. it stays 0 even adding main submitter, sharing it and getting news</li>
+         * <li>9 tree sent for sharing waiting to mark all submitters with 'passed'</li>
+         * <li>10 tree received via sharing in Australia. Can never return to 0</li>
+         * <li>20 tree returned to Italy proved to be a derivative of a zero (or a 10). Only if it is 10 can it become 20. If by chance it loses the status of derivative it returns 10 (never 0)</il>
+         * <li>30 derived tree from which all novelties have been extracted OR with no novelties already upon arrival (gray). Disposable</il>
+         * </ul>
          */
         int grade;
 

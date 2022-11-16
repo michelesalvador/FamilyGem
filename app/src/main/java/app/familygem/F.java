@@ -246,7 +246,7 @@ public class F {
         MediaList mediaList = new MediaList(gc, 0);
         p.accept(mediaList);
         boolean found = false;
-        for (Media med : mediaList.list) { // Look for a media marked Primary Y
+        for (Media med : mediaList.list) { // Look for a media marked Primary 'Y'
             if (med.getPrimary() != null && med.getPrimary().equals("Y")) {
                 showImage(med, img, null);
                 found = true;
