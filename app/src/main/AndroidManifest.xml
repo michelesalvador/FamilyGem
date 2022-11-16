@@ -29,7 +29,7 @@
 				android:resource="@xml/provider_paths"/>
 		</provider>
 		<activity
-			android:name=".Facciata"
+			android:name=".FacadeActivity"
 			android:noHistory="true"
 			android:exported="true">
 			<intent-filter>
@@ -56,84 +56,84 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".Alberi"
+			android:name=".TreesActivity"
 			android:launchMode="singleTask" />
 		<activity
-			android:name=".AlberoNuovo"
+			android:name=".NewTree"
 			android:label="@string/new_tree"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
 			android:name=".Principal"
 			android:theme="@style/AppTheme.NoActionBar"/>
 		<activity
-			android:name=".Opzioni"
+			android:name=".OptionsActivity"
 			android:label="@string/settings"
-			android:parentActivityName=".Alberi"/>
+			android:parentActivityName=".TreesActivity"/>
 		<activity
-			android:name=".Lapide"
+			android:name=".TombstoneActivity"
 			android:label="@string/about"
-			android:parentActivityName=".Opzioni" />
+			android:parentActivityName=".OptionsActivity" />
 		<activity
-			android:name=".InfoAlbero"
+			android:name=".TreeInfoActivity"
 			android:label="@string/tree_info"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
-			android:name=".CartelleMedia"
+			android:name=".MediaFoldersActivity"
 			android:label="@string/media_folders" />
 		<activity
-			android:name=".Condivisione"
+			android:name=".SharingActivity"
 			android:label="@string/share_tree"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
-			android:name=".Compara"
+			android:name=".CompareActivity"
 			android:label="@string/tree_with_news"
-			android:parentActivityName=".Alberi" />
+			android:parentActivityName=".TreesActivity" />
 		<activity
-			android:name=".Confrontatore"
+			android:name=".TreeComparatorActivity"
 			android:label="@string/import_news"
-			android:parentActivityName=".Compara" />
+			android:parentActivityName=".CompareActivity" />
 		<activity
-			android:name=".Conferma"
+			android:name=".ConfirmationActivity"
 			android:label="@string/confirm_news"
-			android:parentActivityName=".Compara" />
+			android:parentActivityName=".CompareActivity" />
 		<activity
 			android:name=".DiagramSettings"
 			android:label="@string/diagram_settings"
 			android:parentActivityName=".Principal" />
 		<activity
-			android:name=".Individuo"
+			android:name=".IndividualPersonActivity"
 			android:theme="@style/AppTheme.NoActionBar" />
 		<activity
-			android:name=".detail.Famiglia" />
+			android:name=".detail.FamilyActivity" />
 		<activity
-			android:name=".detail.Nome" />
+			android:name=".detail.NameActivity" />
 		<activity
-			android:name=".detail.Archivio" />
+			android:name=".detail.RepositoryActivity" />
 		<activity
-			android:name=".detail.ArchivioRef" />
+			android:name=".detail.RepositoryRefActivity" />
 		<activity
-			android:name=".detail.Nota" />
+			android:name=".detail.NoteActivity" />
 		<activity
-			android:name=".detail.Fonte" />
+			android:name=".detail.SourceActivity" />
 		<activity
-			android:name=".detail.CitazioneFonte" />
+			android:name=".detail.SourceCitationActivity" />
 		<activity
-			android:name=".detail.Immagine" />
+			android:name=".detail.ImageActivity" />
 		<activity
-			android:name=".detail.Evento" />
+			android:name=".detail.EventActivity" />
 		<activity
-			android:name=".detail.Indirizzo" />
+			android:name=".detail.AddressActivity" />
 		<activity
-			android:name=".detail.Autore" />
+			android:name=".detail.AuthorActivity" />
 		<activity
-			android:name=".detail.Estensione" />
+			android:name=".detail.ExtensionActivity" />
 		<activity
-			android:name=".detail.Cambiamenti" />
+			android:name=".detail.ChangesActivity" />
 		<activity
-			android:name=".Lavagna"
-			android:parentActivityName=".detail.Immagine"
+			android:name=".BlackboardActivity"
+			android:parentActivityName=".detail.ImageActivity"
 			android:theme="@style/AppTheme.NoActionBar" />
-		<activity android:name=".EditaIndividuo" />
+		<activity android:name=".IndividualEditorActivity" />
 		<activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
 		<service
 			android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

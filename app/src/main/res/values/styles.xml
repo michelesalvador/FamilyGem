@@ -66,6 +66,7 @@
 		<item name="android:layout_height">100dp</item>
 		<item name="android:background">@drawable/ruota_sfondo</item>
 		<item name="android:descendantFocusability">blocksDescendants</item>
+		<item name="colorControlNormal">#00000000</item><!--Hides the infamous blue dividing lines-->
 	</style>
 
 	<style name="AppTheme.BottoneColorato" parent="Widget.AppCompat.Button.Colored">

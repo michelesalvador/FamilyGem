@@ -77,7 +77,9 @@ public class MoveLayout extends FrameLayout {
 		measureChildren(spec, spec);
 	}
 
-	// Intercept motion events also on children with click listener (person cards)
+	/**
+	 * Intercept motion events also on children with click listener (person cards)
+	 * */
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent event) {
 		switch( event.getActionMasked() ) {
@@ -156,8 +158,8 @@ public class MoveLayout extends FrameLayout {
 							mendY, childHeight - height - mendY,
 							overX, overY);
 				}
-				postInvalidate(); //invalidate(); superfluo?
-				//velocityTracker.recycle(); // Provoca IllegalStateException: Already in the pool!
+				postInvalidate(); //invalidate(); superfluous?
+				//velocityTracker.recycle(); // throws IllegalStateException: Already in the pool!
 				return false;
 		}
 		return super.onTouchEvent(event);
@@ -171,8 +173,10 @@ public class MoveLayout extends FrameLayout {
 		}
 	}
 
-	// Calculate overscroll and mend
-	// @param centering Add to 'mendX' and to 'mendY' the space to center a small child inside moveLayout
+	/**
+	 * Calculate overscroll and mend
+	 * @param centering Add to 'mendX' and to 'mendY' the space to center a small child inside moveLayout
+	 * */
 	void calcOverScroll(boolean centering) {
 		overX = (int)(width / 4 * scale);
 		overY = (int)(height / 4 * scale);
@@ -194,10 +198,12 @@ public class MoveLayout extends FrameLayout {
 		return scale;
 	}
 
-	// Scroll to x and y
+	/**
+	 * Scroll to x and y
+	 * */
 	void panTo(int x, int y) {
 		calcOverScroll(false);
-		// Remove eccessive space around
+		// Remove excessive space around
 		if( childHeight * scale - y < height ) // There is space below
 			y = (int)(childHeight * scale - height);
 		if( y < 0 ) // There is space above

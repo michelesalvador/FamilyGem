@@ -1,4 +1,4 @@
--keep class app.familygem.Settings, app.familygem.Chiesa, app.familygem.Podio # for R8.fullMode
+-keep class app.familygem.Settings, app.familygem.ChurchFragment, app.familygem.ListOfAuthorsFragment # for R8.fullMode
 -keepclassmembernames class app.familygem.Settings, app.familygem.Settings$Tree, app.familygem.Settings$Diagram, app.familygem.Settings$ZippedTree, app.familygem.Settings$Share { *; }
 -keepclassmembers class org.folg.gedcom.model.* { *; }
 #-keeppackagenames org.folg.gedcom.model # Gedcom parser lo chiama come stringa eppure funziona anche senza

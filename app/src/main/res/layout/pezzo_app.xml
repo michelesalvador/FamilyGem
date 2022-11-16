@@ -7,7 +7,7 @@
 	android:orientation="horizontal">
 
 	<ImageView
-		android:id="@+id/intento_icona"
+		android:id="@+id/intent_icona"
 		android:layout_width="48dp"
 		android:layout_height="48dp"
 		android:layout_marginStart="15dp"
@@ -16,11 +16,11 @@
 		android:layout_marginBottom="6dp" />
 
 	<TextView
-		android:id="@+id/intento_titolo"
+		android:id="@+id/intent_titolo"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_centerVertical="true"
-		android:layout_toEndOf="@+id/intento_icona"
+		android:layout_toEndOf="@+id/intent_icona"
 		android:textColor="@color/text"
 		android:textSize="18sp" />
 

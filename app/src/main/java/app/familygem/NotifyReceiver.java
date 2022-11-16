@@ -1,8 +1,3 @@
-/*  This BroadcastReceiver has a double function:
-	- Receive intent from Notifier to create notifications
-	- Receive ACTION_BOOT_COMPLETED after reboot to restore notifications saved in settings.json
-*/
-
 package app.familygem;
 
 import android.app.PendingIntent;
@@ -12,6 +7,11 @@ import android.content.Intent;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+/**
+ * This BroadcastReceiver has a double function:
+ * - Receive intent from Notifier to create notifications
+ * - Receive ACTION_BOOT_COMPLETED after reboot to restore notifications saved in settings.json
+ */
 public class NotifyReceiver extends BroadcastReceiver {
 
 	@Override
@@ -23,7 +23,7 @@ public class NotifyReceiver extends BroadcastReceiver {
 
 		} else { // Create notification
 
-			Intent notifyIntent = new Intent(context, Alberi.class)
+			Intent notifyIntent = new Intent(context, TreesActivity.class)
 					.putExtra(Notifier.TREE_ID_KEY, intent.getIntExtra("treeId", 0))
 					.putExtra(Notifier.INDI_ID_KEY, intent.getStringExtra("indiId"))
 					.putExtra(Notifier.NOTIFY_ID_KEY, intent.getIntExtra("id", 1));

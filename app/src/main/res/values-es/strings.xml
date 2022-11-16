@@ -131,7 +131,7 @@
     <string name="crop">Recortar</string>
     <string name="copy">Copiar texto</string>
     <string name="value">Valor</string>
-    <string name="type">Tipo</string>
+    <string name="type">type</string>
     <string name="prefix">Prefijo</string>
     <string name="given">Nombre de pila</string>
     <string name="nickname">Sobrenombre</string>
@@ -159,7 +159,7 @@
     <string name="publication_facts">Publicación</string>
     <string name="call_number">Número de identificación</string>
     <string name="italic">Cursiva</string>
-    <string name="media_type">Tipo multimedia</string>
+    <string name="media_type">type multimedia</string>
     <string name="parentheses">Paréntesis</string>
     <string name="reference_number">Número de referencia</string>
     <string name="cited_by">Citada en</string>

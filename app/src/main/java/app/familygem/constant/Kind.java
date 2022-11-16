@@ -1,7 +1,7 @@
-// GEDCOM date types
-
 package app.familygem.constant;
-
+/**
+ * GEDCOM date types
+ * */
 public enum Kind {
 
 	EXACT(""),

@@ -26,7 +26,7 @@
 		android:textSize="17sp"
 		android:visibility="gone"/>
 
-	<app.familygem.EditoreData
+	<app.familygem.PublisherDateLinearLayout
 		android:id="@+id/fatto_data"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"

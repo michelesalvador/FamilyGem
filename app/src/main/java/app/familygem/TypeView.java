@@ -1,5 +1,3 @@
-// Create a combo box to choose a type text from a list of predefined values
-
 package app.familygem;
 
 import android.content.Context;
@@ -14,6 +12,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Create a combo box to choose a type text from a list of predefined values
+ * */
 public class TypeView extends AppCompatAutoCompleteTextView {
 
 	enum Combo {NAME, RELATIONSHIP}
@@ -24,13 +25,13 @@ public class TypeView extends AppCompatAutoCompleteTextView {
 		Map<String, Integer> types = getTypes(combo);
 		for( String type : types.keySet() ) {
 			if( !Locale.getDefault().getLanguage().equals("en") )
-				type += " - " + context.getString(types.get(type)); // Traduzione in tutte le lingue diverse dall'inglese
+				type += " - " + context.getString(types.get(type)); // Translation into all languages other than English
 			completeTypes.add(type);
 		}
-		AdattatoreLista adattatoreLista = new AdattatoreLista( context, android.R.layout.simple_spinner_dropdown_item, completeTypes);
-		setAdapter( adattatoreLista );
+		ListAdapter listAdapter = new ListAdapter( context, android.R.layout.simple_spinner_dropdown_item, completeTypes);
+		setAdapter( listAdapter );
 		setId( R.id.fatto_edita );
-		//setThreshold(0); // inutile, il minimo è 1
+		//setThreshold(0); // useless, the minimum is 1
 		setInputType( InputType.TYPE_CLASS_TEXT );
 		setOnItemClickListener( (parent, view, position, id) -> {
 			setText((String)types.keySet().toArray()[position]);
@@ -69,7 +70,9 @@ public class TypeView extends AppCompatAutoCompleteTextView {
 		}
 	}
 
-	// Create a Map from a list of values
+	/**
+	 * Create a Map from a list of values
+	 */
 	static Map<String, Integer> ImmutableMap(Object... keyValPair) {
 		Map<String, Integer> map = new LinkedHashMap<>();
 		if( keyValPair.length % 2 != 0 ) {
@@ -83,12 +86,12 @@ public class TypeView extends AppCompatAutoCompleteTextView {
 
 	@Override
 	public boolean enoughToFilter() {
-		return true; // Mostra sempre i suggerimenti
+		return true; // Always show hints
 	}
 
-	class AdattatoreLista extends ArrayAdapter<String> {
-		AdattatoreLista( Context contesto, int pezzo, List<String> stringhe ) {
-			super( contesto, pezzo, stringhe );
+	class ListAdapter extends ArrayAdapter<String> {
+		ListAdapter(Context context, int piece, List<String> strings ) {
+			super( context, piece, strings );
 		}
 		@Override
 		public Filter getFilter() {
@@ -108,7 +111,9 @@ public class TypeView extends AppCompatAutoCompleteTextView {
 		}
 	}
 
-	// Find the translation for predefined English types, or returns the provided type
+	/**
+	 * Find the translation for predefined English types, or returns the provided type
+	 */
 	static String getTranslatedType(String type, Combo combo) {
 		Map<String, Integer> types = getTypes(combo);
 		Integer translation = types.get(type);

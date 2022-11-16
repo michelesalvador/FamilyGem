@@ -1,16 +1,18 @@
-// Family situation
-
 package app.familygem.constant;
 
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
-
+/**
+ * Family situation
+ * */
 public enum Status {
 
 	NONE, // Generic relationship
 	MARRIED, DIVORCED, SEPARATED;
 
-	// Find the status of a Family
+	/**
+	 * Finds the status of [family]
+	 * */
 	public static Status getStatus(Family family) {
 		Status status = NONE;
 		if( family != null ) {

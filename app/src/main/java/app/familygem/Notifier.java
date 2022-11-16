@@ -1,5 +1,3 @@
-// Manager of birthday notifications
-
 package app.familygem;
 
 import android.app.AlarmManager;
@@ -17,6 +15,9 @@ import java.util.Date;
 import java.util.HashSet;
 import app.familygem.constant.Format;
 
+/**
+ * Manager of birthday notifications
+ * */
 class Notifier {
 	static final String TREE_ID_KEY = "targetTreeId";
 	static final String INDI_ID_KEY = "targetIndiId";
@@ -60,8 +61,10 @@ class Notifier {
 		}
 	}
 
-	// Select people who have to celebrate their birthday and add them to the settings
-	// Eventually save settings
+	/**
+	 * Select people who have to celebrate their birthday and add them to the settings
+	 * Eventually save settings
+	 */
 	void findBirthdays(Gedcom gedcom, Settings.Tree tree) {
 		if( tree.birthdays == null )
 			tree.birthdays = new HashSet<>();
@@ -73,21 +76,23 @@ class Notifier {
 				int years = findAge(birth);
 				if( years >= 0 ) {
 					tree.birthdays.add(new Settings.Birthday(person.getId(), U.givenName(person),
-							U.epiteto(person), nextBirthday(birth), years));
+							U.properName(person), nextBirthday(birth), years));
 				}
 			}
 		}
 		Global.settings.save();
 	}
 
-	// Possibly find the birth Date of a person
+	/**
+	 * Possibly find the birth Date of a person
+	 */
 	private Date findBirth(Person person) {
 		if( !U.isDead(person) ) {
 			for( EventFact event : person.getEventsFacts() ) {
 				if( event.getTag().equals("BIRT") && event.getDate() != null ) {
-					Datatore datator = new Datatore(event.getDate());
-					if( datator.isSingleKind() && datator.data1.isFormat(Format.D_M_Y) ) {
-						return datator.data1.date;
+					GedcomDateConverter dateConverter = new GedcomDateConverter(event.getDate());
+					if( dateConverter.isSingleKind() && dateConverter.data1.isFormat(Format.D_M_Y) ) {
+						return dateConverter.data1.date;
 					}
 				}
 			}
@@ -95,7 +100,9 @@ class Notifier {
 		return null;
 	}
 
-	// Count the number of years that will be turned on the next birthday
+	/**
+	 * Count the number of years that will be turned on the next birthday
+	 */
 	private int findAge(Date birth) {
 		int years = now.getYear() - birth.getYear();
 		if( birth.getMonth() < now.getMonth()
@@ -105,7 +112,9 @@ class Notifier {
 		return years <= 120 ? years : -1;
 	}
 
-	// From birth Date find next birthday as long timestamp
+	/**
+	 * From birth Date find next birthday as long timestamp
+	 */
 	private long nextBirthday(Date birth) {
 		birth.setYear(now.getYear());
 		birth.setHours(12);
@@ -115,7 +124,9 @@ class Notifier {
 		return birth.getTime();
 	}
 
-	// Generate an alarm from each birthday of the provided tree
+	/**
+	 * Generate an alarm from each birthday of the provided tree
+	 */
 	void createAlarms(Context context, Settings.Tree tree) {
 		if( tree.birthdays == null ) return;
 		int eventId = tree.id * FACTOR;  // Different for every tree
@@ -139,7 +150,9 @@ class Notifier {
 		}
 	}
 
-	// Delete all alarms already set for a tree
+	/**
+	 * Delete all alarms already set for a tree
+	 */
 	void deleteAlarms(Context context, Settings.Tree tree) {
 		if( tree.birthdays == null ) return;
 		int eventId = tree.id * FACTOR;
