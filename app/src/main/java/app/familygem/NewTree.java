@@ -328,7 +328,7 @@ public class NewTree extends BaseActivity {
                 // Save the settings in preferences
                 String idRadice = U.trovaRadice(gedcom);
                 Global.settings.add(new Settings.Tree(newNumber, treeName, folderPath,
-                        gedcom.getPeople().size(), TreeInfoActivity.quanteGenerazioni(gedcom, idRadice), idRadice, null, 0));
+                        gedcom.getPeople().size(), TreeInfoActivity.countGenerations(gedcom, idRadice), idRadice, null, 0));
                 new Notifier(this, gedcom, newNumber, Notifier.What.CREATE);
                 // If necessary it proposes to show the advanced functions
                 if (!gedcom.getSources().isEmpty() && !Global.settings.expert) {

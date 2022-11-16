@@ -34,7 +34,7 @@ public class ListOfAuthorsFragment extends Fragment {
 		for( final Submitter author : authors ) {
 			View pieceView = inflater.inflate(R.layout.magazzino_pezzo, layout, false);
 			layout.addView(pieceView);
-			((TextView)pieceView.findViewById(R.id.magazzino_nome)).setText(TreeInfoActivity.nomeAutore(author));
+			((TextView)pieceView.findViewById(R.id.magazzino_nome)).setText(TreeInfoActivity.submitterName(author));
 			pieceView.findViewById(R.id.magazzino_archivi).setVisibility(View.GONE);
 			pieceView.setOnClickListener(v -> {
 				Memory.setFirst(author);
