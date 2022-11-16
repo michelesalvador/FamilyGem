@@ -1,5 +1,3 @@
-// List of repositories
-
 package app.familygem;
 
 import android.app.Activity;
@@ -29,6 +27,9 @@ import java.util.Set;
 import app.familygem.detail.RepositoryActivity;
 import static app.familygem.Global.gc;
 
+/**
+ * List of repositories
+ * */
 public class RepositoryFragment extends Fragment {
 
 	@Override
@@ -43,11 +44,11 @@ public class RepositoryFragment extends Fragment {
 				setHasOptionsMenu(true);
 			Collections.sort(repos, (r1, r2) -> {
 				switch( Global.repositoryOrder) {
-					case 1: // Ordina per id
+					case 1: // Sort by id
 						return U.extractNum(r1.getId()) - U.extractNum(r2.getId());
-					case 2: // Ordine alfabetico
+					case 2: // Sort alphabetically
 						return r1.getName().compareToIgnoreCase(r2.getName());
-					case 3: // Ordina per numero di fonti
+					case 3: // Sort by number of sources
 						return countSources(gc, r2) - countSources(gc, r1);
 					default:
 						return 0;
@@ -89,7 +90,9 @@ public class RepositoryFragment extends Fragment {
 		getActivity().getIntent().removeExtra("magazzinoScegliArchivio");
 	}
 
-	// Count how many sources are present in a repository
+	/**
+	 * Count how many sources are present in a repository
+	 */
 	static int countSources(Gedcom gedcom, Repository repo) {
 		int num = 0;
 		for( Source source : gedcom.getSources() ) {
@@ -101,7 +104,9 @@ public class RepositoryFragment extends Fragment {
 		return num;
 	}
 
-	// Create a new repository, optionally linking a source to it
+	/**
+	 * Create a new repository, optionally linking a source to it
+	 */
 	static void newRepository(Context context, Source source) {
 		Repository repo = new Repository();
 		repo.setId(U.newID(gc, Repository.class));
@@ -117,10 +122,12 @@ public class RepositoryFragment extends Fragment {
 		context.startActivity(new Intent(context, RepositoryActivity.class));
 	}
 
-	/* Elimina l'archivio e i ref dalle fonti in cui è citato l'archivio
-		Restituisce un array delle Source modificate
-	Secondo le specifiche Gedcom 5.5, la libreria FS e Family Historian una SOUR prevede un solo Ref a un REPO
-	Invece secondo Gedcom 5.5.1 può avere molteplici Ref ad archivi */
+	/**
+	 * Remove the archive and refs from sources where the archive is mentioned
+	 * According to the Gedcom 5.5 specifications, the FS and Family Historian library a SOUR provides only one Ref to a REPO
+	 * Conversely, according to Gedcom 5.5.1, it can have multiple Refs to archives
+	 * @return an array of modified Sources
+	 * */
 	public static Source[] delete(Repository repo) {
 		Set<Source> sources = new HashSet<>();
 		for( Source sour : gc.getSources() )
@@ -133,7 +140,9 @@ public class RepositoryFragment extends Fragment {
 		return sources.toArray(new Source[0]);
 	}
 
-	// overflow menu in toolbar
+	/**
+	 * overflow menu in toolbar
+	 */
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		SubMenu subMenu = menu.addSubMenu(R.string.order_by);
@@ -161,7 +170,6 @@ public class RepositoryFragment extends Fragment {
 		return true;
 	}
 
-	// Menu contestuale
 	Repository repository;
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
