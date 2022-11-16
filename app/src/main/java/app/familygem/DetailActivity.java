@@ -145,7 +145,7 @@ public class DetailActivity extends AppCompatActivity {
 						edit(piece);
 					// TODO open new Address ("to edit it"?)["for editing"?] //aprire Address nuovo per editarlo
 				} else if( id == 101 ) {//TODO code smell: use of magic numbers
-					RepositoryFragment.newRepository(this, (Source)object);
+					RepositoriesFragment.newRepository(this, (Source)object);
 				} else if( id == 102 ) {
 					Intent intent = new Intent(this, Principal.class);
 					intent.putExtra("magazzinoScegliArchivio", true); //TODO translate

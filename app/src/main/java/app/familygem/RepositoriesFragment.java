@@ -30,7 +30,7 @@ import static app.familygem.Global.gc;
 /**
  * List of repositories
  * */
-public class RepositoryFragment extends Fragment {
+public class RepositoriesFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
@@ -166,7 +166,7 @@ public class RepositoryFragment extends Fragment {
 			default:
 				return false;
 		}
-		getFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new RepositoryFragment()).commit();
+		getFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, new RepositoriesFragment()).commit();
 		return true;
 	}
 

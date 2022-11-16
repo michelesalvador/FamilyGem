@@ -36,7 +36,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 	List<Integer> idMenu = Arrays.asList( R.id.nav_diagramma, R.id.nav_persone, R.id.nav_famiglie,
 			R.id.nav_media, R.id.nav_note, R.id.nav_fonti, R.id.nav_archivi, R.id.nav_autore );
 	List<Class> fragments = Arrays.asList( Diagram.class, ListOfPeopleFragment.class, ChurchFragment.class,
-			GalleryFragment.class, NotebookFragment.class, LibraryFragment.class, RepositoryFragment.class, ListOfAuthorsFragment.class );
+			GalleryFragment.class, NotebookFragment.class, LibraryFragment.class, RepositoriesFragment.class, ListOfAuthorsFragment.class );
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +70,7 @@ public class Principal /*TODO Main?*/extends AppCompatActivity implements Naviga
 			else if( getIntent().getBooleanExtra("quadernoScegliNota",false) )
 				fragment = new NotebookFragment();
 			else if( getIntent().getBooleanExtra("magazzinoScegliArchivio",false) )
-				fragment = new RepositoryFragment();
+				fragment = new RepositoriesFragment();
 			else { // normal opening
 				fragment = new Diagram();
 				backName = "diagram";

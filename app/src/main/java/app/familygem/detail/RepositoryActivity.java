@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import app.familygem.DetailActivity;
 import app.familygem.Global;
-import app.familygem.RepositoryFragment;
+import app.familygem.RepositoriesFragment;
 import app.familygem.R;
 import app.familygem.U;
 
@@ -43,6 +43,6 @@ public class RepositoryActivity extends DetailActivity {
 
 	@Override
 	public void delete() {
-		U.updateChangeDate((Object[]) RepositoryFragment.delete(a));
+		U.updateChangeDate((Object[]) RepositoriesFragment.delete(a));
 	}
 }
