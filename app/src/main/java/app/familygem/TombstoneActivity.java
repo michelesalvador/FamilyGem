@@ -17,6 +17,7 @@ public class TombstoneActivity extends BaseActivity {
 		version.setText(getString(R.string.version_name, BuildConfig.VERSION_NAME));
 
 		TextView link = findViewById(R.id.lapide_link);
+		//TODO replace with LinkMovementMethod and (or?) LinkifyCompat.addLinks()
 		link.setPaintFlags(link.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 		link.setOnClickListener(v -> startActivity(
 				new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.familygem.app")))
