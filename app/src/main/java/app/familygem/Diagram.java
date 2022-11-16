@@ -619,7 +619,7 @@ public class Diagram extends Fragment {
 		List<Family> families = fulcrum.getParentFamilies(gc);
 		if( families.size() > 1 ) {
 			new AlertDialog.Builder(getContext()).setTitle(R.string.which_family)
-					.setItems(U.elencoFamiglie(families), (dialog, which) -> {
+					.setItems(U.listFamilies(families), (dialog, which) -> {
 						completeSelect(fulcrum, which);
 					}).show();
 		} else {
@@ -722,7 +722,7 @@ public class Diagram extends Fragment {
 			} else
 				U.askWhichParentsToShow(getContext(), pers, 2);
 		} else if( id == 2 ) { // Famiglia come coniuge
-			U.askWhichSpouceToShow(getContext(), pers, null);
+			U.askWhichSpouseToShow(getContext(), pers, null);
 		} else if( id == 3 ) { // Collega persona nuova
 			if( Global.settings.expert ) {
 				DialogFragment dialog = new NewRelativeDialog(pers, parentFam, spouseFam, true, null);
@@ -732,7 +732,7 @@ public class Diagram extends Fragment {
 					Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
 					intent.putExtra("idIndividuo", idPersona);
 					intent.putExtra("relazione", quale + 1);
-					if( U.controllaMultiMatrimoni(intent, getContext(), null) ) // aggiunge 'idFamiglia' o 'collocazione'
+					if( U.checkMultipleMarriages(intent, getContext(), null) ) // aggiunge 'idFamiglia' o 'collocazione'
 						return; // se perno è sposo in più famiglie, chiede a chi aggiungere un coniuge o un figlio
 					startActivity(intent);
 				}).show();
@@ -747,7 +747,7 @@ public class Diagram extends Fragment {
 					intent.putExtra("idIndividuo", idPersona);
 					intent.putExtra("anagrafeScegliParente", true);
 					intent.putExtra("relazione", quale + 1);
-					if( U.controllaMultiMatrimoni(intent, getContext(), Diagram.this) )
+					if( U.checkMultipleMarriages(intent, getContext(), Diagram.this) )
 						return;
 					startActivityForResult(intent, 1401);
 				}).show();
@@ -771,7 +771,7 @@ public class Diagram extends Fragment {
 			}
 			ripristina();
 			Family[] modificateArr = modificate.toArray(new Family[0]);
-			U.controllaFamiglieVuote(getContext(), this::ripristina, false, modificateArr);
+			U.checkFamilyItem(getContext(), this::ripristina, false, modificateArr);
 			U.updateChangeDate(pers);
 			U.save(true, (Object[])modificateArr);
 		} else if( id == 7 ) { // Elimina
@@ -779,7 +779,7 @@ public class Diagram extends Fragment {
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
 						Family[] famiglie = ListOfPeopleFragment.deletePerson(getContext(), idPersona);
 						ripristina();
-						U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
+						U.checkFamilyItem(getContext(), this::ripristina, false, famiglie);
 					}).setNeutralButton(R.string.cancel, null).show();
 		} else
 			return false;

@@ -169,7 +169,7 @@ public class TreeComparatorActivity extends BaseActivity {
 		else if( o instanceof Family ) {
 			setRecordTypeTextTo( R.string.family );
 			Family f = (Family) o;
-			txt = U.testoFamiglia( this, gc, f, false );
+			txt = U.familyText( this, gc, f, false );
 			data = dateHour( f.getChange() );
 		}
 		TextView titleText = card.findViewById( R.id.confronto_titolo );

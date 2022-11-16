@@ -313,7 +313,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 								Intent intent1 = new Intent(getApplicationContext(), IndividualEditorActivity.class);
 								intent1.putExtra("idIndividuo", thisPerson.getId());
 								intent1.putExtra("relazione", quale + 1);
-								if( U.controllaMultiMatrimoni(intent1, IndividualPersonActivity.this, null) )
+								if( U.checkMultipleMarriages(intent1, IndividualPersonActivity.this, null) )
 									return;
 								startActivity(intent1);
 							}).show();
@@ -329,7 +329,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 								intent2.putExtra("idIndividuo", thisPerson.getId());
 								intent2.putExtra("anagrafeScegliParente", true);
 								intent2.putExtra("relazione", which + 1);
-								if( U.controllaMultiMatrimoni(intent2, IndividualPersonActivity.this, null) )
+								if( U.checkMultipleMarriages(intent2, IndividualPersonActivity.this, null) )
 									return;
 								startActivityForResult(intent2, 1401);
 							}).show();
@@ -463,7 +463,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 				U.askWhichParentsToShow(this, thisPerson, 2);
 				return true;
 			case 2: // Family as partner
-				U.askWhichSpouceToShow(this, thisPerson, null);
+				U.askWhichSpouseToShow(this, thisPerson, null);
 				return true;
 			case 3: // Set as root
 				Global.settings.getCurrentTree().root = thisPerson.getId();
@@ -479,7 +479,7 @@ public class IndividualPersonActivity extends AppCompatActivity {
 				new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
 						.setPositiveButton(R.string.delete, (dialog, i) -> {
 							Family[] families = ListOfPeopleFragment.deletePerson(this, thisPerson.getId());
-							if( !U.controllaFamiglieVuote(this, this::onBackPressed, true, families) )
+							if( !U.checkFamilyItem(this, this::onBackPressed, true, families) )
 								onBackPressed();
 						}).setNeutralButton(R.string.cancel, null).show();
 				return true;

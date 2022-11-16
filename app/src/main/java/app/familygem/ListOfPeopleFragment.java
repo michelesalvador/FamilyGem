@@ -559,7 +559,7 @@ public class ListOfPeopleFragment extends Fragment {
 		} else if( id == 1 ) { // Family as child
 			U.askWhichParentsToShow(getContext(), gc.getPerson(idIndi), 2);
 		} else if( id == 2 ) { // Family as spouse
-			U.askWhichSpouceToShow(getContext(), gc.getPerson(idIndi), null);
+			U.askWhichSpouseToShow(getContext(), gc.getPerson(idIndi), null);
 		} else if( id == 3 ) { // Edit
 			Intent intent = new Intent(getContext(), IndividualEditorActivity.class);
 			intent.putExtra("idIndividuo", idIndi);
@@ -572,7 +572,7 @@ public class ListOfPeopleFragment extends Fragment {
 						Family[] families = deletePerson(getContext(), idIndi);
 						adapter.notifyDataSetChanged();
 						setupToolbar();
-						U.controllaFamiglieVuote(getContext(), null, false, families);
+						U.checkFamilyItem(getContext(), null, false, families);
 					}).setNeutralButton( R.string.cancel, null ).show();
 		} else {
 			return false;

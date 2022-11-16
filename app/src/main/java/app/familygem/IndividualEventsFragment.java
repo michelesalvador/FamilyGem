@@ -309,7 +309,7 @@ public class IndividualEventsFragment extends Fragment {
 				toUpdateId = 2;
 				break;
 			case 203: // Delete
-				if( U.preserva(pieceObject) ) return false;
+				if( U.preserve(pieceObject) ) return false;
 				one.getNames().remove(pieceObject);
 				Memory.setInstanceAndAllSubsequentToNull(pieceObject);
 				pieceView.setVisibility(View.GONE);

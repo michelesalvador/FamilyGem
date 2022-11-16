@@ -163,7 +163,7 @@ public class SharingActivity extends BaseActivity {
 			LinearLayout rootLayout = findViewById(R.id.condividi_radice);
 			rootLayout.removeView(rootView);
 			rootLayout.setVisibility(View.VISIBLE);
-			rootView = U.linkaPersona(rootLayout, person, 1);
+			rootView = U.linkPerson(rootLayout, person, 1);
 			rootView.setOnClickListener(v -> {
 				Intent intent = new Intent(this, Principal.class);
 				intent.putExtra("anagrafeScegliParente", true);

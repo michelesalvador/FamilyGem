@@ -93,7 +93,7 @@ public class FamilyActivity extends DetailActivity {
 				U.askWhichParentsToShow(this, p, 2);
 			} // a child with one or more families in which he is a spouse
 			else if( relation == Relation.CHILD && !p.getSpouseFamilies(gc).isEmpty() ) {
-				U.askWhichSpouceToShow(this, p, null);
+				U.askWhichSpouseToShow(this, p, null);
 			} // an unmarried child who has multiple parental families
 			else if( parentFam.size() > 1 ) {
 				if( parentFam.size() == 2 ) { // Swap between the 2 parental families //Swappa tra le 2 famiglie genitoriali
@@ -111,7 +111,7 @@ public class FamilyActivity extends DetailActivity {
 					Memory.replaceFirst(otherFamily);
 					recreate();
 				} else
-					U.askWhichSpouceToShow(this, p, null);
+					U.askWhichSpouseToShow(this, p, null);
 			} else {
 				Memory.setFirst(p);
 				startActivity(new Intent(this, IndividualPersonActivity.class));

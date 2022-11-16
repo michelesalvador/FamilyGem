@@ -155,7 +155,7 @@ public class IndividualFamilyFragment extends Fragment {
 		} else if( id == 301 ) { // Family as a son
 			U.askWhichParentsToShow(getContext(), person, 2);
 		} else if( id == 302 ) { // Family as a spouse
-			U.askWhichSpouceToShow(getContext(), person, family);
+			U.askWhichSpouseToShow(getContext(), person, family);
 		} else if( id == 303 ) { // Move up
 			moveFamilyReference(-1);
 		} else if( id == 304 ) { // Move down
@@ -169,14 +169,14 @@ public class IndividualFamilyFragment extends Fragment {
 		} else if( id == 307 ) { // Disconnect from this family
 			FamilyActivity.disconnect(indiId, family);
 			refresh();
-			U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
+			U.checkFamilyItem(getContext(), this::refresh, false, family);
 			U.save(true, family, person);
 		} else if( id == 308 ) { // Delete
 			new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
 					.setPositiveButton(R.string.delete, (dialog, i) -> {
 						ListOfPeopleFragment.deletePerson(getContext(), indiId);
 						refresh();
-						U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
+						U.checkFamilyItem(getContext(), this::refresh, false, family);
 					}).setNeutralButton(R.string.cancel, null).show();
 		} else {
 			return false;

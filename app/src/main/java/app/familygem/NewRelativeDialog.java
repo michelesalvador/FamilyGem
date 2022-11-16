@@ -247,7 +247,7 @@ public class NewRelativeDialog extends DialogFragment {
 		@Override
 		public String toString() {
 			if( family != null)
-				return U.testoFamiglia(context, Global.gc, family, true);
+				return U.familyText(context, Global.gc, family, true);
 			else if( parent != null )
 				return context.getString(R.string.new_family_of, U.properName(parent));
 			else if(existing)

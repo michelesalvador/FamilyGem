@@ -794,7 +794,7 @@ public class DetailActivity extends AppCompatActivity {
 			((ImageActivity)this).updateImage();
 		// If he has modified an author, he asks to refer to him in the header //Se ha modificato un autore chiede di referenziarlo in header
 		else if( object instanceof Submitter )
-			U.autorePrincipale(this, ((Submitter)object).getId());
+			U.mainAuthor(this, ((Submitter)object).getId());
 		else if( this instanceof EventActivity)
 			refresh(); // To update the title bar
 	}
@@ -1000,7 +1000,7 @@ public class DetailActivity extends AppCompatActivity {
 				U.askWhichParentsToShow(this, person, 2);
 				return true;
 			case 13: // Family as a spouse? - Famiglia come coniuge
-				U.askWhichSpouceToShow(this, person, null);
+				U.askWhichSpouseToShow(this, person, null);
 				return true;
 			case 14: // Son moves on? - Figlio sposta su
 				Family fa = (Family)object;
