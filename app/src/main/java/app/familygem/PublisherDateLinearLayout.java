@@ -29,44 +29,44 @@ public class PublisherDateLinearLayout extends LinearLayout {
 	GedcomDateConverter gedcomDateConverter;
 	GedcomDateConverter.Data data1;
 	GedcomDateConverter.Data data2;
-	EditText editaTesto;
-	String[] giorniRuota = { "-","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15",
+	EditText editText;
+	String[] daysWheel = { "-","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15",
 			"16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31" };
-	String[] mesiRuota = { "-", s(R.string.january), s(R.string.february), s(R.string.march), s(R.string.april), s(R.string.may), s(R.string.june),
+	String[] monthsWheel = { "-", s(R.string.january), s(R.string.february), s(R.string.march), s(R.string.april), s(R.string.may), s(R.string.june),
 			s(R.string.july), s(R.string.august), s(R.string.september), s(R.string.october), s(R.string.november), s(R.string.december) };
-	String[] anniRuota = new String[101];
+	String[] yearsWheel = new String[101];
 	int[] dateKinds = { R.string.exact, R.string.approximate, R.string.calculated, R.string.estimated,
 			R.string.after, R.string.before, R.string.between_and,
 			R.string.from, R.string.to, R.string.from_to, R.string.date_phrase };
-	Calendar calenda = GregorianCalendar.getInstance();
-	boolean veroImputTesto; // stabilisce se l'utente sta effettivamente digitando sulla tastiera virtuale o se il testo viene cambiato in altro modo
-	InputMethodManager tastiera;
-	boolean tastieraVisibile;
+	Calendar calendar = GregorianCalendar.getInstance();
+	boolean userIsTyping; // determines if the user is actually typing on the virtual keyboard or if the text is changed in some other way	InputMethodManager tastiera;
+	InputMethodManager keyboard;
+	boolean keyboardIsVisible;
 
-	public PublisherDateLinearLayout(Context contesto, AttributeSet as ) {
-		super( contesto, as );
+	public PublisherDateLinearLayout(Context context, AttributeSet as ) {
+		super( context, as );
 	}
 
 	/**
 	 * Actions to be done only once at the beginning
 	 * */
-	void initialize(final EditText editaTesto ) {
+	void initialize(final EditText editText ) {
 
 		addView( inflate( getContext(), R.layout.editore_data, null ), this.getLayoutParams() );
-		this.editaTesto = editaTesto;
+		this.editText = editText;
 
-		for( int i = 0; i < anniRuota.length - 1; i++ )
-			anniRuota[i] = i < 10 ? "0" + i : "" + i;
-		anniRuota[100] = "-";
+		for(int i = 0; i < yearsWheel.length - 1; i++ )
+			yearsWheel[i] = i < 10 ? "0" + i : "" + i;
+		yearsWheel[100] = "-";
 
-		gedcomDateConverter = new GedcomDateConverter( editaTesto.getText().toString() );
+		gedcomDateConverter = new GedcomDateConverter( editText.getText().toString() );
 		data1 = gedcomDateConverter.data1;
 		data2 = gedcomDateConverter.data2;
 
-		// Arreda l'editore data
+		// Setup the date editor
 		if( Global.settings.expert ) {
-			final TextView elencoTipi = findViewById(R.id.editadata_tipi);
-			elencoTipi.setOnClickListener( vista -> {
+			final TextView listTypes = findViewById(R.id.editadata_tipi);
+			listTypes.setOnClickListener( vista -> {
 				PopupMenu popup = new PopupMenu(getContext(), vista);
 				Menu menu = popup.getMenu();
 				for( int i = 0; i < dateKinds.length - 1; i++ )
@@ -74,9 +74,9 @@ public class PublisherDateLinearLayout extends LinearLayout {
 				popup.show();
 				popup.setOnMenuItemClickListener(item -> {
 					gedcomDateConverter.kind = Kind.values()[item.getItemId()];
-					// Se eventualmente invisibile
+					// If possibly invisible
 					findViewById(R.id.editadata_prima).setVisibility(View.VISIBLE);
-					if( data1.date == null ) // micro settaggio del carro
+					if( data1.date == null ) // wagon micro setting (??)
 						((NumberPicker)findViewById(R.id.prima_anno)).setValue(100);
 					if( gedcomDateConverter.kind == Kind.BETWEEN_AND || gedcomDateConverter.kind == Kind.FROM_TO ) {
 						findViewById(R.id.editadata_seconda_avanzate).setVisibility(VISIBLE);
@@ -87,125 +87,127 @@ public class PublisherDateLinearLayout extends LinearLayout {
 						findViewById(R.id.editadata_seconda_avanzate).setVisibility(GONE);
 						findViewById(R.id.editadata_seconda).setVisibility(GONE);
 					}
-					elencoTipi.setText(dateKinds[item.getItemId()]);
-					veroImputTesto = false;
-					genera();
+					listTypes.setText(dateKinds[item.getItemId()]);
+					userIsTyping = false;
+					generate();
 					return true;
 				});
 			});
 			findViewById(R.id.editadata_negativa1).setOnClickListener(vista -> {
 				data1.negative = ((CompoundButton)vista).isChecked();
-				veroImputTesto = false;
-				genera();
+				userIsTyping = false;
+				generate();
 			});
 			findViewById(R.id.editadata_doppia1).setOnClickListener(vista -> {
 				data1.doubleYear = ((CompoundButton)vista).isChecked();
-				veroImputTesto = false;
-				genera();
+				userIsTyping = false;
+				generate();
 			});
 			findViewById(R.id.editadata_negativa2).setOnClickListener(vista -> {
 				data2.negative = ((CompoundButton)vista).isChecked();
-				veroImputTesto = false;
-				genera();
+				userIsTyping = false;
+				generate();
 			});
 			findViewById(R.id.editadata_doppia2).setOnClickListener(vista -> {
 				data2.doubleYear = ((CompoundButton)vista).isChecked();
-				veroImputTesto = false;
-				genera();
+				userIsTyping = false;
+				generate();
 			});
 			findViewById(R.id.editadata_circa).setVisibility(GONE);
 		} else {
 			findViewById(R.id.editadata_circa).setOnClickListener(vista -> {
 				findViewById(R.id.editadata_seconda).setVisibility(GONE); // casomai fosse visibile per tipi 6 o 9
 				gedcomDateConverter.kind = ((CompoundButton)vista).isChecked() ? Kind.APPROXIMATE : Kind.EXACT;
-				veroImputTesto = false;
-				genera();
+				userIsTyping = false;
+				generate();
 			});
 			findViewById(R.id.editadata_avanzate).setVisibility(GONE);
 		}
 
-		arredaCarro(1, findViewById(R.id.prima_giorno), findViewById(R.id.prima_mese),
+		setupWagon(1, findViewById(R.id.prima_giorno), findViewById(R.id.prima_mese),
 				findViewById(R.id.prima_secolo), findViewById(R.id.prima_anno));
 
-		arredaCarro(2, findViewById(R.id.seconda_giorno), findViewById(R.id.seconda_mese),
+		setupWagon(2, findViewById(R.id.seconda_giorno), findViewById(R.id.seconda_mese),
 				findViewById(R.id.seconda_secolo), findViewById(R.id.seconda_anno));
 
-		// Al primo focus mostra sè stesso (EditoreData) nascondendo la tastiera
-		tastiera = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-		editaTesto.setOnFocusChangeListener((v, ciapaFocus) -> {
-			if( ciapaFocus ) {
+		// At first focus it shows itself (EditoreData) hiding the keyboard
+		keyboard = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		editText.setOnFocusChangeListener((v, hasFocus) -> {
+			if( hasFocus ) {
 				if( gedcomDateConverter.kind == Kind.PHRASE ) {
-					//genera(); // Toglie le parentesi alla frase
-					editaTesto.setText(gedcomDateConverter.phrase);
+					//genera(); // Remove the parentheses from the sentence
+					editText.setText(gedcomDateConverter.phrase);
 				} else {
-					tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 ); // ok nasconde tastiera
-					/*Window finestra = ((Activity)getContext()).getWindow(); non aiuta la scomparsa della tastiera
-					finestra.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );*/
-					editaTesto.setInputType( InputType.TYPE_NULL ); // disabilita input testo con tastiera
-						// necessario in versioni recenti di android in cui la tastiera ricompare
+					keyboardIsVisible = keyboard.hideSoftInputFromWindow( editText.getWindowToken(), 0 ); // ok hide keyboard
+					/*Window window = ((Activity)getContext()).getWindow(); it doesn't help that the keyboard disappears
+					window.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN );*/
+					editText.setInputType( InputType.TYPE_NULL ); // disable keyboard text input
+						//needed in recent versions of android where the keyboard reappears
 				}
-				gedcomDateConverter.data1.date = null; // un resettino
-				impostaTutto();
+					gedcomDateConverter.data1.date = null; // a reset
+				setAll();
 				setVisibility(View.VISIBLE);
 			} else
 				setVisibility(View.GONE);
 		} );
 
-		// Al secondo tocco fa comparire la tastiera
-		editaTesto.setOnTouchListener((vista, event) -> {
+		// The second touch brings up the keyboard
+		editText.setOnTouchListener((view, event) -> {
 			if( event.getAction() == MotionEvent.ACTION_DOWN ) {
-				editaTesto.setInputType(InputType.TYPE_CLASS_TEXT); // riabilita l'input
+				editText.setInputType(InputType.TYPE_CLASS_TEXT); // re-enable the input
 			} else if( event.getAction() == MotionEvent.ACTION_UP ) {
-				tastieraVisibile = tastiera.showSoftInput(editaTesto, 0); // fa ricomparire la tastiera
-				//veroImputTesto = true;
-				//vista.performClick(); non ne vedo l'utilità
+				keyboardIsVisible = keyboard.showSoftInput(editText, 0); // makes the keyboard reappear
+				//userIsTyping = true;
+				//view.performClick(); non ne vedo l'utilità
 			}
 			return false;
 		});
-		// Imposta l'editore data in base a quanto scritto
-		editaTesto.addTextChangedListener(new TextWatcher() {
+		// Set the date publisher based on what is written
+		editText.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence testo, int i, int i1, int i2) {}
 			@Override
 			public void onTextChanged(CharSequence testo, int i, int i1, int i2) {}
 			@Override
 			public void afterTextChanged(Editable testo) {
-				// non so perché ma in android 5 alla prima editazione viene chiamato 2 volte, che comunque non è un problema
-				if( veroImputTesto )
-					impostaTutto();
-				veroImputTesto = true;
+				// i don't know why but in android 5 on first edition it is called 2 times which is not a problem anyway
+				if(userIsTyping)
+					setAll();
+				userIsTyping = true;
 			}
 		});
 	}
 
-	// Prepara le quattro ruote di un carro con le impostazioni iniziali
-	void arredaCarro( final int quale, final NumberPicker ruotaGiorno, final NumberPicker ruotaMese, final NumberPicker ruotaSecolo, final NumberPicker ruotaAnno ) {
-		ruotaGiorno.setMinValue(0);
-		ruotaGiorno.setMaxValue(31);
-		ruotaGiorno.setDisplayedValues( giorniRuota );
-		stylize(ruotaGiorno);
-		ruotaGiorno.setOnValueChangedListener( (picker, vecchio, nuovo) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+	/**
+	 * Prepare the four wheels of a wagon with the initial settings
+	 */
+	void setupWagon(final int which, final NumberPicker dayWheel, final NumberPicker monthWheel, final NumberPicker centuryWheel, final NumberPicker yearWheel ) {
+		dayWheel.setMinValue(0);
+		dayWheel.setMaxValue(31);
+		dayWheel.setDisplayedValues(daysWheel);
+		stylize(dayWheel);
+		dayWheel.setOnValueChangedListener( (picker, vecchio, nuovo) ->
+				update( which == 1 ? data1 : data2, dayWheel, monthWheel, centuryWheel, yearWheel )
 		);
-		ruotaMese.setMinValue(0);
-		ruotaMese.setMaxValue(12);
-		ruotaMese.setDisplayedValues( mesiRuota );
-		stylize(ruotaMese);
-		ruotaMese.setOnValueChangedListener( (picker, vecchio, nuovo) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		monthWheel.setMinValue(0);
+		monthWheel.setMaxValue(12);
+		monthWheel.setDisplayedValues(monthsWheel);
+		stylize(monthWheel);
+		monthWheel.setOnValueChangedListener( (picker, vecchio, nuovo) ->
+				update( which == 1 ? data1 : data2, dayWheel, monthWheel, centuryWheel, yearWheel )
 		);
-		ruotaSecolo.setMinValue(0);
-		ruotaSecolo.setMaxValue(20);
-		stylize(ruotaSecolo);
-		ruotaSecolo.setOnValueChangedListener( (picker, vecchio, nuovo) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		centuryWheel.setMinValue(0);
+		centuryWheel.setMaxValue(20);
+		stylize(centuryWheel);
+		centuryWheel.setOnValueChangedListener( (picker, vecchio, nuovo) ->
+				update( which == 1 ? data1 : data2, dayWheel, monthWheel, centuryWheel, yearWheel )
 		);
-		ruotaAnno.setMinValue(0);
-		ruotaAnno.setMaxValue(100);
-		ruotaAnno.setDisplayedValues( anniRuota );
-		stylize(ruotaAnno);
-		ruotaAnno.setOnValueChangedListener( ( picker, vecchio, nuovo ) ->
-				aggiorna( quale == 1 ? data1 : data2, ruotaGiorno, ruotaMese, ruotaSecolo, ruotaAnno )
+		yearWheel.setMinValue(0);
+		yearWheel.setMaxValue(100);
+		yearWheel.setDisplayedValues(yearsWheel);
+		stylize(yearWheel);
+		yearWheel.setOnValueChangedListener( ( picker, vecchio, nuovo ) ->
+				update( which == 1 ? data1 : data2, dayWheel, monthWheel, centuryWheel, yearWheel )
 		);
 	}
 
@@ -213,26 +215,28 @@ public class PublisherDateLinearLayout extends LinearLayout {
 		wheel.setSaveFromParentEnabled(false);
 	}
 
-	// Prende la stringa data, aggiorna le Date e ci modifica tutto l'editore data
-	// Chiamato quando clicco sul campo editabile, e dopo ogni editazione del testo
-	void impostaTutto() {
-		gedcomDateConverter.analyze( editaTesto.getText().toString() );
+	/**
+	 * Take the date string, update the Dates, and edit all of it in the date editor
+	 * Called when I click on the editable field, and after each text edit
+	 */
+	void setAll() {
+		gedcomDateConverter.analyze( editText.getText().toString() );
 		((CheckBox)findViewById( R.id.editadata_circa )).setChecked( gedcomDateConverter.kind == Kind.APPROXIMATE );
 		((TextView)findViewById( R.id.editadata_tipi )).setText( dateKinds[gedcomDateConverter.kind.ordinal()] );
 
-		// Primo carro
-		impostaCarro( data1, findViewById( R.id.prima_giorno ), findViewById( R.id.prima_mese ),
+		// First wagon
+		setWagon( data1, findViewById( R.id.prima_giorno ), findViewById( R.id.prima_mese ),
 				findViewById( R.id.prima_secolo ), findViewById( R.id.prima_anno ) );
 		if( Global.settings.expert )
-			impostaCecchi( data1 );
+			setCheckboxes( data1 );
 
-		// Secondo carro
+		// Second wagon
 		if( gedcomDateConverter.kind == Kind.BETWEEN_AND || gedcomDateConverter.kind == Kind.FROM_TO ) {
-			impostaCarro( data2, findViewById( R.id.seconda_giorno ), findViewById( R.id.seconda_mese ),
+			setWagon( data2, findViewById( R.id.seconda_giorno ), findViewById( R.id.seconda_mese ),
 					findViewById( R.id.seconda_secolo ), findViewById( R.id.seconda_anno ) );
 			if( Global.settings.expert ) {
 				findViewById( R.id.editadata_seconda_avanzate ).setVisibility( VISIBLE );
-				impostaCecchi( data2 );
+				setCheckboxes( data2 );
 			}
 			findViewById( R.id.editadata_seconda ).setVisibility( VISIBLE );
 		} else {
@@ -241,118 +245,128 @@ public class PublisherDateLinearLayout extends LinearLayout {
 		}
 	}
 
-	// Gira le ruote di un carro in base a una data
-	void impostaCarro(GedcomDateConverter.Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno) {
-		calenda.clear();
+	/**
+	 * Spin the wheels of a wagon according to a date
+	 */
+	void setWagon(GedcomDateConverter.Data data, NumberPicker dayPicker, NumberPicker monthPicker, NumberPicker centuryPicker, NumberPicker yearPicker) {
+		calendar.clear();
 		if( data.date != null )
-			calenda.setTime(data.date);
-		ruotaGiorno.setMaxValue(calenda.getActualMaximum(Calendar.DAY_OF_MONTH));
+			calendar.setTime(data.date);
+		dayPicker.setMaxValue(calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
 		if( data.date != null && (data.isFormat(Format.D_M_Y) || data.isFormat(Format.D_M)) )
-			ruotaGiorno.setValue(data.date.getDate());
+			dayPicker.setValue(data.date.getDate());
 		else
-			ruotaGiorno.setValue(0);
+			dayPicker.setValue(0);
 		if( data.date == null || data.isFormat(Format.Y) )
-			ruotaMese.setValue(0);
+			monthPicker.setValue(0);
 		else
-			ruotaMese.setValue(data.date.getMonth() + 1);
+			monthPicker.setValue(data.date.getMonth() + 1);
 		if( data.date == null || data.isFormat(Format.D_M) )
-			ruotaSecolo.setValue(0);
+			centuryPicker.setValue(0);
 		else
-			ruotaSecolo.setValue((data.date.getYear() + 1900) / 100);
+			centuryPicker.setValue((data.date.getYear() + 1900) / 100);
 		if( data.date == null || data.isFormat(Format.D_M) )
-			ruotaAnno.setValue(100);
+			yearPicker.setValue(100);
 		else
-			ruotaAnno.setValue((data.date.getYear() + 1900) % 100);
+			yearPicker.setValue((data.date.getYear() + 1900) % 100);
 	}
 
-	// Imposta i Checkbox per una data che può essere negativa e doppia
-	void impostaCecchi(GedcomDateConverter.Data data) {
-		CheckBox ceccoBC, ceccoDoppia;
+	/**
+	 * Set the Checkboxes for a date which can be negative and double
+	 */
+	void setCheckboxes(GedcomDateConverter.Data data) {
+		CheckBox checkboxBC, checkboxDouble;
 		if( data.equals(data1) ) {
-			ceccoBC = findViewById(R.id.editadata_negativa1);
-			ceccoDoppia = findViewById(R.id.editadata_doppia1);
+			checkboxBC = findViewById(R.id.editadata_negativa1);
+			checkboxDouble = findViewById(R.id.editadata_doppia1);
 		} else {
-			ceccoBC = findViewById(R.id.editadata_negativa2);
-			ceccoDoppia = findViewById(R.id.editadata_doppia2);
+			checkboxBC = findViewById(R.id.editadata_negativa2);
+			checkboxDouble = findViewById(R.id.editadata_doppia2);
 		}
-		if( data.date == null || data.isFormat(Format.EMPTY) || data.isFormat(Format.D_M) ) { // date senza anno
-			ceccoBC.setVisibility(INVISIBLE);
-			ceccoDoppia.setVisibility(INVISIBLE);
+		if( data.date == null || data.isFormat(Format.EMPTY) || data.isFormat(Format.D_M) ) { // dates without year
+			checkboxBC.setVisibility(INVISIBLE);
+			checkboxDouble.setVisibility(INVISIBLE);
 		} else {
-			ceccoBC.setChecked(data.negative);
-			ceccoBC.setVisibility(VISIBLE);
-			ceccoDoppia.setChecked(data.doubleYear);
-			ceccoDoppia.setVisibility(VISIBLE);
+			checkboxBC.setChecked(data.negative);
+			checkboxBC.setVisibility(VISIBLE);
+			checkboxDouble.setChecked(data.doubleYear);
+			checkboxDouble.setVisibility(VISIBLE);
 		}
 	}
 
-	// Aggiorna una Data coi nuovi valori presi dalle ruote
-	void aggiorna(GedcomDateConverter.Data data, NumberPicker ruotaGiorno, NumberPicker ruotaMese, NumberPicker ruotaSecolo, NumberPicker ruotaAnno ) {
-		if( tastieraVisibile ) {	// Nasconde eventuale tastiera visibile
-			tastieraVisibile = tastiera.hideSoftInputFromWindow( editaTesto.getWindowToken(), 0 );
-				// Nasconde subito la tastiera, ma ha bisogno di un secondo tentativo per restituire false. Comunque non è un problema
+	/**
+	 * Update a Date with the new values taken from the wheels
+	 */
+	void update(GedcomDateConverter.Data data, NumberPicker dayPicker, NumberPicker monthPicker, NumberPicker centuryPicker, NumberPicker yearPicker ) {
+		if(keyboardIsVisible) {	// Hides any visible keyboard
+			keyboardIsVisible = keyboard.hideSoftInputFromWindow( editText.getWindowToken(), 0 );
+				// Hides the keyboard right away, but needs a second try to return false. It's not a problem anyway
 		}
-		int giorno = ruotaGiorno.getValue();
-		int mese = ruotaMese.getValue();
-		int secolo = ruotaSecolo.getValue();
-		int anno = ruotaAnno.getValue();
-		// Imposta i giorni del mese in ruotaGiorno
-		calenda.set( secolo*100+anno, mese-1, 1 );
-		ruotaGiorno.setMaxValue( calenda.getActualMaximum(Calendar.DAY_OF_MONTH) );
+		int day = dayPicker.getValue();
+		int month = monthPicker.getValue();
+		int century = centuryPicker.getValue();
+		int year = yearPicker.getValue();
+		// Set the days of the month in dayWheel
+		calendar.set( century*100+year, month-1, 1 );
+		dayPicker.setMaxValue( calendar.getActualMaximum(Calendar.DAY_OF_MONTH) );
 		if( data.date == null ) data.date = new Date();
-		data.date.setDate( giorno == 0 ? 1 : giorno );  // altrimenti la data M_A arretra di un mese
-		data.date.setMonth( mese == 0 ? 0 : mese - 1 );
-		data.date.setYear( anno == 100 ? -1899 : secolo*100 + anno - 1900 );
-		if( giorno != 0 && mese != 0 && anno != 100 )
+		data.date.setDate( day == 0 ? 1 : day );  // otherwise the M_A date goes back one month
+		data.date.setMonth( month == 0 ? 0 : month - 1 );
+		data.date.setYear( year == 100 ? -1899 : century*100 + year - 1900 );
+		if( day != 0 && month != 0 && year != 100 )
 			data.format.applyPattern(Format.D_M_Y);
-		else if( giorno != 0 && mese != 0 )
+		else if( day != 0 && month != 0 )
 			data.format.applyPattern(Format.D_M);
-		else if( mese != 0 && anno != 100 )
+		else if( month != 0 && year != 100 )
 			data.format.applyPattern(Format.M_Y);
-		else if( anno != 100 )
+		else if( year != 100 )
 			data.format.applyPattern(Format.Y);
 		else
 			data.format.applyPattern(Format.EMPTY);
-		impostaCecchi( data );
-		veroImputTesto = false;
-		genera();
+		setCheckboxes( data );
+		userIsTyping = false;
+		generate();
 	}
 
-	// Ricostruisce la stringa con la data finale e la mette in editaTesto
-	void genera() {
-		String rifatta;
+	/**
+	 * Rebuilds the string with the end date and puts it in {@link #editText}
+	 */
+	void generate() {
+		String redone;
 		if( gedcomDateConverter.kind == Kind.EXACT )
-			rifatta = rifai(data1);
+			redone = redo(data1);
 		else if( gedcomDateConverter.kind == Kind.BETWEEN_AND )
-			rifatta = "BET " + rifai(data1) + " AND " + rifai(data2);
+			redone = "BET " + redo(data1) + " AND " + redo(data2);
 		else if( gedcomDateConverter.kind == Kind.FROM_TO )
-			rifatta = "FROM " + rifai(data1) + " TO " + rifai(data2);
+			redone = "FROM " + redo(data1) + " TO " + redo(data2);
 		else if( gedcomDateConverter.kind == Kind.PHRASE ) {
-			// La frase viene sostituita da data esatta
+			// The phrase is replaced by the exact date
 			gedcomDateConverter.kind = Kind.EXACT;
 			((TextView)findViewById(R.id.editadata_tipi)).setText(dateKinds[0]);
-			rifatta = rifai(data1);
+			redone = redo(data1);
 		} else
-			rifatta = gedcomDateConverter.kind.prefix + " " + rifai(data1);
-		editaTesto.setText(rifatta);
+			redone = gedcomDateConverter.kind.prefix + " " + redo(data1);
+		editText.setText(redone);
 	}
 
-	// Scrive la singola data in base al formato
-	String rifai( GedcomDateConverter.Data data ) {
-		String fatta = "";
+	/**
+	 * Writes the single date according to the format
+	 * */
+	String redo(GedcomDateConverter.Data data ) {
+		String done = "";
 		if( data.date != null ) {
-			// Date con l'anno doppio
+			// Dates with double year
 			if( data.doubleYear && !(data.isFormat(Format.EMPTY) || data.isFormat(Format.D_M)) ) {
-				Date unAnnoDopo = new Date();
-				unAnnoDopo.setYear( data.date.getYear() + 1 );
-				String secondoAnno = String.format( Locale.ENGLISH, "%tY", unAnnoDopo );
-				fatta = data.format.format( data.date ) +"/"+ secondoAnno.substring( 2 );
-			} else // Le altre date normali
-				fatta = data.format.format( data.date );
+				Date aYearLater = new Date();
+				aYearLater.setYear( data.date.getYear() + 1 );
+				String secondoAnno = String.format( Locale.ENGLISH, "%tY", aYearLater );
+				done = data.format.format( data.date ) +"/"+ secondoAnno.substring( 2 );
+			} else // The other normal dates
+				done = data.format.format( data.date );
 		}
 		if( data.negative)
-			fatta += " B.C.";
-		return fatta;
+			done += " B.C.";
+		return done;
 	}
 
 	/**
@@ -360,7 +374,7 @@ public class PublisherDateLinearLayout extends LinearLayout {
 	 * */
 	void encloseInParentheses() {
 		if( gedcomDateConverter.kind == Kind.PHRASE ) {
-			editaTesto.setText("(" + editaTesto.getText() + ")");
+			editText.setText("(" + editText.getText() + ")");
 		}
 	}
 
