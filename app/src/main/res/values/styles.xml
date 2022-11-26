@@ -1,98 +1,104 @@
 <resources>
 
-	<style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
-		<item name="colorPrimary">@color/primary</item>
-		<item name="colorPrimaryDark">@color/primary_dark</item>
-		<item name="colorAccent">@color/accent</item>
-		<item name="android:windowBackground">@color/background</item>
-		<item name="android:textAppearanceSmall">@style/AppTheme.BasicText</item> <!-- Textviews -->
-		<item name="android:textAppearance">@style/AppTheme.BasicText</item> <!-- Radio buttons, switches, checkboxes -->
-		<item name="android:itemTextAppearance">@style/AppTheme.BasicText</item> <!-- Popup, options menu items -->
-		<item name="textAppearancePopupMenuHeader">@style/AppTheme.LittleTitle</item>
-	</style>
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/background</item>
+        <!-- TextView -->
+        <item name="android:textAppearanceSmall">@style/AppTheme.BasicText</item>
+        <!-- RadioButton, SwitchCompat, CheckBox -->
+        <item name="android:textAppearance">@style/AppTheme.BasicText</item>
+        <!-- PopupMenu, options menu item -->
+        <item name="android:itemTextAppearance">@style/AppTheme.BasicText</item>
+        <item name="textAppearancePopupMenuHeader">@style/AppTheme.LittleTitle</item>
+    </style>
 
-	<style name="AppTheme.BasicText">
-		<item name="android:textColor">@color/text</item>
-		<item name="android:textSize">16sp</item>
-	</style>
+    <style name="AppTheme.BasicText">
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">16sp</item>
+    </style>
 
-	<style name="AppTheme.Title">
-		<item name="android:textColor">@color/gray_text</item>
-		<item name="android:textSize">20sp</item>
-	</style>
+    <style name="AppTheme.Title">
+        <item name="android:textColor">@color/gray_text</item>
+        <item name="android:textSize">20sp</item>
+    </style>
 
-	<style name="AppTheme.LittleTitle">
-		<item name="android:textColor">@color/gray_text</item>
-		<item name="android:textSize">15sp</item>
-		<item name="android:textStyle">bold</item>
-	</style>
+    <style name="AppTheme.LittleTitle">
+        <item name="android:textColor">@color/gray_text</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 
-	<style name="AppTheme.Suggestion">
-		<item name="android:textColor">@color/text_veiled</item>
-		<item name="android:textSize">15sp</item>
-	</style>
+    <style name="AppTheme.Suggestion">
+        <item name="android:textColor">@color/text_veiled</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 
-	<style name="AppTheme.ExpandedAppBar">
-		<item name="android:textSize">24sp</item>
-	</style>
+    <style name="AppTheme.ExpandedAppBar">
+        <item name="android:textSize">24sp</item>
+    </style>
 
-	<style name="AppTheme.CollapsedAppBar">
-		<item name="android:textSize">20sp</item>
-	</style>
+    <style name="AppTheme.CollapsedAppBar">
+        <item name="android:textSize">20sp</item>
+    </style>
 
+    <style name="AppTheme.Slug">
+        <item name="android:textColor">@color/gray_text</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:background">@drawable/slug_background</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:paddingBottom">3dp</item>
+    </style>
 
-	<style name="AppTheme.Slug">
-		<item name="android:textColor">@color/gray_text</item>
-		<item name="android:textSize">13sp</item>
-		<item name="android:typeface">monospace</item>
-		<item name="android:background">@drawable/slug_background</item>
-		<item name="android:paddingLeft">6dp</item>
-		<item name="android:paddingTop">2dp</item>
-		<item name="android:paddingRight">6dp</item>
-		<item name="android:paddingBottom">3dp</item>
-	</style>
+    <style name="AppTheme.Navigator" parent="ThemeOverlay.AppCompat">
+        <item name="colorPrimary">@color/primary</item> <!-- Selected text and icon -->
+        <item name="colorControlHighlight">@color/accent</item> <!-- Selected background -->
+    </style>
 
-	<style name="AppTheme.Navigator" parent="ThemeOverlay.AppCompat">
-		<item name="colorPrimary">@color/primary</item><!-- Selected text and icon -->
-		<item name="colorControlHighlight">@color/accent</item><!-- Selected background -->
-	</style>
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 
-	<style name="AppTheme.NoActionBar">
-		<item name="windowActionBar">false</item>
-		<item name="windowNoTitle">true</item>
-	</style>
+    <style name="AppTheme.ActionBar">
+        <item name="colorControlNormal">#FFF</item> <!-- Buttons -->
+        <item name="android:textColorPrimary">#FFF</item> <!-- Text -->
+    </style>
 
-	<style name="AppTheme.ActionBar">
-		<item name="colorControlNormal">#FFF</item><!-- Buttons -->
-		<item name="android:textColorPrimary">#FFF</item><!-- Text -->
-	</style>
+    <style name="TintaBianca" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">@android:color/white</item>
+    </style>
 
-	<style name="TintaBianca" parent="@style/Widget.AppCompat.ActionButton.Overflow">
-		<item name="android:tint">@android:color/white</item>
-	</style>
+    <style name="AppTheme.Wheel">
+        <item name="android:background">@drawable/ruota_sfondo</item>
+        <item name="android:descendantFocusability">blocksDescendants</item>
+        <!-- Hides the dividing lines from API 23 -->
+        <item name="colorControlNormal">@android:color/transparent</item>
+    </style>
 
-	<style name="AppTheme.Wheel">
-		<item name="android:background">@drawable/ruota_sfondo</item>
-		<item name="android:descendantFocusability">blocksDescendants</item>
-		<item name="colorControlNormal">@android:color/transparent</item><!-- Hide the dividing lines from API 23 -->
-	</style>
+    <style name="AppTheme.BottoneColorato" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">#FFF</item>
+    </style>
 
-	<style name="AppTheme.BottoneColorato" parent="Widget.AppCompat.Button.Colored">
-		<item name="android:textColor">#FFF</item>
-	</style>
-	<style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
-		<item name="android:backgroundTint">@color/primary_light</item>
-	</style>
+    <style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
+        <item name="android:backgroundTint">@color/primary_light</item>
+    </style>
 
-	<attr name="spouseColor" format="reference|color"/>
-	<attr name="linesColor" format="reference|color"/>
-	<style name="diagramScreen" parent="AppTheme">
-		<item name="spouseColor">@color/partner_screen</item>
-		<item name="linesColor">@color/diagram_lines_screen</item>
-	</style>
-	<style name="diagramPrint" parent="AppTheme">
-		<item name="spouseColor">@color/partner_print</item>
-		<item name="linesColor">@color/diagram_lines_print</item>
-	</style>
+    <attr name="spouseColor" format="reference|color" />
+    <attr name="linesColor" format="reference|color" />
+
+    <style name="diagramScreen" parent="AppTheme">
+        <item name="spouseColor">@color/partner_screen</item>
+        <item name="linesColor">@color/diagram_lines_screen</item>
+    </style>
+
+    <style name="diagramPrint" parent="AppTheme">
+        <item name="spouseColor">@color/partner_print</item>
+        <item name="linesColor">@color/diagram_lines_print</item>
+    </style>
 
 </resources>

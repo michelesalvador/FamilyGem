@@ -142,7 +142,7 @@ public class ExportTest {
 		File fileGedcomZip = new File( documentsDir, "ਸੰਕੁਚਿਤ.zip" );
 		Exporter esp2 = new Exporter( appContext );
 		assertTrue( esp2.openTree( idAlbero ) );
-		boolean result = esp2.exportZippedGedcom(Uri.fromFile(fileGedcomZip));
+		boolean result = esp2.exportGedcomToZip(Uri.fromFile(fileGedcomZip));
 		s.l( esp2.errorMessage);
 		assertTrue( result );
 		assertEquals( esp2.successMessage, appContext.getString(R.string.zip_exported_ok) );

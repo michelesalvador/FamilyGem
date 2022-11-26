@@ -71,14 +71,14 @@
     <string name="all_ok">Tutto a posto.</string>
     <string name="errors_found">Ci sono %d errori.</string>
     <string name="correct">Correggi</string>
-    <!-- Opzioni -->
+    <!-- SettingsActivity -->
     <string name="settings">Impostazioni</string>
     <string name="auto_save">Salvataggio automatico</string>
     <string name="load_tree_startup">All\'avvio carica l\'ultimo albero aperto</string>
     <string name="show_advanced_functions">Mostra le funzioni avanzate</string>
     <string name="system_language">Lingua di sistema</string>
     <string name="about">Informazioni</string>
-    <!-- InfoAlbero -->
+    <!-- InfoActivity -->
     <string name="item_exists_but_file">Esiste la voce nell\'indice degli alberi, ma per qualche ragione è scomparso il file corrispondente:</string>
     <string name="root">Radice</string>
     <string name="shares">Condivisioni</string>
@@ -102,12 +102,12 @@
     <string name="form">Forma</string>
     <string name="destination">Destinazione</string>
     <string name="time">Ora</string>
-    <!-- Cartelle media -->
+    <!-- MediaFoldersActivity -->
     <string name="media_folders">Cartelle media</string>
     <string name="media_searched_list">I file media vengono cercati dentro a queste cartelle:</string>
     <string name="app_storage">Archiviazione app</string>
     <string name="add_device_folder">Aggiungi una cartella da questo dispositivo.</string>
-    <!-- Condivisione -->
+    <!-- SharingActivity -->
     <string name="share_sensitive">Condivisione di dati sensibili</string>
     <string name="aware_upload_server">Tieni presente che stai per caricare l\'intero albero su un server online.</string>
     <string name="remind_later">Ricordamelo dopo</string>
@@ -122,7 +122,7 @@
     <string name="click_this_link">Clicca questo link per vedere il mio albero genealogico: %s</string>
     <string name="share_with">Condividi con</string>
     <string name="sharing_completed">Condivisione conclusa.</string>
-    <!-- Compara -->
+    <!-- CompareActivity -->
     <string name="tree_with_news">Albero con aggiornamenti</string>
     <string name="tree_without_news">Albero senza novità</string>
     <string name="tree_news_imported">Il vecchio albero qui sopra può ricevere %d aggiornamenti dall\'albero che è stato importato:</string>
@@ -134,13 +134,13 @@
     <string name="one_update_choice">Un aggiornamento richiede una scelta</string>
     <string name="many_updates_choice">%d aggiornamenti richiedono una scelta</string>
     <string name="updates_replace_add">Devi decidere se gli aggiornamenti debbano sostituire elementi esistenti o essere aggiunti come nuovi elementi.</string>
-    <!-- Confrontatore -->
+    <!-- ProcessActivity -->
     <string name="import_news">Importa aggiornamento</string>
     <string name="person">Persona</string>
     <string name="add">Aggiungi</string>
     <string name="replace">Sostituisci</string>
     <string name="ignore">Ignora</string>
-    <!-- Conferma -->
+    <!-- ConfirmationActivity -->
     <string name="confirm_news">Conferma gli aggiornamenti</string>
     <string name="accepted_news">Hai accettato %d aggiornamenti:\n\t%d aggiunte\n\t%d sostituzioni\n\t%d eliminazioni</string>
     <string name="confirm">Conferma</string>
@@ -149,7 +149,7 @@
     <string name="birthdays">Compleanni</string>
     <string name="birthday_notified_midday">Il compleanno di ogni persona sarà notificato a mezzogiorno.</string>
     <string name="turns_years_old">%s compie %d anni oggi.</string>
-    <!-- Diagram -->
+    <!-- DiagramFragment -->
     <string name="new_person">Aggiungi la prima persona.</string>
     <string name="card">Profilo</string>
     <string name="family_as_child">Famiglia (come figlio)</string>
@@ -163,7 +163,7 @@
 \nTocca per aprire il profilo.</string>
     <string name="export_pdf">Esporta PDF</string>
     <string name="pdf_exported_ok">PDF esportato.</string>
-    <!-- Diagram settings -->
+    <!-- DiagramSettingsActivity -->
     <string name="diagram_settings">Impostazioni diagramma</string>
     <string name="generations_display_diagram">Scegli quante generazioni mostrare nel diagramma:</string>
     <string name="ancestors">Antenati</string>
@@ -172,7 +172,7 @@
     <string name="descendants">Discendenti</string>
     <string name="siblings_nephews">Fratelli e nipoti</string>
     <string name="uncles_cousins">Zii e cugini</string>
-    <!-- Anagrafe -->
+    <!-- PersonsFragment -->
     <string name="order_by">Ordina per</string>
     <string name="id">ID</string>
     <string name="surname">Cognome</string>
@@ -237,7 +237,7 @@
     <string name="ex_spouse">Ex coniuge</string>
     <string name="ex_husband">Ex marito</string>
     <string name="ex_wife">Ex moglie</string>
-    <!-- Dettaglio -->
+    <!-- DetailActivity -->
     <string name="new_repository">Nuovo archivio</string>
     <string name="link_repository">Collega archivio</string>
     <string name="choose_source">Scegli fonte</string>
@@ -246,7 +246,7 @@
     <string name="crop">Ritaglia</string>
     <string name="copy">Copia testo</string>
     <string name="make_main_submitter">Vuoi che questo sia l\'autore principale dell\'albero?</string>
-    <!-- Nome -->
+    <!-- NameActivity -->
     <string name="value">Valore</string>
     <string name="type">Tipo</string>
     <string name="prefix">Prefisso</string>
@@ -261,21 +261,21 @@
     <string name="immigrant">Immigrato/a</string>
     <string name="maiden">Nubile</string>
     <string name="married">Sposato/a</string>
-    <!-- Evento -->
+    <!-- EventActivity -->
     <string name="place">Luogo</string>
     <string name="cause">Causa</string>
     <string name="www">Sito web</string>
     <string name="email">E-mail</string>
     <string name="rin">ID automatizzato del record</string>
     <string name="user_id">ID utente</string>
-    <!-- CitazioneFonte -->
+    <!-- SourceCitationActivity -->
     <string name="source_citation">Citazione fonte</string>
     <string name="inexistent_source_citation">Citazione fonte inesistente</string>
     <string name="source_note">Fonte-nota</string>
     <string name="page">Pagina</string>
     <string name="text">Testo</string>
     <string name="certainty">Certezza</string>
-    <!-- Fonte -->
+    <!-- SourceActivity -->
     <string name="abbreviation">Titolo breve</string>
     <string name="title">Titolo</string>
     <string name="author">Autore</string>
@@ -286,12 +286,12 @@
     <string name="parentheses">Parentesi</string>
     <string name="reference_number">Numero di riferimento</string>
     <string name="cited_by">Citata in</string>
-    <!-- ArchivioRef -->
+    <!-- RepositoryRefActivity -->
     <string name="repository_citation">Citazione archivio</string>
     <string name="inexistent_repository_citation">Citazione archivio inesistente</string>
     <string name="repository_note">Archivio-nota</string>
     <string name="repository">Archivio</string>
-    <!-- Immagine -->
+    <!-- MediaActivity -->
     <string name="shared_media">Media condiviso</string>
     <string name="format">Formato</string>
     <string name="primary">Principale</string>
@@ -300,7 +300,7 @@
     <string name="blob">Blob</string>
     <string name="used_by">Usato da</string>
     <string name="into">Dentro a</string>
-    <!-- Indirizzo -->
+    <!-- AddressActivity -->
     <string name="line_1">Linea 1</string>
     <string name="line_2">Linea 2</string>
     <string name="line_3">Linea 3</string>
@@ -308,7 +308,7 @@
     <string name="city">Città</string>
     <string name="state">Stato/provincia</string>
     <string name="country">Nazione</string>
-    <!-- Famiglia -->
+    <!-- FamilyActivity -->
     <string name="number_members">Numero dei membri</string>
     <string name="num_children">%d figli</string>
     <string name="family">Famiglia</string>
@@ -330,14 +330,14 @@
     <string name="adopted">Adottato/a</string>
     <string name="foster">Affidato/a</string>
     <string name="really_delete_family">Questa famiglia sarà eliminata, ma le persone che la compongono non saranno eliminate.</string>
-    <!-- Note -->
+    <!-- NoteActivity -->
     <string name="shared_notes">Note condivise</string>
     <string name="simple_note">Nota semplice</string>
     <string name="simple_notes">Note semplici</string>
     <string name="shared_note">Nota condivisa</string>
     <string name="written_in">Scritta in</string>
     <string name="shared_by">Usata da</string>
-    <!-- EditaIndividuo -->
+    <!-- PersonEditorActivity -->
     <string name="male">Maschio</string>
     <string name="female">Femmina</string>
     <string name="unknown">Sconosciuto</string>
@@ -352,7 +352,7 @@
     <string name="which_family_add_sibling">In quale famiglia vuoi aggiungere il fratello\?</string>
     <string name="which_family_add_spouse">In quale famiglia vuoi aggiungere il coniuge\?</string>
     <string name="which_family_add_child">In quale famiglia vuoi aggiungere il figlio\?</string>
-    <!-- EditoreData -->
+    <!-- DateEditorLayout -->
     <string name="double_date">Doppia</string>
     <string name="january">Gennaio</string>
     <string name="february">Febbraio</string>

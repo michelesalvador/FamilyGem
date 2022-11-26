@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<item name="tag_fulcrum" type="id"/>
-	<item name="tag_husband" type="id"/>
-	<item name="tag_bond" type="id"/>
-	<item name="tag_oggetto" type="id"/>
-	<item name="tag_contenitore" type="id"/>
-	<item name="tag_percorso" type="id"/>
-	<item name="tag_uri" type="id"/>
-	<item name="tag_file_type" type="id"/> <!--	0: placeholder, 1: croppable image, 2: not croppable preview (video), 3: file icon -->
-	<item name="tag_famiglia" type="id"/>
-	<item name="tag_spouse_family_ref" type="id"/>
-	<item name="tag_spouse_ref" type="id"/>
-	<item name="tag_id" type="id"/>
-	<item name="tag_position" type="id"/>
+    <item name="tag_fulcrum" type="id" />
+    <item name="tag_husband" type="id" />
+    <item name="tag_bond" type="id" />
+    <item name="tag_object" type="id" />
+    <item name="tag_contenitore" type="id" />
+    <item name="tag_percorso" type="id" />
+    <item name="tag_uri" type="id" />
+    <item name="tag_file_type" type="id" /> <!-- 0: placeholder, 1: croppable image, 2: not croppable preview (video), 3: file icon -->
+    <item name="tag_famiglia" type="id" />
+    <item name="tag_spouse_family_ref" type="id" />
+    <item name="tag_spouse_ref" type="id" />
+    <item name="tag_id" type="id" />
+    <item name="tag_position" type="id" />
 </resources>

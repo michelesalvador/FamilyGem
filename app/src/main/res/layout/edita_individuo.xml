@@ -1,188 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
-<androidx.constraintlayout.widget.ConstraintLayout
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:focusableInTouchMode="true"
-	android:padding="16dp">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-	<com.google.android.material.textfield.TextInputLayout
-		android:id="@+id/nome_label"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:hint="@string/given"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusableInTouchMode="true"
+        android:padding="16dp">
 
-		<com.google.android.material.textfield.TextInputEditText
-			android:id="@+id/nome"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:inputType="textCapWords|textPersonName"
-			android:nextFocusForward="@+id/cognome"/>
-	</com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/nome_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/given"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-	<com.google.android.material.textfield.TextInputLayout
-		android:id="@+id/cognome_label"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:hint="@string/surname"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/nome_label">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/nome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords|textPersonName"
+                android:nextFocusForward="@+id/cognome" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-		<com.google.android.material.textfield.TextInputEditText
-			android:id="@+id/cognome"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:inputType="textCapWords|textPersonName"
-			android:nextFocusForward="@+id/data_nascita"/>
-	</com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cognome_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/surname"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/nome_label">
 
-	<RadioGroup
-		android:id="@+id/radioGroup"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:orientation="horizontal"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/cognome_label">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/cognome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords|textPersonName"
+                android:nextFocusForward="@+id/data_nascita" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-		<RadioButton
-			android:id="@+id/sesso1"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:text="@string/male"/>
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cognome_label">
 
-		<RadioButton
-			android:id="@+id/sesso2"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:text="@string/female"/>
+            <RadioButton
+                android:id="@+id/sesso1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/male" />
 
-		<RadioButton
-			android:id="@+id/sesso3"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:text="@string/unknown"/>
-	</RadioGroup>
+            <RadioButton
+                android:id="@+id/sesso2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/female" />
 
-	<com.google.android.material.textfield.TextInputLayout
-		android:id="@+id/data_nascita_label"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:hint="@string/birth_date"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/radioGroup">
+            <RadioButton
+                android:id="@+id/sesso3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/unknown" />
+        </RadioGroup>
 
-		<com.google.android.material.textfield.TextInputEditText
-			android:id="@+id/data_nascita"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:inputType="textCapCharacters"
-			android:imeOptions="actionNext"
-			android:nextFocusForward="@+id/luogo_nascita"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/data_nascita_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="@string/birth_date"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/radioGroup">
 
-	</com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/data_nascita"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="textCapCharacters"
+                android:nextFocusForward="@+id/luogo_nascita" />
 
-	<app.familygem.EditoreData
-		android:id="@+id/editore_data_nascita"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:visibility="gone"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/data_nascita_label" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-	<com.google.android.material.textfield.TextInputLayout
-		android:id="@+id/luogo_nascita_label"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:hint="@string/birth_place"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/editore_data_nascita">
+        <app.familygem.DateEditorLayout
+            android:id="@+id/editore_data_nascita"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/data_nascita_label" />
 
-		<app.familygem.TrovaLuogo
-			android:id="@+id/luogo_nascita"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"/>
-	</com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/luogo_nascita_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/birth_place"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editore_data_nascita">
 
-	<androidx.appcompat.widget.SwitchCompat
-		android:id="@+id/defunto"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:text="@string/dead"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/luogo_nascita_label"/>
+            <app.familygem.PlaceFinderTextView
+                android:id="@+id/luogo_nascita"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-	<LinearLayout
-		android:id="@+id/morte"
-		android:orientation="vertical"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="8dp"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/defunto">
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/defunto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/dead"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/luogo_nascita_label" />
 
-		<com.google.android.material.textfield.TextInputLayout
-			android:id="@+id/data_morte_label"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="16dp"
-			android:hint="@string/death_date"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent">
+        <LinearLayout
+            android:id="@+id/morte"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/defunto">
 
-			<com.google.android.material.textfield.TextInputEditText
-				android:id="@+id/data_morte"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:inputType="textCapCharacters"
-				android:imeOptions="actionNext"
-				android:nextFocusForward="@id/luogo_morte"/>
-		</com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/data_morte_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="@string/death_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
 
-		<app.familygem.EditoreData
-			android:id="@+id/editore_data_morte"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:visibility="gone"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/data_morte_label" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/data_morte"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapCharacters"
+                    android:nextFocusForward="@id/luogo_morte" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-		<com.google.android.material.textfield.TextInputLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:hint="@string/death_place"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/editore_data_morte">
+            <app.familygem.DateEditorLayout
+                android:id="@+id/editore_data_morte"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/data_morte_label" />
 
-			<app.familygem.TrovaLuogo
-				android:id="@+id/luogo_morte"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:inputType="textCapWords" />
-		</com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/death_place"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editore_data_morte">
 
-	</LinearLayout>
+                <app.familygem.PlaceFinderTextView
+                    android:id="@+id/luogo_morte"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
