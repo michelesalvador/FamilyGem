@@ -39,9 +39,22 @@ public class MediaFoldersActivity extends BaseActivity {
         updateList();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         findViewById(R.id.fab).setOnClickListener(v -> {
-            int perm = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            final String[] requiredPermissions;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requiredPermissions = new String[] {
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.READ_MEDIA_VIDEO,
+                        Manifest.permission.READ_MEDIA_AUDIO,
+                };
+            } else {
+                requiredPermissions = new String[] {
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                };
+            }
+
+            final int perm = F.checkMultiplePermissions(this, requiredPermissions);
             if (perm == PackageManager.PERMISSION_DENIED)
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 3517);
+                ActivityCompat.requestPermissions(this, requiredPermissions, 3517);
             else if (perm == PackageManager.PERMISSION_GRANTED)
                 chooseFolder();
         });

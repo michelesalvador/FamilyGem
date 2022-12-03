@@ -591,6 +591,15 @@ public class F {
         }
     }
 
+    public static int checkMultiplePermissions(final Context context, final String... permissions) {
+        int result = PackageManager.PERMISSION_GRANTED;
+        for (String permission: permissions) {
+            result |= ContextCompat.checkSelfPermission(context, permission);
+        }
+
+        return result;
+    }
+
     // Methods for image acquisition:
 
     /**
@@ -598,13 +607,24 @@ public class F {
      */
     public static void displayImageCaptureDialog(Context context, Fragment fragment, int code, MediaContainer container) {
         // Request permission to access device memory
-        int perm = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE);
+        final String[] requiredPermissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requiredPermissions = new String[] {
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO,
+            };
+        } else {
+            requiredPermissions = new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+            };
+        }
+        final int perm = checkMultiplePermissions(context, requiredPermissions);
         if (perm == PackageManager.PERMISSION_DENIED) {
             if (fragment != null) { // MediaFragment
-                fragment.requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, code);
+                fragment.requestPermissions(requiredPermissions, code);
             } else
-                ActivityCompat.requestPermissions((AppCompatActivity)context,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, code);
+                ActivityCompat.requestPermissions((AppCompatActivity)context, requiredPermissions, code);
             return;
         }
         // Collect intents useful to capture images
