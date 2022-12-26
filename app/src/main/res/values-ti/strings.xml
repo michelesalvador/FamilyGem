@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sure_delete">ርግጸኛ ዲኻ\?</string>
+    <string name="change_date">መዓልቲ ቐይር</string>
+    <string name="extension">ጭራ</string>
+    <string name="citations">መጣቐሲታት</string>
+    <string name="sources_number">ቑፅሪ ፍልፍላት</string>
+    <string name="trees">ኦማት</string>
+    <string name="sources">ፍልፍላት</string>
+    <string name="notes">መዘኻኸሪታት</string>
+    <string name="create">ፍጠር</string>
+    <string name="tree">ኦም</string>
+    <string name="persons">ሰባት</string>
+    <string name="download">ኣውርድ</string>
+    <string name="save">ኣቐምጥ</string>
+    <string name="open">ክፈት</string>
+    <string name="share_tree">ናይሓባር</string>
+    <string name="delete">ደምስስ</string>
+    <string name="cancel">ግደፍ</string>
+    <string name="diagram">ስእል ሕንፃፅ</string>
+    <string name="media">ዓቛሪ ዳታ</string>
+</resources>

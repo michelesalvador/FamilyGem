@@ -21,7 +21,7 @@
     <string name="drawer_close">ನ್ಯಾವಿಗೇಷನ್ ಡ್ರಾಯರ್ ಅನ್ನು ಮುಚ್ಚಿ</string>
     <string name="drawer_open">ನ್ಯಾವಿಗೇಷನ್ ಡ್ರಾಯರ್ ತೆರೆಯಿರಿ</string>
     <string name="existing_family">ಈಗಾಗಲೇ ಇರುವ ಕುಟುಂಬ</string>
-    <string name="new_family_of">%S ಹೊಸ ಕುಟುಂಬ</string>
+    <string name="new_family_of">%s ಹೊಸ ಕುಟುಂಬ</string>
     <string name="extension">ವಿಸ್ತರಣೆ</string>
     <string name="sources_number">ಮೂಲಗಳ ಸಂಖ್ಯೆ</string>
     <string name="citations">ಉಲ್ಲೇಖಗಳು</string>

@@ -4,7 +4,7 @@
     <string name="saved">Uložené.</string>
     <string name="dead">Úmrtie</string>
     <string name="publication_facts">Publikácia</string>
-    <string name="make_main_submitter">Má byť tento zadávateľ hlavným autorom stromu\?</string>
+    <string name="make_main_submitter">Chcete, aby tento zadávateľ bol hlavným zadávateľom stromu\?</string>
     <string name="make_root">Označiť ako hlavnú osobu</string>
     <string name="uncles_great_uncles">Strýkovia a prastrýkovia</string>
     <string name="generations_display_diagram">Nastavenie počtu generácií zobrazených v diagrame:</string>
@@ -38,7 +38,7 @@
     <string name="which_family_add_spouse">Do ktorej rodiny pridať manžela/manželku\?</string>
     <string name="which_family_add_sibling">Do ktorej rodiny pridať súrodenca\?</string>
     <string name="which_family_add_parent">Do ktorej rodiny pridať rodiča\?</string>
-    <string name="shared_by">Používa</string>
+    <string name="shared_by">Zdieľa</string>
     <string name="line_3">Riadok 3</string>
     <string name="line_2">Riadok 2</string>
     <string name="line_1">Riadok 1</string>
@@ -79,7 +79,7 @@
     <string name="after">Po</string>
     <string name="calculated">Vypočítaný</string>
     <string name="estimated">Odhadovaný</string>
-    <string name="approximate">Asi</string>
+    <string name="approximate">Približne</string>
     <string name="exact">Presne</string>
     <string name="december">December</string>
     <string name="november">November</string>
@@ -146,10 +146,10 @@
     <string name="new_note">Nová poznámka</string>
     <string name="note">Poznámka</string>
     <string name="other">Iné</string>
-    <string name="burial">Pohreb</string>
+    <string name="burial">Pochovanie</string>
     <string name="occupation">Povolanie</string>
     <string name="residence">Bydlisko</string>
-    <string name="baptism">Krst</string>
+    <string name="baptism">Birmovanie</string>
     <string name="birth">Narodenie</string>
     <string name="event">Udalosť</string>
     <string name="new_shared_media">Nové zdieľané médium</string>
@@ -169,10 +169,10 @@
     <string name="child">Dieťa</string>
     <string name="sibling">Súrodenec</string>
     <string name="parent">Rodič</string>
-    <string name="unlink">Zrušiť prepojenie</string>
+    <string name="unlink">Odpojiť</string>
     <string name="modify">Upraviť</string>
     <string name="link_person">Prepojiť existujúcu osobu</string>
-    <string name="new_relative">Prepojiť novú osobu</string>
+    <string name="new_relative">Pripojiť novú osobu</string>
     <string name="family_as_spouse">Rodina (ako manželský partner)</string>
     <string name="family_as_child">Rodina (ako dieťa)</string>
     <string name="card">Profil</string>
@@ -197,7 +197,7 @@
     <string name="sharing_tree">Zdieľanie rodokmeňa</string>
     <string name="correctly_uploaded">Strom úspešne nahraný.</string>
     <string name="usually_your_name">Zvyčajne vaše meno a priezvisko.</string>
-    <string name="changes_submitter">Autor zmien</string>
+    <string name="changes_submitter">Zadávateľ zmien</string>
     <string name="add_device_folder">Pridať priečinok z tohto zariadenia.</string>
     <string name="media_folders">Priečinky médií</string>
     <string name="form">Forma</string>
@@ -222,7 +222,7 @@
     <string name="source_citation">Citácia zdroja</string>
     <string name="cause">Príčina</string>
     <string name="place">Miesto</string>
-    <string name="maiden">Za slobodna</string>
+    <string name="maiden">Dievčenské</string>
     <string name="immigrant">Prisťahovalecké</string>
     <string name="phonetic">Foneticky</string>
     <string name="aka">Alias</string>
@@ -235,7 +235,7 @@
     <string name="crop">Orezať</string>
     <string name="choose_file">Zvoliť súbor</string>
     <string name="choose_repository">Zvoliť archív</string>
-    <string name="link_repository">Prepojiť archív</string>
+    <string name="link_repository">Pripojiť archív</string>
     <string name="new_repository">Nový archív</string>
     <string name="son">Syn</string>
     <string name="daughter">Dcéra</string>
@@ -269,7 +269,7 @@
     <string name="ideally_recipient">Ideálne príjemca zdieľania.</string>
     <string name="app_storage">Úložisko aplikácie</string>
     <string name="time">Čas</string>
-    <string name="submitter">Autor</string>
+    <string name="submitter">Zadávateľ</string>
     <string name="date">Dátum</string>
     <string name="fax">Fax</string>
     <string name="telephone">Telefón</string>
@@ -281,7 +281,7 @@
     <string name="version">Verzia</string>
     <string name="characrter_set">Kódovanie</string>
     <string name="file">Súbor</string>
-    <string name="create_header">Vytvoriť záhlavie</string>
+    <string name="create_header">Vytvoriť hlavičku</string>
     <string name="header">Záhlavie</string>
     <string name="refresh">Aktualizovať</string>
     <string name="root">Hlavná osoba</string>
@@ -316,7 +316,7 @@
     <string name="download_example">Stiahnuť ukážku</string>
     <string name="empty_tree">Vytvoriť prázdny strom</string>
     <string name="download_shared_tree">Stiahnuť zdieľaný strom</string>
-    <string name="submitters">Autori</string>
+    <string name="submitters">Zadávatelia</string>
     <string name="repositories">Archívy</string>
     <string name="families">Rodiny</string>
     <string name="notes">Poznámky</string>
@@ -326,7 +326,7 @@
     <string name="existing_family">Rodina už existuje</string>
     <string name="sources_number">Počet zdrojov</string>
     <string name="citations">Citácie</string>
-    <string name="make_default">Hlavný autor</string>
+    <string name="make_default">Hlavný zadávateľ</string>
     <string name="change_date">Dátum zmeny</string>
     <string name="done">Hotovo</string>
     <string name="cancel">Zrušiť</string>
@@ -363,6 +363,13 @@
     <string name="partner">Partner/ka</string>
     <string name="age">Vek</string>
     <string name="uncles_cousins">Strýkovia a bratranci</string>
-    <string name="partners">Partneri/ky</string>
+    <string name="partners">Partneri/partnerky</string>
     <string name="system_language">Jazyk systému</string>
+    <string name="adopted">Adoptovaný/á</string>
+    <string name="edit_id">Zmena ID</string>
+    <string name="invalid_id">Neplatný ID</string>
+    <string name="foster">Pestúnsky</string>
+    <string name="existing_id">ID už existuje</string>
+    <string name="lineage">Príbuzenský vzťah</string>
+    <string name="undefined">Neurčený</string>
 </resources>

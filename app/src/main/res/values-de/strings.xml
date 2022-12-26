@@ -365,4 +365,11 @@
     <string name="relationship">Beziehung</string>
     <string name="uncles_cousins">Onkel und Cousins</string>
     <string name="system_language">Systemsprache</string>
+    <string name="existing_id">ID existiert bereits</string>
+    <string name="lineage">Verwandtschaft</string>
+    <string name="adopted">Adoptierter/adoptierte</string>
+    <string name="foster">Pflegekind</string>
+    <string name="edit_id">Änderung ID</string>
+    <string name="invalid_id">Ungültige ID</string>
+    <string name="undefined">Unbestimmte</string>
 </resources>

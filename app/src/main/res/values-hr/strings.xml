@@ -15,7 +15,7 @@
     <string name="one_update_choice">Jedno aktualiziranje treba izbor</string>
     <string name="title">Naslov</string>
     <string name="slideshow">Dijaprojekcija</string>
-    <string name="num_children">Broj djece: %d</string>
+    <string name="num_children">%d djece</string>
     <string name="husband">Muž</string>
     <string name="characrter_set">Kodna stranica</string>
     <string name="media_folders">Mape medija</string>
@@ -365,4 +365,11 @@
     <string name="uncles_cousins">Stričevi i rođaci</string>
     <string name="partners">Partneri</string>
     <string name="system_language">Jezik sustava</string>
+    <string name="lineage">Srodstvo</string>
+    <string name="edit_id">Uredi ID</string>
+    <string name="invalid_id">Nevažeći ID</string>
+    <string name="existing_id">Već postojeći ID</string>
+    <string name="adopted">Usvojen/a</string>
+    <string name="foster">Dovjerenij/Dovjerena</string>
+    <string name="undefined">Neodređeno</string>
 </resources>

@@ -21,7 +21,7 @@
     <string name="inexistent_source_citation">Chybějící citace pramene</string>
     <string name="source_citation">Citace pramene</string>
     <string name="www">Webová stránka</string>
-    <string name="make_main_submitter">Má být tento zadavatel hlavním autorem stromu\?</string>
+    <string name="make_main_submitter">Chcete, aby tento zadavatel byl hlavním zadavatelem stromu\?</string>
     <string name="half_sibling">Nevlastní sourozenec</string>
     <string name="make_root">Označit jako hlavní osobu</string>
     <string name="really_delete_person">Opravdu odstranit tuto osobu\?</string>
@@ -89,7 +89,7 @@
     <string name="unknown">Neznámé</string>
     <string name="female">Žena</string>
     <string name="male">Muž</string>
-    <string name="shared_by">Používá</string>
+    <string name="shared_by">Sdílí</string>
     <string name="written_in">Napsáno v</string>
     <string name="shared_note">Sdílená poznámka</string>
     <string name="simple_notes">Jednoduché poznámky</string>
@@ -133,7 +133,7 @@
     <string name="cause">Příčina</string>
     <string name="place">Místo</string>
     <string name="married">Ženatý/Vdaná</string>
-    <string name="maiden">Za svobodna</string>
+    <string name="maiden">Dívčí</string>
     <string name="immigrant">Přistěhovalecké</string>
     <string name="phonetic">Foneticky</string>
     <string name="romanized">Romanizované</string>
@@ -192,7 +192,7 @@
     <string name="choose_file">Zvolit soubor</string>
     <string name="choose_repository">Zvolit archiv</string>
     <string name="choose_source">Zvolit pramen</string>
-    <string name="link_repository">Propojit archiv</string>
+    <string name="link_repository">Připojit archiv</string>
     <string name="new_repository">Nový archiv</string>
     <string name="son">Syn</string>
     <string name="daughter">Dcera</string>
@@ -218,11 +218,11 @@
     <string name="new_note">Nová poznámka</string>
     <string name="note">Poznámka</string>
     <string name="other">Jiné</string>
-    <string name="burial">Pohřeb</string>
+    <string name="burial">Pohřbení</string>
     <string name="death">Úmrtí</string>
     <string name="occupation">Povolání</string>
     <string name="residence">Bydliště</string>
-    <string name="baptism">Křest</string>
+    <string name="baptism">Biřmování</string>
     <string name="birth">Narození</string>
     <string name="event">Událost</string>
     <string name="sex">Pohlaví</string>
@@ -253,10 +253,10 @@
     <string name="spouse">Manžel/ka</string>
     <string name="sibling">Sourozenec</string>
     <string name="parent">Rodič</string>
-    <string name="unlink">Zrušit propojení</string>
+    <string name="unlink">Odpojit</string>
     <string name="modify">Upravit</string>
     <string name="link_person">Propojit stávající osobu</string>
-    <string name="new_relative">Propojit novou osobu</string>
+    <string name="new_relative">Připojit novou osobu</string>
     <string name="family_as_spouse">Rodina (jako manžel/manželka)</string>
     <string name="family_as_child">Rodina (jako dítě)</string>
     <string name="card">Profil</string>
@@ -286,7 +286,7 @@
     <string name="sharing_tree">Sdílení rodokmenu</string>
     <string name="correctly_uploaded">Strom úspěšně nahrán.</string>
     <string name="usually_your_name">Obvykle vaše jméno a příjmení.</string>
-    <string name="changes_submitter">Autor změn</string>
+    <string name="changes_submitter">Zadavatel změn</string>
     <string name="ideally_recipient">Ideálně příjemce sdílení.</string>
     <string name="please_name">Napište jméno.</string>
     <string name="add_device_folder">Přidat složku z tohoto zařízení.</string>
@@ -295,7 +295,7 @@
     <string name="media_folders">Složky médií</string>
     <string name="time">Čas</string>
     <string name="submission">Odeslání</string>
-    <string name="submitter">Autor</string>
+    <string name="submitter">Zadavatel</string>
     <string name="date">Datum</string>
     <string name="fax">Fax</string>
     <string name="telephone">Telefon</string>
@@ -313,7 +313,7 @@
     <string name="empty_tree">Vytvořit prázdný strom</string>
     <string name="download_shared_tree">Stáhnout sdílený strom</string>
     <string name="new_tree">Nový strom</string>
-    <string name="submitters">Autoři</string>
+    <string name="submitters">Zadavatelé</string>
     <string name="repositories">Archivy</string>
     <string name="families">Rodiny</string>
     <string name="notes">Poznámky</string>
@@ -326,7 +326,7 @@
     <string name="extension">Jiné</string>
     <string name="sources_number">Počet pramenů</string>
     <string name="citations">Citace</string>
-    <string name="make_default">Hlavní autor</string>
+    <string name="make_default">Hlavní zadavatel</string>
     <string name="version_name">Verze %s</string>
     <string name="cant_understand_uri">Přijatý identifikátor URI je neznámý.</string>
     <string name="sure_delete">Opravdu odstranit\?</string>
@@ -363,6 +363,13 @@
     <string name="partner">Partner/ka</string>
     <string name="age">Věk</string>
     <string name="uncles_cousins">Strýcové a bratranci</string>
-    <string name="partners">Partneři/ky</string>
+    <string name="partners">Partneři/partnerky</string>
     <string name="system_language">Jazyk systému</string>
+    <string name="lineage">Příbuzenský vztah</string>
+    <string name="invalid_id">Neplatný ID</string>
+    <string name="adopted">Adoptovaný/á</string>
+    <string name="foster">Pěstounský</string>
+    <string name="edit_id">Změna ID</string>
+    <string name="existing_id">ID již existuje</string>
+    <string name="undefined">Neurčený</string>
 </resources>

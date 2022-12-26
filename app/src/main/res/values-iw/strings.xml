@@ -365,4 +365,11 @@
     <string name="which_family">איזו משפחה\?</string>
     <string name="simpsons_tree">עץ משפחת סימפסון</string>
     <string name="system_language">שפת המערכת</string>
+    <string name="adopted">מאומץ</string>
+    <string name="foster">אומנה</string>
+    <string name="lineage">אילן יוחסין</string>
+    <string name="existing_id">המזהה כבר קיים</string>
+    <string name="edit_id">עריכת מזהה</string>
+    <string name="undefined">לא מוגדר</string>
+    <string name="invalid_id">מזהה שגוי</string>
 </resources>
