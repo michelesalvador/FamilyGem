@@ -60,7 +60,7 @@
     <string name="divorce">Razvod</string>
     <string name="marriage">Brak</string>
     <string name="family">Porodica</string>
-    <string name="num_children">Broj dece: %d</string>
+    <string name="num_children">%d dece</string>
     <string name="number_members">Broj članova</string>
     <string name="country">Država</string>
     <string name="state">Pokrajina/Provincija</string>
@@ -317,11 +317,11 @@
     <string name="version_name">Verzija %s</string>
     <string name="cant_understand_uri">Nerazumna primljena URI adresa.</string>
     <string name="something_wrong">Došlo je do neke greške.</string>
-    <string name="change_date">Promeni datum</string>
+    <string name="change_date">Datum izmene</string>
     <string name="done">Gotovo</string>
     <string name="cancel">Ukinuti</string>
     <string name="delete">Izbriši</string>
-    <string name="tagline">Stvori vlastito porodično stablo</string>
+    <string name="tagline">Stvorite vlastito porodično stablo</string>
     <string name="sure_delete">Da li ste sigurni\?</string>
     <string name="media_searched_list">U ovim mapama se pretražuju medijske datoteke:</string>
     <string name="pdf_exported_ok">PDF izvezen.</string>
@@ -333,7 +333,7 @@
     <string name="and">i</string>
     <string name="between">Između</string>
     <string name="separation">Odvajanje</string>
-    <string name="common_law_marriage">Opšte pravo</string>
+    <string name="common_law_marriage">Vanbračna zajednica</string>
     <string name="religious_marriage">Verski</string>
     <string name="civil_marriage">Građanski</string>
     <string name="living_apart_together">Živimo odvojeno</string>
@@ -365,4 +365,11 @@
     <string name="share_sensitive">Deljenje osetljivih podataka</string>
     <string name="not_memory_tree">Nema dovoljno pamćenja za ovo drvo.</string>
     <string name="system_language">Sistemski jezik</string>
+    <string name="adopted">Usvojeni/a</string>
+    <string name="lineage">Srodstvo</string>
+    <string name="edit_id">Izmena ID</string>
+    <string name="invalid_id">Neva\"ze\'ci ID</string>
+    <string name="existing_id">Ve\'c postoje\'ci ID</string>
+    <string name="undefined">Neodređeno</string>
+    <string name="foster">Pohranjeno dete</string>
 </resources>

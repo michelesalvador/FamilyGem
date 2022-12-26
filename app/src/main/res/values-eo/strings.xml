@@ -365,4 +365,11 @@
     <string name="share_sensitive">Dividante sentemajn datumojn</string>
     <string name="not_memory_tree">Ne sufiĉa memoro por ĉi tiu arbo.</string>
     <string name="system_language">Sistema lingvo</string>
+    <string name="lineage">Parenceco</string>
+    <string name="adopted">Adoptita</string>
+    <string name="edit_id">Ŝanĝo de ID</string>
+    <string name="invalid_id">Nevalida ID</string>
+    <string name="existing_id">ID jam ekzistas</string>
+    <string name="undefined">Nedifinita</string>
+    <string name="foster">Vartiga infano</string>
 </resources>

@@ -365,4 +365,11 @@
     <string name="to">Ig</string>
     <string name="empty_media">Üres média</string>
     <string name="not_granted">%s nem igazolt.</string>
+    <string name="lineage">Rokonság</string>
+    <string name="adopted">Örökbefogadott</string>
+    <string name="foster">Nevelt</string>
+    <string name="edit_id">Módosítása ID</string>
+    <string name="invalid_id">Érvénytelen ID</string>
+    <string name="existing_id">ID már létezik</string>
+    <string name="undefined">Meghatározatlan</string>
 </resources>

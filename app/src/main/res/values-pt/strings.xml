@@ -365,4 +365,11 @@
     <string name="separation">Separação</string>
     <string name="and">e</string>
     <string name="system_language">Linguagem do sistema</string>
+    <string name="lineage">Parentesco</string>
+    <string name="adopted">Adotivo/a</string>
+    <string name="foster">Confiado/a</string>
+    <string name="edit_id">Alteração ID</string>
+    <string name="invalid_id">ID não válido</string>
+    <string name="existing_id">ID já existente</string>
+    <string name="undefined">Indefinido</string>
 </resources>

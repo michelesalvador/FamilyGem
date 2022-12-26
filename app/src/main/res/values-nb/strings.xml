@@ -365,4 +365,11 @@
     <string name="share_sensitive">Deler sensitiv data</string>
     <string name="not_memory_tree">Ikke nok minne for dette slektstreet.</string>
     <string name="system_language">Systemspråk</string>
+    <string name="lineage">Slektskap</string>
+    <string name="adopted">Adoptert/e</string>
+    <string name="existing_id">ID finnes allerede</string>
+    <string name="edit_id">Endring ID</string>
+    <string name="invalid_id">Ugyldig ID</string>
+    <string name="undefined">Udefinert</string>
+    <string name="foster">Fosterbarn</string>
 </resources>

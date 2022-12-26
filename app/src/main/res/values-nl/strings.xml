@@ -365,4 +365,11 @@
     <string name="and">En</string>
     <string name="male_partner">Partner</string>
     <string name="system_language">Systeemtaal</string>
+    <string name="lineage">Verwantschap</string>
+    <string name="foster">Pleegkind</string>
+    <string name="existing_id">ID bestaat reeds</string>
+    <string name="invalid_id">Ongeldig ID</string>
+    <string name="undefined">Ongedefinieerde</string>
+    <string name="edit_id">Wijzig ID</string>
+    <string name="adopted">Geadopteerde</string>
 </resources>

@@ -246,7 +246,7 @@
     <string name="country">Kraj</string>
     <string name="num_children">%d dzieci</string>
     <string name="family">Rodzina</string>
-    <string name="marriage">Małżeństwo</string>
+    <string name="marriage">Ślub</string>
     <string name="really_delete_family">Ta rodzina zostanie usunięta, ale członkowie rodziny nie zostaną usunięci.</string>
     <string name="shared_notes">Udostępnione notatki</string>
     <string name="simple_note">Prosta notatka</string>
@@ -328,7 +328,7 @@
     <string name="and">i</string>
     <string name="between">między</string>
     <string name="separation">Oddzielenie</string>
-    <string name="common_law_marriage">Prawo zwyczajowe</string>
+    <string name="common_law_marriage">Małżeństwo według prawa zwyczajowego</string>
     <string name="civil_marriage">Cywilne</string>
     <string name="religious_marriage">Religijne</string>
     <string name="living_together">Wspólne życie</string>
@@ -359,4 +359,11 @@
     <string name="share_sensitive">Udostępnianie danych wrażliwych</string>
     <string name="not_memory_tree">Za mało pamięci dla tego drzewa.</string>
     <string name="system_language">Język systemu</string>
+    <string name="lineage">Pokrewieństwo</string>
+    <string name="adopted">Adoptowany/a</string>
+    <string name="foster">Zastępczy/a</string>
+    <string name="edit_id">Zmiana identyfikatora</string>
+    <string name="invalid_id">Nieważny identyfikator</string>
+    <string name="existing_id">Identyfikator już istnieje</string>
+    <string name="undefined">Nieokreślone</string>
 </resources>
