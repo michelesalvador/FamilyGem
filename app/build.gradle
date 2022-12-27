@@ -22,9 +22,9 @@ android {
 		minSdkVersion 19
 		targetSdkVersion 33
 		versionCode 22
-		versionName '0.9.1.6'
+		versionName '0.9.1.7'
 		vectorDrawables.useSupportLibrary = true
-		resConfigs 'cs', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sr', 'tr', 'uk'
+		resConfigs 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh'
 		def utenteAruba = ""
 		def passwordAruba = ""
 		def utenteGeoNames = "demo"

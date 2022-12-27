@@ -5,47 +5,26 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.os.LocaleListCompat;
 
-import android.os.LocaleList;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import org.xmlpull.v1.XmlPullParser;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 public class SettingsActivity extends BaseActivity {
 
-    Language[] languages = {
-            new Language(null, 0), // System language
-            new Language("cs", 100),
-            new Language("de", 100),
-            new Language("en", 100),
-            new Language("eo", 100),
-            new Language("es", 100),
-            new Language("fa", 100),
-            new Language("fr", 100),
-            new Language("hr", 100),
-            new Language("hu", 100),
-            new Language("in", 100),
-            new Language("it", 100),
-            new Language("iw", 100),
-            new Language("kn", 18),
-            new Language("mr", 13),
-            new Language("nb", 100),
-            new Language("nl", 100),
-            new Language("pl", 100),
-            new Language("pt", 100),
-            new Language("ru", 100),
-            new Language("sk", 100),
-            new Language("sr", 100),
-            new Language("tr", 21),
-            new Language("uk", 100)
-    };
+    List<Language> languages;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -76,17 +55,33 @@ public class SettingsActivity extends BaseActivity {
             Global.settings.save();
         });
 
-        Arrays.sort(languages);
+        // Language picker
+        languages = new ArrayList<>();
+        languages.add(new Language(null, 0)); // System language
+        try { // Gets languages from locales_config.xml
+            XmlPullParser xpp = getResources().getXml(R.xml.locales_config);
+            while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
+                if (xpp.getEventType() == XmlPullParser.START_TAG && xpp.getName().equals("locale")) {
+                    String percent = xpp.getAttributeValue(null, "percent");
+                    languages.add(new Language(xpp.getAttributeValue(0),
+                            percent == null ? 100 : Integer.parseInt(percent)));
+                }
+                xpp.next();
+            }
+        } catch (Exception ignored) {
+        }
+        Collections.sort(languages);
+
         TextView textView = findViewById(R.id.opzioni_language);
         Language actual = getActualLanguage();
         textView.setText(actual.toString());
-        String[] languageArr = new String[languages.length];
-        for (int i = 0; i < languages.length; i++) {
-            languageArr[i] = languages[i].toString();
+        String[] languageArray = new String[languages.size()];
+        for (int i = 0; i < languages.size(); i++) {
+            languageArray[i] = languages.get(i).toString();
         }
         textView.setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
-                .setSingleChoiceItems(languageArr, Arrays.asList(languages).indexOf(actual), (dialog, item) -> {
-                    String code = languages[item].code;
+                .setSingleChoiceItems(languageArray, languages.indexOf(actual), (dialog, item) -> {
+                    String code = languages.get(item).code;
                     // Sets app locale and store it for the future
                     LocaleListCompat appLocale = LocaleListCompat.forLanguageTags(code);
                     AppCompatDelegate.setApplicationLocales(appLocale);
@@ -102,7 +97,7 @@ public class SettingsActivity extends BaseActivity {
                             for (int i = 0; i < systemLocales.size(); i++) {
                                 Locale sysLoc = systemLocales.get(i);
                                 String tag = sysLoc.toLanguageTag();
-                                if (Arrays.stream(languages).anyMatch(lang -> lang.code != null && tag.startsWith(lang.code))) {
+                                if (languages.stream().anyMatch(lang -> lang.code != null && tag.startsWith(lang.code))) {
                                     firstSupportedLocale = new Locale(tag.substring(0, 2)); // Just the 2 chars language code
                                     break;
                                 }
@@ -124,22 +119,25 @@ public class SettingsActivity extends BaseActivity {
                     if (code == null) recreate();
                 }).show());
 
+        // About
         findViewById(R.id.opzioni_lapide).setOnClickListener(view -> startActivity(
                 new Intent(SettingsActivity.this, AboutActivity.class)
         ));
     }
 
-    // Returns the actual Language of the app, otherwise the "system language"
+    /**
+     * Returns the actual Language of the app, otherwise the "system language"
+     */
     private Language getActualLanguage() {
         Locale firstLocale = AppCompatDelegate.getApplicationLocales().get(0);
         if (firstLocale != null) {
-            for (int i = 1; i < languages.length; i++) {
-                Language language = languages[i];
+            for (int i = 1; i < languages.size(); i++) {
+                Language language = languages.get(i);
                 if (firstLocale.toString().startsWith(language.code))
                     return language;
             }
         }
-        return languages[0];
+        return languages.get(0);
     }
 
     private class Language implements Comparable<Language> {
@@ -151,12 +149,13 @@ public class SettingsActivity extends BaseActivity {
             this.percent = percent;
         }
 
+        @NonNull
         @Override
         public String toString() {
             if (code == null) {
-                // Return the string "System language" on the system locale, not on the app locale
+                // Returns the string "System language" on the system locale, not on the app locale
                 Configuration config = new Configuration(getResources().getConfiguration());
-                config.setLocale(Resources.getSystem().getConfiguration().locale);
+                config.setLocale(Resources.getSystem().getConfiguration().locale); // TODO: on API 33 is the app locale instead of the system locale
                 return createConfigurationContext(config).getText(R.string.system_language).toString();
             } else {
                 Locale locale = new Locale(code);

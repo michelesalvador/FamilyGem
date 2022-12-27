@@ -26,7 +26,7 @@
     <string name="submitters">提交人</string>
     <string name="empty_tree">新建一个家谱</string>
     <string name="download_example">下载一个示例</string>
-    <string name="import_gedcom">导入GENCOM文件</string>
+    <string name="import_gedcom">导入GEDCOM文件</string>
     <string name="import_backup">恢复ZIP备份</string>
     <string name="modify_later">之后你可以编辑它。</string>
     <string name="name_of_tree">家谱的标题</string>
@@ -298,10 +298,10 @@
     <string name="estimated">估计的</string>
     <string name="after">之后</string>
     <string name="before">之前</string>
-    <string name="between_and">在......和</string>
+    <string name="between_and">在…和</string>
     <string name="between">之间</string>
     <string name="and">和</string>
-    <string name="from_to">从......到</string>
+    <string name="from_to">从…到</string>
     <string name="from">从</string>
     <string name="to">到</string>
     <string name="date_phrase">短语</string>
