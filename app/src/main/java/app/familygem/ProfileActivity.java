@@ -497,8 +497,10 @@ public class ProfileActivity extends AppCompatActivity {
                 return;
             }
             U.save(true, one);
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) // se clic su freccia indietro in Crop Image
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // After back arrow in Image Cropper
+            F.saveFolderInSettings();
             Global.edited = true;
+        }
     }
 
     @Override

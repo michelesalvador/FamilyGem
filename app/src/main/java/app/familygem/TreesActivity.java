@@ -34,6 +34,7 @@ import org.folg.gedcom.model.MediaRef;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.ParentFamilyRef;
 import org.folg.gedcom.model.Person;
+import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.parser.JsonParser;
@@ -142,9 +143,9 @@ public class TreesActivity extends AppCompatActivity {
                             startActivity(new Intent(TreesActivity.this, Principal.class));
                         });
                     }
-                    treeView.findViewById(R.id.albero_menu).setOnClickListener(vista -> {
-                        boolean esiste = new File(getFilesDir(), treeId + ".json").exists();
-                        PopupMenu popup = new PopupMenu(TreesActivity.this, vista);
+                    treeView.findViewById(R.id.albero_menu).setOnClickListener(view -> {
+                        boolean exists = new File(getFilesDir(), treeId + ".json").exists();
+                        PopupMenu popup = new PopupMenu(TreesActivity.this, view);
                         Menu menu = popup.getMenu();
                         if (treeId == Global.settings.openTree && Global.shouldSave)
                             menu.add(0, -1, 0, R.string.save);
@@ -154,20 +155,22 @@ public class TreesActivity extends AppCompatActivity {
                             menu.add(0, 1, 0, R.string.tree_info);
                         if ((!derivato && !esaurito) || Global.settings.expert)
                             menu.add(0, 2, 0, R.string.rename);
-                        if (esiste && (!derivato || Global.settings.expert) && !esaurito)
+                        if (exists && (!derivato || Global.settings.expert) && !esaurito)
                             menu.add(0, 3, 0, R.string.media_folders);
                         if (!esaurito)
                             menu.add(0, 4, 0, R.string.find_errors);
-                        if (esiste && !derivato && !esaurito) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
+                        if (exists && !derivato && !esaurito) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
                             menu.add(0, 5, 0, R.string.share_tree);
-                        if (esiste && !derivato && !esaurito && Global.settings.expert && Global.settings.trees.size() > 1
+                        if (exists && !derivato && !esaurito && Global.settings.expert && Global.settings.trees.size() > 1)
+                            menu.add(0, 6, 0, "Merge tree"); // TODO: translate
+                        if (exists && !derivato && !esaurito && Global.settings.expert && Global.settings.trees.size() > 1
                                 && tree.shares != null && tree.grade != 0) // cioè dev'essere 9 o 10
-                            menu.add(0, 6, 0, R.string.compare);
-                        if (esiste && Global.settings.expert && !esaurito)
-                            menu.add(0, 7, 0, R.string.export_gedcom);
-                        if (esiste && Global.settings.expert)
-                            menu.add(0, 8, 0, R.string.make_backup);
-                        menu.add(0, 9, 0, R.string.delete);
+                            menu.add(0, 7, 0, R.string.compare);
+                        if (exists && Global.settings.expert && !esaurito)
+                            menu.add(0, 8, 0, R.string.export_gedcom);
+                        if (exists && Global.settings.expert)
+                            menu.add(0, 9, 0, R.string.make_backup);
+                        menu.add(0, 10, 0, R.string.delete);
                         popup.show();
                         popup.setOnMenuItemClickListener(item -> {
                             int id = item.getItemId();
@@ -191,7 +194,7 @@ public class TreesActivity extends AppCompatActivity {
                                     Global.settings.rinomina(treeId, editaNome.getText().toString());
                                     aggiornaLista();
                                 }).setNeutralButton(R.string.cancel, null).create();
-                                editaNome.setOnEditorActionListener((view, action, event) -> {
+                                editaNome.setOnEditorActionListener((textView, action, event) -> {
                                     if (action == EditorInfo.IME_ACTION_DONE)
                                         dialogo.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
                                     return false;
@@ -207,19 +210,22 @@ public class TreesActivity extends AppCompatActivity {
                                 startActivity(new Intent(TreesActivity.this, MediaFoldersActivity.class)
                                         .putExtra("idAlbero", treeId)
                                 );
-                            } else if (id == 4) { // Correggi errori
+                            } else if (id == 4) { // Find errors
                                 findErrors(treeId, false);
-                            } else if (id == 5) { // Condividi albero
+                            } else if (id == 5) { // Share tree
                                 startActivity(new Intent(TreesActivity.this, SharingActivity.class)
                                         .putExtra("idAlbero", treeId)
                                 );
-                            } else if (id == 6) { // Confronta con alberi esistenti
+                            } else if (id == 6) { // Merge with another tree
+                                startActivity(new Intent(TreesActivity.this, MergeActivity.class)
+                                        .putExtra("treeId", treeId));
+                            } else if (id == 7) { // Compare with existing trees
                                 if (NewTreeActivity.confronta(TreesActivity.this, tree, false)) {
                                     tree.grade = 20;
                                     aggiornaLista();
                                 } else
                                     Toast.makeText(TreesActivity.this, R.string.no_results, Toast.LENGTH_LONG).show();
-                            } else if (id == 7) { // Esporta Gedcom
+                            } else if (id == 8) { // Export Gedcom
                                 if (exporter.openTree(treeId)) {
                                     String mime = "application/octet-stream";
                                     String ext = "ged";
@@ -231,10 +237,10 @@ public class TreesActivity extends AppCompatActivity {
                                     }
                                     F.saveDocument(TreesActivity.this, null, treeId, mime, ext, code);
                                 }
-                            } else if (id == 8) { // Fai backup
+                            } else if (id == 9) { // Make backup
                                 if (exporter.openTree(treeId))
                                     F.saveDocument(TreesActivity.this, null, treeId, "application/zip", "zip", 327);
-                            } else if (id == 9) {    // Elimina albero
+                            } else if (id == 10) { // Delete tree
                                 new AlertDialog.Builder(TreesActivity.this).setMessage(R.string.really_delete_tree)
                                         .setPositiveButton(R.string.delete, (dialog, id1) -> {
                                             deleteTree(TreesActivity.this, treeId);
@@ -785,6 +791,21 @@ public class TreesActivity extends AppCompatActivity {
             // Remove empty list of child refs
             if (f.getChildRefs().isEmpty() && correct) {
                 f.setChildRefs(null);
+            }
+        }
+        // Null references in source towards media
+        for (Source source : gc.getSources()) {
+            for (MediaRef mediaRef : source.getMediaRefs()) {
+                if (mediaRef.getRef() == null) {
+                    if (correct) {
+                        source.getMediaRefs().remove(mediaRef);
+                        break;
+                    } else errors++;
+                }
+            }
+            // Removes empty list of media refs
+            if (source.getMediaRefs().isEmpty() && correct) {
+                source.setMediaRefs(null);
             }
         }
 

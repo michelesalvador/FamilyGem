@@ -91,6 +91,10 @@
             android:label="@string/share_tree"
             android:parentActivityName=".TreesActivity" />
         <activity
+            android:name=".MergeActivity"
+            android:label="Merge tree"
+            android:parentActivityName=".TreesActivity" /><!-- TODO: translate -->
+        <activity
             android:name=".share.CompareActivity"
             android:label="@string/tree_with_news"
             android:parentActivityName=".TreesActivity" />
