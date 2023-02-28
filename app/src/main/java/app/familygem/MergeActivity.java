@@ -3,14 +3,19 @@ package app.familygem;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Family;
+import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.ParentFamilyRef;
@@ -35,7 +40,7 @@ import app.familygem.visitor.MediaList;
 import app.familygem.visitor.NoteContainersGuarded;
 
 /**
- * List of available trees that can be merged into the previously selected one.
+ * Here we can select a tree to merge into the previously selected one, and choose how to merge them.
  */
 public class MergeActivity extends BaseActivity {
 
@@ -43,6 +48,10 @@ public class MergeActivity extends BaseActivity {
     private int selectedId; // ID of selected tree (that merged into base tree)
     private List<Settings.Tree> trees;
     private LinearLayout listLayout;
+    private RadioButton radioAnnex;
+    private RadioButton radioGenerate;
+    private EditText titleText;
+    private boolean titleEdited; // To avoid modify an edited title
     private final Records records = new Records();
     private final String GUARDIAN = "modifiedId";
 
@@ -50,20 +59,17 @@ public class MergeActivity extends BaseActivity {
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.merge_activity);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         baseId = getIntent().getIntExtra("treeId", 0);
         Settings.Tree baseTree = Global.settings.getTree(baseId);
-        TextView suggestionView = findViewById(R.id.merge_suggestion);
-        suggestionView.setText("Select a tree to merge into " + baseTree.title + ":"); // TODO: translate
-        //suggestionView.setText(getString(R.string.select_tree_merge, baseTree.title));
         trees = new ArrayList<>(Global.settings.trees);
         trees.remove(baseTree);
         Iterator<Settings.Tree> iterator = trees.iterator();
         while (iterator.hasNext()) {
-            if (iterator.next().grade >= 20)
+            if (iterator.next().grade >= 20) // Derived or exhausted trees
                 iterator.remove();
         }
-
-        // Places all other trees into the list
+        // Places available trees into layout
         for (Settings.Tree tree : trees) {
             listLayout = findViewById(R.id.merge_list);
             View treeView = getLayoutInflater().inflate(R.layout.merge_piece, listLayout, false);
@@ -75,14 +81,80 @@ public class MergeActivity extends BaseActivity {
             treeView.setOnClickListener(view -> selectTree(tree.id));
             treeView.findViewById(R.id.merge_radio).setOnClickListener(view -> selectTree(tree.id));
         }
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        findViewById(R.id.merge_button).setOnClickListener(button -> {
+        // Output radio buttons
+        radioAnnex = findViewById(R.id.merge_radio_annex);
+        radioAnnex.setText(getString(R.string.merge_into, "...", baseTree.title));
+        radioGenerate = findViewById(R.id.merge_radio_generate);
+        titleText = findViewById(R.id.merge_rename);
+        titleText.setText(baseTree.title);
+        titleText.setOnFocusChangeListener((view, focus) -> titleEdited = true);
+        // Merge button
+        Button mergeButton = findViewById(R.id.merge_button);
+        mergeButton.setOnClickListener(button -> {
+            // Disables all views
+            for (int i = 0; i < listLayout.getChildCount(); i++) {
+                View treeView = listLayout.getChildAt(i);
+                treeView.setOnClickListener(null);
+                ((TextView)treeView.findViewById(R.id.merge_title))
+                        .setTextColor(getResources().getColor(R.color.gray_text));
+                treeView.findViewById(R.id.merge_radio).setEnabled(false);
+            }
+            radioAnnex.setEnabled(false);
+            radioGenerate.setEnabled(false);
+            titleText.setEnabled(false);
             button.setEnabled(false);
-            executeMerge();
-            onBackPressed();
+            findViewById(R.id.progress_wheel).setVisibility(View.VISIBLE);
+            new Thread() {
+                @Override
+                public void run() {
+                    Global.gc = TreesActivity.readJson(baseId);
+                    Global.gc2 = TreesActivity.readJson(selectedId);
+                    // Merge selected tree into base tree
+                    if (radioAnnex.isChecked()) {
+                        copyMediaFiles(Global.gc2, selectedId, baseId);
+                        doMerge();
+                        U.saveJson(Global.gc, baseId); // Saves also Global.settings through Notifier
+                        Global.settings.openTree = baseId; // For consistency with Global.gc
+                    } // Generate a third tree from the two
+                    else if (radioGenerate.isChecked()) {
+                        int newNum = Global.settings.max() + 1;
+                        int persons = Global.gc.getPeople().size() + Global.gc2.getPeople().size();
+                        int generations = Math.max(baseTree.generations, Global.settings.getTree(selectedId).generations);
+                        Global.settings.aggiungi(new Settings.Tree(newNum, titleText.getText().toString(), null,
+                                persons, generations, baseTree.root, null, 0));
+                        copyMediaFiles(Global.gc, baseId, newNum);
+                        copyMediaFiles(Global.gc2, selectedId, newNum);
+                        doMerge();
+                        U.saveJson(Global.gc, newNum);
+                        Global.settings.openTree = newNum;
+                    }
+                    Global.indi = baseTree.root; // Resets it to display the correct person in the result tree
+                    runOnUiThread(() -> {
+                        onBackPressed();
+                        Toast.makeText(MergeActivity.this, R.string.merge_complete, Toast.LENGTH_LONG).show();
+                    });
+                }
+            }.start();
         });
+        // Selecting a radio button
+        RadioGroup radioGroup = findViewById(R.id.merge_radiogroup);
+        radioGroup.setOnCheckedChangeListener((group, checked) -> {
+            titleText.setEnabled(checked == R.id.merge_radio_generate);
+            mergeButton.setEnabled(selectedId > 0);
+        });
+        // Populates the records array with the 7 types
+        records.add(Person.class, "I");
+        records.add(Family.class, "F");
+        records.add(Media.class, "M");
+        records.add(Note.class, "T");
+        records.add(Source.class, "S");
+        records.add(Repository.class, "R");
+        records.add(Submitter.class, "U");
     }
 
+    /**
+     * Select a tree from the list.
+     */
     private void selectTree(int treeId) {
         selectedId = treeId;
         for (int i = 0; i < listLayout.getChildCount(); i++) {
@@ -96,22 +168,23 @@ public class MergeActivity extends BaseActivity {
                 radioButton.setChecked(false);
             }
         }
-        findViewById(R.id.merge_button).setEnabled(true);
+        // Annex radio button
+        String label = getString(R.string.merge_into, Global.settings.getTree(selectedId).title, Global.settings.getTree(baseId).title);
+        radioAnnex.setText(label);
+        // Suggested title
+        if (!titleEdited) {
+            String title = Global.settings.getTree(baseId).title + " " + Global.settings.getTree(selectedId).title;
+            titleText.setText(title);
+        }
+        // Merge button
+        if (radioAnnex.isChecked() || radioGenerate.isChecked())
+            findViewById(R.id.merge_button).setEnabled(true);
     }
 
-    private void executeMerge() {
-        Global.gc = TreesActivity.openGedcomTemporarily(baseId, true);
-        Global.gc2 = TreesActivity.openGedcomTemporarily(selectedId, false);
-
-        // Populates the array
-        records.add(Person.class, "I");
-        records.add(Family.class, "F");
-        records.add(Media.class, "M");
-        records.add(Note.class, "T");
-        records.add(Source.class, "S");
-        records.add(Repository.class, "R");
-        records.add(Submitter.class, "U");
-
+    /**
+     * Executes the merge of Global.gc2 into Global.gc.
+     */
+    private void doMerge() {
         // Loops in records of base tree seeking for maximum ID of each record type
         for (Person person : Global.gc.getPeople())
             findMaxId(person);
@@ -128,7 +201,8 @@ public class MergeActivity extends BaseActivity {
         for (Submitter submitter : Global.gc.getSubmitters())
             findMaxId(submitter);
 
-        // Loops in records of the selected tree: if their ID is less than max, update it AND every related ID
+        // Loops in records of the selected tree
+        // If their ID is less than max, updates it and each related ID
         for (Person person : Global.gc2.getPeople()) {
             if (isEligible(person)) {
                 if (checkNotDone(person)) {
@@ -221,39 +295,6 @@ public class MergeActivity extends BaseActivity {
             }
         }
 
-        // Collects existing media and file paths of selected tree, but only from externalFilesDir
-        MediaList mediaList = new MediaList(Global.gc2, 0);
-        Global.gc2.accept(mediaList);
-        Map<Media, String> mediaPaths = new HashMap<>();
-        final String externalSelectedDir = getExternalFilesDir(String.valueOf(selectedId)).getPath();
-        for (Media media : mediaList.list) {
-            String path = F.mediaPath(selectedId, media);
-            if (path != null && path.startsWith(externalSelectedDir))
-                mediaPaths.put(media, path);
-        }
-        // Copies the files to media folder of base tree, renaming them if necessary
-        if (!mediaPaths.isEmpty()) {
-            File externalBaseDir = getExternalFilesDir(String.valueOf(baseId)); // Creates the folder if not existing
-            if (externalBaseDir.list().length == 0) { // Empty folder, probably because just created
-                if (Global.settings.getTree(baseId).dirs.add(externalBaseDir.getPath()))
-                    Global.settings.save();
-            }
-            for (Map.Entry<Media, String> mediaPath : mediaPaths.entrySet()) {
-                String path = mediaPath.getValue();
-                File sourceFile = new File(path);
-                File destinationFile = F.nextAvailableFileName(
-                        externalBaseDir.getPath(), path.substring(path.lastIndexOf('/') + 1));
-                try {
-                    FileUtils.copyFile(sourceFile, destinationFile);
-                } catch (Exception e) {
-                }
-                // Updates file link inside media
-                Media media = mediaPath.getKey();
-                if (media.getFile().contains("/"))
-                    media.setFile(destinationFile.getPath());
-            }
-        }
-
         // Removes guardian extensions from the selected tree
         for (Person person : Global.gc2.getPeople()) {
             removeGuardian(person);
@@ -296,8 +337,41 @@ public class MergeActivity extends BaseActivity {
             Global.gc.addRepository(repo);
         for (Submitter submitter : Global.gc2.getSubmitters())
             Global.gc.addSubmitter(submitter);
+    }
 
-        U.saveJson(Global.gc, baseId);
+    private void copyMediaFiles(Gedcom sourceGedcom, int sourceId, int destinationId) {
+        // Collects existing media and file paths of source tree, but only from externalFilesDir
+        MediaList mediaList = new MediaList(sourceGedcom, 0);
+        sourceGedcom.accept(mediaList);
+        Map<Media, String> mediaPaths = new HashMap<>();
+        final String extSourceDir = getExternalFilesDir(String.valueOf(sourceId)).getPath();
+        for (Media media : mediaList.list) {
+            String path = F.mediaPath(sourceId, media);
+            if (path != null && path.startsWith(extSourceDir))
+                mediaPaths.put(media, path);
+        }
+        // Copies the files to media folder of destination tree, renaming them if necessary
+        if (!mediaPaths.isEmpty()) {
+            File extDestinationDir = getExternalFilesDir(String.valueOf(destinationId)); // Creates the folder if not existing
+            if (extDestinationDir.list().length == 0) { // Empty folder, probably because just created
+                Global.settings.getTree(destinationId).dirs.add(extDestinationDir.getPath());
+                // No need to save Global.settings here because U.saveJson() will do
+            }
+            for (Map.Entry<Media, String> mediaPath : mediaPaths.entrySet()) {
+                String path = mediaPath.getValue();
+                File sourceFile = new File(path);
+                File destinationFile = F.nextAvailableFileName(
+                        extDestinationDir.getPath(), path.substring(path.lastIndexOf('/') + 1));
+                try {
+                    FileUtils.copyFile(sourceFile, destinationFile);
+                } catch (Exception ignored) {
+                }
+                // Updates file link inside media
+                Media media = mediaPath.getKey();
+                if (media.getFile().contains("/"))
+                    media.setFile(destinationFile.getPath());
+            }
+        }
     }
 
     /**
@@ -309,7 +383,7 @@ public class MergeActivity extends BaseActivity {
             String id = (String)aClass.getMethod("getId").invoke(record);
             int num = U.extractNum(id);
             if (num > records.getMax(aClass)) records.setMax(aClass, num);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -317,13 +391,13 @@ public class MergeActivity extends BaseActivity {
     String newId;
 
     /**
-     * Finds a new ID for a record to be merged.
+     * Finds a new ID for a record to be merged and returns true.
      */
     private boolean isEligible(ExtensionContainer record) {
         Class<?> aClass = record.getClass();
         try {
             oldId = (String)aClass.getMethod("getId").invoke(record);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         int maxNum = records.getMax(aClass);
         if (maxNum >= U.extractNum(oldId)) {

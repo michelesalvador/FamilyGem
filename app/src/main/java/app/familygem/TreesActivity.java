@@ -104,13 +104,17 @@ public class TreesActivity extends AppCompatActivity {
                 @Override
                 public View getView(final int position, View convertView, ViewGroup parent) {
                     View treeView = super.getView(position, convertView, parent);
+                    TextView titleView = treeView.findViewById(R.id.albero_titolo);
+                    titleView.setTextColor(getResources().getColor(R.color.text));
+                    TextView detailView = treeView.findViewById(R.id.albero_dati);
+                    detailView.setTextColor(getResources().getColor(R.color.gray_text));
                     int treeId = Integer.parseInt(treeList.get(position).get("id"));
                     Settings.Tree tree = Global.settings.getTree(treeId);
-                    boolean derivato = tree.grade == 20;
-                    boolean esaurito = tree.grade == 30;
-                    if (derivato) {
+                    boolean derived = tree.grade == 20;
+                    boolean exhausted = tree.grade == 30;
+                    if (derived) {
                         treeView.setBackgroundColor(getResources().getColor(R.color.accent_medium));
-                        ((TextView)treeView.findViewById(R.id.albero_dati)).setTextColor(getResources().getColor(R.color.text));
+                        detailView.setTextColor(getResources().getColor(R.color.text));
                         treeView.setOnClickListener(v -> {
                             if (!NewTreeActivity.confronta(TreesActivity.this, tree, true)) {
                                 tree.grade = 10; // viene retrocesso
@@ -119,9 +123,9 @@ public class TreesActivity extends AppCompatActivity {
                                 Toast.makeText(TreesActivity.this, R.string.something_wrong, Toast.LENGTH_LONG).show();
                             }
                         });
-                    } else if (esaurito) {
+                    } else if (exhausted) {
                         treeView.setBackgroundColor(getResources().getColor(R.color.consumed));
-                        ((TextView)treeView.findViewById(R.id.albero_titolo)).setTextColor(getResources().getColor(R.color.gray_text));
+                        titleView.setTextColor(getResources().getColor(R.color.gray_text));
                         treeView.setOnClickListener(v -> {
                             if (!NewTreeActivity.confronta(TreesActivity.this, tree, true)) {
                                 tree.grade = 10; // viene retrocesso
@@ -149,24 +153,24 @@ public class TreesActivity extends AppCompatActivity {
                         Menu menu = popup.getMenu();
                         if (treeId == Global.settings.openTree && Global.shouldSave)
                             menu.add(0, -1, 0, R.string.save);
-                        if ((Global.settings.expert && derivato) || (Global.settings.expert && esaurito))
+                        if ((Global.settings.expert && derived) || (Global.settings.expert && exhausted))
                             menu.add(0, 0, 0, R.string.open);
-                        if (!esaurito || Global.settings.expert)
+                        if (!exhausted || Global.settings.expert)
                             menu.add(0, 1, 0, R.string.tree_info);
-                        if ((!derivato && !esaurito) || Global.settings.expert)
+                        if ((!derived && !exhausted) || Global.settings.expert)
                             menu.add(0, 2, 0, R.string.rename);
-                        if (exists && (!derivato || Global.settings.expert) && !esaurito)
+                        if (exists && (!derived || Global.settings.expert) && !exhausted)
                             menu.add(0, 3, 0, R.string.media_folders);
-                        if (!esaurito)
+                        if (!exhausted)
                             menu.add(0, 4, 0, R.string.find_errors);
-                        if (exists && !derivato && !esaurito) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
+                        if (exists && !derived && !exhausted) // non si può ri-condividere un albero ricevuto indietro, anche se sei esperto..
                             menu.add(0, 5, 0, R.string.share_tree);
-                        if (exists && !derivato && !esaurito && Global.settings.expert && Global.settings.trees.size() > 1)
-                            menu.add(0, 6, 0, "Merge tree"); // TODO: translate
-                        if (exists && !derivato && !esaurito && Global.settings.expert && Global.settings.trees.size() > 1
+                        if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size() > 1)
+                            menu.add(0, 6, 0, R.string.merge_tree);
+                        if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size() > 1
                                 && tree.shares != null && tree.grade != 0) // cioè dev'essere 9 o 10
                             menu.add(0, 7, 0, R.string.compare);
-                        if (exists && Global.settings.expert && !esaurito)
+                        if (exists && Global.settings.expert && !exhausted)
                             menu.add(0, 8, 0, R.string.export_gedcom);
                         if (exists && Global.settings.expert)
                             menu.add(0, 9, 0, R.string.make_backup);

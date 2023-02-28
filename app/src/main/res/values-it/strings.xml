@@ -145,6 +145,14 @@
     <string name="accepted_news">Hai accettato %d aggiornamenti:\n\t%d aggiunte\n\t%d sostituzioni\n\t%d eliminazioni</string>
     <string name="confirm">Conferma</string>
     <string name="all_imported_delete">Tutti gli aggiornamenti sono stati importati.\nVuoi eliminare l\'albero importato?</string>
+    <!-- MergeActivity -->
+    <string name="merge_tree">Unisci albero</string>
+    <string name="merge">Unisci</string>
+    <string name="select_tree">Seleziona un albero da unire:</string>
+    <string name="choose_output">Scegli la destinazione:</string>
+    <string name="merge_into">Unisci %s dentro a %s</string>
+    <string name="generate_new">Genera un nuovo albero dai due</string>
+    <string name="merge_complete">Unione completata.</string>
     <!-- Notifier -->
     <string name="birthdays">Compleanni</string>
     <string name="birthday_notified_midday">Il compleanno di ogni persona sarà notificato a mezzogiorno.</string>

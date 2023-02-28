@@ -137,6 +137,13 @@
     <string name="accepted_news">You accepted %d updates:\n\t%d additions\n\t%d replacements\n\t%d deletions</string>
     <string name="confirm">Confirm</string>
     <string name="all_imported_delete">All updates have been imported.\nDo you want to delete the imported tree?</string>
+    <string name="merge_tree">Merge tree</string>
+    <string name="merge">Merge</string>
+    <string name="select_tree">Select a tree to merge:</string>
+    <string name="choose_output">Choose the destination:</string>
+    <string name="merge_into">Merge %s into %s</string>
+    <string name="generate_new">Generate a new tree from the two</string>
+    <string name="merge_complete">Merge completed.</string>
     <string name="birthdays">Birthdays</string>
     <string name="birthday_notified_midday">The birthday of each person will be notified at midday.</string>
     <string name="turns_years_old">%s turns %d years old today.</string>
