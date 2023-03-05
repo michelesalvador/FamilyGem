@@ -132,6 +132,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".PersonEditorActivity" />
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
+        <activity android:name=".PurchaseActivity" />
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

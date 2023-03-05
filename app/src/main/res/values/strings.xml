@@ -374,4 +374,9 @@
     <string name="edit_id">Edit ID</string>
     <string name="invalid_id">Invalid ID</string>
     <string name="existing_id">Already existing ID</string>
+    <string name="unlock_function">This feature can be unlocked with Family Gem Premium.</string>
+    <string name="more_premium">More about Premium</string>
+    <string name="become_premium">Become Premium</string>
+    <string name="premium_activated">Premium activated.</string>
+    <string name="update_googleplay">Please update Google Play Store app.</string>
 </resources>

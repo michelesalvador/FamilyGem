@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import app.familygem.constant.Extra;
 import app.familygem.share.SharingActivity;
 import app.familygem.visitor.MediaList;
 
@@ -222,7 +223,7 @@ public class TreesActivity extends AppCompatActivity {
                                 );
                             } else if (id == 6) { // Merge with another tree
                                 startActivity(new Intent(TreesActivity.this, MergeActivity.class)
-                                        .putExtra("treeId", treeId));
+                                        .putExtra(Extra.TREE_ID, treeId));
                             } else if (id == 7) { // Compare with existing trees
                                 if (NewTreeActivity.confronta(TreesActivity.this, tree, false)) {
                                     tree.grade = 20;

@@ -401,4 +401,10 @@
     <string name="edit_id">Modifica ID</string>
     <string name="invalid_id">ID non valido</string>
     <string name="existing_id">ID già esistente</string>
+    <!-- PurchaseActivity -->
+    <string name="unlock_function">Questa funzionalità può essere sbloccata con Family Gem Premium.</string>
+    <string name="more_premium">Altre info su Premium</string>
+    <string name="become_premium">Diventa Premium</string>
+    <string name="premium_activated">Premium attivato.</string>
+    <string name="update_googleplay">Si prega di aggiornare l\'app Google Play Store.</string>
 </resources>

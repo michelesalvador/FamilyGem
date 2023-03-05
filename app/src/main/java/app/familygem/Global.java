@@ -41,6 +41,7 @@ public class Global extends MultiDexApplication {
     public static Media croppedMedia; // Temporary parking of the Media in the cropping process
     public static Gedcom gc2; // A shared tree, for comparison of updates
     public static int treeId2; // ID of the shared tree
+    static boolean premium;
 
     /**
      * This is called when the application starts, and also when it is restarted.
