@@ -29,6 +29,7 @@ import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.model.Submitter;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,6 +65,14 @@ public class MergeActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         baseId = getIntent().getIntExtra(Extra.TREE_ID, 0);
         Settings.Tree baseTree = Global.settings.getTree(baseId);
+        // Base tree view
+        View baseView = findViewById(R.id.merge_base);
+        baseView.setBackground(getResources().getDrawable(R.drawable.generic_background));
+        baseView.setPadding(U.dpToPx(15), U.dpToPx(5), U.dpToPx(15), U.dpToPx(7));
+        ((TextView)findViewById(R.id.albero_titolo)).setText(baseTree.title);
+        ((TextView)findViewById(R.id.albero_dati)).setText(TreesActivity.writeData(this, baseTree));
+        findViewById(R.id.albero_menu).setVisibility(View.GONE);
+        // Trees that can be merged
         trees = new ArrayList<>(Global.settings.trees);
         trees.remove(baseTree);
         Iterator<Settings.Tree> iterator = trees.iterator();
@@ -369,7 +378,8 @@ public class MergeActivity extends BaseActivity {
                 File destinationFile = F.nextAvailableFileName(
                         extDestinationDir.getPath(), path.substring(path.lastIndexOf('/') + 1));
                 try {
-                    FileUtils.copyFile(sourceFile, destinationFile);
+                    FileInputStream sourceStream = new FileInputStream(sourceFile);
+                    FileUtils.copyInputStreamToFile(sourceStream, destinationFile);
                 } catch (Exception ignored) {
                 }
                 // Updates file link inside media

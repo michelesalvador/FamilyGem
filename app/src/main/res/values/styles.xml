@@ -37,7 +37,7 @@
     </style>
 
     <style name="AppTheme.Link">
-        <item name="android:textColor">@color/primary</item>
+        <item name="android:textColor">@color/link</item>
         <item name="android:background">@drawable/link_underline</item>
         <item name="android:paddingBottom">2dp</item>
     </style>
