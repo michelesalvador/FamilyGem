@@ -369,7 +369,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 }
             } else if (requestCode == 43616) { // Media from MediaFragment
                 MediaRef mediaRef = new MediaRef();
-                mediaRef.setRef(data.getStringExtra("idMedia"));
+                mediaRef.setRef(data.getStringExtra("mediaId"));
                 ((MediaContainer)object).addMediaRef(mediaRef);
             } else if (requestCode == 4562) { // Repository selected in RepositoriesFragment
                 RepositoryRef archRef = new RepositoryRef();
@@ -391,8 +391,10 @@ public abstract class DetailActivity extends AppCompatActivity {
             }
             // 'true' indicates to reload both this Detail thanks to the following onRestart(), and ProfileActivity or FamilyActivity
             U.save(true, Memory.firstObject());
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE)
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            F.saveFolderInSettings();
             Global.edited = true;
+        }
     }
 
     /**

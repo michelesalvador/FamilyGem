@@ -487,7 +487,7 @@ public class U {
         max = 0;
         String pre = "";
         if (classe == Note.class) {
-            pre = "N";
+            pre = "T";
             for (Note n : gc.getNotes())
                 calcolaMax(n);
         } else if (classe == Submitter.class) {

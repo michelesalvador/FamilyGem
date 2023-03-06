@@ -1,9 +1,9 @@
 package app.familygem;
 
 import android.content.Intent;
-import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 public class AboutActivity extends BaseActivity {
@@ -11,15 +11,28 @@ public class AboutActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.lapide);
+        setContentView(R.layout.about_activity);
 
-        TextView version = findViewById(R.id.lapide_versione);
+        TextView version = findViewById(R.id.about_version);
         version.setText(getString(R.string.version_name, BuildConfig.VERSION_NAME));
 
-        TextView link = findViewById(R.id.lapide_link);
-        link.setPaintFlags(link.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        link.setOnClickListener(v -> startActivity(
-                new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.familygem.app")))
-        );
+        TextView webSite = findViewById(R.id.about_link);
+        webSite.setOnClickListener(view -> startActivity(
+                new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.familygem.app"))));
+
+        // Premium product layout
+        View subscribedLayout = findViewById(R.id.about_subscribed);
+        if (Global.premium) {
+            subscribedLayout.setVisibility(View.VISIBLE);
+        } else {
+            webSite.setVisibility(View.GONE);
+            ProductLayout productLayout = findViewById(R.id.about_product);
+            productLayout.initialize(() -> { // Makes it also visible
+                runOnUiThread(() -> {
+                    productLayout.setVisibility(View.GONE);
+                    subscribedLayout.setVisibility(View.VISIBLE);
+                });
+            });
+        }
     }
 }

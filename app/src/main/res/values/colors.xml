@@ -14,6 +14,7 @@
 	<color name="text">#000</color>
 	<color name="gray_text">#777</color>
 	<color name="text_veiled">#AA000000</color>
+	<color name="link">#960F3E</color>
 	<color name="consumed">#DDD</color>
 	<color name="male">#44AAff</color>
 	<color name="female">#FF66DD</color>

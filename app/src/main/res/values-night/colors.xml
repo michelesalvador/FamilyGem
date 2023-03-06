@@ -12,6 +12,7 @@
 	<color name="text">#FFF</color>
 	<color name="gray_text">#AAA</color>
 	<color name="text_veiled">#AAFFFFFF</color>
+	<color name="link">#FF0059</color>
 	<color name="consumed">#555</color>
 	<color name="partner_screen">#66000000</color>
 	<color name="partner_print">#111</color>

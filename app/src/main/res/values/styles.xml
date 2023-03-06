@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
@@ -33,6 +34,12 @@
     <style name="AppTheme.Suggestion">
         <item name="android:textColor">@color/text_veiled</item>
         <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="AppTheme.Link">
+        <item name="android:textColor">@color/link</item>
+        <item name="android:background">@drawable/link_underline</item>
+        <item name="android:paddingBottom">2dp</item>
     </style>
 
     <style name="AppTheme.ExpandedAppBar">
@@ -100,5 +107,4 @@
         <item name="spouseColor">@color/partner_print</item>
         <item name="linesColor">@color/diagram_lines_print</item>
     </style>
-
 </resources>

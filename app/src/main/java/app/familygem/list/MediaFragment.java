@@ -165,8 +165,10 @@ public class MediaFragment extends Fragment {
                 F.endImageCropping(data);
             }
             U.save(true, Global.croppedMedia);
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) // If user clicks the back arrow in CropImage
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // If user clicks the back arrow in Image Cropper
+            F.saveFolderInSettings();
             Global.edited = true;
+        }
     }
 
     // Contextual menu

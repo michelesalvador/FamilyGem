@@ -593,7 +593,7 @@ public class F {
 
     public static int checkMultiplePermissions(final Context context, final String... permissions) {
         int result = PackageManager.PERMISSION_GRANTED;
-        for (String permission: permissions) {
+        for (String permission : permissions) {
             result |= ContextCompat.checkSelfPermission(context, permission);
         }
 
@@ -609,13 +609,13 @@ public class F {
         // Request permission to access device memory
         final String[] requiredPermissions;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requiredPermissions = new String[] {
+            requiredPermissions = new String[]{
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.READ_MEDIA_VIDEO,
                     Manifest.permission.READ_MEDIA_AUDIO,
             };
         } else {
-            requiredPermissions = new String[] {
+            requiredPermissions = new String[]{
                     Manifest.permission.READ_EXTERNAL_STORAGE,
             };
         }
@@ -768,11 +768,8 @@ public class F {
                 Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
             }
         }
-        // Adds the folder path in the Tree in settings
-        if (Global.settings.getCurrentTree().dirs.add(fileMedia[0].getParent())) // true if it added the folder
-            Global.settings.save();
-        // Sets the found path in the Media
-        media.setFile(fileMedia[0].getAbsolutePath());
+        media.setFile(fileMedia[0].getAbsolutePath()); // Sets the found path in the media
+        Global.mediaFolderPath = fileMedia[0].getParent();
 
         // If it is an image it opens the cropping proposal dialog
         String mimeType = URLConnection.guessContentTypeFromName(fileMedia[0].getName());
@@ -793,8 +790,18 @@ public class F {
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, U.dpToPx(320));
             imageView.setLayoutParams(params); // The size assignment must come AFTER creating the dialog
             return true;
+        } else {
+            saveFolderInSettings();
         }
         return false;
+    }
+
+    /**
+     * Adds the folder path of the imported media to tree settings.
+     */
+    public static void saveFolderInSettings() {
+        if (Global.settings.getCurrentTree().dirs.add(Global.mediaFolderPath)) // True if the folder was added
+            Global.settings.save();
     }
 
     /**
@@ -808,6 +815,7 @@ public class F {
         else if (context instanceof ProfileActivity) {
             ((ProfileActivity)context).refresh();
         }
+        saveFolderInSettings();
         Global.edited = true; // To update previous pages
     }
 
@@ -871,6 +879,8 @@ public class F {
         Picasso.get().invalidate(uri); // Clears from the cache any image that has the same path
         String path = uriFilePath(uri);
         Global.croppedMedia.setFile(path);
+        Global.mediaFolderPath = path.substring(0, path.lastIndexOf('/'));
+        saveFolderInSettings();
     }
 
     /**

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:paddingTop="6dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="7dp">
+
+    <RadioButton
+        android:id="@+id/merge_radio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp" />
+
+    <TextView
+        android:id="@+id/merge_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/merge_radio"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/merge_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/merge_title"
+        android:layout_toEndOf="@id/merge_radio"
+        android:textColor="@color/gray_text"
+        android:textSize="14sp" />
+</RelativeLayout>
