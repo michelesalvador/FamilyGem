@@ -150,7 +150,7 @@
     <string name="merge">Unisci</string>
     <string name="select_tree">Seleziona un albero da unire:</string>
     <string name="choose_output">Scegli la destinazione:</string>
-    <string name="merge_into">Unisci %s dentro a %s</string>
+    <string name="merge_into">Unisci %2$s dentro a %1$s</string>
     <string name="generate_new">Genera un nuovo albero dai due</string>
     <string name="merge_complete">Unione completata.</string>
     <!-- Notifier -->
@@ -405,7 +405,7 @@
     <string name="unlock_function">Questa funzionalità può essere sbloccata con Family Gem Premium.</string>
     <string name="lifetime">A vita</string>
     <string name="more_premium">Più info su Premium</string>
-    <string name="become_premium">Diventa Premium</string>
+    <string name="get_premium">Ottieni Premium</string>
     <string name="premium_activated">Premium attivato.</string>
     <string name="update_playstore">Prego aggiornare l\'app Play Store.</string>
 </resources>

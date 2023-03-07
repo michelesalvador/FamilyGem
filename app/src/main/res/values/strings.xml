@@ -141,7 +141,7 @@
     <string name="merge">Merge</string>
     <string name="select_tree">Select a tree to merge:</string>
     <string name="choose_output">Choose the destination:</string>
-    <string name="merge_into">Merge %s into %s</string>
+    <string name="merge_into">Merge %2$s into %1$s</string>
     <string name="generate_new">Generate a new tree from the two</string>
     <string name="merge_complete">Merge completed.</string>
     <string name="birthdays">Birthdays</string>
@@ -378,7 +378,7 @@
     <string name="unlock_function">This feature can be unlocked with Family Gem Premium.</string>
     <string name="lifetime">Lifetime</string>
     <string name="more_premium">More about Premium</string>
-    <string name="become_premium">Become Premium</string>
+    <string name="get_premium">Get Premium</string>
     <string name="premium_activated">Premium activated.</string>
     <string name="update_playstore">Please update Play Store app.</string>
 </resources>

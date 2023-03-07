@@ -16,7 +16,8 @@
             android:paddingEnd="15dp"
             android:paddingBottom="50dp">
 
-            <include android:id="@+id/merge_base"
+            <include
+                android:id="@+id/merge_base"
                 layout="@layout/pezzo_albero" />
 
             <TextView
@@ -64,11 +65,10 @@
                 android:id="@+id/merge_rename"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp"
-                android:enabled="false"
                 android:hint="@string/name_of_tree"
                 android:inputType="textCapWords"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/merge_button"
@@ -76,6 +76,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
                 android:enabled="false"
                 android:text="@string/merge" />
         </LinearLayout>

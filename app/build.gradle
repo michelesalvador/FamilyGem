@@ -22,7 +22,7 @@ android {
 		minSdkVersion 19
 		targetSdkVersion 33
 		versionCode 24
-		versionName '0.9.2.5'
+		versionName '0.9.2.6'
 		vectorDrawables.useSupportLibrary = true
 		resConfigs 'ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh'
 		def passKey = ""

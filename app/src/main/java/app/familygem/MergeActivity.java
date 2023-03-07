@@ -94,7 +94,7 @@ public class MergeActivity extends BaseActivity {
         }
         // Output radio buttons
         radioAnnex = findViewById(R.id.merge_radio_annex);
-        radioAnnex.setText(getString(R.string.merge_into, "...", baseTree.title));
+        radioAnnex.setText(getString(R.string.merge_into, baseTree.title, "..."));
         radioGenerate = findViewById(R.id.merge_radio_generate);
         titleText = findViewById(R.id.merge_rename);
         titleText.setText(baseTree.title);
@@ -154,7 +154,10 @@ public class MergeActivity extends BaseActivity {
         // Selecting a radio button
         RadioGroup radioGroup = findViewById(R.id.merge_radiogroup);
         radioGroup.setOnCheckedChangeListener((group, checked) -> {
-            titleText.setEnabled(checked == R.id.merge_radio_generate);
+            if (checked == R.id.merge_radio_generate)
+                titleText.setVisibility(View.VISIBLE);
+            else
+                titleText.setVisibility(View.GONE);
             mergeButton.setEnabled(selectedId > 0);
         });
         // Populates the records array with the 7 types
@@ -184,8 +187,8 @@ public class MergeActivity extends BaseActivity {
             }
         }
         // Annex radio button
-        String label = getString(R.string.merge_into, Global.settings.getTree(selectedId).title, Global.settings.getTree(baseId).title);
-        radioAnnex.setText(label);
+        radioAnnex.setText(getString(R.string.merge_into,
+                Global.settings.getTree(baseId).title, Global.settings.getTree(selectedId).title));
         // Suggested title
         if (!titleEdited) {
             String title = Global.settings.getTree(baseId).title + " " + Global.settings.getTree(selectedId).title;
