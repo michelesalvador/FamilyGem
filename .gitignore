@@ -3,5 +3,5 @@
 !.idea/codeStyles/
 build/
 app/libs-source-data/
-chiavi.properties
+credential.properties
 local.properties

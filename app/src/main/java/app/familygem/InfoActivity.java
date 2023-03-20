@@ -23,6 +23,7 @@ import org.folg.gedcom.model.Submitter;
 import java.io.File;
 import java.util.Locale;
 
+import app.familygem.constant.Extra;
 import app.familygem.visitor.MediaList;
 
 public class InfoActivity extends BaseActivity {
@@ -35,7 +36,7 @@ public class InfoActivity extends BaseActivity {
         setContentView(R.layout.info_albero);
         LinearLayout scatola = findViewById(R.id.info_scatola);
 
-        final int treeId = getIntent().getIntExtra("idAlbero", 1);
+        final int treeId = getIntent().getIntExtra(Extra.TREE_ID, 1);
         final Settings.Tree tree = Global.settings.getTree(treeId);
         final File file = new File(getFilesDir(), treeId + ".json");
         String i = getText(R.string.title) + ": " + tree.title;

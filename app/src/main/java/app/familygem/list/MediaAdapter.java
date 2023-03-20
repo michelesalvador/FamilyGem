@@ -135,7 +135,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.gestoreVista
             } else {
                 Intent intent = new Intent(v.getContext(), MediaActivity.class);
                 if (media.getId() != null) { // tutti i Media record
-                    Memory.setFirst(media);
+                    Memory.setLeader(media);
                 } else if ((activity instanceof ProfileActivity && contenitore instanceof Person) // media di primo livello nell'Indi
                         || activity instanceof DetailActivity) { // normale apertura nei Dettagli
                     Memory.add(media);

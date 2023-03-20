@@ -1,11 +1,12 @@
 package app.familygem;
 
-import static graph.gedcom.Util.p;
+import static app.familygem.Logger.l;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -54,7 +55,7 @@ public class ProductLayout extends LinearLayout {
         // Purchase button
         findViewById(R.id.product_button).setOnClickListener(view -> {
             // Launches billing flow if client is connected, reconnecting if necessary.
-            p("Connection state:", billingClient.getConnectionState());
+            l("Connection state:", billingClient.getConnectionState());
             int state = billingClient.getConnectionState();
             if (state == BillingClient.ConnectionState.CONNECTED) {
                 launchFlow();
@@ -71,8 +72,8 @@ public class ProductLayout extends LinearLayout {
      */
     private void connectGoogleBilling() {
         PurchasesUpdatedListener purchasesUpdatedListener = (billingResult, purchases) -> {
-            p("On purchases updated:", billingResult);
-            p("Purchases:", purchases);
+            l("On purchases updated:", billingResult);
+            l("Purchases:", purchases);
             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
                 // Product just purchased
                 for (Purchase purchase : purchases) {
@@ -85,10 +86,10 @@ public class ProductLayout extends LinearLayout {
                 becomePremium();
             } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
                 // User clicks outside the Google Play dialog box
-                p("User cancelled flow");
+                l("User cancelled flow");
             } else {
                 // User not signed in to Google Account
-                p("Other error");
+                l("Other error");
             }
         };
         // Creates client instance, necessary if already created and connection ended
@@ -98,7 +99,7 @@ public class ProductLayout extends LinearLayout {
         billingClient.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
-                p("Billing setup finished:", billingResult);
+                l("Billing setup finished:", billingResult);
                 // The BillingClient is ready
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     if (productDetails != null && !productDetails.isEmpty()) // The Premium product is already visible and we can buy it
@@ -115,7 +116,7 @@ public class ProductLayout extends LinearLayout {
             @Override
             public void onBillingServiceDisconnected() {
                 // Try to restart the connection to Google Play
-                p("Billing service disconnected");
+                l("Billing service disconnected");
                 connectGoogleBilling();
             }
         });
@@ -129,8 +130,8 @@ public class ProductLayout extends LinearLayout {
         QueryPurchasesParams queryPurchasesParams = QueryPurchasesParams.newBuilder()
                 .setProductType(BillingClient.ProductType.INAPP).build();
         billingClient.queryPurchasesAsync(queryPurchasesParams, (billingResult, purchases) -> {
-                    p("On query purchases:", billingResult);
-                    p("Purchases:", purchases);
+                    l("On query purchases:", billingResult);
+                    l("Purchases:", purchases);
                     if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                         if (!purchases.isEmpty() && purchases.get(0).getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
                             // Premium was already been bought
@@ -156,7 +157,7 @@ public class ProductLayout extends LinearLayout {
     private void queryProducts() {
         // Old versions of Google Play app give the error FEATURE_NOT_SUPPORTED: billing client does not support ProductDetails
         BillingResult billingResult = billingClient.isFeatureSupported(BillingClient.FeatureType.PRODUCT_DETAILS);
-        p("Is product details supported:", billingResult);
+        l("Is product details supported:", billingResult);
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED) {
             U.toast(activity, R.string.update_playstore);
             return;
@@ -169,8 +170,8 @@ public class ProductLayout extends LinearLayout {
         QueryProductDetailsParams queryProductDetailsParams = QueryProductDetailsParams.newBuilder()
                 .setProductList(products).build();
         billingClient.queryProductDetailsAsync(queryProductDetailsParams, (billingResult1, productDetailsList) -> {
-                    p("On product details:", billingResult1);
-                    p("Product details list:", productDetailsList);
+                    l("On product details:", billingResult1);
+                    l("Product details list:", productDetailsList);
                     int response = billingResult1.getResponseCode();
                     if (response == BillingClient.BillingResponseCode.OK && !productDetailsList.isEmpty()) {
                         // Displays product details on layout
@@ -203,19 +204,17 @@ public class ProductLayout extends LinearLayout {
      * Can be called after the purchase flow or because the Premium product results already been bought on Google Play.
      */
     private void becomePremium() {
-        Global.premium = true;
+        Global.settings.premium = true;
         Global.settings.save();
         conclusion.run();
-        U.toast(activity, R.string.premium_activated);
-        p("Premium activated.");
+        U.toast(R.string.premium_activated);
     }
 
     /**
      * Displays the Google Play dialog to purchase the product.
      */
     void launchFlow() {
-        // productDetails = new ProductDetails(); // Impossible, not public
-        p("Product details:", productDetails);
+        l("Product details:", productDetails);
         if (productDetails == null || productDetails.isEmpty()) return;
         List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
         for (ProductDetails details : productDetails) {
@@ -227,14 +226,14 @@ public class ProductLayout extends LinearLayout {
                 .build();
         // Launches the billing flow
         BillingResult billingResult = billingClient.launchBillingFlow(activity, billingFlowParams);
-        p("Launch billing flow:", billingResult);
+        l("Launch billing flow:", billingResult);
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
             // User not signed in to Google Account ends here
             // Also if product is already owned ends here
-            p("Response OK");
+            l("Response OK");
         } else {
             // Never seen
-            p("Response KO");
+            l("Response KO");
         }
     }
 
@@ -244,12 +243,12 @@ public class ProductLayout extends LinearLayout {
     private void verifyPurchase(Purchase purchase) {
         new Thread(() -> {
             try {
-                //URL url = new URL("http://10.0.2.2:3000/purchase.php"); // Localhost of computer = 127.0.0.1
-                URL url = new URL("https://www.familygem.app/purchase.php");
+                String protocol = "https";
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) protocol = "http";
+                URL url = new URL(protocol + "://www.familygem.app/purchase.php");
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-                p("Connection:", connection);
+                l("Connection:", connection);
                 connection.setRequestMethod("POST");
-                connection.setDoOutput(true); // Necessary?
                 OutputStream stream = connection.getOutputStream();
                 String query = "passKey=" + URLEncoder.encode(BuildConfig.PASS_KEY, "UTF-8") +
                         "&orderId=" + purchase.getOrderId() +
@@ -263,15 +262,15 @@ public class ProductLayout extends LinearLayout {
                 String line = reader.readLine();
                 reader.close();
                 connection.disconnect();
-                p("Answer:", line);
-                p("Purchase is acknowledged:", purchase.isAcknowledged());
+                l("Answer:", line);
+                l("Purchase is acknowledged:", purchase.isAcknowledged());
                 // Purchase just inserted on backend database
                 if (line.equals(String.valueOf(purchase.getPurchaseTime())) && !purchase.isAcknowledged()) {
                     // Acknowledges purchase
                     AcknowledgePurchaseParams acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
                             .setPurchaseToken(purchase.getPurchaseToken()).build();
                     billingClient.acknowledgePurchase(acknowledgePurchaseParams, billingResult -> {
-                        p("On acknowledge purchase response:", billingResult);
+                        l("On acknowledge purchase response:", billingResult);
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                             becomePremium();
                         } else {
@@ -284,8 +283,7 @@ public class ProductLayout extends LinearLayout {
                 } else {
                     U.toast(activity, R.string.something_wrong);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
             }
         }).start();
     }

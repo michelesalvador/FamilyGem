@@ -187,7 +187,7 @@ public class TreesActivity extends AppCompatActivity {
                                 startActivity(new Intent(TreesActivity.this, Principal.class));
                             } else if (id == 1) { // Info Gedcom
                                 Intent intent = new Intent(TreesActivity.this, InfoActivity.class);
-                                intent.putExtra("idAlbero", treeId);
+                                intent.putExtra(Extra.TREE_ID, treeId);
                                 startActivity(intent);
                             } else if (id == 2) { // Rinomina albero
                                 AlertDialog.Builder builder = new AlertDialog.Builder(TreesActivity.this);
@@ -196,7 +196,7 @@ public class TreesActivity extends AppCompatActivity {
                                 EditText editaNome = vistaMessaggio.findViewById(R.id.nuovo_nome_albero);
                                 editaNome.setText(treeList.get(position).get("titolo"));
                                 AlertDialog dialogo = builder.setPositiveButton(R.string.rename, (dialog, i1) -> {
-                                    Global.settings.rinomina(treeId, editaNome.getText().toString());
+                                    Global.settings.renameTree(treeId, editaNome.getText().toString());
                                     aggiornaLista();
                                 }).setNeutralButton(R.string.cancel, null).create();
                                 editaNome.setOnEditorActionListener((textView, action, event) -> {
@@ -213,13 +213,13 @@ public class TreesActivity extends AppCompatActivity {
                                 }, 300);
                             } else if (id == 3) { // Media folders
                                 startActivity(new Intent(TreesActivity.this, MediaFoldersActivity.class)
-                                        .putExtra("idAlbero", treeId)
+                                        .putExtra(Extra.TREE_ID, treeId)
                                 );
                             } else if (id == 4) { // Find errors
                                 findErrors(treeId, false);
                             } else if (id == 5) { // Share tree
                                 startActivity(new Intent(TreesActivity.this, SharingActivity.class)
-                                        .putExtra("idAlbero", treeId)
+                                        .putExtra(Extra.TREE_ID, treeId)
                                 );
                             } else if (id == 6) { // Merge with another tree
                                 startActivity(new Intent(TreesActivity.this, MergeActivity.class)
@@ -281,7 +281,7 @@ public class TreesActivity extends AppCompatActivity {
 
         // Automatic load of last opened tree of previous session
         if (!birthdayNotifyTapped(getIntent()) && !autoOpenedTree
-                && getIntent().getBooleanExtra("apriAlberoAutomaticamente", false) && Global.settings.openTree > 0) {
+                && getIntent().getBooleanExtra(Extra.AUTO_LOAD_TREE, false) && Global.settings.openTree > 0) {
             listView.post(() -> {
                 if (openGedcom(Global.settings.openTree, false)) {
                     progress.setVisibility(View.VISIBLE);

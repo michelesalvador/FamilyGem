@@ -153,7 +153,7 @@ public class SourcesFragment extends Fragment {
                 getActivity().finish();
             } else {
                 Source source = gc.getSource(idView.getText().toString());
-                Memory.setFirst(source);
+                Memory.setLeader(source);
                 startActivity(new Intent(getContext(), SourceActivity.class));
             }
         }
@@ -264,7 +264,7 @@ public class SourcesFragment extends Fragment {
             else ((SourceCitationContainer)container).addSourceCitation(sourceCitation);
         }
         U.save(true, source);
-        Memory.setFirst(source);
+        Memory.setLeader(source);
         context.startActivity(new Intent(context, SourceActivity.class));
     }
 

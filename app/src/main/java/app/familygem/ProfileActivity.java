@@ -71,11 +71,11 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         U.ensureGlobalGedcomNotNull(gc);
-        one = (Person)Memory.getObject();
+        one = (Person)Memory.getLastObject();
         // Se l'app va in background e viene stoppata, 'Memory' è resettata e quindi 'one' sarà null
         if (one == null && bundle != null) {
             one = gc.getPerson(bundle.getString("idUno")); // In bundle è salvato l'id dell'individuo
-            Memory.setFirst(one); // Altrimenti la memoria è senza una pila
+            Memory.setLeader(one); // Altrimenti la memoria è senza una pila
         }
         if (one == null) return; // Capita raramente che il bundle non faccia il suo lavoro
         Global.indi = one.getId();
@@ -505,7 +505,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Memory.clearStackAndRemove();
+        Memory.stepBack();
         super.onBackPressed();
     }
 

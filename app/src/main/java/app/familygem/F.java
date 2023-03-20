@@ -687,11 +687,11 @@ public class F {
                             Memory.add(med);
                         } else { // Shared media
                             med = MediaFragment.newMedia(container);
-                            Memory.setFirst(med);
+                            Memory.setLeader(med);
                         }
                         med.setFile("");
                         context.startActivity(intent);
-                        U.save(true, Memory.firstObject());
+                        U.save(true, Memory.getLeaderObject());
                     } else if (fragment != null)
                         fragment.startActivityForResult(intent, code); // Thus the result returns to the fragment
                     else

@@ -44,6 +44,7 @@ import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import app.familygem.constant.Extra;
 import app.familygem.share.CompareActivity;
 
 public class NewTreeActivity extends BaseActivity {
@@ -133,7 +134,7 @@ public class NewTreeActivity extends BaseActivity {
             Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
             return;
         }
-        Global.settings.aggiungi(new Settings.Tree(num, title, null, 0, 0, null, null, 0));
+        Global.settings.addTree(new Settings.Tree(num, title, null, 0, 0, null, null, 0));
         Global.settings.openTree = num;
         Global.settings.save();
         onBackPressed();
@@ -220,7 +221,7 @@ public class NewTreeActivity extends BaseActivity {
             Settings.ZippedTree zipped = gson.fromJson(json, Settings.ZippedTree.class);
             Settings.Tree tree = new Settings.Tree(treeNumber, zipped.title, mediaDir.getPath(),
                     zipped.persons, zipped.generations, zipped.root, zipped.shares, zipped.grade);
-            Global.settings.aggiungi(tree);
+            Global.settings.addTree(tree);
             settingsFile.delete();
             // Albero proveniente da condivisione destinato al confronto
             if (zipped.grade == 9 && confronta(context, tree, false)) {
@@ -236,7 +237,7 @@ public class NewTreeActivity extends BaseActivity {
             } else // Example tree (Simpson) or backup tree (from LauncherActivity or from NewTreeActivity)
                 context.startActivity(new Intent(context, TreesActivity.class));
             Global.settings.save();
-            U.toast((Activity)context, R.string.tree_imported_ok);
+            U.toast(R.string.tree_imported_ok);
             return true;
         } catch (Exception e) {
             U.toast((Activity)context, e.getLocalizedMessage());
@@ -294,7 +295,7 @@ public class NewTreeActivity extends BaseActivity {
                     treeName = treeName.substring(0, treeName.lastIndexOf('.'));
                 // Save the settings
                 String rootId = U.trovaRadice(gedcom);
-                Global.settings.aggiungi(new Settings.Tree(newNumber, treeName, folderPath,
+                Global.settings.addTree(new Settings.Tree(newNumber, treeName, folderPath,
                         gedcom.getPeople().size(), InfoActivity.quanteGenerazioni(gedcom, rootId), rootId, null, 0));
                 new Notifier(this, gedcom, newNumber, Notifier.What.CREATE);
                 // If necessary propose to show advanced tools
@@ -365,9 +366,9 @@ public class NewTreeActivity extends BaseActivity {
                             if (share.dateId != null && share.dateId.equals(share2.dateId)) {
                                 if (apriCompara)
                                     contesto.startActivity(new Intent(contesto, CompareActivity.class)
-                                            .putExtra("idAlbero", alb.id)
-                                            .putExtra("idAlbero2", albero2.id)
-                                            .putExtra("idData", share.dateId)
+                                            .putExtra(Extra.TREE_ID, alb.id)
+                                            .putExtra(Extra.TREE_ID_2, albero2.id)
+                                            .putExtra(Extra.DATE_ID, share.dateId)
                                     );
                                 return true;
                             }

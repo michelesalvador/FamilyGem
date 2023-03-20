@@ -16,11 +16,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import app.familygem.constant.Extra;
 
 // Activity where you can see the list of media folders, add them, delete them
 public class MediaFoldersActivity extends BaseActivity {
@@ -33,7 +34,7 @@ public class MediaFoldersActivity extends BaseActivity {
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.cartelle_media);
-        treeId = getIntent().getIntExtra("idAlbero", 0);
+        treeId = getIntent().getIntExtra(Extra.TREE_ID, 0);
         dirs = new ArrayList<>(Global.settings.getTree(treeId).dirs);
         uris = new ArrayList<>(Global.settings.getTree(treeId).uris);
         updateList();
@@ -41,13 +42,13 @@ public class MediaFoldersActivity extends BaseActivity {
         findViewById(R.id.fab).setOnClickListener(v -> {
             final String[] requiredPermissions;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requiredPermissions = new String[] {
+                requiredPermissions = new String[]{
                         Manifest.permission.READ_MEDIA_IMAGES,
                         Manifest.permission.READ_MEDIA_VIDEO,
                         Manifest.permission.READ_MEDIA_AUDIO,
                 };
             } else {
-                requiredPermissions = new String[] {
+                requiredPermissions = new String[]{
                         Manifest.permission.READ_EXTERNAL_STORAGE,
                 };
             }

@@ -62,7 +62,7 @@ public class FamiliesFragment extends Fragment {
                 Family newFamily = newFamily(true);
                 U.save(true, newFamily);
                 // If the user returns immediately back to this fragment, the new empty family is displayed in the list
-                Memory.setFirst(newFamily);
+                Memory.setLeader(newFamily);
                 startActivity(new Intent(getContext(), FamilyActivity.class));
             });
         }
@@ -113,7 +113,7 @@ public class FamiliesFragment extends Fragment {
             childrenView.setText(children.toString());
         registerForContextMenu(familyView);
         familyView.setOnClickListener(v -> {
-            Memory.setFirst(wrapper.family);
+            Memory.setLeader(wrapper.family);
             layout.getContext().startActivity(new Intent(layout.getContext(), FamilyActivity.class));
         });
         familyView.setTag(wrapper.id); // For 'Delete' item in the context menu here in FamiliesFragment

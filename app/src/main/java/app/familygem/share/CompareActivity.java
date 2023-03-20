@@ -33,6 +33,7 @@ import app.familygem.R;
 import app.familygem.Settings;
 import app.familygem.TreesActivity;
 import app.familygem.U;
+import app.familygem.constant.Extra;
 
 /**
  * Activity that introduces the process for importing updates in an existing tree,
@@ -47,8 +48,8 @@ public class CompareActivity extends BaseActivity {
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.compara);
-        int idTree1 = getIntent().getIntExtra("idAlbero", 1); // Old tree present in the app
-        int idTree2 = getIntent().getIntExtra("idAlbero2", 1); // New tree received in sharing
+        int idTree1 = getIntent().getIntExtra(Extra.TREE_ID, 1); // Old tree present in the app
+        int idTree2 = getIntent().getIntExtra(Extra.TREE_ID_2, 1); // New tree received in sharing
         Global.treeId2 = idTree2; // It will be used for the Comparison and ConfirmationActivity images
         Global.gc = TreesActivity.openGedcomTemporarily(idTree1, true);
         Global.gc2 = TreesActivity.openGedcomTemporarily(idTree2, false);
@@ -61,7 +62,7 @@ public class CompareActivity extends BaseActivity {
         TimeZone.setDefault(TimeZone.getTimeZone("Europe/Rome")); // Synchronizes all dates to the italian time zone
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
-            sharingDate = dateFormat.parse(getIntent().getStringExtra("idData"));
+            sharingDate = dateFormat.parse(getIntent().getStringExtra(Extra.DATE_ID));
         } catch (ParseException e) {
             e.printStackTrace();
         }

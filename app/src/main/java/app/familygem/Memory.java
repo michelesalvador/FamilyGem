@@ -1,5 +1,9 @@
 package app.familygem;
 
+import static app.familygem.Logger.l;
+
+import androidx.annotation.NonNull;
+
 import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.Change;
 import org.folg.gedcom.model.EventFact;
@@ -22,7 +26,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import app.familygem.detail.AddressActivity;
-import app.familygem.detail.SubmitterActivity;
 import app.familygem.detail.ChangeActivity;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
@@ -34,6 +37,7 @@ import app.familygem.detail.RepositoryActivity;
 import app.familygem.detail.RepositoryRefActivity;
 import app.familygem.detail.SourceActivity;
 import app.familygem.detail.SourceCitationActivity;
+import app.familygem.detail.SubmitterActivity;
 import app.familygem.visitor.FindStack;
 
 /**
@@ -41,7 +45,7 @@ import app.familygem.visitor.FindStack;
  */
 public class Memory {
 
-    static Map<Class, Class> classes = new HashMap<>();
+    static Map<Class<?>, Class<?>> classes = new HashMap<>();
     private static final Memory memory = new Memory();
     List<StepStack> list = new ArrayList<>();
 
@@ -66,7 +70,7 @@ public class Memory {
      * Returns the last stack of the list, if there is at least one.
      * Otherwise returns an empty stack just to not return null.
      */
-    static StepStack getStepStack() { // TODO: getLastStack()
+    static StepStack getLastStack() {
         if (memory.list.size() > 0)
             return memory.list.get(memory.list.size() - 1);
         else
@@ -85,26 +89,26 @@ public class Memory {
     /**
      * Adds an object in the first position of a new stack.
      */
-    public static void setFirst(Object object) { // TODO: setLeader()
-        setFirst(object, null);
+    public static void setLeader(Object object) {
+        setLeader(object, null);
     }
 
-    public static void setFirst(Object object, String tag) { // TODO: setLeader()
+    public static void setLeader(Object object, String tag) {
         addStack();
         Step step = add(object);
         if (tag != null)
             step.tag = tag;
         else if (object instanceof Person)
             step.tag = "INDI";
-        //print("setFirst");
+        //log("setLeader");
     }
 
     // Aggiunge un object alla fine dell'ultima pila esistente.
     public static Step add(Object object) {
         Step step = new Step();
         step.object = object;
-        getStepStack().add(step);
-        //print("add");
+        getLastStack().add(step);
+        //log("add");
         return step;
     }
 
@@ -112,24 +116,24 @@ public class Memory {
      * Puts an object in a first step if there are no stacks, or replaces the first step in the last existing stack.
      * In other words, puts the leader object without adding any more stacks.
      */
-    public static void replaceFirst(Object object) { // TODO: replaceLeader()
+    public static void replaceLeader(Object object) {
         String tag = object instanceof Family ? "FAM" : "INDI";
         if (memory.list.size() == 0) {
-            setFirst(object, tag);
+            setLeader(object, tag);
         } else {
-            getStepStack().clear();
+            getLastStack().clear();
             Step step = add(object);
             step.tag = tag;
         }
-        //print("replaceFirst");
+        //log("replaceLeader");
     }
 
     /**
      * Returns the object of the first step of the last stack.
      */
-    public static Object firstObject() { // TODO: getLeaderObject()
-        if (getStepStack().size() > 0)
-            return getStepStack().firstElement().object;
+    public static Object getLeaderObject() {
+        if (getLastStack().size() > 0)
+            return getLastStack().firstElement().object;
         else
             return null;
     }
@@ -138,7 +142,7 @@ public class Memory {
      * If the stack has more than one object, gets the second to last object, otherwise returns null.
      */
     public static Object getSecondToLastObject() { // TODO: getPreviousObject()? getPenultimateObject()?
-        StepStack stepStack = getStepStack();
+        StepStack stepStack = getLastStack();
         if (stepStack.size() > 1)
             return stepStack.get(stepStack.size() - 2).object;
         else
@@ -148,25 +152,25 @@ public class Memory {
     /**
      * Returns the object in the last step of the last stack.
      */
-    public static Object getObject() { // TODO: getLastObject()
-        if (getStepStack().size() == 0)
+    public static Object getLastObject() {
+        if (getLastStack().size() == 0)
             return null;
         else
-            return getStepStack().peek().object;
+            return getLastStack().peek().object;
     }
 
     /**
      * Removes one or maybe more steps at the end of the stacks.
      * Represents "one step back", called after onBackPressed().
      */
-    public static void clearStackAndRemove() { // TODO: stepBack()
-        while (getStepStack().size() > 0 && getStepStack().lastElement().clearStackOnBackPressed)
-            getStepStack().pop();
-        if (getStepStack().size() > 0)
-            getStepStack().pop();
-        if (getStepStack().isEmpty())
-            memory.list.remove(getStepStack());
-        //print("back");
+    public static void stepBack() {
+        while (getLastStack().size() > 0 && getLastStack().lastElement().deleteOnBackPressed)
+            getLastStack().pop();
+        if (getLastStack().size() > 0)
+            getLastStack().pop();
+        if (getLastStack().isEmpty())
+            memory.list.remove(getLastStack());
+        //log("stepBack");
     }
 
     /**
@@ -185,26 +189,24 @@ public class Memory {
         }
     }
 
-    // TODO: replace with Log
-    public static void print(String intro) {
-        if (intro != null)
-            s.l(intro);
+    private static void log(String intro) {
+        l(intro + ":");
         for (StepStack stepStack : memory.list) {
-            for (Step step : stepStack) {
-                String stack = step.clearStackOnBackPressed ? "< " : "";
-                if (step.tag != null)
-                    s.p(stack + step.tag + " ");
-                else if (step.object != null)
-                    s.p(stack + step.object.getClass().getSimpleName() + " ");
-                else
-                    s.p(stack + "Null"); // capita in rarissimi casi
-            }
-            s.l("");
+            l(stepStack);
         }
-        s.l("- - - -");
+        l("- - - -");
     }
 
     static class StepStack extends Stack<Step> {
+        @NonNull
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            for (Step step : this) {
+                builder.append(step);
+            }
+            return builder.toString();
+        }
     }
 
     public static class Step {
@@ -213,6 +215,20 @@ public class Memory {
         /**
          * {@link FindStack} sets it to true then onBackPressed() the step will be deleted.
          */
-        public boolean clearStackOnBackPressed; // TODO: deleteOnBackPressed()
+        public boolean deleteOnBackPressed;
+
+        @NonNull
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            if (deleteOnBackPressed) builder.append("< ");
+            if (tag != null)
+                builder.append(tag).append(" ");
+            else if (object != null)
+                builder.append(object.getClass().getSimpleName()).append(" ");
+            else
+                builder.append("null "); // This should never happen
+            return builder.toString();
+        }
     }
 }

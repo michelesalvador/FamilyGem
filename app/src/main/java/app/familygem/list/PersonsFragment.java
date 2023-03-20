@@ -316,7 +316,7 @@ public class PersonsFragment extends Fragment {
                 getActivity().setResult(AppCompatActivity.RESULT_OK, intent);
                 getActivity().finish();
             } else { // Normal link to the profile
-                Memory.setFirst(relative);
+                Memory.setLeader(relative);
                 startActivity(new Intent(getContext(), ProfileActivity.class));
             }
         }

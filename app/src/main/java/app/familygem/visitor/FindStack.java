@@ -25,7 +25,7 @@ import app.familygem.Memory;
 /**
  * Visitor that produces for {@link Memory} a hierarchic stack of objects from a leader record to a given object (target).
  * E.g. Person > Simple Media
- * or Family> Simple Note> SourceCitation> Simple Note
+ * or Family > Simple Note > SourceCitation > Simple Note
  */
 public class FindStack extends Visitor {
 
@@ -47,7 +47,7 @@ public class FindStack extends Visitor {
             step.object = object;
             step.tag = tag;
             if (!isLeader)
-                step.clearStackOnBackPressed = true; // Marks it to delete when onBackPressed()
+                step.deleteOnBackPressed = true; // Marks it to delete when onBackPressed()
             stack.add(step);
         }
         if (object.equals(target)) {

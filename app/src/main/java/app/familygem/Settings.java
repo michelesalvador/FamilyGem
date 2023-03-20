@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ public class Settings {
      */
     public boolean expert;
     public boolean shareAgreement;
+    boolean premium;
     Diagram diagram;
 
     /**
@@ -69,14 +69,14 @@ public class Settings {
         return num;
     }
 
-    void aggiungi(Tree tree) {
+    void addTree(Tree tree) {
         trees.add(tree);
     }
 
-    void rinomina(int id, String nuovoNome) {
+    void renameTree(int id, String newTitle) {
         for (Tree tree : trees) {
             if (tree.id == id) {
-                tree.title = nuovoNome;
+                tree.title = newTitle;
                 break;
             }
         }
@@ -197,7 +197,7 @@ public class Settings {
             birthdays = new HashSet<>();
         }
 
-        public void aggiungiCondivisione(Share share) {
+        public void addShare(Share share) {
             if (shares == null)
                 shares = new ArrayList<>();
             shares.add(share);

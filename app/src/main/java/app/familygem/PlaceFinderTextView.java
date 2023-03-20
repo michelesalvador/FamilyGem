@@ -24,7 +24,8 @@ import java.util.Locale;
  */
 public class PlaceFinderTextView extends AppCompatAutoCompleteTextView {
 
-    ToponymSearchCriteria searchCriteria;
+    private ToponymSearchCriteria searchCriteria;
+    static final String GEONAMES_USER = "geonames_user";
 
     public PlaceFinderTextView(Context context, AttributeSet set) {
         super(context, set);
@@ -34,7 +35,6 @@ public class PlaceFinderTextView extends AppCompatAutoCompleteTextView {
         //setThreshold(2);
 
         // GeoNames settings
-        WebService.setUserName(BuildConfig.utenteGeoNames);
         searchCriteria = new ToponymSearchCriteria();
         searchCriteria.setLanguage(Locale.getDefault().getLanguage()); // 'en', 'es', 'it'...
         searchCriteria.setStyle(Style.FULL);
@@ -42,6 +42,8 @@ public class PlaceFinderTextView extends AppCompatAutoCompleteTextView {
         //searchCriteria.setFuzzy(0.9); // Not with setNameStartsWith
         //searchCriteria.setFeatureClass(FeatureClass.A); // One or the other one
         //searchCriteria.setFeatureClass(FeatureClass.P);
+        String userName = U.getSharedPreferences(getContext()).getString(GEONAMES_USER, "demo");
+        WebService.setUserName(userName);
     }
 
     class ListAdapter extends ArrayAdapter<String> implements Filterable {

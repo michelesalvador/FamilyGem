@@ -36,6 +36,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.MediaContainerList;
 import app.familygem.visitor.MediaReferences;
@@ -139,8 +140,8 @@ public class MediaFragment extends Fragment {
             if (container.getMedia().isEmpty())
                 container.setMedia(null);
             leaders = new HashSet<>(); // Set with only one leader object
-            leaders.add(Memory.firstObject());
-            Memory.clearStackAndRemove(); // Deletes the stack just created
+            leaders.add(Memory.getLeaderObject());
+            Memory.stepBack(); // Deletes the stack just created
         }
         Memory.setInstanceAndAllSubsequentToNull(media);
         if (view != null)
@@ -200,8 +201,7 @@ public class MediaFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == 0) {
             startActivity(new Intent(getContext(), MediaFoldersActivity.class)
-                    .putExtra("idAlbero", Global.settings.openTree)
-            );
+                    .putExtra(Extra.TREE_ID, Global.settings.openTree));
             return true;
         }
         return false;

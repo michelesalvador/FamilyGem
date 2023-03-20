@@ -48,7 +48,7 @@ public class SourceCitationActivity extends DetailActivity {
             ((Note)container).getSourceCitations().remove(c);
         else
             ((SourceCitationContainer)container).getSourceCitations().remove(c);
-        U.updateChangeDate(Memory.firstObject());
+        U.updateChangeDate(Memory.getLeaderObject());
         Memory.setInstanceAndAllSubsequentToNull(c);
     }
 }

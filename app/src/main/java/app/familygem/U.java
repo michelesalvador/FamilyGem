@@ -5,6 +5,10 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -26,6 +30,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKey;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
@@ -64,9 +70,18 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
 import org.joda.time.Years;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -80,7 +95,7 @@ import java.util.TimeZone;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
-import app.familygem.detail.SubmitterActivity;
+import app.familygem.constant.Json;
 import app.familygem.detail.ChangeActivity;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.detail.MediaActivity;
@@ -88,15 +103,16 @@ import app.familygem.detail.NoteActivity;
 import app.familygem.detail.RepositoryRefActivity;
 import app.familygem.detail.SourceActivity;
 import app.familygem.detail.SourceCitationActivity;
+import app.familygem.detail.SubmitterActivity;
 import app.familygem.list.FamiliesFragment;
-import app.familygem.list.SubmittersFragment;
-import app.familygem.list.PersonsFragment;
 import app.familygem.list.MediaAdapter;
+import app.familygem.list.PersonsFragment;
 import app.familygem.list.SourcesFragment;
+import app.familygem.list.SubmittersFragment;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.ListOfSourceCitations;
-import app.familygem.visitor.MediaContainers;
 import app.familygem.visitor.MediaContainerList;
+import app.familygem.visitor.MediaContainers;
 import app.familygem.visitor.NoteContainers;
 import app.familygem.visitor.NoteReferences;
 
@@ -702,7 +718,7 @@ public class U {
                 ((AppCompatActivity)context).registerForContextMenu(noteView);
             noteView.setOnClickListener(v -> {
                 if (note.getId() != null)
-                    Memory.setFirst(note);
+                    Memory.setLeader(note);
                 else
                     Memory.add(note);
                 context.startActivity(new Intent(context, NoteActivity.class));
@@ -743,8 +759,8 @@ public class U {
             if (nc.getNotes().isEmpty())
                 nc.setNotes(null);
             capi = new HashSet<>();
-            capi.add(Memory.firstObject());
-            Memory.clearStackAndRemove();
+            capi.add(Memory.getLeaderObject());
+            Memory.stepBack();
         }
         Memory.setInstanceAndAllSubsequentToNull(note);
         if (view != null)
@@ -840,7 +856,7 @@ public class U {
         }
         vistaTesto.setText(txt);
         vistaFonte.setOnClickListener(v -> {
-            Memory.setFirst(source);
+            Memory.setLeader(source);
             layout.getContext().startActivity(new Intent(layout.getContext(), SourceActivity.class));
         });
     }
@@ -862,7 +878,7 @@ public class U {
         else if (Gender.isFemale(p))
             vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_femmina);
         vistaPersona.setOnClickListener(v -> {
-            Memory.setFirst(p);
+            Memory.setLeader(p);
             Intent intent = new Intent(scatola.getContext(), ProfileActivity.class);
             intent.putExtra("scheda", scheda);
             scatola.getContext().startActivity(intent);
@@ -894,7 +910,7 @@ public class U {
         scatola.addView(vistaFamiglia);
         ((TextView)vistaFamiglia.findViewById(R.id.family_text)).setText(testoFamiglia(scatola.getContext(), Global.gc, fam, false));
         vistaFamiglia.setOnClickListener(v -> {
-            Memory.setFirst(fam);
+            Memory.setLeader(fam);
             scatola.getContext().startActivity(new Intent(scatola.getContext(), FamilyActivity.class));
         });
     }
@@ -908,7 +924,7 @@ public class U {
         parami.height = dpToPx(80);
         F.showImage(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));
         vistaMedia.setOnClickListener(v -> {
-            Memory.setFirst(media);
+            Memory.setLeader(media);
             scatola.getContext().startActivity(new Intent(scatola.getContext(), MediaActivity.class));
         });
     }
@@ -922,7 +938,7 @@ public class U {
         testoNota.setText(autor.getName());
         vista.findViewById(R.id.note_sources).setVisibility(View.GONE);
         vista.setOnClickListener(v -> {
-            Memory.setFirst(autor);
+            Memory.setLeader(autor);
             contesto.startActivity(new Intent(contesto, SubmitterActivity.class));
         });
     }
@@ -1055,7 +1071,9 @@ public class U {
         return dateTime;
     }
 
-    // Save the Json
+    /**
+     * Saves the GEDCOM tree as JSON.
+     */
     public static void saveJson(Gedcom gedcom, int treeId) {
         Header h = gedcom.getHeader();
         // Solo se l'header è di Family Gem
@@ -1071,8 +1089,7 @@ public class U {
         try {
             FileUtils.writeStringToFile(
                     new File(Global.context.getFilesDir(), treeId + ".json"),
-                    new JsonParser().toJson(gedcom), "UTF-8"
-            );
+                    new JsonParser().toJson(gedcom), "UTF-8");
         } catch (IOException e) {
             Toast.makeText(Global.context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
@@ -1201,10 +1218,10 @@ public class U {
         } else { // Viene mostrata la famiglia
             Family family = person.getParentFamilies(Global.gc).get(whichFamily);
             if (context instanceof FamilyActivity) { // Passando di Famiglia in Famiglia non accumula attività nello stack
-                Memory.replaceFirst(family);
+                Memory.replaceLeader(family);
                 ((Activity)context).recreate();
             } else {
-                Memory.setFirst(family);
+                Memory.setLeader(family);
                 context.startActivity(new Intent(context, FamilyActivity.class));
             }
         }
@@ -1228,10 +1245,10 @@ public class U {
         Global.indi = person.getId();
         family = family == null ? person.getSpouseFamilies(Global.gc).get(whichFamily) : family;
         if (context instanceof FamilyActivity) {
-            Memory.replaceFirst(family);
+            Memory.replaceLeader(family);
             ((Activity)context).recreate(); // Non accumula activity nello stack
         } else {
-            Memory.setFirst(family);
+            Memory.setLeader(family);
             context.startActivity(new Intent(context, FamilyActivity.class));
         }
     }
@@ -1526,12 +1543,82 @@ public class U {
         }
     }
 
-    // Mostra un messaggio Toast anche da un thread collaterale
+    /**
+     * Connects to the online server to get credentials.
+     * Must be called from a working thread.
+     */
+    public static JSONObject getCredential(String request) {
+        try {
+            String protocol = "https";
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) protocol = "http";
+            URL url = new URL(protocol + "://www.familygem.app/credential.php");
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            OutputStream stream = connection.getOutputStream();
+            String query = "passKey=" + URLEncoder.encode(BuildConfig.PASS_KEY, "UTF-8")
+                    + "&request=" + request;
+            stream.write(query.getBytes(StandardCharsets.UTF_8));
+            stream.flush();
+            stream.close();
+            // Answer
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line = reader.readLine();
+            connection.disconnect();
+            reader.close();
+            if (line.contains(Json.USER)) {
+                return new JSONObject(new JSONTokener(line));
+            } else
+                toast(line);
+        } catch (Exception e) {
+            toast(e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Returns encrypted shared preferences for API 23+, otherwise normal shared preferences.
+     */
+    static SharedPreferences getSharedPreferences(Context context) {
+        String fileName = "credential";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                MasterKey masterKey = new MasterKey.Builder(context)
+                        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
+                return EncryptedSharedPreferences.create(
+                        context, fileName, masterKey,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+        }
+    }
+
+    @Deprecated
     public static void toast(Activity activity, int message) {
         toast(activity, activity.getString(message));
     }
 
+    @Deprecated
     public static void toast(Activity activity, String message) {
-        activity.runOnUiThread(() -> Toast.makeText(activity, message, Toast.LENGTH_LONG).show());
+        if (message != null) {
+            activity.runOnUiThread(() -> Toast.makeText(activity, message, Toast.LENGTH_LONG).show());
+        }
+    }
+
+    /**
+     * Shows a toast message coming also from a working thread.
+     */
+    public static void toast(int message) {
+        toast(s(message));
+    }
+
+    public static void toast(String message) {
+        if (message != null) {
+            new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(
+                    Global.context, message, Toast.LENGTH_LONG).show());
+        }
     }
 }

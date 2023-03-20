@@ -65,7 +65,7 @@ public class MediaActivity extends DetailActivity {
         if (mediaReferences.leaders.size() > 0)
             U.placeCabinet(box, mediaReferences.leaders.toArray(), R.string.used_by);
         else if (((Activity)box.getContext()).getIntent().getBooleanExtra("daSolo", false))
-            U.placeCabinet(box, Memory.firstObject(), R.string.into);
+            U.placeCabinet(box, Memory.getLeaderObject(), R.string.into);
     }
 
     void displayMedia(Media media, int position) {

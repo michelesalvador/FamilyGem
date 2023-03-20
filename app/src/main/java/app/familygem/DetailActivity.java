@@ -102,7 +102,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         actionBar = getSupportActionBar();
         U.ensureGlobalGedcomNotNull(gc);
 
-        object = Memory.getObject();
+        object = Memory.getLastObject();
         if (object == null) {
             onBackPressed(); // Skip all previous details without object
         } else
@@ -342,7 +342,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             if (requestCode == 34417) { // Family member chosen in PersonsFragment
                 Person personToBeAdded = gc.getPerson(data.getStringExtra("idParente")); //TODO translate
                 FamilyActivity.connect(personToBeAdded, (Family)object, data.getIntExtra("relazione", 0));
-                U.save(true, Memory.firstObject());
+                U.save(true, Memory.getLeaderObject());
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
                 SourceCitation sourceCitation = new SourceCitation();
@@ -358,13 +358,13 @@ public abstract class DetailActivity extends AppCompatActivity {
                 media.setFileTag("FILE");
                 ((MediaContainer)object).addMedia(media);
                 if (F.proposeCropping(this, null, data, media)) {
-                    U.save(false, Memory.firstObject());
+                    U.save(false, Memory.getLeaderObject());
                     return;
                 }
             } else if (requestCode == 4174) { // File coming from SAF or other app becomes shared media
                 Media media = MediaFragment.newMedia(object);
                 if (F.proposeCropping(this, null, data, media)) {
-                    U.save(false, media, Memory.firstObject());
+                    U.save(false, media, Memory.getLeaderObject());
                     return;
                 }
             } else if (requestCode == 43616) { // Media from MediaFragment
@@ -377,7 +377,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ((Source)object).setRepositoryRef(archRef);
             } else if (requestCode == 5173) { // Save in Media a file chosen with the apps from MediaActivity
                 if (F.proposeCropping(this, null, data, (Media)object)) {
-                    U.save(false, Memory.firstObject());
+                    U.save(false, Memory.getLeaderObject());
                     return;
                 }
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -390,7 +390,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ((SourceCitation)object).setRef(data.getStringExtra("sourceId"));
             }
             // 'true' indicates to reload both this Detail thanks to the following onRestart(), and ProfileActivity or FamilyActivity
-            U.save(true, Memory.firstObject());
+            U.save(true, Memory.getLeaderObject());
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             F.saveFolderInSettings();
             Global.edited = true;
@@ -429,10 +429,10 @@ public abstract class DetailActivity extends AppCompatActivity {
         FlexboxLayout slugLayout = findViewById(R.id.dettaglio_bava);
         if (Global.settings.expert) {
             slugLayout.removeAllViews();
-            for (final Memory.Step step : Memory.getStepStack()) {
+            for (final Memory.Step step : Memory.getLastStack()) {
                 View stepView = LayoutInflater.from(this).inflate(R.layout.pezzo_bava, box, false);
                 TextView stepText = stepView.findViewById(R.id.bava_goccia);
-                if (Memory.getStepStack().indexOf(step) < Memory.getStepStack().size() - 1) {
+                if (Memory.getLastStack().indexOf(step) < Memory.getLastStack().size() - 1) {
                     if (step.object instanceof Visitable) // GedcomTag extensions are not Visitable and it is impossible to find the stack of them
                         stepView.setOnClickListener(v -> {
                             new FindStack(gc, step.object);
@@ -718,7 +718,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ViewGroup parent = (ViewGroup)pieceView;
                 int index = parent.indexOfChild(editText);
                 parent.removeView(editText);
-                editText = new PlaceFinderTextView(editText.getContext(), null);
+                editText = new PlaceFinderTextView(this, null);
                 editText.setId(R.id.fatto_edita);
                 parent.addView(editText, index);
             } else
@@ -805,7 +805,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         ((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
         restore(pieceView);
-        U.save(true, Memory.firstObject());
+        U.save(true, Memory.getLeaderObject());
 		/*if( Memory.getStepStack().size() == 1 ) {
 			refresh(); // TODO: The record change date should be updated, but perhaps without reloading everything
 		}*/
@@ -895,7 +895,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         super.onBackPressed();
         if (object instanceof EventFact)
             EventActivity.cleanUpTag((EventFact)object);
-        Memory.clearStackAndRemove();
+        Memory.stepBack();
     }
 
     public void delete() {
@@ -1011,7 +1011,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.askWhichParentsToShow(this, person, 1);
                 return true;
             case 11: // Person card
-                Memory.setFirst(person);
+                Memory.setLeader(person);
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;
             case 12: // Family (as child)
@@ -1139,7 +1139,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         /* At first recreates the page and then saves the tree, which for large trees can take a few seconds
         closeContextMenu(); // Useless. Closing the menu waits for the end of saving,
                 unless you put saveJson() inside a postDelayed() of at least 500 ms */
-        U.updateChangeDate(Memory.firstObject());
+        U.updateChangeDate(Memory.getLeaderObject());
         refresh();
         U.save(true, (Object[])null);
         return true;

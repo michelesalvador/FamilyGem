@@ -87,7 +87,7 @@ public class RepositoriesFragment extends Fragment {
                         getActivity().setResult(Activity.RESULT_OK, intent);
                         getActivity().finish();
                     } else {
-                        Memory.setFirst(repo);
+                        Memory.setLeader(repo);
                         startActivity(new Intent(getContext(), RepositoryActivity.class));
                     }
                 });
@@ -135,7 +135,7 @@ public class RepositoriesFragment extends Fragment {
             source.setRepositoryRef(repoRef);
         }
         U.save(true, repo);
-        Memory.setFirst(repo);
+        Memory.setLeader(repo);
         context.startActivity(new Intent(context, RepositoryActivity.class));
     }
 

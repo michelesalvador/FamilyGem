@@ -22,7 +22,7 @@ public class AboutActivity extends BaseActivity {
 
         // Premium product layout
         View subscribedLayout = findViewById(R.id.about_subscribed);
-        if (Global.premium) {
+        if (Global.settings.premium) {
             subscribedLayout.setVisibility(View.VISIBLE);
         } else {
             webSite.setVisibility(View.GONE);

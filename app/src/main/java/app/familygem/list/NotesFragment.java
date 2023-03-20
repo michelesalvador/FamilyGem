@@ -89,7 +89,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
         } else { // Opens the note detail
             Intent intent = new Intent(getContext(), NoteActivity.class);
             if (note.getId() != null) { // Shared note
-                Memory.setFirst(note);
+                Memory.setLeader(note);
             } else { // Simple note
                 new FindStack(gc, note);
                 intent.putExtra("fromNotes", true);
@@ -147,7 +147,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
             ((NoteContainer)container).addNoteRef(noteRef);
         }
         U.save(true, note);
-        Memory.setFirst(note);
+        Memory.setLeader(note);
         context.startActivity(new Intent(context, NoteActivity.class));
     }
 }

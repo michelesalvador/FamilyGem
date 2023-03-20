@@ -47,7 +47,7 @@ public class SubmittersFragment extends Fragment {
             ((TextView)vistaPezzo.findViewById(R.id.item_name)).setText(InfoActivity.submitterName(autor));
             vistaPezzo.findViewById(R.id.item_num).setVisibility(View.GONE);
             vistaPezzo.setOnClickListener(v -> {
-                Memory.setFirst(autor);
+                Memory.setLeader(autor);
                 startActivity(new Intent(getContext(), SubmitterActivity.class));
             });
             registerForContextMenu(vistaPezzo);
@@ -82,7 +82,7 @@ public class SubmittersFragment extends Fragment {
         U.updateChangeDate(subm);
         gc.addSubmitter(subm);
         if (context != null) {
-            Memory.setFirst(subm);
+            Memory.setLeader(subm);
             context.startActivity(new Intent(context, SubmitterActivity.class));
         }
         return subm;

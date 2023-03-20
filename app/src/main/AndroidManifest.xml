@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
+
+    <uses-sdk tools:overrideLibrary="androidx.security" />
 
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -17,6 +20,7 @@
     <application
         android:name=".Global"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
@@ -44,8 +48,10 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data
                     android:host="www.familygem.app"
                     android:path="/share.php"
@@ -53,8 +59,10 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data
                     android:host="www.familygem.app"
                     android:pathPattern="/condivisi/.*.zip"
@@ -113,7 +121,7 @@
         <activity
             android:name=".ProfileActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".detail.FamilyActivity"/>
+        <activity android:name=".detail.FamilyActivity" />
         <activity android:name=".detail.NameActivity" />
         <activity android:name=".detail.RepositoryActivity" />
         <activity android:name=".detail.RepositoryRefActivity" />

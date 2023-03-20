@@ -16,7 +16,7 @@ public class BaseActivity extends AppCompatActivity {
             if (label != 0) {
                 setTitle(label);
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 }

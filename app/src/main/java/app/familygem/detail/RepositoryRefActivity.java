@@ -52,7 +52,7 @@ public class RepositoryRefActivity extends DetailActivity {
         ((TextView)repoView.findViewById(R.id.fonte_testo)).setText(repo.getName());
         ((CardView)repoView).setCardBackgroundColor(context.getResources().getColor(R.color.repository));
         repoView.setOnClickListener(v -> {
-            Memory.setFirst(repo);
+            Memory.setLeader(repo);
             context.startActivity(new Intent(context, RepositoryActivity.class));
         });
         return repoView;

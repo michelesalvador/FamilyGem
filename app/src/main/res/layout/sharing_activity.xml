@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/share_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                style="@style/AppTheme.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title" />
+
+            <EditText
+                android:id="@+id/share_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:inputType="textCapSentences"
+                android:singleLine="true"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:id="@+id/share_root"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/AppTheme.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/root" />
+
+                <TextView
+                    style="@style/AppTheme.Suggestion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ideally_recipient" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/share_submitter_title"
+                style="@style/AppTheme.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/submitter" />
+
+            <TextView
+                style="@style/AppTheme.Suggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/usually_your_name" />
+
+            <EditText
+                android:id="@+id/share_submitter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textSize="20sp" />
+
+            <CheckBox
+                android:id="@+id/share_allow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:text="@string/allow_developer_access" />
+
+            <Button
+                android:id="@+id/share_button"
+                style="@style/AppTheme.BottoneColorato"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="30dp"
+                android:text="@string/share_tree" />
+        </LinearLayout>
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/share_wheel"
+        android:layout_width="@dimen/wheel_size"
+        android:layout_height="@dimen/wheel_size"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+</RelativeLayout>

@@ -17,9 +17,10 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="20dp"
             android:contentDescription="Family Gem Premium tree"
-            app:srcCompat="@mipmap/icon" />
+            android:gravity="bottom"
+            app:srcCompat="@drawable/merging_trees" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -30,7 +31,7 @@
 
         <app.familygem.ProductLayout
             android:id="@+id/purchase_product"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
 </ScrollView>

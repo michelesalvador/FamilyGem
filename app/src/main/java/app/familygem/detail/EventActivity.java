@@ -25,8 +25,8 @@ public class EventActivity extends DetailActivity {
     @Override
     public void format() {
         e = (EventFact)cast(EventFact.class);
-        if (Memory.firstObject() instanceof Family)
-            setTitle(writeEventTitle((Family)Memory.firstObject(), e));
+        if (Memory.getLeaderObject() instanceof Family)
+            setTitle(writeEventTitle((Family)Memory.getLeaderObject(), e));
         else
             setTitle(ProfileFactsFragment.writeEventTitle(e)); // The title includes e.getDisplayType()
         placeSlug(e.getTag());
@@ -61,7 +61,7 @@ public class EventActivity extends DetailActivity {
     @Override
     public void delete() {
         ((PersonFamilyCommonContainer)Memory.getSecondToLastObject()).getEventsFacts().remove(e);
-        U.updateChangeDate(Memory.firstObject());
+        U.updateChangeDate(Memory.getLeaderObject());
         Memory.setInstanceAndAllSubsequentToNull(e);
     }
 

@@ -12,6 +12,9 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+
 import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.ExtensionContainer;
@@ -47,8 +50,9 @@ import app.familygem.visitor.NoteContainersGuarded;
  */
 public class MergeActivity extends BaseActivity {
 
-    private int baseId; // ID of base tree (that receiving the selected tree)
-    private int selectedId; // ID of selected tree (that merged into base tree)
+    private int baseNum; // ID of base tree (the one receiving the selected tree)
+    private int selectedNum; // ID of selected tree (the one merged into base tree)
+    private int newNum; // ID of the third tree created from base with selected
     private List<Settings.Tree> trees;
     private LinearLayout listLayout;
     private RadioButton radioAnnex;
@@ -57,14 +61,15 @@ public class MergeActivity extends BaseActivity {
     private boolean titleEdited; // To avoid modify an edited title
     private final Records records = new Records();
     private final String GUARDIAN = "modifiedId";
+    private Thread mergeThread;
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.merge_activity);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        baseId = getIntent().getIntExtra(Extra.TREE_ID, 0);
-        Settings.Tree baseTree = Global.settings.getTree(baseId);
+        baseNum = getIntent().getIntExtra(Extra.TREE_ID, 0);
+        Settings.Tree baseTree = Global.settings.getTree(baseNum);
         // Base tree view
         View baseView = findViewById(R.id.merge_base);
         baseView.setBackground(getResources().getDrawable(R.drawable.generic_background));
@@ -99,54 +104,51 @@ public class MergeActivity extends BaseActivity {
         titleText = findViewById(R.id.merge_rename);
         titleText.setText(baseTree.title);
         titleText.setOnFocusChangeListener((view, focus) -> titleEdited = true);
+        // Merging thread
+        mergeThread = new Thread() {
+            @Override
+            public void run() {
+                Global.gc = TreesActivity.readJson(baseNum);
+                Global.gc2 = TreesActivity.readJson(selectedNum);
+                // Merge selected tree into base tree
+                if (radioAnnex.isChecked()) {
+                    copyMediaFiles(Global.gc2, selectedNum, baseNum);
+                    if (isInterrupted()) return;
+                    doMerge();
+                    if (isInterrupted()) return;
+                    U.saveJson(Global.gc, baseNum); // Saves also Global.settings through Notifier
+                    if (isInterrupted()) return;
+                    Global.settings.openTree = baseNum; // For consistency with Global.gc
+                } // Generate a third tree from the two
+                else if (radioGenerate.isChecked()) {
+                    newNum = Global.settings.max() + 1;
+                    int persons = Global.gc.getPeople().size() + Global.gc2.getPeople().size();
+                    int generations = Math.max(baseTree.generations, Global.settings.getTree(selectedNum).generations);
+                    Global.settings.addTree(new Settings.Tree(newNum, titleText.getText().toString(), null,
+                            persons, generations, baseTree.root, null, 0));
+                    copyMediaFiles(Global.gc, baseNum, newNum);
+                    copyMediaFiles(Global.gc2, selectedNum, newNum);
+                    if (isInterrupted()) return;
+                    doMerge();
+                    if (isInterrupted()) return;
+                    U.saveJson(Global.gc, newNum);
+                    if (isInterrupted()) return;
+                    Global.settings.openTree = newNum;
+                }
+                if (isInterrupted()) return;
+                Global.indi = baseTree.root; // Resets it to display the correct person in the result tree
+                runOnUiThread(() -> {
+                    onBackPressed();
+                    Toast.makeText(MergeActivity.this, R.string.merge_complete, Toast.LENGTH_LONG).show();
+                });
+            }
+        };
         // Merge button
         Button mergeButton = findViewById(R.id.merge_button);
         mergeButton.setOnClickListener(button -> {
-            if (Global.premium) {
-                // Disables all views
-                for (int i = 0; i < listLayout.getChildCount(); i++) {
-                    View treeView = listLayout.getChildAt(i);
-                    treeView.setOnClickListener(null);
-                    ((TextView)treeView.findViewById(R.id.merge_title))
-                            .setTextColor(getResources().getColor(R.color.gray_text));
-                    treeView.findViewById(R.id.merge_radio).setEnabled(false);
-                }
-                radioAnnex.setEnabled(false);
-                radioGenerate.setEnabled(false);
-                titleText.setEnabled(false);
-                button.setEnabled(false);
-                findViewById(R.id.progress_wheel).setVisibility(View.VISIBLE);
-                new Thread() {
-                    @Override
-                    public void run() {
-                        Global.gc = TreesActivity.readJson(baseId);
-                        Global.gc2 = TreesActivity.readJson(selectedId);
-                        // Merge selected tree into base tree
-                        if (radioAnnex.isChecked()) {
-                            copyMediaFiles(Global.gc2, selectedId, baseId);
-                            doMerge();
-                            U.saveJson(Global.gc, baseId); // Saves also Global.settings through Notifier
-                            Global.settings.openTree = baseId; // For consistency with Global.gc
-                        } // Generate a third tree from the two
-                        else if (radioGenerate.isChecked()) {
-                            int newNum = Global.settings.max() + 1;
-                            int persons = Global.gc.getPeople().size() + Global.gc2.getPeople().size();
-                            int generations = Math.max(baseTree.generations, Global.settings.getTree(selectedId).generations);
-                            Global.settings.aggiungi(new Settings.Tree(newNum, titleText.getText().toString(), null,
-                                    persons, generations, baseTree.root, null, 0));
-                            copyMediaFiles(Global.gc, baseId, newNum);
-                            copyMediaFiles(Global.gc2, selectedId, newNum);
-                            doMerge();
-                            U.saveJson(Global.gc, newNum);
-                            Global.settings.openTree = newNum;
-                        }
-                        Global.indi = baseTree.root; // Resets it to display the correct person in the result tree
-                        runOnUiThread(() -> {
-                            onBackPressed();
-                            Toast.makeText(MergeActivity.this, R.string.merge_complete, Toast.LENGTH_LONG).show();
-                        });
-                    }
-                }.start();
+            if (Global.settings.premium) {
+                showMergingState();
+                mergeThread.start();
             } else {
                 startActivity(new Intent(this, PurchaseActivity.class).putExtra(Extra.STRING, R.string.merge_tree));
             }
@@ -158,7 +160,7 @@ public class MergeActivity extends BaseActivity {
                 titleText.setVisibility(View.VISIBLE);
             else
                 titleText.setVisibility(View.GONE);
-            mergeButton.setEnabled(selectedId > 0);
+            mergeButton.setEnabled(selectedNum > 0);
         });
         // Populates the records array with the 7 types
         records.add(Person.class, "I");
@@ -174,7 +176,7 @@ public class MergeActivity extends BaseActivity {
      * Select a tree from the list.
      */
     private void selectTree(int treeId) {
-        selectedId = treeId;
+        selectedNum = treeId;
         for (int i = 0; i < listLayout.getChildCount(); i++) {
             View treeItem = listLayout.getChildAt(i);
             RadioButton radioButton = treeItem.findViewById(R.id.merge_radio);
@@ -188,15 +190,33 @@ public class MergeActivity extends BaseActivity {
         }
         // Annex radio button
         radioAnnex.setText(getString(R.string.merge_into,
-                Global.settings.getTree(baseId).title, Global.settings.getTree(selectedId).title));
+                Global.settings.getTree(baseNum).title, Global.settings.getTree(selectedNum).title));
         // Suggested title
         if (!titleEdited) {
-            String title = Global.settings.getTree(baseId).title + " " + Global.settings.getTree(selectedId).title;
+            String title = Global.settings.getTree(baseNum).title + " " + Global.settings.getTree(selectedNum).title;
             titleText.setText(title);
         }
         // Merge button
         if (radioAnnex.isChecked() || radioGenerate.isChecked())
             findViewById(R.id.merge_button).setEnabled(true);
+    }
+
+    /**
+     * Disables all views and displays the progress wheel.
+     */
+    private void showMergingState() {
+        for (int i = 0; i < listLayout.getChildCount(); i++) {
+            View treeView = listLayout.getChildAt(i);
+            treeView.setOnClickListener(null);
+            ((TextView)treeView.findViewById(R.id.merge_title))
+                    .setTextColor(getResources().getColor(R.color.gray_text));
+            treeView.findViewById(R.id.merge_radio).setEnabled(false);
+        }
+        radioAnnex.setEnabled(false);
+        radioGenerate.setEnabled(false);
+        titleText.setEnabled(false);
+        findViewById(R.id.merge_button).setEnabled(false);
+        findViewById(R.id.progress_wheel).setVisibility(View.VISIBLE);
     }
 
     /**
@@ -489,6 +509,39 @@ public class MergeActivity extends BaseActivity {
             max = 0;
         }
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt("selectedId", selectedNum);
+        outState.putBoolean("merging", findViewById(R.id.progress_wheel).getVisibility() == View.VISIBLE);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedState) {
+        super.onRestoreInstanceState(savedState);
+        selectedNum = savedState.getInt("selectedId");
+        if (selectedNum > 0) selectTree(selectedNum);
+        if (savedState.getBoolean("merging"))
+            showMergingState();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mergeThread.isAlive()) {
+            new AlertDialog.Builder(this).setMessage(R.string.sure_delete)
+                    .setNegativeButton(android.R.string.no, (dialog, i) -> dialog.dismiss())
+                    .setPositiveButton(android.R.string.yes, (dialog, i) -> {
+                        mergeThread.interrupt();
+                        Global.settings.openTree = 0;
+                        if (newNum > 0)
+                            TreesActivity.deleteTree(this, newNum);
+                        super.onBackPressed();
+                    }).show();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

@@ -2,6 +2,7 @@ package app.familygem;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.view.View;
 import android.widget.Toast;
 
@@ -41,7 +42,6 @@ public class Global extends MultiDexApplication {
     public static Media croppedMedia; // Temporary parking of the Media in the cropping process
     public static Gedcom gc2; // A shared tree, for comparison of updates
     public static int treeId2; // ID of the shared tree
-    static boolean premium;
 
     /**
      * This is called when the application starts, and also when it is restarted.
@@ -132,12 +132,16 @@ public class Global extends MultiDexApplication {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        // Keep the app locale if system language is changed while the app is running
-        Locale appLocale = AppCompatDelegate.getApplicationLocales().get(0);
-        if (appLocale != null) {
-            Locale.setDefault(appLocale); // Keep the gedcom.jar library locale
-            newConfig.setLocale(appLocale);
-            getApplicationContext().getResources().updateConfiguration(newConfig, null); // Keep global context
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) { // Tiramisu doesn't need this
+            // Keeps the app locale if system language is changed while the app is running
+            Locale appLocale = AppCompatDelegate.getApplicationLocales().get(0);
+            if (appLocale != null) {
+                // Doesn't update directly 'newConfig' because it would create a configuration change loop
+                Configuration resConfig = getResources().getConfiguration();
+                resConfig.setLocale(appLocale);
+                // Keeps locale for static global context
+                getApplicationContext().getResources().updateConfiguration(resConfig, null);
+            }
         }
         super.onConfigurationChanged(newConfig);
     }

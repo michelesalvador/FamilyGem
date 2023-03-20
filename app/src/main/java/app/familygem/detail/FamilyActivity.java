@@ -104,7 +104,7 @@ public class FamilyActivity extends DetailActivity {
                 if (parentFam.size() == 2) { // Swaps between the 2 parental families
                     Global.indi = p.getId();
                     Global.familyNum = parentFam.indexOf(f) == 0 ? 1 : 0;
-                    Memory.replaceFirst(parentFam.get(Global.familyNum));
+                    Memory.replaceLeader(parentFam.get(Global.familyNum));
                     recreate();
                 } else // More than two families
                     U.askWhichParentsToShow(this, p, 2);
@@ -113,12 +113,12 @@ public class FamilyActivity extends DetailActivity {
                 if (spouseFam.size() == 2) { // Swaps between the 2 spouse families
                     Global.indi = p.getId();
                     Family otherFamily = spouseFam.get(spouseFam.indexOf(f) == 0 ? 1 : 0);
-                    Memory.replaceFirst(otherFamily);
+                    Memory.replaceLeader(otherFamily);
                     recreate();
                 } else
                     U.askWhichSpouceToShow(this, p, null);
             } else {
-                Memory.setFirst(p);
+                Memory.setLeader(p);
                 startActivity(new Intent(this, ProfileActivity.class));
             }
         });

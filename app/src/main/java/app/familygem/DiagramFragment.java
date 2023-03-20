@@ -434,7 +434,7 @@ public class DiagramFragment extends Fragment {
             registerForContextMenu(this);
             setOnClickListener(v -> {
                 if (person.getId().equals(Global.indi)) {
-                    Memory.setFirst(person);
+                    Memory.setLeader(person);
                     startActivity(new Intent(getContext(), ProfileActivity.class));
                 } else {
                     clickCard(person);
@@ -482,7 +482,7 @@ public class DiagramFragment extends Fragment {
                 bondLayout.addView(year, yearParams);
             }
             setOnClickListener(view -> {
-                Memory.setFirst(familyNode.spouseFamily);
+                Memory.setLeader(familyNode.spouseFamily);
                 startActivity(new Intent(context, FamilyActivity.class));
             });
         }
@@ -535,7 +535,7 @@ public class DiagramFragment extends Fragment {
             getLayoutInflater().inflate(R.layout.diagram_asterisk, this, true);
             registerForContextMenu(this);
             setOnClickListener(v -> {
-                Memory.setFirst(personNode.person);
+                Memory.setLeader(personNode.person);
                 startActivity(new Intent(getContext(), ProfileActivity.class));
             });
         }
@@ -737,11 +737,11 @@ public class DiagramFragment extends Fragment {
             else // Due famiglie
                 completeSelect(pers, Global.familyNum == 0 ? 1 : 0);
         } else if (id == 0) { // Apri scheda individuo
-            Memory.setFirst(pers);
+            Memory.setLeader(pers);
             startActivity(new Intent(getContext(), ProfileActivity.class));
         } else if (id == 1) { // Famiglia come figlio
             if (idPersona.equals(Global.indi)) { // Se è fulcro apre direttamente la famiglia
-                Memory.setFirst(parentFam);
+                Memory.setLeader(parentFam);
                 startActivity(new Intent(getContext(), FamilyActivity.class));
             } else
                 U.askWhichParentsToShow(getContext(), pers, 2);

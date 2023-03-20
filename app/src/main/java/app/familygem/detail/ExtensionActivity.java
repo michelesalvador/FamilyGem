@@ -31,6 +31,6 @@ public class ExtensionActivity extends DetailActivity {
     @Override
     public void delete() {
         U.deleteExtension(e, Memory.getSecondToLastObject(), null);
-        U.updateChangeDate(Memory.firstObject());
+        U.updateChangeDate(Memory.getLeaderObject());
     }
 }

@@ -31,7 +31,7 @@ public class AddressActivity extends DetailActivity {
     @Override
     public void delete() {
         deleteAddress(Memory.getSecondToLastObject());
-        U.updateChangeDate(Memory.firstObject());
+        U.updateChangeDate(Memory.getLeaderObject());
         Memory.setInstanceAndAllSubsequentToNull(a);
     }
 }

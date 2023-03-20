@@ -35,7 +35,7 @@ public class NoteActivity extends DetailActivity {
             if (noteRefs.count > 0)
                 U.placeCabinet(box, noteRefs.leaders.toArray(), R.string.shared_by);
         } else if (((Activity)box.getContext()).getIntent().getBooleanExtra("fromNotes", false)) {
-            U.placeCabinet(box, Memory.firstObject(), R.string.written_in);
+            U.placeCabinet(box, Memory.getLeaderObject(), R.string.written_in);
         }
     }
 

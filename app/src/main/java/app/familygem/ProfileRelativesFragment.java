@@ -96,7 +96,7 @@ public class ProfileRelativesFragment extends Fragment {
                 FamilyActivity.getRole(person, family, relation, false) + FamilyActivity.writeLineage(person, family));
         vistaPersona.setOnClickListener(v -> {
             getActivity().finish(); // Rimuove l'attività attale dallo stack
-            Memory.replaceFirst(person);
+            Memory.replaceLeader(person);
             Intent intento = new Intent(getContext(), ProfileActivity.class);
             intento.putExtra("scheda", 2); // apre la scheda famiglia
             startActivity(intento);
