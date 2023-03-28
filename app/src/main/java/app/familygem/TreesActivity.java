@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import app.familygem.constant.Code;
 import app.familygem.constant.Extra;
 import app.familygem.share.SharingActivity;
 import app.familygem.visitor.MediaList;
@@ -230,21 +231,33 @@ public class TreesActivity extends AppCompatActivity {
                                     aggiornaLista();
                                 } else
                                     Toast.makeText(TreesActivity.this, R.string.no_results, Toast.LENGTH_LONG).show();
-                            } else if (id == 8) { // Export Gedcom
+                            } else if (id == 8) { // Export GEDCOM
                                 if (exporter.openTree(treeId)) {
-                                    String mime = "application/octet-stream";
-                                    String ext = "ged";
-                                    int code = 636;
-                                    if (exporter.numMediaFilesToAttach() > 0) {
-                                        mime = "application/zip";
-                                        ext = "zip";
-                                        code = 6219;
+                                    final String[] mime = {"application/octet-stream"};
+                                    final String[] ext = {"ged"};
+                                    final int[] code = {Code.GEDCOM_FILE};
+                                    int totMedia = exporter.countMediaFilesToAttach();
+                                    if (totMedia > 0) {
+                                        String[] choices = {getString(R.string.gedcom_media_zip, totMedia),
+                                                getString(R.string.gedcom_only)};
+                                        new AlertDialog.Builder(TreesActivity.this)
+                                                .setTitle(R.string.export_gedcom)
+                                                .setSingleChoiceItems(choices, -1, (dialog, selected) -> {
+                                                    if (selected == 0) {
+                                                        mime[0] = "application/zip";
+                                                        ext[0] = "zip";
+                                                        code[0] = Code.ZIPPED_GEDCOM_FILE;
+                                                    }
+                                                    F.saveDocument(TreesActivity.this, null, treeId, mime[0], ext[0], code[0]);
+                                                    dialog.dismiss();
+                                                }).show();
+                                    } else {
+                                        F.saveDocument(TreesActivity.this, null, treeId, mime[0], ext[0], code[0]);
                                     }
-                                    F.saveDocument(TreesActivity.this, null, treeId, mime, ext, code);
                                 }
-                            } else if (id == 9) { // Make backup
+                            } else if (id == 9) { // Export ZIP backup
                                 if (exporter.openTree(treeId))
-                                    F.saveDocument(TreesActivity.this, null, treeId, "application/zip", "zip", 327);
+                                    F.saveDocument(TreesActivity.this, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP);
                             } else if (id == 10) { // Delete tree
                                 new AlertDialog.Builder(TreesActivity.this).setMessage(R.string.really_delete_tree)
                                         .setPositiveButton(R.string.delete, (dialog, id1) -> {
@@ -514,12 +527,11 @@ public class TreesActivity extends AppCompatActivity {
         if (resultCode == AppCompatActivity.RESULT_OK) {
             Uri uri = data.getData();
             boolean result = false;
-            if (requestCode == 636) { // Esporta il GEDCOM
+            if (requestCode == Code.GEDCOM_FILE) { // Export GEDCOM file only
                 result = exporter.exportGedcom(uri);
-            } else if (requestCode == 6219) { // Esporta il GEDCOM zippato coi media
+            } else if (requestCode == Code.ZIPPED_GEDCOM_FILE) { // Export GEDCOM with media in a ZIP file
                 result = exporter.exportGedcomToZip(uri);
-            } // Esporta il backup ZIP
-            else if (requestCode == 327) {
+            } else if (requestCode == Code.ZIP_BACKUP) { // Export ZIP backup
                 result = exporter.exportZipBackup(null, -1, uri);
             }
             if (result)

@@ -139,7 +139,7 @@ public class Exporter {
     /**
      * Returns the number of media files to attach.
      */
-    public int numMediaFilesToAttach() {
+    public int countMediaFilesToAttach() {
         MediaList mediaList = new MediaList(gedcom, 0);
         gedcom.accept(mediaList);
         int numFiles = 0;

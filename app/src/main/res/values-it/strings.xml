@@ -64,6 +64,8 @@
     <string name="share_tree">Condividi</string>
     <string name="compare">Confronta</string>
     <string name="export_gedcom">Esporta GEDCOM</string>
+    <string name="gedcom_media_zip">Il GEDCOM con %d media in un file ZIP</string>
+    <string name="gedcom_only">Solo il file GEDCOM</string>
     <string name="gedcom_exported_ok">GEDCOM esportato.</string>
     <string name="zip_exported_ok">ZIP esportato.</string>
     <string name="no_results">Nessun risultato.</string>

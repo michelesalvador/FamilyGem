@@ -799,7 +799,7 @@ public class U {
                 String t = "";
                 if (citaz.getValue() != null) t += citaz.getValue() + "\n";
                 if (citaz.getPage() != null) t += citaz.getPage() + "\n";
-                if (citaz.getDate() != null) t += citaz.getDate() + "\n";
+                if (citaz.getDate() != null) t += new GedcomDateConverter(citaz.getDate()).writeDateLong() + "\n";
                 // Vale sia per sourceNote che per sourceCitation
                 if (citaz.getText() != null) t += citaz.getText() + "\n";
                 TextView vistaTesto = vistaCita.findViewById(R.id.citazione_testo);
