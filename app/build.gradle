@@ -1,8 +1,9 @@
-apply plugin: 'com.android.application'
-
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
 def credentialFile = rootProject.file('credential.properties')
 def credential
-
 android {
     if (credentialFile.exists()) {
         credential = new Properties()
@@ -16,6 +17,7 @@ android {
             }
         }
     }
+    namespace 'app.familygem'
     compileSdkVersion 33
     defaultConfig {
         applicationId 'app.familygem'
@@ -32,6 +34,9 @@ android {
         buildConfigField 'String', 'PASS_KEY', '"' + passKey + '"'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         multiDexEnabled true
+    }
+    dataBinding {
+        enabled true
     }
     buildTypes {
         debug {
@@ -57,20 +62,20 @@ android {
             pickFirsts += ['EventFact*.properties']
         }
     }
-    namespace 'app.familygem'
 }
-
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     // commons-io versions from 2.9.0 to 2.11.0 give NoClassDefFoundError on old devices
     implementation 'commons-io:commons-io:2.8.0'
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'commons-net:commons-net:3.8.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-process:2.6.1'
     implementation 'androidx.security:security-crypto:1.1.0-alpha05'
     implementation 'org.familysearch.gedcom:gedcom:1.14.0'
-    implementation 'androidx.work:work-runtime:2.8.0'
+    implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'androidx.appcompat:appcompat:1.7.0-alpha01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
     implementation 'com.android.installreferrer:installreferrer:2.2'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'

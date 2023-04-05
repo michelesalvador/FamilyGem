@@ -99,7 +99,7 @@
             android:label="@string/share_tree"
             android:parentActivityName=".TreesActivity" />
         <activity
-            android:name=".MergeActivity"
+            android:name=".merge.MergeActivity"
             android:label="@string/merge_tree"
             android:parentActivityName=".TreesActivity" />
         <activity

@@ -49,6 +49,7 @@ import java.util.Map;
 
 import app.familygem.constant.Code;
 import app.familygem.constant.Extra;
+import app.familygem.merge.MergeActivity;
 import app.familygem.share.SharingActivity;
 import app.familygem.visitor.MediaList;
 
@@ -459,8 +460,10 @@ public class TreesActivity extends AppCompatActivity {
         return true;
     }
 
-    // Read the Json and return a Gedcom
-    static Gedcom readJson(int treeId) {
+    /**
+     * Reads the tree JSON and returns a GEDCOM.
+     */
+    public static Gedcom readJson(int treeId) {
         Gedcom gedcom;
         File file = new File(Global.context.getFilesDir(), treeId + ".json");
         StringBuilder text = new StringBuilder();
@@ -492,8 +495,10 @@ public class TreesActivity extends AppCompatActivity {
         return gedcom;
     }
 
-    // Replace Italian with English in Json tree data
-    // Introduced in Family Gem 0.8
+    /**
+     * Replaces Italian with English in JSON tree data.
+     * Introduced in Family Gem 0.8
+     */
     static String updateLanguage(String json) {
         json = json.replace("\"zona\":", "\"zone\":");
         json = json.replace("\"famili\":", "\"kin\":");

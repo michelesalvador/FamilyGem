@@ -64,8 +64,8 @@ public class ProcessActivity extends BaseActivity {
             final Object o2 = Comparison.getFront(this).object2;
             if (o != null) classe = o.getClass();
             else classe = o2.getClass();
-            arredaScheda(Global.gc, R.id.confronto_vecchio, o);
-            arredaScheda(Global.gc2, R.id.confronto_nuovo, o2);
+            arredaScheda(Global.gc, Global.settings.openTree, R.id.confronto_vecchio, o);
+            arredaScheda(Global.gc2, Global.treeId2, R.id.confronto_nuovo, o2);
 
             destino = 2;
 
@@ -118,7 +118,7 @@ public class ProcessActivity extends BaseActivity {
             onBackPressed(); // Ritorna a Compara
     }
 
-    void arredaScheda(Gedcom gc, int idScheda, Object o) {
+    void arredaScheda(Gedcom gc, int treeId, int idScheda, Object o) {
         String tit = "";
         String txt = "";
         String data = "";
@@ -151,7 +151,7 @@ public class ProcessActivity extends BaseActivity {
             txt = m.getFile();
             data = dataOra(m.getChange());
             vistaFoto.setVisibility(View.VISIBLE);
-            F.showImage(m, vistaFoto, null);
+            F.showImage(m, vistaFoto, null, treeId);
         } else if (o instanceof Source) {
             tipoRecord(R.string.source);
             Source s = (Source)o;
@@ -168,7 +168,7 @@ public class ProcessActivity extends BaseActivity {
             txt = U.details(p, null);
             data = dataOra(p.getChange());
             vistaFoto.setVisibility(View.VISIBLE);
-            F.showMainImageForPerson(gc, p, vistaFoto);
+            F.showMainImageForPerson(gc, treeId, p, vistaFoto);
         } else if (o instanceof Family) {
             tipoRecord(R.string.family);
             Family f = (Family)o;

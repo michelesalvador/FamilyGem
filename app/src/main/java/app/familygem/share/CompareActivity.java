@@ -50,7 +50,7 @@ public class CompareActivity extends BaseActivity {
         setContentView(R.layout.compara);
         int idTree1 = getIntent().getIntExtra(Extra.TREE_ID, 1); // Old tree present in the app
         int idTree2 = getIntent().getIntExtra(Extra.TREE_ID_2, 1); // New tree received in sharing
-        Global.treeId2 = idTree2; // It will be used for the Comparison and ConfirmationActivity images
+        Global.treeId2 = idTree2; // It will be used by ProcessActivity and ConfirmationActivity
         Global.gc = TreesActivity.openGedcomTemporarily(idTree1, true);
         Global.gc2 = TreesActivity.openGedcomTemporarily(idTree2, false);
         if (Global.gc == null || Global.gc2 == null) {

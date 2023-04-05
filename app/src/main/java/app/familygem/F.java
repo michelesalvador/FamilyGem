@@ -232,19 +232,23 @@ public class F {
      * Receives a Person and chooses the main Media from which to get the image.
      */
     public static Media showMainImageForPerson(Gedcom gedcom, Person person, ImageView imageView) {
+        return showMainImageForPerson(gedcom, 0, person, imageView);
+    }
+
+    public static Media showMainImageForPerson(Gedcom gedcom, int treeId, Person person, ImageView imageView) {
         MediaList mediaList = new MediaList(gedcom, 0);
         person.accept(mediaList);
         Media media = null;
         for (Media med : mediaList.list) { // Looks for a media with Primary value "Y"
             if (med.getPrimary() != null && med.getPrimary().equals("Y")) {
-                showImage(med, imageView, null);
+                showImage(med, imageView, null, treeId);
                 media = med;
                 break;
             }
         }
         if (media == null) { // Alternatively, returns the first one it finds
             for (Media med : mediaList.list) {
-                showImage(med, imageView, null);
+                showImage(med, imageView, null, treeId);
                 media = med;
                 break;
             }
@@ -257,14 +261,11 @@ public class F {
      * Shows a picture with Picasso.
      */
     public static void showImage(Media media, ImageView imageView, ProgressBar progressBar) {
-        int treeId;
-        // ProcessActivity needs the shared tree ID to search its folder
-        View likely = null;
-        if (imageView.getParent() != null && imageView.getParent().getParent() != null)
-            likely = (View)imageView.getParent().getParent().getParent();
-        if (likely != null && likely.getId() == R.id.confronto_nuovo)
-            treeId = Global.treeId2;
-        else treeId = Global.settings.openTree;
+        showImage(media, imageView, progressBar, 0);
+    }
+
+    public static void showImage(Media media, ImageView imageView, ProgressBar progressBar, int treeId) {
+        if (treeId == 0) treeId = Global.settings.openTree;
         String path = mediaPath(treeId, media);
         Uri[] uri = new Uri[1];
         if (path == null)

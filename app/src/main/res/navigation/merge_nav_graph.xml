@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/choiceFragment">
+    <fragment
+        android:id="@+id/choiceFragment"
+        android:name="app.familygem.merge.ChoiceFragment"
+        android:label="@string/merge_tree">
+        <action
+            android:id="@+id/merge_choiceFragment_to_matchFragment"
+            app:destination="@id/matchFragment" />
+        <action
+            android:id="@+id/merge_choiceFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/matchFragment"
+        android:name="app.familygem.merge.MatchFragment"
+        android:label="@string/merge_tree">
+        <action
+            android:id="@+id/merge_matchFragment_self"
+            app:destination="@id/matchFragment" />
+        <action
+            android:id="@+id/merge_matchFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="app.familygem.merge.ResultFragment"
+        android:label="@string/merge_tree" />
+</navigation>

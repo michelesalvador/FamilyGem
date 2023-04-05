@@ -116,5 +116,8 @@
         </rules>
       </arrangement>
     </codeStyleSettings>
+    <codeStyleSettings language="kotlin">
+      <option name="RIGHT_MARGIN" value="120" />
+    </codeStyleSettings>
   </code_scheme>
 </component>

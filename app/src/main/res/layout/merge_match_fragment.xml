@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".merge.MergeActivity">
+
+    <data>
+
+        <variable
+            name="model"
+            type="app.familygem.merge.MergeViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="15dp"
+            android:paddingTop="30dp"
+            android:paddingEnd="15dp"
+            android:paddingBottom="50dp">
+
+            <ProgressBar
+                android:id="@+id/merge_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="@{model.matches.size}"
+                android:progress="@{model.actualMatch + 1}"
+                app:layout_constraintTop_toBottomOf="@+id/merge_counter" />
+
+            <TextView
+                android:id="@+id/merge_counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{model.actualMatch + 1 + `/` + model.matches.size}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/merge_persons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/merge_progress"
+                tools:layout_editor_absoluteX="15dp">
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/leftPerson"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    tools:layout="@layout/merge_person_fragment" />
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/rightPerson"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    tools:layout="@layout/merge_person_fragment" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/merge_question"
+                style="@style/AppTheme.Suggestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_horizontal"
+                android:text="Are these the same person?"
+                app:layout_constraintTop_toBottomOf="@+id/merge_persons" />
+
+            <Button
+                android:id="@+id/merge_keep"
+                style="@style/AppTheme.BottoneNormale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/no"
+                app:layout_constraintEnd_toStartOf="@+id/merge_merge"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/merge_question" />
+
+            <Button
+                android:id="@+id/merge_merge"
+                style="@style/AppTheme.BottoneNormale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:enabled="true"
+                android:text="@string/yes"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/merge_keep"
+                app:layout_constraintTop_toBottomOf="@+id/merge_question" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</layout>

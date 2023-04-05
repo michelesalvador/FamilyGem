@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".merge.MergeActivity">
+
+    <data>
+
+        <variable
+            name="person"
+            type="app.familygem.merge.PersonFragment" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/merge_background"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/casella_sfondo_base"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/merge_border"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/casella_bordo_neutro"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/merge_image"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp"
+                android:adjustViewBounds="true"
+                tools:src="@drawable/image" />
+
+            <TextView
+                android:id="@+id/merge_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@{person.getName}"
+                android:textSize="17sp"
+                tools:text="Name Surname" />
+
+            <TextView
+                android:id="@+id/merge_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                tools:text="Personal data" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/merge_mourn"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/defunto" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
