@@ -252,6 +252,11 @@ public class FamiliesFragment extends Fragment {
                 }
                 return 0;
             });
+            // Updates families sorting in global GEDCOM
+            List<Family> sortedFamilies = new ArrayList<>();
+            for (FamilyWrapper wrapper : familyList) sortedFamilies.add(wrapper.family);
+            gc.setFamilies(sortedFamilies);
+            //U.saveJson(gc, Global.settings.openTree); // Immediately saves families sorting
         }
     }
 
@@ -329,7 +334,6 @@ public class FamiliesFragment extends Fragment {
                 order = id * 2 - 1;
             sortFamilies();
             refresh(What.BASIC);
-            //U.saveJson(false); // Saves the sorting of families
             return true;
         }
         return false;

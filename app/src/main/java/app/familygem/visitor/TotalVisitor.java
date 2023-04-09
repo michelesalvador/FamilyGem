@@ -16,8 +16,8 @@ import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.model.Visitor;
 
 /**
- * Abstract visitor that visits all the possible Gedcom containers distinguishing the leaders
- * (the top-level Gedcom objects, that go at first on the stacks).
+ * Abstract visitor that visits all the possible GEDCOM containers distinguishing the leaders
+ * (the top-level GEDCOM objects, that go at first on the stacks).
  */
 public abstract class TotalVisitor extends Visitor {
 

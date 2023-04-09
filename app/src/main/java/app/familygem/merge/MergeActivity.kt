@@ -3,10 +3,12 @@ package app.familygem.merge
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import app.familygem.BaseActivity
 import app.familygem.R
+import app.familygem.TreesActivity
 
 class MergeActivity : BaseActivity() {
 
@@ -28,8 +30,26 @@ class MergeActivity : BaseActivity() {
 
     // Intercepts the back arrow in actionbar
     override fun onSupportNavigateUp(): Boolean {
-        if (navController.currentDestination?.id == R.id.matchFragment)
+        val destination = navController.currentDestination?.id
+        if (destination == R.id.choiceFragment && model.state.value == State.ACTIVE) {
+            model.coroutine.cancel()
+        } else if (destination == R.id.matchFragment) {
             model.previousMatch()
+        } // Cancel active merging
+        else if (destination == R.id.resultFragment && model.state.value == State.ACTIVE) {
+            AlertDialog.Builder(this).setMessage(R.string.sure_delete)
+                    .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        model.coroutine.cancel()
+                        model.state.value = State.QUIET
+                        if (model.newNum > 0) {
+                            TreesActivity.deleteTree(this, model.newNum)
+                            model.newNum = 0
+                        }
+                        navController.navigateUp()
+                    }.show()
+            return false
+        }
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }

@@ -1569,8 +1569,8 @@ public class U {
                 return new JSONObject(new JSONTokener(line));
             } else
                 toast(line);
-        } catch (Exception e) {
-            toast(e.getLocalizedMessage());
+        } catch (Exception ignored) {
+            // Usually no connection to internet
         }
         return null;
     }

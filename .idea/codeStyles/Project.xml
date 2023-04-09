@@ -1,6 +1,7 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
     <codeStyleSettings language="JAVA">
+      <option name="RIGHT_MARGIN" value="120" />
       <option name="SPACE_AFTER_TYPE_CAST" value="false" />
     </codeStyleSettings>
     <codeStyleSettings language="XML">

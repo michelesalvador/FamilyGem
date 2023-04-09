@@ -19,8 +19,9 @@ class MatchFragment : BaseFragment(R.layout.merge_match_fragment) {
         super.onViewCreated(view, savedInstanceState)
         binding = MergeMatchFragmentBinding.bind(view)
         binding.model = model
-        // Questo sarebbe necessario se il frangment non venisse ricreato ad ogni passaggio
-        //binding.lifecycleOwner = viewLifecycleOwner
+        // Sets the two tree titles
+        binding.mergeLeftTitle.text = model.firstTree.title
+        binding.mergeRightTitle.text = model.secondTree.title
         // Creates two person fragments
         requireActivity().supportFragmentManager.commit {
             add(R.id.leftPerson, PersonFragment::class.java, bundleOf("position" to false))

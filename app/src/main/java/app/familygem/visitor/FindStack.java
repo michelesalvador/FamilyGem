@@ -51,6 +51,7 @@ public class FindStack extends Visitor {
             stack.add(step);
         }
         if (object.equals(target)) {
+            // Eventually removes from the resulting stack the not relevant steps
             Iterator<Memory.Step> steps = stack.iterator();
             while (steps.hasNext()) {
                 CleanStack janitor = new CleanStack(target);
@@ -59,7 +60,7 @@ public class FindStack extends Visitor {
                     steps.remove();
             }
             found = true;
-            //Memoria.stampa("FindStack");
+            //Memory.log("FindStack");
         }
         return true;
     }

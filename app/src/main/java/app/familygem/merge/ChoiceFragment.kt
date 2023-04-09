@@ -2,6 +2,7 @@ package app.familygem.merge
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
@@ -10,6 +11,9 @@ import app.familygem.R
 import app.familygem.TreesActivity
 import app.familygem.databinding.MergeChoiceFragmentBinding
 
+/**
+ * First fragment of the merging process, where user can choose the second tree to merge to the first one.
+ */
 class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
 
     private lateinit var binding: MergeChoiceFragmentBinding
@@ -42,13 +46,28 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
             }
             binding.mergeNext.isEnabled = true
         }
+        // Searching state
+        model.state.observe(viewLifecycleOwner) {
+            if (it == State.ACTIVE) {
+                for (i in 0 until binding.mergeList.childCount) {
+                    val treeView: View = binding.mergeList.getChildAt(i)
+                    treeView.setOnClickListener(null)
+                    treeView.findViewById<TextView>(R.id.merge_title).setTextColor(resources.getColor(R.color.gray_text))
+                    treeView.findViewById<RadioButton>(R.id.merge_radio).isEnabled = false
+                }
+                binding.mergeNext.isEnabled = false
+                requireActivity().findViewById<ProgressBar>(R.id.progress_wheel)?.visibility = View.VISIBLE
+            } else if (it == State.COMPLETE) {
+                if (model.matches.any())
+                    findNavController().navigate(R.id.merge_choiceFragment_to_matchFragment)
+                else
+                    findNavController().navigate(R.id.merge_choiceFragment_to_resultFragment)
+                model.state.value = State.QUIET
+            }
+        }
         // Action button
         binding.mergeNext.setOnClickListener {
             model.findMatches()
-            if (model.matches.any())
-                findNavController().navigate(R.id.merge_choiceFragment_to_matchFragment)
-            else
-                findNavController().navigate(R.id.merge_choiceFragment_to_resultFragment)
         }
     }
 }

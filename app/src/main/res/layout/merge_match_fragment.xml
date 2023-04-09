@@ -34,21 +34,56 @@
 
             <TextView
                 android:id="@+id/merge_counter"
+                style="@style/AppTheme.Suggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{model.actualMatch + 1 + `/` + model.matches.size}"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="1/23" />
+
+            <LinearLayout
+                android:id="@+id/merge_treeTitles"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/merge_progress"
+                app:layout_constraintWidth_max="600dp">
+
+                <TextView
+                    android:id="@+id/merge_leftTitle"
+                    style="@style/AppTheme.Suggestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:gravity="bottom|center_horizontal"
+                    tools:text="First tree title" />
+
+                <TextView
+                    android:id="@+id/merge_rightTitle"
+                    style="@style/AppTheme.Suggestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:gravity="bottom|center_horizontal"
+                    tools:text="Second tree title" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/merge_persons"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@+id/merge_progress"
-                tools:layout_editor_absoluteX="15dp">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/merge_treeTitles"
+                app:layout_constraintWidth_max="600dp">
 
                 <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/leftPerson"
@@ -69,12 +104,11 @@
 
             <TextView
                 android:id="@+id/merge_question"
-                style="@style/AppTheme.Suggestion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center_horizontal"
-                android:text="Are these the same person?"
+                android:text="@string/are_same_person"
                 app:layout_constraintTop_toBottomOf="@+id/merge_persons" />
 
             <Button

@@ -189,7 +189,7 @@ public class Memory {
         }
     }
 
-    private static void log(String intro) {
+    public static void log(String intro) {
         l(intro + ":");
         for (StepStack stepStack : memory.list) {
             l(stepStack);

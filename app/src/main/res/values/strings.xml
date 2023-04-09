@@ -142,6 +142,8 @@
     <string name="merge_tree">Merge tree</string>
     <string name="merge">Merge</string>
     <string name="select_tree">Select a tree to merge:</string>
+    <string name="next">Next</string>
+    <string name="are_same_person">Are they the same person?</string>
     <string name="choose_output">Choose the destination:</string>
     <string name="merge_into">Merge %2$s into %1$s</string>
     <string name="generate_new">Generate a new tree from the two</string>

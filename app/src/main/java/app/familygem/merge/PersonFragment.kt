@@ -6,10 +6,7 @@ import android.text.Html
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import app.familygem.F
-import app.familygem.GedcomDateConverter
-import app.familygem.R
-import app.familygem.U
+import app.familygem.*
 import app.familygem.constant.Gender
 import app.familygem.databinding.MergePersonFragmentBinding
 import org.folg.gedcom.model.Gedcom
@@ -20,6 +17,7 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
     private lateinit var binding: MergePersonFragmentBinding
     private val model: MergeViewModel by activityViewModels()
     private lateinit var person: Person
+    var data = ""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -40,20 +38,24 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
         // Death ribbon
         binding.mergeMourn.visibility = if (U.isDead(person)) View.VISIBLE else View.GONE
         // Personal events
-        var str = ""
         for (event in person.eventsFacts) {
             if (event.tag == "SEX") continue
-            str += "<b>${event.displayType}</b><br>"
-            if (event.value != null) str += "${event.value}\n"
-            if (event.date != null) str += "${GedcomDateConverter(event.date).writeDateLong()}\n"
-            if (event.place != null) str += "${event.place}\n"
-            str += "<br>"
+            data += "<b>${ProfileFactsFragment.writeEventTitle(event)}</b><br>"
+            if (event.value != null) {
+                data += if (event.value == "Y") "${getString(R.string.yes)} "
+                else "${event.value} "
+            }
+            if (event.date != null) data += "${GedcomDateConverter(event.date).writeDateLong()} "
+            if (event.place != null) data += "${event.place} "
+            if (event.address != null) data += "${DetailActivity.writeAddress(event.address, true)} "
+            if (event.cause != null) data += event.cause
+            data += "<br>"
         }
-        if (str.any()) str = str.substring(0, str.length - 4)
+        if (data.any()) data = data.substring(0, data.length - 4)
         binding.mergeData.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            Html.fromHtml(str, Html.FROM_HTML_MODE_COMPACT)
+            Html.fromHtml(data, Html.FROM_HTML_MODE_COMPACT)
         else
-            Html.fromHtml(str)
+            Html.fromHtml(data)
     }
 
     fun getName(): String {
