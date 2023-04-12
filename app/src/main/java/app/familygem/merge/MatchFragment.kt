@@ -34,7 +34,7 @@ class MatchFragment : BaseFragment(R.layout.merge_match_fragment) {
         binding.mergeMerge.setOnClickListener { nextMatch(Will.MERGE) }
         // Accent color for selected option
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val destiny = model.matches[model.actualMatch].destiny
+            val destiny = model.personMatches[model.actualMatch].destiny
             val tint = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.accent))
             if (destiny == Will.KEEP) binding.mergeKeep.backgroundTintList = tint
             else if (destiny == Will.MERGE) binding.mergeMerge.backgroundTintList = tint

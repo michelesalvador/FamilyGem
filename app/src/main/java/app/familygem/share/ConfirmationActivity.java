@@ -33,6 +33,8 @@ import app.familygem.R;
 import app.familygem.Settings;
 import app.familygem.TreesActivity;
 import app.familygem.U;
+import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtilsKt;
 import app.familygem.visitor.ListOfSourceCitations;
 import app.familygem.visitor.MediaContainers;
 import app.familygem.visitor.MediaList;
@@ -53,7 +55,7 @@ public class ConfirmationActivity extends BaseActivity {
             CardView card = findViewById(R.id.conferma_vecchio);
             Settings.Tree tree = Global.settings.getTree(Global.settings.openTree);
             ((TextView)card.findViewById(R.id.confronto_titolo)).setText(tree.title);
-            String txt = TreesActivity.writeData(this, tree);
+            String txt = TreeUtilsKt.getBasicData(tree);
             ((TextView)card.findViewById(R.id.confronto_testo)).setText(txt);
             card.findViewById(R.id.confronto_data).setVisibility(View.GONE);
 
@@ -226,7 +228,7 @@ public class ConfirmationActivity extends BaseActivity {
                     new AlertDialog.Builder(ConfirmationActivity.this)
                             .setMessage(R.string.all_imported_delete)
                             .setPositiveButton(android.R.string.ok, (d, i) -> {
-                                TreesActivity.deleteTree(this, Global.treeId2);
+                                TreeUtils.INSTANCE.deleteTree(Global.treeId2);
                                 done();
                             }).setNegativeButton(R.string.no, (d, i) -> done())
                             .setOnCancelListener(dialog -> done()).show();

@@ -24,7 +24,7 @@ public class Settings {
 
     /**
      * It is "start" as soon as the app is installed (when 'settings.json' doesn't exist).
-     * If the installation comes from a sharing it receives a 'dateId' as "20203112005959" to download the shared tree.
+     * If the installation comes from a sharing it receives a 'dateID' as "20203112005959" to download the shared tree.
      * Then it becomes null and remains null forever.
      * If 'settings.json' is deleted it re-becomes "start" and then immediately null.
      */
@@ -83,7 +83,7 @@ public class Settings {
         save();
     }
 
-    void deleteTree(int id) {
+    public void deleteTree(int id) {
         for (Tree tree : trees) {
             if (tree.id == id) {
                 trees.remove(tree);
@@ -160,9 +160,9 @@ public class Settings {
         public String title;
         public Set<String> dirs;
         Set<String> uris;
-        int persons;
+        public int persons;
         public int generations;
-        int media;
+        public int media;
         public String root;
         public List<Share> shares; // Dati identificativi delle condivisioni attraverso il tempo e lo spazio
         public String shareRoot; // Id della Person radice dell'albero in Condivisione
@@ -180,7 +180,7 @@ public class Settings {
          * </ol>
          */
         public int grade;
-        Set<Birthday> birthdays;
+        public Set<Birthday> birthdays;
 
         public Tree(int id, String title, String dir, int persons, int generations, String root, List<Share> shares, int grade) {
             this.id = id;
@@ -216,7 +216,7 @@ public class Settings {
     }
 
     // Birthday of one person
-    static class Birthday {
+    public static class Birthday {
         String id; // E.g. 'I123'
         String given; // 'John'
         String name; // 'John Doe III'

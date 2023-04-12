@@ -232,7 +232,7 @@ public class NewTreeActivity extends BaseActivity {
                 TreesActivity treesPage = (TreesActivity)context;
                 treesPage.runOnUiThread(() -> {
                     treesPage.progress.setVisibility(View.GONE);
-                    treesPage.aggiornaLista();
+                    treesPage.updateList();
                 });
             } else // Example tree (Simpson) or backup tree (from LauncherActivity or from NewTreeActivity)
                 context.startActivity(new Intent(context, TreesActivity.class));

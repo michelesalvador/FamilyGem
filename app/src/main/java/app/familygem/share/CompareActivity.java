@@ -31,9 +31,10 @@ import app.familygem.BaseActivity;
 import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.Settings;
-import app.familygem.TreesActivity;
 import app.familygem.U;
 import app.familygem.constant.Extra;
+import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtilsKt;
 
 /**
  * Activity that introduces the process for importing updates in an existing tree,
@@ -51,8 +52,8 @@ public class CompareActivity extends BaseActivity {
         int idTree1 = getIntent().getIntExtra(Extra.TREE_ID, 1); // Old tree present in the app
         int idTree2 = getIntent().getIntExtra(Extra.TREE_ID_2, 1); // New tree received in sharing
         Global.treeId2 = idTree2; // It will be used by ProcessActivity and ConfirmationActivity
-        Global.gc = TreesActivity.openGedcomTemporarily(idTree1, true);
-        Global.gc2 = TreesActivity.openGedcomTemporarily(idTree2, false);
+        Global.gc = TreeUtils.INSTANCE.openGedcomTemporarily(idTree1, true);
+        Global.gc2 = TreeUtils.INSTANCE.openGedcomTemporarily(idTree2, false);
         if (Global.gc == null || Global.gc2 == null) {
             Toast.makeText(this, R.string.no_useful_data, Toast.LENGTH_LONG).show();
             onBackPressed();
@@ -159,7 +160,7 @@ public class CompareActivity extends BaseActivity {
         } else {
             button1.setText(R.string.delete_imported_tree);
             button1.setOnClickListener(v -> {
-                TreesActivity.deleteTree(CompareActivity.this, idTree2);
+                TreeUtils.INSTANCE.deleteTree(idTree2);
                 onBackPressed();
             });
             button2.setVisibility(View.GONE);
@@ -252,7 +253,7 @@ public class CompareActivity extends BaseActivity {
         TextView title = card.findViewById(R.id.confronto_titolo);
         TextView data = card.findViewById(R.id.confronto_testo);
         title.setText(tree.title);
-        data.setText(TreesActivity.writeData(this, tree));
+        data.setText(TreeUtilsKt.getBasicData(tree));
         if (cardId == R.id.compara_nuovo) {
             if (tree.grade == 30) {
                 card.setCardBackgroundColor(getResources().getColor(R.color.consumed));

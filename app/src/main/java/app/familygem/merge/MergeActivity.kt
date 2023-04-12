@@ -8,7 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import app.familygem.BaseActivity
 import app.familygem.R
-import app.familygem.TreesActivity
+import app.familygem.util.TreeUtils
 
 class MergeActivity : BaseActivity() {
 
@@ -43,7 +43,7 @@ class MergeActivity : BaseActivity() {
                         model.coroutine.cancel()
                         model.state.value = State.QUIET
                         if (model.newNum > 0) {
-                            TreesActivity.deleteTree(this, model.newNum)
+                            TreeUtils.deleteTree(model.newNum)
                             model.newNum = 0
                         }
                         navController.navigateUp()

@@ -22,7 +22,7 @@ import app.familygem.constant.Format;
 /**
  * Manager of birthday notifications.
  */
-class Notifier {
+public class Notifier {
     static final String TREE_ID_KEY = "targetTreeId";
     static final String INDI_ID_KEY = "targetIndiId";
     static final String NOTIFY_ID_KEY = "notifyId";
@@ -30,9 +30,9 @@ class Notifier {
     private final int FACTOR = 100000;
     private final Date now = new Date();
 
-    enum What {REBOOT, CREATE, DELETE, DEFAULT}
+    public enum What {REBOOT, CREATE, DELETE, DEFAULT}
 
-    Notifier(Context context, Gedcom gedcom, int treeId, What toDo) {
+    public Notifier(Context context, Gedcom gedcom, int treeId, What toDo) {
 
         // Creates the notification channel, necessary only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

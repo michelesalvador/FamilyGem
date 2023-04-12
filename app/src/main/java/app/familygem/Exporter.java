@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.MediaList;
 
 /**
@@ -50,7 +51,7 @@ public class Exporter {
      */
     public boolean openTree(int treeId) {
         this.treeId = treeId;
-        gedcom = TreesActivity.openGedcomTemporarily(treeId, true);
+        gedcom = TreeUtils.INSTANCE.openGedcomTemporarily(treeId, true);
         if (gedcom == null) {
             return error(R.string.no_useful_data);
         }
@@ -79,7 +80,7 @@ public class Exporter {
         // Makes the file visible from Windows
         // But it seems ineffective in KitKat where the file remains invisible
         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
-        Global.gc = TreesActivity.readJson(treeId); // Reset the changes
+        Global.gc = TreeUtils.INSTANCE.readJson(treeId); // Reset the changes
         return success(R.string.gedcom_exported_ok);
     }
 
@@ -107,7 +108,7 @@ public class Exporter {
         if (!createZipFile(collection))
             return false;
         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
-        Global.gc = TreesActivity.readJson(treeId);
+        Global.gc = TreeUtils.INSTANCE.readJson(treeId);
         return success(R.string.zip_exported_ok);
     }
 

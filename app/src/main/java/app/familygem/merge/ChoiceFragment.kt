@@ -8,8 +8,8 @@ import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.navigation.fragment.findNavController
 import app.familygem.R
-import app.familygem.TreesActivity
 import app.familygem.databinding.MergeChoiceFragmentBinding
+import app.familygem.util.getBasicData
 
 /**
  * First fragment of the merging process, where user can choose the second tree to merge to the first one.
@@ -27,7 +27,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
             val treeView = layoutInflater.inflate(R.layout.merge_tree_layout, binding.mergeList, false)
             binding.mergeList.addView(treeView)
             treeView.findViewById<TextView>(R.id.merge_title).text = tree.title
-            treeView.findViewById<TextView>(R.id.merge_detail).text = TreesActivity.writeData(context, tree)
+            treeView.findViewById<TextView>(R.id.merge_detail).text = tree.getBasicData()
             treeView.setOnClickListener { model.setSecondTree(tree.id) }
             treeView.findViewById<RadioButton>(R.id.merge_radio).setOnClickListener { model.setSecondTree(tree.id) }
         }
@@ -58,7 +58,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
                 binding.mergeNext.isEnabled = false
                 requireActivity().findViewById<ProgressBar>(R.id.progress_wheel)?.visibility = View.VISIBLE
             } else if (it == State.COMPLETE) {
-                if (model.matches.any())
+                if (model.personMatches.any())
                     findNavController().navigate(R.id.merge_choiceFragment_to_matchFragment)
                 else
                     findNavController().navigate(R.id.merge_choiceFragment_to_resultFragment)

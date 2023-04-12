@@ -71,7 +71,8 @@
     <string name="no_results">Nessun risultato.</string>
     <string name="really_delete_tree">Vuoi davvero eliminare questo albero?</string>
     <string name="all_ok">Tutto a posto.</string>
-    <string name="errors_found">Ci sono %d errori.</string>
+    <string name="error_found">Trovato un errore.</string>
+    <string name="errors_found">Trovati %d errori.</string>
     <string name="correct">Correggi</string>
     <!-- SettingsActivity -->
     <string name="settings">Impostazioni</string>

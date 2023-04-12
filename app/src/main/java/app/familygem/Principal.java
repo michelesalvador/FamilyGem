@@ -39,6 +39,7 @@ import app.familygem.list.MediaFragment;
 import app.familygem.list.NotesFragment;
 import app.familygem.list.RepositoriesFragment;
 import app.familygem.list.SourcesFragment;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.MediaList;
 import app.familygem.visitor.NoteList;
 
@@ -224,7 +225,7 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
             popup.show();
             popup.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == 0) {
-                    TreesActivity.openGedcom(Global.settings.openTree, false);
+                    TreeUtils.INSTANCE.openGedcom(Global.settings.openTree, false);
                     U.askWhichParentsToShow(this, null, 0); // Semplicemente ricarica il diagramma
                     scatolissima.closeDrawer(GravityCompat.START);
                     //saveButton.setVisibility(View.GONE);

@@ -109,6 +109,7 @@ import app.familygem.list.MediaAdapter;
 import app.familygem.list.PersonsFragment;
 import app.familygem.list.SourcesFragment;
 import app.familygem.list.SubmittersFragment;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.ListOfSourceCitations;
 import app.familygem.visitor.MediaContainerList;
@@ -130,7 +131,7 @@ public class U {
      */
     static void ensureGlobalGedcomNotNull(Gedcom gc) {
         if (gc == null)
-            Global.gc = TreesActivity.readJson(Global.settings.openTree);
+            Global.gc = TreeUtils.INSTANCE.readJson(Global.settings.openTree);
     }
 
     // Id of the main person of a GEDCOM or null

@@ -28,7 +28,7 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="@{model.matches.size}"
+                android:max="@{model.personMatches.size}"
                 android:progress="@{model.actualMatch + 1}"
                 app:layout_constraintTop_toBottomOf="@+id/merge_counter" />
 
@@ -37,7 +37,7 @@
                 style="@style/AppTheme.Suggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{model.actualMatch + 1 + `/` + model.matches.size}"
+                android:text="@{model.actualMatch + 1 + `/` + model.personMatches.size}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="1/23" />

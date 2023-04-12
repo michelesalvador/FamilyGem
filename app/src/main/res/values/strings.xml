@@ -69,6 +69,7 @@
     <string name="no_results">No results.</string>
     <string name="really_delete_tree">Really want to delete this tree?</string>
     <string name="all_ok">Everything is OK.</string>
+    <string name="error_found">One error found.</string>
     <string name="errors_found">%d errors found.</string>
     <string name="correct">Correct</string>
     <string name="settings">Settings</string>

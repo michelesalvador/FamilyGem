@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.Locale;
 
 import app.familygem.constant.Extra;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.MediaList;
 
 public class InfoActivity extends BaseActivity {
@@ -44,7 +45,7 @@ public class InfoActivity extends BaseActivity {
             i += "\n\n" + getText(R.string.item_exists_but_file) + "\n" + file.getAbsolutePath();
         } else {
             i += "\n" + getText(R.string.file) + ": " + file.getAbsolutePath();
-            gc = TreesActivity.openGedcomTemporarily(treeId, false);
+            gc = TreeUtils.INSTANCE.openGedcomTemporarily(treeId, false);
             if (gc == null)
                 i += "\n\n" + getString(R.string.no_useful_data);
             else {
