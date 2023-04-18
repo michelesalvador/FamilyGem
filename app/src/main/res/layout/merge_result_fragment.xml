@@ -19,11 +19,11 @@
 
                 <include
                     android:id="@+id/merge_firstTree"
-                    layout="@layout/pezzo_albero" />
+                    layout="@layout/tree_view" />
 
                 <include
                     android:id="@+id/merge_secondTree"
-                    layout="@layout/pezzo_albero"
+                    layout="@layout/tree_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="15dp"

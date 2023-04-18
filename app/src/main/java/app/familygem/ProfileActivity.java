@@ -53,10 +53,11 @@ import app.familygem.detail.EventActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.detail.SourceCitationActivity;
-import app.familygem.list.PersonsFragment;
 import app.familygem.list.MediaFragment;
 import app.familygem.list.NotesFragment;
+import app.familygem.list.PersonsFragment;
 import app.familygem.list.SourcesFragment;
+import app.familygem.util.TreeUtils;
 import jp.wasabeef.picasso.transformations.BlurTransformation;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -277,7 +278,7 @@ public class ProfileActivity extends AppCompatActivity {
                         one.addName(name);
                         Memory.add(name);
                         startActivity(new Intent(this, NameActivity.class));
-                        U.save(true, one);
+                        TreeUtils.INSTANCE.save(true, one);
                         break;
                     case 21: // Create sex
                         String[] sexNames = {getString(R.string.male), getString(R.string.female), getString(R.string.unknown)};
@@ -291,7 +292,7 @@ public class ProfileActivity extends AppCompatActivity {
                                     dialog.dismiss();
                                     ProfileFactsFragment.updateMaritalRoles(one);
                                     refresh();
-                                    U.save(true, one);
+                                    TreeUtils.INSTANCE.save(true, one);
                                 }).show();
                         break;
                     case 22: // Create note
@@ -301,7 +302,7 @@ public class ProfileActivity extends AppCompatActivity {
                         Memory.add(note);
                         startActivity(new Intent(this, NoteActivity.class));
                         // todo? Dettaglio.edita(View vistaValore);
-                        U.save(true, one);
+                        TreeUtils.INSTANCE.save(true, one);
                         break;
                     case 23: // Create shared note
                         NotesFragment.newNote(this, one);
@@ -317,7 +318,7 @@ public class ProfileActivity extends AppCompatActivity {
                         one.addSourceCitation(citaz);
                         Memory.add(citaz);
                         startActivity(new Intent(this, SourceCitationActivity.class));
-                        U.save(true, one);
+                        TreeUtils.INSTANCE.save(true, one);
                         break;
                     case 26: // Nuova fonte
                         SourcesFragment.newSource(this, one);
@@ -387,7 +388,7 @@ public class ProfileActivity extends AppCompatActivity {
                         one.addEventFact(nuovoEvento);
                         Memory.add(nuovoEvento);
                         startActivity(new Intent(this, EventActivity.class));
-                        U.save(true, one);
+                        TreeUtils.INSTANCE.save(true, one);
                 }
                 return true;
             });
@@ -459,19 +460,19 @@ public class ProfileActivity extends AppCompatActivity {
                 media.setFileTag("FILE");
                 one.addMedia(media);
                 if (F.proposeCropping(this, null, data, media)) { // restituisce true se è un'immagine ritagliabile
-                    U.save(true, one);
+                    TreeUtils.INSTANCE.save(true, one);
                     return;
                 }
             } else if (requestCode == 2174) { // File dalle app in nuovo Media condiviso, con proposta di ritagliarlo
                 Media media = MediaFragment.newMedia(one);
                 if (F.proposeCropping(this, null, data, media)) {
-                    U.save(true, media, one);
+                    TreeUtils.INSTANCE.save(true, media, one);
                     return;
                 }
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
                 // Ottiene l'immagine ritagliata da Android Image Cropper
                 F.endImageCropping(data);
-                U.save(true); // la data di cambio per i Media condivisi viene già salvata nel passaggio precedente
+                TreeUtils.INSTANCE.save(true); // la data di cambio per i Media condivisi viene già salvata nel passaggio precedente
                 // todo passargli Global.mediaCroppato ?
                 return;
             } else if (requestCode == 43614) { // Media from MediaFragment
@@ -487,16 +488,16 @@ public class ProfileActivity extends AppCompatActivity {
                 citaz.setRef(data.getStringExtra("sourceId"));
                 one.addSourceCitation(citaz);
             } else if (requestCode == 1401) { // Parente
-                Object[] modificati = PersonEditorActivity.addParent(
+                Object[] modified = PersonEditorActivity.addParent(
                         data.getStringExtra("idIndividuo"), // corrisponde a uno.getId()
                         data.getStringExtra("idParente"),
                         data.getStringExtra("idFamiglia"),
                         data.getIntExtra("relazione", 0),
                         data.getStringExtra("collocazione"));
-                U.save(true, modificati);
+                TreeUtils.INSTANCE.save(true, modified);
                 return;
             }
-            U.save(true, one);
+            TreeUtils.INSTANCE.save(true, one);
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // After back arrow in Image Cropper
             F.saveFolderInSettings();
             Global.edited = true;

@@ -30,6 +30,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.detail.NoteActivity;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.NoteList;
 
@@ -102,7 +103,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
     public boolean onContextItemSelected(MenuItem item) {
         if (item.getItemId() == 0) { // Delete
             Object[] leaders = U.deleteNote(adapter.selectedNote, null);
-            U.save(false, leaders);
+            TreeUtils.INSTANCE.save(false, leaders);
             getActivity().recreate();
         } else {
             return false;
@@ -146,7 +147,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
             noteRef.setRef(id);
             ((NoteContainer)container).addNoteRef(noteRef);
         }
-        U.save(true, note);
+        TreeUtils.INSTANCE.save(true, note);
         Memory.setLeader(note);
         context.startActivity(new Intent(context, NoteActivity.class));
     }

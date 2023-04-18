@@ -6,6 +6,7 @@ import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.util.ChangeUtils;
 
 public class ExtensionActivity extends DetailActivity {
 
@@ -31,6 +32,6 @@ public class ExtensionActivity extends DetailActivity {
     @Override
     public void delete() {
         U.deleteExtension(e, Memory.getSecondToLastObject(), null);
-        U.updateChangeDate(Memory.getLeaderObject());
+        ChangeUtils.INSTANCE.updateChangeDate(Memory.getLeaderObject());
     }
 }

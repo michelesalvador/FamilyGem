@@ -23,14 +23,15 @@ import java.util.List;
 
 import app.familygem.DetailActivity;
 import app.familygem.Global;
-import app.familygem.PersonEditorActivity;
 import app.familygem.Memory;
+import app.familygem.PersonEditorActivity;
 import app.familygem.ProfileActivity;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.constant.Status;
+import app.familygem.util.TreeUtils;
 
 public class FamilyActivity extends DetailActivity {
 
@@ -268,7 +269,7 @@ public class FamilyActivity extends DetailActivity {
                     ((ProfileActivity)context).refresh();
                 else if (context instanceof FamilyActivity)
                     ((FamilyActivity)context).refresh();
-                U.save(true, person);
+                TreeUtils.INSTANCE.save(true, person);
             }).show();
         }
     }

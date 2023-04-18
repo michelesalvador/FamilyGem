@@ -24,12 +24,14 @@ import org.folg.gedcom.model.Submitter;
 import java.util.List;
 
 import app.familygem.Global;
+import app.familygem.InfoActivity;
 import app.familygem.Memory;
 import app.familygem.NewTreeActivity;
 import app.familygem.R;
-import app.familygem.InfoActivity;
 import app.familygem.U;
 import app.familygem.detail.SubmitterActivity;
+import app.familygem.util.ChangeUtils;
+import app.familygem.util.TreeUtils;
 
 public class SubmittersFragment extends Fragment {
 
@@ -55,7 +57,7 @@ public class SubmittersFragment extends Fragment {
         }
         vista.findViewById(R.id.fab).setOnClickListener(v -> {
             createSubmitter(getContext());
-            U.save(true);
+            TreeUtils.INSTANCE.save(true);
         });
         return vista;
     }
@@ -79,7 +81,7 @@ public class SubmittersFragment extends Fragment {
         Submitter subm = new Submitter();
         subm.setId(U.newID(gc, Submitter.class));
         subm.setName("");
-        U.updateChangeDate(subm);
+        ChangeUtils.INSTANCE.updateChangeDate(subm);
         gc.addSubmitter(subm);
         if (context != null) {
             Memory.setLeader(subm);
@@ -95,7 +97,7 @@ public class SubmittersFragment extends Fragment {
             gc.setHeader(header);
         }
         header.setSubmitterRef(submitter.getId());
-        U.save(false, submitter);
+        TreeUtils.INSTANCE.save(false, submitter);
     }
 
     Submitter submitter;
@@ -119,7 +121,7 @@ public class SubmittersFragment extends Fragment {
             case 1:
                 // Todo conferma elimina
                 deleteSubmitter(submitter);
-                U.save(false);
+                TreeUtils.INSTANCE.save(false);
                 getActivity().recreate();
                 return true;
         }

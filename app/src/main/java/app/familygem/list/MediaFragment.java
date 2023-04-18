@@ -37,6 +37,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.MediaContainerList;
 import app.familygem.visitor.MediaReferences;
@@ -158,14 +159,14 @@ public class MediaFragment extends Fragment {
             if (requestCode == 4546) { // File taken from the supplier app is saved in the Media and possibly cropped
                 Media media = newMedia(null);
                 if (F.proposeCropping(getContext(), this, data, media)) { // Checks if it is an image (therefore it can be cropped)
-                    U.save(false, media);
+                    TreeUtils.INSTANCE.save(false, media);
                     // onRestart() + recreate() must not be triggered otherwise the arrival fragment will be no longer the same
                     return;
                 }
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
                 F.endImageCropping(data);
             }
-            U.save(true, Global.croppedMedia);
+            TreeUtils.INSTANCE.save(true, Global.croppedMedia);
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // If user clicks the back arrow in Image Cropper
             F.saveFolderInSettings();
             Global.edited = true;
@@ -186,7 +187,7 @@ public class MediaFragment extends Fragment {
         if (item.getItemId() == 0) {
             Object[] modified = deleteMedia(media, null);
             recreate();
-            U.save(false, modified);
+            TreeUtils.INSTANCE.save(false, modified);
             return true;
         }
         return false;

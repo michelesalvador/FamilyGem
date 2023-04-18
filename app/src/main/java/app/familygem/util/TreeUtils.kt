@@ -1,15 +1,23 @@
 package app.familygem.util
 
+import android.view.View
 import android.widget.Toast
+import app.familygem.BuildConfig
 import app.familygem.Global
 import app.familygem.Notifier
 import app.familygem.R
 import app.familygem.Settings.Tree
+import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.apache.commons.io.FileUtils
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.parser.JsonParser
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
+import java.io.IOException
 
 fun Tree.getBasicData(): String {
     var data = "$persons ${Global.context.getString(if (persons == 1) R.string.person else R.string.persons).lowercase()}"
@@ -99,6 +107,56 @@ object TreeUtils {
         engJson = engJson.replace("\"passato\":", "\"passed\":")
         return engJson
     }
+
+    /**
+     * Saves the currently opened tree.
+     *
+     * @param refresh Will refresh also other activities
+     * @param objects Record(s) to which update the change date
+     */
+    fun save(refresh: Boolean, vararg objects: Any) {
+        if (refresh) Global.edited = true
+        objects.forEach { ChangeUtils.updateChangeDate(it) }
+        // On the first save adds an extension to submitters
+        if (Global.settings.currentTree.grade == 9) {
+            Global.gc.submitters.forEach { it.putExtension("passed", true) }
+            Global.settings.currentTree.grade = 10
+            Global.settings.save()
+        }
+        if (Global.settings.autoSave) {
+            GlobalScope.launch(Dispatchers.IO) { saveJson(Global.gc, Global.settings.openTree) }
+        } else { // Displays the 'Save' button
+            Global.shouldSave = true
+            if (Global.mainView != null) {
+                val menu = Global.mainView.findViewById<NavigationView>(R.id.menu)
+                menu.getHeaderView(0).findViewById<View>(R.id.menu_salva).visibility = View.VISIBLE
+            }
+        }
+    }
+
+    /**
+     * Saves the GEDCOM tree as JSON.
+     */
+    suspend fun saveJson(gedcom: Gedcom, treeId: Int) {
+        val h = gedcom.header
+        // Only if header is by Family Gem
+        if (h != null && h.generator != null && h.generator.value != null && h.generator.value == "FAMILY_GEM") {
+            // Updates date and time
+            h.dateTime = ChangeUtils.actualDateTime()
+            // If necessary updates the version of Family Gem
+            if (h.generator.version != null && h.generator.version != BuildConfig.VERSION_NAME || h.generator.version == null)
+                h.generator.version = BuildConfig.VERSION_NAME
+        }
+        try {
+            FileUtils.writeStringToFile(File(Global.context.filesDir, "$treeId.json"), JsonParser().toJson(gedcom), "UTF-8")
+        } catch (e: IOException) {
+            Utils.toast(e.localizedMessage)
+        }
+        Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
+    }
+
+    // Temporary hack to call a suspend function from Java
+    fun saveJsonAsync(gedcom: Gedcom, treeId: Int) = GlobalScope.launch(Dispatchers.IO) { saveJson(gedcom, treeId) }
 
     fun deleteTree(treeId: Int) {
         val treeFile = File(Global.context.filesDir, "$treeId.json")

@@ -36,6 +36,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.detail.RepositoryActivity;
+import app.familygem.util.TreeUtils;
 
 /**
  * Fragment with a list of all repositories of the tree.
@@ -134,7 +135,7 @@ public class RepositoriesFragment extends Fragment {
             repoRef.setRef(repo.getId());
             source.setRepositoryRef(repoRef);
         }
-        U.save(true, repo);
+        TreeUtils.INSTANCE.save(true, repo);
         Memory.setLeader(repo);
         context.startActivity(new Intent(context, RepositoryActivity.class));
     }
@@ -197,7 +198,7 @@ public class RepositoriesFragment extends Fragment {
     public boolean onContextItemSelected(MenuItem item) {
         if (item.getItemId() == 0) {
             Source[] fonti = delete(repository);
-            U.save(false, (Object[])fonti);
+            TreeUtils.INSTANCE.save(false, (Object[])fonti);
             getActivity().recreate();
             return true;
         }

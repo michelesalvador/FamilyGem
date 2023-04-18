@@ -167,7 +167,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             val extDestinationDir: File = context.getExternalFilesDir(destinationId.toString())!! // Creates the folder if not existing
             if (extDestinationDir.list()?.size == 0) { // Empty folder, probably because just created
                 Global.settings.getTree(destinationId).dirs.add(extDestinationDir.path)
-                // No need to save Global.settings here because U.saveJson() will do
+                // No need to save Global.settings here because TreeUtils.saveJson() will do
             }
             for (entry in mediaPaths.entries.iterator()) {
                 yield()
@@ -244,7 +244,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 if (score <= 0) {
                     match.destiny = Will.KEEP
                 } else {
-                    // Non-matching spouses of the second family
+                    // Non-matching spouse IDs of the second family
                     val freePartnersIds = match.right.husbandRefs.map { it.ref }.minus(match.spouseMatches.map { it.right.id }.toSet()) +
                             match.right.wifeRefs.map { it.ref }.minus(match.spouseMatches.map { it.right.id }.toSet())
                     if (freePartnersIds.isNotEmpty()) {
@@ -571,7 +571,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             setState(State.ACTIVE)
             copyMediaFiles(context, secondGedcom, secondNum.value!!, firstNum)
             doMerge()
-            if (isActive) U.saveJson(firstGedcom, firstNum) // Saves also Global.settings through Notifier
+            if (isActive) TreeUtils.saveJson(firstGedcom, firstNum) // Saves also Global.settings through Notifier
             setState(if (isActive) State.COMPLETE else State.QUIET)
         }
     }
@@ -589,7 +589,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             copyMediaFiles(context, firstGedcom, firstNum, newNum)
             copyMediaFiles(context, secondGedcom, secondNum.value!!, newNum)
             doMerge()
-            if (isActive) U.saveJson(firstGedcom, newNum)
+            if (isActive) TreeUtils.saveJson(firstGedcom, newNum)
             setState(if (isActive) State.COMPLETE else State.QUIET)
         }
     }

@@ -10,6 +10,7 @@ import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.util.ChangeUtils;
 
 public class SourceCitationActivity extends DetailActivity {
 
@@ -48,7 +49,7 @@ public class SourceCitationActivity extends DetailActivity {
             ((Note)container).getSourceCitations().remove(c);
         else
             ((SourceCitationContainer)container).getSourceCitations().remove(c);
-        U.updateChangeDate(Memory.getLeaderObject());
+        ChangeUtils.INSTANCE.updateChangeDate(Memory.getLeaderObject());
         Memory.setInstanceAndAllSubsequentToNull(c);
     }
 }

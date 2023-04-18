@@ -22,7 +22,7 @@
 
                 <include
                     android:id="@+id/merge_firstTree"
-                    layout="@layout/pezzo_albero" />
+                    layout="@layout/tree_view" />
 
                 <TextView
                     style="@style/AppTheme.Suggestion"

@@ -56,6 +56,8 @@ import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.list.PersonsFragment;
+import app.familygem.util.ChangeUtils;
+import app.familygem.util.TreeUtils;
 import graph.gedcom.Bond;
 import graph.gedcom.CurveLine;
 import graph.gedcom.FamilyNode;
@@ -796,8 +798,8 @@ public class DiagramFragment extends Fragment {
             ripristina();
             Family[] modificateArr = modificate.toArray(new Family[0]);
             U.controllaFamiglieVuote(getContext(), this::ripristina, false, modificateArr);
-            U.updateChangeDate(pers);
-            U.save(true, (Object[])modificateArr);
+            ChangeUtils.INSTANCE.updateChangeDate(pers);
+            TreeUtils.INSTANCE.save(true, (Object[])modificateArr);
         } else if (id == 7) { // Elimina
             new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete, (dialog, i) -> {
@@ -826,7 +828,7 @@ public class DiagramFragment extends Fragment {
                         data.getStringExtra("idFamiglia"),
                         data.getIntExtra("relazione", 0),
                         data.getStringExtra("collocazione"));
-                U.save(true, modificati);
+                TreeUtils.INSTANCE.save(true, modificati);
             } // Export diagram to PDF
             else if (requestCode == 903) {
                 // Stylize diagram for print

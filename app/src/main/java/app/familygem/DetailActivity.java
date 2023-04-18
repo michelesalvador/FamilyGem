@@ -73,12 +73,14 @@ import app.familygem.detail.MediaActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.detail.SourceCitationActivity;
 import app.familygem.list.FamiliesFragment;
-import app.familygem.list.PersonsFragment;
-import app.familygem.list.SubmittersFragment;
 import app.familygem.list.MediaFragment;
 import app.familygem.list.NotesFragment;
+import app.familygem.list.PersonsFragment;
 import app.familygem.list.RepositoriesFragment;
 import app.familygem.list.SourcesFragment;
+import app.familygem.list.SubmittersFragment;
+import app.familygem.util.ChangeUtils;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
 
 public abstract class DetailActivity extends AppCompatActivity {
@@ -235,8 +237,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                     refresh();
                     toBeSaved = true;
                 }
-                if (toBeSaved)
-                    U.save(true, object);
+                if (toBeSaved) TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
                 return true;
             });
         });
@@ -340,9 +341,9 @@ public abstract class DetailActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             // From the 'Link...' submenu in FAB
             if (requestCode == 34417) { // Family member chosen in PersonsFragment
-                Person personToBeAdded = gc.getPerson(data.getStringExtra("idParente")); //TODO translate
+                Person personToBeAdded = gc.getPerson(data.getStringExtra("idParente")); // TODO translate
                 FamilyActivity.connect(personToBeAdded, (Family)object, data.getIntExtra("relazione", 0));
-                U.save(true, Memory.getLeaderObject());
+                TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
                 SourceCitation sourceCitation = new SourceCitation();
@@ -358,13 +359,13 @@ public abstract class DetailActivity extends AppCompatActivity {
                 media.setFileTag("FILE");
                 ((MediaContainer)object).addMedia(media);
                 if (F.proposeCropping(this, null, data, media)) {
-                    U.save(false, Memory.getLeaderObject());
+                    TreeUtils.INSTANCE.save(false, Memory.getLeaderObject());
                     return;
                 }
             } else if (requestCode == 4174) { // File coming from SAF or other app becomes shared media
                 Media media = MediaFragment.newMedia(object);
                 if (F.proposeCropping(this, null, data, media)) {
-                    U.save(false, media, Memory.getLeaderObject());
+                    TreeUtils.INSTANCE.save(false, media, Memory.getLeaderObject());
                     return;
                 }
             } else if (requestCode == 43616) { // Media from MediaFragment
@@ -377,7 +378,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ((Source)object).setRepositoryRef(archRef);
             } else if (requestCode == 5173) { // Save in Media a file chosen with the apps from MediaActivity
                 if (F.proposeCropping(this, null, data, (Media)object)) {
-                    U.save(false, Memory.getLeaderObject());
+                    TreeUtils.INSTANCE.save(false, Memory.getLeaderObject());
                     return;
                 }
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -390,7 +391,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ((SourceCitation)object).setRef(data.getStringExtra("sourceId"));
             }
             // 'true' indicates to reload both this Detail thanks to the following onRestart(), and ProfileActivity or FamilyActivity
-            U.save(true, Memory.getLeaderObject());
+            TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             F.saveFolderInSettings();
             Global.edited = true;
@@ -805,7 +806,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         ((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
         restore(pieceView);
-        U.save(true, Memory.getLeaderObject());
+        TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
 		/*if( Memory.getStepStack().size() == 1 ) {
 			refresh(); // TODO: The record change date should be updated, but perhaps without reloading everything
 		}*/
@@ -882,7 +883,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else if (id == 5) { // All the others objects
             // TODO: confirm deletion of all objects
             delete();
-            U.save(true); // The update of the change dates takes place in the Overrides of delete()
+            TreeUtils.INSTANCE.save(true); // The update of the change dates takes place in the Overrides of delete()
             onBackPressed();
         } else if (id == android.R.id.home) {
             onBackPressed();
@@ -1043,7 +1044,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 18: // Unlink family member
                 FamilyActivity.disconnect((SpouseFamilyRef)pieceView.getTag(R.id.tag_spouse_family_ref),
                         (SpouseRef)pieceView.getTag(R.id.tag_spouse_ref));
-                U.updateChangeDate(person);
+                ChangeUtils.INSTANCE.updateChangeDate(person);
                 findAnotherRepresentativeOfTheFamily(person);
                 break;
             case 19: // Delete family member
@@ -1062,7 +1063,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 break;
             case 22: // Delete note
                 Object[] leaders = U.deleteNote((Note)pieceObject, pieceView);
-                U.save(true, leaders);
+                TreeUtils.INSTANCE.save(true, leaders);
                 return true;
             case 30: // Copy source citation
                 U.copyToClipboard(getText(R.string.source_citation),
@@ -1081,7 +1082,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 break;
             case 41: // Delete media
                 Object[] mediaLeaders = MediaFragment.deleteMedia((Media)pieceObject, null);
-                U.save(true, mediaLeaders); // A shared media may need to update the dates of multiple leaders
+                TreeUtils.INSTANCE.save(true, mediaLeaders); // A shared media may need to update the dates of multiple leaders
                 refresh();
                 return true;
             case 51: // Delete address
@@ -1136,12 +1137,8 @@ public abstract class DetailActivity extends AppCompatActivity {
             default:
                 return false;
         }
-        /* At first recreates the page and then saves the tree, which for large trees can take a few seconds
-        closeContextMenu(); // Useless. Closing the menu waits for the end of saving,
-                unless you put saveJson() inside a postDelayed() of at least 500 ms */
-        U.updateChangeDate(Memory.getLeaderObject());
+        TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
         refresh();
-        U.save(true, (Object[])null);
         return true;
     }
 

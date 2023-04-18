@@ -18,6 +18,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.list.SourcesFragment;
+import app.familygem.util.ChangeUtils;
 import app.familygem.visitor.ListOfSourceCitations;
 
 public class SourceActivity extends DetailActivity {
@@ -81,6 +82,6 @@ public class SourceActivity extends DetailActivity {
 
     @Override
     public void delete() {
-        U.updateChangeDate(SourcesFragment.deleteSource(f));
+        ChangeUtils.INSTANCE.updateChangeDate(SourcesFragment.deleteSource(f));
     }
 }

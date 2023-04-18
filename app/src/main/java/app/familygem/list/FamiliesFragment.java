@@ -36,6 +36,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.detail.FamilyActivity;
+import app.familygem.util.TreeUtils;
 
 public class FamiliesFragment extends Fragment {
 
@@ -60,7 +61,7 @@ public class FamiliesFragment extends Fragment {
             idsAreNumeric = verifyIdsAreNumeric();
             view.findViewById(R.id.fab).setOnClickListener(v -> {
                 Family newFamily = newFamily(true);
-                U.save(true, newFamily);
+                TreeUtils.INSTANCE.save(true, newFamily);
                 // If the user returns immediately back to this fragment, the new empty family is displayed in the list
                 Memory.setLeader(newFamily);
                 startActivity(new Intent(getContext(), FamilyActivity.class));
@@ -161,7 +162,7 @@ public class FamiliesFragment extends Fragment {
         gc.createIndexes(); // Necessary to update persons
         Memory.setInstanceAndAllSubsequentToNull(family);
         Global.familyNum = 0; // In the case that is deleted exactly the family referenced in Global.familyNum
-        U.save(true, members.toArray(new Object[0]));
+        TreeUtils.INSTANCE.save(true, members.toArray(new Object[0]));
     }
 
     public static Family newFamily(boolean addToGedcom) {
@@ -256,7 +257,7 @@ public class FamiliesFragment extends Fragment {
             List<Family> sortedFamilies = new ArrayList<>();
             for (FamilyWrapper wrapper : familyList) sortedFamilies.add(wrapper.family);
             gc.setFamilies(sortedFamilies);
-            //U.saveJson(gc, Global.settings.openTree); // Immediately saves families sorting
+            //TreeUtils.saveJson(gc, Global.settings.openTree); // Immediately saves families sorting
         }
     }
 

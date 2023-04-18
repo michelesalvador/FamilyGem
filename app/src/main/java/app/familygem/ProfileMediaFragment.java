@@ -20,6 +20,7 @@ import org.folg.gedcom.model.Person;
 
 import app.familygem.list.MediaAdapter;
 import app.familygem.list.MediaFragment;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.MediaContainerList;
 
 // Profile media tab
@@ -72,19 +73,19 @@ public class ProfileMediaFragment extends Fragment {
                 medCont.media.setPrimary(null);
             media.setPrimary("Y");
             if (media.getId() != null) // Per aggiornare la data cambiamento nel Media record piuttosto che nella Person
-                U.save(true, media);
+                TreeUtils.INSTANCE.save(true, media);
             else
-                U.save(true, one);
+                TreeUtils.INSTANCE.save(true, one);
             refresh();
             return true;
         } else if (id == 1) { // Scollega
             MediaFragment.disconnectMedia(media.getId(), (MediaContainer)container);
-            U.save(true, one);
+            TreeUtils.INSTANCE.save(true, one);
             refresh();
             return true;
         } else if (id == 2) { // Elimina
             Object[] capi = MediaFragment.deleteMedia(media, null);
-            U.save(true, capi);
+            TreeUtils.INSTANCE.save(true, capi);
             refresh();
             return true;
         }

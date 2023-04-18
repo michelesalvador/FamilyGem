@@ -1,8 +1,10 @@
 package app.familygem
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.view.DragEvent
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -13,11 +15,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Code
 import app.familygem.constant.Extra
 import app.familygem.constant.Gender
 import app.familygem.merge.MergeActivity
 import app.familygem.share.SharingActivity
+import app.familygem.util.TreeUtils
 import app.familygem.util.TreeUtils.deleteTree
 import app.familygem.util.TreeUtils.openGedcom
 import app.familygem.util.TreeUtils.readJson
@@ -25,6 +29,10 @@ import app.familygem.util.getBasicData
 import app.familygem.visitor.MediaList
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.folg.gedcom.model.*
 import java.io.File
 
@@ -33,18 +41,20 @@ import java.io.File
  */
 class TreesActivity : AppCompatActivity() {
     private lateinit var treeList: MutableList<Map<String, String>>
-    private var adapter: SimpleAdapter? = null
+    private lateinit var adapter: SimpleAdapter
     lateinit var progress: View
     private lateinit var welcome: SpeechBubble
     private lateinit var exporter: Exporter
     private var autoOpenedTree = false // To open automatically the tree at startup only once
-    private var consumedNotifications: ArrayList<Int>? = ArrayList() // The birthday notification IDs are stored to display the corresponding person only once
+    private var consumedNotifications: ArrayList<Int>? =
+            ArrayList() // The birthday notification IDs are stored to display the corresponding person only once
+    private var draggedTreeId: Int = 0
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
-        setContentView(R.layout.trees)
+        setContentView(R.layout.trees_activity)
         val listView = findViewById<ListView>(R.id.trees_list)
-        progress = findViewById(R.id.trees_progress)
+        progress = findViewById(R.id.progress_wheel)
         welcome = SpeechBubble(this, R.string.tap_add_tree)
         exporter = Exporter(this)
 
@@ -65,180 +75,160 @@ class TreesActivity : AppCompatActivity() {
             consumedNotifications = savedState.getIntegerArrayList("consumedNotifications")
         }
 
-        if (Global.settings.trees != null) {
-            treeList = ArrayList()
-            adapter = object : SimpleAdapter(this, treeList, R.layout.pezzo_albero,
-                    arrayOf("title", "data"), intArrayOf(R.id.albero_titolo, R.id.albero_dati)) {
-                // Returns a view of the tree list
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val treeView = super.getView(position, convertView, parent)
-                    val titleView = treeView.findViewById<TextView>(R.id.albero_titolo)
-                    titleView.setTextColor(ResourcesCompat.getColor(resources, R.color.text, null))
-                    val detailView = treeView.findViewById<TextView>(R.id.albero_dati)
-                    detailView.setTextColor(ResourcesCompat.getColor(resources, R.color.gray_text, null))
-                    val treeId = treeList[position]["id"]!!.toInt()
-                    val tree = Global.settings.getTree(treeId)
-                    val derived = tree.grade == 20
-                    val exhausted = tree.grade == 30
-                    if (derived) {
-                        treeView.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.accent_medium, null))
-                        detailView.setTextColor(ResourcesCompat.getColor(resources, R.color.text, null))
-                        treeView.setOnClickListener {
-                            if (!NewTreeActivity.confronta(this@TreesActivity, tree, true)) {
-                                tree.grade = 10 // It is downgraded
-                                Global.settings.save()
-                                updateList()
-                                Toast.makeText(this@TreesActivity, R.string.something_wrong, Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    } else if (exhausted) {
-                        treeView.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.consumed, null))
-                        titleView.setTextColor(ResourcesCompat.getColor(resources, R.color.gray_text, null))
-                        treeView.setOnClickListener {
-                            if (!NewTreeActivity.confronta(this@TreesActivity, tree, true)) {
-                                tree.grade = 10 // It is downgraded
-                                Global.settings.save()
-                                updateList()
-                                Toast.makeText(this@TreesActivity, R.string.something_wrong, Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    } else {
-                        treeView.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.back_element, null))
-                        treeView.setOnClickListener {
-                            progress.visibility = View.VISIBLE
-                            if (!(Global.gc != null && treeId == Global.settings.openTree)) { // I not already opened
-                                if (!openGedcom(treeId, true)) {
-                                    progress.visibility = View.GONE
-                                    return@setOnClickListener
-                                }
-                            }
-                            startActivity(Intent(this@TreesActivity, Principal::class.java))
+        if (Global.settings.trees == null) return
+        treeList = ArrayList()
+        adapter = object : SimpleAdapter(this, treeList, R.layout.tree_view,
+                arrayOf("title", "data"), intArrayOf(R.id.tree_title, R.id.tree_data)) {
+            // Returns a view of the tree list
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val treeView = super.getView(position, convertView, parent)
+                val treeLayout = treeView.findViewById<RelativeLayout>(R.id.tree_layout)
+                val titleView = treeLayout.findViewById<TextView>(R.id.tree_title)
+                titleView.setTextColor(ResourcesCompat.getColor(resources, R.color.text, null))
+                val detailView = treeLayout.findViewById<TextView>(R.id.tree_data)
+                detailView.setTextColor(ResourcesCompat.getColor(resources, R.color.gray_text, null))
+                val treeId = treeList[position]["id"]!!.toInt()
+                val tree = Global.settings.getTree(treeId)
+                val derived = tree.grade == 20
+                val exhausted = tree.grade == 30
+                if (derived) {
+                    treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.accent_medium, null))
+                    detailView.setTextColor(ResourcesCompat.getColor(resources, R.color.text, null))
+                    treeView.setOnClickListener {
+                        if (!NewTreeActivity.confronta(this@TreesActivity, tree, true)) {
+                            tree.grade = 10 // It is downgraded
+                            Global.settings.save()
+                            updateList()
+                            Toast.makeText(this@TreesActivity, R.string.something_wrong, Toast.LENGTH_LONG).show()
                         }
                     }
-                    treeView.findViewById<ImageButton>(R.id.albero_menu).setOnClickListener { view: View ->
-                        val exists = File(filesDir, "$treeId.json").exists()
-                        val popup = PopupMenu(this@TreesActivity, view)
-                        val menu = popup.menu
-                        if (treeId == Global.settings.openTree && Global.shouldSave)
-                            menu.add(0, -1, 0, R.string.save)
-                        if (Global.settings.expert && derived || Global.settings.expert && exhausted)
-                            menu.add(0, 0, 0, R.string.open)
-                        if (!exhausted || Global.settings.expert)
-                            menu.add(0, 1, 0, R.string.tree_info)
-                        if (!derived && !exhausted || Global.settings.expert)
-                            menu.add(0, 2, 0, R.string.rename)
-                        if (exists && (!derived || Global.settings.expert) && !exhausted)
-                            menu.add(0, 3, 0, R.string.media_folders)
-                        if (!exhausted)
-                            menu.add(0, 4, 0, R.string.find_errors)
-                        if (exists && !derived && !exhausted) // You cannot re-share a tree received back, even if you are an expert
-                            menu.add(0, 5, 0, R.string.share_tree)
-                        if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1)
-                            menu.add(0, 6, 0, R.string.merge_tree)
-                        if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1
-                                && tree.shares != null && tree.grade != 0) // Must be 9 or 10
-                            menu.add(0, 7, 0, R.string.compare)
-                        if (exists && Global.settings.expert && !exhausted)
-                            menu.add(0, 8, 0, R.string.export_gedcom)
-                        if (exists && Global.settings.expert)
-                            menu.add(0, 9, 0, R.string.make_backup)
-                        menu.add(0, 10, 0, R.string.delete)
-                        popup.show()
-                        popup.setOnMenuItemClickListener { item: MenuItem ->
-                            val id = item.itemId
-                            if (id == -1) { // Save
-                                U.saveJson(Global.gc, treeId)
-                                Global.shouldSave = false
-                            } else if (id == 0) { // Open a derived tree
-                                openGedcom(treeId, true)
-                                startActivity(Intent(this@TreesActivity, Principal::class.java))
-                            } else if (id == 1) { // Tree info
-                                val intent = Intent(this@TreesActivity, InfoActivity::class.java)
-                                intent.putExtra(Extra.TREE_ID, treeId)
-                                startActivity(intent)
-                            } else if (id == 2) { // Rename tree
-                                val renameView = layoutInflater.inflate(R.layout.albero_nomina, listView, false)
-                                val titleEdit = renameView.findViewById<EditText>(R.id.nuovo_nome_albero)
-                                titleEdit.setText(treeList[position]["title"])
-                                val dialog = AlertDialog.Builder(this@TreesActivity)
-                                        .setView(renameView).setTitle(R.string.title)
-                                        .setPositiveButton(R.string.rename) { _, _ ->
-                                            Global.settings.renameTree(treeId, titleEdit.text.toString())
-                                            updateList()
-                                        }.setNeutralButton(R.string.cancel, null).create()
-                                titleEdit.setOnEditorActionListener { _, action, _ ->
-                                    if (action == EditorInfo.IME_ACTION_DONE) dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
-                                    false
-                                }
-                                dialog.show()
-                                renameView.postDelayed({
-                                    titleEdit.requestFocus()
-                                    titleEdit.setSelection(titleEdit.text.length)
-                                    val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                                    inputMethodManager.showSoftInput(titleEdit, InputMethodManager.SHOW_IMPLICIT)
-                                }, 300)
-                            } else if (id == 3) { // Media folders
-                                startActivity(Intent(this@TreesActivity, MediaFoldersActivity::class.java)
-                                        .putExtra(Extra.TREE_ID, treeId)
-                                )
-                            } else if (id == 4) { // Find errors
-                                findErrors(treeId, false)
-                            } else if (id == 5) { // Share tree
-                                startActivity(Intent(this@TreesActivity, SharingActivity::class.java)
-                                        .putExtra(Extra.TREE_ID, treeId)
-                                )
-                            } else if (id == 6) { // Merge with another tree
-                                startActivity(Intent(this@TreesActivity, MergeActivity::class.java)
-                                        .putExtra(Extra.TREE_ID, treeId))
-                            } else if (id == 7) { // Compare with existing trees
-                                if (NewTreeActivity.confronta(this@TreesActivity, tree, false)) {
-                                    tree.grade = 20
+                } else if (exhausted) {
+                    treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.consumed, null))
+                    titleView.setTextColor(ResourcesCompat.getColor(resources, R.color.gray_text, null))
+                    treeView.setOnClickListener {
+                        if (!NewTreeActivity.confronta(this@TreesActivity, tree, true)) {
+                            tree.grade = 10 // It is downgraded
+                            Global.settings.save()
+                            updateList()
+                            Toast.makeText(this@TreesActivity, R.string.something_wrong, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } else {
+                    treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.back_element, null))
+                    treeView.setOnClickListener {
+                        progress.visibility = View.VISIBLE
+                        if (!(Global.gc != null && treeId == Global.settings.openTree)) { // I not already opened
+                            if (!openGedcom(treeId, true)) {
+                                progress.visibility = View.GONE
+                                return@setOnClickListener
+                            }
+                        }
+                        startActivity(Intent(this@TreesActivity, Principal::class.java))
+                    }
+                }
+                treeLayout.visibility = if (treeId == draggedTreeId) View.INVISIBLE else View.VISIBLE
+                // Three dots button
+                treeView.findViewById<ImageButton>(R.id.tree_menu).setOnClickListener { view: View ->
+                    val exists = File(filesDir, "$treeId.json").exists()
+                    val popup = PopupMenu(this@TreesActivity, view)
+                    val menu = popup.menu
+                    if (treeId == Global.settings.openTree && Global.shouldSave)
+                        menu.add(0, -1, 0, R.string.save)
+                    if (Global.settings.expert && derived || Global.settings.expert && exhausted)
+                        menu.add(0, 0, 0, R.string.open)
+                    if (!exhausted || Global.settings.expert)
+                        menu.add(0, 1, 0, R.string.tree_info)
+                    if (!derived && !exhausted || Global.settings.expert)
+                        menu.add(0, 2, 0, R.string.rename)
+                    if (exists && (!derived || Global.settings.expert) && !exhausted)
+                        menu.add(0, 3, 0, R.string.media_folders)
+                    if (!exhausted)
+                        menu.add(0, 4, 0, R.string.find_errors)
+                    if (exists && !derived && !exhausted) // You cannot re-share a tree received back, even if you are an expert
+                        menu.add(0, 5, 0, R.string.share_tree)
+                    if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1)
+                        menu.add(0, 6, 0, R.string.merge_tree)
+                    if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1
+                            && tree.shares != null && tree.grade != 0) // Must be 9 or 10
+                        menu.add(0, 7, 0, R.string.compare)
+                    if (exists && Global.settings.expert && !exhausted)
+                        menu.add(0, 8, 0, R.string.export_gedcom)
+                    if (exists && Global.settings.expert)
+                        menu.add(0, 9, 0, R.string.make_backup)
+                    menu.add(0, 10, 0, R.string.delete)
+                    popup.setOnMenuItemClickListener(MenuItemClickListener(position, treeId))
+                    popup.show()
+                }
+                if (Global.settings.trees.size <= 1) return treeView
+                // Dragging tree listeners
+                treeView.setOnLongClickListener { view ->
+                    val dragShadow = View.DragShadowBuilder(view)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        view.startDragAndDrop(null, dragShadow, tree, 0)
+                    else view.startDrag(null, dragShadow, tree, 0)
+                    draggedTreeId = treeId
+                    treeLayout.visibility = View.INVISIBLE
+                    true
+                }
+                treeView.setOnDragListener { view, event ->
+                    when (event.action) {
+                        DragEvent.ACTION_DRAG_ENTERED -> {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                treeLayout.foreground = ResourcesCompat.getDrawable(resources, R.drawable.line_above, null)
+                            }
+                        }
+                        DragEvent.ACTION_DRAG_LOCATION -> {
+                            val touchY = view.top + event.y // Y coord of touch event inside the current viewport
+                            if (touchY < listView.top + U.dpToPx(60f)) {
+                                listView.smoothScrollBy(-U.dpToPx(10f), 25)
+                            } else if (touchY > listView.bottom - U.dpToPx(60f)) {
+                                listView.smoothScrollBy(U.dpToPx(10f), 25)
+                            }
+                        }
+                        DragEvent.ACTION_DRAG_EXITED, DragEvent.ACTION_DRAG_ENDED -> {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                treeLayout.foreground = null
+                            }
+                        }
+                        DragEvent.ACTION_DROP -> {
+                            val draggedTree = event.localState as Settings.Tree
+                            val startPosition = Global.settings.trees.indexOf(draggedTree)
+                            var dropPosition = listView.getPositionForView(view)
+                            draggedTreeId = 0
+                            when (startPosition) {
+                                dropPosition -> treeLayout.visibility = View.VISIBLE // Dropped on itself
+                                dropPosition - 1 -> adapter.notifyDataSetChanged() // Dropped on the following one
+                                else -> {
+                                    Global.settings.trees.remove(draggedTree)
+                                    if (startPosition < dropPosition) dropPosition--
+                                    Global.settings.trees.add(dropPosition, draggedTree)
                                     updateList()
-                                } else Toast.makeText(this@TreesActivity, R.string.no_results, Toast.LENGTH_LONG).show()
-                            } else if (id == 8) { // Export GEDCOM
-                                if (exporter.openTree(treeId)) {
-                                    val mime = arrayOf("application/octet-stream")
-                                    val extension = arrayOf("ged")
-                                    val code = intArrayOf(Code.GEDCOM_FILE)
-                                    val totMedia = exporter.countMediaFilesToAttach()
-                                    if (totMedia > 0) {
-                                        val choices = arrayOf(getString(R.string.gedcom_media_zip, totMedia),
-                                                getString(R.string.gedcom_only))
-                                        AlertDialog.Builder(this@TreesActivity)
-                                                .setTitle(R.string.export_gedcom)
-                                                .setSingleChoiceItems(choices, -1) { dialog, selected ->
-                                                    if (selected == 0) {
-                                                        mime[0] = "application/zip"
-                                                        extension[0] = "zip"
-                                                        code[0] = Code.ZIPPED_GEDCOM_FILE
-                                                    }
-                                                    F.saveDocument(this@TreesActivity, null, treeId, mime[0], extension[0], code[0])
-                                                    dialog.dismiss()
-                                                }.show()
-                                    } else {
-                                        F.saveDocument(this@TreesActivity, null, treeId, mime[0], extension[0], code[0])
-                                    }
+                                    Global.settings.save()
                                 }
-                            } else if (id == 9) { // Export ZIP backup
-                                if (exporter.openTree(treeId)) F.saveDocument(this@TreesActivity, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP)
-                            } else if (id == 10) { // Delete tree
-                                AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
-                                        .setPositiveButton(R.string.delete) { _, _ ->
-                                            deleteTree(treeId)
-                                            updateList()
-                                        }.setNeutralButton(R.string.cancel, null).show()
-                            } else {
-                                return@setOnMenuItemClickListener false
                             }
-                            true
                         }
                     }
-                    return treeView
+                    true
+                }
+                return treeView
+            }
+        }
+        listView.setOnDragListener { _, event ->
+            when (event.action) {
+                DragEvent.ACTION_DROP -> {
+                    // Drops the tree at the end of the list
+                    val draggedTree = event.localState as Settings.Tree
+                    Global.settings.trees.remove(draggedTree)
+                    Global.settings.trees.add(draggedTree)
+                    draggedTreeId = 0
+                    updateList()
+                    Global.settings.save()
                 }
             }
-            listView.adapter = adapter
-            updateList()
+            true
         }
+        listView.adapter = adapter
+        updateList()
 
         // Custom actionbar
         val bar = supportActionBar
@@ -265,6 +255,96 @@ class TreesActivity : AppCompatActivity() {
                     startActivity(Intent(this, Principal::class.java))
                 }
             }
+        }
+    }
+
+    inner class MenuItemClickListener(val position: Int, val treeId: Int) : PopupMenu.OnMenuItemClickListener {
+        override fun onMenuItemClick(item: MenuItem): Boolean {
+            val id = item.itemId
+            if (id == -1) { // Save
+                GlobalScope.launch(Dispatchers.IO) { TreeUtils.saveJson(Global.gc, treeId) }
+                Global.shouldSave = false
+            } else if (id == 0) { // Open a derived tree
+                openGedcom(treeId, true)
+                startActivity(Intent(this@TreesActivity, Principal::class.java))
+            } else if (id == 1) { // Tree info
+                val intent = Intent(this@TreesActivity, InfoActivity::class.java)
+                intent.putExtra(Extra.TREE_ID, treeId)
+                startActivity(intent)
+            } else if (id == 2) { // Rename tree
+                val renameView = layoutInflater.inflate(R.layout.albero_nomina, null, false)
+                val titleEdit = renameView.findViewById<EditText>(R.id.nuovo_nome_albero)
+                titleEdit.setText(treeList[position]["title"])
+                val dialog = AlertDialog.Builder(this@TreesActivity)
+                        .setView(renameView).setTitle(R.string.title)
+                        .setPositiveButton(R.string.rename) { _, _ ->
+                            Global.settings.renameTree(treeId, titleEdit.text.toString())
+                            updateList()
+                        }.setNeutralButton(R.string.cancel, null).create()
+                titleEdit.setOnEditorActionListener { _, action, _ ->
+                    if (action == EditorInfo.IME_ACTION_DONE) dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
+                    false
+                }
+                dialog.show()
+                renameView.postDelayed({
+                    titleEdit.requestFocus()
+                    titleEdit.setSelection(titleEdit.text.length)
+                    val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.showSoftInput(titleEdit, InputMethodManager.SHOW_IMPLICIT)
+                }, 300)
+            } else if (id == 3) { // Media folders
+                startActivity(Intent(this@TreesActivity, MediaFoldersActivity::class.java)
+                        .putExtra(Extra.TREE_ID, treeId))
+            } else if (id == 4) { // Find errors
+                lifecycleScope.launch(Dispatchers.Default) { findErrors(treeId, false) }
+            } else if (id == 5) { // Share tree
+                startActivity(Intent(this@TreesActivity, SharingActivity::class.java)
+                        .putExtra(Extra.TREE_ID, treeId))
+            } else if (id == 6) { // Merge with another tree
+                startActivity(Intent(this@TreesActivity, MergeActivity::class.java)
+                        .putExtra(Extra.TREE_ID, treeId))
+            } else if (id == 7) { // Compare with existing trees
+                val tree = Global.settings.getTree(treeId)
+                if (NewTreeActivity.confronta(this@TreesActivity, tree, false)) {
+                    tree.grade = 20
+                    updateList()
+                } else Toast.makeText(this@TreesActivity, R.string.no_results, Toast.LENGTH_LONG).show()
+            } else if (id == 8) { // Export GEDCOM
+                if (exporter.openTree(treeId)) {
+                    var mime = "application/octet-stream"
+                    var extension = "ged"
+                    var code = Code.GEDCOM_FILE
+                    val totMedia = exporter.countMediaFilesToAttach()
+                    if (totMedia > 0) {
+                        val choices = arrayOf(getString(R.string.gedcom_media_zip, totMedia), getString(R.string.gedcom_only))
+                        AlertDialog.Builder(this@TreesActivity)
+                                .setTitle(R.string.export_gedcom)
+                                .setSingleChoiceItems(choices, -1) { dialog, selected ->
+                                    if (selected == 0) {
+                                        mime = "application/zip"
+                                        extension = "zip"
+                                        code = Code.ZIPPED_GEDCOM_FILE
+                                    }
+                                    F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
+                                    dialog.dismiss()
+                                }.show()
+                    } else {
+                        F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
+                    }
+                }
+            } else if (id == 9) { // Export ZIP backup
+                if (exporter.openTree(treeId))
+                    F.saveDocument(this@TreesActivity, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP)
+            } else if (id == 10) { // Delete tree
+                AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
+                        .setPositiveButton(R.string.delete) { _, _ ->
+                            deleteTree(treeId)
+                            updateList()
+                        }.setNeutralButton(R.string.cancel, null).show()
+            } else {
+                return false
+            }
+            return true
         }
     }
 
@@ -369,7 +449,7 @@ class TreesActivity : AppCompatActivity() {
             item["data"] = tree.getBasicData()
             treeList.add(item)
         }
-        adapter!!.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -397,7 +477,7 @@ class TreesActivity : AppCompatActivity() {
      * Looks for some errors and returns the fixed GEDCOM or null.
      * @param correct Fix the errors or add error messages to [errorList]
      */
-    fun findErrors(treeId: Int, correct: Boolean): Gedcom? {
+    suspend fun findErrors(treeId: Int, correct: Boolean): Gedcom? {
         errorList.clear()
         val gedcom = readJson(treeId) ?: return null
 
@@ -680,15 +760,20 @@ class TreesActivity : AppCompatActivity() {
             dialog.setMessage(message)
             if (total > 0) {
                 dialog.setPositiveButton(R.string.correct) { _, _ ->
-                    val correctGedcom = findErrors(treeId, true)
-                    U.saveJson(correctGedcom, treeId)
-                    if (treeId == Global.settings.openTree && Global.gc != null) Global.gc = correctGedcom
-                    else Global.gc = null // Resets it to reload corrected
-                    findErrors(treeId, false) // Restart process to display the result
-                    updateList()
+                    lifecycleScope.launch(Dispatchers.Default) {
+                        val correctGedcom = findErrors(treeId, true)
+                        if (correctGedcom != null) {
+                            TreeUtils.saveJson(correctGedcom, treeId)
+                            if (treeId == Global.settings.openTree && Global.gc != null) Global.gc = correctGedcom
+                            else Global.gc = null // Resets it to reload corrected
+                            findErrors(treeId, false) // Restart process to display the result
+                            updateList()
+                        }
+                    }
                 }
             }
-            dialog.setNeutralButton(R.string.cancel, null).show()
+            dialog.setNeutralButton(R.string.cancel, null)
+            withContext(Dispatchers.Main) { dialog.show() }
         }
         return gedcom
     }

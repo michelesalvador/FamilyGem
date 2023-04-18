@@ -33,12 +33,12 @@ import java.util.Random;
 
 import app.familygem.constant.Choice;
 import app.familygem.list.FamiliesFragment;
-import app.familygem.list.SubmittersFragment;
-import app.familygem.list.PersonsFragment;
 import app.familygem.list.MediaFragment;
 import app.familygem.list.NotesFragment;
+import app.familygem.list.PersonsFragment;
 import app.familygem.list.RepositoriesFragment;
 import app.familygem.list.SourcesFragment;
+import app.familygem.list.SubmittersFragment;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.MediaList;
 import app.familygem.visitor.NoteList;
@@ -214,7 +214,7 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
         Button saveButton = menuHeader.findViewById(R.id.menu_salva);
         saveButton.setOnClickListener(view -> {
             view.setVisibility(View.GONE);
-            U.saveJson(Global.gc, Global.settings.openTree);
+            TreeUtils.INSTANCE.saveJsonAsync(Global.gc, Global.settings.openTree);
             scatolissima.closeDrawer(GravityCompat.START);
             Global.shouldSave = false;
             Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show();

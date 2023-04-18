@@ -20,14 +20,15 @@ import org.folg.gedcom.model.Media;
 import java.io.File;
 import java.util.List;
 
-import app.familygem.ImageActivity;
 import app.familygem.DetailActivity;
 import app.familygem.F;
 import app.familygem.Global;
+import app.familygem.ImageActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.list.MediaFragment;
+import app.familygem.util.ChangeUtils;
 import app.familygem.visitor.MediaReferences;
 
 public class MediaActivity extends DetailActivity {
@@ -127,6 +128,6 @@ public class MediaActivity extends DetailActivity {
 
     @Override
     public void delete() {
-        U.updateChangeDate(MediaFragment.deleteMedia(m, null));
+        ChangeUtils.INSTANCE.updateChangeDate(MediaFragment.deleteMedia(m, null));
     }
 }

@@ -33,6 +33,7 @@ import app.familygem.constant.Gender;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.list.FamiliesFragment;
+import app.familygem.util.TreeUtils;
 
 public class PersonEditorActivity extends AppCompatActivity {
 
@@ -342,7 +343,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                 modifications = addParent(idIndi, newId, familyId, relation, getIntent().getStringExtra("collocazione"));
         } else
             Global.indi = p.getId(); // To show the person then in DiagramFragment
-        U.save(true, modifications);
+        TreeUtils.INSTANCE.save(true, modifications);
         onBackPressed();
     }
 

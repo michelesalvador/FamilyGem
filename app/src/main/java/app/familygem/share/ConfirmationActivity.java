@@ -153,7 +153,7 @@ public class ConfirmationActivity extends BaseActivity {
                         }
                     }
                 }
-                if (changed) U.saveJson(Global.gc2, Global.treeId2);
+                if (changed) TreeUtils.INSTANCE.saveJsonAsync(Global.gc2, Global.treeId2);
 
                 // Regular addition / replacement / deletion of records from tree2 to tree
                 for (Comparison.Front front : Comparison.getList()) {
@@ -213,7 +213,7 @@ public class ConfirmationActivity extends BaseActivity {
                             }
                     }
                 }
-                U.saveJson(Global.gc, Global.settings.openTree);
+                TreeUtils.INSTANCE.saveJsonAsync(Global.gc, Global.settings.openTree);
 
                 // If all updates are imported proposes to delete the shared tree
                 boolean allOk = true;

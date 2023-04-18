@@ -36,7 +36,7 @@ public class Settings {
      * It is not reset by closing the tree, to load last opened tree at startup.
      */
     public int openTree;
-    boolean autoSave;
+    public boolean autoSave;
     /**
      * At startup load last opened tree.
      */

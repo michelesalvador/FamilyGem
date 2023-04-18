@@ -53,6 +53,8 @@ import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Json;
 import app.familygem.list.SubmittersFragment;
+import app.familygem.util.ChangeUtils;
+import app.familygem.util.TreeUtils;
 
 public class SharingActivity extends BaseActivity {
 
@@ -131,7 +133,7 @@ public class SharingActivity extends BaseActivity {
                         header = NewTreeActivity.createHeader(tree.id + ".json");
                         gc.setHeader(header);
                     } else
-                        header.setDateTime(U.actualDateTime());
+                        header.setDateTime(ChangeUtils.INSTANCE.actualDateTime());
                     if (submitter[0] == null) {
                         submitter[0] = SubmittersFragment.createSubmitter(null);
                     }
@@ -142,10 +144,10 @@ public class SharingActivity extends BaseActivity {
                     if (!nomeAutoreEditato.equals(submitterName)) {
                         submitterName = nomeAutoreEditato;
                         submitter[0].setName(submitterName);
-                        U.updateChangeDate(submitter[0]);
+                        ChangeUtils.INSTANCE.updateChangeDate(submitter[0]);
                     }
                     submitterId = submitter[0].getId();
-                    U.saveJson(gc, treeId); // baypassando la preferenza di non salvare in atomatico
+                    TreeUtils.INSTANCE.saveJsonAsync(gc, treeId); // baypassando la preferenza di non salvare in atomatico
 
                     // Tree accessibility for app developer
                     CheckBox accessibleTree = findViewById(R.id.share_allow);
@@ -240,9 +242,9 @@ public class SharingActivity extends BaseActivity {
                     Settings.Share share = new Settings.Share(activity.dateId, activity.submitterId);
                     activity.tree.addShare(share);
                     Global.settings.save();
-                } else U.toast(activity, line);
+                } else U.toast(line);
             } catch (Exception e) {
-                U.toast(activity, e.getLocalizedMessage());
+                U.toast(e.getLocalizedMessage());
                 e.printStackTrace();
             }
             return activity;

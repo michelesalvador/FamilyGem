@@ -88,7 +88,7 @@ public class InfoActivity extends BaseActivity {
                 bottoneHeader.setText(R.string.create_header);
                 bottoneHeader.setOnClickListener(view -> {
                     gc.setHeader(NewTreeActivity.createHeader(file.getName()));
-                    U.saveJson(gc, treeId);
+                    TreeUtils.INSTANCE.saveJsonAsync(gc, treeId);
                     recreate();
                 });
             } else {
@@ -178,7 +178,7 @@ public class InfoActivity extends BaseActivity {
                     versioneGc.setForm("LINEAGE-LINKED");
                     h.setDestination(null);
 
-                    U.saveJson(gc, treeId);
+                    TreeUtils.INSTANCE.saveJsonAsync(gc, treeId);
                     recreate();
                 });
 

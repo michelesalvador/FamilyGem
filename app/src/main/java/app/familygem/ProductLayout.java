@@ -109,7 +109,7 @@ public class ProductLayout extends LinearLayout {
                 } // BILLING_UNAVAILABLE, Debug Message: Google Play In-app Billing API version is less than 3
                 else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.BILLING_UNAVAILABLE) {
                     activity.runOnUiThread(() -> findViewById(R.id.product_wheel).setVisibility(GONE));
-                    U.toast(activity, R.string.update_playstore);
+                    U.toast(R.string.update_playstore);
                 }
             }
 
@@ -141,7 +141,7 @@ public class ProductLayout extends LinearLayout {
                         }
                     } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.ERROR) {
                         // Handle the error response.
-                        U.toast(activity, R.string.something_wrong);
+                        U.toast(R.string.something_wrong);
                     } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.DEVELOPER_ERROR) {
                         // Handle the developer error response.
                     } else {
@@ -159,7 +159,7 @@ public class ProductLayout extends LinearLayout {
         BillingResult billingResult = billingClient.isFeatureSupported(BillingClient.FeatureType.PRODUCT_DETAILS);
         l("Is product details supported:", billingResult);
         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED) {
-            U.toast(activity, R.string.update_playstore);
+            U.toast(R.string.update_playstore);
             return;
         }
         List<QueryProductDetailsParams.Product> products = new ArrayList<>();
@@ -192,7 +192,7 @@ public class ProductLayout extends LinearLayout {
                             || response == BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE) {
                         // Can't retrieve products, maybe for network error
                         activity.runOnUiThread(() -> findViewById(R.id.product_wheel).setVisibility(GONE));
-                        U.toast(activity, R.string.something_wrong);
+                        U.toast(R.string.something_wrong);
                     }
                     productDetails = productDetailsList;
                 }
@@ -274,14 +274,14 @@ public class ProductLayout extends LinearLayout {
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                             becomePremium();
                         } else {
-                            U.toast(activity, R.string.something_wrong);
+                            U.toast(R.string.something_wrong);
                         }
                     });
                 } // Premium already purchased in the past
                 else if (line.equals(purchase.getPurchaseToken()) && purchase.isAcknowledged()) {
                     becomePremium();
                 } else {
-                    U.toast(activity, R.string.something_wrong);
+                    U.toast(R.string.something_wrong);
                 }
             } catch (Exception ignored) {
             }

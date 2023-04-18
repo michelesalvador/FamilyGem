@@ -109,6 +109,7 @@ import app.familygem.list.MediaAdapter;
 import app.familygem.list.PersonsFragment;
 import app.familygem.list.SourcesFragment;
 import app.familygem.list.SubmittersFragment;
+import app.familygem.util.ChangeUtils;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.ListOfSourceCitations;
@@ -1016,87 +1017,6 @@ public class U {
         return false;
     }
 
-    /**
-     * Saves the tree.
-     *
-     * @param refresh Will refresh also other activities
-     * @param objects Record(s) of which update the change date
-     */
-    public static void save(boolean refresh, Object... objects) {
-        if (refresh)
-            Global.edited = true;
-        if (objects != null)
-            updateChangeDate(objects);
-
-        // al primo salvataggio marchia gli autori
-        if (Global.settings.getCurrentTree().grade == 9) {
-            for (Submitter autore : Global.gc.getSubmitters())
-                autore.putExtension("passed", true);
-            Global.settings.getCurrentTree().grade = 10;
-            Global.settings.save();
-        }
-
-        if (Global.settings.autoSave)
-            saveJson(Global.gc, Global.settings.openTree);
-        else { // mostra il tasto Salva
-            Global.shouldSave = true;
-            if (Global.mainView != null) {
-                NavigationView menu = Global.mainView.findViewById(R.id.menu);
-                menu.getHeaderView(0).findViewById(R.id.menu_salva).setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-    // Update the change date of record(s)
-    public static void updateChangeDate(Object... objects) {
-        for (Object object : objects) {
-            try { // Se aggiornando non ha il metodo get/setChange, passa oltre silenziosamente
-                Change change = (Change)object.getClass().getMethod("getChange").invoke(object);
-                if (change == null) // il record non ha ancora un CHAN
-                    change = new Change();
-                change.setDateTime(actualDateTime());
-                object.getClass().getMethod("setChange", Change.class).invoke(object, change);
-                // Estensione con l'ID della zona, una stringa come "America/Sao_Paulo"
-                change.putExtension("zone", TimeZone.getDefault().getID());
-            } catch (Exception e) {
-            }
-        }
-    }
-
-    // Return actual DateTime
-    public static DateTime actualDateTime() {
-        DateTime dateTime = new DateTime();
-        Date now = new Date();
-        dateTime.setValue(String.format(Locale.ENGLISH, "%te %<Tb %<tY", now));
-        dateTime.setTime(String.format(Locale.ENGLISH, "%tT", now));
-        return dateTime;
-    }
-
-    /**
-     * Saves the GEDCOM tree as JSON.
-     */
-    public static void saveJson(Gedcom gedcom, int treeId) {
-        Header h = gedcom.getHeader();
-        // Solo se l'header è di Family Gem
-        if (h != null && h.getGenerator() != null
-                && h.getGenerator().getValue() != null && h.getGenerator().getValue().equals("FAMILY_GEM")) {
-            // Aggiorna la data e l'ora
-            h.setDateTime(actualDateTime());
-            // Eventualmente aggiorna la versione di Family Gem
-            if ((h.getGenerator().getVersion() != null && !h.getGenerator().getVersion().equals(BuildConfig.VERSION_NAME))
-                    || h.getGenerator().getVersion() == null)
-                h.getGenerator().setVersion(BuildConfig.VERSION_NAME);
-        }
-        try {
-            FileUtils.writeStringToFile(
-                    new File(Global.context.getFilesDir(), treeId + ".json"),
-                    new JsonParser().toJson(gedcom), "UTF-8");
-        } catch (IOException e) {
-            Toast.makeText(Global.context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-        }
-        new Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT);
-    }
-
     public static int castJsonInt(Object unknown) {
         if (unknown instanceof Integer) return (int)unknown;
         else return ((JsonPrimitive)unknown).getAsInt();
@@ -1138,7 +1058,7 @@ public class U {
                             Global.gc.setHeader(testa[0]);
                         }
                         testa[0].setSubmitterRef(idAutore);
-                        save(true);
+                        TreeUtils.INSTANCE.save(true);
                     }).setNegativeButton(R.string.no, null).show();
         }
     }
@@ -1412,7 +1332,7 @@ public class U {
                                         modified.add(family);
                                     }
                             }
-                            U.save(true, modified.toArray());
+                            TreeUtils.INSTANCE.save(true, modified.toArray());
                             Settings.Tree tree = Global.settings.getCurrentTree();
                             if (oldId.equals(tree.root)) {
                                 tree.root = newId;
@@ -1436,27 +1356,27 @@ public class U {
                                         modified.add(person);
                                     }
                             }
-                            U.save(true, modified.toArray());
+                            TreeUtils.INSTANCE.save(true, modified.toArray());
                         } else if (record instanceof Media) {
                             Media media = (Media)record;
                             MediaContainers mediaContainers = new MediaContainers(Global.gc, media, newId);
                             media.setId(newId);
-                            U.updateChangeDate(media);
-                            U.save(true, mediaContainers.containers.toArray());
+                            ChangeUtils.INSTANCE.updateChangeDate(media);
+                            TreeUtils.INSTANCE.save(true, mediaContainers.containers.toArray());
                         } else if (record instanceof Note) {
                             Note note = (Note)record;
                             NoteContainers noteContainers = new NoteContainers(Global.gc, note, newId);
                             note.setId(newId);
-                            U.updateChangeDate(note);
-                            U.save(true, noteContainers.containers.toArray());
+                            ChangeUtils.INSTANCE.updateChangeDate(note);
+                            TreeUtils.INSTANCE.save(true, noteContainers.containers.toArray());
                         } else if (record instanceof Source) {
                             ListOfSourceCitations citations = new ListOfSourceCitations(Global.gc, oldId);
                             for (ListOfSourceCitations.Triplet triple : citations.list)
                                 triple.citation.setRef(newId);
                             Source source = (Source)record;
                             source.setId(newId);
-                            U.updateChangeDate(source);
-                            U.save(true, citations.getProgenitors());
+                            ChangeUtils.INSTANCE.updateChangeDate(source);
+                            TreeUtils.INSTANCE.save(true, citations.getProgenitors());
                         } else if (record instanceof Repository) {
                             Set<Source> modified = new HashSet<>();
                             for (Source source : Global.gc.getSources()) {
@@ -1468,8 +1388,8 @@ public class U {
                             }
                             Repository repo = (Repository)record;
                             repo.setId(newId);
-                            U.updateChangeDate(repo);
-                            U.save(true, modified.toArray());
+                            ChangeUtils.INSTANCE.updateChangeDate(repo);
+                            TreeUtils.INSTANCE.save(true, modified.toArray());
                         } else if (record instanceof Submitter) {
                             for (Settings.Share share : Global.settings.getCurrentTree().shares)
                                 if (oldId.equals(share.submitter))
@@ -1480,7 +1400,7 @@ public class U {
                                 header.setSubmitterRef(newId);
                             Submitter submitter = (Submitter)record;
                             submitter.setId(newId);
-                            U.save(true, submitter);
+                            TreeUtils.INSTANCE.save(true, submitter);
                         }
                         Global.gc.createIndexes();
                         refresh.run();
@@ -1594,18 +1514,6 @@ public class U {
             }
         } else {
             return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
-        }
-    }
-
-    @Deprecated
-    public static void toast(Activity activity, int message) {
-        toast(activity, activity.getString(message));
-    }
-
-    @Deprecated
-    public static void toast(Activity activity, String message) {
-        if (message != null) {
-            activity.runOnUiThread(() -> Toast.makeText(activity, message, Toast.LENGTH_LONG).show());
         }
     }
 

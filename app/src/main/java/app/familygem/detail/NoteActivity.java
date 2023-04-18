@@ -9,6 +9,7 @@ import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.util.ChangeUtils;
 import app.familygem.visitor.NoteReferences;
 
 public class NoteActivity extends DetailActivity {
@@ -41,6 +42,6 @@ public class NoteActivity extends DetailActivity {
 
     @Override
     public void delete() {
-        U.updateChangeDate(U.deleteNote(n, null));
+        ChangeUtils.INSTANCE.updateChangeDate(U.deleteNote(n, null));
     }
 }

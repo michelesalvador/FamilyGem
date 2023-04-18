@@ -5,7 +5,7 @@ import org.folg.gedcom.model.Address;
 import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
-import app.familygem.U;
+import app.familygem.util.ChangeUtils;
 
 public class AddressActivity extends DetailActivity {
 
@@ -31,7 +31,7 @@ public class AddressActivity extends DetailActivity {
     @Override
     public void delete() {
         deleteAddress(Memory.getSecondToLastObject());
-        U.updateChangeDate(Memory.getLeaderObject());
+        ChangeUtils.INSTANCE.updateChangeDate(Memory.getLeaderObject());
         Memory.setInstanceAndAllSubsequentToNull(a);
     }
 }

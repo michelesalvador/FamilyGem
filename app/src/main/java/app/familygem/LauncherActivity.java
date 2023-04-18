@@ -55,7 +55,7 @@ public class LauncherActivity extends AppCompatActivity {
             else if (uri.getLastPathSegment().endsWith(".zip")) // click on the invitation page
                 dateId = uri.getLastPathSegment().replace(".zip", "");
             else {
-                U.toast(this, R.string.cant_understand_uri);
+                U.toast(R.string.cant_understand_uri);
                 return;
             }
             if (!BuildConfig.PASS_KEY.isEmpty()) {
@@ -137,7 +137,7 @@ public class LauncherActivity extends AppCompatActivity {
      * Negative conclusion of the above method.
      */
     static void downloadFailed(Context context, String message, View wheel) {
-        U.toast((Activity)context, message);
+        U.toast(message);
         if (wheel != null)
             ((Activity)context).runOnUiThread(() -> wheel.setVisibility(View.GONE));
         else

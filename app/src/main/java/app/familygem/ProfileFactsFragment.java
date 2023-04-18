@@ -37,6 +37,7 @@ import app.familygem.constant.Gender;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
 import app.familygem.detail.NameActivity;
+import app.familygem.util.TreeUtils;
 
 public class ProfileFactsFragment extends Fragment {
 
@@ -209,7 +210,7 @@ public class ProfileFactsFragment extends Fragment {
                             updateMaritalRoles(one);
                             dialog.dismiss();
                             refresh();
-                            U.save(true, one);
+                            TreeUtils.INSTANCE.save(true, one);
                         }).show());
             } else { // All other events
                 U.placeMedia(otherLayout, object, false);
@@ -356,7 +357,7 @@ public class ProfileFactsFragment extends Fragment {
                 break;
             case 227:
                 Object[] capi = U.deleteNote((Note)pieceObject, pieceView);
-                U.save(true, capi);
+                TreeUtils.INSTANCE.save(true, capi);
                 refresh();
                 return true;
             // Citazione fonte
@@ -375,7 +376,7 @@ public class ProfileFactsFragment extends Fragment {
                 return false;
         }
         refresh();
-        U.save(true, one);
+        TreeUtils.INSTANCE.save(true, one);
         return true;
     }
 

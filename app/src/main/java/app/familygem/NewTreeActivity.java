@@ -1,6 +1,5 @@
 package app.familygem;
 
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -46,6 +45,7 @@ import java.util.zip.ZipInputStream;
 
 import app.familygem.constant.Extra;
 import app.familygem.share.CompareActivity;
+import app.familygem.util.ChangeUtils;
 
 public class NewTreeActivity extends BaseActivity {
 
@@ -240,7 +240,7 @@ public class NewTreeActivity extends BaseActivity {
             U.toast(R.string.tree_imported_ok);
             return true;
         } catch (Exception e) {
-            U.toast((Activity)context, e.getLocalizedMessage());
+            U.toast(e.getLocalizedMessage());
         }
         return false;
     }
@@ -377,27 +377,27 @@ public class NewTreeActivity extends BaseActivity {
     }
 
     // Crea l'intestazione standard per questa app
-    public static Header createHeader(String nomeFile) {
-        Header testa = new Header();
+    public static Header createHeader(String fileName) {
+        Header header = new Header();
         Generator app = new Generator();
         app.setValue("FAMILY_GEM");
         app.setName("Family Gem");
         app.setVersion(BuildConfig.VERSION_NAME);
-        testa.setGenerator(app);
-        testa.setFile(nomeFile);
-        GedcomVersion versione = new GedcomVersion();
-        versione.setForm("LINEAGE-LINKED");
-        versione.setVersion("5.5.1");
-        testa.setGedcomVersion(versione);
+        header.setGenerator(app);
+        header.setFile(fileName);
+        GedcomVersion version = new GedcomVersion();
+        version.setForm("LINEAGE-LINKED");
+        version.setVersion("5.5.1");
+        header.setGedcomVersion(version);
         CharacterSet codifica = new CharacterSet();
         codifica.setValue("UTF-8");
-        testa.setCharacterSet(codifica);
+        header.setCharacterSet(codifica);
         Locale loc = new Locale(Locale.getDefault().getLanguage());
         // C'è anche Resources.getSystem().getConfiguration().locale.getLanguage() che ritorna lo stesso 'it'
-        testa.setLanguage(loc.getDisplayLanguage(Locale.ENGLISH));    // ok prende la lingua di sistema in inglese, non nella lingua locale
+        header.setLanguage(loc.getDisplayLanguage(Locale.ENGLISH)); // ok prende la lingua di sistema in inglese, non nella lingua locale
         // in header ci sono due campi data: TRANSMISSION_DATE un po' forzatamente può contenere la data di ultima modifica
-        testa.setDateTime(U.actualDateTime());
-        return testa;
+        header.setDateTime(ChangeUtils.INSTANCE.actualDateTime());
+        return header;
     }
 
     // Freccia indietro nella toolbar come quella hardware

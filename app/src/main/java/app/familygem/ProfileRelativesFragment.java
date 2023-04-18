@@ -24,6 +24,7 @@ import java.util.List;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.list.PersonsFragment;
+import app.familygem.util.TreeUtils;
 
 public class ProfileRelativesFragment extends Fragment {
 
@@ -108,7 +109,7 @@ public class ProfileRelativesFragment extends Fragment {
 
     private void moveFamilyRef(int direction) {
         Collections.swap(one.getSpouseFamilyRefs(), posFam, posFam + direction);
-        U.save(true, one);
+        TreeUtils.INSTANCE.save(true, one);
         refresh();
     }
 
@@ -172,7 +173,7 @@ public class ProfileRelativesFragment extends Fragment {
             FamilyActivity.disconnect(indiId, family);
             refresh();
             U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
-            U.save(true, family, person);
+            TreeUtils.INSTANCE.save(true, family, person);
         } else if (id == 308) { // Elimina
             new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete, (dialog, i) -> {

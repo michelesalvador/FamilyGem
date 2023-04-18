@@ -43,6 +43,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.detail.SourceActivity;
+import app.familygem.util.TreeUtils;
 import app.familygem.visitor.ListOfSourceCitations;
 
 /**
@@ -263,7 +264,7 @@ public class SourcesFragment extends Fragment {
             if (container instanceof Note) ((Note)container).addSourceCitation(sourceCitation);
             else ((SourceCitationContainer)container).addSourceCitation(sourceCitation);
         }
-        U.save(true, source);
+        TreeUtils.INSTANCE.save(true, source);
         Memory.setLeader(source);
         context.startActivity(new Intent(context, SourceActivity.class));
     }
@@ -365,7 +366,7 @@ public class SourcesFragment extends Fragment {
             U.editId(getContext(), source, getActivity()::recreate);
         } else if (item.getItemId() == 1) { // Delete source
             Object[] objects = deleteSource(source);
-            U.save(false, objects);
+            TreeUtils.INSTANCE.save(false, objects);
             getActivity().recreate();
         } else {
             return false;

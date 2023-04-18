@@ -10,6 +10,7 @@ import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.util.ChangeUtils;
 
 public class NameActivity extends DetailActivity {
 
@@ -55,7 +56,7 @@ public class NameActivity extends DetailActivity {
     public void delete() {
         Person currentPerson = gc.getPerson(Global.indi);
         currentPerson.getNames().remove(n);
-        U.updateChangeDate(currentPerson);
+        ChangeUtils.INSTANCE.updateChangeDate(currentPerson);
         Memory.setInstanceAndAllSubsequentToNull(n);
     }
 }

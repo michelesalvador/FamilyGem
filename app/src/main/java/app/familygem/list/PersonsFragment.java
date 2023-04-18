@@ -50,8 +50,8 @@ import app.familygem.DiagramFragment;
 import app.familygem.F;
 import app.familygem.GedcomDateConverter;
 import app.familygem.Global;
-import app.familygem.PersonEditorActivity;
 import app.familygem.Memory;
+import app.familygem.PersonEditorActivity;
 import app.familygem.ProfileActivity;
 import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
@@ -59,6 +59,7 @@ import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
+import app.familygem.util.TreeUtils;
 
 public class PersonsFragment extends Fragment {
 
@@ -158,8 +159,7 @@ public class PersonsFragment extends Fragment {
     private class PersonsAdapter extends RecyclerView.Adapter<IndiHolder> implements Filterable {
         @Override
         public IndiHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View indiView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.piece_person, parent, false);
+            View indiView = LayoutInflater.from(parent.getContext()).inflate(R.layout.piece_person, parent, false);
             registerForContextMenu(indiView);
             return new IndiHolder(indiView);
         }
@@ -705,7 +705,7 @@ public class PersonsFragment extends Fragment {
         if (Global.indi != null && Global.indi.equals(personId))
             Global.indi = newRootId;
         Toast.makeText(context, R.string.person_deleted, Toast.LENGTH_SHORT).show();
-        U.save(true, (Object[])families);
+        TreeUtils.INSTANCE.save(true, (Object[])families);
         return families;
     }
 }

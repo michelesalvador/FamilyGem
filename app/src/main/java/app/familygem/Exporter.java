@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import app.familygem.util.ChangeUtils;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.MediaList;
 
@@ -198,7 +199,7 @@ public class Exporter {
             gedcom.setHeader(NewTreeActivity.createHeader(gedcomFilename));
         else {
             header.setFile(gedcomFilename);
-            header.setDateTime(U.actualDateTime());
+            header.setDateTime(ChangeUtils.INSTANCE.actualDateTime());
         }
     }
 
