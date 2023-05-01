@@ -178,7 +178,7 @@ class TreesActivity : AppCompatActivity() {
                             }
                         }
                         DragEvent.ACTION_DRAG_LOCATION -> {
-                            val touchY = view.top + event.y // Y coord of touch event inside the current viewport
+                            val touchY = view.top + event.y // Y coordinate of touch event inside the current viewport
                             if (touchY < listView.top + U.dpToPx(60f)) {
                                 listView.smoothScrollBy(-U.dpToPx(10f), 25)
                             } else if (touchY > listView.bottom - U.dpToPx(60f)) {
@@ -223,6 +223,19 @@ class TreesActivity : AppCompatActivity() {
                     draggedTreeId = 0
                     updateList()
                     Global.settings.save()
+                }
+                DragEvent.ACTION_DRAG_EXITED -> {
+                    // Fixes the drop outside the list on old devices
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                        draggedTreeId = 0
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    // Refreshes the list dropping a tree outside the list (e.g. on the toolbar)
+                    // Called only from API 24+
+                    draggedTreeId = 0
+                    adapter.notifyDataSetChanged()
                 }
             }
             true
@@ -296,6 +309,7 @@ class TreesActivity : AppCompatActivity() {
                 startActivity(Intent(this@TreesActivity, MediaFoldersActivity::class.java)
                         .putExtra(Extra.TREE_ID, treeId))
             } else if (id == 4) { // Find errors
+                progress.visibility = View.VISIBLE
                 lifecycleScope.launch(Dispatchers.Default) { findErrors(treeId, false) }
             } else if (id == 5) { // Share tree
                 startActivity(Intent(this@TreesActivity, SharingActivity::class.java)
@@ -479,7 +493,8 @@ class TreesActivity : AppCompatActivity() {
      */
     suspend fun findErrors(treeId: Int, correct: Boolean): Gedcom? {
         errorList.clear()
-        val gedcom = readJson(treeId) ?: return null
+        val gedcom = if (Global.shouldSave && treeId == Global.settings.openTree && Global.gc != null) Global.gc
+        else readJson(treeId) ?: return null
 
         // Root in settings
         val tree = Global.settings.getTree(treeId)
@@ -707,22 +722,6 @@ class TreesActivity : AppCompatActivity() {
             }
         }
 
-        // Null references in source towards media
-        // Solves possible errors caused by the "mediaId" bug, fixed with commit dbea5adb
-        gedcom.sources.forEach { source ->
-            val mediaIterator = source.mediaRefs.iterator()
-            while (mediaIterator.hasNext()) {
-                if (mediaIterator.next().ref == null) {
-                    if (correct) mediaIterator.remove()
-                    else addError("OBJE without value in ${source.id}")
-                }
-            }
-            // Removes empty list of media refs
-            if (source.mediaRefs.isEmpty() && correct) {
-                source.mediaRefs = null
-            }
-        }
-
         // Adds a 'TYPE' tag to name types that don't have it
         gedcom.people.forEach { person ->
             person.names.forEach {
@@ -760,20 +759,25 @@ class TreesActivity : AppCompatActivity() {
             dialog.setMessage(message)
             if (total > 0) {
                 dialog.setPositiveButton(R.string.correct) { _, _ ->
+                    progress.visibility = View.VISIBLE
                     lifecycleScope.launch(Dispatchers.Default) {
                         val correctGedcom = findErrors(treeId, true)
                         if (correctGedcom != null) {
                             TreeUtils.saveJson(correctGedcom, treeId)
+                            Global.shouldSave = false // Just in case
                             if (treeId == Global.settings.openTree && Global.gc != null) Global.gc = correctGedcom
                             else Global.gc = null // Resets it to reload corrected
                             findErrors(treeId, false) // Restart process to display the result
-                            updateList()
+                            withContext(Dispatchers.Main) { updateList() }
                         }
                     }
                 }
             }
             dialog.setNeutralButton(R.string.cancel, null)
-            withContext(Dispatchers.Main) { dialog.show() }
+            withContext(Dispatchers.Main) {
+                progress.visibility = View.GONE
+                dialog.show()
+            }
         }
         return gedcom
     }

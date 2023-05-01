@@ -2,6 +2,7 @@ package app.familygem;
 
 import static app.familygem.Global.gc;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -29,7 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
+import app.familygem.constant.Relation;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.list.FamiliesFragment;
@@ -37,32 +40,34 @@ import app.familygem.util.TreeUtils;
 
 public class PersonEditorActivity extends AppCompatActivity {
 
-    Person p;
-    String idIndi;
-    String familyId;
-    int relation;
-    RadioButton sexMale;
-    RadioButton sexFemale;
-    RadioButton sexUnknown;
-    int lastChecked;
-    EditText birthDate;
-    DateEditorLayout birthDateEditor;
-    EditText birthPlace;
-    SwitchCompat isDeadSwitch;
-    EditText deathDate;
-    DateEditorLayout deathDateEditor;
-    EditText deathPlace;
-    boolean nameFromPieces; //If the given name and surname come from the Given and Surname pieces, they must return there
+    private String personId; // ID of the person we want to edit. If null we have to create a new person.
+    private String familyId;
+    private Relation relation; // If not null is the relation between the pivot (personId) and the person we have to create
+    private Person person; // The person to edit or create
+    private RadioButton sexMale;
+    private RadioButton sexFemale;
+    private RadioButton sexUnknown;
+    private int lastChecked;
+    private EditText birthDate;
+    private DateEditorLayout birthDateEditor;
+    private EditText birthPlace;
+    private SwitchCompat isDeadSwitch;
+    private EditText deathDate;
+    private DateEditorLayout deathDateEditor;
+    private EditText deathPlace;
+    private boolean fromFamilyActivity; // Previous activity was DetailActivity
+    private boolean nameFromPieces; // If the given name and surname come from the Given and Surname pieces, they must return there
 
     @Override
-    protected void onCreate(Bundle bandolo) {
-        super.onCreate(bandolo);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         U.ensureGlobalGedcomNotNull(gc);
         setContentView(R.layout.edita_individuo);
-        Bundle bundle = getIntent().getExtras();
-        idIndi = bundle.getString("idIndividuo");
-        familyId = bundle.getString("idFamiglia");
-        relation = bundle.getInt("relazione", 0);
+        Intent intent = getIntent();
+        personId = intent.getStringExtra("idIndividuo");
+        familyId = intent.getStringExtra("idFamiglia");
+        relation = (Relation)intent.getSerializableExtra(Extra.RELATION);
+        fromFamilyActivity = intent.getBooleanExtra(Extra.FROM_FAMILY, false);
 
         sexMale = findViewById(R.id.sesso1);
         sexFemale = findViewById(R.id.sesso2);
@@ -94,41 +99,41 @@ public class PersonEditorActivity extends AppCompatActivity {
         disableDeath();
 
         // New person in kinship relationship
-        if (relation > 0) {
-            p = new Person();
-            Person pivot = gc.getPerson(idIndi);
+        if (relation != null) {
+            person = new Person();
+            Person pivot = gc.getPerson(personId);
             String surname = null;
-            // Brother's surname
-            if (relation == 2) { // Sibling
+            // Sibling's surname
+            if (relation == Relation.SIBLING) {
                 surname = U.surname(pivot);
-                // Father's surname
-            } else if (relation == 4) { // Child from DiagramFragment or ProfileActivity
-                if (Gender.isMale(pivot))
-                    surname = U.surname(pivot);
-                else if (familyId != null) {
+            } // Father's surname
+            else if (relation == Relation.CHILD) {
+                if (fromFamilyActivity) { // Child from FamilyActivity
                     Family fam = gc.getFamily(familyId);
-                    if (fam != null && !fam.getHusbands(gc).isEmpty())
+                    if (!fam.getHusbands(gc).isEmpty())
                         surname = U.surname(fam.getHusbands(gc).get(0));
+                    else if (!fam.getChildren(gc).isEmpty())
+                        surname = U.surname(fam.getChildren(gc).get(0));
+                } else { // Child from DiagramFragment or ProfileActivity
+                    if (Gender.isMale(pivot))
+                        surname = U.surname(pivot);
+                    else if (familyId != null) {
+                        Family fam = gc.getFamily(familyId);
+                        if (fam != null && !fam.getHusbands(gc).isEmpty())
+                            surname = U.surname(fam.getHusbands(gc).get(0));
+                    }
                 }
-            } else if (relation == 6) { // Child from FamilyActivity
-                Family fam = gc.getFamily(familyId);
-                if (!fam.getHusbands(gc).isEmpty())
-                    surname = U.surname(fam.getHusbands(gc).get(0));
-                else if (!fam.getChildren(gc).isEmpty())
-                    surname = U.surname(fam.getChildren(gc).get(0));
             }
             ((EditText)findViewById(R.id.cognome)).setText(surname);
-            // New unrelated person
-        } else if (idIndi.equals("TIZIO_NUOVO")) {
-            p = new Person();
-            // Gets the data of an existing person to edit them
-        } else {
-            p = gc.getPerson(idIndi);
+        } else if (personId == null) { // New unrelated person
+            person = new Person();
+        } else { // Gets the data of an existing person to edit them
+            person = gc.getPerson(personId);
             // Given name and surname
-            if (!p.getNames().isEmpty()) {
+            if (!person.getNames().isEmpty()) {
                 String givenName = "";
                 String surname = "";
-                Name n = p.getNames().get(0);
+                Name n = person.getNames().get(0);
                 String value = n.getValue();
                 if (value != null) {
                     givenName = value.replaceAll("/.*?/", "").trim(); // Removes surname between two "/"
@@ -148,7 +153,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                 ((EditText)findViewById(R.id.cognome)).setText(surname);
             }
             // Sex
-            switch (Gender.getGender(p)) {
+            switch (Gender.getGender(person)) {
                 case MALE:
                     sexMale.setChecked(true);
                     break;
@@ -160,7 +165,7 @@ public class PersonEditorActivity extends AppCompatActivity {
             }
             lastChecked = radioGroup.getCheckedRadioButtonId();
             // Birth and death
-            for (EventFact fact : p.getEventsFacts()) {
+            for (EventFact fact : person.getEventsFacts()) {
                 if (fact.getTag().equals("BIRT")) {
                     if (fact.getDate() != null)
                         birthDate.setText(fact.getDate().trim());
@@ -226,13 +231,13 @@ public class PersonEditorActivity extends AppCompatActivity {
         String givenName = ((EditText)findViewById(R.id.nome)).getText().toString().trim();
         String surname = ((EditText)findViewById(R.id.cognome)).getText().toString().trim();
         Name name;
-        if (p.getNames().isEmpty()) {
+        if (person.getNames().isEmpty()) {
             List<Name> names = new ArrayList<>();
             name = new Name();
             names.add(name);
-            p.setNames(names);
+            person.setNames(names);
         } else
-            name = p.getNames().get(0);
+            name = person.getNames().get(0);
 
         if (nameFromPieces) {
             name.setGiven(givenName);
@@ -251,7 +256,7 @@ public class PersonEditorActivity extends AppCompatActivity {
             chosenGender = "U";
         if (chosenGender != null) {
             boolean missingSex = true;
-            for (EventFact fact : p.getEventsFacts()) {
+            for (EventFact fact : person.getEventsFacts()) {
                 if (fact.getTag().equals("SEX")) {
                     fact.setValue(chosenGender);
                     missingSex = false;
@@ -261,13 +266,13 @@ public class PersonEditorActivity extends AppCompatActivity {
                 EventFact sex = new EventFact();
                 sex.setTag("SEX");
                 sex.setValue(chosenGender);
-                p.addEventFact(sex);
+                person.addEventFact(sex);
             }
-            ProfileFactsFragment.updateMaritalRoles(p);
+            ProfileFactsFragment.updateSpouseRoles(person);
         } else { // Remove existing sex tag
-            for (EventFact fact : p.getEventsFacts()) {
+            for (EventFact fact : person.getEventsFacts()) {
                 if (fact.getTag().equals("SEX")) {
-                    p.getEventsFacts().remove(fact);
+                    person.getEventsFacts().remove(fact);
                     break;
                 }
             }
@@ -278,7 +283,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         String date = birthDate.getText().toString().trim();
         String place = birthPlace.getText().toString().trim();
         boolean found = false;
-        for (EventFact fact : p.getEventsFacts()) {
+        for (EventFact fact : person.getEventsFacts()) {
             if (fact.getTag().equals("BIRT")) {
                 /* TODO:
                    if (date.isEmpty() && place.isEmpty() && tagAllEmpty(fact))
@@ -297,7 +302,7 @@ public class PersonEditorActivity extends AppCompatActivity {
             birth.setDate(date);
             birth.setPlace(place);
             EventActivity.cleanUpTag(birth);
-            p.addEventFact(birth);
+            person.addEventFact(birth);
         }
 
         // Death
@@ -305,10 +310,10 @@ public class PersonEditorActivity extends AppCompatActivity {
         date = deathDate.getText().toString().trim();
         place = deathPlace.getText().toString().trim();
         found = false;
-        for (EventFact fact : p.getEventsFacts()) {
+        for (EventFact fact : person.getEventsFacts()) {
             if (fact.getTag().equals("DEAT")) {
                 if (!isDeadSwitch.isChecked()) {
-                    p.getEventsFacts().remove(fact);
+                    person.getEventsFacts().remove(fact);
                 } else {
                     fact.setDate(date);
                     fact.setPlace(place);
@@ -319,30 +324,31 @@ public class PersonEditorActivity extends AppCompatActivity {
             }
         }
         if (!found && isDeadSwitch.isChecked()) {
-            EventFact morte = new EventFact();
-            morte.setTag("DEAT");
-            morte.setDate(date);
-            morte.setPlace(place);
-            EventActivity.cleanUpTag(morte);
-            p.addEventFact(morte);
+            EventFact death = new EventFact();
+            death.setTag("DEAT");
+            death.setDate(date);
+            death.setPlace(place);
+            EventActivity.cleanUpTag(death);
+            person.addEventFact(death);
         }
 
         // Finalization of new person
-        Object[] modifications = {p, null}; // The null is used to receive a possible Family
-        if (idIndi.equals("TIZIO_NUOVO") || relation > 0) {
+        Object[] modifications = {person, null}; // The null is used to receive a possible Family
+        if (personId == null || relation != null) {
             String newId = U.newID(gc, Person.class);
-            p.setId(newId);
-            gc.addPerson(p);
+            person.setId(newId);
+            gc.addPerson(person);
             if (Global.settings.getCurrentTree().root == null)
                 Global.settings.getCurrentTree().root = newId;
             Global.settings.save();
-            if (relation >= 5) { // Comes from FamilyActivity
-                FamilyActivity.connect(p, gc.getFamily(familyId), relation);
-                modifications[1] = gc.getFamily(familyId);
-            } else if (relation > 0) // Comes from DiagramFragment o ProfileRelativesFragment
-                modifications = addParent(idIndi, newId, familyId, relation, getIntent().getStringExtra("collocazione"));
+            if (fromFamilyActivity) { // Comes from FamilyActivity
+                Family family = gc.getFamily(familyId);
+                FamilyActivity.connect(person, family, relation);
+                modifications[1] = family;
+            } else if (relation != null) // Comes from DiagramFragment o ProfileRelativesFragment
+                modifications = addParent(personId, newId, familyId, relation, getIntent().getStringExtra("collocazione"));
         } else
-            Global.indi = p.getId(); // To show the person then in DiagramFragment
+            Global.indi = person.getId(); // To show the person then in DiagramFragment
         TreeUtils.INSTANCE.save(true, modifications);
         onBackPressed();
     }
@@ -353,13 +359,14 @@ public class PersonEditorActivity extends AppCompatActivity {
      * @param familyId Id of the target family. If it is null, a new family is created
      * @param placing  Summarizes how the family was identified and therefore what to do with the people involved
      */
-    static Object[] addParent(String pivotId, String newId, String familyId, int relation, String placing) {
+    static Object[] addParent(String pivotId, String newId, String familyId, Relation relation, String placing) {
         Global.indi = pivotId;
         Person newPerson = gc.getPerson(newId);
         // A new family is created in which both pivot and newPerson end up
         if (placing != null && placing.startsWith("NUOVA_FAMIGLIA_DI")) { // Contains the ID of the parent to create a new family of
             pivotId = placing.substring(17); // The parent effectively becomes the pivot
-            relation = relation == 2 ? 4 : relation; // Instead of a sibling to pivot, it is as if we were putting a child to the parent
+            // Instead of a sibling to pivot, it is as if we were putting a child to the parent
+            relation = relation == Relation.SIBLING ? Relation.CHILD : relation;
         }
         // In ListOfPeopleActivity has been identified the family in which will end up the pivot
         else if (placing != null && placing.equals("FAMIGLIA_ESISTENTE")) {
@@ -381,25 +388,25 @@ public class PersonEditorActivity extends AppCompatActivity {
 
         // Population of refs
         switch (relation) {
-            case 1: // Parent
+            case PARENT:
                 refSpouse1.setRef(newId);
                 refChild1.setRef(pivotId);
                 if (newPerson != null) newPerson.addSpouseFamilyRef(spouseFamilyRef);
                 if (pivot != null) pivot.addParentFamilyRef(parentFamilyRef);
                 break;
-            case 2: // Sibling
+            case SIBLING:
                 refChild1.setRef(pivotId);
                 refFiglio2.setRef(newId);
                 if (pivot != null) pivot.addParentFamilyRef(parentFamilyRef);
                 if (newPerson != null) newPerson.addParentFamilyRef(parentFamilyRef);
                 break;
-            case 3: // Partner
+            case PARTNER:
                 refSpouse1.setRef(pivotId);
                 refSposo2.setRef(newId);
                 if (pivot != null) pivot.addSpouseFamilyRef(spouseFamilyRef);
                 if (newPerson != null) newPerson.addSpouseFamilyRef(spouseFamilyRef);
                 break;
-            case 4: // Child
+            case CHILD:
                 refSpouse1.setRef(pivotId);
                 refChild1.setRef(newId);
                 if (pivot != null) pivot.addSpouseFamilyRef(spouseFamilyRef);
@@ -415,7 +422,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         if (refFiglio2.getRef() != null)
             family.addChild(refFiglio2);
 
-        if (relation == 1 || relation == 2) // It will bring up the selected family
+        if (relation == Relation.PARENT || relation == Relation.SIBLING) // It will bring up the selected family
             Global.familyNum = gc.getPerson(Global.indi).getParentFamilies(gc).indexOf(family);
         else
             Global.familyNum = 0; // Otherwise resets it
@@ -431,7 +438,7 @@ public class PersonEditorActivity extends AppCompatActivity {
     }
 
     /**
-     * Adds the spouse in a family: always and only on the basis of sex
+     * Adds the spouse in a family: always and only on the basis of sex.
      */
     public static void addSpouse(Family family, SpouseRef sr) {
         Person person = Global.gc.getPerson(sr.getRef());

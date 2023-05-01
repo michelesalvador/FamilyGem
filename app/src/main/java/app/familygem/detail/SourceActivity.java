@@ -3,9 +3,9 @@ package app.familygem.detail;
 import static app.familygem.Global.gc;
 
 import android.content.Intent;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
@@ -23,37 +23,38 @@ import app.familygem.visitor.ListOfSourceCitations;
 
 public class SourceActivity extends DetailActivity {
 
-    Source f;
+    Source source;
 
     @Override
     public void format() {
         setTitle(R.string.source);
-        f = (Source)cast(Source.class);
-        placeSlug("SOUR", f.getId());
-        ListOfSourceCitations citations = new ListOfSourceCitations(gc, f.getId());
-        f.putExtension("citaz", citations.list.size()); // For SourcesFragment
+        source = (Source)cast(Source.class);
+        placeSlug("SOUR", source.getId());
+        ListOfSourceCitations citations = new ListOfSourceCitations(gc, source.getId());
+        source.putExtension("citaz", citations.list.size()); // For SourcesFragment
+        int multiLine = InputType.TYPE_TEXT_FLAG_MULTI_LINE;
         place(getString(R.string.abbreviation), "Abbreviation");
-        place(getString(R.string.title), "Title", true, true);
-        place(getString(R.string.type), "Type", false, true); // '_TYPE' tag not GEDCOM standard
-        place(getString(R.string.author), "Author", true, true);
-        place(getString(R.string.publication_facts), "PublicationFacts", true, true);
-        place(getString(R.string.date), "Date"); // Always null in my Gedcom
-        place(getString(R.string.text), "Text", true, true);
-        place(getString(R.string.call_number), "CallNumber", false, false); // CALN tag should be in the SOURCE_REPOSITORY_CITATION per GEDCOM specs
-        place(getString(R.string.italic), "Italic", false, false); // _italic indicates source title to be in italics
-        place(getString(R.string.media_type), "MediaType", false, false); // MEDI tag, should be in SOURCE_REPOSITORY_CITATION
-        place(getString(R.string.parentheses), "Paren", false, false); // _PAREN indicates source facts are to be enclosed in parentheses
-        place(getString(R.string.reference_number), "ReferenceNumber"); // REFN tag TODO: maybe set it common = false?
-        place(getString(R.string.rin), "Rin", false, false);
-        place(getString(R.string.user_id), "Uid", false, false);
-        placeExtensions(f);
+        place(getString(R.string.title), "Title", true, multiLine);
+        place(getString(R.string.type), "Type", false, 0); // '_TYPE' tag not GEDCOM standard
+        place(getString(R.string.author), "Author", true, multiLine);
+        place(getString(R.string.publication_facts), "PublicationFacts", true, multiLine);
+        place(getString(R.string.date), "Date", false, 0); // Here it's not GEDCOM standard, should be in SOUR.DATA.EVEN.DATE
+        place(getString(R.string.text), "Text", true, multiLine);
+        place(getString(R.string.call_number), "CallNumber", false, 0); // CALN tag should be in the SOURCE_REPOSITORY_CITATION per GEDCOM specs
+        place(getString(R.string.italic), "Italic", false, 0); // _italic indicates source title to be in italics
+        place(getString(R.string.media_type), "MediaType", false, 0); // MEDI tag, should be in SOURCE_REPOSITORY_CITATION
+        place(getString(R.string.parentheses), "Paren", false, 0); // _PAREN indicates source facts are to be enclosed in parentheses
+        place(getString(R.string.reference_number), "ReferenceNumber"); // REFN tag
+        place(getString(R.string.rin), "Rin", false, 0);
+        place(getString(R.string.user_id), "Uid", false, 0);
+        placeExtensions(source);
 
         // Places the citation to the repository
-        if (f.getRepositoryRef() != null) {
+        if (source.getRepositoryRef() != null) {
             View refView = LayoutInflater.from(this).inflate(R.layout.pezzo_citazione_fonte, box, false);
             box.addView(refView);
             refView.setBackgroundColor(getResources().getColor(R.color.repository_citation));
-            final RepositoryRef repositoryRef = f.getRepositoryRef();
+            final RepositoryRef repositoryRef = source.getRepositoryRef();
             if (repositoryRef.getRepository(gc) != null) {
                 ((TextView)refView.findViewById(R.id.fonte_testo)).setText(repositoryRef.getRepository(gc).getName());
                 ((CardView)refView.findViewById(R.id.citazione_fonte)).setCardBackgroundColor(getResources().getColor(R.color.repository));
@@ -73,15 +74,15 @@ public class SourceActivity extends DetailActivity {
             registerForContextMenu(refView);
             refView.setTag(R.id.tag_object, repositoryRef); // For the context menu
         }
-        U.placeNotes(box, f, true);
-        U.placeMedia(box, f, true);
-        U.placeChangeDate(box, f.getChange());
+        U.placeNotes(box, source, true);
+        U.placeMedia(box, source, true);
+        U.placeChangeDate(box, source.getChange());
         if (!citations.list.isEmpty())
             U.placeCabinet(box, citations.getProgenitors(), R.string.cited_by);
     }
 
     @Override
     public void delete() {
-        ChangeUtils.INSTANCE.updateChangeDate(SourcesFragment.deleteSource(f));
+        ChangeUtils.INSTANCE.updateChangeDate(SourcesFragment.deleteSource(source));
     }
 }

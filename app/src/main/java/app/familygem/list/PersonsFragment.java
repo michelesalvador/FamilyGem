@@ -57,8 +57,10 @@ import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
+import app.familygem.constant.Relation;
 import app.familygem.util.TreeUtils;
 
 public class PersonsFragment extends Fragment {
@@ -90,7 +92,7 @@ public class PersonsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-        View view = inflater.inflate(R.layout.recycler_view, container, false);
+        View view = inflater.inflate(R.layout.recyclerview, container, false);
         if (gc != null) {
             establishPeople();
             RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
@@ -98,9 +100,7 @@ public class PersonsFragment extends Fragment {
             recyclerView.setAdapter(adapter);
             idsAreNumeric = verifyNumericIds();
             view.findViewById(R.id.fab).setOnClickListener(v -> {
-                Intent intent = new Intent(getContext(), PersonEditorActivity.class);
-                intent.putExtra("idIndividuo", "TIZIO_NUOVO");
-                startActivity(intent);
+                startActivity(new Intent(getContext(), PersonEditorActivity.class));
             });
 
             // Fast scroller
@@ -282,16 +282,16 @@ public class PersonsFragment extends Fragment {
                 String collocazione = intent.getStringExtra("collocazione");
                 if (collocazione != null && collocazione.equals("FAMIGLIA_ESISTENTE")) {
                     String idFamiglia = null;
-                    switch (intent.getIntExtra("relazione", 0)) {
-                        case 1: // Genitore
+                    switch ((Relation)intent.getSerializableExtra(Extra.RELATION)) {
+                        case PARENT:
                             if (relative.getSpouseFamilyRefs().size() > 0)
                                 idFamiglia = relative.getSpouseFamilyRefs().get(0).getRef();
                             break;
-                        case 2:
+                        case SIBLING:
                             if (relative.getParentFamilyRefs().size() > 0)
                                 idFamiglia = relative.getParentFamilyRefs().get(0).getRef();
                             break;
-                        case 3:
+                        case PARTNER:
                             for (Family fam : relative.getSpouseFamilies(gc)) {
                                 if (fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty()) {
                                     idFamiglia = fam.getId();
@@ -299,7 +299,7 @@ public class PersonsFragment extends Fragment {
                                 }
                             }
                             break;
-                        case 4:
+                        case CHILD:
                             for (Family fam : relative.getParentFamilies(gc)) {
                                 if (fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty()) {
                                     idFamiglia = fam.getId();
@@ -441,7 +441,7 @@ public class PersonsFragment extends Fragment {
     }
 
     /**
-     * Count how many near relatives one person has: parents, siblings, step-siblings, spouses and children.
+     * Count how many near relatives one person has: parents, siblings, half-siblings, spouses and children.
      *
      * @param person The person to start from
      * @return Number of near relatives (person excluded)

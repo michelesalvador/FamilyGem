@@ -8,18 +8,19 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.StrictMode;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
 import androidx.core.content.FileProvider;
-import androidx.multidex.BuildConfig;
 
 import org.folg.gedcom.model.Media;
 
 import java.io.File;
 import java.util.List;
 
+import app.familygem.BuildConfig;
 import app.familygem.DetailActivity;
 import app.familygem.F;
 import app.familygem.Global;
@@ -33,36 +34,35 @@ import app.familygem.visitor.MediaReferences;
 
 public class MediaActivity extends DetailActivity {
 
-    Media m;
+    Media media;
     View imageView;
 
     @Override
     public void format() {
-        m = (Media)cast(Media.class);
-        if (m.getId() != null) { // Only shared Media have ID, inline Media don't
+        media = (Media)cast(Media.class);
+        if (media.getId() != null) { // Only shared Media have ID, inline Media don't
             setTitle(R.string.shared_media);
-            placeSlug("OBJE", m.getId());
+            placeSlug("OBJE", media.getId());
         } else {
             setTitle(R.string.media);
             placeSlug("OBJE", null);
         }
-        displayMedia(m, box.getChildCount());
+        displayMedia(media, box.getChildCount());
         place(getString(R.string.title), "Title");
-        place(getString(R.string.type), "Type", false, false); // Tag '_TYPE' not GEDCOM standard
-        if (Global.settings.expert)
-            place(getString(R.string.file), "File"); // File name, visible only with advanced tools
+        place(getString(R.string.type), "Type", false, 0); // Tag '_TYPE' not GEDCOM standard
         // TODO: File string should be max 259 characters according to GEDCOM 5.5.5 specs
-        place(getString(R.string.format), "Format", Global.settings.expert, false); // File format, e.g. 'jpeg'
+        place(getString(R.string.file), "File", Global.settings.expert, InputType.TYPE_CLASS_TEXT); // File name, visible only with advanced tools
+        place(getString(R.string.format), "Format", Global.settings.expert, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS); // File format, e.g. 'JPEG'
         place(getString(R.string.primary), "Primary"); // Tag '_PRIM' not GEDCOM standard, but used to select main media
-        place(getString(R.string.scrapbook), "Scrapbook", false, false); // Scrapbook that contains the Media record, not GEDCOM standard
-        place(getString(R.string.slideshow), "SlideShow", false, false); // Not GEDCOM standard
-        place(getString(R.string.blob), "Blob", false, true);
+        place(getString(R.string.scrapbook), "Scrapbook", false, 0); // Scrapbook that contains the Media record, not GEDCOM standard
+        place(getString(R.string.slideshow), "SlideShow", false, 0); // Not GEDCOM standard
+        place(getString(R.string.blob), "Blob", false, InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         //m.getFileTag(); // The tag, could be 'FILE' or '_FILE'
-        placeExtensions(m);
-        U.placeNotes(box, m, true);
-        U.placeChangeDate(box, m.getChange());
+        placeExtensions(media);
+        U.placeNotes(box, media, true);
+        U.placeChangeDate(box, media.getChange());
         // List of records in which the media is used
-        MediaReferences mediaReferences = new MediaReferences(gc, m, false);
+        MediaReferences mediaReferences = new MediaReferences(gc, media, false);
         if (mediaReferences.leaders.size() > 0)
             U.placeCabinet(box, mediaReferences.leaders.toArray(), R.string.used_by);
         else if (((Activity)box.getContext()).getIntent().getBooleanExtra("daSolo", false))
@@ -123,11 +123,11 @@ public class MediaActivity extends DetailActivity {
     public void updateImage() {
         int position = box.indexOfChild(imageView);
         box.removeView(imageView);
-        displayMedia(m, position);
+        displayMedia(media, position);
     }
 
     @Override
     public void delete() {
-        ChangeUtils.INSTANCE.updateChangeDate(MediaFragment.deleteMedia(m, null));
+        ChangeUtils.INSTANCE.updateChangeDate(MediaFragment.deleteMedia(media, null));
     }
 }

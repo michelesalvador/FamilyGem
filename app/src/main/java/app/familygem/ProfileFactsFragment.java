@@ -207,7 +207,7 @@ public class ProfileFactsFragment extends Fragment {
                 eventView.setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
                         .setSingleChoiceItems(sexes.values().toArray(new String[0]), chosenSex, (dialog, item) -> {
                             ((EventFact)object).setValue(new ArrayList<>(sexes.keySet()).get(item));
-                            updateMaritalRoles(one);
+                            updateSpouseRoles(one);
                             dialog.dismiss();
                             refresh();
                             TreeUtils.INSTANCE.save(true, one);
@@ -227,44 +227,37 @@ public class ProfileFactsFragment extends Fragment {
         }
     }
 
-    // In tutte le famiglie coniugali rimuove gli spouse ref di 'person' e ne aggiunge uno corrispondente al sesso
-    // Serve soprattutto in caso di esportazione del Gedcom per avere allineati gli HUSB e WIFE con il sesso
-    static void updateMaritalRoles(Person person) {
+    /**
+     * Removes the spouse refs in all spouse families of the person and adds one corresponding to the gender.
+     * It is especially useful when exporting GEDCOM to have the HUSB and WIFE tags aligned with the gender.
+     */
+    static void updateSpouseRoles(Person person) {
         SpouseRef spouseRef = new SpouseRef();
         spouseRef.setRef(person.getId());
-        boolean removed = false;
-        for (Family fam : person.getSpouseFamilies(gc)) {
-            if (Gender.isFemale(person)) { // Female 'person' will become a wife
-                Iterator<SpouseRef> husbandRefs = fam.getHusbandRefs().iterator();
-                while (husbandRefs.hasNext()) {
-                    String hr = husbandRefs.next().getRef();
-                    if (hr != null && hr.equals(person.getId())) {
-                        husbandRefs.remove();
-                        removed = true;
+        for (Family family : person.getSpouseFamilies(gc)) {
+            if (Gender.isFemale(person)) { // Female person will become a wife
+                Iterator<SpouseRef> iterator = family.getHusbandRefs().iterator();
+                while (iterator.hasNext()) {
+                    String husbandRef = iterator.next().getRef();
+                    if (husbandRef != null && husbandRef.equals(person.getId())) {
+                        iterator.remove();
+                        family.addWife(spouseRef);
                     }
                 }
-                if (removed) {
-                    fam.addWife(spouseRef);
-                    removed = false;
-                }
-            } else { // For all other sexs 'person' will become husband
-                Iterator<SpouseRef> wifeRefs = fam.getWifeRefs().iterator();
-                while (wifeRefs.hasNext()) {
-                    String wr = wifeRefs.next().getRef();
-                    if (wr != null && wr.equals(person.getId())) {
-                        wifeRefs.remove();
-                        removed = true;
+            } else { // For all other genders person will become a husband
+                Iterator<SpouseRef> iterator = family.getWifeRefs().iterator();
+                while (iterator.hasNext()) {
+                    String wifeRef = iterator.next().getRef();
+                    if (wifeRef != null && wifeRef.equals(person.getId())) {
+                        iterator.remove();
+                        family.addHusband(spouseRef);
                     }
-                }
-                if (removed) {
-                    fam.addHusband(spouseRef);
-                    removed = false;
                 }
             }
         }
     }
 
-    // Menu contestuale
+    // Context menu
     View pieceView;
     Object pieceObject;
 

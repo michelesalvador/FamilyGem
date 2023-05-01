@@ -56,20 +56,20 @@ public class NewTreeActivity extends BaseActivity {
         super.onCreate(bundle);
         setContentView(R.layout.new_tree);
         progress = findViewById(R.id.new_progress);
-        String referrer = Global.settings.referrer; // Dataid proveniente da una condivisione
-        boolean esisteDataId = referrer != null && referrer.matches("[0-9]{14}");
+        String referrer = Global.settings.referrer; // DateID coming from a sharing
+        boolean dateIdExists = referrer != null && referrer.matches("\\d{14}");
 
-        // Scarica l'albero condiviso
-        Button scaricaCondiviso = findViewById(R.id.new_download_shared);
-        if (esisteDataId)
-            // Non ha bisogno di permessi perché scarica e decomprime solo nello storage esterno dell'app
-            scaricaCondiviso.setOnClickListener(v -> LauncherActivity.downloadShared(this, referrer, progress));
+        // Downloads the shared tree
+        Button downloadShared = findViewById(R.id.new_download_shared);
+        if (dateIdExists)
+            // Doesn't need any permissions because it unpacks only into the app's external storage
+            downloadShared.setOnClickListener(v -> LauncherActivity.downloadShared(this, referrer, progress));
         else
-            scaricaCondiviso.setVisibility(View.GONE);
+            downloadShared.setVisibility(View.GONE);
 
         // Create an empty tree
         Button emptyTree = findViewById(R.id.new_empty_tree);
-        if (esisteDataId) {
+        if (dateIdExists) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                 emptyTree.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.primary_light)));
         }
@@ -98,7 +98,7 @@ public class NewTreeActivity extends BaseActivity {
         });
 
         Button downloadExample = findViewById(R.id.new_download_example);
-        downloadExample.setOnClickListener(v -> downloadExample()); // It doesn't need permission
+        downloadExample.setOnClickListener(v -> downloadExample()); // Doesn't need permissions
 
         // Let you choose a GEDCOM file to import
         Button importGedcom = findViewById(R.id.new_import_gedcom);
@@ -152,31 +152,33 @@ public class NewTreeActivity extends BaseActivity {
             findViewById(R.id.new_download_example).setEnabled(false);
             return;
         }
-        String url = "https://drive.google.com/uc?export=download&id=1FT-60avkxrHv6G62pxXs9S6Liv5WkkKf";
-        String percorsoZip = getExternalCacheDir() + "/the_Simpsons.zip";
-        File fileZip = new File(percorsoZip);
-        if (fileZip.exists())
-            fileZip.delete();
-        DownloadManager.Request richiesta = new DownloadManager.Request(Uri.parse(url))
+        File zipFile = new File(getExternalCacheDir(), "the Simpsons.zip");
+        if (zipFile.exists()) zipFile.delete();
+        String url = "https://www.familygem.app/simpsons.zip";
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
                 .setTitle(getString(R.string.simpsons_tree))
                 .setDescription(getString(R.string.family_gem_example))
                 .setMimeType("application/zip")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationUri(Uri.parse("file://" + percorsoZip));
-        downloadManager.enqueue(richiesta);
-        BroadcastReceiver alCompletamento = new BroadcastReceiver() {
+                .setDestinationUri(Uri.fromFile(zipFile));
+        downloadManager.enqueue(request);
+        BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context contesto, Intent intento) {
-                unZip(contesto, percorsoZip, null);
-                unregisterReceiver(this);
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
+                    unZip(context, zipFile.getPath(), null);
+                    unregisterReceiver(this);
+                }
             }
         };
-        registerReceiver(alCompletamento, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         // ACTION_DOWNLOAD_COMPLETE intende il completamento di QUALSIASI download che è in corso, non solo questo.
     }
 
-    // Unzip a ZIP file in the device storage
-    // Used equally by: Simpsons example, backup files and shared trees
+    /**
+     * Unzips a ZIP tree file in the device storage.
+     * Used equally by: Simpsons example, backup files and shared trees.
+     */
     static boolean unZip(Context context, String zipPath, Uri zipUri) {
         int treeNumber = Global.settings.max() + 1;
         File mediaDir = context.getExternalFilesDir(String.valueOf(treeNumber));

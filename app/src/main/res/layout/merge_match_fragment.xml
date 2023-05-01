@@ -6,6 +6,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="model"
             type="app.familygem.merge.MergeViewModel" />
@@ -23,6 +25,26 @@
             android:paddingEnd="15dp"
             android:paddingBottom="50dp">
 
+            <TextView
+                android:id="@+id/merge_counter"
+                style="@style/AppTheme.Suggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{model.actualMatch + 1 + `/` + model.personMatches.size}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="1/23" />
+
+            <ImageButton
+                android:id="@+id/merge_abort"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#0000"
+                android:visibility="@{model.actualMatch > 0 ? View.VISIBLE : View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/elimina" />
+
             <ProgressBar
                 android:id="@+id/merge_progress"
                 style="?android:attr/progressBarStyleHorizontal"
@@ -31,16 +53,6 @@
                 android:max="@{model.personMatches.size}"
                 android:progress="@{model.actualMatch + 1}"
                 app:layout_constraintTop_toBottomOf="@+id/merge_counter" />
-
-            <TextView
-                android:id="@+id/merge_counter"
-                style="@style/AppTheme.Suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{model.actualMatch + 1 + `/` + model.personMatches.size}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="1/23" />
 
             <LinearLayout
                 android:id="@+id/merge_treeTitles"

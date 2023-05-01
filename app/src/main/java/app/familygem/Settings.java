@@ -159,7 +159,7 @@ public class Settings {
         public int id;
         public String title;
         public Set<String> dirs;
-        Set<String> uris;
+        public Set<String> uris;
         public int persons;
         public int generations;
         public int media;

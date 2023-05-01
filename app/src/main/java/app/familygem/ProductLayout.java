@@ -130,25 +130,20 @@ public class ProductLayout extends LinearLayout {
         QueryPurchasesParams queryPurchasesParams = QueryPurchasesParams.newBuilder()
                 .setProductType(BillingClient.ProductType.INAPP).build();
         billingClient.queryPurchasesAsync(queryPurchasesParams, (billingResult, purchases) -> {
-                    l("On query purchases:", billingResult);
-                    l("Purchases:", purchases);
-                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                        if (!purchases.isEmpty() && purchases.get(0).getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
-                            // Premium was already been bought
-                            verifyPurchase(purchases.get(0));
-                        } else {
-                            queryProducts(); // To display the product and buy it
-                        }
-                    } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.ERROR) {
-                        // Handle the error response.
-                        U.toast(R.string.something_wrong);
-                    } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.DEVELOPER_ERROR) {
-                        // Handle the developer error response.
-                    } else {
-                        // Other error codes are available, but are never returned by the Appstore SDK.
-                    }
+            l("On query purchases:", billingResult);
+            l("Purchases:", purchases);
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                if (!purchases.isEmpty() && purchases.get(0).getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+                    // Premium was already been bought
+                    verifyPurchase(purchases.get(0));
+                } else {
+                    queryProducts(); // To display the product and buy it
                 }
-        );
+            } else { // All errors
+                activity.runOnUiThread(() -> findViewById(R.id.product_wheel).setVisibility(GONE));
+                U.toast(R.string.something_wrong);
+            }
+        });
     }
 
     /**
@@ -283,7 +278,8 @@ public class ProductLayout extends LinearLayout {
                 } else {
                     U.toast(R.string.something_wrong);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                l("Verify purchase failed:", e.getLocalizedMessage());
             }
         }).start();
     }

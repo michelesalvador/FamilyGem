@@ -16,7 +16,6 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +34,7 @@ import app.familygem.util.TreeUtils;
 
 public class FamilyActivity extends DetailActivity {
 
-    Family f;
+    Family family;
     static String[] lineageTexts = {U.s(R.string.undefined) + " (" + U.s(R.string.birth).toLowerCase() + ")",
             U.s(R.string.birth), U.s(R.string.adopted), U.s(R.string.foster)};
     static String[] lineageTypes = {null, "birth", "adopted", "foster"};
@@ -43,22 +42,22 @@ public class FamilyActivity extends DetailActivity {
     @Override
     public void format() {
         setTitle(R.string.family);
-        f = (Family)cast(Family.class);
-        placeSlug("FAM", f.getId());
-        for (SpouseRef husbandRef : f.getHusbandRefs())
+        family = (Family)cast(Family.class);
+        placeSlug("FAM", family.getId());
+        for (SpouseRef husbandRef : family.getHusbandRefs())
             addMember(husbandRef, Relation.PARTNER);
-        for (SpouseRef wifeRef : f.getWifeRefs())
+        for (SpouseRef wifeRef : family.getWifeRefs())
             addMember(wifeRef, Relation.PARTNER);
-        for (ChildRef childRef : f.getChildRefs())
+        for (ChildRef childRef : family.getChildRefs())
             addMember(childRef, Relation.CHILD);
-        for (EventFact ef : f.getEventsFacts()) {
-            place(writeEventTitle(f, ef), ef);
+        for (EventFact ef : family.getEventsFacts()) {
+            place(writeEventTitle(family, ef), ef);
         }
-        placeExtensions(f);
-        U.placeNotes(box, f, true);
-        U.placeMedia(box, f, true);
-        U.placeSourceCitations(box, f);
-        U.placeChangeDate(box, f.getChange());
+        placeExtensions(family);
+        U.placeNotes(box, family, true);
+        U.placeMedia(box, family, true);
+        U.placeSourceCitations(box, family);
+        U.placeChangeDate(box, family.getChange());
     }
 
     /**
@@ -67,7 +66,7 @@ public class FamilyActivity extends DetailActivity {
     void addMember(SpouseRef sr, Relation relation) {
         Person p = sr.getPerson(gc);
         if (p == null) return;
-        View personView = U.placeIndividual(box, p, getRole(p, f, relation, true) + writeLineage(p, f));
+        View personView = U.placeIndividual(box, p, getRole(p, family, relation, true) + writeLineage(p, family));
         personView.setTag(R.id.tag_object, p); // For the context menu in DetailActivity
 
         /* Ref inside the individual towards the family.
@@ -78,13 +77,13 @@ public class FamilyActivity extends DetailActivity {
          */
         if (relation == Relation.PARTNER) {
             for (SpouseFamilyRef sfr : p.getSpouseFamilyRefs())
-                if (f.getId().equals(sfr.getRef())) {
+                if (family.getId().equals(sfr.getRef())) {
                     personView.setTag(R.id.tag_spouse_family_ref, sfr);
                     break;
                 }
         } else if (relation == Relation.CHILD) {
             for (ParentFamilyRef pfr : p.getParentFamilyRefs())
-                if (f.getId().equals(pfr.getRef())) {
+                if (family.getId().equals(pfr.getRef())) {
                     personView.setTag(R.id.tag_spouse_family_ref, pfr);
                     break;
                 }
@@ -104,7 +103,7 @@ public class FamilyActivity extends DetailActivity {
             else if (parentFam.size() > 1) {
                 if (parentFam.size() == 2) { // Swaps between the 2 parental families
                     Global.indi = p.getId();
-                    Global.familyNum = parentFam.indexOf(f) == 0 ? 1 : 0;
+                    Global.familyNum = parentFam.indexOf(family) == 0 ? 1 : 0;
                     Memory.replaceLeader(parentFam.get(Global.familyNum));
                     recreate();
                 } else // More than two families
@@ -113,7 +112,7 @@ public class FamilyActivity extends DetailActivity {
             else if (spouseFam.size() > 1) {
                 if (spouseFam.size() == 2) { // Swaps between the 2 spouse families
                     Global.indi = p.getId();
-                    Family otherFamily = spouseFam.get(spouseFam.indexOf(f) == 0 ? 1 : 0);
+                    Family otherFamily = spouseFam.get(spouseFam.indexOf(family) == 0 ? 1 : 0);
                     Memory.replaceLeader(otherFamily);
                     recreate();
                 } else
@@ -275,34 +274,27 @@ public class FamilyActivity extends DetailActivity {
     }
 
     /**
-     * Connects a person to a family as a parent or child.
+     * Connects a person to a family as parent or child.
      */
-    public static void connect(Person person, Family family, int role) {
-        switch (role) {
-            case 5: // Parent // TODO: code smell: use of magic number
+    public static void connect(Person person, Family family, Relation relation) {
+        switch (relation) {
+            case PARTNER:
                 // The person Ref inside the family
-                SpouseRef sr = new SpouseRef();
-                sr.setRef(person.getId());
-                PersonEditorActivity.addSpouse(family, sr);
+                SpouseRef spouseRef = new SpouseRef();
+                spouseRef.setRef(person.getId());
+                PersonEditorActivity.addSpouse(family, spouseRef);
                 // The family Ref inside the person
-                SpouseFamilyRef sfr = new SpouseFamilyRef();
-                sfr.setRef(family.getId());
-                //person.getSpouseFamilyRefs().add(sfr); // Throws UnsupportedOperationException if the list is empty
-                //List<SpouseFamilyRef> sfrList = person.getSpouseFamilyRefs(); // This doesn't work:
-                // when the list doesn't exist, instead of returning an ArrayList it returns a Collections$EmptyList which is immutable: it does not allow add()
-                List<SpouseFamilyRef> sfrList = new ArrayList<>(person.getSpouseFamilyRefs());
-                sfrList.add(sfr);
-                person.setSpouseFamilyRefs(sfrList);
+                SpouseFamilyRef spouseFamilyRef = new SpouseFamilyRef();
+                spouseFamilyRef.setRef(family.getId());
+                person.addSpouseFamilyRef(spouseFamilyRef);
                 break;
-            case 6: // Child
-                ChildRef cr = new ChildRef();
-                cr.setRef(person.getId());
-                family.addChild(cr);
-                ParentFamilyRef pfr = new ParentFamilyRef();
-                pfr.setRef(family.getId());
-                List<ParentFamilyRef> pfrList = new ArrayList<>(person.getParentFamilyRefs());
-                pfrList.add(pfr);
-                person.setParentFamilyRefs(pfrList);
+            case CHILD:
+                ChildRef childRef = new ChildRef();
+                childRef.setRef(person.getId());
+                family.addChild(childRef);
+                ParentFamilyRef parentFamilyRef = new ParentFamilyRef();
+                parentFamilyRef.setRef(family.getId());
+                person.addParentFamilyRef(parentFamilyRef);
         }
     }
 

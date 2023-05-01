@@ -276,7 +276,6 @@
 \n\tZamjene: %d
 \n\tBrisanja: %d</string>
     <string name="version">Verzija</string>
-    <string name="new_source_note">Nova napomena uz izvor</string>
     <string name="choose_source">Odaberi izvor</string>
     <string name="root">Glavna osoba</string>
     <string name="abbreviation">Kratki naslov</string>

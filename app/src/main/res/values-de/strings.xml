@@ -28,7 +28,6 @@
     <string name="something_wrong">Es ist ein Fehler aufgetreten.</string>
     <string name="repository_note">Archiv-Anmerkung</string>
     <string name="source_note">Quellen-Anmerkung</string>
-    <string name="new_source_note">Neue Quellen-Anmerkung</string>
     <string name="link_shared_note">Verbundene geteilte Anmerkung</string>
     <string name="new_shared_note">Neue geteilte Anmerkung</string>
     <string name="new_note">Neue Anmerkung</string>

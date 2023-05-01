@@ -155,7 +155,6 @@
     <string name="new_shared_note">新建共享注释</string>
     <string name="link_shared_note">链接共享注释</string>
     <string name="source">来源</string>
-    <string name="new_source_note">新建文本引用</string>
     <string name="link_source">链接来源</string>
     <string name="primary_media">主要媒体</string>
     <string name="move_up">上移</string>

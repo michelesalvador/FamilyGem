@@ -33,9 +33,9 @@ public class TypeView extends AppCompatAutoCompleteTextView {
         }
         ListAdapter listAdapter = new ListAdapter(context, android.R.layout.simple_spinner_dropdown_item, completeTypes);
         setAdapter(listAdapter);
-        setId(R.id.fatto_edita);
+        setId(R.id.event_edit);
         //setThreshold(0); // Useless, the minimum is 1
-        setInputType(InputType.TYPE_CLASS_TEXT);
+        setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         setOnItemClickListener((parent, view, position, id) -> {
             setText((String)types.keySet().toArray()[position]);
         });

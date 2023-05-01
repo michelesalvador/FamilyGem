@@ -52,6 +52,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
@@ -162,9 +163,7 @@ public class DiagramFragment extends Fragment {
             if (fulcrum == null) {
                 View button = LayoutInflater.from(getContext()).inflate(R.layout.diagram_button, null);
                 button.findViewById(R.id.diagram_new).setOnClickListener(v ->
-                        startActivity(new Intent(getContext(), PersonEditorActivity.class)
-                                .putExtra("idIndividuo", "TIZIO_NUOVO")
-                        )
+                        startActivity(new Intent(getContext(), PersonEditorActivity.class))
                 );
                 new SuggestionBalloon(getContext(), button, R.string.new_person);
                 if (!Global.settings.expert)
@@ -730,7 +729,7 @@ public class DiagramFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        CharSequence[] parenti = {getText(R.string.parent), getText(R.string.sibling),
+        CharSequence[] relatives = {getText(R.string.parent), getText(R.string.sibling),
                 getText(R.string.partner), getText(R.string.child)};
         int id = item.getItemId();
         if (id == -1) { // Diagramma per fulcro figlio in più famiglie
@@ -754,10 +753,10 @@ public class DiagramFragment extends Fragment {
                 DialogFragment dialog = new NewRelativeDialog(pers, parentFam, spouseFam, true, null);
                 dialog.show(getActivity().getSupportFragmentManager(), "scegli");
             } else {
-                new AlertDialog.Builder(getContext()).setItems(parenti, (dialog, quale) -> {
-                    Intent intent = new Intent(getContext(), PersonEditorActivity.class);
-                    intent.putExtra("idIndividuo", idPersona);
-                    intent.putExtra("relazione", quale + 1);
+                new AlertDialog.Builder(getContext()).setItems(relatives, (dialog, selected) -> {
+                    Intent intent = new Intent(getContext(), PersonEditorActivity.class)
+                            .putExtra("idIndividuo", idPersona)
+                            .putExtra(Extra.RELATION, Relation.get(selected));
                     if (U.controllaMultiMatrimoni(intent, getContext(), null)) // aggiunge 'idFamiglia' o 'collocazione'
                         return; // se pivot è sposo in più famiglie, chiede a chi aggiungere un coniuge o un figlio
                     startActivity(intent);
@@ -768,11 +767,11 @@ public class DiagramFragment extends Fragment {
                 DialogFragment dialog = new NewRelativeDialog(pers, parentFam, spouseFam, false, DiagramFragment.this);
                 dialog.show(getActivity().getSupportFragmentManager(), "scegli");
             } else {
-                new AlertDialog.Builder(getContext()).setItems(parenti, (dialog, quale) -> {
-                    Intent intent = new Intent(getContext(), Principal.class);
-                    intent.putExtra("idIndividuo", idPersona);
-                    intent.putExtra(Choice.PERSON, true);
-                    intent.putExtra("relazione", quale + 1);
+                new AlertDialog.Builder(getContext()).setItems(relatives, (dialog, selected) -> {
+                    Intent intent = new Intent(getContext(), Principal.class)
+                            .putExtra(Choice.PERSON, true)
+                            .putExtra("idIndividuo", idPersona)
+                            .putExtra(Extra.RELATION, Relation.get(selected));
                     if (U.controllaMultiMatrimoni(intent, getContext(), DiagramFragment.this))
                         return;
                     startActivityForResult(intent, 1401);
@@ -822,13 +821,13 @@ public class DiagramFragment extends Fragment {
         if (resultCode == AppCompatActivity.RESULT_OK) {
             // Add the relative who has been chosen in PersonsFragment
             if (requestCode == 1401) {
-                Object[] modificati = PersonEditorActivity.addParent(
+                Object[] modified = PersonEditorActivity.addParent(
                         data.getStringExtra("idIndividuo"), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione
                         data.getStringExtra("idParente"),
                         data.getStringExtra("idFamiglia"),
-                        data.getIntExtra("relazione", 0),
+                        (Relation)data.getSerializableExtra(Extra.RELATION),
                         data.getStringExtra("collocazione"));
-                TreeUtils.INSTANCE.save(true, modificati);
+                TreeUtils.INSTANCE.save(true, modified);
             } // Export diagram to PDF
             else if (requestCode == 903) {
                 // Stylize diagram for print

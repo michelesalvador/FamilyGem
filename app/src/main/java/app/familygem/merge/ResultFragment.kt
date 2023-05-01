@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
+import app.familygem.BuildConfig
 import app.familygem.Global
 import app.familygem.PurchaseActivity
 import app.familygem.R
@@ -55,7 +56,7 @@ class ResultFragment : BaseFragment(R.layout.merge_result_fragment) {
             }
             // Merge button
             bind.mergeButton.setOnClickListener {
-                if (Global.settings.premium) {
+                if (Global.settings.premium || BuildConfig.PASS_KEY.isEmpty()) {
                     if (bind.mergeRadioAnnex.isChecked)
                         model.performAnnexMerge(requireContext())
                     else if (bind.mergeRadioGenerate.isChecked)

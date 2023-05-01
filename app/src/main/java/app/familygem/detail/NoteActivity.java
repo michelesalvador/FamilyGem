@@ -1,6 +1,7 @@
 package app.familygem.detail;
 
 import android.app.Activity;
+import android.text.InputType;
 
 import org.folg.gedcom.model.Note;
 
@@ -14,25 +15,25 @@ import app.familygem.visitor.NoteReferences;
 
 public class NoteActivity extends DetailActivity {
 
-    Note n;
+    Note note;
 
     @Override
     public void format() {
-        n = (Note)cast(Note.class);
-        if (n.getId() == null) {
+        note = (Note)cast(Note.class);
+        if (note.getId() == null) {
             setTitle(R.string.note);
             placeSlug("NOTE");
         } else {
             setTitle(R.string.shared_note);
-            placeSlug("NOTE", n.getId());
+            placeSlug("NOTE", note.getId());
         }
-        place(getString(R.string.text), "Value", true, true);
-        place(getString(R.string.rin), "Rin", false, false);
-        placeExtensions(n);
-        U.placeSourceCitations(box, n);
-        U.placeChangeDate(box, n.getChange());
-        if (n.getId() != null) {
-            NoteReferences noteRefs = new NoteReferences(Global.gc, n.getId(), false);
+        place(getString(R.string.text), "Value", true, InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        place(getString(R.string.rin), "Rin", false, 0);
+        placeExtensions(note);
+        U.placeSourceCitations(box, note);
+        U.placeChangeDate(box, note.getChange());
+        if (note.getId() != null) {
+            NoteReferences noteRefs = new NoteReferences(Global.gc, note.getId(), false);
             if (noteRefs.count > 0)
                 U.placeCabinet(box, noteRefs.leaders.toArray(), R.string.shared_by);
         } else if (((Activity)box.getContext()).getIntent().getBooleanExtra("fromNotes", false)) {
@@ -42,6 +43,6 @@ public class NoteActivity extends DetailActivity {
 
     @Override
     public void delete() {
-        ChangeUtils.INSTANCE.updateChangeDate(U.deleteNote(n, null));
+        ChangeUtils.INSTANCE.updateChangeDate(U.deleteNote(note, null));
     }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.familygem.F
+import app.familygem.GedcomDateConverter
 import app.familygem.Global
 import app.familygem.Settings.Tree
 import app.familygem.U
@@ -22,7 +23,11 @@ import org.folg.gedcom.model.*
 import java.io.File
 import java.io.FileInputStream
 import kotlin.collections.set
+import kotlin.math.abs
 
+/**
+ * Merges second tree into first tree, or generates a third tree from the two.
+ */
 class MergeViewModel(state: SavedStateHandle) : ViewModel() {
 
     val firstNum: Int // ID of the first tree
@@ -73,8 +78,11 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
      * Returns the person name or null.
      */
     private fun getNameValue(person: Person): String? {
-        return if (person.names.any()) person.names[0].displayValue.replace("/", "").trim()
-        else null
+        if (person.names.any()) {
+            val name = person.names[0].displayValue.replace("/", "").trim()
+            if (name.isNotEmpty()) return name
+        }
+        return null
     }
 
     private suspend fun setState(stat: State) {
@@ -82,7 +90,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     }
 
     /**
-     * Searches for persons with the same name in the first and second GEDCOM
+     * Searches for persons with similar name in the first and second GEDCOM
      */
     fun findMatches() {
         coroutine = viewModelScope.launch(Dispatchers.Default) {
@@ -92,13 +100,23 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             if (isActive) tempGedcom = TreeUtils.readJson(secondNum.value!!) else return@launch
             if (tempGedcom != null) secondGedcom = tempGedcom
             personMatches.clear()
-            for (person1 in firstGedcom.people) {
+            firstGedcom.people.forEach { person1 ->
                 yield()
                 val name1 = getNameValue(person1)
                 if (name1 != null) {
-                    for (person2 in secondGedcom.people) {
+                    secondGedcom.people.forEach inner@{ person2 ->
                         val name2 = getNameValue(person2)
-                        if (name2 != null && name1.equals(name2, true)) {
+                        if (name2 != null && (name1.startsWith(name2, true) || name2.startsWith(name1, true))) {
+                            // Avoids persons with too distant years of birth
+                            val births1 = person1.eventsFacts.filter { it.tag == "BIRT" && it.date != null }
+                            val births2 = person2.eventsFacts.filter { it.tag == "BIRT" && it.date != null }
+                            if (births1.isNotEmpty() && births2.isNotEmpty()) {
+                                val year1 = GedcomDateConverter(births1[0].date).year
+                                val year2 = GedcomDateConverter(births2[0].date).year
+                                if (year1 != Int.MAX_VALUE && year2 != Int.MAX_VALUE) {
+                                    if (abs(year1 - year2) > 5) return@inner
+                                }
+                            }
                             personMatches.add(PersonMatch(person1, person2))
                         }
                     }
@@ -111,26 +129,36 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     fun nextMatch(will: Will): Boolean {
         val match = personMatches[actualMatch]
         match.destiny = will
-        // Checks if actual matching person has mergeable parents and adds them to matches
         if (will == Will.MERGE && state.value != State.ACTIVE) { // In case the user navigated back
-            if (match.left.parentFamilyRefs.any() && match.right.parentFamilyRefs.any()) {
-                val firstFamily = match.left.getParentFamilies(firstGedcom)[0]
-                val secondFamily = match.right.getParentFamilies(secondGedcom)[0]
-                if (firstFamily.husbandRefs.any() && secondFamily.husbandRefs.any()) {
-                    val firstFather = firstFamily.getHusbands(firstGedcom)[0]
-                    val secondFather = secondFamily.getHusbands(secondGedcom)[0]
-                    personMatches.addMatch(PersonMatch(firstFather, secondFather))
-                }
-                if (firstFamily.wifeRefs.any() && secondFamily.wifeRefs.any()) {
-                    val firstMother = firstFamily.getWives(firstGedcom)[0]
-                    val secondMother = secondFamily.getWives(secondGedcom)[0]
-                    personMatches.addMatch(PersonMatch(firstMother, secondMother))
+            // Adds to the matches mergeable parents of actual matching person
+            match.left.getParentFamilies(firstGedcom).forEach { firstFamily ->
+                match.right.getParentFamilies(secondGedcom).forEach { secondFamily ->
+                    firstFamily.getHusbands(firstGedcom).forEach { firstFather ->
+                        secondFamily.getHusbands(secondGedcom).forEach { secondFather ->
+                            personMatches.addMatch(PersonMatch(firstFather, secondFather))
+                        }
+                    }
+                    firstFamily.getWives(firstGedcom).forEach { firstMother ->
+                        secondFamily.getWives(secondGedcom).forEach { secondMother ->
+                            personMatches.addMatch(PersonMatch(firstMother, secondMother))
+                        }
+                    }
                 }
             }
-            // Checks if actual matching person has mergeable spouses and adds them to matches
-            if (match.left.spouseFamilyRefs.any() && match.right.spouseFamilyRefs.any()) {
-                // TODO: find first and second non-matching partners to propose to merge them
-                //personMatches.addMatch(PersonMatch(firstPartner, secondPartner))
+            // Adds to the matches mergeable spouses of actual matching person
+            match.left.getSpouseFamilies(firstGedcom).forEach { firstFamily ->
+                match.right.getSpouseFamilies(secondGedcom).forEach { secondFamily ->
+                    firstFamily.getHusbands(firstGedcom).filterNot { it == match.left }.forEach { firstHusband ->
+                        secondFamily.getHusbands(secondGedcom).filterNot { it == match.right }.forEach { secondHusband ->
+                            personMatches.addMatch(PersonMatch(firstHusband, secondHusband))
+                        }
+                    }
+                    firstFamily.getWives(firstGedcom).filterNot { it == match.left }.forEach { firstWife ->
+                        secondFamily.getWives(secondGedcom).filterNot { it == match.right }.forEach { secondWife ->
+                            personMatches.addMatch(PersonMatch(firstWife, secondWife))
+                        }
+                    }
+                }
             }
         }
         return if (actualMatch < personMatches.size - 1) {
@@ -185,6 +213,11 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 if (media.file.contains("/")) media.file = destinationFile.path
             }
         }
+        // Copies media folder paths
+        val sourceTree = Global.settings.getTree(sourceId)
+        val destinationTree = Global.settings.getTree(destinationId)
+        destinationTree.dirs.addAll(sourceTree.dirs.filterNot { it.startsWith(extSourceDir) }) // External files dir excluded
+        destinationTree.uris.addAll(sourceTree.uris)
     }
 
     /**
@@ -214,10 +247,11 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         }
 
         // Families of first GEDCOM with at least one matching member
+        val firstMatchingIds = personMatches.filter { it.destiny == Will.MERGE }.map { it.left.id }
         val firstFamiliesPool = firstGedcom.families.filter { family ->
-            family.husbandRefs.any { ref -> personMatches.map { it.left.id }.contains(ref.ref) } ||
-                    family.wifeRefs.any { ref -> personMatches.map { it.left.id }.contains(ref.ref) } ||
-                    family.childRefs.any { ref -> personMatches.map { it.left.id }.contains(ref.ref) }
+            family.husbandRefs.any { firstMatchingIds.contains(it.ref) } ||
+                    family.wifeRefs.any { firstMatchingIds.contains(it.ref) } ||
+                    family.childRefs.any { firstMatchingIds.contains(it.ref) }
         }
 
         // Loops familyMatches to find the most suitable matching family from the first GEDCOM and assign them KEEP or MERGE
@@ -230,9 +264,8 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                         family.wifeRefs.count { ref -> match.spouseMatches.map { it.left.id }.contains(ref.ref) } +
                         family.childRefs.count { ref -> match.childMatches.map { it.left.id }.contains(ref.ref) }
                 // Counts non-matching spouses of first family
-                val nonMatchingPartners = (family.getHusbands(firstGedcom) + family.getWives(firstGedcom)).minus(
-                        match.spouseMatches.map { it.left }.toSet()
-                ).size
+                val nonMatchingPartners = (family.getHusbands(firstGedcom) + family.getWives(firstGedcom))
+                        .minus(match.spouseMatches.map { it.left }.toSet()).size
                 family.putExtension(SCORE, matchers - nonMatchingPartners)
             }
             // Selects the family with higher score or null
@@ -241,18 +274,15 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 match.destiny = Will.KEEP
             } else {
                 val score = matchingFamily.getExtension(SCORE) as Int
-                if (score <= 0) {
+                // Total spouses of first and second family must be less than two
+                val totalSpouses = (matchingFamily.getHusbands(firstGedcom) + matchingFamily.getWives(firstGedcom)).minus(
+                        match.spouseMatches.map { it.left }.toSet()).size +
+                        (match.right.getHusbands(secondGedcom) + match.right.getWives(secondGedcom)).size
+                if (score <= 0 || totalSpouses > 2) {
                     match.destiny = Will.KEEP
                 } else {
-                    // Non-matching spouse IDs of the second family
-                    val freePartnersIds = match.right.husbandRefs.map { it.ref }.minus(match.spouseMatches.map { it.right.id }.toSet()) +
-                            match.right.wifeRefs.map { it.ref }.minus(match.spouseMatches.map { it.right.id }.toSet())
-                    if (freePartnersIds.isNotEmpty()) {
-                        match.destiny = Will.KEEP
-                    } else {
-                        match.left = matchingFamily
-                        match.destiny = Will.MERGE
-                    }
+                    match.left = matchingFamily
+                    match.destiny = Will.MERGE
                 }
             }
         }
@@ -539,9 +569,9 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     /**
      * Checks if the GUARDIAN extension doesn't exist and puts it in the object.
      */
-    private fun checkNotDone(objct: ExtensionContainer): Boolean {
-        if (objct.getExtension(GUARDIAN) == null) {
-            objct.putExtension(GUARDIAN, true)
+    private fun checkNotDone(obj: ExtensionContainer): Boolean {
+        if (obj.getExtension(GUARDIAN) == null) {
+            obj.putExtension(GUARDIAN, true)
             return true
         }
         return false
@@ -550,17 +580,17 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     /**
      * Removes all extensions.
      */
-    private fun removeExtensions(objct: ExtensionContainer) {
-        objct.getExtension(UPDATE_REF)?.let { objct.extensions.remove(UPDATE_REF) }
-        removeGuardian(objct)
+    private fun removeExtensions(obj: ExtensionContainer) {
+        obj.getExtension(UPDATE_REF)?.let { obj.extensions.remove(UPDATE_REF) }
+        removeGuardian(obj)
     }
 
     /**
      * Removes the guardian extension.
      */
-    private fun removeGuardian(objct: ExtensionContainer) {
-        objct.getExtension(GUARDIAN)?.let { objct.extensions.remove(GUARDIAN) }
-        if (objct.extensions.isEmpty()) objct.extensions = null
+    private fun removeGuardian(obj: ExtensionContainer) {
+        obj.getExtension(GUARDIAN)?.let { obj.extensions.remove(GUARDIAN) }
+        if (obj.extensions.isEmpty()) obj.extensions = null
     }
 
     /**

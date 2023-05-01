@@ -33,14 +33,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.JsonPrimitive;
 
-import org.apache.commons.io.FileUtils;
 import org.folg.gedcom.model.Change;
 import org.folg.gedcom.model.ChildRef;
-import org.folg.gedcom.model.DateTime;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Family;
@@ -64,7 +61,6 @@ import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.model.Submitter;
-import org.folg.gedcom.parser.JsonParser;
 import org.folg.gedcom.parser.ModelParser;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -74,8 +70,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -84,18 +78,17 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Json;
+import app.familygem.constant.Relation;
 import app.familygem.detail.ChangeActivity;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.detail.MediaActivity;
@@ -636,10 +629,10 @@ public class U {
      * Add a generic not editable title-text item to a Layout.
      */
     public static void place(LinearLayout layout, String title, String text) {
-        View pieceView = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_fatto, layout, false);
+        View pieceView = LayoutInflater.from(layout.getContext()).inflate(R.layout.event_view, layout, false);
         layout.addView(pieceView);
-        ((TextView)pieceView.findViewById(R.id.fatto_titolo)).setText(title);
-        TextView textView = pieceView.findViewById(R.id.fatto_testo);
+        ((TextView)pieceView.findViewById(R.id.event_title)).setText(title);
+        TextView textView = pieceView.findViewById(R.id.event_text);
         if (text == null) textView.setVisibility(View.GONE);
         else textView.setText(text);
     }
@@ -1036,15 +1029,17 @@ public class U {
         return (int)(dips * Global.context.getResources().getDisplayMetrics().density + 0.5f);
     }
 
-    // Valuta se ci sono persone collegabili rispetto a una persona.
-    // Usato per decidere se far comparire 'Link existing person' nel menu.
+    /**
+     * Evaluates whether there are people connectable with respect to a given person.
+     * Used to decide whether to show 'Link existing person' menu item.
+     */
     static boolean linkablePersons(Person person) {
         int total = Global.gc.getPeople().size();
         if (total > 0 && (Global.settings.expert // Expert user can always
                 || person == null)) // In an empty family oneFamilyMember is null
             return true;
-        int kin = PersonsFragment.countRelatives(person);
-        return total > kin + 1;
+        int kinship = PersonsFragment.countRelatives(person);
+        return total > kinship + 1;
     }
 
     // Chiede se referenziare un autore nell'header dell'albero
@@ -1182,36 +1177,36 @@ public class U {
         Person perno = Global.gc.getPerson(idPerno);
         List<Family> famGenitori = perno.getParentFamilies(Global.gc);
         List<Family> famSposi = perno.getSpouseFamilies(Global.gc);
-        int relazione = intent.getIntExtra("relazione", 0);
-        ArrayAdapter<NewRelativeDialog.VoceFamiglia> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
+        Relation relation = (Relation)intent.getSerializableExtra(Extra.RELATION);
+        ArrayAdapter<NewRelativeDialog.FamilyItem> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
 
-        // Genitori: esiste già una famiglia che abbia almeno uno spazio vuoto
-        if (relazione == 1 && famGenitori.size() == 1
+        // Parents: there is already a family that has at least one empty space
+        if (relation == Relation.PARENT && famGenitori.size() == 1
                 && (famGenitori.get(0).getHusbandRefs().isEmpty() || famGenitori.get(0).getWifeRefs().isEmpty()))
             intent.putExtra("idFamiglia", famGenitori.get(0).getId()); // aggiunge 'idFamiglia' all'intent esistente
         // se questa famiglia è già piena di genitori, 'idFamiglia' rimane null
         // quindi verrà cercata la famiglia esistente del destinatario oppure si crearà una famiglia nuova
 
-        // Genitori: esistono più famiglie
-        if (relazione == 1 && famGenitori.size() > 1) {
+        // Parents: there are many families
+        if (relation == Relation.PARENT && famGenitori.size() > 1) {
             for (Family fam : famGenitori)
                 if (fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty())
-                    adapter.add(new NewRelativeDialog.VoceFamiglia(contesto, fam));
+                    adapter.add(new NewRelativeDialog.FamilyItem(contesto, fam));
             if (adapter.getCount() == 1)
-                intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+                intent.putExtra("idFamiglia", adapter.getItem(0).family.getId());
             else if (adapter.getCount() > 1) {
                 new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_parent)
                         .setAdapter(adapter, (dialog, quale) -> {
-                            intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+                            intent.putExtra("idFamiglia", adapter.getItem(quale).family.getId());
                             concludiMultiMatrimoni(contesto, intent, frammento);
                         }).show();
                 return true;
             }
         }
-        // Fratello
-        else if (relazione == 2 && famGenitori.size() == 1) {
+        // Sibling
+        else if (relation == Relation.SIBLING && famGenitori.size() == 1) {
             intent.putExtra("idFamiglia", famGenitori.get(0).getId());
-        } else if (relazione == 2 && famGenitori.size() > 1) {
+        } else if (relation == Relation.SIBLING && famGenitori.size() > 1) {
             new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_sibling)
                     .setItems(elencoFamiglie(famGenitori), (dialog, quale) -> {
                         intent.putExtra("idFamiglia", famGenitori.get(quale).getId());
@@ -1219,33 +1214,33 @@ public class U {
                     }).show();
             return true;
         }
-        // Coniuge
-        else if (relazione == 3 && famSposi.size() == 1) {
+        // Partner
+        else if (relation == Relation.PARTNER && famSposi.size() == 1) {
             if (famSposi.get(0).getHusbandRefs().isEmpty() || famSposi.get(0).getWifeRefs().isEmpty()) // Se c'è uno slot libero
                 intent.putExtra("idFamiglia", famSposi.get(0).getId());
-        } else if (relazione == 3 && famSposi.size() > 1) {
+        } else if (relation == Relation.PARTNER && famSposi.size() > 1) {
             for (Family fam : famSposi) {
                 if (fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty())
-                    adapter.add(new NewRelativeDialog.VoceFamiglia(contesto, fam));
+                    adapter.add(new NewRelativeDialog.FamilyItem(contesto, fam));
             }
             // Nel caso di zero famiglie papabili, idFamiglia rimane null
             if (adapter.getCount() == 1) {
-                intent.putExtra("idFamiglia", adapter.getItem(0).famiglia.getId());
+                intent.putExtra("idFamiglia", adapter.getItem(0).family.getId());
             } else if (adapter.getCount() > 1) {
                 //adapter.add(new NuovoParente.VoceFamiglia(contesto,perno) );
                 new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_spouse)
                         .setAdapter(adapter, (dialog, quale) -> {
-                            intent.putExtra("idFamiglia", adapter.getItem(quale).famiglia.getId());
+                            intent.putExtra("idFamiglia", adapter.getItem(quale).family.getId());
                             concludiMultiMatrimoni(contesto, intent, frammento);
                         }).show();
                 return true;
             }
         }
-        // Figlio: esiste già una famiglia con o senza figli
-        else if (relazione == 4 && famSposi.size() == 1) {
+        // Child: there is already a family with or without children
+        else if (relation == Relation.CHILD && famSposi.size() == 1) {
             intent.putExtra("idFamiglia", famSposi.get(0).getId());
-        } // Figlio: esistono molteplici famiglie coniugali
-        else if (relazione == 4 && famSposi.size() > 1) {
+        } // Child: there are many spouse families
+        else if (relation == Relation.CHILD && famSposi.size() > 1) {
             new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_child)
                     .setItems(elencoFamiglie(famSposi), (dialog, quale) -> {
                         intent.putExtra("idFamiglia", famSposi.get(quale).getId());

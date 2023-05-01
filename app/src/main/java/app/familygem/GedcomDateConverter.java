@@ -11,7 +11,7 @@ import app.familygem.constant.Format;
 import app.familygem.constant.Kind;
 
 /**
- * This class receives a Gedcom date, parses it and translates it into a {@link Data}.
+ * This class receives a GEDCOM date, parses it and translates it into a {@link Data}.
  */
 public class GedcomDateConverter {
 
@@ -307,6 +307,16 @@ public class GedcomDateConverter {
     public int getDateNumber() {
         if (data1.date != null && !data1.isFormat(Format.D_M)) {
             return (data1.date.getYear() + 1900) * 10000 + (data1.date.getMonth() + 1) * 100 + data1.date.getDate();
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    /**
+     * Returns an integer representing the year of the main date, otherwise MAX_VALUE.
+     */
+    public int getYear() {
+        if (data1.date != null && !data1.isFormat(Format.D_M)) {
+            return (data1.date.getYear() + 1900);
         }
         return Integer.MAX_VALUE;
     }

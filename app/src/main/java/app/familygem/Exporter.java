@@ -3,7 +3,9 @@ package app.familygem;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.OpenableColumns;
 
 import androidx.documentfile.provider.DocumentFile;
@@ -77,10 +79,7 @@ public class Exporter {
         } catch (Exception e) {
             return error(e.getLocalizedMessage());
         }
-
-        // Makes the file visible from Windows
-        // But it seems ineffective in KitKat where the file remains invisible
-        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
+        makeFileVisible(targetUri);
         Global.gc = TreeUtils.INSTANCE.readJson(treeId); // Reset the changes
         return success(R.string.gedcom_exported_ok);
     }
@@ -108,7 +107,7 @@ public class Exporter {
         collection.put(gedcomDocument, 0);
         if (!createZipFile(collection))
             return false;
-        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
+        makeFileVisible(targetUri);
         Global.gc = TreeUtils.INSTANCE.readJson(treeId);
         return success(R.string.zip_exported_ok);
     }
@@ -134,7 +133,7 @@ public class Exporter {
         files.put(DocumentFile.fromFile(fileSettings), 0);
         if (!createZipFile(files))
             return false;
-        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, targetUri));
+        makeFileVisible(targetUri);
         return success(R.string.zip_exported_ok);
     }
 
@@ -279,6 +278,18 @@ public class Exporter {
             return error(e.getLocalizedMessage());
         }
         return true;
+    }
+
+    /**
+     * Makes the just created file visible from Windows file explorer.
+     */
+    private void makeFileVisible(Uri uri) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            String filePath = F.uriFilePath(targetUri);
+            MediaScannerConnection.scanFile(context, new String[]{filePath}, null, null);
+        } else { // This is ineffective in KitKat where the file remains invisible
+            context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
+        }
     }
 
     public boolean success(int message) {

@@ -23,27 +23,27 @@ import app.familygem.util.ChangeUtils;
 
 public class RepositoryRefActivity extends DetailActivity {
 
-    RepositoryRef r;
+    RepositoryRef repoRef;
 
     @Override
     public void format() {
         placeSlug("REPO");
-        r = (RepositoryRef)cast(RepositoryRef.class);
-        if (r.getRepository(gc) != null) { // An actual repository is referenced
+        repoRef = (RepositoryRef)cast(RepositoryRef.class);
+        if (repoRef.getRepository(gc) != null) { // An actual repository is referenced
             setTitle(R.string.repository_citation);
-            View repositoryCard = putRepository(box, r.getRepository(gc));
-            repositoryCard.setTag(R.id.tag_object, r.getRepository(gc)); // For the context menu TODO: still needed?
+            View repositoryCard = putRepository(box, repoRef.getRepository(gc));
+            repositoryCard.setTag(R.id.tag_object, repoRef.getRepository(gc)); // For the context menu TODO: still needed?
             registerForContextMenu(repositoryCard);
-        } else if (r.getRef() != null) { // Ref to a non-existent repository (perhaps deleted)
-            setTitle(R.string.inexistent_repository_citation);
+        } else if (repoRef.getRef() != null) { // Ref to a non-existent repository (perhaps deleted)
+            setTitle(R.string.inexistent_repository_citation); // TODO: could be removed
         } else { // Without ref
             setTitle(R.string.repository_note);
         }
-        place(getString(R.string.value), "Value", false, true);
+        place(getString(R.string.value), "Value", false, 0);
         place(getString(R.string.call_number), "CallNumber");
         place(getString(R.string.media_type), "MediaType");
-        placeExtensions(r);
-        U.placeNotes(box, r, true);
+        placeExtensions(repoRef);
+        U.placeNotes(box, repoRef, true);
     }
 
     public static View putRepository(LinearLayout layout, final Repository repo) {
@@ -65,6 +65,6 @@ public class RepositoryRefActivity extends DetailActivity {
         Source container = (Source)Memory.getSecondToLastObject();
         container.setRepositoryRef(null);
         ChangeUtils.INSTANCE.updateChangeDate(container);
-        Memory.setInstanceAndAllSubsequentToNull(r);
+        Memory.setInstanceAndAllSubsequentToNull(repoRef);
     }
 }

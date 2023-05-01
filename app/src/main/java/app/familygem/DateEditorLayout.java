@@ -134,7 +134,7 @@ public class DateEditorLayout extends LinearLayout {
         arredaCarro(2, findViewById(R.id.seconda_giorno), findViewById(R.id.seconda_mese),
                 findViewById(R.id.seconda_secolo), findViewById(R.id.seconda_anno));
 
-        // Al primo focus mostra sè stesso (EditoreData) nascondendo la tastiera
+        // Al primo focus mostra sè stesso (DateEditorLayout) nascondendo la tastiera
         tastiera = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         editaTesto.setOnFocusChangeListener((v, ciapaFocus) -> {
             if (ciapaFocus) {
@@ -158,7 +158,7 @@ public class DateEditorLayout extends LinearLayout {
         // Al secondo tocco fa comparire la tastiera
         editaTesto.setOnTouchListener((vista, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                editaTesto.setInputType(InputType.TYPE_CLASS_TEXT); // riabilita l'input
+                editaTesto.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS); // riabilita l'input
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 tastieraVisibile = tastiera.showSoftInput(editaTesto, 0); // fa ricomparire la tastiera
                 //veroImputTesto = true;

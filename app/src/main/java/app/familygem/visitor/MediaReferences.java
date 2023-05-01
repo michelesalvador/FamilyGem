@@ -23,10 +23,10 @@ public class MediaReferences extends TotalVisitor {
     public int num = 0; // Number of references to the Media
     public Set<Object> leaders = new LinkedHashSet<>(); // List of the leader objects containing the Media
 
-    public MediaReferences(Gedcom gc, Media media, boolean deleteRefs) {
+    public MediaReferences(Gedcom gedcom, Media media, boolean deleteRefs) {
         this.media = media;
         shouldDeleteRefs = deleteRefs;
-        gc.accept(this);
+        gedcom.accept(this);
     }
 
     @Override
@@ -35,15 +35,20 @@ public class MediaReferences extends TotalVisitor {
             leader = object;
         if (object instanceof MediaContainer) {
             MediaContainer container = (MediaContainer)object;
-            Iterator<MediaRef> mediaRefs = container.getMediaRefs().iterator();
-            while (mediaRefs.hasNext())
-                if (mediaRefs.next().getRef().equals(media.getId())) {
+            Iterator<MediaRef> iterator = container.getMediaRefs().iterator();
+            while (iterator.hasNext()) {
+                MediaRef mediaRef = iterator.next();
+                if (mediaRef.getRef() == null) {
+                    // Removes possible null reference caused by the "mediaId" bug, fixed with commit dbea5adb
+                    iterator.remove();
+                } else if (mediaRef.getRef().equals(media.getId())) {
                     leaders.add(leader);
                     if (shouldDeleteRefs)
-                        mediaRefs.remove();
+                        iterator.remove();
                     else
                         num++;
                 }
+            }
             if (container.getMediaRefs().isEmpty())
                 container.setMediaRefs(null);
         }

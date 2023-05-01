@@ -30,6 +30,10 @@ class MatchFragment : BaseFragment(R.layout.merge_match_fragment) {
             add(R.id.rightPerson, PersonFragment::class.java, bundleOf("position" to true))
         }
         // Buttons
+        binding.mergeAbort.setOnClickListener {
+            findNavController().popBackStack(R.id.choiceFragment, false)
+            model.actualMatch = 0
+        }
         binding.mergeKeep.setOnClickListener { nextMatch(Will.KEEP) }
         binding.mergeMerge.setOnClickListener { nextMatch(Will.MERGE) }
         // Accent color for selected option

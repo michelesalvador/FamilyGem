@@ -62,9 +62,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
+import app.familygem.constant.Relation;
 import app.familygem.detail.AddressActivity;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
@@ -156,7 +160,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                         if (thing.equals("Email"))
                             ((Submitter)object).setEmailTag("EMAIL");
                     }
-                    View piece = placePiece(eggs.get(id).title, "", thing, eggs.get(id).multiLine);
+                    View piece = placePiece(eggs.get(id).title, "", thing, eggs.get(id).inputType);
                     if (thing instanceof String)
                         edit(piece);
                     // TODO: open new Address for editing
@@ -203,16 +207,16 @@ public abstract class DetailActivity extends AppCompatActivity {
                     startActivityForResult(intent, 5065);
                 } else if (id == 120 || id == 121) { // Create new family member
                     Intent intent = new Intent(this, PersonEditorActivity.class);
-                    intent.putExtra("idIndividuo", "TIZIO_NUOVO"); // TODO: translate
                     intent.putExtra("idFamiglia", ((Family)object).getId()); // TODO: translate
-                    intent.putExtra("relazione", id - 115); // TODO: translate
+                    intent.putExtra(Extra.RELATION, Relation.get(id - 118));
+                    intent.putExtra(Extra.FROM_FAMILY, true);
                     startActivity(intent);
                 } else if (id == 122 || id == 123) { // Link existing person
                     Intent intent = new Intent(this, Principal.class);
                     intent.putExtra(Choice.PERSON, true);
-                    intent.putExtra("relazione", id - 117);
+                    intent.putExtra(Extra.RELATION, Relation.get(id - 120));
                     startActivityForResult(intent, 34417);
-                } else if (id == 124) { // Place marriage event
+                } else if (id == 130) { // Place marriage event
                     EventFact marriage = new EventFact();
                     marriage.setTag("MARR");
                     marriage.setDate("");
@@ -222,7 +226,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                     Memory.add(marriage);
                     startActivity(new Intent(this, EventActivity.class));
                     toBeSaved = true;
-                } else if (id == 125) { // Place divorce event
+                } else if (id == 131) { // Place divorce event
                     EventFact divorce = new EventFact();
                     divorce.setTag("DIV");
                     divorce.setDate("");
@@ -272,15 +276,20 @@ public abstract class DetailActivity extends AppCompatActivity {
             counter++;
         }
         if (object instanceof Family) {
-            boolean hasChildren = !((Family)object).getChildRefs().isEmpty();
+            Family family = (Family)object;
+            boolean hasChildren = !family.getChildRefs().isEmpty();
             SubMenu newMemberMenu = menu.addSubMenu(0, 100, 0, R.string.new_relative);
-            // Non-expert can add maximum two parents, expert also more than two
-            if (!(!Global.settings.expert && ((Family)object).getHusbandRefs().size() + ((Family)object).getWifeRefs().size() >= 2))
+            // Inexpert can add maximum two parents, expert also more than two
+            if (Global.settings.expert || family.getHusbandRefs().size() + family.getWifeRefs().size() < 2)
                 newMemberMenu.add(0, 120, 0, hasChildren ? R.string.parent : R.string.partner);
             newMemberMenu.add(0, 121, 0, R.string.child);
-            if (U.linkablePersons(oneFamilyMember)) {
+            // Inexpert can add people only not already member of the family
+            Set<Person> members = new HashSet<>(family.getHusbands(gc));
+            members.addAll(family.getWives(gc));
+            members.addAll(family.getChildren(gc));
+            if (Global.settings.expert || !members.containsAll(gc.getPeople())) {
                 SubMenu linkMemberMenu = menu.addSubMenu(0, 100, 0, R.string.link_person);
-                if (!(!Global.settings.expert && ((Family)object).getHusbandRefs().size() + ((Family)object).getWifeRefs().size() >= 2))
+                if (Global.settings.expert || family.getHusbandRefs().size() + family.getWifeRefs().size() < 2)
                     linkMemberMenu.add(0, 122, 0, hasChildren ? R.string.parent : R.string.partner);
                 linkMemberMenu.add(0, 123, 0, R.string.child);
             }
@@ -291,8 +300,8 @@ public abstract class DetailActivity extends AppCompatActivity {
                 marriageLabel += " — MARR";
                 divorceLabel += " — DIV";
             }
-            eventSubMenu.add(0, 124, 0, marriageLabel);
-            eventSubMenu.add(0, 125, 0, divorceLabel);
+            eventSubMenu.add(0, 130, 0, marriageLabel);
+            eventSubMenu.add(0, 131, 0, divorceLabel);
 
             // The other events that can be placed
             SubMenu otherSubMenu = eventSubMenu.addSubMenu(0, 100, 0, R.string.other);
@@ -324,7 +333,6 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         if ((object instanceof SourceCitationContainer || object instanceof Note) && Global.settings.expert) {
             SubMenu subSource = menu.addSubMenu(0, 100, 0, R.string.source);
-            subSource.add(0, 109, 0, R.string.new_source_note);
             subSource.add(0, 110, 0, R.string.new_source);
             if (!gc.getSources().isEmpty())
                 subSource.add(0, 111, 0, R.string.link_source);
@@ -342,7 +350,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             // From the 'Link...' submenu in FAB
             if (requestCode == 34417) { // Family member chosen in PersonsFragment
                 Person personToBeAdded = gc.getPerson(data.getStringExtra("idParente")); // TODO translate
-                FamilyActivity.connect(personToBeAdded, (Family)object, data.getIntExtra("relazione", 0));
+                FamilyActivity.connect(personToBeAdded, (Family)object, (Relation)data.getSerializableExtra(Extra.RELATION));
                 TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
@@ -462,9 +470,9 @@ public abstract class DetailActivity extends AppCompatActivity {
     private void concludeOtherPiece() {
         for (int i = 0; i < box.getChildCount(); i++) {
             View otherPiece = box.getChildAt(i);
-            EditText editText = otherPiece.findViewById(R.id.fatto_edita);
+            EditText editText = otherPiece.findViewById(R.id.event_edit);
             if (editText != null && editText.isShown()) {
-                TextView textView = otherPiece.findViewById(R.id.fatto_testo);
+                TextView textView = otherPiece.findViewById(R.id.event_text);
                 if (!editText.getText().toString().equals(textView.getText().toString())) // If there has been editing
                     save(otherPiece);
                 else
@@ -501,29 +509,26 @@ public abstract class DetailActivity extends AppCompatActivity {
         String title;
         Object yolk; // Can be a method string ("Value", "Date", "Type"...) or an Address
         boolean common; // Indicates whether to make it appear in the FAB menu to insert the piece
-        boolean multiLine;
+        int inputType;
 
-        Egg(String title, Object yolk, boolean common, boolean multiLine) {
+        Egg(String title, Object yolk, boolean common, int inputType) {
             this.title = title;
             this.yolk = yolk;
             this.common = common;
-            this.multiLine = multiLine;
+            this.inputType = inputType;
             eggs.add(this); // TODO: this is bad form: it relies on the side effect of creating an object, which should naturally be stateless, and makes it unclear from reading the code what should happen, besides for the compiler not necessarily knowing that anything was done with the object, which I would imagine makes garbage collection slower - besides for being bad form.
         }
     }
 
     /**
-     * This is an overload of the next method.
-     */
-    public void place(String title, String method) {
-        place(title, method, true, false);
-    }
-
-    /**
      * Attempts to put a basic editable text piece in the layout.
      */
-    public void place(String title, String method, boolean common, boolean multiLine) {
-        new Egg(title, method, common, multiLine);
+    public void place(String title, String method) {
+        place(title, method, true, 0);
+    }
+
+    public void place(String title, String method, boolean common, int inputType) {
+        new Egg(title, method, common, inputType);
         String text;
         try {
             text = (String)object.getClass().getMethod("get" + method).invoke(object); // TODO: this reflection is bad performance
@@ -538,7 +543,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                     || tag.equals("MARR") || tag.equals("DIV")))
                 return;
         }
-        placePiece(title, text, method, multiLine);
+        placePiece(title, text, method, inputType);
     }
 
     /**
@@ -547,8 +552,8 @@ public abstract class DetailActivity extends AppCompatActivity {
      */
     public void place(String title, Address address) {
         Address addressNotNull = address == null ? new Address() : address;
-        new Egg(title, addressNotNull, true, false);
-        placePiece(title, writeAddress(address, false), addressNotNull, false);
+        new Egg(title, addressNotNull, true, 0);
+        placePiece(title, writeAddress(address, false), addressNotNull, 0);
     }
 
     /**
@@ -556,20 +561,23 @@ public abstract class DetailActivity extends AppCompatActivity {
      */
     public void place(String title, EventFact event) {
         EventFact eventNotNull = event == null ? new EventFact() : event;
-        placePiece(title, writeEvent(event), eventNotNull, false);
+        placePiece(title, writeEvent(event), eventNotNull, 0);
     }
 
-    public View placePiece(String title, String text, Object object, boolean multiLine) {
+    public View placePiece(String title, String text, Object object, int inputType) {
         if (text == null) return null;
-        View pieceView = LayoutInflater.from(box.getContext()).inflate(R.layout.pezzo_fatto, box, false);
+        View pieceView = LayoutInflater.from(box.getContext()).inflate(R.layout.event_view, box, false);
         box.addView(pieceView);
-        ((TextView)pieceView.findViewById(R.id.fatto_titolo)).setText(title);
-        ((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
-        EditText editText = pieceView.findViewById(R.id.fatto_edita);
-        if (multiLine) {
-            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-            editText.setVerticalScrollBarEnabled(true);
-        }
+        ((TextView)pieceView.findViewById(R.id.event_title)).setText(title);
+        ((TextView)pieceView.findViewById(R.id.event_text)).setText(text);
+        EditText editText = pieceView.findViewById(R.id.event_edit);
+        if (inputType > 0) {
+            // Multi line is always capital sentences too
+            if (inputType == InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+                inputType |= InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+            editText.setInputType(inputType);
+        } else // Default edit text is single line capital sentences
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         View.OnClickListener click = null;
         if (object instanceof Integer) { // Full name in inexperienced mode
             click = this::edit;
@@ -577,7 +585,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             click = this::edit;
             // If it is a date
             if (object.equals("Date")) {
-                dateEditor = pieceView.findViewById(R.id.fatto_data);
+                dateEditor = pieceView.findViewById(R.id.event_date);
                 dateEditor.initialize(editText);
             }
         } else if (object instanceof Address) { // Address
@@ -591,7 +599,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 startActivity(new Intent(this, EventActivity.class));
             };
             // Family EventFacts can have notes and media
-            LinearLayout noteLayout = pieceView.findViewById(R.id.fatto_note);
+            LinearLayout noteLayout = pieceView.findViewById(R.id.event_other);
             U.placeNotes(noteLayout, object, false);
             U.placeMedia(noteLayout, object, false);
         } else if (object instanceof GedcomTag) { // Extension
@@ -608,7 +616,7 @@ public abstract class DetailActivity extends AppCompatActivity {
 
     public void placeExtensions(ExtensionContainer container) {
         for (Extension ext : U.findExtensions(container)) {
-            placePiece(ext.name, ext.text, ext.gedcomTag, false);
+            placePiece(ext.name, ext.text, ext.gedcomTag, 0);
         }
     }
 
@@ -705,12 +713,12 @@ public abstract class DetailActivity extends AppCompatActivity {
 
     void edit(View pieceView) {
         concludeOtherPiece();
-        TextView textView = pieceView.findViewById(R.id.fatto_testo);
+        TextView textView = pieceView.findViewById(R.id.event_text);
         textView.setVisibility(View.GONE);
         fab.hide();
         Object pieceObject = pieceView.getTag(R.id.tag_object);
         boolean showInput = false;
-        editText = pieceView.findViewById(R.id.fatto_edita);
+        editText = pieceView.findViewById(R.id.event_edit);
         // Place
         if (pieceObject.equals("Place")) {
             showInput = true;
@@ -720,7 +728,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 int index = parent.indexOfChild(editText);
                 parent.removeView(editText);
                 editText = new PlaceFinderTextView(this, null);
-                editText.setId(R.id.fatto_edita);
+                editText.setId(R.id.event_edit);
                 parent.addView(editText, index);
             } else
                 editText.setVisibility(View.VISIBLE);
@@ -742,7 +750,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 parent.addView(editText, parent.indexOfChild(editText));
             } else
                 editText.setVisibility(View.VISIBLE);
-        } // Data
+        } // Date
         else if (pieceObject.equals("Date")) {
             editText.setVisibility(View.VISIBLE);
         } // All other normal editing cases
@@ -750,14 +758,16 @@ public abstract class DetailActivity extends AppCompatActivity {
             showInput = true;
             editText.setVisibility(View.VISIBLE);
         }
-        if (showInput) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-        }
         CharSequence text = textView.getText();
         editText.setText(text);
         editText.requestFocus();
         editText.setSelection(text.length()); // Cursor at the end
+        if (showInput) {
+            editText.postDelayed(() -> {
+                InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                input.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+            }, 100);
+        }
 
         // Intercepts the 'Done' and 'Next' on the keyboard
         editText.setOnEditorActionListener((vista, actionId, keyEvent) -> {
@@ -795,8 +805,8 @@ public abstract class DetailActivity extends AppCompatActivity {
         String text = editText.getText().toString().trim();
         Object pieceObject = pieceView.getTag(R.id.tag_object);
         if (pieceObject instanceof Integer) { // Save given name and surname in the non-expert mode
-            String givenName = ((EditText)box.getChildAt(0).findViewById(R.id.fatto_edita)).getText().toString();
-            String surname = ((EditText)box.getChildAt(1).findViewById(R.id.fatto_edita)).getText().toString();
+            String givenName = ((EditText)box.getChildAt(0).findViewById(R.id.event_edit)).getText().toString();
+            String surname = ((EditText)box.getChildAt(1).findViewById(R.id.event_edit)).getText().toString();
             ((Name)object).setValue(givenName + " /" + surname + "/");
         } else try { // All other normal methods
             object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, text); // TODO: reflection
@@ -804,7 +814,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             Toast.makeText(box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
             return; // In case of error it remains in editor mode
         }
-        ((TextView)pieceView.findViewById(R.id.fatto_testo)).setText(text);
+        ((TextView)pieceView.findViewById(R.id.event_text)).setText(text);
         restore(pieceView);
         TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
 		/*if( Memory.getStepStack().size() == 1 ) {
@@ -824,15 +834,15 @@ public abstract class DetailActivity extends AppCompatActivity {
      * Operations common to Save and Cancel
      */
     void restore(View pieceView) {
+        InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        input.hideSoftInputFromWindow(editText.getWindowToken(), 0);
         editText.setVisibility(View.GONE);
-        pieceView.findViewById(R.id.fatto_data).setVisibility(View.GONE);
-        pieceView.findViewById(R.id.fatto_testo).setVisibility(View.VISIBLE);
+        pieceView.findViewById(R.id.event_date).setVisibility(View.GONE);
+        pieceView.findViewById(R.id.event_text).setVisibility(View.VISIBLE);
         actionBar.setDisplayShowCustomEnabled(false); // Hides custom toolbar
         actionBar.setDisplayHomeAsUpEnabled(true);
         whichMenu = 1;
         invalidateOptionsMenu();
-        InputMethodManager imm = (InputMethodManager)getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(pieceView.getWindowToken(), 0);
         if (!(object instanceof Note && !Global.settings.expert)) // NoteActivity in inexperienced mode have no FAB
             fab.show();
     }
@@ -981,7 +991,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 } else if (pieceObject.equals(4043) || pieceObject.equals(6064)) // Name and surname for inexperienced
                     menu.add(0, 0, 0, R.string.copy);
             } else if (pieceObject instanceof String) {
-                if (((TextView)view.findViewById(R.id.fatto_testo)).getText().length() > 0)
+                if (((TextView)view.findViewById(R.id.event_text)).getText().length() > 0)
                     menu.add(0, 0, 0, R.string.copy);
                 menu.add(0, 1, 0, R.string.delete);
             }
@@ -997,8 +1007,8 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 50: // Address
             case 55: // Event
             case 60: // Extension
-                U.copyToClipboard(((TextView)pieceView.findViewById(R.id.fatto_titolo)).getText(),
-                        ((TextView)pieceView.findViewById(R.id.fatto_testo)).getText());
+                U.copyToClipboard(((TextView)pieceView.findViewById(R.id.event_title)).getText(),
+                        ((TextView)pieceView.findViewById(R.id.event_text)).getText());
                 return true;
             case 1: // Delete editable piece
                 try {

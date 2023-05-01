@@ -48,7 +48,9 @@ import java.util.Collections;
 import java.util.List;
 
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
+import app.familygem.constant.Relation;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
@@ -241,7 +243,6 @@ public class ProfileActivity extends AppCompatActivity {
                         subNota.add(0, 24, 0, R.string.link_shared_note);
                     if (Global.settings.expert) {
                         SubMenu subFonte = menu.addSubMenu(R.string.source);
-                        subFonte.add(0, 25, 0, R.string.new_source_note);
                         subFonte.add(0, 26, 0, R.string.new_source);
                         if (!gc.getSources().isEmpty())
                             subFonte.add(0, 27, 0, R.string.link_source);
@@ -254,7 +255,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
             popup.show();
             popup.setOnMenuItemClickListener(item -> {
-                CharSequence[] familiari = {getText(R.string.parent), getText(R.string.sibling), getText(R.string.partner), getText(R.string.child)};
+                CharSequence[] relatives = {getText(R.string.parent), getText(R.string.sibling), getText(R.string.partner), getText(R.string.child)};
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 switch (item.getItemId()) {
                     // Scheda Eventi
@@ -290,7 +291,7 @@ public class ProfileActivity extends AppCompatActivity {
                                     gender.setValue(sexValues[i]);
                                     one.addEventFact(gender);
                                     dialog.dismiss();
-                                    ProfileFactsFragment.updateMaritalRoles(one);
+                                    ProfileFactsFragment.updateSpouseRoles(one);
                                     refresh();
                                     TreeUtils.INSTANCE.save(true, one);
                                 }).show();
@@ -334,10 +335,10 @@ public class ProfileActivity extends AppCompatActivity {
                             DialogFragment dialog = new NewRelativeDialog(one, null, null, true, null);
                             dialog.show(getSupportFragmentManager(), "scegli");
                         } else {
-                            builder.setItems(familiari, (dialog, quale) -> {
+                            builder.setItems(relatives, (dialog, selected) -> {
                                 Intent intent1 = new Intent(getApplicationContext(), PersonEditorActivity.class);
                                 intent1.putExtra("idIndividuo", one.getId());
-                                intent1.putExtra("relazione", quale + 1);
+                                intent1.putExtra(Extra.RELATION, Relation.get(selected));
                                 if (U.controllaMultiMatrimoni(intent1, this, null))
                                     return;
                                 startActivity(intent1);
@@ -349,11 +350,11 @@ public class ProfileActivity extends AppCompatActivity {
                             DialogFragment dialog = new NewRelativeDialog(one, null, null, false, null);
                             dialog.show(getSupportFragmentManager(), "scegli");
                         } else {
-                            builder.setItems(familiari, (dialog, quale) -> {
+                            builder.setItems(relatives, (dialog, selected) -> {
                                 Intent intent2 = new Intent(getApplication(), Principal.class);
-                                intent2.putExtra("idIndividuo", one.getId());
                                 intent2.putExtra(Choice.PERSON, true);
-                                intent2.putExtra("relazione", quale + 1);
+                                intent2.putExtra("idIndividuo", one.getId());
+                                intent2.putExtra(Extra.RELATION, Relation.get(selected));
                                 if (U.controllaMultiMatrimoni(intent2, this, null))
                                     return;
                                 startActivityForResult(intent2, 1401);
@@ -492,7 +493,7 @@ public class ProfileActivity extends AppCompatActivity {
                         data.getStringExtra("idIndividuo"), // corrisponde a uno.getId()
                         data.getStringExtra("idParente"),
                         data.getStringExtra("idFamiglia"),
-                        data.getIntExtra("relazione", 0),
+                        (Relation)data.getSerializableExtra(Extra.RELATION),
                         data.getStringExtra("collocazione"));
                 TreeUtils.INSTANCE.save(true, modified);
                 return;
