@@ -10,6 +10,7 @@ import org.folg.gedcom.model.Person;
 import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.Memory;
+import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.util.ChangeUtils;
@@ -20,9 +21,9 @@ public class NameActivity extends DetailActivity {
 
     @Override
     public void format() {
-        setTitle(R.string.name);
         placeSlug("NAME", null);
         name = (Name)cast(Name.class);
+        setTitle(ProfileFactsFragment.writeNameTitle(name));
         int capWords = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS;
         if (Global.settings.expert)
             place(getString(R.string.value), "Value", true, capWords);

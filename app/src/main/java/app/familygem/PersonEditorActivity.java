@@ -57,6 +57,8 @@ public class PersonEditorActivity extends AppCompatActivity {
     private EditText deathPlace;
     private boolean fromFamilyActivity; // Previous activity was DetailActivity
     private boolean nameFromPieces; // If the given name and surname come from the Given and Surname pieces, they must return there
+    private boolean surnameBefore; // The given name comes after the surname, e.g. '/Simpson/ Homer'
+    private String nameSuffix; // Last part of the name, not editable here
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         familyId = intent.getStringExtra("idFamiglia");
         relation = (Relation)intent.getSerializableExtra(Extra.RELATION);
         fromFamilyActivity = intent.getBooleanExtra(Extra.FROM_FAMILY, false);
+        nameSuffix = "";
 
         sexMale = findViewById(R.id.sesso1);
         sexFemale = findViewById(R.id.sesso2);
@@ -133,19 +136,28 @@ public class PersonEditorActivity extends AppCompatActivity {
             if (!person.getNames().isEmpty()) {
                 String givenName = "";
                 String surname = "";
-                Name n = person.getNames().get(0);
-                String value = n.getValue();
+                Name name = person.getNames().get(0);
+                String value = name.getValue();
                 if (value != null) {
-                    givenName = value.replaceAll("/.*?/", "").trim(); // Removes surname between two "/"
-                    if (value.indexOf('/') < value.lastIndexOf('/'))
+                    value = value.trim();
+                    if (value.indexOf('/') < value.lastIndexOf('/')) { // There is a surname between two "/"
+                        if (value.indexOf('/') > 0) givenName = value.substring(0, value.indexOf('/')).trim();
                         surname = value.substring(value.indexOf('/') + 1, value.lastIndexOf('/')).trim();
+                        nameSuffix = value.substring(value.lastIndexOf('/') + 1).trim();
+                        if (givenName.isEmpty() && !nameSuffix.isEmpty()) { // Given name is after surname
+                            givenName = nameSuffix;
+                            surnameBefore = true;
+                        }
+                    } else {
+                        givenName = value;
+                    }
                 } else {
-                    if (n.getGiven() != null) {
-                        givenName = n.getGiven();
+                    if (name.getGiven() != null) {
+                        givenName = name.getGiven();
                         nameFromPieces = true;
                     }
-                    if (n.getSurname() != null) {
-                        surname = n.getSurname();
+                    if (name.getSurname() != null) {
+                        surname = name.getSurname();
                         nameFromPieces = true;
                     }
                 }
@@ -243,7 +255,14 @@ public class PersonEditorActivity extends AppCompatActivity {
             name.setGiven(givenName);
             name.setSurname(surname);
         } else {
-            name.setValue(givenName + " /" + surname + "/".trim());
+            String value = "";
+            if (!surname.isEmpty()) value = "/" + surname + "/";
+            if (surnameBefore) value += " " + givenName;
+            else {
+                value = givenName + " " + value;
+                if (!nameSuffix.isEmpty()) value += " " + nameSuffix;
+            }
+            name.setValue(value.trim());
         }
 
         // Sex

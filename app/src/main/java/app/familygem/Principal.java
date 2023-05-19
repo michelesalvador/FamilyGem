@@ -147,8 +147,8 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
         return classe.isInstance(attuale);
     }
 
-    // Update title, random image, 'Save' button in menu header, and menu items count
-    void furnishMenu() {
+    // Updates title, random image, 'Save' button in menu header, and menu items count
+    public void furnishMenu() {
         NavigationView navigation = scatolissima.findViewById(R.id.menu);
         View menuHeader = navigation.getHeaderView(0);
         ImageView imageView = menuHeader.findViewById(R.id.menu_immagine);
@@ -204,10 +204,8 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
                         count = gc.getSubmitters().size();
                 }
                 TextView countView = menu.getItem(i).getActionView().findViewById(R.id.menu_item_text);
-                if (count > 0)
-                    countView.setText(String.valueOf(count));
-                else
-                    countView.setVisibility(View.GONE);
+                if (count > 0) countView.setText(String.valueOf(count));
+                else countView.setText("");
             }
         }
         // Save button

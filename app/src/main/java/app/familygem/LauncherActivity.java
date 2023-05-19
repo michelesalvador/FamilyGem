@@ -20,6 +20,7 @@ import java.io.InputStream;
 
 import app.familygem.constant.Extra;
 import app.familygem.constant.Json;
+import app.familygem.util.TreeUtils;
 
 public class LauncherActivity extends AppCompatActivity {
 
@@ -112,7 +113,8 @@ public class LauncherActivity extends AppCompatActivity {
                             fos.write(data, 0, count);
                         }
                         fos.close();
-                        if (client.completePendingCommand() && NewTreeActivity.unZip(context, zipPath, null)) {
+                        if (client.completePendingCommand()) {
+                            TreeUtils.INSTANCE.unZipTreeAsync(context, zipPath, null); // TODO: rimettilo nell'if qui sopra, o meglio trasforma l'if qui sotto in un callback
                             // If the tree was downloaded with the install referrer
                             if (Global.settings.referrer != null && Global.settings.referrer.equals(dateId)) {
                                 Global.settings.referrer = null;

@@ -206,7 +206,7 @@ public class Settings {
 
     // The essential data of a share
     public static class Share {
-        String dateId; // on compressed date and time format: YYYYMMDDhhmmss
+        public String dateId; // On compressed date and time format: YYYYMMDDhhmmss
         public String submitter; // Submitter id
 
         public Share(String dateId, String submitter) {
@@ -242,16 +242,16 @@ public class Settings {
      * Model of the file 'settings.json' inside a backup, shared or example ZIP file.
      * It contains basic info of the zipped tree.
      */
-    static class ZippedTree {
-        String title;
-        int persons;
-        int generations;
-        String root;
-        List<Share> shares;
+    public static class ZippedTree {
+        public String title;
+        public int persons;
+        public int generations;
+        public String root;
+        public List<Share> shares;
         /**
          * Coming from {@link Tree#grade}.
          */
-        int grade;
+        public int grade;
 
         ZippedTree(String title, int persons, int generations, String root, List<Share> shares, int grade) {
             this.title = title;

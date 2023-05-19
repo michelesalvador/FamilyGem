@@ -315,7 +315,7 @@ public class GedcomDateConverter {
      * Returns an integer representing the year of the main date, otherwise MAX_VALUE.
      */
     public int getYear() {
-        if (data1.date != null && !data1.isFormat(Format.D_M)) {
+        if (data1.date != null && !data1.isFormat(Format.D_M) && isSingleKind()) {
             return (data1.date.getYear() + 1900);
         }
         return Integer.MAX_VALUE;

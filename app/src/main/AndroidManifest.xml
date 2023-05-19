@@ -49,8 +49,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
                     android:host="www.familygem.app"
@@ -60,13 +60,65 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
                     android:host="www.familygem.app"
                     android:pathPattern="/condivisi/.*.zip"
                     android:scheme="https" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".OpenGedcomActivity"
+            android:exported="true"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.ged" />
+                <data android:pathPattern=".*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\.GED" />
+                <data android:pathPattern=".*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.GED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.ged" />
+                <data android:pathPattern=".*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.ged" />
+                <data android:pathPattern=".*\\.GED" />
+                <data android:pathPattern=".*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.GED" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.GED" />
             </intent-filter>
         </activity>
         <activity

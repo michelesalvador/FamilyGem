@@ -33,6 +33,7 @@ import java.util.Set;
 
 import app.familygem.Global;
 import app.familygem.Memory;
+import app.familygem.Principal;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.detail.FamilyActivity;
@@ -193,10 +194,12 @@ public class FamiliesFragment extends Fragment {
                         .setPositiveButton(android.R.string.yes, (dialog, i) -> {
                             deleteFamily(selected);
                             refresh(What.RELOAD);
+                            ((Principal)requireActivity()).furnishMenu();
                         }).setNeutralButton(android.R.string.cancel, null).show();
             } else {
                 deleteFamily(selected);
                 refresh(What.RELOAD);
+                ((Principal)requireActivity()).furnishMenu();
             }
         } else {
             return false;
@@ -257,7 +260,7 @@ public class FamiliesFragment extends Fragment {
             List<Family> sortedFamilies = new ArrayList<>();
             for (FamilyWrapper wrapper : familyList) sortedFamilies.add(wrapper.family);
             gc.setFamilies(sortedFamilies);
-            //TreeUtils.saveJson(gc, Global.settings.openTree); // Immediately saves families sorting
+            TreeUtils.INSTANCE.save(false); // Immediately saves families sorting
         }
     }
 

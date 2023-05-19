@@ -59,6 +59,8 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
     }
 
     fun getName(): String {
-        return U.firstAndLastName(person.names[0], " ")
+        return if (person.names.any())
+            U.firstAndLastName(person.names[0], " ")
+        else "[${getString(R.string.no_name)}]"
     }
 }

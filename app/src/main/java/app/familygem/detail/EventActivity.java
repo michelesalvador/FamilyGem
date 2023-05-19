@@ -31,7 +31,7 @@ public class EventActivity extends DetailActivity {
         if (Memory.getLeaderObject() instanceof Family)
             setTitle(writeEventTitle((Family)Memory.getLeaderObject(), event));
         else
-            setTitle(ProfileFactsFragment.writeEventTitle(event)); // The title includes e.getDisplayType()
+            setTitle(ProfileFactsFragment.writeEventTitle(event)); // The title includes event.getDisplayType()
         placeSlug(event.getTag());
         if (Arrays.asList(eventTags).contains(event.getTag())) // It's an event (without Value)
             place(getString(R.string.value), "Value", false, 0);
@@ -66,7 +66,7 @@ public class EventActivity extends DetailActivity {
     }
 
     /**
-     * Delete the main empty tags and possibly set 'Y' as value.
+     * Deletes the main empty tags and possibly sets 'Y' as value.
      */
     public static void cleanUpTag(EventFact ef) {
         if (ef.getType() != null && ef.getType().isEmpty()) ef.setType(null);

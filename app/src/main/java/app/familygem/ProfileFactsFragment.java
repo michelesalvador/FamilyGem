@@ -50,12 +50,8 @@ public class ProfileFactsFragment extends Fragment {
             LinearLayout layout = vistaEventi.findViewById(R.id.contenuto_scheda);
             one = gc.getPerson(Global.indi);
             if (one != null) {
-                for (Name nome : one.getNames()) {
-                    String tit = getString(R.string.name);
-                    if (nome.getType() != null && !nome.getType().isEmpty()) {
-                        tit += " (" + TypeView.getTranslatedType(nome.getType(), TypeView.Combo.NAME) + ")";
-                    }
-                    placeEvent(layout, tit, U.firstAndLastName(nome, " "), nome);
+                for (Name name : one.getNames()) {
+                    placeEvent(layout, writeNameTitle(name), U.firstAndLastName(name, " "), name);
                 }
                 for (EventFact fact : one.getEventsFacts()) {
                     placeEvent(layout, writeEventTitle(fact), writeEventText(fact), fact);
@@ -86,6 +82,17 @@ public class ProfileFactsFragment extends Fragment {
                 suffisso = true;
         }
         return ricco || suffisso;
+    }
+
+    /**
+     * Composes the title of a name, optionally with the type.
+     */
+    public static String writeNameTitle(Name name) {
+        String txt = U.s(R.string.name);
+        if (name.getType() != null && !name.getType().isEmpty()) {
+            txt += " (" + TypeView.getTranslatedType(name.getType(), TypeView.Combo.NAME) + ")";
+        }
+        return txt;
     }
 
     // Compose the title of an event of the person
@@ -141,7 +148,11 @@ public class ProfileFactsFragment extends Fragment {
         if (event.getPlace() != null) txt += event.getPlace() + "\n";
         Address indirizzo = event.getAddress();
         if (indirizzo != null) txt += DetailActivity.writeAddress(indirizzo, true) + "\n";
-        if (event.getCause() != null) txt += event.getCause();
+        if (event.getCause() != null) txt += event.getCause() + "\n";
+        if (event.getWww() != null) txt += event.getWww() + "\n";
+        if (event.getEmail() != null) txt += event.getEmail() + "\n";
+        if (event.getPhone() != null) txt += event.getPhone() + "\n";
+        if (event.getFax() != null) txt += event.getFax();
         return txt.trim();
     }
 

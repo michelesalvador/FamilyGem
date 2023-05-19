@@ -91,7 +91,7 @@ public class F {
     /**
      * Receives a URI and tries to return the path to the file.
      */
-    static String uriFilePath(Uri uri) {
+    public static String uriFilePath(Uri uri) {
         if (uri == null) return null;
         if (uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("file")) {
             // Remove 'file://'

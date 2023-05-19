@@ -195,7 +195,7 @@ public class Exporter {
     private void updateHeader(String gedcomFilename) {
         Header header = gedcom.getHeader();
         if (header == null)
-            gedcom.setHeader(NewTreeActivity.createHeader(gedcomFilename));
+            gedcom.setHeader(TreeUtils.INSTANCE.createHeader(gedcomFilename));
         else {
             header.setFile(gedcomFilename);
             header.setDateTime(ChangeUtils.INSTANCE.actualDateTime());

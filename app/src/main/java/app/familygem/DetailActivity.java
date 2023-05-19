@@ -74,6 +74,7 @@ import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.detail.MediaActivity;
+import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.detail.SourceCitationActivity;
 import app.familygem.list.FamiliesFragment;
@@ -826,7 +827,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             // If a submitter has been edited, asks to reference him in the Gedcom header
         else if (object instanceof Submitter)
             U.autorePrincipale(this, ((Submitter)object).getId());
-        else if (this instanceof EventActivity)
+        else if (this instanceof NameActivity || this instanceof EventActivity)
             refresh(); // To update the title bar
     }
 

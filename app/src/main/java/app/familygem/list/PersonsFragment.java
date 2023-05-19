@@ -52,6 +52,7 @@ import app.familygem.GedcomDateConverter;
 import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.PersonEditorActivity;
+import app.familygem.Principal;
 import app.familygem.ProfileActivity;
 import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
@@ -65,9 +66,9 @@ import app.familygem.util.TreeUtils;
 
 public class PersonsFragment extends Fragment {
 
-    private List<PersonWrapper> allPeople = new ArrayList<>(); // The immutable complete list of people
-    private List<PersonWrapper> selectedPeople = new ArrayList<>(); // Some persons selected by the search feature
-    private PersonsAdapter adapter = new PersonsAdapter();
+    private final List<PersonWrapper> allPeople = new ArrayList<>(); // The immutable complete list of people
+    private final List<PersonWrapper> selectedPeople = new ArrayList<>(); // Some persons selected by the search feature
+    private final PersonsAdapter adapter = new PersonsAdapter();
     private @NonNull
     Order order = Order.NONE;
     private SearchView searchView;
@@ -215,7 +216,7 @@ public class PersonsFragment extends Fragment {
             indiView.findViewById(R.id.person_border).setBackgroundResource(border);
 
             U.details(person, indiView.findViewById(R.id.person_details));
-            F.showMainImageForPerson(Global.gc, person, indiView.findViewById(R.id.person_image));
+            F.showMainImageForPerson(gc, person, indiView.findViewById(R.id.person_image));
             indiView.findViewById(R.id.person_mourning).setVisibility(U.isDead(person) ? View.VISIBLE : View.GONE);
         }
 
@@ -573,7 +574,7 @@ public class PersonsFragment extends Fragment {
         subMenu.add(0, 5, 0, R.string.number_relatives);
 
         // Search in PersonsFragment
-        inflater.inflate(R.menu.search, menu); // già questo basta a far comparire la lente con il campo di ricerca
+        inflater.inflate(R.menu.search, menu); // This only makes appear the lens with the search field
         searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -603,7 +604,13 @@ public class PersonsFragment extends Fragment {
                 order = Order.values()[id * 2 - 1];
             sortPeople();
             adapter.notifyDataSetChanged();
-            //U.salvaJson(false); // dubbio se metterlo per salvare subito il riordino delle persone...
+            // Updates sorting of people in global GEDCOM too
+            if (selectedPeople.size() == gc.getPeople().size()) { // Only if there is no filtering
+                List<Person> sortedPeople = new ArrayList<>();
+                for (PersonWrapper wrapper : selectedPeople) sortedPeople.add(wrapper.person);
+                gc.setPeople(sortedPeople);
+                TreeUtils.INSTANCE.save(false); // Too much?
+            }
             return true;
         }
         return false;
@@ -653,6 +660,7 @@ public class PersonsFragment extends Fragment {
                         adapter.notifyItemRemoved(position);
                         adapter.notifyItemRangeChanged(position, selectedPeople.size() - position);
                         furnishToolbar();
+                        ((Principal)requireActivity()).furnishMenu();
                         U.controllaFamiglieVuote(getContext(), null, false, famiglie);
                     }).setNeutralButton(R.string.cancel, null).show();
         } else {

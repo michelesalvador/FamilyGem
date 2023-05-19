@@ -95,7 +95,7 @@ class TreesActivity : AppCompatActivity() {
                     treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.accent_medium, null))
                     detailView.setTextColor(ResourcesCompat.getColor(resources, R.color.text, null))
                     treeView.setOnClickListener {
-                        if (!NewTreeActivity.confronta(this@TreesActivity, tree, true)) {
+                        if (!TreeUtils.compareTrees(this@TreesActivity, tree, true)) {
                             tree.grade = 10 // It is downgraded
                             Global.settings.save()
                             updateList()
@@ -106,7 +106,7 @@ class TreesActivity : AppCompatActivity() {
                     treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.consumed, null))
                     titleView.setTextColor(ResourcesCompat.getColor(resources, R.color.gray_text, null))
                     treeView.setOnClickListener {
-                        if (!NewTreeActivity.confronta(this@TreesActivity, tree, true)) {
+                        if (!TreeUtils.compareTrees(this@TreesActivity, tree, true)) {
                             tree.grade = 10 // It is downgraded
                             Global.settings.save()
                             updateList()
@@ -285,8 +285,8 @@ class TreesActivity : AppCompatActivity() {
                 intent.putExtra(Extra.TREE_ID, treeId)
                 startActivity(intent)
             } else if (id == 2) { // Rename tree
-                val renameView = layoutInflater.inflate(R.layout.albero_nomina, null, false)
-                val titleEdit = renameView.findViewById<EditText>(R.id.nuovo_nome_albero)
+                val renameView = layoutInflater.inflate(R.layout.tree_title_dialog, null, false)
+                val titleEdit = renameView.findViewById<EditText>(R.id.treeTitle_edit)
                 titleEdit.setText(treeList[position]["title"])
                 val dialog = AlertDialog.Builder(this@TreesActivity)
                         .setView(renameView).setTitle(R.string.title)
@@ -319,7 +319,7 @@ class TreesActivity : AppCompatActivity() {
                         .putExtra(Extra.TREE_ID, treeId))
             } else if (id == 7) { // Compare with existing trees
                 val tree = Global.settings.getTree(treeId)
-                if (NewTreeActivity.confronta(this@TreesActivity, tree, false)) {
+                if (TreeUtils.compareTrees(this@TreesActivity, tree, false)) {
                     tree.grade = 20
                     updateList()
                 } else Toast.makeText(this@TreesActivity, R.string.no_results, Toast.LENGTH_LONG).show()
@@ -458,7 +458,7 @@ class TreesActivity : AppCompatActivity() {
             item["id"] = tree.id.toString()
             item["title"] = tree.title
             // If GEDCOM is already open, updates the data
-            if (Global.gc != null && Global.settings.openTree == tree.id && tree.persons < 100)
+            if (Global.gc != null && Global.settings.openTree == tree.id)
                 InfoActivity.refreshData(Global.gc, tree)
             item["data"] = tree.getBasicData()
             treeList.add(item)
@@ -529,6 +529,83 @@ class TreesActivity : AppCompatActivity() {
             } else addError("Missing share root person")
         }
 
+        // Null IDs
+        gedcom.people.filter { it.id == null }.forEach {
+            if (correct) it.id = U.newID(gedcom, Person::class.java)
+            else addError("INDI without ID")
+        }
+        gedcom.families.filter { it.id == null }.forEach {
+            if (correct) it.id = U.newID(gedcom, Family::class.java)
+            else addError("FAM without ID")
+        }
+        gedcom.media.filter { it.id == null }.forEach {
+            if (correct) it.id = U.newID(gedcom, Media::class.java)
+            else addError("OBJE without ID")
+        }
+        gedcom.notes.filter { it.id == null }.forEach {
+            if (correct) it.id = U.newID(gedcom, Note::class.java)
+            else addError("NOTE without ID")
+        }
+        gedcom.sources.filter { it.id == null }.forEach {
+            if (correct) it.id = U.newID(gedcom, Source::class.java)
+            else addError("SOUR without ID")
+        }
+        gedcom.repositories.filter { it.id == null }.forEach {
+            if (correct) it.id = U.newID(gedcom, Repository::class.java)
+            else addError("REPO without ID")
+        }
+        gedcom.submitters.filter { it.id == null }.forEach {
+            if (correct) it.id = U.newID(gedcom, Submitter::class.java)
+            else addError("SUBM without ID")
+        }
+
+        // Duplicated IDs
+        val doneIds: MutableSet<String> = mutableSetOf()
+        gedcom.people.filterNot { it.id == null }.filter { person -> gedcom.people.count { it.id == person.id } > 1 }
+                .filterNot { doneIds.add(it.id) }.forEach {
+                    if (correct) it.id = U.newID(gedcom, Person::class.java)
+                    else addError("Multiple INDI with ID ${it.id}")
+                }
+        doneIds.clear()
+        gedcom.families.filterNot { it.id == null }.filter { family -> gedcom.families.count { it.id == family.id } > 1 }
+                .filterNot { doneIds.add(it.id) }.forEach {
+                    if (correct) it.id = U.newID(gedcom, Family::class.java)
+                    else addError("Multiple FAM with ID ${it.id}")
+                }
+        doneIds.clear()
+        gedcom.media.filterNot { it.id == null }.filter { media -> gedcom.media.count { it.id == media.id } > 1 }
+                .filterNot { doneIds.add(it.id) }.forEach {
+                    if (correct) it.id = U.newID(gedcom, Media::class.java)
+                    else addError("Multiple OBJE with ID ${it.id}")
+                }
+        doneIds.clear()
+        gedcom.notes.filterNot { it.id == null }.filter { note -> gedcom.notes.count { it.id == note.id } > 1 }
+                .filterNot { doneIds.add(it.id) }.forEach {
+                    if (correct) it.id = U.newID(gedcom, Note::class.java)
+                    else addError("Multiple NOTE with ID ${it.id}")
+                }
+        doneIds.clear()
+        gedcom.sources.filterNot { it.id == null }.filter { source -> gedcom.sources.count { it.id == source.id } > 1 }
+                .filterNot { doneIds.add(it.id) }.forEach {
+                    if (correct) it.id = U.newID(gedcom, Source::class.java)
+                    else addError("Multiple SOUR with ID ${it.id}")
+                }
+        doneIds.clear()
+        gedcom.repositories.filterNot { it.id == null }.filter { repo -> gedcom.repositories.count { it.id == repo.id } > 1 }
+                .filterNot { doneIds.add(it.id) }.forEach {
+                    if (correct) it.id = U.newID(gedcom, Repository::class.java)
+                    else addError("Multiple REPO with ID ${it.id}")
+                }
+        doneIds.clear()
+        gedcom.submitters.filterNot { it.id == null }.filter { submitter -> gedcom.submitters.count { it.id == submitter.id } > 1 }
+                .filterNot { doneIds.add(it.id) }.forEach {
+                    if (correct) it.id = U.newID(gedcom, Submitter::class.java)
+                    else addError("Multiple SUBM with ID ${it.id}")
+                }
+
+        // After modification of IDs it's necessary to refresh the indexes
+        if (correct) gedcom.createIndexes()
+
         // Empty families
         val familyIterator = gedcom.families.iterator()
         while (familyIterator.hasNext()) {
@@ -547,6 +624,7 @@ class TreesActivity : AppCompatActivity() {
         // Silently deletes empty list of families
         if (gedcom.families.isEmpty() && correct) gedcom.families = null
 
+        // References from persons to families
         gedcom.people.forEach { person ->
             val personId = person.id
             // References from a person towards parent families

@@ -93,7 +93,7 @@ public class SubmittersFragment extends Fragment {
     public static void mainSubmitter(Submitter submitter) {
         Header header = gc.getHeader();
         if (header == null) {
-            header = NewTreeActivity.createHeader(Global.settings.openTree + ".json");
+            header = TreeUtils.INSTANCE.createHeader(Global.settings.openTree + ".json");
             gc.setHeader(header);
         }
         header.setSubmitterRef(submitter.getId());

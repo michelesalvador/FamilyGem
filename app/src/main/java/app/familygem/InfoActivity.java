@@ -49,17 +49,7 @@ public class InfoActivity extends BaseActivity {
             if (gc == null)
                 i += "\n\n" + getString(R.string.no_useful_data);
             else {
-                // Aggiornamento dei dati automatico o su richiesta
-                if (tree.persons < 100) {
-                    refreshData(gc, tree);
-                } else {
-                    Button bottoneAggiorna = findViewById(R.id.info_aggiorna);
-                    bottoneAggiorna.setVisibility(View.VISIBLE);
-                    bottoneAggiorna.setOnClickListener(v -> {
-                        refreshData(gc, tree);
-                        recreate();
-                    });
-                }
+                refreshData(gc, tree);
                 i += "\n\n" + getText(R.string.persons) + ": " + tree.persons
                         + "\n" + getText(R.string.families) + ": " + gc.getFamilies().size()
                         + "\n" + getText(R.string.generations) + ": " + tree.generations
@@ -87,7 +77,7 @@ public class InfoActivity extends BaseActivity {
             if (h == null) {
                 bottoneHeader.setText(R.string.create_header);
                 bottoneHeader.setOnClickListener(view -> {
-                    gc.setHeader(NewTreeActivity.createHeader(file.getName()));
+                    gc.setHeader(TreeUtils.INSTANCE.createHeader(file.getName()));
                     TreeUtils.INSTANCE.saveJsonAsync(gc, treeId);
                     recreate();
                 });
@@ -210,7 +200,7 @@ public class InfoActivity extends BaseActivity {
     // Refresh the data displayed below the tree title in TreesActivity list
     static void refreshData(Gedcom gedcom, Settings.Tree treeItem) {
         treeItem.persons = gedcom.getPeople().size();
-        treeItem.generations = quanteGenerazioni(gedcom, U.getRootId(gedcom, treeItem));
+        treeItem.generations = countGenerations(gedcom, U.getRootId(gedcom, treeItem));
         MediaList visitaMedia = new MediaList(gedcom, 0);
         gedcom.accept(visitaMedia);
         treeItem.media = visitaMedia.list.size();
@@ -262,17 +252,18 @@ public class InfoActivity extends BaseActivity {
 
     static int genMin;
     static int genMax;
+    static final String GENERATION = "gen";
 
-    public static int quanteGenerazioni(Gedcom gc, String radice) {
-        if (gc.getPeople().isEmpty())
+    public static int countGenerations(Gedcom gedcom, String root) {
+        if (gedcom.getPeople().isEmpty())
             return 0;
         genMin = 0;
         genMax = 0;
-        risaliGenerazioni(gc.getPerson(radice), gc, 0);
-        discendiGenerazioni(gc.getPerson(radice), gc, 0);
-        // Rimuove dalle persone l'estensione 'gen' per permettere successivi conteggi
-        for (Person person : gc.getPeople()) {
-            person.getExtensions().remove("gen");
+        risaliGenerazioni(gedcom.getPerson(root), gedcom, 0);
+        discendiGenerazioni(gedcom.getPerson(root), gedcom, 0);
+        // Rimuove dalle persone l'estensione GENERATION per permettere successivi conteggi
+        for (Person person : gedcom.getPeople()) {
+            person.getExtensions().remove(GENERATION);
             if (person.getExtensions().isEmpty())
                 person.setExtensions(null);
         }
@@ -280,44 +271,45 @@ public class InfoActivity extends BaseActivity {
     }
 
     // riceve una Person e trova il numero della generazione di antenati più remota
-    static void risaliGenerazioni(Person person, Gedcom gc, int gen) {
+    static void risaliGenerazioni(Person person, Gedcom gedcom, int gen) {
         if (gen < genMin)
             genMin = gen;
         // aggiunge l'estensione per indicare che è passato da questa Persona
-        person.putExtension("gen", gen);
+        person.putExtension(GENERATION, gen);
         // se è un capostipite va a contare le generazioni di discendenti o risale su eventuali altri matrimoni
-        if (person.getParentFamilies(gc).isEmpty())
-            discendiGenerazioni(person, gc, gen);
-        for (Family family : person.getParentFamilies(gc)) {
+        if (person.getParentFamilies(gedcom).isEmpty())
+            discendiGenerazioni(person, gedcom, gen);
+        for (Family family : person.getParentFamilies(gedcom)) {
             // intercetta eventuali fratelli della radice
-            for (Person sibling : family.getChildren(gc))
-                if (sibling.getExtension("gen") == null)
-                    discendiGenerazioni(sibling, gc, gen);
-            for (Person father : family.getHusbands(gc))
-                if (father.getExtension("gen") == null)
-                    risaliGenerazioni(father, gc, gen - 1);
-            for (Person mother : family.getWives(gc))
-                if (mother.getExtension("gen") == null)
-                    risaliGenerazioni(mother, gc, gen - 1);
+            for (Person sibling : family.getChildren(gedcom))
+                if (sibling.getExtension(GENERATION) == null)
+                    discendiGenerazioni(sibling, gedcom, gen);
+            for (Person father : family.getHusbands(gedcom))
+                if (father.getExtension(GENERATION) == null)
+                    risaliGenerazioni(father, gedcom, gen - 1);
+            for (Person mother : family.getWives(gedcom))
+                if (mother.getExtension(GENERATION) == null)
+                    risaliGenerazioni(mother, gedcom, gen - 1);
         }
     }
 
     // riceve una Person e trova il numero della generazione più remota di discendenti
-    static void discendiGenerazioni(Person person, Gedcom gc, int gen) {
-        if (gen > genMax)
+    static void discendiGenerazioni(Person person, Gedcom gedcom, int gen) {
+        if (gen > genMax) {
             genMax = gen;
-        person.putExtension("gen", gen);
-        for (Family family : person.getSpouseFamilies(gc)) {
+        }
+        person.putExtension(GENERATION, gen);
+        for (Family family : person.getSpouseFamilies(gedcom)) {
             // individua anche la famiglia dei coniugi
-            for (Person wife : family.getWives(gc))
-                if (wife.getExtension("gen") == null)
-                    risaliGenerazioni(wife, gc, gen);
-            for (Person husband : family.getHusbands(gc))
-                if (husband.getExtension("gen") == null)
-                    risaliGenerazioni(husband, gc, gen);
-            for (Person child : family.getChildren(gc))
-                if (child.getExtension("gen") == null)
-                    discendiGenerazioni(child, gc, gen + 1);
+            for (Person wife : family.getWives(gedcom))
+                if (wife.getExtension(GENERATION) == null)
+                    risaliGenerazioni(wife, gedcom, gen);
+            for (Person husband : family.getHusbands(gedcom))
+                if (husband.getExtension(GENERATION) == null)
+                    risaliGenerazioni(husband, gedcom, gen);
+            for (Person child : family.getChildren(gedcom))
+                if (child.getExtension(GENERATION) == null)
+                    discendiGenerazioni(child, gedcom, gen + 1);
         }
     }
 

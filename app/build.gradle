@@ -24,7 +24,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 33
         versionCode 24
-        versionName '0.9.2.8'
+        versionName '0.9.2.9'
         vectorDrawables.useSupportLibrary = true
         resConfigs 'ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh'
         def passKey = ''
@@ -77,7 +77,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
     implementation 'com.android.installreferrer:installreferrer:2.2'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation files('libs/gedcomgraph-3.2.jar')
     implementation 'joda-time:joda-time:2.12.1'

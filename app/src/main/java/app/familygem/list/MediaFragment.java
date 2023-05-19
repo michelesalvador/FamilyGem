@@ -33,6 +33,7 @@ import app.familygem.F;
 import app.familygem.Global;
 import app.familygem.MediaFoldersActivity;
 import app.familygem.Memory;
+import app.familygem.Principal;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
@@ -187,6 +188,7 @@ public class MediaFragment extends Fragment {
         if (item.getItemId() == 0) {
             Object[] modified = deleteMedia(media, null);
             recreate();
+            ((Principal)requireActivity()).furnishMenu();
             TreeUtils.INSTANCE.save(false, modified);
             return true;
         }
