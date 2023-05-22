@@ -63,11 +63,8 @@ class TreesActivity : AppCompatActivity() {
         if (referrer != null && referrer == "start") retrieveReferrer()
         // If in the referrer has been stored a dateID (which will be annulled as soon as used)
         else if (referrer != null && referrer.matches("\\d{14}".toRegex())) {
-            AlertDialog.Builder(this).setTitle(R.string.a_new_tree)
-                    .setMessage(R.string.you_can_download)
-                    .setPositiveButton(R.string.download) { _, _ -> LauncherActivity.downloadShared(this, referrer, progress) }
-                    .setNeutralButton(R.string.cancel, null).show()
-        } // If there is no tree
+            showSharedTreeDialog(referrer) {}
+        } // If there are no trees
         else if (Global.settings.trees.isEmpty()) welcome.show()
 
         if (savedState != null) {
@@ -271,6 +268,26 @@ class TreesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Displays an AlertDialog that asks to download the shared tree.
+     */
+    private fun showSharedTreeDialog(dateId: String, onCancel: () -> Unit) {
+        AlertDialog.Builder(this)
+                .setTitle(R.string.a_new_tree)
+                .setMessage(R.string.you_can_download)
+                .setNeutralButton(R.string.cancel) { _, _ -> onCancel() }
+                .setOnCancelListener { onCancel() }
+                .setPositiveButton(R.string.download) { _, _ ->
+                    progress.visibility = View.VISIBLE
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        TreeUtils.downloadSharedTree(this@TreesActivity, dateId, {
+                            progress.visibility = View.GONE
+                            updateList()
+                        }, { progress.visibility = View.GONE })
+                    }
+                }.show()
+    }
+
     inner class MenuItemClickListener(val position: Int, val treeId: Int) : PopupMenu.OnMenuItemClickListener {
         override fun onMenuItemClick(item: MenuItem): Boolean {
             val id = item.itemId
@@ -420,14 +437,9 @@ class TreesActivity : AppCompatActivity() {
                         val referrer = details.installReferrer
                         if (referrer != null && referrer.matches("\\d{14}".toRegex())) { // It's a dateID
                             Global.settings.referrer = referrer
-                            AlertDialog.Builder(this@TreesActivity).setTitle(R.string.a_new_tree)
-                                    .setMessage(R.string.you_can_download)
-                                    .setPositiveButton(R.string.download) { _, _ ->
-                                        LauncherActivity.downloadShared(this@TreesActivity, referrer, progress)
-                                    }.setNeutralButton(R.string.cancel) { _, _ -> welcome.show() }
-                                    .setOnCancelListener { welcome.show() }.show()
+                            showSharedTreeDialog(referrer, welcome::show)
                         } else { // It's anything else
-                            Global.settings.referrer = null // Nulls it so he won't look for it again
+                            Global.settings.referrer = null // We null it so we won't look for it again
                             welcome.show()
                         }
                         Global.settings.save()

@@ -42,7 +42,14 @@ class NewTreeActivity : BaseActivity() {
         // Downloads the shared tree
         val downloadShared = findViewById<Button>(R.id.new_download_shared)
         if (dateIdExists) // Doesn't need any permissions because it unpacks only into the app's external storage
-            downloadShared.setOnClickListener { LauncherActivity.downloadShared(this, referrer, progress) }
+            downloadShared.setOnClickListener {
+                progress.visibility = View.VISIBLE
+                lifecycleScope.launch(Dispatchers.IO) {
+                    TreeUtils.downloadSharedTree(this@NewTreeActivity, referrer,
+                            { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
+                            { progress.visibility = View.GONE })
+                }
+            }
         else downloadShared.visibility = View.GONE
 
         // Creates an empty tree
@@ -79,7 +86,7 @@ class NewTreeActivity : BaseActivity() {
         findViewById<Button>(R.id.new_download_example).setOnClickListener {
             it.isEnabled = false
             progress.visibility = View.VISIBLE
-            lifecycleScope.launch(Dispatchers.IO) { downloadExample() }
+            lifecycleScope.launch(Dispatchers.IO) { downloadExample(it as Button) }
         }
 
         // Imports a GEDCOM file chosen with SAF
@@ -92,7 +99,6 @@ class NewTreeActivity : BaseActivity() {
                         TreeUtils.importGedcom(this@NewTreeActivity, uri, {
                             // Successful import
                             onBackPressedDispatcher.onBackPressed()
-                            Toast.makeText(this@NewTreeActivity, R.string.tree_imported_ok, Toast.LENGTH_SHORT).show()
                         }, { // Unsuccessful import
                             progress.visibility = View.GONE
                         })
@@ -120,7 +126,9 @@ class NewTreeActivity : BaseActivity() {
                         }
                         if (isValidBackup) {
                             lifecycleScope.launch(Dispatchers.Default) {
-                                TreeUtils.unZipTree(this@NewTreeActivity, null, uri)
+                                TreeUtils.unZipTree(this@NewTreeActivity, null, uri,
+                                        { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
+                                        { progress.visibility = View.GONE })
                             }
                             /* TODO: nello strano caso che viene importato col backup ZIP lo stesso albero suggerito dal referrer
                                 bisognerebbe annullare il referrer:
@@ -171,7 +179,7 @@ class NewTreeActivity : BaseActivity() {
     /**
      * Downloads the Simpsons ZIP file from Google Drive into the app's external cache, so without permissions needed.
      */
-    private suspend fun downloadExample() {
+    private suspend fun downloadExample(downloadButton: Button) {
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         val url = "https://www.googleapis.com/drive/v3/files/1yMZgqhHx6_yP-_mjrUULDiNAaFTrAYQv?alt=media&key=AIzaSyDN3OS52Wxs58px8fPcPKOUdC0WBZFOCSY"
         val zipFile = File(externalCacheDir, "the Simpsons.zip")
@@ -200,7 +208,9 @@ class NewTreeActivity : BaseActivity() {
                         }
                         DownloadManager.STATUS_SUCCESSFUL -> {
                             finishDownload = true
-                            TreeUtils.unZipTree(this, zipFile.path, null)
+                            TreeUtils.unZipTree(this, zipFile.path, null,
+                                    { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
+                                    { progress.visibility = View.GONE; downloadButton.isEnabled = true })
                         }
                     }
                 }

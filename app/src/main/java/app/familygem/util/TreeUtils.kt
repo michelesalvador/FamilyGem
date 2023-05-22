@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import app.familygem.*
 import app.familygem.Settings.Tree
 import app.familygem.constant.Extra
+import app.familygem.constant.Json
 import app.familygem.share.CompareActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
@@ -17,6 +18,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.io.FileUtils
+import org.apache.commons.net.ftp.FTPClient
 import org.folg.gedcom.model.*
 import org.folg.gedcom.parser.JsonParser
 import org.folg.gedcom.parser.ModelParser
@@ -210,6 +212,10 @@ object TreeUtils {
      * Imports a GEDCOM provided by an URI.
      */
     suspend fun importGedcom(context: Context, uri: Uri, onSuccess: () -> Unit, onFail: () -> Unit) {
+        val onSuccessWithMessage = {
+            Toast.makeText(context, R.string.tree_imported_ok, Toast.LENGTH_LONG).show()
+            onSuccess()
+        }
         try {
             // Reads the input
             val input = context.contentResolver.openInputStream(uri)
@@ -254,11 +260,11 @@ object TreeUtils {
                             .setPositiveButton(android.R.string.ok) { _, _ ->
                                 Global.settings.expert = true
                                 Global.settings.save()
-                                onSuccess()
-                            }.setNegativeButton(android.R.string.cancel) { _, _ -> onSuccess() }
+                                onSuccessWithMessage()
+                            }.setNegativeButton(android.R.string.cancel) { _, _ -> onSuccessWithMessage() }
                             .show()
 
-                } else onSuccess()
+                } else onSuccessWithMessage()
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
@@ -275,10 +281,62 @@ object TreeUtils {
     }
 
     /**
+     * Connects to the server and downloads the ZIP file to import it.
+     */
+    suspend fun downloadSharedTree(context: Context, dateId: String, onSuccess: () -> Unit, onFail: () -> Unit) {
+        val credential = U.getCredential(Json.FTP)
+        if (credential != null) {
+            try {
+                val client = FTPClient() // TODO: refactor to use Retrofit
+                client.connect(credential.getString(Json.HOST), credential.getInt(Json.PORT))
+                client.enterLocalPassiveMode()
+                client.login(credential.getString(Json.USER), credential.getString(Json.PASSWORD))
+                val zipPath = context.externalCacheDir?.path + "/$dateId.zip"
+                val fos = FileOutputStream(zipPath)
+                val path = credential.getString(Json.SHARED_PATH) + "/" + dateId + ".zip"
+                val input = client.retrieveFileStream(path)
+                if (input != null) {
+                    val data = ByteArray(1024)
+                    var count: Int
+                    while (input.read(data).also { count = it } != -1) {
+                        fos.write(data, 0, count)
+                    }
+                    fos.close()
+                    if (client.completePendingCommand()) {
+                        unZipTree(context, zipPath, null, {
+                            // If the tree was downloaded with the install referrer from TreesActivity or NewTreeActivity
+                            if (Global.settings.referrer != null && Global.settings.referrer == dateId) {
+                                Global.settings.referrer = null
+                                Global.settings.save()
+                            }
+                            onSuccess()
+                        }, onFail)
+                    } else // Failed decompression of downloaded ZIP (eg. corrupted file)
+                        downloadFailed(context.getString(R.string.backup_invalid), onFail)
+                } else // Did not find the file on the server
+                    downloadFailed(context.getString(R.string.something_wrong), onFail)
+                client.logout()
+                client.disconnect()
+            } catch (e: java.lang.Exception) {
+                downloadFailed(e.localizedMessage, onFail)
+            }
+        } else // Credentials are null
+            downloadFailed(context.getString(R.string.something_wrong), onFail)
+    }
+
+    /**
+     * Negative conclusion of the above method.
+     */
+    private suspend fun downloadFailed(message: String?, onFail: () -> Unit?) {
+        Utils.toast(message)
+        withContext(Dispatchers.Main) { onFail() }
+    }
+
+    /**
      * Unzips a ZIP tree file in the device storage.
      * Used equally by: Simpsons example, backup files and shared trees.
      */
-    suspend fun unZipTree(context: Context, zipPath: String?, zipUri: Uri?): Boolean { // TODO: sostituisci Boolean con callback
+    suspend fun unZipTree(context: Context, zipPath: String?, zipUri: Uri?, onSuccess: () -> Unit, onFail: () -> Unit) {
         val treeNumber = Global.settings.max() + 1
         var mediaDir = context.getExternalFilesDir(treeNumber.toString())
         val sourceDir = context.applicationInfo.sourceDir
@@ -322,27 +380,15 @@ object TreeUtils {
             if (zipped.grade == 9 && compareTrees(context, tree, false)) {
                 tree.grade = 20 // Marks it as derived
             }
-            // The download was done from the referrer dialog in TreesActivity
-            if (context is TreesActivity) {
-                withContext(Dispatchers.Main) {
-                    context.progress.visibility = View.GONE
-                    context.updateList()
-                }
-            } else // Example tree (Simpson) or backup tree (from LauncherActivity or from NewTreeActivity)
-                context.startActivity(Intent(context, TreesActivity::class.java))
             Global.settings.save()
             Utils.toast(R.string.tree_imported_ok)
-            return true
+            withContext(Dispatchers.Main) { onSuccess() }
+            return
         } catch (e: Exception) {
             Utils.toast(e.localizedMessage)
-            // TODO: onFail()
         }
-        return false
+        withContext(Dispatchers.Main) { onFail() }
     }
-
-    // Temporary hack to call a suspend function from Java
-    fun unZipTreeAsync(context: Context, zipPath: String?, zipUri: Uri?) =
-            GlobalScope.launch(Dispatchers.Default) { unZipTree(context, zipPath, zipUri) }
 
     /**
      * Replaces Italian with English in the Json settings of ZIP backup.

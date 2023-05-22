@@ -28,7 +28,7 @@ public class Settings {
      * Then it becomes null and remains null forever.
      * If 'settings.json' is deleted it re-becomes "start" and then immediately null.
      */
-    String referrer;
+    public String referrer;
     public List<Tree> trees;
     /**
      * Number of the tree currently opened. '0' means not any particular tree.

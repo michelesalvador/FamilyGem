@@ -107,7 +107,7 @@ public class SettingsActivity extends BaseActivity {
                             configuration.setLocale(Resources.getSystem().getConfiguration().locale);
                         }
                     }
-                    getApplicationContext().getResources().updateConfiguration(configuration, null);
+                    Global.context = createConfigurationContext(configuration);
                     // Removes switches to force KitKat to update their language
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
                         LinearLayout layout = findViewById(R.id.layout);
