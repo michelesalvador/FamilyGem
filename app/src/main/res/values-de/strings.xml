@@ -309,7 +309,7 @@
     <string name="change_date">Datum ändern</string>
     <string name="done">Fertig</string>
     <string name="cancel">Abbrechen</string>
-    <string name="delete">Stammbaum löschen</string>
+    <string name="delete">Löschen</string>
     <string name="tagline">Erstelle deinen eigenen Stammbaum</string>
     <string name="www">Webseite</string>
     <string name="email">E-Mail</string>
@@ -371,4 +371,22 @@
     <string name="edit_id">Änderung ID</string>
     <string name="invalid_id">Ungültige ID</string>
     <string name="undefined">Unbestimmte</string>
+    <string name="merge_tree">Stammbaum zusammenführen</string>
+    <string name="merge">Zusammenführen</string>
+    <string name="merge_into">%2$s in %1$s zusammenführen</string>
+    <string name="merge_complete">Zusammenführung abgeschlossen.</string>
+    <string name="select_tree">Wählen Sie einen Stammbaum zum Zusammenführen aus:</string>
+    <string name="choose_output">Wählen Sie einen Standort:</string>
+    <string name="generate_new">Erstellen eines neuen Stammbaums aus zwei</string>
+    <string name="unlock_function">Diese Funktion kann mit Family Gem Premium freigeschaltet werden.</string>
+    <string name="lifetime">Lebenslang</string>
+    <string name="more_premium">Mehr zu Premium</string>
+    <string name="premium_activated">Premium aktiviert.</string>
+    <string name="update_playstore">Bitte aktualisieren Sie die Play Store App.</string>
+    <string name="get_premium">Premium bekommen</string>
+    <string name="gedcom_only">Nur GEDCOM Datei</string>
+    <string name="gedcom_media_zip">GEDCOM mit %d Medien in einer ZIP-Datei</string>
+    <string name="next">Nächste</string>
+    <string name="error_found">Ein Fehler gefunden.</string>
+    <string name="are_same_person">Handelt es sich um dieselbe Person\?</string>
 </resources>

@@ -328,7 +328,7 @@
     <string name="media_searched_list">Mediabestanden worden doorzocht in deze mappen:</string>
     <string name="zip_exported_ok">ZIP geëxporteerd.</string>
     <string name="gedcom_exported_ok">GEDCOM geëxporteerd.</string>
-    <string name="sure_delete">Echt verwijderen\?</string>
+    <string name="sure_delete">Weet je het zeker\?</string>
     <string name="age">Leeftijd</string>
     <string name="partner">Partner</string>
     <string name="female_partner">Partner</string>
@@ -371,4 +371,22 @@
     <string name="undefined">Ongedefinieerde</string>
     <string name="edit_id">Wijzig ID</string>
     <string name="adopted">Geadopteerde</string>
+    <string name="generate_new">Maak een nieuwe stamboom van twee</string>
+    <string name="merge_complete">Samenvoeging voltooid.</string>
+    <string name="gedcom_media_zip">GEDCOM met %d media in ZIP bestand</string>
+    <string name="merge">Samenvoegen</string>
+    <string name="select_tree">Selecteer een stamboom om samen te voegen:</string>
+    <string name="choose_output">Kies een locatie:</string>
+    <string name="merge_into">Samenvoegen %2$s in %1$s</string>
+    <string name="unlock_function">Deze functie kan worden ontgrendeld met Family Gem Premium.</string>
+    <string name="lifetime">Levenslang</string>
+    <string name="more_premium">Meer over Premium</string>
+    <string name="get_premium">Krijg Premium</string>
+    <string name="premium_activated">Premium geactiveerd.</string>
+    <string name="update_playstore">Update de Play Store app.</string>
+    <string name="merge_tree">Stamboom samenvoegen</string>
+    <string name="gedcom_only">Alleen GEDCOM-bestand</string>
+    <string name="error_found">Eén fout gevonden.</string>
+    <string name="next">Volgende</string>
+    <string name="are_same_person">Zijn ze dezelfde persoon\?</string>
 </resources>

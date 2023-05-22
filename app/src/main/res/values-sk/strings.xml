@@ -371,4 +371,21 @@
     <string name="existing_id">ID už existuje</string>
     <string name="lineage">Príbuzenský vzťah</string>
     <string name="undefined">Neurčený</string>
+    <string name="merge_tree">Zlúčiť strom</string>
+    <string name="merge">Zlúčiť</string>
+    <string name="choose_output">Vybrať umiestnenie:</string>
+    <string name="select_tree">Vybrať strom na zlúčenie:</string>
+    <string name="merge_into">Zlúčiť %2$s do %1$s</string>
+    <string name="generate_new">Vytvoriť nový strom z dvoch</string>
+    <string name="merge_complete">Zlúčenie dokončené.</string>
+    <string name="unlock_function">Túto funkciu je možné odomknúť pomocou Family Gem Premium.</string>
+    <string name="lifetime">Doživotne</string>
+    <string name="more_premium">Viac o Premium</string>
+    <string name="premium_activated">Premium aktivovaný.</string>
+    <string name="update_playstore">Aktualizujte aplikáciu Obchod Play.</string>
+    <string name="get_premium">Získať Premium</string>
+    <string name="gedcom_only">Iba súbor GEDCOM</string>
+    <string name="gedcom_media_zip">GEDCOM s %d médiami v súbore ZIP</string>
+    <string name="are_same_person">Sú to tie isté osoby\?</string>
+    <string name="error_found">Nájdená jedna chyba.</string>
 </resources>

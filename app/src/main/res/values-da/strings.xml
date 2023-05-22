@@ -77,7 +77,7 @@
     <string name="time">Tid</string>
     <string name="shares">Deling</string>
     <string name="refresh">Opdater</string>
-    <string name="header">Header</string>
+    <string name="header">Overskrift</string>
     <string name="create_header">Opret header</string>
     <string name="update_header">Opdater header</string>
     <string name="copyright">Copyright</string>
@@ -371,4 +371,22 @@
     <string name="empty_family_delete">Der er et par tomme familier tilbage.
 \nØnsker du at slette dem\?</string>
     <string name="not_granted">%s ikke indvilget.</string>
+    <string name="merge_complete">Sammenlægningen afsluttet.</string>
+    <string name="merge_tree">Sammenlægning af træe</string>
+    <string name="merge">Sammenlægning</string>
+    <string name="select_tree">Vælg et træ, der skal slås sammen:</string>
+    <string name="choose_output">Vælg destinationen:</string>
+    <string name="merge_into">Sammenlæg %2$s i %1$s</string>
+    <string name="generate_new">Generer et nyt træ fra de to</string>
+    <string name="unlock_function">Denne funktion kan låses op med Family Gem Premium.</string>
+    <string name="lifetime">Livstid</string>
+    <string name="more_premium">Mere om Premium</string>
+    <string name="premium_activated">Premium aktiveret.</string>
+    <string name="update_playstore">Opdater Play Store app.</string>
+    <string name="get_premium">Få Premium</string>
+    <string name="gedcom_only">Kun GEDCOM-fil</string>
+    <string name="gedcom_media_zip">GEDCOM med %d medier i en ZIP-fil</string>
+    <string name="error_found">En fejl fundet.</string>
+    <string name="next">Følgende</string>
+    <string name="are_same_person">Er de den samme person\?</string>
 </resources>

@@ -371,4 +371,20 @@
     <string name="invalid_id">Недійсний ідентифікатор</string>
     <string name="existing_id">Вже існуючий ідентифікатор</string>
     <string name="undefined">Невизначені</string>
+    <string name="merge_tree">Об\'єднати дерево</string>
+    <string name="merge">Об’єднати</string>
+    <string name="select_tree">Виберіть дерево для об\'єднання:</string>
+    <string name="choose_output">Виберіть місце::</string>
+    <string name="generate_new">Створіть нове дерево з двох</string>
+    <string name="merge_complete">Об\'єднання завершено.</string>
+    <string name="unlock_function">Цю функцію можна розблокувати за допомогою Family Gem Premium.</string>
+    <string name="lifetime">Пожиттєво</string>
+    <string name="more_premium">Більше про Premium</string>
+    <string name="update_playstore">Оновите програму Play Store.</string>
+    <string name="premium_activated">Premium активований.</string>
+    <string name="merge_into">Об\'єднати %2$s в %1$s</string>
+    <string name="get_premium">Отримати Premium</string>
+    <string name="gedcom_only">Тільки файл GEDCOM</string>
+    <string name="gedcom_media_zip">GEDCOM з %d медіа у ZIP-файлі</string>
+    <string name="error_found">Знайдена одна помилка.</string>
 </resources>

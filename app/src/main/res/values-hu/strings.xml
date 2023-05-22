@@ -371,4 +371,22 @@
     <string name="invalid_id">Érvénytelen ID</string>
     <string name="existing_id">ID már létezik</string>
     <string name="undefined">Meghatározatlan</string>
+    <string name="premium_activated">Premium aktiválva.</string>
+    <string name="merge_tree">Fa egyesítése</string>
+    <string name="merge">Egyesítés</string>
+    <string name="select_tree">Válassza ki az egyesítendő fát:</string>
+    <string name="choose_output">Válassza ki a célállomást:</string>
+    <string name="merge_into">%2$s egyesítése %1$s-be</string>
+    <string name="generate_new">Új fa létrehozása két</string>
+    <string name="merge_complete">Egyesítés befejeződött.</string>
+    <string name="gedcom_media_zip">GEDCOM a %d médiával egy ZIP fájlban</string>
+    <string name="gedcom_only">Csak GEDCOM fájl</string>
+    <string name="unlock_function">Ezt a funkciót a Family Gem Premium szolgáltatással lehet feloldani.</string>
+    <string name="lifetime">Élethosszig tartó</string>
+    <string name="get_premium">Szerezd Premium</string>
+    <string name="more_premium">Többet a Premium</string>
+    <string name="update_playstore">Frissítse a Play Store alkalmazást.</string>
+    <string name="error_found">Egy hiba található.</string>
+    <string name="next">Következő</string>
+    <string name="are_same_person">Ők ugyanaz az ember\?</string>
 </resources>

@@ -371,4 +371,20 @@
     <string name="existing_id">Ve\'c postoje\'ci ID</string>
     <string name="undefined">Neodređeno</string>
     <string name="foster">Pohranjeno dete</string>
+    <string name="merge_tree">Spojiti stablo</string>
+    <string name="merge">Spojiti</string>
+    <string name="select_tree">Izaberite stablo za spajanje:</string>
+    <string name="choose_output">Izaberite odredište:</string>
+    <string name="generate_new">Generišiti novo stablo od njih dvoje</string>
+    <string name="merge_complete">Spajanje je završeno.</string>
+    <string name="unlock_function">Ova funkcija se može otključati uz Family Gem Premium.</string>
+    <string name="lifetime">Doživotno</string>
+    <string name="more_premium">Više o Premium</string>
+    <string name="premium_activated">Premium aktiviran.</string>
+    <string name="update_playstore">Ažurirajte aplikaciju Plai prodavnica.</string>
+    <string name="merge_into">Spojiti %2$s u %1$s</string>
+    <string name="get_premium">Nabaviti Premium</string>
+    <string name="gedcom_only">Samo GEDCOM datoteka</string>
+    <string name="gedcom_media_zip">GEDCOM sa %d medija u ZIP datoteci</string>
+    <string name="error_found">Pronađena jedna greška.</string>
 </resources>

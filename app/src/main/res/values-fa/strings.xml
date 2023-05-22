@@ -363,4 +363,27 @@
     <string name="empty_family">خانواده خالی</string>
     <string name="empty_family_delete">چند خانواده خالی مانده اند.
 \nآیا می خواهید آنها را حذف کنید؟</string>
+    <string name="system_language">زبان سیستم</string>
+    <string name="lineage">اجداد</string>
+    <string name="foster">پرورش دادن</string>
+    <string name="adopted">به تصویب رسید</string>
+    <string name="existing_id">شناسه از قبل موجود است</string>
+    <string name="edit_id">ویرایش شناسه</string>
+    <string name="invalid_id">شناسه نامعتبر</string>
+    <string name="merge_tree">ادغام درختواره</string>
+    <string name="merge">ادغام</string>
+    <string name="choose_output">انتخاب مقصد:</string>
+    <string name="merge_into">ادغام %2$s به %1$s</string>
+    <string name="generate_new">تولید درخت واره جدید از این دو</string>
+    <string name="merge_complete">ادغام کامل شد.</string>
+    <string name="premium_activated">پریمیوم فعال شد.</string>
+    <string name="unlock_function">این ویژگی در نسخه پریمیوم فامیلی جم قابل باز شدن است.</string>
+    <string name="lifetime">در طول عمر</string>
+    <string name="more_premium">اطلاعات بیشتر در مورد نسخه پریمیوم</string>
+    <string name="update_playstore">لطفا برنامه Play Store را به روز کنید.</string>
+    <string name="get_premium">دریافت نسخه پریمیوم</string>
+    <string name="undefined">تعریف نشده</string>
+    <string name="select_tree">انتخاب درختواره برای ادغام:</string>
+    <string name="gedcom_media_zip">GEDCOM با %d مدیا در یک فایل فشرده</string>
+    <string name="gedcom_only">فقط فایل GEDCOM</string>
 </resources>

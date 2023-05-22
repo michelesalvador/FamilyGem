@@ -371,4 +371,20 @@
 \n\t%d dopolnitve
 \n\t%d zamenjave
 \n\t%d odstranitve</string>
+    <string name="merge_tree">Združiti drevo</string>
+    <string name="merge">Združiti</string>
+    <string name="select_tree">Izberiti drevo za združitev:</string>
+    <string name="merge_complete">Združitev zaključeno.</string>
+    <string name="choose_output">Izberiti lokacijo:</string>
+    <string name="generate_new">Ustvariti novo drevo iz dveh</string>
+    <string name="unlock_function">To funkcijo lahko odklenete pomočjo Family Gem Premium.</string>
+    <string name="lifetime">Doživljenjsko</string>
+    <string name="more_premium">Več o Premium</string>
+    <string name="update_playstore">Posodobite aplikacijo Trgovina Play.</string>
+    <string name="merge_into">Združiti %2$s v %1$s</string>
+    <string name="get_premium">Pridobiti Premium</string>
+    <string name="premium_activated">Premium aktiviran.</string>
+    <string name="gedcom_only">Samo datoteka GEDCOM</string>
+    <string name="gedcom_media_zip">GEDCOM z %d mediji v datoteki ZIP</string>
+    <string name="error_found">Najdena ena napaka.</string>
 </resources>

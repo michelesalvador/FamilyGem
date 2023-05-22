@@ -332,7 +332,7 @@
     <string name="family_as">Obitelj (kao %s)</string>
     <string name="turns_years_old">%s danas puni %d godina.</string>
     <string name="birthday_notified_midday">Rođendan svake osobe bit će obaviješten u podne.</string>
-    <string name="birthdays">Rođendane</string>
+    <string name="birthdays">Rođendani</string>
     <string name="allow_developer_access">Omogući razvojnom programeru aplikacije pristup zajedničkom stablu</string>
     <string name="remind_later">Podsjeti kasnije</string>
     <string name="aware_upload_server">Imaj na umu da ćeš cijelo stablo prenijeti na poslužitelj na mreži.</string>
@@ -371,4 +371,22 @@
     <string name="adopted">Usvojen/a</string>
     <string name="foster">Dovjerenij/Dovjerena</string>
     <string name="undefined">Neodređeno</string>
+    <string name="merge">Spoji</string>
+    <string name="merge_tree">Spoji stablo</string>
+    <string name="lifetime">Doživotno</string>
+    <string name="more_premium">Više o Premium</string>
+    <string name="premium_activated">Premium aktiviran.</string>
+    <string name="update_playstore">Ažurirajte aplikaciju Trgovina Play.</string>
+    <string name="merge_into">Spoji %2$s u %1$s</string>
+    <string name="select_tree">Odaberi stablo za spajanje:</string>
+    <string name="generate_new">Stvori novo stablo iz tih dva stabla</string>
+    <string name="merge_complete">Spajanje završeno.</string>
+    <string name="unlock_function">Ova se funkcija može otključati s Family Gem Premium.</string>
+    <string name="get_premium">Nabavi Premium</string>
+    <string name="choose_output">Odaberi odredište:</string>
+    <string name="gedcom_only">Samo GEDCOM datoteka</string>
+    <string name="gedcom_media_zip">GEDCOM s %d medijima u ZIP datoteci</string>
+    <string name="are_same_person">Jesu li te osobe iste\?</string>
+    <string name="next">Dalje</string>
+    <string name="error_found">Pronađena jedna greška.</string>
 </resources>

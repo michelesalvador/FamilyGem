@@ -371,4 +371,22 @@
     <string name="edit_id">עריכת מזהה</string>
     <string name="undefined">לא מוגדר</string>
     <string name="invalid_id">מזהה שגוי</string>
+    <string name="merge_tree">מיזוג עץ</string>
+    <string name="merge">מיזוג</string>
+    <string name="select_tree">נא לבחור עץ למיזוג:</string>
+    <string name="choose_output">בחירת היעד:</string>
+    <string name="merge_into">מיזוג %2$s לתוך %1$s</string>
+    <string name="generate_new">יצירת עץ חדש משני אלו</string>
+    <string name="merge_complete">המיזוג הושלם.</string>
+    <string name="unlock_function">אפשר לשחרר את היכולת הזאת עם Family Gem פרימיום.</string>
+    <string name="more_premium">מידע נוסף על פרימיום</string>
+    <string name="premium_activated">הפרימיום הופעל.</string>
+    <string name="lifetime">לכל החיים</string>
+    <string name="get_premium">הצטרפות לפרימיום</string>
+    <string name="update_playstore">נא לעדכן את היישומון מחנות Play.</string>
+    <string name="gedcom_only">קובץ GEDCOM בלבד</string>
+    <string name="gedcom_media_zip">GEDCOM עם %d פריטי מדיה בקובץ ZIP</string>
+    <string name="next">הבא</string>
+    <string name="are_same_person">זה אותו אדם\?</string>
+    <string name="error_found">נמצאה שגיאה אחת.</string>
 </resources>
