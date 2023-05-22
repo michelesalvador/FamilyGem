@@ -365,4 +365,22 @@
     <string name="invalid_id">Nieważny identyfikator</string>
     <string name="existing_id">Identyfikator już istnieje</string>
     <string name="undefined">Nieokreślone</string>
+    <string name="merge_tree">Scalaj drzewo</string>
+    <string name="merge">Scalaj</string>
+    <string name="select_tree">Wybierz drzewo do scalenia:</string>
+    <string name="choose_output">Wybierz miejsce przeznaczenia:</string>
+    <string name="merge_into">Scalanie %2$s w %1$s</string>
+    <string name="generate_new">Wygeneruj nowe drzewo z dwóch</string>
+    <string name="merge_complete">Scalanie zakończone.</string>
+    <string name="unlock_function">Tę funkcję można odblokować za pomocą Family Gem Premium.</string>
+    <string name="lifetime">Dożywotnio</string>
+    <string name="more_premium">Więcej o Premium</string>
+    <string name="premium_activated">Premium aktywowany.</string>
+    <string name="update_playstore">Zaktualizuj aplikację Sklep Play.</string>
+    <string name="get_premium">Uzyskaj Premium</string>
+    <string name="gedcom_media_zip">GEDCOM z %d mediami w pliku ZIP</string>
+    <string name="gedcom_only">Tylko plik GEDCOM</string>
+    <string name="next">Dalej</string>
+    <string name="are_same_person">Czy to ta sama osoba\?</string>
+    <string name="error_found">Znaleziono jeden błąd.</string>
 </resources>

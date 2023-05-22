@@ -371,4 +371,21 @@
     <string name="edit_id">Změna ID</string>
     <string name="existing_id">ID již existuje</string>
     <string name="undefined">Neurčený</string>
+    <string name="merge_tree">Sloučit strom</string>
+    <string name="merge">Sloučit</string>
+    <string name="select_tree">Vybrat strom pro sloučení:</string>
+    <string name="choose_output">Zvolit umístění:</string>
+    <string name="generate_new">Vytvořit nový strom ze dvou</string>
+    <string name="merge_complete">Sloučení dokončeno.</string>
+    <string name="unlock_function">Tuto funkci lze odemknout pomocí Family Gem Premium.</string>
+    <string name="lifetime">Doživotní</string>
+    <string name="more_premium">Více o Premium</string>
+    <string name="premium_activated">Premium aktivován.</string>
+    <string name="update_playstore">Aktualizujte aplikaci Obchod Play.</string>
+    <string name="merge_into">Sloučit %2$s do %1$s</string>
+    <string name="get_premium">Získat Premium</string>
+    <string name="gedcom_only">Pouze soubor GEDCOM</string>
+    <string name="gedcom_media_zip">GEDCOM s %d médii v souboru ZIP</string>
+    <string name="are_same_person">Jsou to stejné osoby\?</string>
+    <string name="error_found">Nalezena jedna chyba.</string>
 </resources>

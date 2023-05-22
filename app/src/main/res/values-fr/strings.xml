@@ -370,5 +370,23 @@
     <string name="invalid_id">ID invalide</string>
     <string name="lineage">Parenté</string>
     <string name="existing_id">ID déjà existant</string>
-	<string name="undefined">Indéfinie</string>
+    <string name="undefined">Indéfinie</string>
+    <string name="merge_tree">Fusionner un arbre</string>
+    <string name="merge">Fusionner</string>
+    <string name="select_tree">Sélectionner un arbre à fusionner :</string>
+    <string name="merge_complete">Fusion terminée.</string>
+    <string name="unlock_function">Cette fonction peut être débloquée avec Family Gem Premium.</string>
+    <string name="lifetime">À vie</string>
+    <string name="more_premium">Plus d\'infos sur Premium</string>
+    <string name="premium_activated">Premium activé.</string>
+    <string name="update_playstore">Veuillez mettre à jour l\'app Play Store.</string>
+    <string name="merge_into">Fusionner %2$s avec %1$s</string>
+    <string name="get_premium">Obtenir Premium</string>
+    <string name="choose_output">Choisir la destination :</string>
+    <string name="generate_new">Générer un nouvel arbre à partir des deux</string>
+    <string name="gedcom_only">Seulement le fichier GEDCOM</string>
+    <string name="gedcom_media_zip">GEDCOM avec %d médias dans un fichier ZIP</string>
+    <string name="error_found">Une erreur trouvée.</string>
+    <string name="next">Suivant</string>
+    <string name="are_same_person">Sont-ils la même personne \?</string>
 </resources>

@@ -287,7 +287,7 @@
     <string name="download">Скачать</string>
     <string name="you_can_download">Теперь вы можете скачать дерево, которым с вами поделились.</string>
     <string name="a_new_tree">Новое семейное дерево</string>
-    <string name="simpsons_tree">Семейное древо Симпсонов</string>
+    <string name="simpsons_tree">Семейное дерево Симпсонов</string>
     <string name="tree">Дерево</string>
     <string name="invalid_gedcom">Недействительный файл GEDCOM.</string>
     <string name="backup_invalid">Эта резервная копия недействительна.</string>
@@ -371,4 +371,21 @@
     <string name="invalid_id">Неверный идентификатор</string>
     <string name="existing_id">Уже существующий идентификатор</string>
     <string name="undefined">Неопределенные</string>
+    <string name="merge_tree">Объединить дерево</string>
+    <string name="merge">Объединить</string>
+    <string name="select_tree">Выберите дерево для объединения:</string>
+    <string name="merge_complete">Объединение завершено.</string>
+    <string name="choose_output">Выберите направление:</string>
+    <string name="generate_new">Создать новое дерево из двух</string>
+    <string name="lifetime">Пожизненно</string>
+    <string name="more_premium">Узнать больше о Premium</string>
+    <string name="premium_activated">Premium активирован.</string>
+    <string name="unlock_function">Эта функция может быть доступна с Family Gem Premium.</string>
+    <string name="update_playstore">Пожалуйста, обновите Play Store.</string>
+    <string name="merge_into">Объединить %2$s в %1$s</string>
+    <string name="get_premium">Получить Premium</string>
+    <string name="gedcom_only">Только файл GEDCOM</string>
+    <string name="gedcom_media_zip">GEDCOM с %d медиа в ZIP-файле</string>
+    <string name="error_found">Найдена одна ошибка.</string>
+    <string name="next">Следующий</string>
 </resources>

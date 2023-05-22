@@ -371,4 +371,5 @@
     <string name="existing_id">ID jam ekzistas</string>
     <string name="undefined">Nedifinita</string>
     <string name="foster">Vartiga infano</string>
+    <string name="error_found">Unu eraro trovita.</string>
 </resources>

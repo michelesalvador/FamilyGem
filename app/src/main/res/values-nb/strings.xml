@@ -371,4 +371,7 @@
     <string name="invalid_id">Ugyldig ID</string>
     <string name="undefined">Udefinert</string>
     <string name="foster">Fosterbarn</string>
+    <string name="gedcom_media_zip">GEDCOM med %d medier i en ZIP fil</string>
+    <string name="gedcom_only">Kun GEDCOM-fil</string>
+    <string name="error_found">Én feil funnet.</string>
 </resources>
