@@ -14,15 +14,17 @@
     <locale android:name="fr" />
     <locale android:name="hr" />
     <locale android:name="hu" />
-    <locale android:name="in" />
+    <locale
+        android:name="in"
+        percent="93" />
     <locale android:name="it" />
     <locale android:name="iw" />
     <locale
         android:name="kn"
-        percent="18" />
+        percent="17" />
     <locale
         android:name="mr"
-        percent="13" />
+        percent="12" />
     <locale android:name="nb" />
     <locale android:name="nl" />
     <locale android:name="pl" />
@@ -36,7 +38,7 @@
         percent="5" />
     <locale
         android:name="tr"
-        percent="21" />
+        percent="20" />
     <locale android:name="uk" />
     <locale android:name="zh" />
 </locale-config>
