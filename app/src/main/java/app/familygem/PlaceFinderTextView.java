@@ -61,7 +61,7 @@ public class PlaceFinderTextView extends AppCompatAutoCompleteTextView {
 
         @Override
         public String getItem(int index) {
-            if (places.size() > 0 && index < places.size()) // Evita IndexOutOfBoundsException
+            if (places.size() > 0 && index < places.size()) // Avoids IndexOutOfBoundsException
                 return places.get(index);
             return "";
         }
@@ -95,7 +95,7 @@ public class PlaceFinderTextView extends AppCompatAutoCompleteTextView {
                             }
                             filterResults.values = places;
                             filterResults.count = places.size();
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                     }
                     return filterResults;

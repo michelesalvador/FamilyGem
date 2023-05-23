@@ -44,7 +44,6 @@ import app.familygem.BaseActivity;
 import app.familygem.BuildConfig;
 import app.familygem.Exporter;
 import app.familygem.Global;
-import app.familygem.NewTreeActivity;
 import app.familygem.Principal;
 import app.familygem.R;
 import app.familygem.Settings;
