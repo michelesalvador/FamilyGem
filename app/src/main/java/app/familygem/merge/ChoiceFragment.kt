@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
+import androidx.core.content.res.ResourcesCompat.getColor
 import androidx.navigation.fragment.findNavController
 import app.familygem.R
 import app.familygem.databinding.MergeChoiceFragmentBinding
@@ -37,7 +37,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
                 val treeItem: View = binding.mergeList.getChildAt(i)
                 val radioButton = treeItem.findViewById<RadioButton>(R.id.merge_radio)
                 if (model.trees[i].id == it) {
-                    treeItem.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.accent_light, null))
+                    treeItem.setBackgroundColor(getColor(resources, R.color.accent_light, null))
                     radioButton.isChecked = true
                 } else {
                     treeItem.setBackgroundColor(0x0000)
@@ -52,7 +52,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
                 for (i in 0 until binding.mergeList.childCount) {
                     val treeView: View = binding.mergeList.getChildAt(i)
                     treeView.setOnClickListener(null)
-                    treeView.findViewById<TextView>(R.id.merge_title).setTextColor(resources.getColor(R.color.gray_text))
+                    treeView.findViewById<TextView>(R.id.merge_title).setTextColor(getColor(resources, R.color.gray_text, null))
                     treeView.findViewById<RadioButton>(R.id.merge_radio).isEnabled = false
                 }
                 binding.mergeNext.isEnabled = false

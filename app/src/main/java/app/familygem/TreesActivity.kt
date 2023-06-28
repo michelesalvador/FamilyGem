@@ -10,7 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ListView
+import android.widget.RelativeLayout
+import android.widget.SimpleAdapter
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -33,7 +39,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.folg.gedcom.model.*
+import org.folg.gedcom.model.ChildRef
+import org.folg.gedcom.model.Family
+import org.folg.gedcom.model.Gedcom
+import org.folg.gedcom.model.Media
+import org.folg.gedcom.model.Note
+import org.folg.gedcom.model.ParentFamilyRef
+import org.folg.gedcom.model.Person
+import org.folg.gedcom.model.Repository
+import org.folg.gedcom.model.Source
+import org.folg.gedcom.model.SpouseFamilyRef
+import org.folg.gedcom.model.SpouseRef
+import org.folg.gedcom.model.Submitter
 import java.io.File
 
 /**
@@ -364,8 +381,8 @@ class TreesActivity : AppCompatActivity() {
                     }
                 }
             } else if (id == 9) { // Export ZIP backup
-                if (exporter.openTree(treeId))
-                    F.saveDocument(this@TreesActivity, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP)
+                exporter.openTree(treeId)
+                F.saveDocument(this@TreesActivity, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP)
             } else if (id == 10) { // Delete tree
                 AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
                         .setPositiveButton(R.string.delete) { _, _ ->

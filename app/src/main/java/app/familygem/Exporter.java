@@ -155,38 +155,40 @@ public class Exporter {
      * Returns a DocumentFile Map of the media that it can find.
      */
     private Map<DocumentFile, Integer> collectMedia() {
-        MediaList mediaList = new MediaList(gedcom, 0);
-        gedcom.accept(mediaList);
-        /* It happens that different Media point to the same file.
-           And it could also happen that different paths end up with the same filenames,
-           eg. 'pathA/img.jpg' 'pathB/img.jpg'
-           It's necessary to avoid that files with the same name end up in the ZIP.
-           This loop creates a list of paths with unique filenames. */
-        Set<String> paths = new HashSet<>();
-        Set<String> onlyFileNames = new HashSet<>(); // Control file names
-        for (Media med : mediaList.list) {
-            String path = med.getFile();
-            if (path != null && !path.isEmpty()) {
-                String fileName = path.replace('\\', '/');
-                if (fileName.lastIndexOf('/') > -1)
-                    fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
-                if (!onlyFileNames.contains(fileName))
-                    paths.add(path);
-                onlyFileNames.add(fileName);
-            }
-        }
         Map<DocumentFile, Integer> collection = new HashMap<>();
-        for (String path : paths) {
-            Media med = new Media();
-            med.setFile(path);
-            // Paths
-            String mediaPath = F.mediaPath(treeId, med);
-            if (mediaPath != null)
-                collection.put(DocumentFile.fromFile(new File(mediaPath)), 2); // todo canRead() ?
-            else { // URIs
-                Uri mediaUri = F.mediaUri(treeId, med);
-                if (mediaUri != null)
-                    collection.put(DocumentFile.fromSingleUri(context, mediaUri), 2);
+        if (gedcom != null) { // gedcom could be null if openTree() has failed
+            MediaList mediaList = new MediaList(gedcom, 0);
+            gedcom.accept(mediaList);
+            /* It happens that different Media point to the same file.
+               And it could also happen that different paths end up with the same filenames,
+               eg. 'pathA/img.jpg' 'pathB/img.jpg'
+               It's necessary to avoid that files with the same name end up in the ZIP.
+               This loop creates a list of paths with unique filenames. */
+            Set<String> paths = new HashSet<>();
+            Set<String> onlyFileNames = new HashSet<>(); // Control file names
+            for (Media med : mediaList.list) {
+                String path = med.getFile();
+                if (path != null && !path.isEmpty()) {
+                    String fileName = path.replace('\\', '/');
+                    if (fileName.lastIndexOf('/') > -1)
+                        fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
+                    if (!onlyFileNames.contains(fileName))
+                        paths.add(path);
+                    onlyFileNames.add(fileName);
+                }
+            }
+            for (String path : paths) {
+                Media med = new Media();
+                med.setFile(path);
+                // Paths
+                String mediaPath = F.mediaPath(treeId, med);
+                if (mediaPath != null)
+                    collection.put(DocumentFile.fromFile(new File(mediaPath)), 2); // todo canRead() ?
+                else { // URIs
+                    Uri mediaUri = F.mediaUri(treeId, med);
+                    if (mediaUri != null)
+                        collection.put(DocumentFile.fromSingleUri(context, mediaUri), 2);
+                }
             }
         }
         return collection;

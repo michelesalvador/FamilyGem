@@ -56,7 +56,8 @@ object TreeUtils {
      */
     fun openGedcomTemporarily(treeId: Int, putInGlobal: Boolean): Gedcom? {
         val gedcom: Gedcom?
-        if (Global.gc != null && Global.settings.openTree == treeId) gedcom = Global.gc else {
+        if (Global.gc != null && Global.settings.openTree == treeId) gedcom = Global.gc
+        else {
             gedcom = readJson(treeId)
             if (putInGlobal && gedcom != null) {
                 Global.gc = gedcom // To be able to use for example F.oneImage()
@@ -80,6 +81,18 @@ object TreeUtils {
                 text.append(line).append('\n')
             }
             reader.close()
+            var json: String = text.toString()
+            json = updateTreeLanguage(json)
+            gedcom = JsonParser().fromJson(json)
+            if (gedcom == null) {
+                Toast.makeText(Global.context, R.string.no_useful_data, Toast.LENGTH_LONG).show()
+                return null
+            }
+            // This Notifier was introduced in version 0.9.1
+            // TODO: Can be removed from here in the future because tree.birthdays will never more be null
+            if (Global.settings.getTree(treeId).birthdays == null) {
+                Notifier(Global.context, gedcom, treeId, Notifier.What.CREATE)
+            }
         } catch (e: Exception) {
             Toast.makeText(Global.context, e.localizedMessage, Toast.LENGTH_LONG).show()
             return null
@@ -87,18 +100,6 @@ object TreeUtils {
             val message = if (e is OutOfMemoryError) Global.context.getString(R.string.not_memory_tree) else e.localizedMessage
             Toast.makeText(Global.context, message, Toast.LENGTH_LONG).show()
             return null
-        }
-        var json: String = text.toString()
-        json = updateTreeLanguage(json)
-        gedcom = JsonParser().fromJson(json)
-        if (gedcom == null) {
-            Toast.makeText(Global.context, R.string.no_useful_data, Toast.LENGTH_LONG).show()
-            return null
-        }
-        // This Notifier was introduced in version 0.9.1
-        // TODO: Can be removed from here in the future because tree.birthdays will never more be null
-        if (Global.settings.getTree(treeId).birthdays == null) {
-            Notifier(Global.context, gedcom, treeId, Notifier.What.CREATE)
         }
         return gedcom
     }
@@ -266,15 +267,17 @@ object TreeUtils {
 
                 } else onSuccessWithMessage()
             }
-        } catch (e: Exception) {
+        } catch (exception: Exception) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, e.localizedMessage, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, exception.localizedMessage, Toast.LENGTH_LONG).show()
                 onFail()
             }
-        } catch (e: Error) {
-            e.printStackTrace()
+        } catch (error: Error) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, R.string.something_wrong, Toast.LENGTH_LONG).show()
+                val message = if (error is OutOfMemoryError) context.getString(R.string.not_memory_tree)
+                else if (error.localizedMessage != null) error.localizedMessage
+                else context.getString(R.string.something_wrong)
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 onFail()
             }
         }

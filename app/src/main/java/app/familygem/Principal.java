@@ -50,7 +50,7 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
     NavigationView menuPrincipe;
     List<Integer> idMenu = Arrays.asList(R.id.nav_diagramma, R.id.nav_persone, R.id.nav_famiglie,
             R.id.nav_media, R.id.nav_note, R.id.nav_fonti, R.id.nav_archivi, R.id.nav_autore);
-    List<Class> frammenti = Arrays.asList(DiagramFragment.class, PersonsFragment.class, FamiliesFragment.class,
+    List<Class<?>> frammenti = Arrays.asList(DiagramFragment.class, PersonsFragment.class, FamiliesFragment.class,
             MediaFragment.class, NotesFragment.class, SourcesFragment.class, RepositoriesFragment.class, SubmittersFragment.class);
 
     @Override
