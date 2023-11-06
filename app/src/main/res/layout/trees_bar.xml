@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:orientation="horizontal">
-	<TextView
-		style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:textColor="#fff"
-		android:text="@string/trees" />
-	<ImageButton
-		android:id="@+id/trees_settings"
-		android:layout_width="50dp"
-		android:layout_height="match_parent"
-		android:layout_alignParentEnd="true"
-		android:background="?attr/actionBarItemBackground"
-		app:srcCompat="@drawable/gear" />
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:text="@string/trees"
+        android:textColor="#FFF" />
+
+    <ImageButton
+        android:id="@+id/trees_help"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:layout_toStartOf="@+id/trees_settings"
+        android:background="?attr/actionBarItemBackground"
+        android:tooltipText="@string/help"
+        app:srcCompat="@drawable/questionmark" />
+
+    <ImageButton
+        android:id="@+id/trees_settings"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:background="?attr/actionBarItemBackground"
+        android:tooltipText="@string/settings"
+        app:srcCompat="@drawable/gear" />
 </RelativeLayout>

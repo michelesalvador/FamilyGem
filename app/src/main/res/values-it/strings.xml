@@ -74,6 +74,7 @@
     <string name="error_found">Trovato un errore.</string>
     <string name="errors_found">Trovati %d errori.</string>
     <string name="correct">Correggi</string>
+    <string name="help">Aiuto</string>
     <!-- SettingsActivity -->
     <string name="settings">Impostazioni</string>
     <string name="auto_save">Salvataggio automatico</string>

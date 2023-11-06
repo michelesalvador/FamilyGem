@@ -1,6 +1,7 @@
 package app.familygem
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -260,6 +261,9 @@ class TreesActivity : AppCompatActivity() {
         // Custom actionbar
         val bar = supportActionBar
         val treesBar = layoutInflater.inflate(R.layout.trees_bar, listView, false)
+        treesBar.findViewById<ImageButton>(R.id.trees_help).setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/michelesalvador/FamilyGem/wiki")))
+        }
         treesBar.findViewById<ImageButton>(R.id.trees_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
