@@ -755,10 +755,10 @@ public class DiagramFragment extends Fragment {
             } else {
                 new AlertDialog.Builder(getContext()).setItems(relatives, (dialog, selected) -> {
                     Intent intent = new Intent(getContext(), PersonEditorActivity.class)
-                            .putExtra("idIndividuo", idPersona)
+                            .putExtra(Extra.PERSON_ID, idPersona)
                             .putExtra(Extra.RELATION, Relation.get(selected));
-                    if (U.controllaMultiMatrimoni(intent, getContext(), null)) // aggiunge 'idFamiglia' o 'collocazione'
-                        return; // se pivot è sposo in più famiglie, chiede a chi aggiungere un coniuge o un figlio
+                    if (U.checkMultiMarriages(intent, getContext(), null))
+                        return;
                     startActivity(intent);
                 }).show();
             }
@@ -770,16 +770,16 @@ public class DiagramFragment extends Fragment {
                 new AlertDialog.Builder(getContext()).setItems(relatives, (dialog, selected) -> {
                     Intent intent = new Intent(getContext(), Principal.class)
                             .putExtra(Choice.PERSON, true)
-                            .putExtra("idIndividuo", idPersona)
+                            .putExtra(Extra.PERSON_ID, idPersona)
                             .putExtra(Extra.RELATION, Relation.get(selected));
-                    if (U.controllaMultiMatrimoni(intent, getContext(), DiagramFragment.this))
+                    if (U.checkMultiMarriages(intent, getContext(), DiagramFragment.this))
                         return;
                     startActivityForResult(intent, 1401);
                 }).show();
             }
         } else if (id == 5) { // Modifica
             Intent intent = new Intent(getContext(), PersonEditorActivity.class);
-            intent.putExtra("idIndividuo", idPersona);
+            intent.putExtra(Extra.PERSON_ID, idPersona);
             startActivity(intent);
         } else if (id == 6) { // Scollega
             /*  Todo ad esser precisi bisognerebbe usare Famiglia.scollega(sfr, sr)
@@ -821,12 +821,12 @@ public class DiagramFragment extends Fragment {
         if (resultCode == AppCompatActivity.RESULT_OK) {
             // Add the relative who has been chosen in PersonsFragment
             if (requestCode == 1401) {
-                Object[] modified = PersonEditorActivity.addParent(
-                        data.getStringExtra("idIndividuo"), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione
-                        data.getStringExtra("idParente"),
-                        data.getStringExtra("idFamiglia"),
+                Object[] modified = PersonEditorActivity.addRelative(
+                        data.getStringExtra(Extra.PERSON_ID), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione
+                        data.getStringExtra(Extra.RELATIVE_ID),
+                        data.getStringExtra(Extra.FAMILY_ID),
                         (Relation)data.getSerializableExtra(Extra.RELATION),
-                        data.getStringExtra("collocazione"));
+                        data.getStringExtra(Extra.DESTINATION));
                 TreeUtils.INSTANCE.save(true, modified);
             } // Export diagram to PDF
             else if (requestCode == 903) {

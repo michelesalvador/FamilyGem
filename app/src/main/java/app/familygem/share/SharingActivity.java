@@ -334,7 +334,7 @@ public class SharingActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == AppCompatActivity.RESULT_OK) {
             if (requestCode == 5007) {
-                tree.shareRoot = data.getStringExtra("idParente");
+                tree.shareRoot = data.getStringExtra(Extra.RELATIVE_ID);
                 Global.settings.save();
                 displayShareRoot();
             }

@@ -54,7 +54,6 @@ import app.familygem.constant.Relation;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
-import app.familygem.detail.SourceCitationActivity;
 import app.familygem.list.MediaFragment;
 import app.familygem.list.NotesFragment;
 import app.familygem.list.PersonsFragment;
@@ -236,16 +235,16 @@ public class ProfileActivity extends AppCompatActivity {
                         otherSubMenu.add(0, 50 + i, 0, (String)item.second);
                         i++;
                     }
-                    SubMenu subNota = menu.addSubMenu(R.string.note);
-                    subNota.add(0, 22, 0, R.string.new_note);
-                    subNota.add(0, 23, 0, R.string.new_shared_note);
+                    SubMenu noteSubMenu = menu.addSubMenu(R.string.note);
+                    noteSubMenu.add(0, 22, 0, R.string.new_note);
+                    noteSubMenu.add(0, 23, 0, R.string.new_shared_note);
                     if (!gc.getNotes().isEmpty())
-                        subNota.add(0, 24, 0, R.string.link_shared_note);
+                        noteSubMenu.add(0, 24, 0, R.string.link_shared_note);
                     if (Global.settings.expert) {
-                        SubMenu subFonte = menu.addSubMenu(R.string.source);
-                        subFonte.add(0, 26, 0, R.string.new_source);
+                        SubMenu sourceSubMenu = menu.addSubMenu(R.string.source);
+                        sourceSubMenu.add(0, 25, 0, R.string.new_source);
                         if (!gc.getSources().isEmpty())
-                            subFonte.add(0, 27, 0, R.string.link_source);
+                            sourceSubMenu.add(0, 26, 0, R.string.link_source);
                     }
                     break;
                 case 2: // Individuo Familiari
@@ -313,18 +312,10 @@ public class ProfileActivity extends AppCompatActivity {
                         intent.putExtra(Choice.NOTE, true);
                         startActivityForResult(intent, 4074);
                         break;
-                    case 25: // Nuova fonte-nota
-                        SourceCitation citaz = new SourceCitation();
-                        citaz.setValue("");
-                        one.addSourceCitation(citaz);
-                        Memory.add(citaz);
-                        startActivity(new Intent(this, SourceCitationActivity.class));
-                        TreeUtils.INSTANCE.save(true, one);
-                        break;
-                    case 26: // Nuova fonte
+                    case 25: // New source
                         SourcesFragment.newSource(this, one);
                         break;
-                    case 27: // Collega fonte
+                    case 26: // Link existing source
                         Intent intento = new Intent(this, Principal.class);
                         intento.putExtra(Choice.SOURCE, true);
                         startActivityForResult(intento, 50473);
@@ -337,9 +328,9 @@ public class ProfileActivity extends AppCompatActivity {
                         } else {
                             builder.setItems(relatives, (dialog, selected) -> {
                                 Intent intent1 = new Intent(getApplicationContext(), PersonEditorActivity.class);
-                                intent1.putExtra("idIndividuo", one.getId());
+                                intent1.putExtra(Extra.PERSON_ID, one.getId());
                                 intent1.putExtra(Extra.RELATION, Relation.get(selected));
-                                if (U.controllaMultiMatrimoni(intent1, this, null))
+                                if (U.checkMultiMarriages(intent1, this, null))
                                     return;
                                 startActivity(intent1);
                             }).show();
@@ -353,9 +344,9 @@ public class ProfileActivity extends AppCompatActivity {
                             builder.setItems(relatives, (dialog, selected) -> {
                                 Intent intent2 = new Intent(getApplication(), Principal.class);
                                 intent2.putExtra(Choice.PERSON, true);
-                                intent2.putExtra("idIndividuo", one.getId());
+                                intent2.putExtra(Extra.PERSON_ID, one.getId());
                                 intent2.putExtra(Extra.RELATION, Relation.get(selected));
-                                if (U.controllaMultiMatrimoni(intent2, this, null))
+                                if (U.checkMultiMarriages(intent2, this, null))
                                     return;
                                 startActivityForResult(intent2, 1401);
                             }).show();
@@ -369,25 +360,26 @@ public class ProfileActivity extends AppCompatActivity {
                             keyTag = mainEventTags[item.getItemId() - 40];
                         if (keyTag == null)
                             return false;
-                        EventFact nuovoEvento = new EventFact();
-                        nuovoEvento.setTag(keyTag);
+                        EventFact event = new EventFact();
+                        event.setTag(keyTag);
                         switch (keyTag) {
                             case "OCCU":
-                                nuovoEvento.setValue("");
+                            case "TITL":
+                                event.setValue("");
                                 break;
                             case "RESI":
-                                nuovoEvento.setPlace("");
+                                event.setPlace("");
                                 break;
                             case "BIRT":
                             case "DEAT":
                             case "CHR":
                             case "BAPM":
                             case "BURI":
-                                nuovoEvento.setPlace("");
-                                nuovoEvento.setDate("");
+                                event.setPlace("");
+                                event.setDate("");
                         }
-                        one.addEventFact(nuovoEvento);
-                        Memory.add(nuovoEvento);
+                        one.addEventFact(event);
+                        Memory.add(event);
                         startActivity(new Intent(this, EventActivity.class));
                         TreeUtils.INSTANCE.save(true, one);
                 }
@@ -477,24 +469,24 @@ public class ProfileActivity extends AppCompatActivity {
                 // todo passargli Global.mediaCroppato ?
                 return;
             } else if (requestCode == 43614) { // Media from MediaFragment
-                MediaRef rifMedia = new MediaRef();
-                rifMedia.setRef(data.getStringExtra("mediaId"));
-                one.addMediaRef(rifMedia);
-            } else if (requestCode == 4074) { // Nota
-                NoteRef rifNota = new NoteRef();
-                rifNota.setRef(data.getStringExtra("noteId"));
-                one.addNoteRef(rifNota);
-            } else if (requestCode == 50473) { // Fonte
-                SourceCitation citaz = new SourceCitation();
-                citaz.setRef(data.getStringExtra("sourceId"));
-                one.addSourceCitation(citaz);
-            } else if (requestCode == 1401) { // Parente
-                Object[] modified = PersonEditorActivity.addParent(
-                        data.getStringExtra("idIndividuo"), // corrisponde a uno.getId()
-                        data.getStringExtra("idParente"),
-                        data.getStringExtra("idFamiglia"),
+                MediaRef mediaRef = new MediaRef();
+                mediaRef.setRef(data.getStringExtra("mediaId"));
+                one.addMediaRef(mediaRef);
+            } else if (requestCode == 4074) { // Note
+                NoteRef noteRef = new NoteRef();
+                noteRef.setRef(data.getStringExtra("noteId"));
+                one.addNoteRef(noteRef);
+            } else if (requestCode == 50473) { // Source
+                SourceCitation citation = new SourceCitation();
+                citation.setRef(data.getStringExtra("sourceId"));
+                one.addSourceCitation(citation);
+            } else if (requestCode == 1401) { // Relative
+                Object[] modified = PersonEditorActivity.addRelative(
+                        data.getStringExtra(Extra.PERSON_ID), // Corresponds to one.getId()
+                        data.getStringExtra(Extra.RELATIVE_ID),
+                        data.getStringExtra(Extra.FAMILY_ID),
                         (Relation)data.getSerializableExtra(Extra.RELATION),
-                        data.getStringExtra("collocazione"));
+                        data.getStringExtra(Extra.DESTINATION));
                 TreeUtils.INSTANCE.save(true, modified);
                 return;
             }
@@ -545,7 +537,7 @@ public class ProfileActivity extends AppCompatActivity {
                 return true;
             case 4: // Edit
                 Intent intent1 = new Intent(this, PersonEditorActivity.class);
-                intent1.putExtra("idIndividuo", one.getId());
+                intent1.putExtra(Extra.PERSON_ID, one.getId());
                 startActivity(intent1);
                 return true;
             case 5:    // Delete

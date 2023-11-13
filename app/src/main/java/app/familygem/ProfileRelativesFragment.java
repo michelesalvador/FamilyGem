@@ -21,6 +21,7 @@ import org.folg.gedcom.model.SpouseFamilyRef;
 import java.util.Collections;
 import java.util.List;
 
+import app.familygem.constant.Extra;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.list.PersonsFragment;
@@ -165,7 +166,7 @@ public class ProfileRelativesFragment extends Fragment {
             moveFamilyRef(1);
         } else if (id == 305) { // Modifica
             Intent intent = new Intent(getContext(), PersonEditorActivity.class);
-            intent.putExtra("idIndividuo", indiId);
+            intent.putExtra(Extra.PERSON_ID, indiId);
             startActivity(intent);
         } else if (id == 306) { // Lineage
             FamilyActivity.chooseLineage(getContext(), person, family);

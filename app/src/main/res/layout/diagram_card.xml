@@ -35,7 +35,7 @@
         android:paddingLeft="6dp"
         android:paddingTop="4dp"
         android:paddingRight="6dp"
-        android:paddingBottom="4dp">
+        android:paddingBottom="6dp">
 
         <ImageView
             android:id="@+id/card_photo"

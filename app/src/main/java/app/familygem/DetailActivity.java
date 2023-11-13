@@ -208,7 +208,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                     startActivityForResult(intent, 5065);
                 } else if (id == 120 || id == 121) { // Create new family member
                     Intent intent = new Intent(this, PersonEditorActivity.class);
-                    intent.putExtra("idFamiglia", ((Family)object).getId()); // TODO: translate
+                    intent.putExtra(Extra.FAMILY_ID, ((Family)object).getId());
                     intent.putExtra(Extra.RELATION, Relation.get(id - 118));
                     intent.putExtra(Extra.FROM_FAMILY, true);
                     startActivity(intent);
@@ -350,7 +350,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             // From the 'Link...' submenu in FAB
             if (requestCode == 34417) { // Family member chosen in PersonsFragment
-                Person personToBeAdded = gc.getPerson(data.getStringExtra("idParente")); // TODO translate
+                Person personToBeAdded = gc.getPerson(data.getStringExtra(Extra.RELATIVE_ID));
                 FamilyActivity.connect(personToBeAdded, (Family)object, (Relation)data.getSerializableExtra(Extra.RELATION));
                 TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
                 return;
@@ -456,7 +456,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 if (id != null) {
                     label += " " + id; // Id for main records INDI, FAMI, REPO... e.g. 'SOUR S123'
                     stepView.setOnClickListener(v -> {
-                        concludeOtherPiece();
+                        concludeActivePieces();
                         U.editId(this, (ExtensionContainer)object, this::refresh);
                     });
                 }
@@ -467,17 +467,19 @@ public abstract class DetailActivity extends AppCompatActivity {
             slugLayout.setVisibility(View.GONE);
     }
 
-    // Conclude the possible editing of another piece
-    private void concludeOtherPiece() {
+    /**
+     * Concludes the possible editing of an active piece.
+     */
+    private void concludeActivePieces() {
         for (int i = 0; i < box.getChildCount(); i++) {
-            View otherPiece = box.getChildAt(i);
-            EditText editText = otherPiece.findViewById(R.id.event_edit);
+            View piece = box.getChildAt(i);
+            EditText editText = piece.findViewById(R.id.event_edit);
             if (editText != null && editText.isShown()) {
-                TextView textView = otherPiece.findViewById(R.id.event_text);
+                TextView textView = piece.findViewById(R.id.event_text);
                 if (!editText.getText().toString().equals(textView.getText().toString())) // If there has been editing
-                    save(otherPiece);
+                    save(piece);
                 else
-                    restore(otherPiece);
+                    restore(piece);
             }
         }
     }
@@ -713,7 +715,7 @@ public abstract class DetailActivity extends AppCompatActivity {
     int whichMenu = 1; // Used to hide the options menu when entering editor mode TODO: replace with a boolean as 'editMode'
 
     void edit(View pieceView) {
-        concludeOtherPiece();
+        concludeActivePieces();
         TextView textView = pieceView.findViewById(R.id.event_text);
         textView.setVisibility(View.GONE);
         fab.hide();
@@ -954,7 +956,14 @@ public abstract class DetailActivity extends AppCompatActivity {
                 menu.add(0, 22, 0, R.string.delete);
             } else if (pieceObject instanceof SourceCitation) {
                 menu.add(0, 30, 0, R.string.copy);
-                menu.add(0, 31, 0, R.string.delete);
+                List<SourceCitation> sourceCitations;
+                if (object instanceof Note) sourceCitations = ((Note)object).getSourceCitations();
+                else sourceCitations = ((SourceCitationContainer)object).getSourceCitations();
+                if (sourceCitations.indexOf(pieceObject) > 0)
+                    menu.add(0, 31, 0, R.string.move_up);
+                if (sourceCitations.indexOf(pieceObject) < sourceCitations.size() - 1)
+                    menu.add(0, 32, 0, R.string.move_down);
+                menu.add(0, 33, 0, R.string.delete);
             } else if (pieceObject instanceof Media) {
                 if (((Media)pieceObject).getId() != null)
                     menu.add(0, 40, 0, R.string.unlink);
@@ -1046,7 +1055,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 break;
             case 16: // Edit
                 Intent i = new Intent(this, PersonEditorActivity.class);
-                i.putExtra("idIndividuo", person.getId());
+                i.putExtra(Extra.PERSON_ID, person.getId());
                 startActivity(i);
                 return true;
             case 17: // Lineage
@@ -1081,8 +1090,22 @@ public abstract class DetailActivity extends AppCompatActivity {
                         ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
                                 + ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
                 return true;
-            case 31: // Delete source citation
-                if (object instanceof Note) // Note does not extend SourceCitationContainer
+            case 31: // Move up source citation
+                List<SourceCitation> sourceCitations1;
+                if (object instanceof Note) sourceCitations1 = ((Note)object).getSourceCitations();
+                else sourceCitations1 = ((SourceCitationContainer)object).getSourceCitations();
+                int index1 = sourceCitations1.indexOf(pieceObject);
+                Collections.swap(sourceCitations1, index1, index1 - 1);
+                break;
+            case 32: // Move down source citation
+                List<SourceCitation> sourceCitations2;
+                if (object instanceof Note) sourceCitations2 = ((Note)object).getSourceCitations();
+                else sourceCitations2 = ((SourceCitationContainer)object).getSourceCitations();
+                int index2 = sourceCitations2.indexOf(pieceObject);
+                Collections.swap(sourceCitations2, index2, index2 + 1);
+                break;
+            case 33: // Delete source citation
+                if (object instanceof Note)
                     ((Note)object).getSourceCitations().remove(pieceObject);
                 else
                     ((SourceCitationContainer)object).getSourceCitations().remove(pieceObject);
@@ -1100,12 +1123,12 @@ public abstract class DetailActivity extends AppCompatActivity {
                 deleteAddress(object);
                 break;
             case 56: // Move up family event
-                int index1 = ((Family)object).getEventsFacts().indexOf(pieceObject);
-                Collections.swap(((Family)object).getEventsFacts(), index1, index1 - 1);
+                int index3 = ((Family)object).getEventsFacts().indexOf(pieceObject);
+                Collections.swap(((Family)object).getEventsFacts(), index3, index3 - 1);
                 break;
             case 57: // Move down family event
-                int index2 = ((Family)object).getEventsFacts().indexOf(pieceObject);
-                Collections.swap(((Family)object).getEventsFacts(), index2, index2 + 1);
+                int index4 = ((Family)object).getEventsFacts().indexOf(pieceObject);
+                Collections.swap(((Family)object).getEventsFacts(), index4, index4 + 1);
                 break;
             case 58: // Delete family event
                 ((Family)object).getEventsFacts().remove(pieceObject);
@@ -1184,16 +1207,11 @@ public abstract class DetailActivity extends AppCompatActivity {
         F.cropImage(this, mediaFile, mediaUri, null);
     }
 
-    /**
-     * Closes the keyboard that may be visible.
-     */
+    // When activity goes on background, saves data that could be on editing
     @Override
     protected void onPause() {
         super.onPause();
-        if (editText != null) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-        }
+        concludeActivePieces();
     }
 
     @Override

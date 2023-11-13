@@ -1169,101 +1169,104 @@ public class U {
         }
     }
 
-    // Usato per collegare una persona ad un'altra, solo in modalità inesperto
-    // Verifica se il perno potrebbe avere o ha molteplici matrimoni e chiede a quale attaccare un coniuge o un figlio
-    // È anche responsabile di settare 'idFamiglia' oppure 'collocazione'
-    static boolean controllaMultiMatrimoni(Intent intent, Context contesto, Fragment frammento) {
-        String idPerno = intent.getStringExtra("idIndividuo");
-        Person perno = Global.gc.getPerson(idPerno);
-        List<Family> famGenitori = perno.getParentFamilies(Global.gc);
-        List<Family> famSposi = perno.getSpouseFamilies(Global.gc);
+    /**
+     * Used to link one person to another, in non-expert mode only.
+     * Checks if the pivot has multiple marriages and asks which one to attach a spouse or child to.
+     * Is also responsible for setting FAMILY_ID or DESTINATION.
+     *
+     * @return True if a dialog is shown
+     */
+    static boolean checkMultiMarriages(Intent intent, Context context, Fragment fragment) {
+        String pivotId = intent.getStringExtra(Extra.PERSON_ID);
+        Person pivot = Global.gc.getPerson(pivotId);
+        List<Family> parentFamilies = pivot.getParentFamilies(Global.gc);
+        List<Family> spouseFamilies = pivot.getSpouseFamilies(Global.gc);
         Relation relation = (Relation)intent.getSerializableExtra(Extra.RELATION);
-        ArrayAdapter<NewRelativeDialog.FamilyItem> adapter = new ArrayAdapter<>(contesto, android.R.layout.simple_list_item_1);
+        ArrayAdapter<NewRelativeDialog.FamilyItem> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1);
 
         // Parents: there is already a family that has at least one empty space
-        if (relation == Relation.PARENT && famGenitori.size() == 1
-                && (famGenitori.get(0).getHusbandRefs().isEmpty() || famGenitori.get(0).getWifeRefs().isEmpty()))
-            intent.putExtra("idFamiglia", famGenitori.get(0).getId()); // aggiunge 'idFamiglia' all'intent esistente
-        // se questa famiglia è già piena di genitori, 'idFamiglia' rimane null
-        // quindi verrà cercata la famiglia esistente del destinatario oppure si crearà una famiglia nuova
+        if (relation == Relation.PARENT && parentFamilies.size() == 1
+                && (parentFamilies.get(0).getHusbandRefs().isEmpty() || parentFamilies.get(0).getWifeRefs().isEmpty()))
+            intent.putExtra(Extra.FAMILY_ID, parentFamilies.get(0).getId()); // Adds 'FAMILY_ID' to the existing intent
+        // If this unique family is already full of parents, FAMILY_ID remains null
+        // then the recipient's existing family will be searched, or a new family will be created
 
         // Parents: there are many families
-        if (relation == Relation.PARENT && famGenitori.size() > 1) {
-            for (Family fam : famGenitori)
+        if (relation == Relation.PARENT && parentFamilies.size() > 1) {
+            for (Family fam : parentFamilies)
                 if (fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty())
-                    adapter.add(new NewRelativeDialog.FamilyItem(contesto, fam));
+                    adapter.add(new NewRelativeDialog.FamilyItem(context, fam));
             if (adapter.getCount() == 1)
-                intent.putExtra("idFamiglia", adapter.getItem(0).family.getId());
+                intent.putExtra(Extra.FAMILY_ID, adapter.getItem(0).family.getId());
             else if (adapter.getCount() > 1) {
-                new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_parent)
+                new AlertDialog.Builder(context).setTitle(R.string.which_family_add_parent)
                         .setAdapter(adapter, (dialog, quale) -> {
-                            intent.putExtra("idFamiglia", adapter.getItem(quale).family.getId());
-                            concludiMultiMatrimoni(contesto, intent, frammento);
+                            intent.putExtra(Extra.FAMILY_ID, adapter.getItem(quale).family.getId());
+                            concludeMultiMarriages(context, intent, fragment);
                         }).show();
                 return true;
             }
         }
         // Sibling
-        else if (relation == Relation.SIBLING && famGenitori.size() == 1) {
-            intent.putExtra("idFamiglia", famGenitori.get(0).getId());
-        } else if (relation == Relation.SIBLING && famGenitori.size() > 1) {
-            new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_sibling)
-                    .setItems(elencoFamiglie(famGenitori), (dialog, quale) -> {
-                        intent.putExtra("idFamiglia", famGenitori.get(quale).getId());
-                        concludiMultiMatrimoni(contesto, intent, frammento);
+        else if (relation == Relation.SIBLING && parentFamilies.size() == 1) {
+            intent.putExtra(Extra.FAMILY_ID, parentFamilies.get(0).getId());
+        } else if (relation == Relation.SIBLING && parentFamilies.size() > 1) {
+            new AlertDialog.Builder(context).setTitle(R.string.which_family_add_sibling)
+                    .setItems(elencoFamiglie(parentFamilies), (dialog, quale) -> {
+                        intent.putExtra(Extra.FAMILY_ID, parentFamilies.get(quale).getId());
+                        concludeMultiMarriages(context, intent, fragment);
                     }).show();
             return true;
         }
         // Partner
-        else if (relation == Relation.PARTNER && famSposi.size() == 1) {
-            if (famSposi.get(0).getHusbandRefs().isEmpty() || famSposi.get(0).getWifeRefs().isEmpty()) // Se c'è uno slot libero
-                intent.putExtra("idFamiglia", famSposi.get(0).getId());
-        } else if (relation == Relation.PARTNER && famSposi.size() > 1) {
-            for (Family fam : famSposi) {
-                if (fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty())
-                    adapter.add(new NewRelativeDialog.FamilyItem(contesto, fam));
+        else if (relation == Relation.PARTNER && spouseFamilies.size() == 1) {
+            if (spouseFamilies.get(0).getHusbandRefs().isEmpty() || spouseFamilies.get(0).getWifeRefs().isEmpty())
+                intent.putExtra(Extra.FAMILY_ID, spouseFamilies.get(0).getId());
+        } else if (relation == Relation.PARTNER && spouseFamilies.size() > 1) {
+            for (Family family : spouseFamilies) {
+                if (family.getHusbandRefs().isEmpty() || family.getWifeRefs().isEmpty())
+                    adapter.add(new NewRelativeDialog.FamilyItem(context, family));
             }
-            // Nel caso di zero famiglie papabili, idFamiglia rimane null
+            // In the case of zero eligible families, FAMILY_ID remains null
             if (adapter.getCount() == 1) {
-                intent.putExtra("idFamiglia", adapter.getItem(0).family.getId());
+                intent.putExtra(Extra.FAMILY_ID, adapter.getItem(0).family.getId());
             } else if (adapter.getCount() > 1) {
-                //adapter.add(new NuovoParente.VoceFamiglia(contesto,perno) );
-                new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_spouse)
-                        .setAdapter(adapter, (dialog, quale) -> {
-                            intent.putExtra("idFamiglia", adapter.getItem(quale).family.getId());
-                            concludiMultiMatrimoni(contesto, intent, frammento);
+                new AlertDialog.Builder(context).setTitle(R.string.which_family_add_spouse)
+                        .setAdapter(adapter, (dialog, which) -> {
+                            intent.putExtra(Extra.FAMILY_ID, adapter.getItem(which).family.getId());
+                            concludeMultiMarriages(context, intent, fragment);
                         }).show();
                 return true;
             }
         }
         // Child: there is already a family with or without children
-        else if (relation == Relation.CHILD && famSposi.size() == 1) {
-            intent.putExtra("idFamiglia", famSposi.get(0).getId());
+        else if (relation == Relation.CHILD && spouseFamilies.size() == 1) {
+            intent.putExtra(Extra.FAMILY_ID, spouseFamilies.get(0).getId());
         } // Child: there are many spouse families
-        else if (relation == Relation.CHILD && famSposi.size() > 1) {
-            new AlertDialog.Builder(contesto).setTitle(R.string.which_family_add_child)
-                    .setItems(elencoFamiglie(famSposi), (dialog, quale) -> {
-                        intent.putExtra("idFamiglia", famSposi.get(quale).getId());
-                        concludiMultiMatrimoni(contesto, intent, frammento);
+        else if (relation == Relation.CHILD && spouseFamilies.size() > 1) {
+            new AlertDialog.Builder(context).setTitle(R.string.which_family_add_child)
+                    .setItems(elencoFamiglie(spouseFamilies), (dialog, quale) -> {
+                        intent.putExtra(Extra.FAMILY_ID, spouseFamilies.get(quale).getId());
+                        concludeMultiMarriages(context, intent, fragment);
                     }).show();
             return true;
         }
         // Not having found a family of pivot, tells PersonsFragment to try to place the pivot in the recipient's family
-        if (intent.getStringExtra("idFamiglia") == null && intent.getBooleanExtra(Choice.PERSON, false))
-            intent.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
+        if (intent.getStringExtra(Extra.FAMILY_ID) == null && intent.getBooleanExtra(Choice.PERSON, false))
+            intent.putExtra(Extra.DESTINATION, "EXISTING_FAMILY");
         return false;
     }
 
-    // Conclusione della funzione precedente
-    static void concludiMultiMatrimoni(Context contesto, Intent intent, Fragment frammento) {
+    // Conclusion of the previous function
+    static void concludeMultiMarriages(Context context, Intent intent, Fragment fragment) {
         if (intent.getBooleanExtra(Choice.PERSON, false)) {
-            // Open PersonsFragment
-            if (frammento != null)
-                frammento.startActivityForResult(intent, 1401);
+            // Opens PersonsFragment
+            if (fragment != null)
+                fragment.startActivityForResult(intent, 1401);
             else
-                ((Activity)contesto).startActivityForResult(intent, 1401);
-        } else // Open PersonEditorActivity
-            contesto.startActivity(intent);
+                ((Activity)context).startActivityForResult(intent, 1401);
+        } else // Opens PersonEditorActivity
+            context.startActivity(intent);
     }
 
     // Controlla che una o più famiglie siano vuote e propone di eliminarle

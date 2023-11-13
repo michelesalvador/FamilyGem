@@ -93,17 +93,17 @@ public class NewRelativeDialog extends DialogFragment {
         });
 
         builder.setView(view).setPositiveButton(android.R.string.ok, (dialog, id) -> {
-            // Setta alcuni valori che verranno passati a EditaIndividuo o ad PersonsFragment e arriveranno ad aggiungiParente()
+            // Sets some extras that will be passed to PersonEditorActivity or to PersonsFragment and will arrive to addRelative()
             Intent intent = new Intent();
-            intent.putExtra("idIndividuo", pivot.getId());
+            intent.putExtra(Extra.PERSON_ID, pivot.getId());
             intent.putExtra(Extra.RELATION, relation);
             FamilyItem familyItem = (FamilyItem)spinner.getSelectedItem();
             if (familyItem.family != null)
-                intent.putExtra("idFamiglia", familyItem.family.getId());
-            else if (familyItem.parent != null) // Uso 'collocazione' per veicolare l'id del genitore (il terzo attore della scena)
-                intent.putExtra("collocazione", "NUOVA_FAMIGLIA_DI" + familyItem.parent.getId());
-            else if (familyItem.existing) // veicola a PersonsFragment l'intenzione di congiungersi a famiglia esistente
-                intent.putExtra("collocazione", "FAMIGLIA_ESISTENTE");
+                intent.putExtra(Extra.FAMILY_ID, familyItem.family.getId());
+            else if (familyItem.parent != null) // We use DESTINATION to convey the parent's ID (the third actor in the scene)
+                intent.putExtra(Extra.DESTINATION, "NEW_FAMILY_OF" + familyItem.parent.getId());
+            else if (familyItem.existing) // Conveys to PersonsFragment the intention to join an existing family
+                intent.putExtra(Extra.DESTINATION, "EXISTING_FAMILY");
             if (newPerson) { // Link new person
                 intent.setClass(getContext(), PersonEditorActivity.class);
                 startActivity(intent);

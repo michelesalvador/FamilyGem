@@ -66,8 +66,8 @@ public class PersonEditorActivity extends AppCompatActivity {
         U.ensureGlobalGedcomNotNull(gc);
         setContentView(R.layout.edita_individuo);
         Intent intent = getIntent();
-        personId = intent.getStringExtra("idIndividuo");
-        familyId = intent.getStringExtra("idFamiglia");
+        personId = intent.getStringExtra(Extra.PERSON_ID);
+        familyId = intent.getStringExtra(Extra.FAMILY_ID);
         relation = (Relation)intent.getSerializableExtra(Extra.RELATION);
         fromFamilyActivity = intent.getBooleanExtra(Extra.FROM_FAMILY, false);
         nameSuffix = "";
@@ -365,7 +365,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                 FamilyActivity.connect(person, family, relation);
                 modifications[1] = family;
             } else if (relation != null) // Comes from DiagramFragment o ProfileRelativesFragment
-                modifications = addParent(personId, newId, familyId, relation, getIntent().getStringExtra("collocazione"));
+                modifications = addRelative(personId, newId, familyId, relation, getIntent().getStringExtra(Extra.DESTINATION));
         } else
             Global.indi = person.getId(); // To show the person then in DiagramFragment
         TreeUtils.INSTANCE.save(true, modifications);
@@ -377,18 +377,19 @@ public class PersonEditorActivity extends AppCompatActivity {
      *
      * @param familyId Id of the target family. If it is null, a new family is created
      * @param placing  Summarizes how the family was identified and therefore what to do with the people involved
+     * @return An array of modified records
      */
-    static Object[] addParent(String pivotId, String newId, String familyId, Relation relation, String placing) {
+    static Object[] addRelative(String pivotId, String newId, String familyId, Relation relation, String placing) {
         Global.indi = pivotId;
         Person newPerson = gc.getPerson(newId);
         // A new family is created in which both pivot and newPerson end up
-        if (placing != null && placing.startsWith("NUOVA_FAMIGLIA_DI")) { // Contains the ID of the parent to create a new family of
-            pivotId = placing.substring(17); // The parent effectively becomes the pivot
+        if (placing != null && placing.startsWith("NEW_FAMILY_OF")) { // Contains the ID of the parent to create a new family of
+            pivotId = placing.substring(13); // The parent actually becomes the pivot
             // Instead of a sibling to pivot, it is as if we were putting a child to the parent
             relation = relation == Relation.SIBLING ? Relation.CHILD : relation;
         }
         // In ListOfPeopleActivity has been identified the family in which will end up the pivot
-        else if (placing != null && placing.equals("FAMIGLIA_ESISTENTE")) {
+        else if (placing != null && placing.equals("EXISTING_FAMILY")) {
             newId = null;
             newPerson = null;
         }
