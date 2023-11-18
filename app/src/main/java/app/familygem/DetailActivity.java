@@ -90,14 +90,15 @@ import app.familygem.visitor.FindStack;
 
 public abstract class DetailActivity extends AppCompatActivity {
 
-    public LinearLayout box;
-    public Object object; // Name, Media, SourceCitation etc.
-    List<Egg> eggs = new ArrayList<>(); // List of all the possible editable pieces
-    List<Pair<String, String>> otherEvents; // Events for the Family FAB
-    public Person oneFamilyMember; // A family member used to hide in the FAB 'Link person'
-    DateEditorLayout dateEditor;
-    FloatingActionButton fab;
-    ActionBar actionBar;
+    protected LinearLayout box;
+    protected Object object; // Name, Media, SourceCitation etc.
+    private final List<Egg> eggs = new ArrayList<>(); // List of all the possible editable pieces
+    private List<Pair<String, String>> otherEvents; // Events for the Family FAB
+    protected boolean surnameBefore; // The given name comes after the surname, e.g. "/Simpson/ Homer"
+    protected Person oneFamilyMember; // A family member used to hide in the FAB 'Link person'
+    private DateEditorLayout dateEditor;
+    private FloatingActionButton fab;
+    private ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -356,40 +357,33 @@ public abstract class DetailActivity extends AppCompatActivity {
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
                 SourceCitation sourceCitation = new SourceCitation();
-                sourceCitation.setRef(data.getStringExtra("sourceId"));
+                sourceCitation.setRef(data.getStringExtra(Extra.SOURCE_ID));
                 if (object instanceof Note) ((Note)object).addSourceCitation(sourceCitation);
                 else ((SourceCitationContainer)object).addSourceCitation(sourceCitation);
             } else if (requestCode == 7074) { // Shared note
                 NoteRef noteRef = new NoteRef();
-                noteRef.setRef(data.getStringExtra("noteId"));
+                noteRef.setRef(data.getStringExtra(Extra.NOTE_ID));
                 ((NoteContainer)object).addNoteRef(noteRef);
             } else if (requestCode == 4173) { // File coming from SAF or other app becomes local media
                 Media media = new Media();
                 media.setFileTag("FILE");
                 ((MediaContainer)object).addMedia(media);
-                if (F.proposeCropping(this, null, data, media)) {
-                    TreeUtils.INSTANCE.save(false, Memory.getLeaderObject());
-                    return;
-                }
+                if (!F.setFileAndProposeCropping(this, null, data, media)) return;
             } else if (requestCode == 4174) { // File coming from SAF or other app becomes shared media
-                Media media = MediaFragment.newMedia(object);
-                if (F.proposeCropping(this, null, data, media)) {
-                    TreeUtils.INSTANCE.save(false, media, Memory.getLeaderObject());
-                    return;
-                }
+                Media media = MediaFragment.newSharedMedia(object);
+                if (F.setFileAndProposeCropping(this, null, data, media))
+                    TreeUtils.INSTANCE.save(true, media, Memory.getLeaderObject());
+                return;
             } else if (requestCode == 43616) { // Media from MediaFragment
                 MediaRef mediaRef = new MediaRef();
-                mediaRef.setRef(data.getStringExtra("mediaId"));
+                mediaRef.setRef(data.getStringExtra(Extra.MEDIA_ID));
                 ((MediaContainer)object).addMediaRef(mediaRef);
             } else if (requestCode == 4562) { // Repository selected in RepositoriesFragment
                 RepositoryRef archRef = new RepositoryRef();
                 archRef.setRef(data.getStringExtra("repoId"));
                 ((Source)object).setRepositoryRef(archRef);
-            } else if (requestCode == 5173) { // Save in Media a file chosen with the apps from MediaActivity
-                if (F.proposeCropping(this, null, data, (Media)object)) {
-                    TreeUtils.INSTANCE.save(false, Memory.getLeaderObject());
-                    return;
-                }
+            } else if (requestCode == 5173) { // Saves in Media a file chosen with the apps from MediaActivity
+                if (!F.setFileAndProposeCropping(this, null, data, (Media)object)) return;
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
                 F.endImageCropping(data);
             }
@@ -397,28 +391,36 @@ public abstract class DetailActivity extends AppCompatActivity {
             if (requestCode == 5390) { // Sets the repository that has been chosen in the RepositoriesFragment list by RepositoryRefActivity
                 ((RepositoryRef)object).setRef(data.getStringExtra("repoId"));
             } else if (requestCode == 7047) { // Sets the source that has been chosen in SourcesFragment by SourceCitationActivity
-                ((SourceCitation)object).setRef(data.getStringExtra("sourceId"));
+                ((SourceCitation)object).setRef(data.getStringExtra(Extra.SOURCE_ID));
             }
-            // 'true' indicates to reload both this Detail thanks to the following onRestart(), and ProfileActivity or FamilyActivity
+            // 'true' indicates to reload both this Detail thanks to the following onRestart(), and all previous activities
             TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             F.saveFolderInSettings();
-            Global.edited = true;
         }
     }
 
-    /**
-     * Updates contents when coming back with onBackPressed().
-     */
+    boolean isActivityRestarting; // To call refresh() only onBackPressed()
+
     @Override
     public void onRestart() {
         super.onRestart();
-        if (Global.edited) { // Refresh the detail
+        isActivityRestarting = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Updates contents when coming back with onBackPressed()
+        if (Global.edited && isActivityRestarting) {
             refresh();
+            isActivityRestarting = false;
         }
     }
 
-    public void format() {
+    protected abstract void format();
+
+    public void delete() {
     }
 
     /**
@@ -582,7 +584,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else // Default edit text is single line capital sentences
             editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         View.OnClickListener click = null;
-        if (object instanceof Integer) { // Full name in inexperienced mode
+        if (object instanceof Integer) { // Given name or surname in non-expert mode
             click = this::edit;
         } else if (object instanceof String) { // Method
             click = this::edit;
@@ -807,10 +809,24 @@ public abstract class DetailActivity extends AppCompatActivity {
             dateEditor.finishEditing();
         String text = editText.getText().toString().trim();
         Object pieceObject = pieceView.getTag(R.id.tag_object);
-        if (pieceObject instanceof Integer) { // Save given name and surname in the non-expert mode
-            String givenName = ((EditText)box.getChildAt(0).findViewById(R.id.event_edit)).getText().toString();
-            String surname = ((EditText)box.getChildAt(1).findViewById(R.id.event_edit)).getText().toString();
-            ((Name)object).setValue(givenName + " /" + surname + "/");
+        if (pieceObject instanceof Integer) { // Saves given name and surname on non-expert mode
+            String givenName = "";
+            String surname = "";
+            // Editing given name
+            if (pieceObject.equals(4043)) {
+                givenName = text.replaceAll("/", ""); // Character "/" is reserved to identify surname
+                surname = ((TextView)box.getChildAt(1).findViewById(R.id.event_text)).getText().toString();
+            } // Editing surname
+            else if (pieceObject.equals(6064)) {
+                givenName = ((TextView)box.getChildAt(0).findViewById(R.id.event_text)).getText().toString();
+                surname = text.replaceAll("/", ""); // TODO: Should be better to PREVENT insertion of "/" (e.g. with InputFilter)
+            }
+            String value = givenName;
+            if (!surname.isEmpty()) {
+                if (surnameBefore) value = "/" + surname + "/ " + value;
+                else value += " /" + surname + "/";
+            }
+            ((Name)object).setValue(value.trim());
         } else try { // All other normal methods
             object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, text); // TODO: reflection
         } catch (Exception e) {
@@ -912,9 +928,6 @@ public abstract class DetailActivity extends AppCompatActivity {
         Memory.stepBack();
     }
 
-    public void delete() {
-    }
-
     // Contextual menu
     View pieceView; // Editable text, notes, citations, media...
     Object pieceObject;
@@ -998,7 +1011,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                     if (pieceView.findViewById(R.id.immagine_foto).getTag(R.id.tag_file_type).equals(1))
                         menu.add(0, 100, 0, R.string.crop);
                     menu.add(0, 101, 0, R.string.choose_file);
-                } else if (pieceObject.equals(4043) || pieceObject.equals(6064)) // Name and surname for inexperienced
+                } else if (pieceObject.equals(4043) || pieceObject.equals(6064)) // Name and surname for non-expert
                     menu.add(0, 0, 0, R.string.copy);
             } else if (pieceObject instanceof String) {
                 if (((TextView)view.findViewById(R.id.event_text)).getText().length() > 0)

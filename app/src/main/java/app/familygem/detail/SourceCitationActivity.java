@@ -19,7 +19,7 @@ public class SourceCitationActivity extends DetailActivity {
     SourceCitation citation;
 
     @Override
-    public void format() {
+    protected void format() {
         placeSlug("SOUR");
         citation = (SourceCitation)cast(SourceCitation.class);
         if (citation.getSource(gc) != null) { // Citation of an existing source

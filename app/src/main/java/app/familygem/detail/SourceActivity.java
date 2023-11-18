@@ -26,7 +26,7 @@ public class SourceActivity extends DetailActivity {
     Source source;
 
     @Override
-    public void format() {
+    protected void format() {
         setTitle(R.string.source);
         source = (Source)cast(Source.class);
         placeSlug("SOUR", source.getId());

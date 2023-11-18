@@ -14,7 +14,7 @@ public class AddressActivity extends DetailActivity {
     Address address;
 
     @Override
-    public void format() {
+    protected void format() {
         setTitle(R.string.address);
         placeSlug("ADDR");
         address = (Address)cast(Address.class);

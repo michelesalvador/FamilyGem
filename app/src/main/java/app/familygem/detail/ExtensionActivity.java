@@ -15,7 +15,7 @@ public class ExtensionActivity extends DetailActivity {
     GedcomTag extension;
 
     @Override
-    public void format() {
+    protected void format() {
         setTitle(getString(R.string.extension));
         extension = (GedcomTag)cast(GedcomTag.class);
         placeSlug(extension.getTag());

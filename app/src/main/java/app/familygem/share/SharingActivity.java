@@ -184,7 +184,7 @@ public class SharingActivity extends BaseActivity {
             LinearLayout rootLayout = findViewById(R.id.share_root);
             rootLayout.removeView(rootView);
             rootLayout.setVisibility(View.VISIBLE);
-            rootView = U.linkaPersona(rootLayout, person, 1);
+            rootView = U.placePerson(rootLayout, person);
             rootView.setOnClickListener(v -> {
                 Intent intent = new Intent(this, Principal.class);
                 intent.putExtra(Choice.PERSON, true);

@@ -20,7 +20,7 @@ public class RepositoryActivity extends DetailActivity {
     Repository repository;
 
     @Override
-    public void format() {
+    protected void format() {
         setTitle(R.string.repository);
         repository = (Repository)cast(Repository.class);
         placeSlug("REPO", repository.getId());

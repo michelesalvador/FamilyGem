@@ -26,7 +26,7 @@ public class RepositoryRefActivity extends DetailActivity {
     RepositoryRef repoRef;
 
     @Override
-    public void format() {
+    protected void format() {
         placeSlug("REPO");
         repoRef = (RepositoryRef)cast(RepositoryRef.class);
         if (repoRef.getRepository(gc) != null) { // An actual repository is referenced

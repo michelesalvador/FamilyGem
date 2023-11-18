@@ -14,7 +14,7 @@ public class SubmitterActivity extends DetailActivity {
     Submitter submitter;
 
     @Override
-    public void format() {
+    protected void format() {
         setTitle(R.string.submitter);
         submitter = (Submitter)cast(Submitter.class);
         placeSlug("SUBM", submitter.getId());

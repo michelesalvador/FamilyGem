@@ -26,7 +26,7 @@ public class EventActivity extends DetailActivity {
             "ANUL", "DIV", "DIVF", "ENGA", "MARB", "MARC", "MARR", "MARL", "MARS"}; // Family events
 
     @Override
-    public void format() {
+    protected void format() {
         event = (EventFact)cast(EventFact.class);
         if (Memory.getLeaderObject() instanceof Family)
             setTitle(writeEventTitle((Family)Memory.getLeaderObject(), event));

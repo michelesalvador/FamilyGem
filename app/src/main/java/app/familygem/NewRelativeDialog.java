@@ -111,9 +111,9 @@ public class NewRelativeDialog extends DialogFragment {
                 intent.putExtra(Choice.PERSON, true);
                 intent.setClass(getContext(), Principal.class);
                 if (fragment != null)
-                    fragment.startActivityForResult(intent, 1401);
+                    ((DiagramFragment)fragment).choosePersonLauncher.launch(intent);
                 else
-                    getActivity().startActivityForResult(intent, 1401);
+                    ((ProfileActivity)getActivity()).choosePersonLauncher.launch(intent);
             }
         }).setNeutralButton(R.string.cancel, null);
         dialog = builder.create();
@@ -140,7 +140,7 @@ public class NewRelativeDialog extends DialogFragment {
     }
 
     // Dice se in una famiglia c'è spazio vuoto per aggiungere uno dei due genitori
-    boolean carenzaConiugi(Family fam) {
+    private boolean carenzaConiugi(Family fam) {
         return fam.getHusbandRefs().size() + fam.getWifeRefs().size() < 2;
     }
 

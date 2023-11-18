@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
@@ -41,47 +42,49 @@ import app.familygem.util.TreeUtils;
 
 public class ProfileFactsFragment extends Fragment {
 
-    Person one;
+    private Person one;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View vistaEventi = inflater.inflate(R.layout.individuo_scheda, container, false);
+        View factsView = inflater.inflate(R.layout.profile_page_fragment, container, false);
         if (gc != null) {
-            LinearLayout layout = vistaEventi.findViewById(R.id.contenuto_scheda);
+            LinearLayout layout = factsView.findViewById(R.id.profile_page);
             one = gc.getPerson(Global.indi);
             if (one != null) {
                 for (Name name : one.getNames()) {
                     placeEvent(layout, writeNameTitle(name), U.firstAndLastName(name, " "), name);
                 }
-                for (EventFact fact : one.getEventsFacts()) {
-                    placeEvent(layout, writeEventTitle(fact), writeEventText(fact), fact);
+                for (EventFact event : one.getEventsFacts()) {
+                    placeEvent(layout, writeEventTitle(event), writeEventText(event), event);
                 }
-                for (Extension est : U.findExtensions(one)) {
-                    placeEvent(layout, est.name, est.text, est.gedcomTag);
+                for (Extension extension : U.findExtensions(one)) {
+                    placeEvent(layout, extension.name, extension.text, extension.gedcomTag);
                 }
                 U.placeNotes(layout, one, true);
                 U.placeSourceCitations(layout, one);
                 U.placeChangeDate(layout, one.getChange());
             }
         }
-        return vistaEventi;
+        return factsView;
     }
 
-    // Scopre se è un nome con name pieces o un suffisso nel value
-    boolean nomeComplesso(Name n) {
+    /**
+     * Finds out if it is a name with name pieces or a suffix in the value.
+     */
+    boolean isNameComplex(Name name) {
         // Name pieces
-        boolean ricco = n.getGiven() != null || n.getSurname() != null
-                || n.getPrefix() != null || n.getSurnamePrefix() != null || n.getSuffix() != null
-                || n.getFone() != null || n.getRomn() != null;
-        // Qualcosa dopo il cognome
-        String nome = n.getValue();
-        boolean suffisso = false;
-        if (nome != null) {
-            nome = nome.trim();
-            if (nome.lastIndexOf('/') < nome.length() - 1)
-                suffisso = true;
+        boolean hasPieces = name.getGiven() != null || name.getSurname() != null
+                || name.getPrefix() != null || name.getSurnamePrefix() != null || name.getSuffix() != null
+                || name.getFone() != null || name.getRomn() != null;
+        // Suffix after the surname
+        String value = name.getValue();
+        boolean hasSuffix = false;
+        if (value != null) {
+            value = value.trim();
+            if (value.indexOf('/') > 0 && value.lastIndexOf('/') < value.length() - 1)
+                hasSuffix = true;
         }
-        return ricco || suffisso;
+        return hasPieces || hasSuffix;
     }
 
     /**
@@ -95,7 +98,9 @@ public class ProfileFactsFragment extends Fragment {
         return txt;
     }
 
-    // Compose the title of an event of the person
+    /**
+     * Composes the title of an event.
+     */
     public static String writeEventTitle(EventFact event) {
         int str = 0;
         switch (event.getTag()) {
@@ -142,12 +147,12 @@ public class ProfileFactsFragment extends Fragment {
             else txt = event.getValue();
             txt += "\n";
         }
-        //if( fatto.getType() != null ) txt += fatto.getType() + "\n"; // Included in event title
+        //if (event.getType() != null) txt += event.getType() + "\n"; // Included in event title
         if (event.getDate() != null)
             txt += new GedcomDateConverter(event.getDate()).writeDateLong() + "\n";
         if (event.getPlace() != null) txt += event.getPlace() + "\n";
-        Address indirizzo = event.getAddress();
-        if (indirizzo != null) txt += DetailActivity.writeAddress(indirizzo, true) + "\n";
+        Address address = event.getAddress();
+        if (address != null) txt += DetailActivity.writeAddress(address, true) + "\n";
         if (event.getCause() != null) txt += event.getCause() + "\n";
         if (event.getWww() != null) txt += event.getWww() + "\n";
         if (event.getEmail() != null) txt += event.getEmail() + "\n";
@@ -181,8 +186,8 @@ public class ProfileFactsFragment extends Fragment {
         if (object instanceof Name) {
             U.placeMedia(otherLayout, object, false);
             eventView.setOnClickListener(v -> {
-                // Se è un nome complesso propone la modalità esperto
-                if (!Global.settings.expert && nomeComplesso((Name)object)) {
+                // If it is a complex name, suggests expert mode
+                if (!Global.settings.expert && isNameComplex((Name)object)) {
                     new AlertDialog.Builder(getContext()).setMessage(R.string.complex_tree_advanced_tools)
                             .setPositiveButton(android.R.string.ok, (dialog, i) -> {
                                 Global.settings.expert = true;
@@ -269,12 +274,12 @@ public class ProfileFactsFragment extends Fragment {
     }
 
     // Context menu
-    View pieceView;
-    Object pieceObject;
+    private View pieceView;
+    private Object pieceObject;
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
-        // menuInfo come al solito è null
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
+        // 'info' as usual is null
         pieceView = view;
         pieceObject = view.getTag(R.id.tag_object);
         if (pieceObject instanceof Name) {
@@ -309,69 +314,67 @@ public class ProfileFactsFragment extends Fragment {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        List<Name> nomi = one.getNames();
-        List<EventFact> fatti = one.getEventsFacts();
+        List<Name> names = one.getNames();
+        List<EventFact> events = one.getEventsFacts();
         switch (item.getItemId()) {
-            // Nome
-            case 200: // Copia nome
-            case 210: // Copia evento
-            case 220: // Copia estensione
+            case 200: // Copy name
+            case 210: // Copy event
+            case 220: // Copy extension
                 U.copyToClipboard(((TextView)pieceView.findViewById(R.id.evento_titolo)).getText(),
                         ((TextView)pieceView.findViewById(R.id.evento_testo)).getText());
                 return true;
-            case 201: // Sposta su
-                nomi.add(nomi.indexOf(pieceObject) - 1, (Name)pieceObject);
-                nomi.remove(nomi.lastIndexOf(pieceObject));
+            // Name
+            case 201: // Move up
+                names.add(names.indexOf(pieceObject) - 1, (Name)pieceObject);
+                names.remove(names.lastIndexOf(pieceObject));
                 break;
-            case 202: // Sposta giù
-                nomi.add(nomi.indexOf(pieceObject) + 2, (Name)pieceObject);
-                nomi.remove(nomi.indexOf(pieceObject));
+            case 202: // Move down
+                names.add(names.indexOf(pieceObject) + 2, (Name)pieceObject);
+                names.remove(pieceObject);
                 break;
-            case 203: // Elimina
-                if (U.preserva(pieceObject)) return false;
+            case 203: // Delete
+                //if (U.preserva(pieceObject)) return false; TODO: confirm delete
                 one.getNames().remove(pieceObject);
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject);
-                pieceView.setVisibility(View.GONE);
                 break;
-            // Evento generico
-            case 211: // Sposta su
-                fatti.add(fatti.indexOf(pieceObject) - 1, (EventFact)pieceObject);
-                fatti.remove(fatti.lastIndexOf(pieceObject));
+            // Event
+            case 211: // Move up
+                events.add(events.indexOf(pieceObject) - 1, (EventFact)pieceObject);
+                events.remove(events.lastIndexOf(pieceObject));
                 break;
-            case 212: // Sposta giu
-                fatti.add(fatti.indexOf(pieceObject) + 2, (EventFact)pieceObject);
-                fatti.remove(fatti.indexOf(pieceObject));
+            case 212: // Move down
+                events.add(events.indexOf(pieceObject) + 2, (EventFact)pieceObject);
+                events.remove(pieceObject);
                 break;
-            case 213:
-                // todo Conferma elimina
+            case 213: // Delete
+                // TODO Confirm delete
                 one.getEventsFacts().remove(pieceObject);
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject);
-                pieceView.setVisibility(View.GONE);
                 break;
-            // Estensione
-            case 221: // Elimina
+            // Extension
+            case 221: // Delete
                 U.deleteExtension((GedcomTag)pieceObject, one, pieceView);
                 break;
-            // Nota
-            case 225: // Copia
+            // Note
+            case 225: // Copy text
                 U.copyToClipboard(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.note_text)).getText());
                 return true;
-            case 226: // Scollega
-                U.disconnectNote((Note)pieceObject, one, pieceView);
+            case 226: // Unlink
+                U.disconnectNote((Note)pieceObject, one, null);
                 break;
-            case 227:
-                Object[] capi = U.deleteNote((Note)pieceObject, pieceView);
-                TreeUtils.INSTANCE.save(true, capi);
+            case 227: // Delete
+                Object[] leaders = U.deleteNote((Note)pieceObject, null);
+                TreeUtils.INSTANCE.save(true, leaders);
                 refresh();
                 return true;
-            // Citazione fonte
-            case 230: // Copia
+            // Source citation
+            case 230: // Copy text
                 U.copyToClipboard(getText(R.string.source_citation),
                         ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
                                 + ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
                 return true;
-            case 231: // Elimina
-                // todo conferma : Vuoi eliminare questa citazione della fonte? La fonte continuerà ad esistere.
+            case 231: // Delete
+                // TODO: Confirm : Do you want to delete this source citation? The source will continue to exist.
                 one.getSourceCitations().remove(pieceObject);
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject);
                 pieceView.setVisibility(View.GONE);
@@ -379,12 +382,12 @@ public class ProfileFactsFragment extends Fragment {
             default:
                 return false;
         }
-        refresh();
         TreeUtils.INSTANCE.save(true, one);
+        refresh();
         return true;
     }
 
-    // Update content
+    // Updates activity content
     void refresh() {
         ((ProfileActivity)requireActivity()).refresh();
     }

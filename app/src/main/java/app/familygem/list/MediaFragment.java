@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -89,14 +90,17 @@ public class MediaFragment extends Fragment {
     /**
      * Updates the contents of the gallery.
      */
-    public void recreate() {
+    public void refresh() {
         mediaVisitor.mediaList.clear();
         gc.accept(mediaVisitor);
         adapter.notifyDataSetChanged();
         setToolbarTitle();
     }
 
-    public static Media newMedia(Object container) {
+    /**
+     * Creates a new shared media, optionally inside a container record.
+     */
+    public static Media newSharedMedia(@Nullable Object container) {
         Media media = new Media();
         media.setId(U.newID(gc, Media.class));
         media.setFileTag("FILE"); // Necessary to then export the GEDCOM
@@ -158,19 +162,15 @@ public class MediaFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == 4546) { // File taken from the supplier app is saved in the Media and possibly cropped
-                Media media = newMedia(null);
-                if (F.proposeCropping(getContext(), this, data, media)) { // Checks if it is an image (therefore it can be cropped)
-                    TreeUtils.INSTANCE.save(false, media);
-                    // onRestart() + recreate() must not be triggered otherwise the arrival fragment will be no longer the same
-                    return;
-                }
+                Media media = newSharedMedia(null);
+                if (F.setFileAndProposeCropping(getContext(), this, data, media))
+                    TreeUtils.INSTANCE.save(true, media);
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
                 F.endImageCropping(data);
+                TreeUtils.INSTANCE.save(true, Global.croppedMedia);
             }
-            TreeUtils.INSTANCE.save(true, Global.croppedMedia);
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // If user clicks the back arrow in Image Cropper
             F.saveFolderInSettings();
-            Global.edited = true;
         }
     }
 
@@ -187,9 +187,9 @@ public class MediaFragment extends Fragment {
     public boolean onContextItemSelected(MenuItem item) {
         if (item.getItemId() == 0) {
             Object[] modified = deleteMedia(media, null);
-            recreate();
-            ((Principal)requireActivity()).furnishMenu();
             TreeUtils.INSTANCE.save(false, modified);
+            refresh();
+            ((Principal)requireActivity()).furnishMenu();
             return true;
         }
         return false;

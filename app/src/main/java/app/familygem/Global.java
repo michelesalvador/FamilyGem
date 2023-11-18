@@ -28,7 +28,6 @@ public class Global extends MultiDexApplication {
      * Which parents' family to show in the diagram, usually 0.
      */
     public static int familyNum;
-    public static View mainView;
     public static boolean edited; // There has been an editing in ProfileActivity or in DetailActivity and therefore the content of the previous pages must be updated
     public static boolean shouldSave; // The Gedcom content has been changed and needs to be saved
     /**

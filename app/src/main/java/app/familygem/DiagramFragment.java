@@ -31,6 +31,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -87,6 +89,7 @@ public class DiagramFragment extends Fragment {
     private boolean printPDF; // We are exporting a PDF
     private final boolean leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR;
     private boolean firstTime = true;
+    ActivityResultLauncher<Intent> choosePersonLauncher;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
@@ -137,6 +140,19 @@ public class DiagramFragment extends Fragment {
         animator = new AnimatorSet();
         animator.play(alphaIn);
 
+        // Adds the relative who has been chosen in PersonsFragment
+        choosePersonLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
+                Intent data = result.getData();
+                Object[] modified = PersonEditorActivity.addRelative(
+                        data.getStringExtra(Extra.PERSON_ID), // Corresponds to 'idPersona', which however is annulled in case of a configuration change
+                        data.getStringExtra(Extra.RELATIVE_ID),
+                        data.getStringExtra(Extra.FAMILY_ID),
+                        (Relation)data.getSerializableExtra(Extra.RELATION),
+                        data.getStringExtra(Extra.DESTINATION));
+                TreeUtils.INSTANCE.save(true, modified);
+            }
+        });
         return view;
     }
 
@@ -751,7 +767,7 @@ public class DiagramFragment extends Fragment {
         } else if (id == 3) { // Collega persona nuova
             if (Global.settings.expert) {
                 DialogFragment dialog = new NewRelativeDialog(pers, parentFam, spouseFam, true, null);
-                dialog.show(getActivity().getSupportFragmentManager(), "scegli");
+                dialog.show(getActivity().getSupportFragmentManager(), null);
             } else {
                 new AlertDialog.Builder(getContext()).setItems(relatives, (dialog, selected) -> {
                     Intent intent = new Intent(getContext(), PersonEditorActivity.class)
@@ -765,7 +781,7 @@ public class DiagramFragment extends Fragment {
         } else if (id == 4) { // Collega persona esistente
             if (Global.settings.expert) {
                 DialogFragment dialog = new NewRelativeDialog(pers, parentFam, spouseFam, false, DiagramFragment.this);
-                dialog.show(getActivity().getSupportFragmentManager(), "scegli");
+                dialog.show(getActivity().getSupportFragmentManager(), null);
             } else {
                 new AlertDialog.Builder(getContext()).setItems(relatives, (dialog, selected) -> {
                     Intent intent = new Intent(getContext(), Principal.class)
@@ -774,7 +790,7 @@ public class DiagramFragment extends Fragment {
                             .putExtra(Extra.RELATION, Relation.get(selected));
                     if (U.checkMultiMarriages(intent, getContext(), DiagramFragment.this))
                         return;
-                    startActivityForResult(intent, 1401);
+                    choosePersonLauncher.launch(intent);
                 }).show();
             }
         } else if (id == 5) { // Modifica
@@ -794,24 +810,24 @@ public class DiagramFragment extends Fragment {
                 FamilyActivity.disconnect(idPersona, spouseFam);
                 modificate.add(spouseFam);
             }
-            ripristina();
+            refresh();
             Family[] modificateArr = modificate.toArray(new Family[0]);
-            U.controllaFamiglieVuote(getContext(), this::ripristina, false, modificateArr);
+            U.controllaFamiglieVuote(getContext(), this::refresh, false, modificateArr);
             ChangeUtils.INSTANCE.updateChangeDate(pers);
             TreeUtils.INSTANCE.save(true, (Object[])modificateArr);
         } else if (id == 7) { // Elimina
             new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete, (dialog, i) -> {
                         Family[] famiglie = PersonsFragment.deletePerson(getContext(), idPersona);
-                        ripristina();
-                        U.controllaFamiglieVuote(getContext(), this::ripristina, false, famiglie);
+                        refresh();
+                        U.controllaFamiglieVuote(getContext(), this::refresh, false, famiglie);
                     }).setNeutralButton(R.string.cancel, null).show();
         } else
             return false;
         return true;
     }
 
-    private void ripristina() {
+    void refresh() {
         forceDraw = true;
         onStart();
     }
@@ -819,17 +835,8 @@ public class DiagramFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
-            // Add the relative who has been chosen in PersonsFragment
-            if (requestCode == 1401) {
-                Object[] modified = PersonEditorActivity.addRelative(
-                        data.getStringExtra(Extra.PERSON_ID), // corrisponde a 'idPersona', il quale però si annulla in caso di cambio di configurazione
-                        data.getStringExtra(Extra.RELATIVE_ID),
-                        data.getStringExtra(Extra.FAMILY_ID),
-                        (Relation)data.getSerializableExtra(Extra.RELATION),
-                        data.getStringExtra(Extra.DESTINATION));
-                TreeUtils.INSTANCE.save(true, modified);
-            } // Export diagram to PDF
-            else if (requestCode == 903) {
+            // Export diagram to PDF
+            if (requestCode == 903) {
                 // Stylize diagram for print
                 printPDF = true;
                 for (int i = 0; i < box.getChildCount(); i++) {

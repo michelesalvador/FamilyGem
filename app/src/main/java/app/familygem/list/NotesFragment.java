@@ -26,9 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.familygem.Memory;
+import app.familygem.Principal;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.detail.NoteActivity;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
@@ -36,7 +38,8 @@ import app.familygem.visitor.NoteList;
 
 public class NotesFragment extends Fragment implements NotesAdapter.ItemClickListener {
 
-    NotesAdapter adapter;
+    private List<Note> allNotes;
+    private NotesAdapter adapter;
 
     public static List<Note> getAllNotes(boolean sharedOnly) {
         // Shared notes
@@ -58,17 +61,20 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         boolean sharedOnly = getActivity().getIntent().getBooleanExtra(Choice.NOTE, false);
-        List<Note> allNotes = getAllNotes(sharedOnly);
+        allNotes = getAllNotes(sharedOnly);
         adapter = new NotesAdapter(getContext(), allNotes, sharedOnly);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
+        registerForContextMenu(recyclerView);
+        furnishToolbar();
+        view.findViewById(R.id.fab).setOnClickListener(v -> newNote(getContext(), null));
+        return view;
+    }
 
+    private void furnishToolbar() {
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(allNotes.size() + " "
                 + getString(allNotes.size() == 1 ? R.string.note : R.string.notes).toLowerCase());
         setHasOptionsMenu(allNotes.size() > 1);
-        registerForContextMenu(recyclerView);
-        view.findViewById(R.id.fab).setOnClickListener(v -> newNote(getContext(), null));
-        return view;
     }
 
     // Leaving the activity without choosing a shared note resets the extra
@@ -84,7 +90,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
         // Returns the ID of a note to ProfileActivity and DetailActivity
         if (getActivity().getIntent().getBooleanExtra(Choice.NOTE, false)) {
             Intent intent = new Intent();
-            intent.putExtra("noteId", note.getId());
+            intent.putExtra(Extra.NOTE_ID, note.getId());
             getActivity().setResult(AppCompatActivity.RESULT_OK, intent);
             getActivity().finish();
         } else { // Opens the note detail
@@ -104,7 +110,8 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
         if (item.getItemId() == 0) { // Delete
             Object[] leaders = U.deleteNote(adapter.selectedNote, null);
             TreeUtils.INSTANCE.save(false, leaders);
-            getActivity().recreate();
+            refresh();
+            ((Principal)requireActivity()).furnishMenu();
         } else {
             return false;
         }
@@ -129,6 +136,16 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
                 return false;
             }
         });
+    }
+
+    /**
+     * Updates list and toolbar.
+     */
+    public void refresh() {
+        allNotes = getAllNotes(false);
+        adapter.noteList = allNotes;
+        adapter.notifyDataSetChanged();
+        furnishToolbar();
     }
 
     /**

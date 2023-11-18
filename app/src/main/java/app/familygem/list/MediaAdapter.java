@@ -29,6 +29,7 @@ import app.familygem.ProfileActivity;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.detail.MediaActivity;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.MediaContainerList;
@@ -101,15 +102,13 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.gestoreVista
                 vista.setTag(R.id.tag_object, media);
                 vista.setTag(R.id.tag_contenitore, contenitore);
                 // Registra menu contestuale
-                final AppCompatActivity attiva = (AppCompatActivity)vista.getContext();
+                final AppCompatActivity activity = (AppCompatActivity)vista.getContext();
                 if (vista.getContext() instanceof ProfileActivity) { // ProfileMediaFragment
-                    attiva.getSupportFragmentManager()
-                            .findFragmentByTag("android:switcher:" + R.id.profile_pager + ":0") // non garantito in futuro
-                            .registerForContextMenu(vista);
+                    ((ProfileActivity)activity).getPageFragment(0).registerForContextMenu(vista);
                 } else if (vista.getContext() instanceof Principal) // MediaFragment
-                    attiva.getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment).registerForContextMenu(vista);
+                    activity.getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment).registerForContextMenu(vista);
                 else // nelle AppCompatActivity
-                    attiva.registerForContextMenu(vista);
+                    activity.registerForContextMenu(vista);
             } else {
                 RecyclerView.LayoutParams parami = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, U.dpToPx(110));
                 int margin = U.dpToPx(5);
@@ -128,7 +127,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.gestoreVista
             // Restituisce l'ID di un object media a ProfileMediaFragment
             if (activity.getIntent().getBooleanExtra(Choice.MEDIA, false)) {
                 Intent intent = new Intent();
-                intent.putExtra("mediaId", media.getId());
+                intent.putExtra(Extra.MEDIA_ID, media.getId());
                 activity.setResult(Activity.RESULT_OK, intent);
                 activity.finish();
                 // MediaFragment in modalità normale apre MediaActivity

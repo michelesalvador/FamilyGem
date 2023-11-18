@@ -2,7 +2,9 @@ package app.familygem;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +27,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -79,7 +80,7 @@ public class F {
      * Wrapper of uriFilePath() to get a folder in KitKat.
      */
     static String uriPathFolderKitKat(Context context, Uri uri) {
-        String path = uriFilePath(uri);
+        String path = getFilePathFromUri(uri);
         if (path != null && path.lastIndexOf('/') > 0) {
             return path.substring(0, path.lastIndexOf('/'));
         } else {
@@ -91,10 +92,10 @@ public class F {
     /**
      * Receives a URI and tries to return the path to the file.
      */
-    public static String uriFilePath(Uri uri) {
+    public static String getFilePathFromUri(Uri uri) {
         if (uri == null) return null;
         if (uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("file")) {
-            // Remove 'file://'
+            // Removes 'file://'
             return uri.getPath();
         }
         switch (uri.getAuthority()) {
@@ -276,7 +277,7 @@ public class F {
         if (path != null || uri[0] != null) {
             RequestCreator creator;
             if (path != null)
-                creator = Picasso.get().load("file://" + path);
+                creator = Picasso.get().load(new File(path));
             else
                 creator = Picasso.get().load(uri[0]);
             creator.placeholder(R.drawable.image).fit().centerInside()
@@ -688,7 +689,7 @@ public class F {
                             container.addMedia(med);
                             Memory.add(med);
                         } else { // Shared media
-                            med = MediaFragment.newMedia(container);
+                            med = MediaFragment.newSharedMedia(container);
                             Memory.setLeader(med);
                         }
                         med.setFile("");
@@ -725,18 +726,19 @@ public class F {
     }
 
     /**
-     * Saves the retrieved file and proposes to crop it if it is an image.
+     * Saves into 'media' the file retrieved from 'data' and optionally proposes to crop it whether is an image.
      *
-     * @return true if opens the dialog and therefore the updating of the activity must be blocked
+     * @param data Contains the Uri of a file
+     * @return True on successfully setting the file (croppable or not)
      */
-    public static boolean proposeCropping(Context context, Fragment fragment, Intent data, Media media) {
+    public static boolean setFileAndProposeCropping(Context context, Fragment fragment, Intent data, Media media) {
         // Finds the path of the image
         Uri uri = null;
         String path;
         // Content taken with SAF
         if (data != null && data.getData() != null) {
             uri = data.getData();
-            path = uriFilePath(uri);
+            path = getFilePathFromUri(uri);
         } // Photo from camera app
         else if (Global.pathOfCameraDestination != null) {
             path = Global.pathOfCameraDestination;
@@ -752,50 +754,70 @@ public class F {
         if (path != null && path.lastIndexOf('/') > 0) { // If it is a full path to the file
             // Directly points to the file
             fileMedia[0] = new File(path);
-        } else { // It is just the file name 'myFile.ext' or more rarely null
+        } else { // 'path' is just the file name "myFile.ext", or a title "My file", or more rarely null
             // External app storage: /storage/emulated/0/Android/data/app.familygem/files/12
             File externalFilesDir = context.getExternalFilesDir(String.valueOf(Global.settings.openTree));
             try { // We use the URI
-                InputStream input = context.getContentResolver().openInputStream(uri);
+                InputStream input;
+                ContentResolver resolver = context.getContentResolver();
+                if (isVirtualFile(context, uri)) {
+                    String[] openableMimeTypes = resolver.getStreamTypes(uri, "*/*");
+                    input = resolver.openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null).createInputStream();
+                } else input = resolver.openInputStream(uri);
                 // TODO: if the file already exists, do not duplicate it but reuse it: as in ConfirmationActivity.copyFiles
+                String type = resolver.getType(uri); // E.g. "image/jpeg" or "application/vnd.google-apps.spreadsheet"
+                String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(type);
+                if (extension == null) { // Last part of mime type becomes the extension
+                    extension = type.lastIndexOf('.') > 0 ? type.substring(type.lastIndexOf('.') + 1) : type.substring(type.indexOf('/') + 1);
+                    //media.setFormat(type);
+                }
                 if (path == null) { // Null filename, must be created from scratch
-                    String type = context.getContentResolver().getType(uri);
-                    path = type.substring(0, type.indexOf('/')) + "."
-                            + MimeTypeMap.getSingleton().getExtensionFromMimeType(type);
+                    path = type.substring(0, type.indexOf('/')) + "." + extension;
+                } else if (path.indexOf('.') < 0) { // File title without extension
+                    path += "." + extension;
                 }
                 fileMedia[0] = nextAvailableFileName(externalFilesDir.getAbsolutePath(), path);
-                FileUtils.copyInputStreamToFile(input, fileMedia[0]); // Crea la cartella se non esiste
+                FileUtils.copyInputStreamToFile(input, fileMedia[0]); // Creates the folder if doesn't exist
             } catch (Exception e) {
                 String msg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : context.getString(R.string.something_wrong);
                 Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+                return false;
             }
         }
         media.setFile(fileMedia[0].getAbsolutePath()); // Sets the found path in the media
         Global.mediaFolderPath = fileMedia[0].getParent();
 
-        // If it is an image it opens the cropping proposal dialog
+        // If it is an image opens the cropping proposal dialog
         String mimeType = URLConnection.guessContentTypeFromName(fileMedia[0].getName());
         if (mimeType != null && mimeType.startsWith("image/")) {
-            ImageView imageView = new ImageView(context);
-            showImage(media, imageView, null);
             Global.croppedMedia = media; // Media parked waiting to be updated with new file path
-            Global.edited = false; // In order not to refresh activity which in recent Androids does not show the AlertDialog
-            new AlertDialog.Builder(context)
-                    .setView(imageView)
-                    .setMessage(R.string.want_crop_image)
+            final Dialog alert = new AlertDialog.Builder(context).setView(R.layout.crop_image_dialog)
                     .setPositiveButton(R.string.yes, (dialog, id) -> cropImage(context, fileMedia[0], null, fragment))
-                    .setNeutralButton(R.string.no, (dialog, which) -> {
-                        finishProposeCropping(context, fragment);
-                    }).setOnCancelListener(dialog -> { // Click out of the dialog
-                        finishProposeCropping(context, fragment);
-                    }).show();
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, U.dpToPx(320));
-            imageView.setLayoutParams(params); // The size assignment must come AFTER creating the dialog
-            return true;
+                    .setNeutralButton(R.string.no, (dialog, which) -> finishProposeCropping(context, fragment))
+                    .setOnCancelListener(dialog -> finishProposeCropping(context, fragment)) // Click out of the dialog
+                    .show();
+            showImage(media, alert.findViewById(R.id.crop_image), null);
         } else {
             saveFolderInSettings();
         }
-        return false;
+        return true;
+    }
+
+    /**
+     * Files got from Google Drive are "virtual".
+     */
+    private static boolean isVirtualFile(Context context, Uri uri) {
+        if (!DocumentsContract.isDocumentUri(context, uri)) return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Cursor cursor = context.getContentResolver()
+                    .query(uri, new String[]{DocumentsContract.Document.COLUMN_FLAGS}, null, null, null);
+            int flags = 0;
+            if (cursor != null && cursor.moveToFirst()) {
+                flags = cursor.getInt(0);
+                cursor.close();
+            }
+            return (flags & DocumentsContract.Document.FLAG_VIRTUAL_DOCUMENT) != 0;
+        } else return false;
     }
 
     /**
@@ -807,18 +829,17 @@ public class F {
     }
 
     /**
-     * Negative conclusion of the image cropping proposal: simply refresh the page to show the image
+     * Negative conclusion of the image cropping proposal: simply refreshes the page to show the image.
+     * Usually a refresh is not needed, but in some cases yes (file downloaded from cloud).
      */
     static void finishProposeCropping(Context context, Fragment fragment) {
         if (fragment instanceof MediaFragment)
-            ((MediaFragment)fragment).recreate();
+            ((MediaFragment)fragment).refresh();
         else if (context instanceof DetailActivity)
             ((DetailActivity)context).refresh();
-        else if (context instanceof ProfileActivity) {
+        else if (context instanceof ProfileActivity)
             ((ProfileActivity)context).refresh();
-        }
         saveFolderInSettings();
-        Global.edited = true; // To update previous pages
     }
 
     /**
@@ -876,10 +897,10 @@ public class F {
      * Ends the cropping procedure of an image.
      */
     public static void endImageCropping(Intent data) {
-        CropImage.ActivityResult risultato = CropImage.getActivityResult(data);
-        Uri uri = risultato.getUri(); // Eg. 'file:///storage/emulated/0/Android/data/app.familygem/files/5/anna.webp'
+        CropImage.ActivityResult result = CropImage.getActivityResult(data);
+        Uri uri = result.getUri(); // E.g. 'file:///storage/emulated/0/Android/data/app.familygem/files/5/anna.webp'
         Picasso.get().invalidate(uri); // Clears from the cache any image that has the same path
-        String path = uriFilePath(uri);
+        String path = getFilePathFromUri(uri);
         Global.croppedMedia.setFile(path);
         Global.mediaFolderPath = path.substring(0, path.lastIndexOf('/'));
         saveFolderInSettings();

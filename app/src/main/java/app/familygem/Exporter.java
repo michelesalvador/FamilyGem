@@ -287,7 +287,7 @@ public class Exporter {
      */
     private void makeFileVisible(Uri uri) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            String filePath = F.uriFilePath(targetUri);
+            String filePath = F.getFilePathFromUri(targetUri);
             MediaScannerConnection.scanFile(context, new String[]{filePath}, null, null);
         } else { // This is ineffective in KitKat where the file remains invisible
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));

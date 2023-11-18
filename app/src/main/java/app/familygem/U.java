@@ -706,9 +706,7 @@ public class U {
             textView.setMaxLines(10);
             noteView.setTag(R.id.tag_object, note);
             if (context instanceof ProfileActivity) { // ProfileFactsFragment
-                ((AppCompatActivity)context).getSupportFragmentManager()
-                        .findFragmentByTag("android:switcher:" + R.id.profile_pager + ":1") // non garantito in futuro
-                        .registerForContextMenu(noteView);
+                ((ProfileActivity)context).getPageFragment(1).registerForContextMenu(noteView);
             } else if (layout.getId() != R.id.dispensa_scatola) // nelle AppCompatActivity tranne che nella dispensa
                 ((AppCompatActivity)context).registerForContextMenu(noteView);
             noteView.setOnClickListener(v -> {
@@ -806,9 +804,7 @@ public class U {
                 placeMedia(scatolaAltro, citaz, false);
                 vistaCita.setTag(R.id.tag_object, citaz);
                 if (layout.getContext() instanceof ProfileActivity) { // ProfileFactsFragment
-                    ((AppCompatActivity)layout.getContext()).getSupportFragmentManager()
-                            .findFragmentByTag("android:switcher:" + R.id.profile_pager + ":1")
-                            .registerForContextMenu(vistaCita);
+                    ((ProfileActivity)layout.getContext()).getPageFragment(1).registerForContextMenu(vistaCita);
                 } else // AppCompatActivity
                     ((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaCita);
 
@@ -856,29 +852,32 @@ public class U {
         });
     }
 
-    // La view ritornata è usata da Condivisione
-    public static View linkaPersona(LinearLayout scatola, Person p, int scheda) {
-        View vistaPersona = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_individuo_piccolo, scatola, false);
-        scatola.addView(vistaPersona);
-        F.showMainImageForPerson(Global.gc, p, vistaPersona.findViewById(R.id.collega_foto));
-        ((TextView)vistaPersona.findViewById(R.id.collega_nome)).setText(properName(p));
-        String dati = twoDates(p, false);
-        TextView vistaDettagli = vistaPersona.findViewById(R.id.collega_dati);
-        if (dati.isEmpty()) vistaDettagli.setVisibility(View.GONE);
-        else vistaDettagli.setText(dati);
-        if (!isDead(p))
-            vistaPersona.findViewById(R.id.collega_lutto).setVisibility(View.GONE);
-        if (Gender.isMale(p))
-            vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_maschio);
-        else if (Gender.isFemale(p))
-            vistaPersona.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_femmina);
-        vistaPersona.setOnClickListener(v -> {
-            Memory.setLeader(p);
-            Intent intent = new Intent(scatola.getContext(), ProfileActivity.class);
-            intent.putExtra("scheda", scheda);
-            scatola.getContext().startActivity(intent);
+    /**
+     * Creates into layout a small card of a person, linked to the person profile.
+     * Used by Cabinet and SharingActivity.
+     */
+    public static View placePerson(LinearLayout layout, Person person) {
+        View personView = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_individuo_piccolo, layout, false);
+        layout.addView(personView);
+        F.showMainImageForPerson(Global.gc, person, personView.findViewById(R.id.collega_foto));
+        ((TextView)personView.findViewById(R.id.collega_nome)).setText(properName(person));
+        String dates = twoDates(person, false);
+        TextView detailView = personView.findViewById(R.id.collega_dati);
+        if (dates.isEmpty()) detailView.setVisibility(View.GONE);
+        else detailView.setText(dates);
+        if (!isDead(person))
+            personView.findViewById(R.id.collega_lutto).setVisibility(View.GONE);
+        if (Gender.isMale(person))
+            personView.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_maschio);
+        else if (Gender.isFemale(person))
+            personView.findViewById(R.id.collega_bordo).setBackgroundResource(R.drawable.casella_bordo_femmina);
+        personView.setOnClickListener(view -> {
+            Memory.setLeader(person);
+            Intent intent = new Intent(layout.getContext(), ProfileActivity.class);
+            intent.putExtra(Extra.PAGE, 1);
+            layout.getContext().startActivity(intent);
         });
-        return vistaPersona;
+        return personView;
     }
 
     public static String testoFamiglia(Context contesto, Gedcom gc, Family fam, boolean unaLinea) {
@@ -962,7 +961,7 @@ public class U {
     // Riconosce il tipo di record e aggiunge il link appropriato alla scatola
     static void mettiQualsiasi(LinearLayout scatola, Object record) {
         if (record instanceof Person)
-            linkaPersona(scatola, (Person)record, 1);
+            placePerson(scatola, (Person)record);
         else if (record instanceof Source)
             placeSource(scatola, (Source)record, false);
         else if (record instanceof Family)
@@ -1262,9 +1261,9 @@ public class U {
         if (intent.getBooleanExtra(Choice.PERSON, false)) {
             // Opens PersonsFragment
             if (fragment != null)
-                fragment.startActivityForResult(intent, 1401);
+                ((DiagramFragment)fragment).choosePersonLauncher.launch(intent);
             else
-                ((Activity)context).startActivityForResult(intent, 1401);
+                ((ProfileActivity)context).choosePersonLauncher.launch(intent);
         } else // Opens PersonEditorActivity
             context.startActivity(intent);
     }

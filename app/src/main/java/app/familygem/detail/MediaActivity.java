@@ -38,7 +38,7 @@ public class MediaActivity extends DetailActivity {
     View imageView;
 
     @Override
-    public void format() {
+    protected void format() {
         media = (Media)cast(Media.class);
         if (media.getId() != null) { // Only shared Media have ID, inline Media don't
             setTitle(R.string.shared_media);

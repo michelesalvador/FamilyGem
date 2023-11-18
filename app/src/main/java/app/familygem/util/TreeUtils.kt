@@ -3,15 +3,20 @@ package app.familygem.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import app.familygem.*
+import app.familygem.BuildConfig
+import app.familygem.F
+import app.familygem.Global
+import app.familygem.InfoActivity
+import app.familygem.Notifier
+import app.familygem.R
+import app.familygem.Settings
 import app.familygem.Settings.Tree
+import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
 import app.familygem.share.CompareActivity
-import com.google.android.material.navigation.NavigationView
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -19,11 +24,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.io.FileUtils
 import org.apache.commons.net.ftp.FTPClient
-import org.folg.gedcom.model.*
+import org.folg.gedcom.model.CharacterSet
+import org.folg.gedcom.model.Gedcom
+import org.folg.gedcom.model.GedcomVersion
+import org.folg.gedcom.model.Generator
+import org.folg.gedcom.model.Header
 import org.folg.gedcom.parser.JsonParser
 import org.folg.gedcom.parser.ModelParser
-import java.io.*
-import java.util.*
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.FileReader
+import java.io.IOException
+import java.io.PrintWriter
+import java.util.Locale
 import java.util.zip.ZipInputStream
 
 fun Tree.getBasicData(): String {
@@ -133,12 +148,8 @@ object TreeUtils {
         }
         if (Global.settings.autoSave) {
             GlobalScope.launch(Dispatchers.IO) { saveJson(Global.gc, Global.settings.openTree) }
-        } else { // Displays the 'Save' button
-            Global.shouldSave = true
-            if (Global.mainView != null) {
-                val menu = Global.mainView.findViewById<NavigationView>(R.id.menu)
-                menu.getHeaderView(0).findViewById<View>(R.id.menu_salva).visibility = View.VISIBLE
-            }
+        } else {
+            Global.shouldSave = true // The 'Save' button will be displayed
         }
     }
 
@@ -236,7 +247,7 @@ object TreeUtils {
             printWriter.print(jsonParser.toJson(gedcom))
             printWriter.close()
             // Tree name and folder path
-            val path = F.uriFilePath(uri)
+            val path = F.getFilePathFromUri(uri)
             var treeName: String
             var folderPath: String? = null
             if (path != null && path.lastIndexOf('/') > 0) { // It's a full path to the gedcom file

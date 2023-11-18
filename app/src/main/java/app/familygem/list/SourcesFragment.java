@@ -42,6 +42,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
+import app.familygem.constant.Extra;
 import app.familygem.detail.SourceActivity;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.ListOfSourceCitations;
@@ -149,7 +150,7 @@ public class SourcesFragment extends Fragment {
             // Restituisce l'id di una fonte a ProfileActivity e Dettaglio
             if (getActivity().getIntent().getBooleanExtra(Choice.SOURCE, false)) {
                 Intent intent = new Intent();
-                intent.putExtra("sourceId", idView.getText().toString());
+                intent.putExtra(Extra.SOURCE_ID, idView.getText().toString());
                 getActivity().setResult(Activity.RESULT_OK, intent);
                 getActivity().finish();
             } else {

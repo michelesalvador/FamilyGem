@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -22,9 +25,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -43,6 +46,7 @@ import org.folg.gedcom.model.NoteRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -63,73 +67,84 @@ import jp.wasabeef.picasso.transformations.BlurTransformation;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    Person one;
-    TabLayout tabLayout;
-    Fragment[] tabs = new Fragment[3];
-    String[] mainEventTags = {"BIRT", "BAPM", "RESI", "OCCU", "DEAT", "BURI"};
-    List<Pair<String, String>> otherEvents; // List of tag + label
+    private Person one;
+    private TabLayout tabLayout;
+    private final Fragment[] pages = new Fragment[3];
+    private PagesAdapter adapter;
+    private FloatingActionButton fab;
+    private final String[] mainEventTags = {"BIRT", "BAPM", "RESI", "OCCU", "DEAT", "BURI"};
+    private List<Pair<String, String>> otherEvents; // List of tag + label
+    ActivityResultLauncher<Intent> choosePersonLauncher;
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         U.ensureGlobalGedcomNotNull(gc);
         one = (Person)Memory.getLastObject();
-        // Se l'app va in background e viene stoppata, 'Memory' è resettata e quindi 'one' sarà null
+        // If the app goes to background and is stopped, 'Memory' is reset and therefore 'one' will be null
         if (one == null && bundle != null) {
-            one = gc.getPerson(bundle.getString("idUno")); // In bundle è salvato l'id dell'individuo
-            Memory.setLeader(one); // Altrimenti la memoria è senza una pila
+            one = gc.getPerson(bundle.getString("oneId"));
+            Memory.setLeader(one); // Otherwise Memory is without a stack
         }
-        if (one == null) return; // Capita raramente che il bundle non faccia il suo lavoro
+        if (one == null) return; // Rarely the bundle doesn't do its job
         Global.indi = one.getId();
-        setContentView(R.layout.individuo);
+        setContentView(R.layout.profile_activity);
+        fab = findViewById(R.id.fab);
 
-        // Barra
+        // Toolbar
         Toolbar toolbar = findViewById(R.id.profile_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // fa comparire la freccia indietro e il menu
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Brings up the back arrow and the options menu
 
-        // Assegna alla vista pagina un adapter che gestisce le tre schede
-        ViewPager viewPager = findViewById(R.id.profile_pager);
-        ImpaginatoreSezioni impaginatoreSezioni = new ImpaginatoreSezioni();
-        viewPager.setAdapter(impaginatoreSezioni);
+        // Assigns to the pager an adapter that manages the three pages
+        ViewPager2 viewPager = findViewById(R.id.profile_pager);
+        adapter = new PagesAdapter(this);
+        viewPager.setAdapter(adapter);
 
-        // arricchisce il tablayout
+        // Furnishes tab layout
         tabLayout = findViewById(R.id.profile_tabs);
-        tabLayout.setupWithViewPager(viewPager); // altrimenti il testo nei TabItem scompare (?!)
-        tabLayout.getTabAt(0).setText(R.string.media);
-        tabLayout.getTabAt(1).setText(R.string.events);
-        tabLayout.getTabAt(2).setText(R.string.relatives);
-        tabLayout.getTabAt(getIntent().getIntExtra("scheda", 1)).select();
-
-        // per animare il FAB
-        final FloatingActionButton fab = findViewById(R.id.fab);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.media));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.events));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.relatives));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onPageScrolled(int posizione,  // 0 tra la prima e la seconda, 1 tra la seconda e la terza...
-                                       float scostamento, // 1 -> 0 a destra, 0 -> 1 a sinistra
-                                       int positionOffsetPixels) {
-                if (scostamento > 0)
-                    fab.hide();
-                else
-                    fab.show();
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
             }
 
             @Override
-            public void onPageSelected(int position) {
+            public void onTabUnselected(TabLayout.Tab tab) {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            // Changes tab when swiping
+            @Override
+            public void onPageSelected(int position) {
+                tabLayout.selectTab(tabLayout.getTabAt(position));
+            }
+
+            // Animates the FAB
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                // positionOffset is 0.0 > 1.0 during swiping, and becomes 0.0 at the end
+                if (positionOffset > 0) fab.hide();
+                else fab.show();
+            }
+        });
+        // Only at first creation selects one specific tab
+        if (bundle == null)
+            tabLayout.getTabAt(getIntent().getIntExtra(Extra.PAGE, 1)).select();
 
         // List of other events
         String[] otherEventTags = {"CHR", "CREM", "ADOP", "BARM", "BATM", "BLES", "CONF", "FCOM", "ORDN", //Events
                 "NATU", "EMIG", "IMMI", "CENS", "PROB", "WILL", "GRAD", "RETI", "EVEN",
                 "CAST", "DSCR", "EDUC", "NATI", "NCHI", "PROP", "RELI", "SSN", "TITL", // Attributes
                 "_MILT"}; // User-defined
-        /* Standard GEDCOM tags missing in the EventFact.DISPLAY_TYPE list:
-            BASM (there is BATM instead) CHRA IDNO NMR FACT */
+        // Standard GEDCOM tags missing in the EventFact.DISPLAY_TYPE list: BASM (there is BATM instead) CHRA IDNO NMR FACT
         otherEvents = new ArrayList<>();
         for (String tag : otherEventTags) {
             EventFact event = new EventFact();
@@ -141,29 +156,76 @@ public class ProfileActivity extends AppCompatActivity {
         }
         // Alphabetically sorted by label
         Collections.sort(otherEvents, (item1, item2) -> item1.second.compareTo(item2.second));
+
+        // Manages the result of choosing a person in PersonsFragment
+        choosePersonLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
+                Intent data = result.getData();
+                Object[] modified = PersonEditorActivity.addRelative(
+                        data.getStringExtra(Extra.PERSON_ID), // Corresponds to one.getId()
+                        data.getStringExtra(Extra.RELATIVE_ID),
+                        data.getStringExtra(Extra.FAMILY_ID),
+                        (Relation)data.getSerializableExtra(Extra.RELATION),
+                        data.getStringExtra(Extra.DESTINATION));
+                TreeUtils.INSTANCE.save(true, modified);
+                refresh(); // To display the result in Relatives fragment
+            }
+        });
     }
 
-    class ImpaginatoreSezioni extends FragmentPagerAdapter {
+    private class PagesAdapter extends FragmentStateAdapter {
+        private final int PAGES_NUM = 3;
+        private int itemIdIncrement = PAGES_NUM;
 
-        ImpaginatoreSezioni() {
-            super(getSupportFragmentManager());
+        public PagesAdapter(@NonNull FragmentActivity fragmentActivity) {
+            super(fragmentActivity);
         }
 
-        @Override // in realtà non seleziona ma CREA le tre schede
-        public Fragment getItem(int position) {
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
             if (position == 0)
-                tabs[0] = new ProfileMediaFragment();
+                pages[0] = new ProfileMediaFragment();
             else if (position == 1)
-                tabs[1] = new ProfileFactsFragment();
+                pages[1] = new ProfileFactsFragment();
             else if (position == 2)
-                tabs[2] = new ProfileRelativesFragment();
-            return tabs[position];
+                pages[2] = new ProfileRelativesFragment();
+            return pages[position];
         }
 
         @Override
-        public int getCount() {
-            return 3;
+        public int getItemCount() {
+            return PAGES_NUM;
         }
+
+        @Override
+        public long getItemId(int position) {
+            long id = super.getItemId(position);
+            if (itemIdIncrement > PAGES_NUM) id += itemIdIncrement;
+            return id;
+        }
+
+        @Override
+        public boolean containsItem(long itemId) {
+            boolean does = super.containsItem(itemId);
+            return does;
+        }
+
+        /**
+         * Reloads the three pages.
+         */
+        public void notifyPagesChanged() {
+            itemIdIncrement += PAGES_NUM;
+            for (int i = 0; i < 3; i++) {
+                notifyItemChanged(i);
+            }
+        }
+    }
+
+    public Fragment getPageFragment(int page) {
+        Fragment fragment = pages[page];
+        if (fragment == null) fragment = adapter.createFragment(page);
+        return fragment;
     }
 
     @Override
@@ -172,7 +234,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (one == null || Global.edited)
             one = gc.getPerson(Global.indi);
 
-        if (one == null) { // ritornando indietro nella Scheda di un individuo che è stato eliminato
+        if (one == null) { // Coming back to the profile of a person who has been deleted
             onBackPressed();
             return;
         }
@@ -192,30 +254,24 @@ public class ProfileActivity extends AppCompatActivity {
         toolbarLayout.setCollapsedTitleTextAppearance(R.style.AppTheme_CollapsedAppBar);
         setImages();
         if (Global.edited) {
-            // Reload the 3 tabs coming back to the profile
-            for (Fragment tab : tabs) {
-                if (tab != null) { // At the first activity creation they are null
-                    getSupportFragmentManager().beginTransaction().detach(tab).commit();
-                    getSupportFragmentManager().beginTransaction().attach(tab).commit();
-                }
-            }
+            adapter.notifyPagesChanged();
             invalidateOptionsMenu();
         }
 
-        // Menu FAB
-        findViewById(R.id.fab).setOnClickListener(vista -> {
-            PopupMenu popup = new PopupMenu(this, vista);
+        // FAB menu
+        fab.setOnClickListener(view -> {
+            PopupMenu popup = new PopupMenu(this, view);
             Menu menu = popup.getMenu();
             switch (tabLayout.getSelectedTabPosition()) {
-                case 0: // Individuo Media
+                case 0: // Media
                     menu.add(0, 10, 0, R.string.new_media);
                     menu.add(0, 11, 0, R.string.new_shared_media);
                     if (!gc.getMedia().isEmpty())
                         menu.add(0, 12, 0, R.string.link_shared_media);
                     break;
-                case 1: // Individuo Eventi
+                case 1: // Facts
                     menu.add(0, 20, 0, R.string.name);
-                    // Sesso
+                    // Sex
                     if (Gender.getGender(one) == Gender.NONE)
                         menu.add(0, 21, 0, R.string.sex);
                     // Main events
@@ -231,8 +287,8 @@ public class ProfileActivity extends AppCompatActivity {
                     // Other events
                     SubMenu otherSubMenu = eventSubMenu.addSubMenu(R.string.other);
                     i = 0;
-                    for (Pair item : otherEvents) {
-                        otherSubMenu.add(0, 50 + i, 0, (String)item.second);
+                    for (Pair<String, String> item : otherEvents) {
+                        otherSubMenu.add(0, 50 + i, 0, item.second);
                         i++;
                     }
                     SubMenu noteSubMenu = menu.addSubMenu(R.string.note);
@@ -247,7 +303,7 @@ public class ProfileActivity extends AppCompatActivity {
                             sourceSubMenu.add(0, 26, 0, R.string.link_source);
                     }
                     break;
-                case 2: // Individuo Familiari
+                case 2: // Relatives
                     menu.add(0, 30, 0, R.string.new_relative);
                     if (U.linkablePersons(one))
                         menu.add(0, 31, 0, R.string.link_person);
@@ -257,21 +313,21 @@ public class ProfileActivity extends AppCompatActivity {
                 CharSequence[] relatives = {getText(R.string.parent), getText(R.string.sibling), getText(R.string.partner), getText(R.string.child)};
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 switch (item.getItemId()) {
-                    // Scheda Eventi
-                    case 0:
+                    case 0: // When a submenu is clicked
                         break;
-                    // Media
-                    case 10: // Cerca media locale
+                    // Media page
+                    case 10: // Choose local media
                         F.displayImageCaptureDialog(this, null, 2173, one);
                         break;
-                    case 11: // Cerca oggetto media
+                    case 11: // Choose media record
                         F.displayImageCaptureDialog(this, null, 2174, one);
                         break;
-                    case 12: // Link media in MediaFragment
-                        Intent inten = new Intent(this, Principal.class);
-                        inten.putExtra(Choice.MEDIA, true);
-                        startActivityForResult(inten, 43614);
+                    case 12: // Link media from MediaFragment
+                        Intent intent1 = new Intent(this, Principal.class);
+                        intent1.putExtra(Choice.MEDIA, true);
+                        startActivityForResult(intent1, 43614);
                         break;
+                    // Facts page
                     case 20: // Create name
                         Name name = new Name();
                         name.setValue("//");
@@ -301,58 +357,58 @@ public class ProfileActivity extends AppCompatActivity {
                         one.addNote(note);
                         Memory.add(note);
                         startActivity(new Intent(this, NoteActivity.class));
-                        // todo? Dettaglio.edita(View vistaValore);
+                        // TODO: maybe make it editable with DetailActivity.edit(value);
                         TreeUtils.INSTANCE.save(true, one);
                         break;
                     case 23: // Create shared note
                         NotesFragment.newNote(this, one);
                         break;
                     case 24: // Link shared note
-                        Intent intent = new Intent(this, Principal.class);
-                        intent.putExtra(Choice.NOTE, true);
-                        startActivityForResult(intent, 4074);
+                        Intent intent2 = new Intent(this, Principal.class);
+                        intent2.putExtra(Choice.NOTE, true);
+                        startActivityForResult(intent2, 4074);
                         break;
                     case 25: // New source
                         SourcesFragment.newSource(this, one);
                         break;
                     case 26: // Link existing source
-                        Intent intento = new Intent(this, Principal.class);
-                        intento.putExtra(Choice.SOURCE, true);
-                        startActivityForResult(intento, 50473);
+                        Intent intent3 = new Intent(this, Principal.class);
+                        intent3.putExtra(Choice.SOURCE, true);
+                        startActivityForResult(intent3, 50473);
                         break;
-                    // Scheda Familiari
-                    case 30:// Collega persona nuova
+                    // Relatives page
+                    case 30:// Link new person
                         if (Global.settings.expert) {
                             DialogFragment dialog = new NewRelativeDialog(one, null, null, true, null);
-                            dialog.show(getSupportFragmentManager(), "scegli");
+                            dialog.show(getSupportFragmentManager(), null);
                         } else {
                             builder.setItems(relatives, (dialog, selected) -> {
-                                Intent intent1 = new Intent(getApplicationContext(), PersonEditorActivity.class);
-                                intent1.putExtra(Extra.PERSON_ID, one.getId());
-                                intent1.putExtra(Extra.RELATION, Relation.get(selected));
-                                if (U.checkMultiMarriages(intent1, this, null))
+                                Intent intent4 = new Intent(getApplicationContext(), PersonEditorActivity.class);
+                                intent4.putExtra(Extra.PERSON_ID, one.getId());
+                                intent4.putExtra(Extra.RELATION, Relation.get(selected));
+                                if (U.checkMultiMarriages(intent4, this, null))
                                     return;
-                                startActivity(intent1);
+                                startActivity(intent4);
                             }).show();
                         }
                         break;
-                    case 31: // Collega persona esistente
+                    case 31: // Link existing person
                         if (Global.settings.expert) {
                             DialogFragment dialog = new NewRelativeDialog(one, null, null, false, null);
-                            dialog.show(getSupportFragmentManager(), "scegli");
+                            dialog.show(getSupportFragmentManager(), null);
                         } else {
                             builder.setItems(relatives, (dialog, selected) -> {
-                                Intent intent2 = new Intent(getApplication(), Principal.class);
-                                intent2.putExtra(Choice.PERSON, true);
-                                intent2.putExtra(Extra.PERSON_ID, one.getId());
-                                intent2.putExtra(Extra.RELATION, Relation.get(selected));
-                                if (U.checkMultiMarriages(intent2, this, null))
+                                Intent intent5 = new Intent(getApplication(), Principal.class);
+                                intent5.putExtra(Choice.PERSON, true);
+                                intent5.putExtra(Extra.PERSON_ID, one.getId());
+                                intent5.putExtra(Extra.RELATION, Relation.get(selected));
+                                if (U.checkMultiMarriages(intent5, this, null))
                                     return;
-                                startActivityForResult(intent2, 1401);
+                                choosePersonLauncher.launch(intent5);
                             }).show();
                         }
                         break;
-                    default:
+                    default: // Events
                         String keyTag = null;
                         if (item.getItemId() >= 50) {
                             keyTag = otherEvents.get(item.getItemId() - 50).first;
@@ -390,11 +446,12 @@ public class ProfileActivity extends AppCompatActivity {
 
     /* Displays an image in the profile header.
        The blurred background image is displayed in most cases (jpg, png, gif...).
-       ToDo but not in case of a video preview, or image downloaded from the web with ZuppaMedia */
+       TODO: but not in case of a video preview, or image downloaded from the web with F.DownloadImage() */
     void setImages() {
         ImageView imageView = findViewById(R.id.profile_image);
         Media media = F.showMainImageForPerson(Global.gc, one, imageView);
         // Same image blurred on background
+        ImageView backImageView = findViewById(R.id.profile_background);
         if (media != null) {
             String path = F.mediaPath(Global.settings.openTree, media);
             Uri uri = null;
@@ -402,21 +459,18 @@ public class ProfileActivity extends AppCompatActivity {
                 uri = F.mediaUri(Global.settings.openTree, media);
             if (path != null || uri != null) {
                 RequestCreator creator;
-                ImageView backImageView = findViewById(R.id.profile_background);
-                backImageView.setColorFilter(ContextCompat.getColor(
-                        this, R.color.primary_grayed), PorterDuff.Mode.MULTIPLY);
-                if (path != null)
-                    creator = Picasso.get().load("file://" + path);
-                else
-                    creator = Picasso.get().load(uri);
+                backImageView.setColorFilter(ContextCompat.getColor(this, R.color.primary_grayed), PorterDuff.Mode.MULTIPLY);
+                if (path != null) creator = Picasso.get().load(new File(path));
+                else creator = Picasso.get().load(uri);
                 creator.resize(200, 200).centerCrop()
-                        .transform(new BlurTransformation(Global.context, 5, 1))
-                        .into(backImageView);
+                        .transform(new BlurTransformation(Global.context, 5, 1)).into(backImageView);
             }
-        }
+        } else backImageView.setImageBitmap(null);
     }
 
-    // Refresh everyting without recreating the activity
+    /**
+     * Refreshes header and pages without recreating the activity.
+     */
     public void refresh() {
         // Name in the header
         CollapsingToolbarLayout toolbarLayout = findViewById(R.id.profile_toolbar_layout);
@@ -428,72 +482,52 @@ public class ProfileActivity extends AppCompatActivity {
             TextView idView = findViewById(R.id.profile_id);
             idView.setText("INDI " + one.getId());
         }
-        // 3 tabs
-        for (Fragment tab : tabs) {
-            if (tab != null) {
-                FragmentManager manager = getSupportFragmentManager();
-                manager.beginTransaction().detach(tab).commit();
-                manager.beginTransaction().attach(tab).commit();
-            }
-        }
+        // Three pages
+        adapter.notifyPagesChanged();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("idUno", one.getId());
+        outState.putString("oneId", one.getId());
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == 2173) { // File fornito da un'app diventa media locale eventualmente ritagliato con Android Image Cropper
+            if (requestCode == 2173) { // File provided by another app becomes local media
                 Media media = new Media();
                 media.setFileTag("FILE");
                 one.addMedia(media);
-                if (F.proposeCropping(this, null, data, media)) { // restituisce true se è un'immagine ritagliabile
+                if (F.setFileAndProposeCropping(this, null, data, media))
                     TreeUtils.INSTANCE.save(true, one);
-                    return;
-                }
-            } else if (requestCode == 2174) { // File dalle app in nuovo Media condiviso, con proposta di ritagliarlo
-                Media media = MediaFragment.newMedia(one);
-                if (F.proposeCropping(this, null, data, media)) {
-                    TreeUtils.INSTANCE.save(true, media, one);
-                    return;
-                }
-            } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-                // Ottiene l'immagine ritagliata da Android Image Cropper
+            } else if (requestCode == 2174) { // Shared media
+                Media sharedMedia = MediaFragment.newSharedMedia(one);
+                if (F.setFileAndProposeCropping(this, null, data, sharedMedia))
+                    TreeUtils.INSTANCE.save(true, sharedMedia, one);
+            } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // Gets the image cropped by Android Image Cropper
                 F.endImageCropping(data);
-                TreeUtils.INSTANCE.save(true); // la data di cambio per i Media condivisi viene già salvata nel passaggio precedente
-                // todo passargli Global.mediaCroppato ?
-                return;
+                TreeUtils.INSTANCE.save(true); // The change date for shared media is already saved in the previous step
+                // TODO: pass Global.croppedMedia?
             } else if (requestCode == 43614) { // Media from MediaFragment
                 MediaRef mediaRef = new MediaRef();
-                mediaRef.setRef(data.getStringExtra("mediaId"));
+                mediaRef.setRef(data.getStringExtra(Extra.MEDIA_ID));
                 one.addMediaRef(mediaRef);
+                TreeUtils.INSTANCE.save(true, one);
             } else if (requestCode == 4074) { // Note
                 NoteRef noteRef = new NoteRef();
-                noteRef.setRef(data.getStringExtra("noteId"));
+                noteRef.setRef(data.getStringExtra(Extra.NOTE_ID));
                 one.addNoteRef(noteRef);
+                TreeUtils.INSTANCE.save(true, one);
             } else if (requestCode == 50473) { // Source
                 SourceCitation citation = new SourceCitation();
-                citation.setRef(data.getStringExtra("sourceId"));
+                citation.setRef(data.getStringExtra(Extra.SOURCE_ID));
                 one.addSourceCitation(citation);
-            } else if (requestCode == 1401) { // Relative
-                Object[] modified = PersonEditorActivity.addRelative(
-                        data.getStringExtra(Extra.PERSON_ID), // Corresponds to one.getId()
-                        data.getStringExtra(Extra.RELATIVE_ID),
-                        data.getStringExtra(Extra.FAMILY_ID),
-                        (Relation)data.getSerializableExtra(Extra.RELATION),
-                        data.getStringExtra(Extra.DESTINATION));
-                TreeUtils.INSTANCE.save(true, modified);
-                return;
+                TreeUtils.INSTANCE.save(true, one);
             }
-            TreeUtils.INSTANCE.save(true, one);
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // After back arrow in Image Cropper
             F.saveFolderInSettings();
-            Global.edited = true;
         }
     }
 
@@ -536,15 +570,15 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(R.string.this_is_root, U.properName(one)), Toast.LENGTH_LONG).show();
                 return true;
             case 4: // Edit
-                Intent intent1 = new Intent(this, PersonEditorActivity.class);
-                intent1.putExtra(Extra.PERSON_ID, one.getId());
-                startActivity(intent1);
+                Intent intent = new Intent(this, PersonEditorActivity.class);
+                intent.putExtra(Extra.PERSON_ID, one.getId());
+                startActivity(intent);
                 return true;
-            case 5:    // Delete
+            case 5: // Delete
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
                         .setPositiveButton(R.string.delete, (dialog, i) -> {
-                            Family[] famiglie = PersonsFragment.deletePerson(this, one.getId());
-                            if (!U.controllaFamiglieVuote(this, this::onBackPressed, true, famiglie))
+                            Family[] families = PersonsFragment.deletePerson(this, one.getId());
+                            if (!U.controllaFamiglieVuote(this, this::onBackPressed, true, families))
                                 onBackPressed();
                         }).setNeutralButton(R.string.cancel, null).show();
                 return true;
@@ -555,8 +589,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int codice, String[] permessi, int[] accordi) {
-        super.onRequestPermissionsResult(codice, permessi, accordi);
-        F.permissionsResult(this, null, codice, permessi, accordi, one);
+    public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(code, permissions, results);
+        F.permissionsResult(this, null, code, permissions, results, one);
     }
 }

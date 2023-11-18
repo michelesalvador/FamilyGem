@@ -20,7 +20,7 @@ public class NameActivity extends DetailActivity {
     Name name;
 
     @Override
-    public void format() {
+    protected void format() {
         placeSlug("NAME", null);
         name = (Name)cast(Name.class);
         setTitle(ProfileFactsFragment.writeNameTitle(name));
@@ -32,9 +32,12 @@ public class NameActivity extends DetailActivity {
             String surname = "";
             String value = name.getValue();
             if (value != null) {
-                givenName = value.replaceAll("/.*?/", "").trim(); // Remove the surname
+                value = value.trim();
+                givenName = value.replaceAll("/.*?/", "").trim(); // Removes the surname between two "/"
                 if (value.indexOf('/') < value.lastIndexOf('/'))
                     surname = value.substring(value.indexOf('/') + 1, value.lastIndexOf('/')).trim();
+                if (value.indexOf('/') == 0 && value.lastIndexOf('/') < value.length() - 1) // Surname before given name
+                    surnameBefore = true;
             }
             placePiece(getString(R.string.given), givenName, 4043, capWords);
             placePiece(getString(R.string.surname), surname, 6064, capWords);

@@ -18,7 +18,7 @@ public class NoteActivity extends DetailActivity {
     Note note;
 
     @Override
-    public void format() {
+    protected void format() {
         note = (Note)cast(Note.class);
         if (note.getId() == null) {
             setTitle(R.string.note);

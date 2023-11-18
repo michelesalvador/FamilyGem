@@ -11,8 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Person;
@@ -29,158 +31,150 @@ import app.familygem.util.TreeUtils;
 
 public class ProfileRelativesFragment extends Fragment {
 
-    private View tabView;
-    Person one;
+    private View relativesView;
+    private Person one;
+    private FragmentActivity activity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        tabView = inflater.inflate(R.layout.individuo_scheda, container, false);
+        relativesView = inflater.inflate(R.layout.profile_page_fragment, container, false);
         if (gc != null) {
             one = gc.getPerson(Global.indi);
             if (one != null) {
-                /* ToDo Mostrare/poter settare nelle famiglie geniotriali il pedigree, in particolare 'adopted'
-                LinearLayout scatola = vistaFamiglia.findViewById( R.id.contenuto_scheda );
-                for( ParentFamilyRef pfr : uno.getParentFamilyRefs() ) {
-                    U.metti( scatola, "Ref", pfr.getRef() );
-                    U.metti( scatola, "Primary", pfr.getPrimary() ); // Custom tag _PRIM _PRIMARY
-                    U.metti( scatola, "Relationship Type", pfr.getRelationshipType() ); // Tag PEDI (pedigree)
-                    for( Estensione altroTag : U.trovaEstensioni( pfr ) )
-                        U.metti( scatola, altroTag.nome, altroTag.testo );
-                } */
-                // Famiglie di origine: genitori e fratelli
-                List<Family> listaFamiglie = one.getParentFamilies(gc);
-                for (Family famiglia : listaFamiglie) {
-                    for (Person padre : famiglia.getHusbands(gc))
-                        createCard(padre, Relation.PARENT, famiglia);
-                    for (Person madre : famiglia.getWives(gc))
-                        createCard(madre, Relation.PARENT, famiglia);
-                    for (Person fratello : famiglia.getChildren(gc)) // solo i figli degli stessi due genitori, non i fratellastri
-                        if (!fratello.equals(one))
-                            createCard(fratello, Relation.SIBLING, famiglia);
+                // Parents and siblings
+                List<Family> families = one.getParentFamilies(gc);
+                for (Family family : families) {
+                    for (Person father : family.getHusbands(gc))
+                        createCard(father, Relation.PARENT, family);
+                    for (Person mother : family.getWives(gc))
+                        createCard(mother, Relation.PARENT, family);
+                    for (Person sibling : family.getChildren(gc)) // Only children of the same two parents, not half-siblings
+                        if (!sibling.equals(one))
+                            createCard(sibling, Relation.SIBLING, family);
                 }
-                // Fratellastri e sorellastre
-                for (Family famiglia : one.getParentFamilies(gc)) {
-                    for (Person padre : famiglia.getHusbands(gc)) {
-                        List<Family> famigliePadre = padre.getSpouseFamilies(gc);
-                        famigliePadre.removeAll(listaFamiglie);
-                        for (Family fam : famigliePadre)
-                            for (Person fratellastro : fam.getChildren(gc))
-                                createCard(fratellastro, Relation.HALF_SIBLING, fam);
+                // Half-siblings
+                for (Family family : one.getParentFamilies(gc)) {
+                    for (Person father : family.getHusbands(gc)) {
+                        List<Family> fatherFamilies = father.getSpouseFamilies(gc);
+                        fatherFamilies.removeAll(families);
+                        for (Family fam : fatherFamilies)
+                            for (Person halfSibling : fam.getChildren(gc))
+                                createCard(halfSibling, Relation.HALF_SIBLING, fam);
                     }
-                    for (Person madre : famiglia.getWives(gc)) {
-                        List<Family> famiglieMadre = madre.getSpouseFamilies(gc);
-                        famiglieMadre.removeAll(listaFamiglie);
-                        for (Family fam : famiglieMadre)
-                            for (Person fratellastro : fam.getChildren(gc))
-                                createCard(fratellastro, Relation.HALF_SIBLING, fam);
+                    for (Person mother : family.getWives(gc)) {
+                        List<Family> motherFamilies = mother.getSpouseFamilies(gc);
+                        motherFamilies.removeAll(families);
+                        for (Family fam : motherFamilies)
+                            for (Person halfSibling : fam.getChildren(gc))
+                                createCard(halfSibling, Relation.HALF_SIBLING, fam);
                     }
                 }
-                // Coniugi e figli
+                // Partners and children
                 for (Family family : one.getSpouseFamilies(gc)) {
-                    for (Person marito : family.getHusbands(gc))
-                        if (!marito.equals(one))
-                            createCard(marito, Relation.PARTNER, family);
-                    for (Person moglie : family.getWives(gc))
-                        if (!moglie.equals(one))
-                            createCard(moglie, Relation.PARTNER, family);
-                    for (Person figlio : family.getChildren(gc)) {
-                        createCard(figlio, Relation.CHILD, family);
+                    for (Person husband : family.getHusbands(gc))
+                        if (!husband.equals(one))
+                            createCard(husband, Relation.PARTNER, family);
+                    for (Person wife : family.getWives(gc))
+                        if (!wife.equals(one))
+                            createCard(wife, Relation.PARTNER, family);
+                    for (Person child : family.getChildren(gc)) {
+                        createCard(child, Relation.CHILD, family);
                     }
                 }
             }
         }
-        return tabView;
+        activity = requireActivity();
+        return relativesView;
     }
 
     void createCard(final Person person, Relation relation, Family family) {
-        LinearLayout scatola = tabView.findViewById(R.id.contenuto_scheda);
-        View vistaPersona = U.placeIndividual(scatola, person,
+        LinearLayout layout = relativesView.findViewById(R.id.profile_page);
+        View personView = U.placeIndividual(layout, person,
                 FamilyActivity.getRole(person, family, relation, false) + FamilyActivity.writeLineage(person, family));
-        vistaPersona.setOnClickListener(v -> {
-            getActivity().finish(); // Rimuove l'attività attale dallo stack
+        personView.setOnClickListener(view -> {
+            getActivity().finish(); // Removes the current activity from the stack
             Memory.replaceLeader(person);
-            Intent intento = new Intent(getContext(), ProfileActivity.class);
-            intento.putExtra("scheda", 2); // apre la scheda famiglia
-            startActivity(intento);
+            Intent intent = new Intent(getContext(), ProfileActivity.class);
+            intent.putExtra(Extra.PAGE, 2); // Opens the Relatives page
+            startActivity(intent);
         });
-        registerForContextMenu(vistaPersona);
-        vistaPersona.setTag(R.id.tag_famiglia, family); // Il principale scopo di questo tag è poter scollegare l'individuo dalla famiglia
-        // ma è usato anche qui sotto per spostare i molteplici matrimoni
+        registerForContextMenu(personView);
+        personView.setTag(R.id.tag_family, family); // To pass the family to the context menu
     }
 
     private void moveFamilyRef(int direction) {
-        Collections.swap(one.getSpouseFamilyRefs(), posFam, posFam + direction);
+        Collections.swap(one.getSpouseFamilyRefs(), familyPosition, familyPosition + direction);
         TreeUtils.INSTANCE.save(true, one);
-        refresh();
+        refreshAll();
     }
 
-    // Menu contestuale
-    private String indiId;
+    // Context menu
+    private String personId;
     private Person person;
     private Family family;
-    private int posFam; // posizione della famiglia coniugale per chi ne ha più di una
+    private int familyPosition; // Position of the spouse family (for those who have more than one)
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
-        indiId = (String)vista.getTag();
-        person = gc.getPerson(indiId);
-        family = (Family)vista.getTag(R.id.tag_famiglia);
-        posFam = -1;
-        if (one.getSpouseFamilyRefs().size() > 1 && !family.getChildren(gc).contains(person)) { // solo i coniugi, non i figli
-            List<SpouseFamilyRef> refi = one.getSpouseFamilyRefs();
-            for (SpouseFamilyRef sfr : refi)
-                if (sfr.getRef().equals(family.getId()))
-                    posFam = refi.indexOf(sfr);
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
+        personId = (String)view.getTag();
+        person = gc.getPerson(personId);
+        family = (Family)view.getTag(R.id.tag_family);
+        familyPosition = -1;
+        if (one.getSpouseFamilyRefs().size() > 1 && !family.getChildren(gc).contains(person)) {
+            List<SpouseFamilyRef> familyRefs = one.getSpouseFamilyRefs();
+            for (SpouseFamilyRef ref : familyRefs)
+                if (ref.getRef().equals(family.getId()))
+                    familyPosition = familyRefs.indexOf(ref);
         }
-        // Meglio usare numeri che non confliggano con i menu contestuali delle altre schede individuo
+        // Better to use numbers that do not conflict with the context menus of other profile pages
         menu.add(0, 300, 0, R.string.diagram);
         String[] familyLabels = DiagramFragment.getFamilyLabels(getContext(), person, family);
         if (familyLabels[0] != null)
             menu.add(0, 301, 0, familyLabels[0]);
         if (familyLabels[1] != null)
             menu.add(0, 302, 0, familyLabels[1]);
-        if (posFam > 0)
+        if (familyPosition > 0)
             menu.add(0, 303, 0, R.string.move_before);
-        if (posFam >= 0 && posFam < one.getSpouseFamilyRefs().size() - 1)
+        if (familyPosition >= 0 && familyPosition < one.getSpouseFamilyRefs().size() - 1)
             menu.add(0, 304, 0, R.string.move_after);
         menu.add(0, 305, 0, R.string.modify);
         if (FamilyActivity.findParentFamilyRef(person, family) != null)
             menu.add(0, 306, 0, R.string.lineage);
         menu.add(0, 307, 0, R.string.unlink);
-        if (!person.equals(one)) // Qui non può eliminare sè stesso
+        if (!person.equals(one)) // Here cannot delete himself
             menu.add(0, 308, 0, R.string.delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == 300) { // Diagramma
+        if (id == 300) { // Diagram
             U.askWhichParentsToShow(getContext(), person, 1);
-        } else if (id == 301) { // Famiglia come figlio
+        } else if (id == 301) { // Family as child
             U.askWhichParentsToShow(getContext(), person, 2);
-        } else if (id == 302) { // Famiglia come coniuge
+        } else if (id == 302) { // Family as partner
             U.askWhichSpouceToShow(getContext(), person, family);
-        } else if (id == 303) { // Sposta su
+        } else if (id == 303) { // Move up
             moveFamilyRef(-1);
-        } else if (id == 304) { // Sposta giù
+        } else if (id == 304) { // Move down
             moveFamilyRef(1);
-        } else if (id == 305) { // Modifica
+        } else if (id == 305) { // Edit
             Intent intent = new Intent(getContext(), PersonEditorActivity.class);
-            intent.putExtra(Extra.PERSON_ID, indiId);
+            intent.putExtra(Extra.PERSON_ID, personId);
             startActivity(intent);
         } else if (id == 306) { // Lineage
             FamilyActivity.chooseLineage(getContext(), person, family);
-        } else if (id == 307) { // Scollega da questa famiglia
-            FamilyActivity.disconnect(indiId, family);
-            refresh();
-            U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
+        } else if (id == 307) { // Unlink
+            FamilyActivity.disconnect(personId, family);
             TreeUtils.INSTANCE.save(true, family, person);
-        } else if (id == 308) { // Elimina
+            refreshAll();
+            U.controllaFamiglieVuote(getContext(), this::refreshOptionsMenu, false, family);
+        } else if (id == 308) { // Delete
             new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete, (dialog, i) -> {
-                        PersonsFragment.deletePerson(getContext(), indiId);
-                        refresh();
-                        U.controllaFamiglieVuote(getContext(), this::refresh, false, family);
+                        PersonsFragment.deletePerson(getContext(), personId);
+                        refreshAll();
+                        U.controllaFamiglieVuote(getContext(), this::refreshOptionsMenu, false, family);
                     }).setNeutralButton(R.string.cancel, null).show();
         } else {
             return false;
@@ -188,8 +182,17 @@ public class ProfileRelativesFragment extends Fragment {
         return true;
     }
 
-    // Refresh the content
-    public void refresh() {
+    /**
+     * Refreshes all the content.
+     */
+    public void refreshAll() {
         ((ProfileActivity)requireActivity()).refresh();
+    }
+
+    /**
+     * Refreshes options menu only.
+     */
+    public void refreshOptionsMenu() {
+        activity.invalidateOptionsMenu(); // Can't call requireActivity() here because the fragment is already detached
     }
 }

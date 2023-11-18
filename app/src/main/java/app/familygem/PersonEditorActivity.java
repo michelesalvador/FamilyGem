@@ -4,6 +4,7 @@ import static app.familygem.Global.gc;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -44,6 +45,8 @@ public class PersonEditorActivity extends AppCompatActivity {
     private String familyId;
     private Relation relation; // If not null is the relation between the pivot (personId) and the person we have to create
     private Person person; // The person to edit or create
+    private EditText givenNameView;
+    private EditText surnameView;
     private RadioButton sexMale;
     private RadioButton sexFemale;
     private RadioButton sexUnknown;
@@ -57,7 +60,7 @@ public class PersonEditorActivity extends AppCompatActivity {
     private EditText deathPlace;
     private boolean fromFamilyActivity; // Previous activity was DetailActivity
     private boolean nameFromPieces; // If the given name and surname come from the Given and Surname pieces, they must return there
-    private boolean surnameBefore; // The given name comes after the surname, e.g. '/Simpson/ Homer'
+    private boolean surnameBefore; // The given name comes after the surname, e.g. "/Simpson/ Homer"
     private String nameSuffix; // Last part of the name, not editable here
 
     @Override
@@ -72,6 +75,8 @@ public class PersonEditorActivity extends AppCompatActivity {
         fromFamilyActivity = intent.getBooleanExtra(Extra.FROM_FAMILY, false);
         nameSuffix = "";
 
+        givenNameView = findViewById(R.id.nome);
+        surnameView = findViewById(R.id.cognome);
         sexMale = findViewById(R.id.sesso1);
         sexFemale = findViewById(R.id.sesso2);
         sexUnknown = findViewById(R.id.sesso3);
@@ -82,6 +87,14 @@ public class PersonEditorActivity extends AppCompatActivity {
         deathDate = findViewById(R.id.data_morte);
         deathDateEditor = findViewById(R.id.editore_data_morte);
         deathPlace = findViewById(R.id.luogo_morte);
+
+        // Forbidden "/" character in name
+        InputFilter[] filters = new InputFilter[]{(source, start, end, dest, dstart, dend) -> {
+            if (source.toString().contains("/")) return source.toString().replaceAll("/", "");
+            return null;
+        }};
+        givenNameView.setFilters(filters);
+        surnameView.setFilters(filters);
 
         // Toggle sex radio buttons
         RadioGroup radioGroup = findViewById(R.id.radioGroup);
@@ -127,7 +140,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                     }
                 }
             }
-            ((EditText)findViewById(R.id.cognome)).setText(surname);
+            surnameView.setText(surname);
         } else if (personId == null) { // New unrelated person
             person = new Person();
         } else { // Gets the data of an existing person to edit them
@@ -161,8 +174,8 @@ public class PersonEditorActivity extends AppCompatActivity {
                         nameFromPieces = true;
                     }
                 }
-                ((EditText)findViewById(R.id.nome)).setText(givenName);
-                ((EditText)findViewById(R.id.cognome)).setText(surname);
+                givenNameView.setText(givenName);
+                surnameView.setText(surname);
             }
             // Sex
             switch (Gender.getGender(person)) {
@@ -240,8 +253,8 @@ public class PersonEditorActivity extends AppCompatActivity {
         U.ensureGlobalGedcomNotNull(gc); // A crash occurred because gc was null here
 
         // Name
-        String givenName = ((EditText)findViewById(R.id.nome)).getText().toString().trim();
-        String surname = ((EditText)findViewById(R.id.cognome)).getText().toString().trim();
+        String givenName = givenNameView.getText().toString().trim();
+        String surname = surnameView.getText().toString().trim();
         Name name;
         if (person.getNames().isEmpty()) {
             List<Name> names = new ArrayList<>();

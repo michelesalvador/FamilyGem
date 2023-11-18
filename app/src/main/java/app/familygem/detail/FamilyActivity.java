@@ -40,7 +40,7 @@ public class FamilyActivity extends DetailActivity {
     static String[] lineageTypes = {null, "birth", "adopted", "foster"};
 
     @Override
-    public void format() {
+    protected void format() {
         setTitle(R.string.family);
         family = (Family)cast(Family.class);
         placeSlug("FAM", family.getId());

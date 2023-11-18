@@ -69,7 +69,6 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
 
         menuPrincipe = findViewById(R.id.menu);
         menuPrincipe.setNavigationItemSelectedListener(this);
-        Global.mainView = scatolissima;
         U.ensureGlobalGedcomNotNull(gc);
         furnishMenu();
 
@@ -116,28 +115,39 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
             aggiornaInterfaccia(fragment);
     }
 
-    // Aggiorna i contenuti quando si torna indietro con backPressed()
+    boolean isActivityRestarting;
+
     @Override
     public void onRestart() {
         super.onRestart();
-        if (Global.edited) {
+        isActivityRestarting = true;
+    }
+
+    // Aggiorna i contenuti quando si torna indietro con backPressed()
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (Global.edited && isActivityRestarting) {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
             if (fragment instanceof DiagramFragment) {
-                ((DiagramFragment)fragment).forceDraw = true; // Così ridisegna il diagramma
+                ((DiagramFragment)fragment).refresh(); // Redraws the diagram
             } else if (fragment instanceof PersonsFragment) {
                 ((PersonsFragment)fragment).restart();
             } else if (fragment instanceof FamiliesFragment) {
                 ((FamiliesFragment)fragment).refresh(FamiliesFragment.What.RELOAD);
             } else if (fragment instanceof MediaFragment) {
-                ((MediaFragment)fragment).recreate();
-            /*} else if( fragment instanceof NotesFragment ) {
-                // Doesn't work to update NotesFragment when a note is deleted
-                ((NotesFragment)fragment).adapter.notifyDataSetChanged(); */
-            } else {
-                recreate(); // questo dovrebbe andare a scomparire man mano
+                ((MediaFragment)fragment).refresh();
+            } else if (fragment instanceof NotesFragment) {
+                ((NotesFragment)fragment).refresh();
+            } else { // This should gradually disappear
+                Global.edited = false;
+                isActivityRestarting = false;
+                recreate();
+                return;
             }
             furnishMenu(); // To display the Save button and update items count
             Global.edited = false;
+            isActivityRestarting = false;
         }
     }
 

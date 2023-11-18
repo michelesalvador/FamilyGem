@@ -15,27 +15,27 @@ import app.familygem.U;
  */
 public class ChangeActivity extends DetailActivity {
 
-    Change c;
+    Change change;
 
     @Override
-    public void format() {
+    protected void format() {
         setTitle(R.string.change_date);
         placeSlug("CHAN");
-        c = (Change)cast(Change.class);
-        DateTime dateTime = c.getDateTime();
+        change = (Change)cast(Change.class);
+        DateTime dateTime = change.getDateTime();
         if (dateTime != null) {
             if (dateTime.getValue() != null)
                 U.place(box, getString(R.string.value), dateTime.getValue());
             if (dateTime.getTime() != null)
                 U.place(box, getString(R.string.time), dateTime.getTime());
         }
-        placeExtensions(c);
-        U.placeNotes(box, c, true);
+        placeExtensions(change);
+        U.placeNotes(box, change, true);
     }
 
     // Options menu not needed
     @Override
-    public boolean onCreateOptionsMenu(Menu m) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         return false;
     }
 }
