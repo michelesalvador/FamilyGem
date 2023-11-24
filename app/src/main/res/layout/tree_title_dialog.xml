@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/name_of_tree"
-        android:inputType="textCapWords"
+        android:inputType="textCapSentences"
         android:maxLines="1"
         android:selectAllOnFocus="true" />
 </LinearLayout>

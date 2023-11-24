@@ -20,7 +20,6 @@ import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -69,8 +68,7 @@ public class PersonsFragment extends Fragment {
     private final List<PersonWrapper> allPeople = new ArrayList<>(); // The immutable complete list of people
     private List<PersonWrapper> selectedPeople = new ArrayList<>(); // Some persons selected by the search feature
     private final PersonsAdapter adapter = new PersonsAdapter();
-    private @NonNull
-    Order order = Order.NONE;
+    private Order order = Order.NONE;
     private SearchView searchView;
     private boolean idsAreNumeric;
 
@@ -94,25 +92,23 @@ public class PersonsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
         View view = inflater.inflate(R.layout.recyclerview, container, false);
-        if (gc != null) {
-            establishPeople();
-            RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
-            recyclerView.setPadding(12, 12, 12, recyclerView.getPaddingBottom());
-            recyclerView.setAdapter(adapter);
-            idsAreNumeric = verifyNumericIds();
-            view.findViewById(R.id.fab).setOnClickListener(v -> startActivity(new Intent(getContext(), PersonEditorActivity.class)));
-
-            // Fast scroller
-            StateListDrawable thumbDrawable = (StateListDrawable)ContextCompat.getDrawable(getContext(), R.drawable.scroll_thumb);
-            Drawable lineDrawable = ContextCompat.getDrawable(getContext(), R.drawable.empty);
-            new FastScrollerEx(recyclerView, thumbDrawable, lineDrawable, thumbDrawable, lineDrawable,
-                    U.dpToPx(40), U.dpToPx(100), 0, true, U.dpToPx(80));
-        }
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        recyclerView.setPadding(12, 12, 12, recyclerView.getPaddingBottom());
+        recyclerView.setAdapter(adapter);
+        // FAB
+        view.findViewById(R.id.fab).setOnClickListener(v -> startActivity(new Intent(getContext(), PersonEditorActivity.class)));
+        // Fast scroller
+        StateListDrawable thumbDrawable = (StateListDrawable)ContextCompat.getDrawable(getContext(), R.drawable.scroll_thumb);
+        Drawable lineDrawable = ContextCompat.getDrawable(getContext(), R.drawable.empty);
+        new FastScrollerEx(recyclerView, thumbDrawable, lineDrawable, thumbDrawable, lineDrawable,
+                U.dpToPx(40), U.dpToPx(100), 0, true, U.dpToPx(80));
+        if (TreeUtils.INSTANCE.isGlobalGedcomOk(this::refresh)) establishPeople();
         return view;
     }
 
     // Put all the people inside the lists
     private void establishPeople() {
+        idsAreNumeric = verifyNumericIds(); // Maybe some ID has been changed
         allPeople.clear();
         for (Person person : gc.getPeople()) {
             allPeople.add(new PersonWrapper(person));
@@ -274,9 +270,9 @@ public class PersonsFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            // Chooses the relative and returns the values to DiagramFragment, ProfileActivity, FamilyActivity or SharingActivity
             Person relative = gc.getPerson((String)view.getTag(R.id.tag_id));
             Intent intent = getActivity().getIntent();
+            // Chooses the relative and returns the values to DiagramFragment, ProfileActivity, FamilyActivity or SharingActivity
             if (intent.getBooleanExtra(Choice.PERSON, false)) {
                 intent.putExtra(Extra.RELATIVE_ID, relative.getId());
                 // Searches for any existing family that can host the pivot
@@ -324,7 +320,7 @@ public class PersonsFragment extends Fragment {
     }
 
     // Updates all the contents onBackPressed()
-    public void restart() {
+    public void refresh() {
         // Recreates the lists for some person added or removed
         establishPeople();
         // Updates content of existing views
@@ -454,7 +450,7 @@ public class PersonsFragment extends Fragment {
      */
     public static int countRelatives(Person person) {
         int count = 0;
-        if (person != null) {
+        if (person != null && gc != null) {
             // Parents and siblings
             List<Family> personFamilies = person.getParentFamilies(gc);
             for (Family family : personFamilies) {
@@ -645,11 +641,11 @@ public class PersonsFragment extends Fragment {
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == 0) { // Display diagram
-            U.askWhichParentsToShow(getContext(), gc.getPerson(personId), 1);
+            U.whichParentsToShow(getContext(), gc.getPerson(personId), 1);
         } else if (id == 1) { // Family as child
-            U.askWhichParentsToShow(getContext(), gc.getPerson(personId), 2);
+            U.whichParentsToShow(getContext(), gc.getPerson(personId), 2);
         } else if (id == 2) { // Family as partner
-            U.askWhichSpouceToShow(getContext(), gc.getPerson(personId), null);
+            U.whichSpousesToShow(getContext(), gc.getPerson(personId), null);
         } else if (id == 3) { // Edit person
             Intent intent = new Intent(getContext(), PersonEditorActivity.class);
             intent.putExtra(Extra.PERSON_ID, personId);
@@ -714,7 +710,7 @@ public class PersonsFragment extends Fragment {
         Memory.setInstanceAndAllSubsequentToNull(person);
         gc.getPeople().remove(person);
         gc.createIndexes(); // Necessary
-        String newRootId = U.trovaRadice(gc); // TODO: could be "find next of kin"
+        String newRootId = U.findRootId(gc); // TODO: could be "find next of kin"
         if (Global.settings.getCurrentTree().root != null && Global.settings.getCurrentTree().root.equals(personId)) {
             Global.settings.getCurrentTree().root = newRootId;
         }

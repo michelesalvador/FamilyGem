@@ -130,7 +130,7 @@ public class DiagramFragment extends Fragment {
         moveLayout.leftToRight = leftToRight;
         box = view.findViewById(R.id.diagram_box);
         //box.setBackgroundColor(0x22ff0000);
-        graph = new Graph(Global.gc); // Create a diagram model
+        graph = new Graph(); // Creates a diagram model
         moveLayout.graph = graph;
         forceDraw = true; // To be sure the diagram will be drawn
 
@@ -162,6 +162,7 @@ public class DiagramFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        if (!TreeUtils.INSTANCE.isGlobalGedcomOk(this::refreshAll)) return;
         // Reasons why we can continue, especially things that have changed
         if (forceDraw || (fulcrum != null && !fulcrum.getId().equals(Global.indi)) // TODO: should be tested
                 || (graph != null && graph.whichFamily != Global.familyNum)) {
@@ -169,7 +170,7 @@ public class DiagramFragment extends Fragment {
             box.removeAllViews();
             box.setAlpha(0);
 
-            String[] ids = {Global.indi, Global.settings.getCurrentTree().root, U.trovaRadice(gc)};
+            String[] ids = {Global.indi, Global.settings.getCurrentTree().root, U.findRootId(gc)};
             for (String id : ids) {
                 fulcrum = gc.getPerson(id);
                 if (fulcrum != null)
@@ -186,7 +187,8 @@ public class DiagramFragment extends Fragment {
                     ((View)moveLayout.getParent()).findViewById(R.id.diagram_options).setVisibility(View.GONE);
             } else {
                 Global.indi = fulcrum.getId(); // Confirms it just in case
-                graph.maxAncestors(Global.settings.diagram.ancestors)
+                graph.setGedcom(gc)
+                        .maxAncestors(Global.settings.diagram.ancestors)
                         .maxGreatUncles(Global.settings.diagram.uncles)
                         .displaySpouses(Global.settings.diagram.spouses)
                         .maxDescendants(Global.settings.diagram.descendants)
@@ -648,7 +650,8 @@ public class DiagramFragment extends Fragment {
     }
 
     private void clickCard(Person person) {
-        selectParentFamily(person);
+        if (TreeUtils.INSTANCE.isGlobalGedcomOk(() -> selectParentFamily(person)))
+            selectParentFamily(person);
     }
 
     /**
@@ -761,9 +764,9 @@ public class DiagramFragment extends Fragment {
                 Memory.setLeader(parentFam);
                 startActivity(new Intent(getContext(), FamilyActivity.class));
             } else
-                U.askWhichParentsToShow(getContext(), pers, 2);
+                U.whichParentsToShow(getContext(), pers, 2);
         } else if (id == 2) { // Famiglia come coniuge
-            U.askWhichSpouceToShow(getContext(), pers, null);
+            U.whichSpousesToShow(getContext(), pers, null);
         } else if (id == 3) { // Collega persona nuova
             if (Global.settings.expert) {
                 DialogFragment dialog = new NewRelativeDialog(pers, parentFam, spouseFam, true, null);
@@ -810,26 +813,31 @@ public class DiagramFragment extends Fragment {
                 FamilyActivity.disconnect(idPersona, spouseFam);
                 modificate.add(spouseFam);
             }
-            refresh();
-            Family[] modificateArr = modificate.toArray(new Family[0]);
-            U.controllaFamiglieVuote(getContext(), this::refresh, false, modificateArr);
+            Family[] modifiedArray = modificate.toArray(new Family[0]);
+            U.controllaFamiglieVuote(getContext(), this::refreshAll, false, modifiedArray);
             ChangeUtils.INSTANCE.updateChangeDate(pers);
-            TreeUtils.INSTANCE.save(true, (Object[])modificateArr);
-        } else if (id == 7) { // Elimina
+            TreeUtils.INSTANCE.save(true, (Object[])modifiedArray);
+            refreshAll();
+        } else if (id == 7) { // Delete
             new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete, (dialog, i) -> {
-                        Family[] famiglie = PersonsFragment.deletePerson(getContext(), idPersona);
-                        refresh();
-                        U.controllaFamiglieVuote(getContext(), this::refresh, false, famiglie);
+                        Family[] families = PersonsFragment.deletePerson(getContext(), idPersona);
+                        refreshAll();
+                        U.controllaFamiglieVuote(getContext(), this::refreshAll, false, families);
                     }).setNeutralButton(R.string.cancel, null).show();
         } else
             return false;
         return true;
     }
 
-    void refresh() {
+    void refreshDiagram() {
         forceDraw = true;
         onStart();
+    }
+
+    private void refreshAll() {
+        refreshDiagram();
+        ((Principal)requireActivity()).furnishMenu();
     }
 
     @Override

@@ -3,7 +3,6 @@ package app.familygem;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -20,6 +19,7 @@ import java.util.Locale;
 
 public class Global extends MultiDexApplication {
 
+    private Thread.UncaughtExceptionHandler defaultExceptionHandler;
     public static Gedcom gc;
     public static Context context;
     public static Settings settings;
@@ -48,11 +48,10 @@ public class Global extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
         context = getApplicationContext();
-        start(context);
-    }
 
-    public static void start(Context context) {
         File settingsFile = new File(context.getFilesDir(), "settings.json");
         // Renames "preferenze.json" to "settings.json" (introduced in version 0.8)
         File preferencesFile = new File(context.getFilesDir(), "preferenze.json");
@@ -86,7 +85,7 @@ public class Global extends MultiDexApplication {
                         settings.trees.add(new Settings.Tree(treeId, String.valueOf(treeId),
                                 mediaDir.exists() ? mediaDir.getPath() : null,
                                 0, 0, null, null, 0));
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -103,11 +102,22 @@ public class Global extends MultiDexApplication {
     }
 
     /**
+     * Intercepts crashes on the main thread.
+     */
+    private final Thread.UncaughtExceptionHandler exceptionHandler = (thread, exception) -> {
+        // Disables auto-load of last opened tree
+        if (Global.settings.loadTree) {
+            Global.settings.loadTree = false;
+            Global.settings.save();
+        }
+        defaultExceptionHandler.uncaughtException(thread, exception);
+    };
+
+    /**
      * Modifications to the text coming from files/settings.json
      */
     private static String updateSettings(String json) {
-        // Version 0.8 added new settings for the diagram
-        return json
+        return json // Version 0.8 added new settings for the diagram
                 .replace("\"siblings\":true", "siblings:2,cousins:2,spouses:true")
                 .replace("\"siblings\":false", "siblings:0,cousins:0,spouses:true")
 

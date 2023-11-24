@@ -17,9 +17,26 @@ import app.familygem.visitor.ListOfSourceCitations
 import app.familygem.visitor.MediaContainersGuarded
 import app.familygem.visitor.MediaList
 import app.familygem.visitor.NoteContainersGuarded
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.apache.commons.io.FileUtils
-import org.folg.gedcom.model.*
+import org.folg.gedcom.model.ExtensionContainer
+import org.folg.gedcom.model.Family
+import org.folg.gedcom.model.Gedcom
+import org.folg.gedcom.model.Media
+import org.folg.gedcom.model.Note
+import org.folg.gedcom.model.ParentFamilyRef
+import org.folg.gedcom.model.Person
+import org.folg.gedcom.model.PersonFamilyCommonContainer
+import org.folg.gedcom.model.Repository
+import org.folg.gedcom.model.Source
+import org.folg.gedcom.model.SpouseFamilyRef
+import org.folg.gedcom.model.SpouseRef
+import org.folg.gedcom.model.Submitter
 import java.io.File
 import java.io.FileInputStream
 import kotlin.collections.set
@@ -96,9 +113,15 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         coroutine = viewModelScope.launch(Dispatchers.Default) {
             setState(State.ACTIVE)
             var tempGedcom = TreeUtils.readJson(firstNum)
-            if (tempGedcom != null) firstGedcom = tempGedcom
+            if (tempGedcom != null) firstGedcom = tempGedcom else {
+                setState(State.RESET)
+                return@launch
+            }
             if (isActive) tempGedcom = TreeUtils.readJson(secondNum.value!!) else return@launch
-            if (tempGedcom != null) secondGedcom = tempGedcom
+            if (tempGedcom != null) secondGedcom = tempGedcom else {
+                setState(State.RESET)
+                return@launch
+            }
             personMatches.clear()
             firstGedcom.people.forEach { person1 ->
                 yield()

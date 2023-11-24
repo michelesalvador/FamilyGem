@@ -69,12 +69,11 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
 
         menuPrincipe = findViewById(R.id.menu);
         menuPrincipe.setNavigationItemSelectedListener(this);
-        U.ensureGlobalGedcomNotNull(gc);
         furnishMenu();
 
-        if (savedInstanceState == null) {  // carica la home solo la prima volta, non ruotando lo schermo
+        if (savedInstanceState == null) { // Loads only the first time, not rotating the screen
             Fragment fragment;
-            String backName = null; // Etichetta per individuare diagramma nel backstack dei frammenti
+            String backName = null; // Label to locate diagram in fragment backstack
             if (getIntent().getBooleanExtra(Choice.PERSON, false))
                 fragment = new PersonsFragment();
             else if (getIntent().getBooleanExtra(Choice.MEDIA, false))
@@ -112,7 +111,7 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
     public void onAttachFragment(@NonNull Fragment fragment) {
         super.onAttachFragment(fragment);
         if (!(fragment instanceof NewRelativeDialog))
-            aggiornaInterfaccia(fragment);
+            updateInterface(fragment);
     }
 
     boolean isActivityRestarting;
@@ -130,9 +129,9 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
         if (Global.edited && isActivityRestarting) {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
             if (fragment instanceof DiagramFragment) {
-                ((DiagramFragment)fragment).refresh(); // Redraws the diagram
+                ((DiagramFragment)fragment).refreshDiagram();
             } else if (fragment instanceof PersonsFragment) {
-                ((PersonsFragment)fragment).restart();
+                ((PersonsFragment)fragment).refresh();
             } else if (fragment instanceof FamiliesFragment) {
                 ((FamiliesFragment)fragment).refresh(FamiliesFragment.What.RELOAD);
             } else if (fragment instanceof MediaFragment) {
@@ -233,10 +232,10 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
             popup.show();
             popup.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == 0) {
-                    TreeUtils.INSTANCE.openGedcom(Global.settings.openTree, false);
-                    U.askWhichParentsToShow(this, null, 0); // Semplicemente ricarica il diagramma
+                    // TODO: put in a Kotlin coroutine
+                    TreeUtils.INSTANCE.openGedcomAsync(Global.settings.openTree, false);
+                    U.whichParentsToShow(this, null, 0); // Basically simply reloads the diagram
                     scatolissima.closeDrawer(GravityCompat.START);
-                    //saveButton.setVisibility(View.GONE);
                     Global.edited = false;
                     Global.shouldSave = false;
                     furnishMenu();
@@ -248,18 +247,20 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
         saveButton.setVisibility(Global.shouldSave ? View.VISIBLE : View.GONE);
     }
 
-    // Evidenzia voce del menu e mostra/nasconde toolbar
-    void aggiornaInterfaccia(Fragment fragment) {
+    /**
+     * Highlights one menu item and shows/hides the toolbar.
+     */
+    private void updateInterface(Fragment fragment) {
         if (fragment == null)
             fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
         if (fragment != null) {
-            int numFram = frammenti.indexOf(fragment.getClass());
+            int fragmentPosition = frammenti.indexOf(fragment.getClass());
             if (menuPrincipe != null)
-                menuPrincipe.setCheckedItem(idMenu.get(numFram));
+                menuPrincipe.setCheckedItem(idMenu.get(fragmentPosition));
             if (toolbar == null)
                 toolbar = findViewById(R.id.toolbar);
             if (toolbar != null)
-                toolbar.setVisibility(numFram == 0 ? View.GONE : View.VISIBLE);
+                toolbar.setVisibility(fragmentPosition == 0 ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -273,7 +274,7 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
                 // Fa tornare a TreesActivity invece di rivedere il primo diagramma del backstack
                 super.onBackPressed();
             } else
-                aggiornaInterfaccia(null);
+                updateInterface(null);
         }
     }
 
@@ -286,16 +287,19 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
         }
         if (fragment != null) {
             if (fragment instanceof DiagramFragment) {
-                int cosaAprire = 0; // Mostra il diagramma senza chiedere dei molteplici genitori
-                // Se sono già in diagramma e clicco Diagramma, mostra la persona radice
+                int whatToOpen;
                 if (frammentoAttuale(DiagramFragment.class)) {
+                    // If I'm already in diagram and I click Diagram, shows the root person
                     Global.indi = Global.settings.getCurrentTree().root;
-                    cosaAprire = 1; // Eventualmente chiede dei molteplici genitori
+                    whatToOpen = 1; // Possibly asks about multiple parents
+                } else {
+                    whatToOpen = 0; // Shows the diagram without asking about multiple parents
                 }
-                U.askWhichParentsToShow(this, Global.gc.getPerson(Global.indi), cosaAprire);
+                Runnable openDiagram = () -> U.whichParentsToShow(this, gc.getPerson(Global.indi), whatToOpen);
+                if (TreeUtils.INSTANCE.isGlobalGedcomOk(openDiagram)) openDiagram.run();
             } else {
                 FragmentManager fm = getSupportFragmentManager();
-                // Rimuove frammento precedente dalla storia se è lo stesso che stiamo per vedere
+                // Removes previous fragment from history if it's the same one we are about to see
                 if (frammentoAttuale(fragment.getClass())) fm.popBackStack();
                 fm.beginTransaction().replace(R.id.contenitore_fragment, fragment).addToBackStack(null).commit();
             }

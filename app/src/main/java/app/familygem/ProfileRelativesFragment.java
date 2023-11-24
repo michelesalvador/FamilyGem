@@ -149,11 +149,11 @@ public class ProfileRelativesFragment extends Fragment {
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == 300) { // Diagram
-            U.askWhichParentsToShow(getContext(), person, 1);
+            U.whichParentsToShow(getContext(), person, 1);
         } else if (id == 301) { // Family as child
-            U.askWhichParentsToShow(getContext(), person, 2);
+            U.whichParentsToShow(getContext(), person, 2);
         } else if (id == 302) { // Family as partner
-            U.askWhichSpouceToShow(getContext(), person, family);
+            U.whichSpousesToShow(getContext(), person, family);
         } else if (id == 303) { // Move up
             moveFamilyRef(-1);
         } else if (id == 304) { // Move down

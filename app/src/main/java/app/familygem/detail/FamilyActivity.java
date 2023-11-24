@@ -95,10 +95,10 @@ public class FamilyActivity extends DetailActivity {
             List<Family> spouseFam = p.getSpouseFamilies(gc);
             // A spouse with one or more families in which he is a child
             if (relation == Relation.PARTNER && !parentFam.isEmpty()) {
-                U.askWhichParentsToShow(this, p, 2);
+                U.whichParentsToShow(this, p, 2);
             } // A child with one or more families in which he is a partner
             else if (relation == Relation.CHILD && !p.getSpouseFamilies(gc).isEmpty()) {
-                U.askWhichSpouceToShow(this, p, null);
+                U.whichSpousesToShow(this, p, null);
             } // An unmarried child who has multiple parental families
             else if (parentFam.size() > 1) {
                 if (parentFam.size() == 2) { // Swaps between the 2 parental families
@@ -107,7 +107,7 @@ public class FamilyActivity extends DetailActivity {
                     Memory.replaceLeader(parentFam.get(Global.familyNum));
                     recreate();
                 } else // More than two families
-                    U.askWhichParentsToShow(this, p, 2);
+                    U.whichParentsToShow(this, p, 2);
             } // A spouse without parents but with multiple spouse families
             else if (spouseFam.size() > 1) {
                 if (spouseFam.size() == 2) { // Swaps between the 2 spouse families
@@ -116,7 +116,7 @@ public class FamilyActivity extends DetailActivity {
                     Memory.replaceLeader(otherFamily);
                     recreate();
                 } else
-                    U.askWhichSpouceToShow(this, p, null);
+                    U.whichSpousesToShow(this, p, null);
             } else {
                 Memory.setLeader(p);
                 startActivity(new Intent(this, ProfileActivity.class));

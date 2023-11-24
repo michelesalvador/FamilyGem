@@ -49,7 +49,7 @@ public class Memory {
     private static final Memory memory = new Memory();
     List<StepStack> list = new ArrayList<>();
 
-    Memory() {
+    private Memory() {
         classes.put(Person.class, ProfileActivity.class);
         classes.put(Repository.class, RepositoryActivity.class);
         classes.put(RepositoryRef.class, RepositoryRefActivity.class);

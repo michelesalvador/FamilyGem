@@ -23,7 +23,6 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -71,7 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private final Fragment[] pages = new Fragment[3];
     private PagesAdapter adapter;
-    private FloatingActionButton fab;
+    private FloatingActionButton fabView;
     private final String[] mainEventTags = {"BIRT", "BAPM", "RESI", "OCCU", "DEAT", "BURI"};
     private List<Pair<String, String>> otherEvents; // List of tag + label
     ActivityResultLauncher<Intent> choosePersonLauncher;
@@ -79,28 +78,16 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        U.ensureGlobalGedcomNotNull(gc);
-        one = (Person)Memory.getLastObject();
-        // If the app goes to background and is stopped, 'Memory' is reset and therefore 'one' will be null
-        if (one == null && bundle != null) {
-            one = gc.getPerson(bundle.getString("oneId"));
-            Memory.setLeader(one); // Otherwise Memory is without a stack
-        }
-        if (one == null) return; // Rarely the bundle doesn't do its job
-        Global.indi = one.getId();
         setContentView(R.layout.profile_activity);
-        fab = findViewById(R.id.fab);
-
+        fabView = findViewById(R.id.fab);
         // Toolbar
         Toolbar toolbar = findViewById(R.id.profile_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Brings up the back arrow and the options menu
-
         // Assigns to the pager an adapter that manages the three pages
         ViewPager2 viewPager = findViewById(R.id.profile_pager);
         adapter = new PagesAdapter(this);
         viewPager.setAdapter(adapter);
-
         // Furnishes tab layout
         tabLayout = findViewById(R.id.profile_tabs);
         tabLayout.addTab(tabLayout.newTab().setText(R.string.media));
@@ -131,13 +118,12 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 // positionOffset is 0.0 > 1.0 during swiping, and becomes 0.0 at the end
-                if (positionOffset > 0) fab.hide();
-                else fab.show();
+                if (positionOffset > 0) fabView.hide();
+                else fabView.show();
             }
         });
         // Only at first creation selects one specific tab
-        if (bundle == null)
-            tabLayout.getTabAt(getIntent().getIntExtra(Extra.PAGE, 1)).select();
+        if (bundle == null) tabLayout.getTabAt(getIntent().getIntExtra(Extra.PAGE, 1)).select();
 
         // List of other events
         String[] otherEventTags = {"CHR", "CREM", "ADOP", "BARM", "BATM", "BLES", "CONF", "FCOM", "ORDN", //Events
@@ -171,6 +157,27 @@ public class ProfileActivity extends AppCompatActivity {
                 refresh(); // To display the result in Relatives fragment
             }
         });
+        // One person
+        one = (Person)Memory.getLeaderObject();
+        if (TreeUtils.INSTANCE.isGlobalGedcomOk(() -> {
+            setOne(bundle);
+            refresh();
+        })) setOne(bundle);
+    }
+
+    /**
+     * Tries to set the person that is displayed here in profile.
+     */
+    private void setOne(Bundle bundle) {
+        // If the app goes to background and is stopped, 'Memory' is reset and therefore 'one' will be null
+        if (one == null && bundle != null) {
+            String oneId = bundle.getString("oneId");
+            if (oneId != null) { // Rarely the bundle doesn't do its job
+                Memory.setLeader(one); // Otherwise Memory is without a stack
+                one = gc.getPerson(oneId);
+            }
+        }
+        if (one != null) Global.indi = one.getId();
     }
 
     private class PagesAdapter extends FragmentStateAdapter {
@@ -207,8 +214,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         public boolean containsItem(long itemId) {
-            boolean does = super.containsItem(itemId);
-            return does;
+            return super.containsItem(itemId);
         }
 
         /**
@@ -231,14 +237,11 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (one == null || Global.edited)
-            one = gc.getPerson(Global.indi);
-
+        if ((one == null || Global.edited) && gc != null) one = gc.getPerson(Global.indi);
         if (one == null) { // Coming back to the profile of a person who has been deleted
             onBackPressed();
             return;
         }
-
         // Person ID in the header
         TextView idView = findViewById(R.id.profile_id);
         if (Global.settings.expert) {
@@ -257,9 +260,9 @@ public class ProfileActivity extends AppCompatActivity {
             adapter.notifyPagesChanged();
             invalidateOptionsMenu();
         }
-
         // FAB menu
-        fab.setOnClickListener(view -> {
+        fabView.setOnClickListener(view -> {
+            if (gc == null) return;
             PopupMenu popup = new PopupMenu(this, view);
             Menu menu = popup.getMenu();
             switch (tabLayout.getSelectedTabPosition()) {
@@ -379,8 +382,7 @@ public class ProfileActivity extends AppCompatActivity {
                     // Relatives page
                     case 30:// Link new person
                         if (Global.settings.expert) {
-                            DialogFragment dialog = new NewRelativeDialog(one, null, null, true, null);
-                            dialog.show(getSupportFragmentManager(), null);
+                            new NewRelativeDialog(one, null, null, true, null).show(getSupportFragmentManager(), null);
                         } else {
                             builder.setItems(relatives, (dialog, selected) -> {
                                 Intent intent4 = new Intent(getApplicationContext(), PersonEditorActivity.class);
@@ -394,8 +396,7 @@ public class ProfileActivity extends AppCompatActivity {
                         break;
                     case 31: // Link existing person
                         if (Global.settings.expert) {
-                            DialogFragment dialog = new NewRelativeDialog(one, null, null, false, null);
-                            dialog.show(getSupportFragmentManager(), null);
+                            new NewRelativeDialog(one, null, null, false, null).show(getSupportFragmentManager(), null);
                         } else {
                             builder.setItems(relatives, (dialog, selected) -> {
                                 Intent intent5 = new Intent(getApplication(), Principal.class);
@@ -444,10 +445,12 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    /* Displays an image in the profile header.
-       The blurred background image is displayed in most cases (jpg, png, gif...).
-       TODO: but not in case of a video preview, or image downloaded from the web with F.DownloadImage() */
-    void setImages() {
+    /**
+     * Displays an image in the profile header.
+     * The blurred background image is displayed in most cases (jpg, png, gif...).
+     * TODO: but not in case of a video preview, or image downloaded from the web with F.DownloadImage()
+     */
+    private void setImages() {
         ImageView imageView = findViewById(R.id.profile_image);
         Media media = F.showMainImageForPerson(Global.gc, one, imageView);
         // Same image blurred on background
@@ -484,12 +487,14 @@ public class ProfileActivity extends AppCompatActivity {
         }
         // Three pages
         adapter.notifyPagesChanged();
+        // Menu
+        invalidateOptionsMenu();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putString("oneId", one.getId());
+        super.onSaveInstanceState(outState);/**/
     }
 
     @Override
@@ -539,6 +544,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        if (gc == null || one == null) return false;
         menu.add(0, 0, 0, R.string.diagram);
         String[] familyLabels = DiagramFragment.getFamilyLabels(this, one, null);
         if (familyLabels[0] != null)
@@ -556,13 +562,13 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case 0: // DiagramFragment
-                U.askWhichParentsToShow(this, one, 1);
+                U.whichParentsToShow(this, one, 1);
                 return true;
             case 1: // Family as child
-                U.askWhichParentsToShow(this, one, 2);
+                U.whichParentsToShow(this, one, 2);
                 return true;
             case 2: // Family as partner
-                U.askWhichSpouceToShow(this, one, null);
+                U.whichSpousesToShow(this, one, null);
                 return true;
             case 3: // Set as root
                 Global.settings.getCurrentTree().root = one.getId();

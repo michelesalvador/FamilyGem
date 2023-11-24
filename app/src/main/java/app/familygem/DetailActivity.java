@@ -97,7 +97,7 @@ public abstract class DetailActivity extends AppCompatActivity {
     protected boolean surnameBefore; // The given name comes after the surname, e.g. "/Simpson/ Homer"
     protected Person oneFamilyMember; // A family member used to hide in the FAB 'Link person'
     private DateEditorLayout dateEditor;
-    private FloatingActionButton fab;
+    private FloatingActionButton fabView;
     private ActionBar actionBar;
 
     @Override
@@ -106,15 +106,8 @@ public abstract class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         box = findViewById(R.id.detail_box);
-        fab = findViewById(R.id.fab);
+        fabView = findViewById(R.id.fab);
         actionBar = getSupportActionBar();
-        U.ensureGlobalGedcomNotNull(gc);
-
-        object = Memory.getLastObject();
-        if (object == null) {
-            onBackPressed(); // Skip all previous details without object
-        } else
-            format();
 
         // List of other Family events
         String[] otherEventTags = {"ANUL", "CENS", "DIVF", "ENGA", "MARB", "MARC", "MARL", "MARS", "RESI", "EVEN", "NCHI"};
@@ -129,134 +122,32 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         Collections.sort(otherEvents, (item1, item2) -> item1.second.compareTo(item2.second));
 
+        object = Memory.getLastObject();
+        if (object == null) {
+            onBackPressed(); // Skip all previous details without object
+        } else if (TreeUtils.INSTANCE.isGlobalGedcomOk(this::setupInterface)) {
+            setupInterface();
+        }
+    }
+
+    private void setupInterface() {
+        // Content
+        format();
         // Floating Action Button
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> {
-            PopupMenu popup = fabMenu(view);
+        PopupMenu popup = createFabMenu(fabView);
+        fabView.setOnClickListener(view -> {
             popup.show();
-            popup.setOnMenuItemClickListener(item -> {
-                // The FAB places a new piece (egg) and makes it immediately editable
-                int id = item.getItemId();
-                boolean toBeSaved = false;
-                if (id < 100) {
-                    Object thing = eggs.get(id).yolk;
-                    if (thing instanceof Address) { // thing is a new Address()
-                        if (object instanceof EventFact)
-                            ((EventFact)object).setAddress((Address)thing);
-                        else if (object instanceof Submitter)
-                            ((Submitter)object).setAddress((Address)thing);
-                        else if (object instanceof Repository)
-                            ((Repository)object).setAddress((Address)thing);
-                    }
-                    // Tags needed to then export to Gedcom
-                    if (object instanceof Name && thing.equals("Type")) {
-                        ((Name)object).setTypeTag("TYPE");
-                    } else if (object instanceof Repository) {
-                        if (thing.equals("Www"))
-                            ((Repository)object).setWwwTag("WWW");
-                        if (thing.equals("Email"))
-                            ((Repository)object).setEmailTag("EMAIL");
-                    } else if (object instanceof Submitter) {
-                        if (thing.equals("Www"))
-                            ((Submitter)object).setWwwTag("WWW");
-                        if (thing.equals("Email"))
-                            ((Submitter)object).setEmailTag("EMAIL");
-                    }
-                    View piece = placePiece(eggs.get(id).title, "", thing, eggs.get(id).inputType);
-                    if (thing instanceof String)
-                        edit(piece);
-                    // TODO: open new Address for editing
-                } else if (id == 101) { // TODO: code smell: use of magic numbers
-                    RepositoriesFragment.newRepository(this, (Source)object);
-                } else if (id == 102) {
-                    Intent intent = new Intent(this, Principal.class);
-                    intent.putExtra(Choice.REPOSITORY, true);
-                    startActivityForResult(intent, 4562);
-                } else if (id == 103) { // New note
-                    Note note = new Note();
-                    note.setValue("");
-                    ((NoteContainer)object).addNote(note);
-                    Memory.add(note);
-                    startActivity(new Intent(this, NoteActivity.class));
-                    toBeSaved = true;
-                } else if (id == 104) { // New shared note
-                    NotesFragment.newNote(this, object);
-                } else if (id == 105) { // Link shared note
-                    Intent intent = new Intent(this, Principal.class);
-                    intent.putExtra(Choice.NOTE, true);
-                    startActivityForResult(intent, 7074);
-                } else if (id == 106) { // Search for local media
-                    F.displayImageCaptureDialog(this, null, 4173, (MediaContainer)object);
-                } else if (id == 107) { // Search for shared media
-                    F.displayImageCaptureDialog(this, null, 4174, (MediaContainer)object);
-                } else if (id == 108) { // Link shared media
-                    Intent intent = new Intent(this, Principal.class);
-                    intent.putExtra(Choice.MEDIA, true);
-                    startActivityForResult(intent, 43616);
-                } else if (id == 109) { // New note-source (source citation without reference to a source)
-                    SourceCitation citation = new SourceCitation();
-                    citation.setValue("");
-                    if (object instanceof Note) ((Note)object).addSourceCitation(citation);
-                    else ((SourceCitationContainer)object).addSourceCitation(citation);
-                    Memory.add(citation);
-                    startActivity(new Intent(this, SourceCitationActivity.class));
-                    toBeSaved = true;
-                } else if (id == 110) { // New source
-                    SourcesFragment.newSource(this, object);
-                } else if (id == 111) { // Link existing source
-                    Intent intent = new Intent(this, Principal.class);
-                    intent.putExtra(Choice.SOURCE, true);
-                    startActivityForResult(intent, 5065);
-                } else if (id == 120 || id == 121) { // Create new family member
-                    Intent intent = new Intent(this, PersonEditorActivity.class);
-                    intent.putExtra(Extra.FAMILY_ID, ((Family)object).getId());
-                    intent.putExtra(Extra.RELATION, Relation.get(id - 118));
-                    intent.putExtra(Extra.FROM_FAMILY, true);
-                    startActivity(intent);
-                } else if (id == 122 || id == 123) { // Link existing person
-                    Intent intent = new Intent(this, Principal.class);
-                    intent.putExtra(Choice.PERSON, true);
-                    intent.putExtra(Extra.RELATION, Relation.get(id - 120));
-                    startActivityForResult(intent, 34417);
-                } else if (id == 130) { // Place marriage event
-                    EventFact marriage = new EventFact();
-                    marriage.setTag("MARR");
-                    marriage.setDate("");
-                    marriage.setPlace("");
-                    marriage.setType("");
-                    ((Family)object).addEventFact(marriage);
-                    Memory.add(marriage);
-                    startActivity(new Intent(this, EventActivity.class));
-                    toBeSaved = true;
-                } else if (id == 131) { // Place divorce event
-                    EventFact divorce = new EventFact();
-                    divorce.setTag("DIV");
-                    divorce.setDate("");
-                    ((Family)object).addEventFact(divorce);
-                    Memory.add(divorce);
-                    startActivity(new Intent(this, EventActivity.class));
-                    toBeSaved = true;
-                } else if (id >= 200) { // Place another event
-                    EventFact event = new EventFact();
-                    event.setTag(otherEvents.get(id - 200).first);
-                    ((Family)object).addEventFact(event);
-                    refresh();
-                    toBeSaved = true;
-                }
-                if (toBeSaved) TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
-                return true;
-            });
+            popup.setOnMenuItemClickListener(fabMenuListener);
         });
         // If the FAB menu is empty hides the FAB
-        if (!fabMenu(null).getMenu().hasVisibleItems())
-            fab.hide();
+        if (!popup.getMenu().hasVisibleItems()) fabView.hide();
         // TODO: when the FAB was hidden, if a piece is deleted the FAB should reappear
     }
 
     /**
-     * FAB menu: only with methods that are not already present in box
+     * Creates FAB menu: only with methods that are not already present in box.
      */
-    PopupMenu fabMenu(View fabView) {
+    private PopupMenu createFabMenu(View fabView) {
         PopupMenu popup = new PopupMenu(this, fabView);
         Menu menu = popup.getMenu();
         String[] withAddress = {"Www", "Email", "Phone", "Fax"}; // These objects appear in the Event FAB if an Address exists
@@ -341,6 +232,121 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         return popup;
     }
+
+    /**
+     * Actions to place a new piece (egg) optionally making it immediately editable.
+     */
+    PopupMenu.OnMenuItemClickListener fabMenuListener = item -> {
+        int id = item.getItemId();
+        boolean toBeSaved = false;
+        if (id < 100) {
+            Object thing = eggs.get(id).yolk;
+            if (thing instanceof Address) { // thing is a new Address()
+                if (object instanceof EventFact)
+                    ((EventFact)object).setAddress((Address)thing);
+                else if (object instanceof Submitter)
+                    ((Submitter)object).setAddress((Address)thing);
+                else if (object instanceof Repository)
+                    ((Repository)object).setAddress((Address)thing);
+            }
+            // Tags needed to then export to Gedcom
+            if (object instanceof Name && thing.equals("Type")) {
+                ((Name)object).setTypeTag("TYPE");
+            } else if (object instanceof Repository) {
+                if (thing.equals("Www"))
+                    ((Repository)object).setWwwTag("WWW");
+                if (thing.equals("Email"))
+                    ((Repository)object).setEmailTag("EMAIL");
+            } else if (object instanceof Submitter) {
+                if (thing.equals("Www"))
+                    ((Submitter)object).setWwwTag("WWW");
+                if (thing.equals("Email"))
+                    ((Submitter)object).setEmailTag("EMAIL");
+            }
+            View piece = placePiece(eggs.get(id).title, "", thing, eggs.get(id).inputType);
+            if (thing instanceof String)
+                edit(piece);
+            // TODO: open new Address for editing
+        } else if (id == 101) { // TODO: code smell: use of magic numbers
+            RepositoriesFragment.newRepository(this, (Source)object);
+        } else if (id == 102) {
+            Intent intent = new Intent(this, Principal.class);
+            intent.putExtra(Choice.REPOSITORY, true);
+            startActivityForResult(intent, 4562);
+        } else if (id == 103) { // New note
+            Note note = new Note();
+            note.setValue("");
+            ((NoteContainer)object).addNote(note);
+            Memory.add(note);
+            startActivity(new Intent(this, NoteActivity.class));
+            toBeSaved = true;
+        } else if (id == 104) { // New shared note
+            NotesFragment.newNote(this, object);
+        } else if (id == 105) { // Link shared note
+            Intent intent = new Intent(this, Principal.class);
+            intent.putExtra(Choice.NOTE, true);
+            startActivityForResult(intent, 7074);
+        } else if (id == 106) { // Search for local media
+            F.displayImageCaptureDialog(this, null, 4173, (MediaContainer)object);
+        } else if (id == 107) { // Search for shared media
+            F.displayImageCaptureDialog(this, null, 4174, (MediaContainer)object);
+        } else if (id == 108) { // Link shared media
+            Intent intent = new Intent(this, Principal.class);
+            intent.putExtra(Choice.MEDIA, true);
+            startActivityForResult(intent, 43616);
+        } else if (id == 109) { // New note-source (source citation without reference to a source)
+            SourceCitation citation = new SourceCitation();
+            citation.setValue("");
+            if (object instanceof Note) ((Note)object).addSourceCitation(citation);
+            else ((SourceCitationContainer)object).addSourceCitation(citation);
+            Memory.add(citation);
+            startActivity(new Intent(this, SourceCitationActivity.class));
+            toBeSaved = true;
+        } else if (id == 110) { // New source
+            SourcesFragment.newSource(this, object);
+        } else if (id == 111) { // Link existing source
+            Intent intent = new Intent(this, Principal.class);
+            intent.putExtra(Choice.SOURCE, true);
+            startActivityForResult(intent, 5065);
+        } else if (id == 120 || id == 121) { // Create new family member
+            Intent intent = new Intent(this, PersonEditorActivity.class);
+            intent.putExtra(Extra.FAMILY_ID, ((Family)object).getId());
+            intent.putExtra(Extra.RELATION, Relation.get(id - 118));
+            intent.putExtra(Extra.FROM_FAMILY, true);
+            startActivity(intent);
+        } else if (id == 122 || id == 123) { // Link existing person
+            Intent intent = new Intent(this, Principal.class);
+            intent.putExtra(Choice.PERSON, true);
+            intent.putExtra(Extra.RELATION, Relation.get(id - 120));
+            startActivityForResult(intent, 34417);
+        } else if (id == 130) { // Place marriage event
+            EventFact marriage = new EventFact();
+            marriage.setTag("MARR");
+            marriage.setDate("");
+            marriage.setPlace("");
+            marriage.setType("");
+            ((Family)object).addEventFact(marriage);
+            Memory.add(marriage);
+            startActivity(new Intent(this, EventActivity.class));
+            toBeSaved = true;
+        } else if (id == 131) { // Place divorce event
+            EventFact divorce = new EventFact();
+            divorce.setTag("DIV");
+            divorce.setDate("");
+            ((Family)object).addEventFact(divorce);
+            Memory.add(divorce);
+            startActivity(new Intent(this, EventActivity.class));
+            toBeSaved = true;
+        } else if (id >= 200) { // Place another event
+            EventFact event = new EventFact();
+            event.setTag(otherEvents.get(id - 200).first);
+            ((Family)object).addEventFact(event);
+            refresh();
+            toBeSaved = true;
+        }
+        if (toBeSaved) TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
+        return true;
+    };
 
     /**
      * Places what has been chosen in the lists.
@@ -720,7 +726,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         concludeActivePieces();
         TextView textView = pieceView.findViewById(R.id.event_text);
         textView.setVisibility(View.GONE);
-        fab.hide();
+        fabView.hide();
         Object pieceObject = pieceView.getTag(R.id.tag_object);
         boolean showInput = false;
         editText = pieceView.findViewById(R.id.event_edit);
@@ -862,8 +868,8 @@ public abstract class DetailActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         whichMenu = 1;
         invalidateOptionsMenu();
-        if (!(object instanceof Note && !Global.settings.expert)) // NoteActivity in inexperienced mode have no FAB
-            fab.show();
+        if (!(object instanceof Note && !Global.settings.expert)) // NoteActivity on non-expert mode has no FAB
+            fabView.show();
     }
 
     @Override
@@ -1042,17 +1048,17 @@ public abstract class DetailActivity extends AppCompatActivity {
                 }
                 break;
             case 10: // Diagram
-                U.askWhichParentsToShow(this, person, 1);
+                U.whichParentsToShow(this, person, 1);
                 return true;
             case 11: // Person card
                 Memory.setLeader(person);
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;
             case 12: // Family (as child)
-                U.askWhichParentsToShow(this, person, 2);
+                U.whichParentsToShow(this, person, 2);
                 return true;
             case 13: // Family (as partner)
-                U.askWhichSpouceToShow(this, person, null);
+                U.whichSpousesToShow(this, person, null);
                 return true;
             case 14: // Move up child
                 Family fa = (Family)object;

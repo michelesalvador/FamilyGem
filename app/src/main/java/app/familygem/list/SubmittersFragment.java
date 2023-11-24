@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -24,42 +25,43 @@ import org.folg.gedcom.model.Submitter;
 import java.util.List;
 
 import app.familygem.Global;
-import app.familygem.InfoActivity;
 import app.familygem.Memory;
-import app.familygem.NewTreeActivity;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.detail.SubmitterActivity;
 import app.familygem.util.ChangeUtils;
+import app.familygem.util.SubmitterUtilsKt;
 import app.familygem.util.TreeUtils;
 
 public class SubmittersFragment extends Fragment {
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle stato) {
-        List<Submitter> submitterList = gc.getSubmitters();
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(submitterList.size() + " " +
-                getString(submitterList.size() == 1 ? R.string.submitter : R.string.submitters).toLowerCase());
-        setHasOptionsMenu(true);
-        View vista = inflater.inflate(R.layout.scrollview, container, false);
-        LinearLayout layout = vista.findViewById(R.id.scrollview_layout);
-        for (final Submitter autor : submitterList) {
-            View vistaPezzo = inflater.inflate(R.layout.scrollview_item, layout, false);
-            layout.addView(vistaPezzo);
-            ((TextView)vistaPezzo.findViewById(R.id.item_name)).setText(InfoActivity.submitterName(autor));
-            vistaPezzo.findViewById(R.id.item_num).setVisibility(View.GONE);
-            vistaPezzo.setOnClickListener(v -> {
-                Memory.setLeader(autor);
-                startActivity(new Intent(getContext(), SubmitterActivity.class));
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+        View view = inflater.inflate(R.layout.scrollview, container, false);
+        if (gc != null) {
+            List<Submitter> submitterList = gc.getSubmitters();
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(submitterList.size() + " " +
+                    getString(submitterList.size() == 1 ? R.string.submitter : R.string.submitters).toLowerCase());
+            setHasOptionsMenu(true);
+            LinearLayout layout = view.findViewById(R.id.scrollview_layout);
+            for (final Submitter submitter : submitterList) {
+                View submView = inflater.inflate(R.layout.scrollview_item, layout, false);
+                layout.addView(submView);
+                ((TextView)submView.findViewById(R.id.item_name)).setText(SubmitterUtilsKt.writeName(submitter));
+                submView.findViewById(R.id.item_num).setVisibility(View.GONE);
+                submView.setOnClickListener(v -> {
+                    Memory.setLeader(submitter);
+                    startActivity(new Intent(getContext(), SubmitterActivity.class));
+                });
+                registerForContextMenu(submView);
+                submView.setTag(submitter);
+            }
+            view.findViewById(R.id.fab).setOnClickListener(v -> {
+                createSubmitter(getContext());
+                TreeUtils.INSTANCE.save(true);
             });
-            registerForContextMenu(vistaPezzo);
-            vistaPezzo.setTag(autor);
         }
-        vista.findViewById(R.id.fab).setOnClickListener(v -> {
-            createSubmitter(getContext());
-            TreeUtils.INSTANCE.save(true);
-        });
-        return vista;
+        return view;
     }
 
     // Delete one submitter
@@ -103,7 +105,7 @@ public class SubmittersFragment extends Fragment {
     Submitter submitter;
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
+    public void onCreateContextMenu(@NonNull ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
         submitter = (Submitter)vista.getTag();
         if (gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(submitter))
             menu.add(0, 0, 0, R.string.make_default);
@@ -122,7 +124,7 @@ public class SubmittersFragment extends Fragment {
                 // Todo conferma elimina
                 deleteSubmitter(submitter);
                 TreeUtils.INSTANCE.save(false);
-                getActivity().recreate();
+                requireActivity().recreate();
                 return true;
         }
         return false;

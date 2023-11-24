@@ -121,31 +121,40 @@ public class U {
     }
 
     /**
-     * Reloads {@link Global#gc} in case it is null.
+     * @return The ID of the main person of the tree
      */
-    static void ensureGlobalGedcomNotNull(Gedcom gc) {
-        if (gc == null)
-            Global.gc = TreeUtils.INSTANCE.readJson(Global.settings.openTree);
-    }
-
-    // Id of the main person of a GEDCOM or null
-    static String getRootId(Gedcom gedcom, Settings.Tree tree) {
+    public static String getRootId(Gedcom gedcom, Settings.Tree tree) {
         if (tree.root != null) {
             Person root = gedcom.getPerson(tree.root);
             if (root != null)
                 return root.getId();
         }
-        return trovaRadice(gedcom);
+        return findRootId(gedcom);
     }
 
-    // restituisce l'id della Person iniziale di un Gedcom
-    // Todo Integrate into getRootId(Gedcom, Tree)?
-    public static String trovaRadice(Gedcom gc) {
-        if (gc.getHeader() != null)
-            if (valoreTag(gc.getHeader().getExtensions(), "_ROOT") != null)
-                return valoreTag(gc.getHeader().getExtensions(), "_ROOT");
-        if (!gc.getPeople().isEmpty())
-            return gc.getPeople().get(0).getId();
+    /**
+     * @return The ID of initial person of a GEDCOM or null
+     */
+    public static String findRootId(Gedcom gedcom) {
+        // Family Historian root
+        if (gedcom.getHeader() != null)
+            if (valoreTag(gedcom.getHeader().getExtensions(), "_ROOT") != null)
+                return valoreTag(gedcom.getHeader().getExtensions(), "_ROOT");
+        if (!gedcom.getPeople().isEmpty()) {
+            // Lower numeric ID
+            String minId = null;
+            int minNum = Integer.MAX_VALUE;
+            for (Person person : gedcom.getPeople()) {
+                int num = extractNum(person.getId());
+                if (num < minNum) {
+                    minNum = num;
+                    minId = person.getId();
+                }
+            }
+            if (minNum < Integer.MAX_VALUE) return minId;
+            // ID of the first person
+            return gedcom.getPeople().get(0).getId();
+        }
         return null;
     }
 
@@ -1057,15 +1066,6 @@ public class U {
         }
     }
 
-    // Restituisce il primo autore non passato
-    public static Submitter autoreFresco(Gedcom gc) {
-        for (Submitter autore : gc.getSubmitters()) {
-            if (autore.getExtension("passed") == null)
-                return autore;
-        }
-        return null;
-    }
-
     /**
      * Check if a submitter has participated in the shares.
      * Used by {@link SubmittersFragment} and {@link DetailActivity} to avoid deleting the submitter.
@@ -1091,25 +1091,24 @@ public class U {
     }
 
     /**
-     * Asks which family to show of a person who is child in more than one family.
+     * May ask which family to show of a person who is child in more than one family.
      *
      * @param whatToOpen Activity/Fragment to open:
      *                   0: diagram of the previous family, without asking which family (first click on Diagram)
      *                   1: diagram possibly asking which family
      *                   2: family possibly asking which family
      */
-    public static void askWhichParentsToShow(Context context, Person person, int whatToOpen) { // TODO whichParentsToShow()
-        if (person == null)
+    public static void whichParentsToShow(Context context, Person person, int whatToOpen) {
+        if (person == null) {
             finishParentSelection(context, null, 1, 0);
-        else {
+        } else {
             List<Family> famiglie = person.getParentFamilies(Global.gc);
             if (famiglie.size() > 1 && whatToOpen > 0) {
                 new AlertDialog.Builder(context).setTitle(R.string.which_family)
                         .setItems(elencoFamiglie(famiglie), (dialog, quale) -> {
                             finishParentSelection(context, person, whatToOpen, quale);
                         }).show();
-            } else
-                finishParentSelection(context, person, whatToOpen, 0);
+            } else finishParentSelection(context, person, whatToOpen, 0);
         }
 
     }
@@ -1145,18 +1144,18 @@ public class U {
     /**
      * For a person who has multiple marriages asks which one to show.
      */
-    public static void askWhichSpouceToShow(Context context, Person person, Family family) { // TODO: whichPartnersToShow()
+    public static void whichSpousesToShow(Context context, Person person, Family family) {
         if (person.getSpouseFamilies(Global.gc).size() > 1 && family == null) {
             new AlertDialog.Builder(context).setTitle(R.string.which_family)
                     .setItems(elencoFamiglie(person.getSpouseFamilies(Global.gc)), (dialog, which) -> {
-                        finishPartnersSelection(context, person, null, which);
+                        finishSpousesSelection(context, person, null, which);
                     }).show();
         } else {
-            finishPartnersSelection(context, person, family, 0);
+            finishSpousesSelection(context, person, family, 0);
         }
     }
 
-    private static void finishPartnersSelection(Context context, Person person, Family family, int whichFamily) {
+    private static void finishSpousesSelection(Context context, Person person, Family family, int whichFamily) {
         Global.indi = person.getId();
         family = family == null ? person.getSpouseFamilies(Global.gc).get(whichFamily) : family;
         if (context instanceof FamilyActivity) {

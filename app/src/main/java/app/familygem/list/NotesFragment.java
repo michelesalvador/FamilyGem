@@ -58,16 +58,18 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
         View view = inflater.inflate(R.layout.recyclerview, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        boolean sharedOnly = getActivity().getIntent().getBooleanExtra(Choice.NOTE, false);
-        allNotes = getAllNotes(sharedOnly);
-        adapter = new NotesAdapter(getContext(), allNotes, sharedOnly);
-        adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
-        registerForContextMenu(recyclerView);
-        furnishToolbar();
-        view.findViewById(R.id.fab).setOnClickListener(v -> newNote(getContext(), null));
+        if (gc != null) {
+            RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            boolean sharedOnly = getActivity().getIntent().getBooleanExtra(Choice.NOTE, false);
+            allNotes = getAllNotes(sharedOnly);
+            adapter = new NotesAdapter(getContext(), allNotes, sharedOnly);
+            adapter.setClickListener(this);
+            recyclerView.setAdapter(adapter);
+            registerForContextMenu(recyclerView);
+            furnishToolbar();
+            view.findViewById(R.id.fab).setOnClickListener(v -> newNote(getContext(), null));
+        }
         return view;
     }
 

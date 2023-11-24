@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.view.DragEvent
 import android.view.MenuItem
 import android.view.View
@@ -32,11 +31,14 @@ import app.familygem.util.TreeUtils
 import app.familygem.util.TreeUtils.deleteTree
 import app.familygem.util.TreeUtils.openGedcom
 import app.familygem.util.TreeUtils.readJson
+import app.familygem.util.Utils
 import app.familygem.util.getBasicData
 import app.familygem.visitor.MediaList
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,9 +66,8 @@ class TreesActivity : AppCompatActivity() {
     private lateinit var welcome: SpeechBubble
     private lateinit var exporter: Exporter
     private var autoOpenedTree = false // To open automatically the tree at startup only once
-    private var consumedNotifications: ArrayList<Int>? =
-            ArrayList() // The birthday notification IDs are stored to display the corresponding person only once
-    private var draggedTreeId: Int = 0
+    private var consumedNotifications = ArrayList<Int>() // The birthday notification IDs are stored to display the corresponding person only once
+    private var draggedTreeId = 0
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
@@ -87,7 +88,7 @@ class TreesActivity : AppCompatActivity() {
 
         if (savedState != null) {
             autoOpenedTree = savedState.getBoolean("autoOpenedTree")
-            consumedNotifications = savedState.getIntegerArrayList("consumedNotifications")
+            consumedNotifications = savedState.getIntegerArrayList("consumedNotifications")!!
         }
 
         if (Global.settings.trees == null) return
@@ -132,13 +133,15 @@ class TreesActivity : AppCompatActivity() {
                     treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.back_element, null))
                     treeView.setOnClickListener {
                         progress.visibility = View.VISIBLE
-                        if (!(Global.gc != null && treeId == Global.settings.openTree)) { // I not already opened
-                            if (!openGedcom(treeId, true)) {
-                                progress.visibility = View.GONE
-                                return@setOnClickListener
+                        if (Global.gc != null && treeId == Global.settings.openTree) { // Tree already opened
+                            startActivity(Intent(this@TreesActivity, Principal::class.java))
+                        } else {
+                            lifecycleScope.launch(IO) {
+                                if (openGedcom(treeId, true))
+                                    startActivity(Intent(this@TreesActivity, Principal::class.java))
+                                else withContext(Main) { progress.visibility = View.GONE }
                             }
                         }
-                        startActivity(Intent(this@TreesActivity, Principal::class.java))
                     }
                 }
                 treeLayout.visibility = if (treeId == draggedTreeId) View.INVISIBLE else View.VISIBLE
@@ -279,12 +282,12 @@ class TreesActivity : AppCompatActivity() {
         // Automatic load of last opened tree of previous session
         if ((!birthdayNotifyTapped(intent) && !autoOpenedTree
                         && intent.getBooleanExtra(Extra.AUTO_LOAD_TREE, false)) && Global.settings.openTree > 0) {
-            listView.post {
+            progress.visibility = View.VISIBLE
+            lifecycleScope.launch(IO) {
                 if (openGedcom(Global.settings.openTree, false)) {
-                    progress.visibility = View.VISIBLE
                     autoOpenedTree = true
-                    startActivity(Intent(this, Principal::class.java))
-                }
+                    startActivity(Intent(this@TreesActivity, Principal::class.java))
+                } else withContext(Main) { progress.visibility = View.GONE }
             }
         }
     }
@@ -300,7 +303,7 @@ class TreesActivity : AppCompatActivity() {
                 .setOnCancelListener { onCancel() }
                 .setPositiveButton(R.string.download) { _, _ ->
                     progress.visibility = View.VISIBLE
-                    lifecycleScope.launch(Dispatchers.IO) {
+                    lifecycleScope.launch(IO) {
                         TreeUtils.downloadSharedTree(this@TreesActivity, dateId, {
                             progress.visibility = View.GONE
                             updateList()
@@ -313,11 +316,15 @@ class TreesActivity : AppCompatActivity() {
         override fun onMenuItemClick(item: MenuItem): Boolean {
             val id = item.itemId
             if (id == -1) { // Save
-                GlobalScope.launch(Dispatchers.IO) { TreeUtils.saveJson(Global.gc, treeId) }
+                GlobalScope.launch(IO) { TreeUtils.saveJson(Global.gc, treeId) }
                 Global.shouldSave = false
             } else if (id == 0) { // Open a derived tree
-                openGedcom(treeId, true)
-                startActivity(Intent(this@TreesActivity, Principal::class.java))
+                progress.visibility = View.VISIBLE
+                lifecycleScope.launch(IO) {
+                    if (openGedcom(treeId, true))
+                        startActivity(Intent(this@TreesActivity, Principal::class.java))
+                    else withContext(Main) { progress.visibility = View.GONE }
+                }
             } else if (id == 1) { // Tree info
                 val intent = Intent(this@TreesActivity, InfoActivity::class.java)
                 intent.putExtra(Extra.TREE_ID, treeId)
@@ -348,7 +355,10 @@ class TreesActivity : AppCompatActivity() {
                         .putExtra(Extra.TREE_ID, treeId))
             } else if (id == 4) { // Find errors
                 progress.visibility = View.VISIBLE
-                lifecycleScope.launch(Dispatchers.Default) { findErrors(treeId, false) }
+                lifecycleScope.launch(Default) {
+                    if (findErrors(treeId, false) == null)
+                        withContext(Main) { progress.visibility = View.GONE }
+                }
             } else if (id == 5) { // Share tree
                 startActivity(Intent(this@TreesActivity, SharingActivity::class.java)
                         .putExtra(Extra.TREE_ID, treeId))
@@ -362,31 +372,37 @@ class TreesActivity : AppCompatActivity() {
                     updateList()
                 } else Toast.makeText(this@TreesActivity, R.string.no_results, Toast.LENGTH_LONG).show()
             } else if (id == 8) { // Export GEDCOM
-                if (exporter.openTree(treeId)) {
-                    var mime = "application/octet-stream"
-                    var extension = "ged"
-                    var code = Code.GEDCOM_FILE
-                    val totMedia = exporter.countMediaFilesToAttach()
-                    if (totMedia > 0) {
-                        val choices = arrayOf(getString(R.string.gedcom_media_zip, totMedia), getString(R.string.gedcom_only))
-                        AlertDialog.Builder(this@TreesActivity)
-                                .setTitle(R.string.export_gedcom)
-                                .setSingleChoiceItems(choices, -1) { dialog, selected ->
-                                    if (selected == 0) {
-                                        mime = "application/zip"
-                                        extension = "zip"
-                                        code = Code.ZIPPED_GEDCOM_FILE
-                                    }
-                                    F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
-                                    dialog.dismiss()
-                                }.show()
-                    } else {
-                        F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
-                    }
+                lifecycleScope.launch(IO) {
+                    if (exporter.openTree(treeId)) {
+                        var mime = "application/octet-stream"
+                        var extension = "ged"
+                        var code = Code.GEDCOM_FILE
+                        val totMedia = exporter.countMediaFilesToAttach()
+                        if (totMedia > 0) {
+                            withContext(Main) {
+                                val choices = arrayOf(getString(R.string.gedcom_media_zip, totMedia), getString(R.string.gedcom_only))
+                                AlertDialog.Builder(this@TreesActivity)
+                                        .setTitle(R.string.export_gedcom)
+                                        .setSingleChoiceItems(choices, -1) { dialog, selected ->
+                                            if (selected == 0) {
+                                                mime = "application/zip"
+                                                extension = "zip"
+                                                code = Code.ZIPPED_GEDCOM_FILE
+                                            }
+                                            F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
+                                            dialog.dismiss()
+                                        }.show()
+                            }
+                        } else {
+                            F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
+                        }
+                    } else Utils.toast(exporter.errorMessage)
                 }
             } else if (id == 9) { // Export ZIP backup
-                exporter.openTree(treeId)
-                F.saveDocument(this@TreesActivity, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP)
+                lifecycleScope.launch(IO) {
+                    exporter.openTree(treeId)
+                    F.saveDocument(this@TreesActivity, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP)
+                }
             } else if (id == 10) { // Delete tree
                 AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
                         .setPositiveButton(R.string.delete) { _, _ ->
@@ -400,23 +416,11 @@ class TreesActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        // Hides the progress wheel, especially when navigating back to this activity
-        progress.visibility = View.GONE
-    }
-
     // Since TreesActivity is launchMode=singleTask, onRestart is also called with startActivity (except the first one)
     // but obviously only if TreesActivity has called onStop (doing it fast only calls onPause)
     override fun onRestart() {
         super.onRestart()
         updateList()
-    }
-
-    // New intent coming from a tapped notification
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        birthdayNotifyTapped(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -425,19 +429,31 @@ class TreesActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
+    // By leaving the activity hides the progress wheel
+    override fun onStop() {
+        super.onStop()
+        progress.visibility = View.GONE
+    }
+
+    // New intent coming from a tapped notification
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        birthdayNotifyTapped(intent)
+    }
+
     // If a birthday notification was tapped loads the relative tree and returns true
     private fun birthdayNotifyTapped(intent: Intent): Boolean {
         val treeId = intent.getIntExtra(Notifier.TREE_ID_KEY, 0)
         val notifyId = intent.getIntExtra(Notifier.NOTIFY_ID_KEY, 0)
-        if (treeId > 0 && !consumedNotifications!!.contains(notifyId)) {
-            Handler().post {
+        if (treeId > 0 && !consumedNotifications.contains(notifyId)) {
+            progress.visibility = View.VISIBLE
+            lifecycleScope.launch(IO) {
                 if (openGedcom(treeId, true)) {
-                    progress.visibility = View.VISIBLE
                     Global.indi = intent.getStringExtra(Notifier.INDI_ID_KEY)
-                    consumedNotifications!!.add(notifyId)
-                    startActivity(Intent(this, Principal::class.java))
-                    Notifier(this, Global.gc, treeId, Notifier.What.DEFAULT) // Actually deletes present notification
-                }
+                    consumedNotifications.add(notifyId)
+                    startActivity(Intent(this@TreesActivity, Principal::class.java))
+                    Notifier(this@TreesActivity, Global.gc, treeId, Notifier.What.DEFAULT) // Actually deletes present notification
+                } else withContext(Main) { progress.visibility = View.GONE }
             }
             return true
         }
@@ -492,7 +508,7 @@ class TreesActivity : AppCompatActivity() {
             item["title"] = tree.title
             // If GEDCOM is already open, updates the data
             if (Global.gc != null && Global.settings.openTree == tree.id)
-                InfoActivity.refreshData(Global.gc, tree)
+                TreeUtils.refreshData(Global.gc, tree)
             item["data"] = tree.getBasicData()
             treeList.add(item)
         }
@@ -502,18 +518,22 @@ class TreesActivity : AppCompatActivity() {
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
-            val uri = data!!.data
-            var result = false
-            when (requestCode) {
-                // Export GEDCOM file only
-                Code.GEDCOM_FILE -> result = exporter.exportGedcom(uri)
-                // Export GEDCOM with media in a ZIP file
-                Code.ZIPPED_GEDCOM_FILE -> result = exporter.exportGedcomToZip(uri)
-                // Export ZIP backup
-                Code.ZIP_BACKUP -> result = exporter.exportZipBackup(null, -1, uri)
+            lifecycleScope.launch(IO) {
+                val uri = data!!.data
+                if (uri != null) {
+                    var result = false
+                    when (requestCode) {
+                        // Exports GEDCOM file only
+                        Code.GEDCOM_FILE -> result = exporter.exportGedcom(uri)
+                        // Exports GEDCOM with media in a ZIP file
+                        Code.ZIPPED_GEDCOM_FILE -> result = exporter.exportGedcomToZip(uri)
+                        // Exports ZIP backup
+                        Code.ZIP_BACKUP -> result = exporter.exportZipBackup(null, -1, uri)
+                    }
+                    if (result) Utils.toast(exporter.successMessage)
+                    else Utils.toast(exporter.errorMessage)
+                } else Utils.toast(R.string.cant_understand_uri)
             }
-            if (result) Toast.makeText(this@TreesActivity, exporter.successMessage, Toast.LENGTH_SHORT).show()
-            else Toast.makeText(this@TreesActivity, exporter.errorMessage, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -536,7 +556,7 @@ class TreesActivity : AppCompatActivity() {
         if (tree.root != null && root == null) {
             if (gedcom.people.isNotEmpty()) {
                 if (correct) {
-                    tree.root = U.trovaRadice(gedcom)
+                    tree.root = U.findRootId(gedcom)
                     Global.settings.save()
                 } else addError("Missing root person")
             } else { // Tree without persons
@@ -549,7 +569,7 @@ class TreesActivity : AppCompatActivity() {
         // Or a root is not indicated in settings even though there are people in the tree
         if (root == null && gedcom.people.isNotEmpty()) {
             if (correct) {
-                tree.root = U.trovaRadice(gedcom)
+                tree.root = U.findRootId(gedcom)
                 Global.settings.save()
             } else addError("Root not defined")
         }
@@ -722,22 +742,18 @@ class TreesActivity : AppCompatActivity() {
                 person.spouseFamilyRefs = null
             }
 
-            // References to non-existent media
+            // References to non-existent media, or multiple media with same ID
             // TODO: it's for a person only, it should be done maybe with a Visitor for every other record
             val mediaIterator = person.mediaRefs.iterator()
-            var count = 0
             while (mediaIterator.hasNext()) {
                 val mediaId = mediaIterator.next().ref
                 val media = gedcom.getMedia(mediaId)
                 if (media == null) {
                     if (correct) mediaIterator.remove()
                     else addError("Broken OBJE $mediaId in $personId")
-                } else {
-                    if (mediaId == media.id) {
-                        count++
-                        if (count > 1) if (correct) mediaIterator.remove()
-                        else addError("Multiple OBJE $mediaId in $personId")
-                    }
+                } else if (person.mediaRefs.filter { it.ref == mediaId }.size > 1) {
+                    if (correct) mediaIterator.remove()
+                    else addError("Multiple OBJE $mediaId in $personId")
                 }
             }
         }
@@ -871,7 +887,7 @@ class TreesActivity : AppCompatActivity() {
             if (total > 0) {
                 dialog.setPositiveButton(R.string.correct) { _, _ ->
                     progress.visibility = View.VISIBLE
-                    lifecycleScope.launch(Dispatchers.Default) {
+                    lifecycleScope.launch(Default) {
                         val correctGedcom = findErrors(treeId, true)
                         if (correctGedcom != null) {
                             TreeUtils.saveJson(correctGedcom, treeId)
@@ -879,13 +895,13 @@ class TreesActivity : AppCompatActivity() {
                             if (treeId == Global.settings.openTree && Global.gc != null) Global.gc = correctGedcom
                             else Global.gc = null // Resets it to reload corrected
                             findErrors(treeId, false) // Restart process to display the result
-                            withContext(Dispatchers.Main) { updateList() }
+                            withContext(Main) { updateList() }
                         }
                     }
                 }
             }
             dialog.setNeutralButton(R.string.cancel, null)
-            withContext(Dispatchers.Main) {
+            withContext(Main) {
                 progress.visibility = View.GONE
                 dialog.show()
             }

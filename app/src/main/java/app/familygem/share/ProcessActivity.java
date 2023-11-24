@@ -1,5 +1,3 @@
-// Activity per valutare un record dell'albero importato, con eventuale confronto col corrispondente record dell'albero vecchio
-
 package app.familygem.share;
 
 import android.content.Intent;
@@ -14,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.cardview.widget.CardView;
 
@@ -33,211 +32,214 @@ import app.familygem.F;
 import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.constant.Extra;
 
+/**
+ * Evaluates a record of the imported tree, with possible comparison with the corresponding record of the old tree.
+ */
 public class ProcessActivity extends BaseActivity {
 
-    Class classe; // la classe dominante dell'attività
-    int destino;
+    Class<?> clazz; // The class that rules the activity
+    int destiny;
 
     @Override
-    protected void onCreate(Bundle bandolo) {
-        super.onCreate(bandolo);
-        setContentView(R.layout.confronto);
+    protected void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        setContentView(R.layout.process_activity);
 
         if (Comparison.getList().size() > 0) {
-
             int max;
-            int posizione;
+            int position;
             if (Comparison.get().autoContinue) {
                 max = Comparison.get().numChoices;
-                posizione = Comparison.get().choicesMade;
+                position = Comparison.get().choicesMade;
             } else {
                 max = Comparison.getList().size();
-                posizione = getIntent().getIntExtra("posizione", 0);
+                position = getIntent().getIntExtra(Extra.POSITION, 0);
             }
-            ProgressBar barra = findViewById(R.id.confronto_progresso);
-            barra.setMax(max);
-            barra.setProgress(posizione);
-            ((TextView)findViewById(R.id.confronto_stato)).setText(posizione + "/" + max);
+            ProgressBar bar = findViewById(R.id.process_progress);
+            bar.setMax(max);
+            bar.setProgress(position);
+            ((TextView)findViewById(R.id.process_state)).setText(position + "/" + max);
 
-            final Object o = Comparison.getFront(this).object;
-            final Object o2 = Comparison.getFront(this).object2;
-            if (o != null) classe = o.getClass();
-            else classe = o2.getClass();
-            arredaScheda(Global.gc, Global.settings.openTree, R.id.confronto_vecchio, o);
-            arredaScheda(Global.gc2, Global.treeId2, R.id.confronto_nuovo, o2);
+            final Object obj = Comparison.getFront(this).object;
+            final Object obj2 = Comparison.getFront(this).object2;
+            if (obj != null) clazz = obj.getClass();
+            else clazz = obj2.getClass();
+            populateCard(Global.gc, Global.settings.openTree, R.id.process_old, obj);
+            populateCard(Global.gc2, Global.treeId2, R.id.process_new, obj2);
 
-            destino = 2;
+            destiny = 2;
 
-            Button bottoneOk = findViewById(R.id.confronto_bottone_ok);
-            bottoneOk.setBackground(AppCompatResources.getDrawable(getApplicationContext(), R.drawable.frecciona));
-            if (o == null) {
-                destino = 1;
-                bottoneOk.setText(R.string.add);
-                bottoneOk.setBackgroundColor(0xff00dd00); // getResources().getColor(R.color.evidenzia)
-                bottoneOk.setHeight(30); // inefficace
-            } else if (o2 == null) {
-                destino = 3;
-                bottoneOk.setText(R.string.delete);
-                bottoneOk.setBackgroundColor(0xffff0000);
+            Button okButton = findViewById(R.id.process_okButton);
+            okButton.setBackground(AppCompatResources.getDrawable(getApplicationContext(), R.drawable.frecciona));
+            if (obj == null) {
+                destiny = 1;
+                okButton.setText(R.string.add);
+                okButton.setBackgroundColor(0xff00dd00); // getResources().getColor(R.color.accent)
+                okButton.setHeight(30); // ineffective
+            } else if (obj2 == null) {
+                destiny = 3;
+                okButton.setText(R.string.delete);
+                okButton.setBackgroundColor(0xffff0000);
             } else if (Comparison.getFront(this).canBothAddAndReplace) {
-                // Altro bottone Aggiungi
-                Button bottoneAggiungi = new Button(this);
-                bottoneAggiungi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-                bottoneAggiungi.setTextColor(0xFFFFFFFF);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                // Creates another "Add" button
+                Button addButton = new Button(this);
+                addButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+                addButton.setTextColor(0xFFFFFFFF);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.rightMargin = 15;
                 params.weight = 3;
-                bottoneAggiungi.setLayoutParams(params);
-                bottoneAggiungi.setText(R.string.add);
-                bottoneAggiungi.setBackgroundColor(0xff00dd00);
-                bottoneAggiungi.setOnClickListener(v -> {
+                addButton.setLayoutParams(params);
+                addButton.setText(R.string.add);
+                addButton.setBackgroundColor(0xff00dd00);
+                addButton.setOnClickListener(view -> {
                     Comparison.getFront(this).destiny = 1;
-                    vaiAvanti();
+                    goAhead();
                 });
-                ((LinearLayout)findViewById(R.id.confronto_bottoni)).addView(bottoneAggiungi, 1);
+                ((LinearLayout)findViewById(R.id.process_buttons)).addView(addButton, 1);
             }
 
-            // Prosegue in automatico se non c'è una doppia azione da scegliere
+            // Continues automatically if there is no double action to choose
             if (Comparison.get().autoContinue && !Comparison.getFront(this).canBothAddAndReplace) {
-                Comparison.getFront(this).destiny = destino;
-                vaiAvanti();
+                Comparison.getFront(this).destiny = destiny;
+                goAhead();
             }
-
-            // Bottone per accettare la novità
-            bottoneOk.setOnClickListener(vista -> {
-                Comparison.getFront(this).destiny = destino;
-                vaiAvanti();
+            // Button to accept the update
+            okButton.setOnClickListener(view -> {
+                Comparison.getFront(this).destiny = destiny;
+                goAhead();
             });
-
-            findViewById(R.id.confronto_bottone_ignora).setOnClickListener(v -> {
+            // Button to ignore the update
+            findViewById(R.id.process_ignoreButton).setOnClickListener(view -> {
                 Comparison.getFront(this).destiny = 0;
-                vaiAvanti();
+                goAhead();
             });
         } else
-            onBackPressed(); // Ritorna a Compara
+            onBackPressed(); // Returns to CompareActivity
     }
 
-    void arredaScheda(Gedcom gc, int treeId, int idScheda, Object o) {
-        String tit = "";
-        String txt = "";
-        String data = "";
-        CardView carta = findViewById(idScheda);
-        ImageView vistaFoto = carta.findViewById(R.id.confronto_foto);
-        if (o instanceof Note) {
-            tipoRecord(R.string.shared_note);
-            Note n = (Note)o;
-            txt = n.getValue();
-            data = dataOra(n.getChange());
-        } else if (o instanceof Submitter) {
-            tipoRecord(R.string.submitter);
-            Submitter s = (Submitter)o;
-            tit = s.getName();
-            if (s.getEmail() != null) txt += s.getEmail() + "\n";
-            if (s.getAddress() != null) txt += DetailActivity.writeAddress(s.getAddress(), true);
-            data = dataOra(s.getChange());
-        } else if (o instanceof Repository) {
-            tipoRecord(R.string.repository);
-            Repository r = (Repository)o;
-            tit = r.getName();
-            if (r.getAddress() != null)
-                txt += DetailActivity.writeAddress(r.getAddress(), true) + "\n";
-            if (r.getEmail() != null) txt += r.getEmail();
-            data = dataOra(r.getChange());
-        } else if (o instanceof Media) {
-            tipoRecord(R.string.shared_media);
-            Media m = (Media)o;
-            if (m.getTitle() != null) tit = m.getTitle();
-            txt = m.getFile();
-            data = dataOra(m.getChange());
-            vistaFoto.setVisibility(View.VISIBLE);
-            F.showImage(m, vistaFoto, null, treeId);
-        } else if (o instanceof Source) {
-            tipoRecord(R.string.source);
-            Source s = (Source)o;
-            if (s.getTitle() != null) tit = s.getTitle();
-            else if (s.getAbbreviation() != null) tit = s.getAbbreviation();
-            if (s.getAuthor() != null) txt = s.getAuthor() + "\n";
-            if (s.getPublicationFacts() != null) txt += s.getPublicationFacts() + "\n";
-            if (s.getText() != null) txt += s.getText();
-            data = dataOra(s.getChange());
-        } else if (o instanceof Person) {
-            tipoRecord(R.string.person);
-            Person p = (Person)o;
-            tit = U.properName(p);
-            txt = U.details(p, null);
-            data = dataOra(p.getChange());
-            vistaFoto.setVisibility(View.VISIBLE);
-            F.showMainImageForPerson(gc, treeId, p, vistaFoto);
-        } else if (o instanceof Family) {
-            tipoRecord(R.string.family);
-            Family f = (Family)o;
-            txt = U.testoFamiglia(this, gc, f, false);
-            data = dataOra(f.getChange());
+    void populateCard(Gedcom gedcom, int treeId, int cardId, Object obj) {
+        String title = "";
+        String text = "";
+        String date = "";
+        CardView cardView = findViewById(cardId);
+        ImageView imageView = cardView.findViewById(R.id.compare_image);
+        if (obj instanceof Note) {
+            writeType(R.string.shared_note);
+            Note note = (Note)obj;
+            text = note.getValue();
+            date = getDateTime(note.getChange());
+        } else if (obj instanceof Submitter) {
+            writeType(R.string.submitter);
+            Submitter submitter = (Submitter)obj;
+            title = submitter.getName();
+            if (submitter.getEmail() != null) text += submitter.getEmail() + "\n";
+            if (submitter.getAddress() != null) text += DetailActivity.writeAddress(submitter.getAddress(), true);
+            date = getDateTime(submitter.getChange());
+        } else if (obj instanceof Repository) {
+            writeType(R.string.repository);
+            Repository repository = (Repository)obj;
+            title = repository.getName();
+            if (repository.getAddress() != null)
+                text += DetailActivity.writeAddress(repository.getAddress(), true) + "\n";
+            if (repository.getEmail() != null) text += repository.getEmail();
+            date = getDateTime(repository.getChange());
+        } else if (obj instanceof Media) {
+            writeType(R.string.shared_media);
+            Media media = (Media)obj;
+            if (media.getTitle() != null) title = media.getTitle();
+            text = media.getFile();
+            date = getDateTime(media.getChange());
+            imageView.setVisibility(View.VISIBLE);
+            F.showImage(media, imageView, null, treeId);
+        } else if (obj instanceof Source) {
+            writeType(R.string.source);
+            Source source = (Source)obj;
+            if (source.getTitle() != null) title = source.getTitle();
+            else if (source.getAbbreviation() != null) title = source.getAbbreviation();
+            if (source.getAuthor() != null) text = source.getAuthor() + "\n";
+            if (source.getPublicationFacts() != null) text += source.getPublicationFacts() + "\n";
+            if (source.getText() != null) text += source.getText();
+            date = getDateTime(source.getChange());
+        } else if (obj instanceof Person) {
+            writeType(R.string.person);
+            Person person = (Person)obj;
+            title = U.properName(person);
+            text = U.details(person, null);
+            date = getDateTime(person.getChange());
+            imageView.setVisibility(View.VISIBLE);
+            F.showMainImageForPerson(gedcom, treeId, person, imageView);
+        } else if (obj instanceof Family) {
+            writeType(R.string.family);
+            Family family = (Family)obj;
+            text = U.testoFamiglia(this, gedcom, family, false);
+            date = getDateTime(family.getChange());
         }
-        TextView testoTitolo = carta.findViewById(R.id.confronto_titolo);
-        if (tit == null || tit.isEmpty())
-            testoTitolo.setVisibility(View.GONE);
+        // Title
+        TextView titleView = cardView.findViewById(R.id.compare_title);
+        if (title == null || title.isEmpty())
+            titleView.setVisibility(View.GONE);
         else
-            testoTitolo.setText(tit);
-
-        TextView testoTesto = carta.findViewById(R.id.confronto_testo);
-        if (txt.isEmpty())
-            testoTesto.setVisibility(View.GONE);
+            titleView.setText(title);
+        // Text
+        TextView textView = cardView.findViewById(R.id.compare_text);
+        if (text.isEmpty()) textView.setVisibility(View.GONE);
         else {
-            if (txt.endsWith("\n"))
-                txt = txt.substring(0, txt.length() - 1);
-            testoTesto.setText(txt);
+            if (text.endsWith("\n")) text = text.substring(0, text.length() - 1);
+            textView.setText(text);
         }
-
-        View vistaCambi = carta.findViewById(R.id.confronto_data);
-        if (data.isEmpty())
-            vistaCambi.setVisibility(View.GONE);
-        else
-            ((TextView)vistaCambi.findViewById(R.id.cambi_testo)).setText(data);
-
-        if (idScheda == R.id.confronto_nuovo) {
-            carta.setCardBackgroundColor(getResources().getColor(R.color.accent_medium));
+        // Change date
+        View changeView = cardView.findViewById(R.id.compare_date);
+        if (date.isEmpty()) changeView.setVisibility(View.GONE);
+        else ((TextView)changeView.findViewById(R.id.cambi_testo)).setText(date);
+        // Background color
+        if (cardId == R.id.process_new) {
+            cardView.setCardBackgroundColor(getResources().getColor(R.color.accent_medium));
         }
-
-        if (tit.isEmpty() && txt.isEmpty() && data.isEmpty()) // todo intendi object null?
-            carta.setVisibility(View.GONE);
+        // Invisible if empty
+        if ((title == null || title.isEmpty()) && text.isEmpty() && date.isEmpty())
+            cardView.setVisibility(View.GONE);
     }
 
-    // Titolo della pagina
-    void tipoRecord(int string) {
-        TextView testoTipo = findViewById(R.id.confronto_tipo);
-        testoTipo.setText(getString(string));
+    /**
+     * Writes the page title.
+     */
+    private void writeType(int string) {
+        ((TextView)findViewById(R.id.process_type)).setText(getString(string));
     }
 
-    String dataOra(Change cambi) {
+    String getDateTime(Change change) {
         String dataOra = "";
-        if (cambi != null)
-            dataOra = cambi.getDateTime().getValue() + " - " + cambi.getDateTime().getTime();
+        if (change != null)
+            dataOra = change.getDateTime().getValue() + " - " + change.getDateTime().getTime();
         return dataOra;
     }
 
-    void vaiAvanti() {
+    /**
+     * Opens next comparison or final confirmation.
+     */
+    private void goAhead() {
         Intent intent = new Intent();
-        if (getIntent().getIntExtra("posizione", 0) == Comparison.getList().size()) {
-            // Terminati i confronti
+        if (getIntent().getIntExtra(Extra.POSITION, 0) == Comparison.getList().size()) {
+            // The comparisons are over
             intent.setClass(this, ConfirmationActivity.class);
         } else {
-            // Prossimo confronto
+            // Next comparison
             intent.setClass(this, ProcessActivity.class);
-            intent.putExtra("posizione", getIntent().getIntExtra("posizione", 0) + 1);
+            intent.putExtra(Extra.POSITION, getIntent().getIntExtra(Extra.POSITION, 0) + 1);
         }
         if (Comparison.get().autoContinue) {
             if (Comparison.getFront(this).canBothAddAndReplace)
                 Comparison.get().choicesMade++;
-            else
-                finish(); // rimuove il front attuale dallo stack
+            else finish(); // Removes the current front from the stack
         }
         startActivity(intent);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem i) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         onBackPressed();
         return true;
     }

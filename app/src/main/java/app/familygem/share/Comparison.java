@@ -5,13 +5,15 @@ import android.app.Activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import app.familygem.constant.Extra;
+
 /**
  * Singleton that manages the objects of the 2 Gedcoms during the import of updates.
  */
 public class Comparison {
 
     private static final Comparison comparison = new Comparison();
-    private List<Front> list = new ArrayList<>();
+    private final List<Front> list = new ArrayList<>();
     boolean autoContinue; // Determines whether to automatically accept all updates
     int numChoices; // Total choices in case of autoContinue
     int choicesMade; // Position in case of autoContinue //Posizione in caso di autoProsegui
@@ -37,7 +39,7 @@ public class Comparison {
      * Returns the currently active front.
      */
     static Front getFront(Activity activity) {
-        return getList().get(activity.getIntent().getIntExtra("posizione", 0) - 1);
+        return getList().get(activity.getIntent().getIntExtra(Extra.POSITION, 0) - 1);
     }
 
     /**

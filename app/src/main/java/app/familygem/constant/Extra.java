@@ -13,6 +13,7 @@ public class Extra {
     public static final String NOTE_ID = "noteId";
     public static final String PAGE = "page";
     public static final String PERSON_ID = "personId";
+    public static final String POSITION = "position";
     public static final String RELATION = "relation";
     public static final String RELATIVE_ID = "relativeId";
     public static final String SOURCE_ID = "sourceId";

@@ -47,6 +47,7 @@ public class PersonEditorActivity extends AppCompatActivity {
     private Person person; // The person to edit or create
     private EditText givenNameView;
     private EditText surnameView;
+    private RadioGroup radioGroup;
     private RadioButton sexMale;
     private RadioButton sexFemale;
     private RadioButton sexUnknown;
@@ -66,7 +67,6 @@ public class PersonEditorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        U.ensureGlobalGedcomNotNull(gc);
         setContentView(R.layout.edita_individuo);
         Intent intent = getIntent();
         personId = intent.getStringExtra(Extra.PERSON_ID);
@@ -77,6 +77,7 @@ public class PersonEditorActivity extends AppCompatActivity {
 
         givenNameView = findViewById(R.id.nome);
         surnameView = findViewById(R.id.cognome);
+        radioGroup = findViewById(R.id.radioGroup);
         sexMale = findViewById(R.id.sesso1);
         sexFemale = findViewById(R.id.sesso2);
         sexUnknown = findViewById(R.id.sesso3);
@@ -97,7 +98,6 @@ public class PersonEditorActivity extends AppCompatActivity {
         surnameView.setFilters(filters);
 
         // Toggle sex radio buttons
-        RadioGroup radioGroup = findViewById(R.id.radioGroup);
         View.OnClickListener radioClick = radioButton -> {
             if (radioButton.getId() == lastChecked) {
                 radioGroup.clearCheck();
@@ -114,6 +114,29 @@ public class PersonEditorActivity extends AppCompatActivity {
 
         disableDeath();
 
+        birthDateEditor.initialize(birthDate);
+        isDeadSwitch.setOnCheckedChangeListener((button, checked) -> {
+            if (checked) enableDeath();
+            else disableDeath();
+        });
+        deathDateEditor.initialize(deathDate);
+        deathPlace.setOnEditorActionListener((vista, actionId, keyEvent) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) save();
+            return false;
+        });
+
+        // Toolbar
+        ActionBar toolbar = getSupportActionBar();
+        View actionBar = getLayoutInflater().inflate(R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
+        actionBar.findViewById(R.id.edita_annulla).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        actionBar.findViewById(R.id.edita_salva).setOnClickListener(v -> save());
+        toolbar.setCustomView(actionBar);
+        toolbar.setDisplayShowCustomEnabled(true);
+
+        if (TreeUtils.INSTANCE.isGlobalGedcomOk(this::populateFields)) populateFields();
+    }
+
+    private void populateFields() {
         // New person in kinship relationship
         if (relation != null) {
             person = new Person();
@@ -207,30 +230,9 @@ public class PersonEditorActivity extends AppCompatActivity {
                 }
             }
         }
-        birthDateEditor.initialize(birthDate);
-        isDeadSwitch.setOnCheckedChangeListener((button, checked) -> {
-            if (checked)
-                enableDeath();
-            else
-                disableDeath();
-        });
-        deathDateEditor.initialize(deathDate);
-        deathPlace.setOnEditorActionListener((vista, actionId, keyEvent) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE)
-                save();
-            return false;
-        });
-
-        // Toolbar
-        ActionBar toolbar = getSupportActionBar();
-        View actionBar = getLayoutInflater().inflate(R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
-        actionBar.findViewById(R.id.edita_annulla).setOnClickListener(v -> onBackPressed());
-        actionBar.findViewById(R.id.edita_salva).setOnClickListener(v -> save());
-        toolbar.setCustomView(actionBar);
-        toolbar.setDisplayShowCustomEnabled(true);
     }
 
-    void disableDeath() {
+    private void disableDeath() {
         findViewById(R.id.morte).setVisibility(View.GONE);
         birthPlace.setImeOptions(EditorInfo.IME_ACTION_DONE);
         birthPlace.setNextFocusForwardId(0);
@@ -242,15 +244,15 @@ public class PersonEditorActivity extends AppCompatActivity {
         });
     }
 
-    void enableDeath() {
+    private void enableDeath() {
         birthPlace.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         birthPlace.setNextFocusForwardId(R.id.data_morte);
         birthPlace.setOnEditorActionListener(null);
         findViewById(R.id.morte).setVisibility(View.VISIBLE);
     }
 
-    void save() {
-        U.ensureGlobalGedcomNotNull(gc); // A crash occurred because gc was null here
+    private void save() {
+        if (!TreeUtils.INSTANCE.isGlobalGedcomOk(this::save)) return; // A crash occurred because gc was null here
 
         // Name
         String givenName = givenNameView.getText().toString().trim();
@@ -382,7 +384,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         } else
             Global.indi = person.getId(); // To show the person then in DiagramFragment
         TreeUtils.INSTANCE.save(true, modifications);
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
     }
 
     /**

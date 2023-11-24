@@ -169,6 +169,7 @@
             android:parentActivityName=".Principal" />
         <activity
             android:name=".ProfileActivity"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".detail.FamilyActivity" />
         <activity android:name=".detail.NameActivity" />

@@ -48,16 +48,16 @@ public class ConfirmationActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.conferma);
+        setContentView(R.layout.confirmation_activity);
         if (!Comparison.getList().isEmpty()) {
 
             // Old tree
-            CardView card = findViewById(R.id.conferma_vecchio);
+            CardView card = findViewById(R.id.confirmation_old);
             Settings.Tree tree = Global.settings.getTree(Global.settings.openTree);
-            ((TextView)card.findViewById(R.id.confronto_titolo)).setText(tree.title);
+            ((TextView)card.findViewById(R.id.compare_title)).setText(tree.title);
             String txt = TreeUtilsKt.getBasicData(tree);
-            ((TextView)card.findViewById(R.id.confronto_testo)).setText(txt);
-            card.findViewById(R.id.confronto_data).setVisibility(View.GONE);
+            ((TextView)card.findViewById(R.id.compare_text)).setText(txt);
+            card.findViewById(R.id.compare_date).setVisibility(View.GONE);
 
             int add = 0;
             int replace = 0;
@@ -75,14 +75,14 @@ public class ConfirmationActivity extends BaseActivity {
                 }
             }
             String text = getString(R.string.accepted_news, add + replace + delete, add, replace, delete);
-            ((TextView)findViewById(R.id.conferma_testo)).setText(text);
+            ((TextView)findViewById(R.id.confirmation_text)).setText(text);
 
-            findViewById(R.id.conferma_annulla).setOnClickListener(v -> {
+            findViewById(R.id.confirmation_cancel).setOnClickListener(v -> {
                 Comparison.reset();
                 startActivity(new Intent(ConfirmationActivity.this, TreesActivity.class));
             });
 
-            findViewById(R.id.conferma_ok).setOnClickListener(v -> {
+            findViewById(R.id.confirmation_ok).setOnClickListener(v -> {
                 // Change the ID and all refs in all the objects with canBothAddAndReplace and destiny 'add'
                 boolean changed = false;
                 for (Comparison.Front front : Comparison.getList()) {

@@ -50,6 +50,8 @@
             </LinearLayout>
         </ScrollView>
 
-        <include layout="@layout/progress" />
+        <include
+            android:id="@+id/merge_wheel"
+            layout="@layout/progress" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -42,32 +42,25 @@ import app.familygem.util.TreeUtils;
 public class FamiliesFragment extends Fragment {
 
     private LinearLayout layout;
-    private List<FamilyWrapper> familyList;
+    private List<FamilyWrapper> familyList = new ArrayList<>();
     private int order;
     private boolean idsAreNumeric;
 
-    public enum What {
-        RELOAD, UPDATE, BASIC
-    }
+    public enum What {RELOAD, UPDATE, BASIC}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
         View view = inflater.inflate(R.layout.scrollview, container, false);
         layout = view.findViewById(R.id.scrollview_layout);
-        if (gc != null) {
-            familyList = new ArrayList<>();
-            refresh(What.RELOAD);
-            if (familyList.size() > 1)
-                setHasOptionsMenu(true);
-            idsAreNumeric = verifyIdsAreNumeric();
-            view.findViewById(R.id.fab).setOnClickListener(v -> {
-                Family newFamily = newFamily(true);
-                TreeUtils.INSTANCE.save(true, newFamily);
-                // If the user returns immediately back to this fragment, the new empty family is displayed in the list
-                Memory.setLeader(newFamily);
-                startActivity(new Intent(getContext(), FamilyActivity.class));
-            });
-        }
+        // FAB
+        view.findViewById(R.id.fab).setOnClickListener(v -> {
+            Family newFamily = newFamily(true); // TODO: Crashes if Global.gc is null
+            TreeUtils.INSTANCE.save(true, newFamily);
+            // If the user returns immediately back to this fragment, the new empty family is displayed in the list
+            Memory.setLeader(newFamily);
+            startActivity(new Intent(getContext(), FamilyActivity.class));
+        });
+        if (TreeUtils.INSTANCE.isGlobalGedcomOk(() -> refresh(What.RELOAD))) refresh(What.RELOAD);
         return view;
     }
 
@@ -279,6 +272,8 @@ public class FamiliesFragment extends Fragment {
         layout.removeAllViews();
         for (FamilyWrapper wrapper : familyList)
             placeFamily(layout, wrapper);
+        idsAreNumeric = verifyIdsAreNumeric();
+        setHasOptionsMenu(familyList.size() > 1);
     }
 
     private class FamilyWrapper {

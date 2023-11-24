@@ -58,17 +58,16 @@ public class MediaFragment extends Fragment {
         View view = inflater.inflate(R.layout.gallery, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.gallery_recycler);
         recyclerView.setHasFixedSize(true);
-        if (gc != null) {
-            mediaVisitor = new MediaContainerList(gc, !getActivity().getIntent().getBooleanExtra(Choice.MEDIA, false));
+        view.findViewById(R.id.fab).setOnClickListener(
+                v -> F.displayImageCaptureDialog(getContext(), MediaFragment.this, 4546, null));
+        mediaVisitor = new MediaContainerList(gc, !getActivity().getIntent().getBooleanExtra(Choice.MEDIA, false));
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new MediaAdapter(mediaVisitor.mediaList, true);
+        recyclerView.setAdapter(adapter);
+        if (TreeUtils.INSTANCE.isGlobalGedcomOk(this::refresh)) {
             gc.accept(mediaVisitor);
             setToolbarTitle();
-            RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
-            recyclerView.setLayoutManager(layoutManager);
-            adapter = new MediaAdapter(mediaVisitor.mediaList, true);
-            recyclerView.setAdapter(adapter);
-            view.findViewById(R.id.fab).setOnClickListener(v ->
-                    F.displayImageCaptureDialog(getContext(), MediaFragment.this, 4546, null)
-            );
         }
         return view;
     }

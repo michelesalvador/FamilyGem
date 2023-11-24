@@ -8,7 +8,6 @@ import androidx.appcompat.app.AlertDialog
 import app.familygem.BuildConfig
 import app.familygem.F
 import app.familygem.Global
-import app.familygem.InfoActivity
 import app.familygem.Notifier
 import app.familygem.R
 import app.familygem.Settings
@@ -17,8 +16,11 @@ import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
 import app.familygem.share.CompareActivity
+import app.familygem.util.Utils.string
+import app.familygem.visitor.MediaList
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,6 +31,7 @@ import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.GedcomVersion
 import org.folg.gedcom.model.Generator
 import org.folg.gedcom.model.Header
+import org.folg.gedcom.model.Person
 import org.folg.gedcom.parser.JsonParser
 import org.folg.gedcom.parser.ModelParser
 import java.io.BufferedReader
@@ -42,18 +45,21 @@ import java.util.Locale
 import java.util.zip.ZipInputStream
 
 fun Tree.getBasicData(): String {
-    var data = "$persons ${Global.context.getString(if (persons == 1) R.string.person else R.string.persons).lowercase()}"
+    var data = "$persons ${string(if (persons == 1) R.string.person else R.string.persons).lowercase()}"
     if (persons > 1 && generations > 0) data += " - $generations " +
-            Global.context.getString(if (generations == 1) R.string.generation else R.string.generations).lowercase()
+            string(if (generations == 1) R.string.generation else R.string.generations).lowercase()
     if (media > 0) data += " - $media ${Global.context.getString(R.string.media).lowercase()}"
     return data
 }
 
+/**
+ * Functions about the general tree shared across many classes.
+ */
 object TreeUtils {
     /**
      * Standard opening of a stored GEDCOM to edit it.
      */
-    fun openGedcom(treeId: Int, saveSettings: Boolean): Boolean {
+    suspend fun openGedcom(treeId: Int, saveSettings: Boolean): Boolean {
         Global.gc = readJson(treeId)
         if (Global.gc == null) return false
         if (saveSettings) {
@@ -66,10 +72,13 @@ object TreeUtils {
         return true
     }
 
+    // Temporary hack for Java
+    fun openGedcomAsync(treeId: Int, saveSettings: Boolean) = GlobalScope.launch(IO) { openGedcom(treeId, saveSettings) }
+
     /**
      *  Lightly opens a stored GEDCOM for different purposes.
      */
-    fun openGedcomTemporarily(treeId: Int, putInGlobal: Boolean): Gedcom? {
+    suspend fun openGedcomTemporarily(treeId: Int, putInGlobal: Boolean): Gedcom? {
         val gedcom: Gedcom?
         if (Global.gc != null && Global.settings.openTree == treeId) gedcom = Global.gc
         else {
@@ -85,7 +94,7 @@ object TreeUtils {
     /**
      * Reads the tree JSON and returns a GEDCOM or null.
      */
-    fun readJson(treeId: Int): Gedcom? {
+    suspend fun readJson(treeId: Int): Gedcom? {
         val gedcom: Gedcom?
         val file = File(Global.context.filesDir, "$treeId.json")
         val text = StringBuilder()
@@ -99,21 +108,18 @@ object TreeUtils {
             var json: String = text.toString()
             json = updateTreeLanguage(json)
             gedcom = JsonParser().fromJson(json)
-            if (gedcom == null) {
-                Toast.makeText(Global.context, R.string.no_useful_data, Toast.LENGTH_LONG).show()
-                return null
-            }
+            if (gedcom == null) throw Exception(string(R.string.no_useful_data))
             // This Notifier was introduced in version 0.9.1
             // TODO: Can be removed from here in the future because tree.birthdays will never more be null
             if (Global.settings.getTree(treeId).birthdays == null) {
                 Notifier(Global.context, gedcom, treeId, Notifier.What.CREATE)
             }
-        } catch (e: Exception) {
-            Toast.makeText(Global.context, e.localizedMessage, Toast.LENGTH_LONG).show()
+        } catch (exception: Exception) {
+            Utils.toast(exception.localizedMessage)
             return null
-        } catch (e: Error) {
-            val message = if (e is OutOfMemoryError) Global.context.getString(R.string.not_memory_tree) else e.localizedMessage
-            Toast.makeText(Global.context, message, Toast.LENGTH_LONG).show()
+        } catch (error: Error) {
+            val message = if (error is OutOfMemoryError) string(R.string.not_memory_tree) else error.localizedMessage
+            Utils.toast(message)
             return null
         }
         return gedcom
@@ -132,6 +138,21 @@ object TreeUtils {
     }
 
     /**
+     * Checks if [Global.gc] is not null and in case reloads it asynchronously.
+     * @param refresh Optional function executed on main thread after reloading
+     */
+    fun isGlobalGedcomOk(refresh: Runnable?): Boolean {
+        return if (Global.gc != null) true
+        else {
+            GlobalScope.launch(IO) {
+                Global.gc = readJson(Global.settings.openTree)
+                withContext(Main) { refresh?.run() }
+            }
+            false
+        }
+    }
+
+    /**
      * Saves the currently opened tree.
      *
      * @param refresh Will refresh also other activities
@@ -147,7 +168,7 @@ object TreeUtils {
             Global.settings.save()
         }
         if (Global.settings.autoSave) {
-            GlobalScope.launch(Dispatchers.IO) { saveJson(Global.gc, Global.settings.openTree) }
+            GlobalScope.launch(IO) { saveJson(Global.gc, Global.settings.openTree) }
         } else {
             Global.shouldSave = true // The 'Save' button will be displayed
         }
@@ -175,7 +196,19 @@ object TreeUtils {
     }
 
     // Temporary hack to call a suspend function from Java
-    fun saveJsonAsync(gedcom: Gedcom, treeId: Int) = GlobalScope.launch(Dispatchers.IO) { saveJson(gedcom, treeId) }
+    fun saveJsonAsync(gedcom: Gedcom, treeId: Int) = GlobalScope.launch(IO) { saveJson(gedcom, treeId) }
+
+    /**
+     * Refreshes the data displayed below the tree title in TreesActivity list.
+     */
+    fun refreshData(gedcom: Gedcom, treeItem: Tree) {
+        treeItem.persons = gedcom.people.size
+        treeItem.generations = countGenerations(gedcom, U.getRootId(gedcom, treeItem))
+        val mediaVisitor = MediaList(gedcom, 0)
+        gedcom.accept(mediaVisitor)
+        treeItem.media = mediaVisitor.list.size
+        Global.settings.save()
+    }
 
     fun deleteTree(treeId: Int) {
         val treeFile = File(Global.context.filesDir, "$treeId.json")
@@ -220,6 +253,59 @@ object TreeUtils {
         return header
     }
 
+    private var generationMin = 0
+    private var generationMax = 0
+    private const val GENERATION = "gen"
+
+    /**
+     * @return Total number of generations of the tree starting from a root person
+     */
+    private fun countGenerations(gedcom: Gedcom, root: String?): Int {
+        if (gedcom.people.isEmpty()) return 0
+        generationMin = 0
+        generationMax = 0
+        ascendGenerations(gedcom.getPerson(root), gedcom, 0)
+        descendGenerations(gedcom.getPerson(root), gedcom, 0)
+        // Removes from persons the GENERATION extension to allow later counting
+        for (person in gedcom.people) {
+            person.extensions.remove(GENERATION)
+            if (person.extensions.isEmpty()) person.extensions = null
+        }
+        return 1 - generationMin + generationMax
+    }
+
+    // Receives a person and finds the number of the earliest generation of ancestors
+    private fun ascendGenerations(person: Person, gedcom: Gedcom, generation: Int) {
+        if (generation < generationMin) generationMin = generation
+        // Adds the extension to indicate that passed by this person
+        person.putExtension(GENERATION, generation)
+        // If person is a progenitor, goes to count the generations of descendants
+        if (person.getParentFamilies(gedcom).isEmpty()) descendGenerations(person, gedcom, generation)
+        for (family in person.getParentFamilies(gedcom)) {
+            for (sibling in family.getChildren(gedcom)) // Intercepts also any siblings
+                if (sibling.getExtension(GENERATION) == null) descendGenerations(sibling, gedcom, generation)
+            for (father in family.getHusbands(gedcom))
+                if (father.getExtension(GENERATION) == null) ascendGenerations(father, gedcom, generation - 1)
+            for (mother in family.getWives(gedcom))
+                if (mother.getExtension(GENERATION) == null) ascendGenerations(mother, gedcom, generation - 1)
+        }
+    }
+
+    // Receives a person and finds the number of the earliest generation of descendants
+    private fun descendGenerations(person: Person, gedcom: Gedcom, generation: Int) {
+        if (generation > generationMax) generationMax = generation
+        person.putExtension(GENERATION, generation)
+        for (family in person.getSpouseFamilies(gedcom)) {
+            // Identifies also other spouses
+            for (wife in family.getWives(gedcom))
+                if (wife.getExtension(GENERATION) == null) ascendGenerations(wife, gedcom, generation)
+            for (husband in family.getHusbands(gedcom))
+                if (husband.getExtension(GENERATION) == null) ascendGenerations(husband, gedcom, generation)
+            for (child in family.getChildren(gedcom))
+                if (child.getExtension(GENERATION) == null) descendGenerations(child, gedcom, generation + 1)
+        }
+    }
+
     /**
      * Imports a GEDCOM provided by an URI.
      */
@@ -233,7 +319,7 @@ object TreeUtils {
             val input = context.contentResolver.openInputStream(uri)
             val gedcom = ModelParser().parseGedcom(input)
             if (gedcom.header == null) {
-                withContext(Dispatchers.Main) {
+                withContext(Main) {
                     Toast.makeText(context, R.string.invalid_gedcom, Toast.LENGTH_LONG).show()
                     onFail()
                 }
@@ -261,11 +347,11 @@ object TreeUtils {
             if (treeName.lastIndexOf('.') > 0) // Removes the extension
                 treeName = treeName.substring(0, treeName.lastIndexOf('.'))
             // Saves the settings
-            val rootId = U.trovaRadice(gedcom)
+            val rootId = U.findRootId(gedcom)
             Global.settings.addTree(Tree(newNumber, treeName, folderPath,
-                    gedcom.people.size, InfoActivity.countGenerations(gedcom, rootId), rootId, null, 0))
+                    gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, 0))
             Notifier(context, gedcom, newNumber, Notifier.What.CREATE)
-            withContext(Dispatchers.Main) {
+            withContext(Main) {
                 // If necessary propose to show advanced tools
                 if (gedcom.sources.isNotEmpty() && !Global.settings.expert) {
                     AlertDialog.Builder(context).setMessage(R.string.complex_tree_advanced_tools)
@@ -279,12 +365,12 @@ object TreeUtils {
                 } else onSuccessWithMessage()
             }
         } catch (exception: Exception) {
-            withContext(Dispatchers.Main) {
+            withContext(Main) {
                 Toast.makeText(context, exception.localizedMessage, Toast.LENGTH_LONG).show()
                 onFail()
             }
         } catch (error: Error) {
-            withContext(Dispatchers.Main) {
+            withContext(Main) {
                 val message = if (error is OutOfMemoryError) context.getString(R.string.not_memory_tree)
                 else if (error.localizedMessage != null) error.localizedMessage
                 else context.getString(R.string.something_wrong)
@@ -343,7 +429,7 @@ object TreeUtils {
      */
     private suspend fun downloadFailed(message: String?, onFail: () -> Unit?) {
         Utils.toast(message)
-        withContext(Dispatchers.Main) { onFail() }
+        withContext(Main) { onFail() }
     }
 
     /**
@@ -396,12 +482,12 @@ object TreeUtils {
             }
             Global.settings.save()
             Utils.toast(R.string.tree_imported_ok)
-            withContext(Dispatchers.Main) { onSuccess() }
+            withContext(Main) { onSuccess() }
             return
         } catch (e: Exception) {
             Utils.toast(e.localizedMessage)
         }
-        withContext(Dispatchers.Main) { onFail() }
+        withContext(Main) { onFail() }
     }
 
     /**

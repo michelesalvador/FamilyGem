@@ -22,10 +22,8 @@ class MergeActivity : BaseActivity() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Physical back button
-        onBackPressedDispatcher.addCallback(this) {
-            onSupportNavigateUp()
-        }
+        // Intercepts physical back button
+        onBackPressedDispatcher.addCallback(this) { onSupportNavigateUp() }
     }
 
     // Intercepts the back arrow in actionbar

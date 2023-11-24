@@ -58,16 +58,17 @@ public class SourcesFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-        sourceList = gc.getSources();
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(sourceList.size() + " " +
-                getString(sourceList.size() == 1 ? R.string.source : R.string.sources).toLowerCase());
-        if (sourceList.size() > 1)
-            setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.sources, container, false);
-        RecyclerView recyclerView = view.findViewById(R.id.sources_recycler);
-        adapter = new SourcesAdapter();
-        recyclerView.setAdapter(adapter);
-        view.findViewById(R.id.fab).setOnClickListener(v -> newSource(getContext(), null));
+        if (gc != null) {
+            sourceList = gc.getSources();
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(sourceList.size() + " " +
+                    getString(sourceList.size() == 1 ? R.string.source : R.string.sources).toLowerCase());
+            if (sourceList.size() > 1) setHasOptionsMenu(true);
+            RecyclerView recyclerView = view.findViewById(R.id.sources_recycler);
+            adapter = new SourcesAdapter();
+            recyclerView.setAdapter(adapter);
+            view.findViewById(R.id.fab).setOnClickListener(v -> newSource(getContext(), null));
+        }
         return view;
     }
 
