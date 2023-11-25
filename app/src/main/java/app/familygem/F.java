@@ -137,7 +137,7 @@ public class F {
                             String filename = findFilename(rebuilt);
                             if (filename != null)
                                 return filename;
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                     }
                 }
@@ -171,7 +171,7 @@ public class F {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String treeDocId = DocumentsContract.getTreeDocumentId(uri);
             switch (uri.getAuthority()) {
-                case "com.android.externalstorage.documents": // internal memory and SD card
+                case "com.android.externalstorage.documents": // Internal memory and SD card
                     String[] split = treeDocId.split(":");
                     String path = null;
                     // Main storage
@@ -199,7 +199,7 @@ public class F {
                         return path;
                     }
                     break;
-                case "com.android.providers.downloads.documents": // provider Downloads e sottocartelle
+                case "com.android.providers.downloads.documents": // Provider for Downloads (and sub-folders)
                     if (treeDocId.equals("downloads"))
                         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
                     if (treeDocId.startsWith("raw:/"))
@@ -307,7 +307,7 @@ public class F {
                                     mMR.setDataSource(Global.context, uri[0]);
                                     bitmap = mMR.getFrameAtTime();
                                 }
-                            } catch (Exception excpt) {
+                            } catch (Exception ignored) {
                             }
                             imageView.setTag(R.id.tag_file_type, 2);
                             if (bitmap == null) {
@@ -346,7 +346,7 @@ public class F {
                             imageView.setTag(R.id.tag_file_type, 1);
                             try {
                                 new CacheImage(media).execute(new URL(filePath));
-                            } catch (Exception e) {
+                            } catch (Exception ignored) {
                             }
                         }
 
@@ -421,11 +421,11 @@ public class F {
         return null;
     }
 
-    static Bitmap generateIcon(ImageView view, int icona, String testo) {
+    static Bitmap generateIcon(ImageView view, int icon, String text) {
         LayoutInflater inflater = (LayoutInflater)view.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View inflated = inflater.inflate(icona, null);
+        View inflated = inflater.inflate(icon, null);
         RelativeLayout frameLayout = inflated.findViewById(R.id.icona);
-        ((TextView)frameLayout.findViewById(R.id.icona_testo)).setText(testo);
+        ((TextView)frameLayout.findViewById(R.id.icona_testo)).setText(text);
         frameLayout.setDrawingCacheEnabled(true);
         frameLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
@@ -447,9 +447,10 @@ public class F {
 
         protected String doInBackground(URL... url) {
             try {
-                File cacheFolder = new File(Global.context.getCacheDir().getPath() + "/" + Global.settings.openTree);
+                File cacheFolder = new File(Global.context.getCacheDir(), String.valueOf(Global.settings.openTree));
+                // new File() does not create the folder if it doesn't exist
                 if (!cacheFolder.exists()) {
-                    // Delete the "cache" extension from all Media
+                    // Deletes the "cache" extension from all Media
                     MediaList mediaList = new MediaList(Global.gc, 0);
                     Global.gc.accept(mediaList);
                     for (Media media : mediaList.list)
@@ -479,8 +480,7 @@ public class F {
                 File cache = nextAvailableFileName(cacheFolder.getPath(), "img." + ext);
                 FileUtils.copyURLToFile(url[0], cache);
                 return cache.getPath();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
             }
             return null;
         }
@@ -553,16 +553,16 @@ public class F {
                         maxLengthSrc = img.attr("src").length();
                     }
                 }
-                String percorso = null;
+                String path = null;
                 if (imgHeightWithAlt != null)
-                    percorso = imgHeightWithAlt.absUrl("src"); // Absolute URL on src
+                    path = imgHeightWithAlt.absUrl("src"); // Absolute URL on src
                 else if (imgHeight != null)
-                    percorso = imgHeight.absUrl("src");
+                    path = imgHeight.absUrl("src");
                 else if (imgLengthAlt != null)
-                    percorso = imgLengthAlt.absUrl("src");
+                    path = imgLengthAlt.absUrl("src");
                 else if (imgLengthSrc != null)
-                    percorso = imgLengthSrc.absUrl("src");
-                url = new URL(percorso);
+                    path = imgLengthSrc.absUrl("src");
+                url = new URL(path);
                 InputStream inputStream = url.openConnection().getInputStream();
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true; // it just takes the info of the image without downloading it
@@ -606,16 +606,16 @@ public class F {
     // Methods for image acquisition:
 
     /**
-     * Offers a nice list of apps for capturing images
+     * Offers a nice list of apps for capturing images.
      */
     public static void displayImageCaptureDialog(Context context, Fragment fragment, int code, MediaContainer container) {
-        // Request permission to access device memory
+        // Requests permission to access device memory
         final String[] requiredPermissions;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requiredPermissions = new String[]{
                     Manifest.permission.READ_MEDIA_IMAGES,
                     Manifest.permission.READ_MEDIA_VIDEO,
-                    Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.READ_MEDIA_AUDIO
             };
         } else {
             requiredPermissions = new String[]{
@@ -630,9 +630,9 @@ public class F {
                 ActivityCompat.requestPermissions((AppCompatActivity)context, requiredPermissions, code);
             return;
         }
-        // Collect intents useful to capture images
+        // Collects intents useful to capture images
         List<ResolveInfo> resolveInfos = new ArrayList<>();
-        final List<Intent> intents = new ArrayList<>();
+        List<Intent> intents = new ArrayList<>();
         // Cameras
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         for (ResolveInfo info : context.getPackageManager().queryIntentActivities(cameraIntent, 0)) {
@@ -646,9 +646,11 @@ public class F {
         galleryIntent.setType("image/*");
         String[] mimeTypes = {"image/*", "audio/*", "video/*", "application/*", "text/*"};
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT)
-            mimeTypes[0] = "*/*"; // Otherwise KitKat does not see the 'application / *' in Downloads
+            mimeTypes[0] = "*/*"; // Otherwise KitKat does not see the 'application/*' in Downloads
         galleryIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
         for (ResolveInfo info : context.getPackageManager().queryIntentActivities(galleryIntent, 0)) {
+            if (info.activityInfo.packageName.equals("com.google.android.apps.docs"))
+                continue; // Excludes the Google Drive app, because files there are not accessible
             Intent finalIntent = new Intent(galleryIntent);
             finalIntent.setComponent(new ComponentName(info.activityInfo.packageName, info.activityInfo.name));
             intents.add(finalIntent);
@@ -668,9 +670,7 @@ public class F {
                     Intent intent = intents.get(id);
                     // Set up a URI in which to put the photo taken by the camera app
                     if (intent.getAction() != null && intent.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE)) {
-                        File dir = context.getExternalFilesDir(String.valueOf(Global.settings.openTree));
-                        if (!dir.exists())
-                            dir.mkdir();
+                        File dir = context.getExternalFilesDir(String.valueOf(Global.settings.openTree)); // Creates dir if it doesn't exist
                         File photoFile = nextAvailableFileName(dir.getAbsolutePath(), "image.jpg");
                         Global.pathOfCameraDestination = photoFile.getAbsolutePath(); // Saves it to retake it after the photo is taken
                         Uri photoUri;
@@ -680,7 +680,7 @@ public class F {
                             photoUri = Uri.fromFile(photoFile);
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                     }
-                    if (intent.getComponent().getPackageName().equals("app.familygem")) { // TODO: extract to build property
+                    if (intent.getComponent().getPackageName().equals(BuildConfig.APPLICATION_ID)) {
                         // Create an empty Media
                         Media med;
                         if (code == 4173 || code == 2173) { // Simple media
@@ -713,7 +713,7 @@ public class F {
                 ResolveInfo info = resolveInfos.get(position);
                 ImageView image = view.findViewById(R.id.app_icon);
                 TextView textview = view.findViewById(R.id.app_title);
-                if (info.activityInfo.packageName.equals("app.familygem")) {
+                if (info.activityInfo.packageName.equals(BuildConfig.APPLICATION_ID)) {
                     image.setImageResource(R.drawable.image);
                     textview.setText(R.string.empty_media);
                 } else {
@@ -852,8 +852,6 @@ public class F {
             uriMedia = Uri.fromFile(fileMedia);
         // Destination
         File externalFilesDir = context.getExternalFilesDir(String.valueOf(Global.settings.openTree));
-        if (!externalFilesDir.exists())
-            externalFilesDir.mkdir();
         File destinationFile;
         if (fileMedia != null && fileMedia.getAbsolutePath().startsWith(externalFilesDir.getAbsolutePath()))
             destinationFile = fileMedia; // Files already in the storage folder are overwritten
