@@ -449,7 +449,7 @@ class TreesActivity : AppCompatActivity() {
             progress.visibility = View.VISIBLE
             lifecycleScope.launch(IO) {
                 if (openGedcom(treeId, true)) {
-                    Global.indi = intent.getStringExtra(Notifier.INDI_ID_KEY)
+                    Global.indi = intent.getStringExtra(Notifier.PERSON_ID_KEY)
                     consumedNotifications.add(notifyId)
                     startActivity(Intent(this@TreesActivity, Principal::class.java))
                     Notifier(this@TreesActivity, Global.gc, treeId, Notifier.What.DEFAULT) // Actually deletes present notification

@@ -44,7 +44,7 @@ class InfoActivity : BaseActivity() {
         val textView = findViewById<TextView>(R.id.info_text)
         table = findViewById(R.id.info_table)
         row(getText(R.string.title), tree.title)
-        if (Global.settings.expert) row("ID", tree.id.toString())
+        if (Global.settings.expert) row(getText(R.string.id), tree.id.toString())
         if (!file.exists()) {
             titleView.text = getText(R.string.file)
             textView.text = "${getText(R.string.item_exists_but_file)}\n${file.absolutePath}"

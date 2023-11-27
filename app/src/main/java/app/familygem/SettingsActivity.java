@@ -29,10 +29,10 @@ public class SettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.opzioni);
+        setContentView(R.layout.settings_activity);
 
         // Auto save
-        SwitchCompat save = findViewById(R.id.opzioni_salva);
+        SwitchCompat save = findViewById(R.id.settings_autoSave);
         save.setChecked(Global.settings.autoSave);
         save.setOnCheckedChangeListener((widget, active) -> {
             Global.settings.autoSave = active;
@@ -40,7 +40,7 @@ public class SettingsActivity extends BaseActivity {
         });
 
         // Load tree at startup
-        SwitchCompat load = findViewById(R.id.opzioni_carica);
+        SwitchCompat load = findViewById(R.id.settings_loadTree);
         load.setChecked(Global.settings.loadTree);
         load.setOnCheckedChangeListener((widget, active) -> {
             Global.settings.loadTree = active;
@@ -48,7 +48,7 @@ public class SettingsActivity extends BaseActivity {
         });
 
         // Expert mode
-        SwitchCompat expert = findViewById(R.id.opzioni_esperto);
+        SwitchCompat expert = findViewById(R.id.settings_expert);
         expert.setChecked(Global.settings.expert);
         expert.setOnCheckedChangeListener((widget, active) -> {
             Global.settings.expert = active;
@@ -72,7 +72,7 @@ public class SettingsActivity extends BaseActivity {
         }
         Collections.sort(languages);
 
-        TextView textView = findViewById(R.id.opzioni_language);
+        TextView textView = findViewById(R.id.settings_language);
         Language actual = getActualLanguage();
         textView.setText(actual.toString());
         String[] languageArray = new String[languages.size()];
@@ -110,7 +110,7 @@ public class SettingsActivity extends BaseActivity {
                     Global.context = createConfigurationContext(configuration);
                     // Removes switches to force KitKat to update their language
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                        LinearLayout layout = findViewById(R.id.layout);
+                        LinearLayout layout = findViewById(R.id.settings_layout);
                         layout.removeView(save);
                         layout.removeView(load);
                         layout.removeView(expert);
@@ -120,7 +120,7 @@ public class SettingsActivity extends BaseActivity {
                 }).show());
 
         // About
-        findViewById(R.id.opzioni_lapide).setOnClickListener(view -> startActivity(
+        findViewById(R.id.settings_about).setOnClickListener(view -> startActivity(
                 new Intent(SettingsActivity.this, AboutActivity.class)
         ));
     }

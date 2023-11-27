@@ -17,6 +17,7 @@ import org.folg.gedcom.model.Person;
 import java.util.Date;
 import java.util.HashSet;
 
+import app.familygem.constant.Extra;
 import app.familygem.constant.Format;
 
 /**
@@ -24,7 +25,7 @@ import app.familygem.constant.Format;
  */
 public class Notifier {
     static final String TREE_ID_KEY = "targetTreeId";
-    static final String INDI_ID_KEY = "targetIndiId";
+    static final String PERSON_ID_KEY = "targetPersonId";
     static final String NOTIFY_ID_KEY = "notifyId";
     static final String CHANNEL_ID = "birthdays";
     private final int FACTOR = 100000;
@@ -33,6 +34,10 @@ public class Notifier {
     public enum What {REBOOT, CREATE, DELETE, DEFAULT}
 
     public Notifier(Context context, Gedcom gedcom, int treeId, What toDo) {
+        Settings.Tree tree = Global.settings.getTree(treeId);
+
+        // With custom fixed date is nonsense to create birthday notifications
+        if (tree.settings.customDate && toDo != What.DELETE) return;
 
         // Creates the notification channel, necessary only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -45,7 +50,6 @@ public class Notifier {
         // Deletes previous Workish notifications
         WorkManager.getInstance(context).cancelAllWork(); // Todo remove after version 0.9.1
 
-        Settings.Tree tree = Global.settings.getTree(treeId);
         switch (toDo) {
             case REBOOT: // After reboot restores all alarms from settings
                 for (Settings.Tree tree1 : Global.settings.trees) {
@@ -66,8 +70,10 @@ public class Notifier {
         }
     }
 
-    // Selects people who have to celebrate their birthday and add them to the settings
-    // Eventually save settings
+    /**
+     * Selects people who have to celebrate their birthday and add them to the settings.
+     * Eventually save settings.
+     */
     void findBirthdays(Gedcom gedcom, Settings.Tree tree) {
         if (tree.birthdays == null)
             tree.birthdays = new HashSet<>();
@@ -76,7 +82,7 @@ public class Notifier {
         for (Person person : gedcom.getPeople()) {
             Date birth = findBirth(person);
             if (birth != null) {
-                int years = findAge(birth);
+                int years = findAge(birth, tree);
                 if (years >= 0) {
                     tree.birthdays.add(new Settings.Birthday(person.getId(), U.givenName(person),
                             U.properName(person), nextBirthday(birth), years));
@@ -86,14 +92,16 @@ public class Notifier {
         Global.settings.save();
     }
 
-    // Possibly finds the birth Date of a person
+    /**
+     * Possibly finds the birth Date of a person or null.
+     */
     private Date findBirth(Person person) {
         if (!U.isDead(person)) {
             for (EventFact event : person.getEventsFacts()) {
                 if (event.getTag().equals("BIRT") && event.getDate() != null) {
-                    GedcomDateConverter datator = new GedcomDateConverter(event.getDate());
-                    if (datator.isSingleKind() && datator.data1.isFormat(Format.D_M_Y)) {
-                        return datator.data1.date;
+                    GedcomDateConverter dater = new GedcomDateConverter(event.getDate());
+                    if (dater.isSingleKind() && dater.data1.isFormat(Format.D_M_Y)) {
+                        return dater.data1.date;
                     }
                 }
             }
@@ -101,17 +109,21 @@ public class Notifier {
         return null;
     }
 
-    // Counts the number of years that will be turned on the next birthday
-    private int findAge(Date birth) {
+    /**
+     * Counts the number of years that will be turned on the next birthday.
+     */
+    private int findAge(Date birth, Settings.Tree tree) {
         int years = now.getYear() - birth.getYear();
         if (birth.getMonth() < now.getMonth()
                 || (birth.getMonth() == now.getMonth() && birth.getDate() < now.getDate())
                 || (birth.getMonth() == now.getMonth() && birth.getDate() == now.getDate() && now.getHours() >= 12))
             years++;
-        return years <= 120 ? years : -1;
+        return years <= tree.settings.lifeSpan ? years : -1;
     }
 
-    // From birth Date finds next birthday as long timestamp
+    /**
+     * From birth Date finds next birthday as long timestamp.
+     */
     private long nextBirthday(Date birth) {
         birth.setYear(now.getYear());
         birth.setHours(12);
@@ -121,7 +133,9 @@ public class Notifier {
         return birth.getTime();
     }
 
-    // Generates an alarm from each birthday of the provided tree
+    /**
+     * Generates an alarm from each birthday of the provided tree.
+     */
     void createAlarms(Context context, Settings.Tree tree) {
         if (tree.birthdays == null) return;
         int eventId = tree.id * FACTOR;  // Different for every tree
@@ -129,11 +143,11 @@ public class Notifier {
         for (Settings.Birthday birthday : tree.birthdays) {
             if (birthday.date > now.getTime()) { // Avoid setting alarm for a past birthday
                 Intent intent = new Intent(context, NotifyReceiver.class)
-                        .putExtra("id", eventId)
-                        .putExtra("title", birthday.name + " (" + tree.title + ")")
-                        .putExtra("text", context.getString(R.string.turns_years_old, birthday.given, birthday.age))
-                        .putExtra("treeId", tree.id)
-                        .putExtra("indiId", birthday.id);
+                        .putExtra(Extra.ID, eventId)
+                        .putExtra(Extra.TITLE, birthday.name + " (" + tree.title + ")")
+                        .putExtra(Extra.TEXT, context.getString(R.string.turns_years_old, birthday.given, birthday.age))
+                        .putExtra(Extra.TREE_ID, tree.id)
+                        .putExtra(Extra.PERSON_ID, birthday.id);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context, eventId++, intent,
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT);
                 try {
@@ -145,7 +159,9 @@ public class Notifier {
         }
     }
 
-    // Deletes all alarms already set for a tree
+    /**
+     * Deletes all alarms already set for a tree.
+     */
     void deleteAlarms(Context context, Settings.Tree tree) {
         if (tree.birthdays == null) return;
         int eventId = tree.id * FACTOR;

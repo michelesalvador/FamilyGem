@@ -1,48 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	tools:showIn="navigation_view">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
 
-	<group android:checkableBehavior="single">
-		<item
-			android:id="@+id/nav_diagramma"
-			android:icon="@drawable/menu_diagramma"
-			android:title="@string/diagram" />
-		<item
-			android:id="@+id/nav_persone"
-			android:icon="@drawable/menu_persona"
-			android:title="@string/persons"
-			app:actionLayout="@layout/menu_item_extra"/>
-		<item
-			android:id="@+id/nav_famiglie"
-			android:icon="@drawable/menu_famiglia"
-			android:title="@string/families"
-			app:actionLayout="@layout/menu_item_extra"/>
-		<item
-			android:id="@+id/nav_media"
-			android:icon="@drawable/menu_ritratto"
-			android:title="@string/media"
-			app:actionLayout="@layout/menu_item_extra"/>
-		<item
-			android:id="@+id/nav_note"
-			android:icon="@drawable/menu_nota"
-			android:title="@string/notes"
-			app:actionLayout="@layout/menu_item_extra"/>
-		<item
-			android:id="@+id/nav_fonti"
-			android:icon="@drawable/menu_fonte"
-			android:title="@string/sources"
-			app:actionLayout="@layout/menu_item_extra"/>
-		<item
-			android:id="@+id/nav_archivi"
-			android:icon="@drawable/menu_tempio"
-			android:title="@string/repositories"
-			app:actionLayout="@layout/menu_item_extra"/>
-		<item
-			android:id="@+id/nav_autore"
-			android:icon="@drawable/menu_autore"
-			android:title="@string/submitters"
-			app:actionLayout="@layout/menu_item_extra"/>
-	</group>
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_diagram"
+            android:icon="@drawable/menu_diagramma"
+            android:title="@string/diagram" />
+        <item
+            android:id="@+id/nav_persons"
+            android:icon="@drawable/menu_persona"
+            android:title="@string/persons"
+            app:actionLayout="@layout/menu_item_extra" />
+        <item
+            android:id="@+id/nav_families"
+            android:icon="@drawable/menu_famiglia"
+            android:title="@string/families"
+            app:actionLayout="@layout/menu_item_extra" />
+        <item
+            android:id="@+id/nav_media"
+            android:icon="@drawable/menu_ritratto"
+            android:title="@string/media"
+            app:actionLayout="@layout/menu_item_extra" />
+        <item
+            android:id="@+id/nav_notes"
+            android:icon="@drawable/menu_nota"
+            android:title="@string/notes"
+            app:actionLayout="@layout/menu_item_extra" />
+        <item
+            android:id="@+id/nav_sources"
+            android:icon="@drawable/menu_fonte"
+            android:title="@string/sources"
+            app:actionLayout="@layout/menu_item_extra" />
+        <item
+            android:id="@+id/nav_repositories"
+            android:icon="@drawable/menu_tempio"
+            android:title="@string/repositories"
+            app:actionLayout="@layout/menu_item_extra" />
+        <item
+            android:id="@+id/nav_submitters"
+            android:icon="@drawable/menu_autore"
+            android:title="@string/submitters"
+            app:actionLayout="@layout/menu_item_extra" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/gear"
+            android:title="Tree settings" />
+    </group>
 </menu>

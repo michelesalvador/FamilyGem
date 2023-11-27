@@ -48,10 +48,11 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
     DrawerLayout scatolissima;
     Toolbar toolbar;
     NavigationView menuPrincipe;
-    List<Integer> idMenu = Arrays.asList(R.id.nav_diagramma, R.id.nav_persone, R.id.nav_famiglie,
-            R.id.nav_media, R.id.nav_note, R.id.nav_fonti, R.id.nav_archivi, R.id.nav_autore);
-    List<Class<?>> frammenti = Arrays.asList(DiagramFragment.class, PersonsFragment.class, FamiliesFragment.class,
-            MediaFragment.class, NotesFragment.class, SourcesFragment.class, RepositoriesFragment.class, SubmittersFragment.class);
+    List<Integer> menuIds = Arrays.asList(R.id.nav_diagram, R.id.nav_persons, R.id.nav_families,
+            R.id.nav_media, R.id.nav_notes, R.id.nav_sources, R.id.nav_repositories, R.id.nav_submitters, R.id.nav_settings);
+    List<Class<?>> fragments = Arrays.asList(DiagramFragment.class, PersonsFragment.class, FamiliesFragment.class,
+            MediaFragment.class, NotesFragment.class, SourcesFragment.class, RepositoriesFragment.class, SubmittersFragment.class,
+            TreeSettingsFragment.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +74,6 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
 
         if (savedInstanceState == null) { // Loads only the first time, not rotating the screen
             Fragment fragment;
-            String backName = null; // Label to locate diagram in fragment backstack
             if (getIntent().getBooleanExtra(Choice.PERSON, false))
                 fragment = new PersonsFragment();
             else if (getIntent().getBooleanExtra(Choice.MEDIA, false))
@@ -84,12 +84,10 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
                 fragment = new NotesFragment();
             else if (getIntent().getBooleanExtra(Choice.REPOSITORY, false))
                 fragment = new RepositoriesFragment();
-            else { // la normale apertura
+            else { // Regular opening
                 fragment = new DiagramFragment();
-                backName = "diagram";
             }
-            getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, fragment)
-                    .addToBackStack(backName).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.contenitore_fragment, fragment).addToBackStack(null).commit();
         }
 
         menuPrincipe.getHeaderView(0).findViewById(R.id.menu_alberi).setOnClickListener(v -> {
@@ -97,12 +95,13 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
             startActivity(new Intent(Principal.this, TreesActivity.class));
         });
 
-        // Nasconde le voci del menu più ostiche
+        // Hides some menu items for non-expert users
         if (!Global.settings.expert) {
             Menu menu = menuPrincipe.getMenu();
-            menu.findItem(R.id.nav_fonti).setVisible(false);
-            menu.findItem(R.id.nav_archivi).setVisible(false);
-            menu.findItem(R.id.nav_autore).setVisible(false);
+            menu.findItem(R.id.nav_sources).setVisible(false);
+            menu.findItem(R.id.nav_repositories).setVisible(false);
+            menu.findItem(R.id.nav_submitters).setVisible(false);
+            menu.findItem(R.id.nav_settings).setVisible(false);
         }
     }
 
@@ -110,7 +109,7 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
     @Override
     public void onAttachFragment(@NonNull Fragment fragment) {
         super.onAttachFragment(fragment);
-        if (!(fragment instanceof NewRelativeDialog))
+        if (!(fragment instanceof NewRelativeDialog || fragment instanceof DatePickerFragment))
             updateInterface(fragment);
     }
 
@@ -148,12 +147,6 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
             Global.edited = false;
             isActivityRestarting = false;
         }
-    }
-
-    // Riceve una classe tipo 'DiagramFragment.class' e dice se è il fragment attualmente visibile sulla scena
-    private boolean frammentoAttuale(Class classe) {
-        Fragment attuale = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
-        return classe.isInstance(attuale);
     }
 
     // Updates title, random image, 'Save' button in menu header, and menu items count
@@ -254,9 +247,9 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
         if (fragment == null)
             fragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
         if (fragment != null) {
-            int fragmentPosition = frammenti.indexOf(fragment.getClass());
+            int fragmentPosition = fragments.indexOf(fragment.getClass());
             if (menuPrincipe != null)
-                menuPrincipe.setCheckedItem(idMenu.get(fragmentPosition));
+                menuPrincipe.setCheckedItem(menuIds.get(fragmentPosition));
             if (toolbar == null)
                 toolbar = findViewById(R.id.toolbar);
             if (toolbar != null)
@@ -279,33 +272,47 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Fragment fragment = null;
         try {
-            fragment = (Fragment)frammenti.get(idMenu.indexOf(item.getItemId())).newInstance();
-        } catch (Exception e) {
+            fragment = (Fragment)fragments.get(menuIds.indexOf(item.getItemId())).newInstance();
+        } catch (Exception ignored) {
         }
-        if (fragment != null) {
-            if (fragment instanceof DiagramFragment) {
-                int whatToOpen;
-                if (frammentoAttuale(DiagramFragment.class)) {
-                    // If I'm already in diagram and I click Diagram, shows the root person
-                    Global.indi = Global.settings.getCurrentTree().root;
-                    whatToOpen = 1; // Possibly asks about multiple parents
-                } else {
-                    whatToOpen = 0; // Shows the diagram without asking about multiple parents
-                }
-                Runnable openDiagram = () -> U.whichParentsToShow(this, gc.getPerson(Global.indi), whatToOpen);
-                if (TreeUtils.INSTANCE.isGlobalGedcomOk(openDiagram)) openDiagram.run();
+        // Removes TreeSettingsFragment from back stack
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment lastFragment = fm.getFragments().get(fm.getFragments().size() - 1);
+        boolean deleteSettingsFragment = false;
+        if (lastFragment instanceof TreeSettingsFragment) {
+            deleteSettingsFragment = true;
+        }
+        // Adds the next fragment to main activity
+        if (fragment instanceof DiagramFragment) {
+            if (deleteSettingsFragment) fm.popBackStack();
+            int whatToOpen;
+            if (isCurrentFragment(DiagramFragment.class)) {
+                // If we are already in diagram and we click Diagram, shows the root person
+                Global.indi = Global.settings.getCurrentTree().root;
+                whatToOpen = 1; // Possibly asks about multiple parents
             } else {
-                FragmentManager fm = getSupportFragmentManager();
-                // Removes previous fragment from history if it's the same one we are about to see
-                if (frammentoAttuale(fragment.getClass())) fm.popBackStack();
-                fm.beginTransaction().replace(R.id.contenitore_fragment, fragment).addToBackStack(null).commit();
+                whatToOpen = 0; // Shows the diagram without asking about multiple parents
             }
+            Runnable openDiagram = () -> U.whichParentsToShow(this, gc.getPerson(Global.indi), whatToOpen);
+            if (TreeUtils.INSTANCE.isGlobalGedcomOk(openDiagram)) openDiagram.run();
+        } else {
+            // Removes previous fragment from history if it's the same one we are about to see or if it's TreeSettingsFragment
+            if (isCurrentFragment(fragment.getClass()) || deleteSettingsFragment) fm.popBackStack();
+            fm.beginTransaction().replace(R.id.contenitore_fragment, fragment).addToBackStack(null).commit();
         }
         scatolissima.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Receives a class like 'DiagramFragment.class' and says whether it is the fragment currently visible.
+     */
+    private boolean isCurrentFragment(Class<?> aClass) {
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
+        return aClass.isInstance(currentFragment);
     }
 
     // Automatically opens the 'Sort by' sub-menu

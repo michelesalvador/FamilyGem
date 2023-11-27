@@ -349,7 +349,7 @@ object TreeUtils {
             // Saves the settings
             val rootId = U.findRootId(gedcom)
             Global.settings.addTree(Tree(newNumber, treeName, folderPath,
-                    gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, 0))
+                    gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, null, 0))
             Notifier(context, gedcom, newNumber, Notifier.What.CREATE)
             withContext(Main) {
                 // If necessary propose to show advanced tools
@@ -473,7 +473,7 @@ object TreeUtils {
             val gson = Gson()
             val zipped = gson.fromJson(json, Settings.ZippedTree::class.java)
             val tree = Tree(treeNumber, zipped.title, mediaDir!!.path,
-                    zipped.persons, zipped.generations, zipped.root, zipped.shares, zipped.grade)
+                    zipped.persons, zipped.generations, zipped.root, zipped.settings, zipped.shares, zipped.grade)
             Global.settings.addTree(tree)
             settingsFile.delete()
             // Tree coming from sharing intended for comparison

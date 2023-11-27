@@ -352,11 +352,15 @@ public class U {
         }
         // Add the age between parentheses
         if (start != null && start.isSingleKind() && !start.data1.isFormat(Format.D_M)) {
+            Settings.TreeSettings treeSettings = Global.settings.getCurrentTree().settings;
             LocalDate startDate = new LocalDate(start.data1.date); // Converted to joda time
-            // If the person is still alive the end is now
-            LocalDate now = LocalDate.now();
+            // If the person is still alive the end is a fixed date or now
+            LocalDate now;
+            if (treeSettings.customDate) now = new LocalDate(treeSettings.fixedDate);
+            else now = LocalDate.now();
             if (end == null && (startDate.isBefore(now) || startDate.isEqual(now))
-                    && Years.yearsBetween(startDate, now).getYears() <= 120 && !isDead(person)) {
+                    && Years.yearsBetween(startDate, now).getYears() <= treeSettings.lifeSpan
+                    && !isDead(person)) {
                 end = new GedcomDateConverter(now.toDate());
                 endYear = end.writeDate(false);
             }
@@ -1116,22 +1120,22 @@ public class U {
     private static void finishParentSelection(Context context, Person person, int whatToOpen, int whichFamily) {
         if (person != null)
             Global.indi = person.getId();
-        if (whatToOpen > 0) // Viene impostata la famiglia da mostrare
-            Global.familyNum = whichFamily; // normalmente è la 0
-        if (whatToOpen < 2) { // Mostra il diagramma
+        if (whatToOpen > 0) // Sets the family to show
+            Global.familyNum = whichFamily; // Normally it is 0
+        if (whatToOpen < 2) { // Displays the diagram
             if (context instanceof Principal) { // DiagramFragment, PersonsFragment or Principal itself
                 FragmentManager fm = ((AppCompatActivity)context).getSupportFragmentManager();
-                // Nome del frammento precedente nel backstack
-                String previousName = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName();
-                if (previousName != null && previousName.equals("diagram"))
-                    fm.popBackStack(); // Ricliccando su Diagram rimuove dalla storia il frammento di diagramma predente
-                fm.beginTransaction().replace(R.id.contenitore_fragment, new DiagramFragment()).addToBackStack("diagram").commit();
-            } else { // Da individuo o da famiglia
+                // Previous fragment in the backstack
+                Fragment previousFragment = fm.getFragments().get(fm.getFragments().size() - 1);
+                if (previousFragment instanceof DiagramFragment)
+                    fm.popBackStack(); // Clicking on Diagram removes the previous diagram fragment from the backstack
+                fm.beginTransaction().replace(R.id.contenitore_fragment, new DiagramFragment()).addToBackStack(null).commit();
+            } else { // From ProfileActivity or from FamilyActivity
                 context.startActivity(new Intent(context, Principal.class));
             }
-        } else { // Viene mostrata la famiglia
+        } else { // The family is shown
             Family family = person.getParentFamilies(Global.gc).get(whichFamily);
-            if (context instanceof FamilyActivity) { // Passando di Famiglia in Famiglia non accumula attività nello stack
+            if (context instanceof FamilyActivity) { // Moving from family to family does not accumulate activities in the stack
                 Memory.replaceLeader(family);
                 ((Activity)context).recreate();
             } else {

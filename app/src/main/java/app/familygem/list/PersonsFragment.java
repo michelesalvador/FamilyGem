@@ -55,6 +55,7 @@ import app.familygem.Principal;
 import app.familygem.ProfileActivity;
 import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
+import app.familygem.Settings;
 import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
@@ -542,11 +543,14 @@ public class PersonsFragment extends Fragment {
                 }
             }
             if (start != null && start.isSingleKind() && !start.data1.isFormat(Format.D_M)) {
+                Settings.TreeSettings treeSettings = Global.settings.getCurrentTree().settings;
                 LocalDate startDate = new LocalDate(start.data1.date);
-                // If the person is still alive the end is now
-                LocalDate now = LocalDate.now();
+                LocalDate now;
+                if (treeSettings.customDate) now = new LocalDate(treeSettings.fixedDate);
+                else now = LocalDate.now();
                 if (end == null && startDate.isBefore(now)
-                        && Years.yearsBetween(startDate, now).getYears() <= 120 && !U.isDead(person)) {
+                        && Years.yearsBetween(startDate, now).getYears() <= treeSettings.lifeSpan
+                        && !U.isDead(person)) {
                     end = new GedcomDateConverter(now.toDate());
                 }
                 if (end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M)) {

@@ -47,7 +47,7 @@ public class Settings {
     public boolean expert;
     public boolean shareAgreement;
     public boolean premium;
-    Diagram diagram;
+    DiagramSettings diagram;
 
     /**
      * Initializes first boot values.
@@ -57,7 +57,7 @@ public class Settings {
         referrer = "start";
         trees = new ArrayList<>();
         autoSave = true;
-        diagram = new Diagram().init();
+        diagram = new DiagramSettings().init();
     }
 
     public int max() {
@@ -108,9 +108,9 @@ public class Settings {
 
     // The tree currently open
     public Tree getCurrentTree() {
-        for (Tree alb : trees) {
-            if (alb.id == openTree)
-                return alb;
+        for (Tree tree : trees) {
+            if (tree.id == openTree)
+                return tree;
         }
         return null;
     }
@@ -135,7 +135,7 @@ public class Settings {
         return null;
     }
 
-    static class Diagram {
+    static class DiagramSettings {
         int ancestors;
         int uncles;
         int descendants;
@@ -144,7 +144,7 @@ public class Settings {
         boolean spouses;
 
         // Default values
-        Diagram init() {
+        DiagramSettings init() {
             ancestors = 3;
             uncles = 2;
             descendants = 3;
@@ -164,6 +164,7 @@ public class Settings {
         public int generations;
         public int media;
         public String root;
+        public TreeSettings settings;
         public List<Share> shares; // Dati identificativi delle condivisioni attraverso il tempo e lo spazio
         public String shareRoot; // Id della Person radice dell'albero in Condivisione
         /**
@@ -182,16 +183,17 @@ public class Settings {
         public int grade;
         public Set<Birthday> birthdays;
 
-        public Tree(int id, String title, String dir, int persons, int generations, String root, List<Share> shares, int grade) {
+        public Tree(int id, String title, String dir, int persons, int generations, String root,
+                    TreeSettings settings, List<Share> shares, int grade) {
             this.id = id;
             this.title = title;
             dirs = new LinkedHashSet<>();
-            if (dir != null)
-                dirs.add(dir);
+            if (dir != null) dirs.add(dir);
             uris = new LinkedHashSet<>();
             this.persons = persons;
             this.generations = generations;
             this.root = root;
+            this.settings = settings != null ? settings : new TreeSettings();
             this.shares = shares;
             this.grade = grade;
             birthdays = new HashSet<>();
@@ -204,7 +206,20 @@ public class Settings {
         }
     }
 
-    // The essential data of a share
+    /**
+     * Settings at tree level.
+     * Are saved into the main settings for each tree and also into settings of an exported ZIP tree (backup or shared).
+     * Introduced on Family Gem 1.0.1 (December 2023).
+     */
+    public static class TreeSettings {
+        public int lifeSpan = 110;
+        public boolean customDate = false;
+        public String fixedDate = null;
+    }
+
+    /**
+     * The essential data of a share.
+     */
     public static class Share {
         public String dateId; // On compressed date and time format: YYYYMMDDhhmmss
         public String submitter; // Submitter id
@@ -215,7 +230,9 @@ public class Settings {
         }
     }
 
-    // Birthday of one person
+    /**
+     * Birthday of one person.
+     */
     public static class Birthday {
         String id; // E.g. 'I123'
         String given; // 'John'
@@ -247,17 +264,19 @@ public class Settings {
         public int persons;
         public int generations;
         public String root;
+        public TreeSettings settings;
         public List<Share> shares;
         /**
          * Coming from {@link Tree#grade}.
          */
         public int grade;
 
-        ZippedTree(String title, int persons, int generations, String root, List<Share> shares, int grade) {
+        ZippedTree(String title, int persons, int generations, String root, TreeSettings settings, List<Share> shares, int grade) {
             this.title = title;
             this.persons = persons;
             this.generations = generations;
             this.root = root;
+            this.settings = settings;
             this.shares = shares;
             this.grade = grade;
         }

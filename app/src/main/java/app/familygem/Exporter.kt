@@ -111,7 +111,7 @@ class Exporter(private val context: Context) {
         val tree = Global.settings.getTree(treeId)
         if (root == null) root = tree.root
         if (grade < 0) grade = tree.grade
-        val settings = ZippedTree(tree.title, tree.persons, tree.generations, root, tree.shares, grade)
+        val settings = ZippedTree(tree.title, tree.persons, tree.generations, root, tree.settings, tree.shares, grade)
         val settingsFile = settings.save()
         files[DocumentFile.fromFile(settingsFile)] = Type.KEEP_NAME
         if (!createZipFile(files)) return false

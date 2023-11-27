@@ -638,7 +638,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             newNum = Global.settings.max() + 1
             val persons = firstGedcom.people.size + secondGedcom.people.size
             val generations = firstTree.generations.coerceAtLeast(secondTree.generations)
-            Global.settings.addTree(Tree(newNum, title, null, persons, generations, firstTree.root, null, 0))
+            Global.settings.addTree(Tree(newNum, title, null, persons, generations, firstTree.root, firstTree.settings, null, 0))
             copyMediaFiles(context, firstGedcom, firstNum, newNum)
             copyMediaFiles(context, secondGedcom, secondNum.value!!, newNum)
             doMerge()

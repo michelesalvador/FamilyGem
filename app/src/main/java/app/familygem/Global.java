@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDexApplication;
 
@@ -84,7 +85,7 @@ public class Global extends MultiDexApplication {
                         File mediaDir = new File(context.getExternalFilesDir(null), String.valueOf(treeId));
                         settings.trees.add(new Settings.Tree(treeId, String.valueOf(treeId),
                                 mediaDir.exists() ? mediaDir.getPath() : null,
-                                0, 0, null, null, 0));
+                                0, 0, null, null, null, 0));
                     } catch (Exception ignored) {
                     }
                 }
@@ -94,9 +95,18 @@ public class Global extends MultiDexApplication {
                 settings.referrer = null;
             settings.save();
         }
+        // Tree settings were introduced in version 1.0.1
+        boolean toBeSaved = false;
+        for (Settings.Tree tree : settings.trees) {
+            if (tree.settings == null) {
+                tree.settings = new Settings.TreeSettings();
+                toBeSaved = true;
+            }
+        }
+        if (toBeSaved) settings.save();
         // Diagram settings were (probably) introduced in version 0.7.4
         if (settings.diagram == null) {
-            settings.diagram = new Settings.Diagram().init();
+            settings.diagram = new Settings.DiagramSettings().init();
             settings.save();
         }
     }
@@ -140,7 +150,7 @@ public class Global extends MultiDexApplication {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) { // Tiramisu doesn't need this
             // Keeps the app locale if system language is changed while the app is running
             Locale appLocale = AppCompatDelegate.getApplicationLocales().get(0);
