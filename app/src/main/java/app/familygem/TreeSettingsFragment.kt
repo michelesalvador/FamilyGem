@@ -24,7 +24,7 @@ class TreeSettingsFragment : Fragment(R.layout.tree_settings_activity) {
     var edited = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        (activity as AppCompatActivity?)!!.supportActionBar!!.title = "Tree settings"
+        (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.tree_settings)
 
         // Life span
         yearsEdit = requireActivity().findViewById(R.id.treeSettings_years)

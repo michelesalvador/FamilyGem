@@ -391,6 +391,13 @@
     <string name="from">Da</string>
     <string name="to">A</string>
     <string name="date_phrase">Frase</string>
+    <!-- TreeSettingsActivity -->
+    <string name="tree_settings">Impostazioni albero</string>
+    <string name="max_life_span">Durata massima di vita</string>
+    <string name="years">Anni</string>
+    <string name="current_date">Data attuale</string>
+    <string name="device_date">Data del dispositivo</string>
+    <string name="fixed_date">Data fissa</string>
     <!-- U -->
     <string name="no_name">Senza nome</string>
     <string name="empty_name">Nome vuoto</string>

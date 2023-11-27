@@ -47,6 +47,6 @@
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/gear"
-            android:title="Tree settings" />
+            android:title="@string/tree_settings" />
     </group>
 </menu>

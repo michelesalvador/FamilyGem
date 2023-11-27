@@ -365,6 +365,12 @@
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="date_phrase">Phrase</string>
+    <string name="tree_settings">Tree settings</string>
+    <string name="max_life_span">Maximum life span</string>
+    <string name="years">Years</string>
+    <string name="current_date">Current date</string>
+    <string name="device_date">Date of device</string>
+    <string name="fixed_date">Fixed date</string>
     <string name="no_name">No name</string>
     <string name="empty_name">Empty name</string>
     <string name="months">months</string>

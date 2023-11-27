@@ -20,16 +20,16 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Maximum life span" />
+                android:text="@string/max_life_span" />
 
             <EditText
                 android:id="@+id/treeSettings_years"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Years"
+                android:hint="@string/years"
                 android:inputType="number" />
         </LinearLayout>
 
@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="Current date" />
+            android:text="@string/current_date" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -55,13 +55,13 @@
                     android:id="@+id/treeSettings_deviceDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Date of device" />
+                    android:text="@string/device_date" />
 
                 <RadioButton
                     android:id="@+id/treeSettings_fixedDate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Fixed date" />
+                    android:text="@string/fixed_date" />
             </RadioGroup>
 
             <TextView
