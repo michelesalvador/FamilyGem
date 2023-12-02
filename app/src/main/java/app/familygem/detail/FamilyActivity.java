@@ -31,11 +31,12 @@ import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.constant.Status;
 import app.familygem.util.TreeUtils;
+import app.familygem.util.Utils;
 
 public class FamilyActivity extends DetailActivity {
 
     Family family;
-    static String[] lineageTexts = {U.s(R.string.undefined) + " (" + U.s(R.string.birth).toLowerCase() + ")",
+    static String[] lineageTexts = {U.s(R.string.undefined) + " (" + Utils.INSTANCE.caseString(R.string.birth) + ")",
             U.s(R.string.birth), U.s(R.string.adopted), U.s(R.string.foster)};
     static String[] lineageTypes = {null, "birth", "adopted", "foster"};
 
@@ -226,7 +227,7 @@ public class FamilyActivity extends DetailActivity {
                     role = R.string.child;
             }
         }
-        return Global.context.getString(role);
+        return Utils.INSTANCE.caseString(role);
     }
 
     /**

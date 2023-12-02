@@ -101,7 +101,6 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
             menu.findItem(R.id.nav_sources).setVisible(false);
             menu.findItem(R.id.nav_repositories).setVisible(false);
             menu.findItem(R.id.nav_submitters).setVisible(false);
-            menu.findItem(R.id.nav_settings).setVisible(false);
         }
     }
 

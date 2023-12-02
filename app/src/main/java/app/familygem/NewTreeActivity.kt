@@ -12,13 +12,19 @@ import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.util.TreeUtils
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
@@ -44,7 +50,7 @@ class NewTreeActivity : BaseActivity() {
         if (dateIdExists) // Doesn't need any permissions because it unpacks only into the app's external storage
             downloadShared.setOnClickListener {
                 progress.visibility = View.VISIBLE
-                lifecycleScope.launch(Dispatchers.IO) {
+                lifecycleScope.launch(IO) {
                     TreeUtils.downloadSharedTree(this@NewTreeActivity, referrer,
                             { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
                             { progress.visibility = View.GONE })
@@ -86,7 +92,7 @@ class NewTreeActivity : BaseActivity() {
         findViewById<Button>(R.id.new_download_example).setOnClickListener {
             it.isEnabled = false
             progress.visibility = View.VISIBLE
-            lifecycleScope.launch(Dispatchers.IO) { downloadExample(it as Button) }
+            lifecycleScope.launch(IO) { downloadExample(it as Button) }
         }
 
         // Imports a GEDCOM file chosen with SAF
@@ -95,7 +101,7 @@ class NewTreeActivity : BaseActivity() {
                 val uri = result.data?.data
                 if (uri != null) {
                     progress.visibility = View.VISIBLE
-                    lifecycleScope.launch(Dispatchers.Default) {
+                    lifecycleScope.launch(IO) {
                         TreeUtils.importGedcom(this@NewTreeActivity, uri, {
                             // Successful import
                             onBackPressedDispatcher.onBackPressed()
@@ -125,7 +131,7 @@ class NewTreeActivity : BaseActivity() {
                                     .toList().containsAll(listOf("settings.json", "tree.json"))
                         }
                         if (isValidBackup) {
-                            lifecycleScope.launch(Dispatchers.Default) {
+                            lifecycleScope.launch(Default) {
                                 TreeUtils.unZipTree(this@NewTreeActivity, null, uri,
                                         { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
                                         { progress.visibility = View.GONE })
@@ -199,7 +205,7 @@ class NewTreeActivity : BaseActivity() {
                 if (cursor.moveToFirst()) {
                     when (cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
                         DownloadManager.STATUS_FAILED -> {
-                            withContext(Dispatchers.Main) {
+                            withContext(Main) {
                                 progress.visibility = View.GONE
                                 findViewById<Button>(R.id.new_download_example).isEnabled = true
                                 Toast.makeText(this@NewTreeActivity, R.string.something_wrong, Toast.LENGTH_LONG).show()

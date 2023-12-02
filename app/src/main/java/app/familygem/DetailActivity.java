@@ -497,7 +497,7 @@ public abstract class DetailActivity extends AppCompatActivity {
      * or a new instance of the class, but in this case it immediately goes back.
      * TODO: code smell: no type safety and reflection creating new classes.
      */
-    public Object cast(Class aClass) {
+    public Object cast(Class<?> aClass) {
         Object casted = null;
         try {
             // If it goes wrong will return a new instance of the class, just to not crash DetailActivity

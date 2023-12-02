@@ -40,6 +40,7 @@ import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.util.TreeUtils;
+import app.familygem.util.Utils;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.MediaContainerList;
 import app.familygem.visitor.MediaReferences;
@@ -83,7 +84,7 @@ public class MediaFragment extends Fragment {
 
     void setToolbarTitle() {
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(mediaVisitor.mediaList.size()
-                + " " + getString(R.string.media).toLowerCase());
+                + " " + Utils.INSTANCE.caseString(R.string.media));
     }
 
     /**

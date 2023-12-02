@@ -29,8 +29,8 @@ import app.familygem.Memory;
  */
 public class FindStack extends Visitor {
 
-    private List<Memory.Step> stack;
-    private Object target;
+    private final List<Memory.Step> stack;
+    private final Object target;
     private boolean found;
 
     public FindStack(Gedcom gedcom, Object target) {
@@ -39,7 +39,7 @@ public class FindStack extends Visitor {
         gedcom.accept(this);
     }
 
-    private boolean opera(Object object, String tag, boolean isLeader) {
+    private boolean addStep(Object object, String tag, boolean isLeader) {
         if (!found) {
             if (isLeader)
                 stack.clear(); // A leader makes a stack start all over again
@@ -66,76 +66,76 @@ public class FindStack extends Visitor {
     }
 
     @Override
-    public boolean visit(Header step) {
-        return opera(step, "HEAD", true);
+    public boolean visit(Header header) {
+        return addStep(header, "HEAD", true);
     }
 
     @Override
-    public boolean visit(Person step) {
-        return opera(step, "INDI", true);
+    public boolean visit(Person person) {
+        return addStep(person, "INDI", true);
     }
 
     @Override
-    public boolean visit(Family step) {
-        return opera(step, "FAM", true);
+    public boolean visit(Family family) {
+        return addStep(family, "FAM", true);
     }
 
     @Override
-    public boolean visit(Source step) {
-        return opera(step, "SOUR", true);
+    public boolean visit(Source source) {
+        return addStep(source, "SOUR", true);
     }
 
     @Override
-    public boolean visit(Repository step) {
-        return opera(step, "REPO", true);
+    public boolean visit(Repository repository) {
+        return addStep(repository, "REPO", true);
     }
 
     @Override
-    public boolean visit(Submitter step) {
-        return opera(step, "SUBM", true);
+    public boolean visit(Submitter submitter) {
+        return addStep(submitter, "SUBM", true);
     }
 
     @Override
-    public boolean visit(Media step) {
-        return opera(step, "OBJE", step.getId() != null);
+    public boolean visit(Media media) {
+        return addStep(media, "OBJE", media.getId() != null);
     }
 
     @Override
-    public boolean visit(Note step) {
-        return opera(step, "NOTE", step.getId() != null);
+    public boolean visit(Note note) {
+        return addStep(note, "NOTE", note.getId() != null);
     }
 
     @Override
-    public boolean visit(Name step) {
-        return opera(step, "NAME", false);
+    public boolean visit(Name name) {
+        return addStep(name, "NAME", false);
     }
 
     @Override
-    public boolean visit(EventFact step) {
-        return opera(step, step.getTag(), false);
+    public boolean visit(EventFact eventFact) {
+        return addStep(eventFact, eventFact.getTag(), false);
     }
 
     @Override
-    public boolean visit(SourceCitation step) {
-        return opera(step, "SOUR", false);
+    public boolean visit(SourceCitation sourceCitation) {
+        return addStep(sourceCitation, "SOUR", false);
     }
 
     @Override
-    public boolean visit(RepositoryRef step) {
-        return opera(step, "REPO", false);
+    public boolean visit(RepositoryRef repositoryRef) {
+        return addStep(repositoryRef, "REPO", false);
     }
 
     @Override
-    public boolean visit(Change step) {
-        return opera(step, "CHAN", false);
+    public boolean visit(Change change) {
+        return addStep(change, "CHAN", false);
     }
 
     /* GedcomTag is not Visitable and therefore the visit does not continue
     @Override
     public boolean visit(String extensionKey, Object extensions) {
         if (extensionKey.equals(ModelParser.MORE_TAGS_EXTENSION_KEY)) {
-            for (GedcomTag ext : (List<GedcomTag>)extensions) {
-                opera(ext, ext.getTag(), false);
+            for (GedcomTag extension : (List<GedcomTag>)extensions) {
+                addStep(extension, extension.getTag(), false);
             }
         }
         return true;

@@ -699,12 +699,12 @@ public class DiagramFragment extends Fragment {
         List<Family> spouseFams = person.getSpouseFamilies(gc);
         if (parentFams.size() > 0)
             labels[0] = spouseFams.isEmpty() ? context.getString(R.string.family)
-                    : context.getString(R.string.family_as, FamilyActivity.getRole(person, null, Relation.CHILD, true).toLowerCase());
+                    : context.getString(R.string.family_as, FamilyActivity.getRole(person, null, Relation.CHILD, true));
         if (family == null && spouseFams.size() == 1)
             family = spouseFams.get(0);
         if (spouseFams.size() > 0)
             labels[1] = parentFams.isEmpty() ? context.getString(R.string.family)
-                    : context.getString(R.string.family_as, FamilyActivity.getRole(person, family, Relation.PARTNER, true).toLowerCase());
+                    : context.getString(R.string.family_as, FamilyActivity.getRole(person, family, Relation.PARTNER, true));
         return labels;
     }
 

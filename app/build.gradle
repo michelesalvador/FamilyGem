@@ -24,7 +24,7 @@ android {
         minSdk 19
         targetSdk 34
         versionCode 25
-        versionName '1.0.0.3'
+        versionName '1.0.0.5'
         vectorDrawables.useSupportLibrary = true
         resourceConfigurations += ['ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh']
         def passKey = ''
@@ -52,6 +52,9 @@ android {
                 signingConfig signingConfigs.config
         }
     }
+    buildFeatures {
+        buildConfig true
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -69,7 +72,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-process:2.6.2'
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     implementation 'org.familysearch.gedcom:gedcom:1.14.0'
-    implementation 'androidx.work:work-runtime:2.8.1'
+    implementation 'androidx.work:work-runtime:2.9.0'
     implementation 'androidx.appcompat:appcompat:1.7.0-alpha03'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.7.5'
@@ -86,7 +89,7 @@ dependencies {
     implementation files('libs/geonames-1.1.15.jar')
     implementation 'com.squareup.picasso:picasso:2.8' // 2.8 is more than 2.71828
     implementation 'jp.wasabeef:picasso-transformations:2.2.1'
-    // Don't update Jdom to version 2.x for compatibility with GeoNames
+    // Don't update Jdom to version 2.x for compatibility with GeoNames 1.1.15
     implementation 'org.jdom:jdom:1.1.3'
     // To avoid ClassNotFoundException org.apache.xerces.parsers.SAXParser when building with minifyEnabled
     implementation 'xerces:xercesImpl:2.12.0'

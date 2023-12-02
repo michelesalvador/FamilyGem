@@ -16,6 +16,7 @@ import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
 import app.familygem.share.CompareActivity
+import app.familygem.util.Utils.caseString
 import app.familygem.util.Utils.string
 import app.familygem.visitor.MediaList
 import com.google.gson.Gson
@@ -45,11 +46,12 @@ import java.util.Locale
 import java.util.zip.ZipInputStream
 
 fun Tree.getBasicData(): String {
-    var data = "$persons ${string(if (persons == 1) R.string.person else R.string.persons).lowercase()}"
-    if (persons > 1 && generations > 0) data += " - $generations " +
-            string(if (generations == 1) R.string.generation else R.string.generations).lowercase()
-    if (media > 0) data += " - $media ${Global.context.getString(R.string.media).lowercase()}"
-    return data
+    val builder = StringBuilder()
+    builder.append("$persons ${caseString(if (persons == 1) R.string.person else R.string.persons)}")
+    if (persons > 1 && generations > 0)
+        builder.append(" - $generations ${caseString(if (generations == 1) R.string.generation else R.string.generations)}")
+    if (media > 0) builder.append(" - $media ${caseString(R.string.media)}")
+    return builder.toString()
 }
 
 /**

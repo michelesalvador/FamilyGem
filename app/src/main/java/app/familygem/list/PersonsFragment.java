@@ -63,6 +63,7 @@ import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.util.TreeUtils;
+import app.familygem.util.Utils;
 
 public class PersonsFragment extends Fragment {
 
@@ -148,7 +149,7 @@ public class PersonsFragment extends Fragment {
     // Title and options in toolbar
     private void furnishToolbar() {
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(allPeople.size() + " "
-                + getString(allPeople.size() == 1 ? R.string.person : R.string.persons).toLowerCase());
+                + Utils.INSTANCE.caseString(allPeople.size() == 1 ? R.string.person : R.string.persons));
         setHasOptionsMenu(allPeople.size() > 1);
     }
 

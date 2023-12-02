@@ -32,6 +32,7 @@ import app.familygem.detail.SubmitterActivity;
 import app.familygem.util.ChangeUtils;
 import app.familygem.util.SubmitterUtilsKt;
 import app.familygem.util.TreeUtils;
+import app.familygem.util.Utils;
 
 public class SubmittersFragment extends Fragment {
 
@@ -41,7 +42,7 @@ public class SubmittersFragment extends Fragment {
         if (gc != null) {
             List<Submitter> submitterList = gc.getSubmitters();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(submitterList.size() + " " +
-                    getString(submitterList.size() == 1 ? R.string.submitter : R.string.submitters).toLowerCase());
+                    Utils.INSTANCE.caseString(submitterList.size() == 1 ? R.string.submitter : R.string.submitters));
             setHasOptionsMenu(true);
             LinearLayout layout = view.findViewById(R.id.scrollview_layout);
             for (final Submitter submitter : submitterList) {

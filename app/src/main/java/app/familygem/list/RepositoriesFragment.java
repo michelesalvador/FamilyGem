@@ -37,6 +37,7 @@ import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.detail.RepositoryActivity;
 import app.familygem.util.TreeUtils;
+import app.familygem.util.Utils;
 
 /**
  * Fragment with a list of all repositories of the tree.
@@ -60,7 +61,7 @@ public class RepositoriesFragment extends Fragment {
         if (gc != null) {
             List<Repository> repos = gc.getRepositories();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(repos.size() + " "
-                    + getString(repos.size() == 1 ? R.string.repository : R.string.repositories).toLowerCase());
+                    + Utils.INSTANCE.caseString(repos.size() == 1 ? R.string.repository : R.string.repositories));
             if (repos.size() > 1)
                 setHasOptionsMenu(true);
             Collections.sort(repos, (r1, r2) -> {
