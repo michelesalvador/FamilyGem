@@ -41,7 +41,7 @@ public class GedcomDateConverter {
         kind = Kind.EXACT;
     }
 
-    public class Data {
+    public static class Data {
         public Date date;
         SimpleDateFormat format;
         boolean negative;

@@ -192,6 +192,7 @@
     <string name="surname">Cognome</string>
     <string name="year">Anno</string>
     <string name="age">Età</string>
+    <string name="birthday">Compleanno</string>
     <string name="number_relatives">Numero di familiari</string>
     <string name="really_delete_person">Vuoi davvero eliminare questa persona?</string>
     <string name="person_deleted">Persona eliminata.</string>

@@ -518,6 +518,7 @@ class TreesActivity : AppCompatActivity() {
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) {
+            progress.visibility = View.VISIBLE
             lifecycleScope.launch(IO) {
                 val uri = data!!.data
                 if (uri != null) {
@@ -533,6 +534,7 @@ class TreesActivity : AppCompatActivity() {
                     if (result) Utils.toast(exporter.successMessage)
                     else Utils.toast(exporter.errorMessage)
                 } else Utils.toast(R.string.cant_understand_uri)
+                withContext(Main) { progress.visibility = View.GONE }
             }
         }
     }

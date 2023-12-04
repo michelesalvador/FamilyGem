@@ -35,6 +35,7 @@ import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Person;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.joda.time.Years;
 
 import java.util.ArrayList;
@@ -80,6 +81,7 @@ public class PersonsFragment extends Fragment {
         SURNAME_ASC, SURNAME_DESC,
         DATE_ASC, DATE_DESC,
         AGE_ASC, AGE_DESC,
+        BIRTHDAY_ASC, BIRTHDAY_DESC,
         KIN_ASC, KIN_DESC;
 
         public Order next() {
@@ -173,7 +175,10 @@ public class PersonsFragment extends Fragment {
                 label = person.getId();
             else if (order == Order.SURNAME_ASC || order == Order.SURNAME_DESC)
                 label = U.surname(person);
-            else if (order == Order.KIN_ASC || order == Order.KIN_DESC)
+            else if (order == Order.BIRTHDAY_ASC || order == Order.BIRTHDAY_DESC) {
+                int birthday = selectedPeople.get(position).birthday;
+                if (birthday > Integer.MIN_VALUE) label = String.valueOf(birthday);
+            } else if (order == Order.KIN_ASC || order == Order.KIN_DESC)
                 label = String.valueOf(selectedPeople.get(position).relatives);
             TextView infoView = personView.findViewById(R.id.person_info);
             if (label == null)
@@ -358,7 +363,7 @@ public class PersonsFragment extends Fragment {
             Person p1 = wrapper1.person;
             Person p2 = wrapper2.person;
             switch (order) {
-                case ID_ASC: // Sort for GEDCOM ID
+                case ID_ASC: // Sorts by GEDCOM ID
                     if (idsAreNumeric)
                         return U.extractNum(p1.getId()) - U.extractNum(p2.getId());
                     else
@@ -368,35 +373,34 @@ public class PersonsFragment extends Fragment {
                         return U.extractNum(p2.getId()) - U.extractNum(p1.getId());
                     else
                         return p2.getId().compareToIgnoreCase(p1.getId());
-                case SURNAME_ASC: // Sort for surname
-                    if (wrapper1.surname == null) // Null surnames go to the end
-                        return wrapper2.surname == null ? 0 : 1;
-                    if (wrapper2.surname == null)
-                        return -1;
+                case SURNAME_ASC: // Sorts by surname
+                    if (wrapper1.surname == null) return 1; // Null surnames go to the bottom
+                    if (wrapper2.surname == null) return -1;
                     return wrapper1.surname.compareTo(wrapper2.surname);
                 case SURNAME_DESC:
-                    if (wrapper1.surname == null)
-                        return wrapper2.surname == null ? 0 : 1;
-                    if (wrapper2.surname == null)
-                        return -1;
+                    if (wrapper1.surname == null) return 1;
+                    if (wrapper2.surname == null) return -1;
                     return wrapper2.surname.compareTo(wrapper1.surname);
-                case DATE_ASC: // Sort for person's main year
+                case DATE_ASC: // Sorts by person's main date
                     return wrapper1.date - wrapper2.date;
                 case DATE_DESC:
-                    if (wrapper2.date == Integer.MAX_VALUE) // Those without year go to the bottom
-                        return -1;
-                    if (wrapper1.date == Integer.MAX_VALUE)
-                        return 1;
+                    if (wrapper1.date == Integer.MAX_VALUE) return 1; // Those without date go to the bottom
+                    if (wrapper2.date == Integer.MAX_VALUE) return -1;
                     return wrapper2.date - wrapper1.date;
-                case AGE_ASC: // Sort for main person's year
+                case AGE_ASC: // Sorts by person's age
                     return wrapper1.age - wrapper2.age;
                 case AGE_DESC:
-                    if (wrapper2.age == Integer.MAX_VALUE) // Those without age go to the bottom
-                        return -1;
-                    if (wrapper1.age == Integer.MAX_VALUE)
-                        return 1;
+                    if (wrapper1.age == Integer.MAX_VALUE) return 1; // Those without age go to the bottom
+                    if (wrapper2.age == Integer.MAX_VALUE) return -1;
                     return wrapper2.age - wrapper1.age;
-                case KIN_ASC: // Sort for number of relatives
+                case BIRTHDAY_ASC: // Sorts by days to person's next birthday
+                    if (wrapper2.birthday == 0) return 1; // Otherwhise with wrapper1 MIN_VALUE returns -2147483648
+                    return wrapper2.birthday - wrapper1.birthday;
+                case BIRTHDAY_DESC:
+                    if (wrapper1.birthday == Integer.MIN_VALUE) return 1; // Those without birthday go to the bottom
+                    if (wrapper2.birthday == Integer.MIN_VALUE) return -1;
+                    return wrapper1.birthday - wrapper2.birthday;
+                case KIN_ASC: // Sorts by number of relatives
                     return wrapper1.relatives - wrapper2.relatives;
                 case KIN_DESC:
                     return wrapper2.relatives - wrapper1.relatives;
@@ -496,8 +500,9 @@ public class PersonsFragment extends Fragment {
         final Person person;
         String text; // Single string with all names and events for search
         String surname; // Surname and name of the person
-        int date; // Date in the format YYYYMMDD
-        int age; // Age in days
+        int date = Integer.MAX_VALUE; // Date in the format YYYYMMDD
+        int age = Integer.MAX_VALUE; // Age in days
+        int birthday = Integer.MIN_VALUE; // Negative days to the next birthday
         int relatives; // Number of near relatives
 
         PersonWrapper(Person person) {
@@ -519,17 +524,16 @@ public class PersonsFragment extends Fragment {
             // Surname and first name concatenated
             surname = getSurnameFirstname(person);
 
-            // Finds the first date of a person's life or MAX_VALUE
-            date = Integer.MAX_VALUE;
+            // Finds the first date of the person's life
             for (EventFact event : person.getEventsFacts()) {
                 if (event.getDate() != null) {
                     datator.analyze(event.getDate());
                     date = datator.getDateNumber();
+                    break;
                 }
             }
 
-            // Calculates the age of a person in days or MAX_VALUE
-            age = Integer.MAX_VALUE;
+            // Calculates age and days to next birthday
             GedcomDateConverter start = null, end = null;
             for (EventFact event : person.getEventsFacts()) {
                 if (event.getTag() != null && event.getTag().equals("BIRT") && event.getDate() != null) {
@@ -543,22 +547,31 @@ public class PersonsFragment extends Fragment {
                     break;
                 }
             }
-            if (start != null && start.isSingleKind() && !start.data1.isFormat(Format.D_M)) {
+            if (start != null && start.isSingleKind()) {
                 Settings.TreeSettings treeSettings = Global.settings.getCurrentTree().settings;
                 LocalDate startDate = new LocalDate(start.data1.date);
                 LocalDate now;
                 if (treeSettings.customDate) now = new LocalDate(treeSettings.fixedDate);
                 else now = LocalDate.now();
-                if (end == null && startDate.isBefore(now)
-                        && Years.yearsBetween(startDate, now).getYears() <= treeSettings.lifeSpan
-                        && !U.isDead(person)) {
-                    end = new GedcomDateConverter(now.toDate());
-                }
-                if (end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M)) {
-                    LocalDate endDate = new LocalDate(end.data1.date);
-                    if (startDate.isBefore(endDate) || startDate.isEqual(endDate)) {
-                        age = Days.daysBetween(startDate, endDate).getDays();
+                boolean living = !U.isDead(person) && Years.yearsBetween(startDate, now).getYears() <= treeSettings.lifeSpan;
+                // Calculates the person age in days
+                if (!start.data1.isFormat(Format.D_M)) {
+                    if (living && end == null && (startDate.isBefore(now) || startDate.isEqual(now))) {
+                        end = new GedcomDateConverter(now.toDate());
                     }
+                    if (end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M)) {
+                        LocalDate endDate = new LocalDate(end.data1.date);
+                        if (startDate.isBefore(endDate) || startDate.isEqual(endDate)) {
+                            age = Days.daysBetween(startDate, endDate).getDays();
+                        }
+                    }
+                }
+                // Counts the days remaining to the person next birthday
+                if (living && !(start.data1.isFormat(Format.Y) || start.data1.isFormat(Format.M_Y))) {
+                    int ageYears = new Period(startDate, now).getYears();
+                    LocalDate nextBirthday = startDate.plusYears(ageYears);
+                    if (nextBirthday.isBefore(now)) nextBirthday = startDate.plusYears(ageYears + 1);
+                    birthday = Days.daysBetween(nextBirthday, now).getDays();
                 }
             }
 
@@ -577,7 +590,8 @@ public class PersonsFragment extends Fragment {
         subMenu.add(0, 2, 0, R.string.surname);
         subMenu.add(0, 3, 0, R.string.date);
         subMenu.add(0, 4, 0, R.string.age);
-        subMenu.add(0, 5, 0, R.string.number_relatives);
+        subMenu.add(0, 5, 0, R.string.birthday);
+        subMenu.add(0, 6, 0, R.string.number_relatives);
 
         // Search in PersonsFragment
         inflater.inflate(R.menu.search, menu); // This only makes appear the lens with the search field
@@ -600,7 +614,7 @@ public class PersonsFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id > 0 && id <= 5) {
+        if (id > 0 && id <= 6) {
             // Clicking twice the same menu item switches sorting ASC and DESC
             if (order == Order.values()[id * 2 - 1])
                 order = order.next();

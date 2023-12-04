@@ -24,7 +24,7 @@ android {
         minSdk 19
         targetSdk 34
         versionCode 25
-        versionName '1.0.0.5'
+        versionName '1.0.0.7'
         vectorDrawables.useSupportLibrary = true
         resourceConfigurations += ['ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh']
         def passKey = ''

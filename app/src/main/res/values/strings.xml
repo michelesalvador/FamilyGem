@@ -178,6 +178,7 @@
     <string name="surname">Surname</string>
     <string name="year">Year</string>
     <string name="age">Age</string>
+    <string name="birthday">Birthday</string>
     <string name="number_relatives">Number of relatives</string>
     <string name="really_delete_person">Really want to delete this person?</string>
     <string name="person_deleted">Person deleted.</string>
