@@ -194,7 +194,7 @@ class SharingActivity : BaseActivity() {
             val rootLayout = findViewById<LinearLayout>(R.id.share_root)
             rootLayout.visibility = View.VISIBLE
             rootLayout.removeView(rootView)
-            rootView = U.placePerson(rootLayout, person)
+            rootView = U.placeSmallPerson(rootLayout, person)
             rootView!!.setOnClickListener {
                 val intent = Intent(this, Principal::class.java)
                 intent.putExtra(Choice.PERSON, true)

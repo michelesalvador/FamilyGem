@@ -60,6 +60,7 @@ import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.list.PersonsFragment;
 import app.familygem.util.ChangeUtils;
+import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
 import graph.gedcom.Bond;
 import graph.gedcom.CurveLine;
@@ -434,10 +435,10 @@ public class DiagramFragment extends Fragment {
             } else if (personNode.acquired) {
                 background.setBackgroundResource(R.drawable.casella_sfondo_sposo);
             }
-            F.showMainImageForPerson(Global.gc, person, view.findViewById(R.id.card_photo));
+            FileUtil.INSTANCE.selectMainImage(person, view.findViewById(R.id.card_picture));
             TextView vistaNome = view.findViewById(R.id.card_name);
             String nome = U.properName(person, true);
-            if (nome.isEmpty() && view.findViewById(R.id.card_photo).getVisibility() == View.VISIBLE)
+            if (nome.isEmpty() && view.findViewById(R.id.card_picture).getVisibility() == View.VISIBLE)
                 vistaNome.setVisibility(View.GONE);
             else vistaNome.setText(nome);
             TextView vistaTitolo = view.findViewById(R.id.card_title);

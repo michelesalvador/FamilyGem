@@ -1,5 +1,7 @@
 package app.familygem.visitor;
 
+import android.net.Uri;
+
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
@@ -14,8 +16,8 @@ import org.folg.gedcom.model.Visitor;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import app.familygem.F;
 import app.familygem.Global;
+import app.familygem.util.FileUtil;
 
 /**
  * Collects an ordered set of Media.
@@ -24,7 +26,7 @@ import app.familygem.Global;
 public class MediaList extends Visitor {
 
     public Set<Media> list = new LinkedHashSet<>();
-    private Gedcom gedcom;
+    private final Gedcom gedcom;
     /**
      * <ol start="0">
      *     <li>All media
@@ -33,7 +35,7 @@ public class MediaList extends Visitor {
      *     <li>Shared and local but only previewable images and videos (for the main menu)
      * </ol>
      */
-    private int mediaType;
+    private final int mediaType;
 
     public MediaList(Gedcom gedcom, int mediaType) {
         this.gedcom = gedcom;
@@ -58,7 +60,17 @@ public class MediaList extends Visitor {
      * Adds only the media alleged with preview (images and videos).
      */
     private void filter(Media media) {
-        String path = F.mediaPath(Global.settings.openTree, media); // TODO: and images from URIs?
+        String path = FileUtil.INSTANCE.getPathFromMedia(media, Global.settings.openTree);
+        if (path == null) { // Images from URIs
+            Uri uri = FileUtil.INSTANCE.getUriFromMedia(media, Global.settings.openTree);
+            if (uri != null) path = uri.getPath();
+        }
+        // Maybe is the URL of a web resource
+        if (path == null && media.getFile() != null
+                && (media.getFile().startsWith("http://") || media.getFile().startsWith("https://"))) {
+            path = media.getFile();
+            if (path.indexOf('?') > 0) path = path.substring(0, (path.indexOf('?'))); // Removes any query
+        }
         if (path != null) {
             int index = path.lastIndexOf('.');
             if (index > 0) {
@@ -76,6 +88,7 @@ public class MediaList extends Visitor {
                     case "3gp":
                     case "webm":
                     case "mkv":
+                    case "pdf":
                         list.add(media);
                 }
             }

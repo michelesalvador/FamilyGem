@@ -69,6 +69,7 @@ import java.util.Set;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Relation;
+import app.familygem.constant.Type;
 import app.familygem.detail.AddressActivity;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
@@ -134,20 +135,20 @@ public abstract class DetailActivity extends AppCompatActivity {
         // Content
         format();
         // Floating Action Button
-        PopupMenu popup = createFabMenu(fabView);
         fabView.setOnClickListener(view -> {
-            popup.show();
+            PopupMenu popup = createFabMenu();
             popup.setOnMenuItemClickListener(fabMenuListener);
+            popup.show();
         });
         // If the FAB menu is empty hides the FAB
-        if (!popup.getMenu().hasVisibleItems()) fabView.hide();
+        if (!createFabMenu().getMenu().hasVisibleItems()) fabView.hide();
         // TODO: when the FAB was hidden, if a piece is deleted the FAB should reappear
     }
 
     /**
      * Creates FAB menu: only with methods that are not already present in box.
      */
-    private PopupMenu createFabMenu(View fabView) {
+    private PopupMenu createFabMenu() {
         PopupMenu popup = new PopupMenu(this, fabView);
         Menu menu = popup.getMenu();
         String[] withAddress = {"Www", "Email", "Phone", "Fax"}; // These objects appear in the Event FAB if an Address exists
@@ -612,7 +613,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             // Family EventFacts can have notes and media
             LinearLayout noteLayout = pieceView.findViewById(R.id.event_other);
             U.placeNotes(noteLayout, object, false);
-            U.placeMedia(noteLayout, object, false);
+            U.placeMedia(noteLayout, (MediaContainer)object, false);
         } else if (object instanceof GedcomTag) { // Extension
             click = v -> {
                 Memory.add(object);
@@ -621,7 +622,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         pieceView.setOnClickListener(click);
         registerForContextMenu(pieceView);
-        pieceView.setTag(R.id.tag_object, object); // It serves various processes to recognize the piece
+        pieceView.setTag(R.id.tag_object, object); // Serves various processes to recognize the piece
         return pieceView;
     }
 
@@ -879,7 +880,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                     gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(object)))
                 menu.add(0, 1, 0, R.string.make_default);
             if (object instanceof Media) {
-                if (box.findViewById(R.id.immagine_foto).getTag(R.id.tag_file_type).equals(1))
+                if (box.findViewById(R.id.image_picture).getTag(R.id.tag_file_type) == Type.CROPPABLE)
                     menu.add(0, 2, 0, R.string.crop);
                 menu.add(0, 3, 0, R.string.choose_file);
             }
@@ -1014,7 +1015,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             } else if (pieceObject instanceof Integer) {
                 if (pieceObject.equals(43614)) { // The image in MediaActivity
                     // It is a croppable image
-                    if (pieceView.findViewById(R.id.immagine_foto).getTag(R.id.tag_file_type).equals(1))
+                    if (pieceView.findViewById(R.id.image_picture).getTag(R.id.tag_file_type) == Type.CROPPABLE)
                         menu.add(0, 100, 0, R.string.crop);
                     menu.add(0, 101, 0, R.string.choose_file);
                 } else if (pieceObject.equals(4043) || pieceObject.equals(6064)) // Name and surname for non-expert
@@ -1216,9 +1217,9 @@ public abstract class DetailActivity extends AppCompatActivity {
      * Receives a View in which there is the image to be cropped and starts cropping.
      */
     private void cropImage(View view) {
-        ImageView imageView = view.findViewById(R.id.immagine_foto);
+        ImageView imageView = view.findViewById(R.id.image_picture);
         File mediaFile = null;
-        String path = (String)imageView.getTag(R.id.tag_percorso);
+        String path = (String)imageView.getTag(R.id.tag_path);
         if (path != null)
             mediaFile = new File(path);
         Uri mediaUri = (Uri)imageView.getTag(R.id.tag_uri);

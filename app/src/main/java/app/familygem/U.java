@@ -103,6 +103,8 @@ import app.familygem.list.PersonsFragment;
 import app.familygem.list.SourcesFragment;
 import app.familygem.list.SubmittersFragment;
 import app.familygem.util.ChangeUtils;
+import app.familygem.util.FileUtil;
+import app.familygem.util.MediaUtil;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.ListOfSourceCitations;
@@ -670,30 +672,33 @@ public class U {
         return dates.trim();
     }
 
-    public static View placeIndividual(LinearLayout scatola, Person persona, String ruolo) {
-        View vistaIndi = LayoutInflater.from(scatola.getContext()).inflate(R.layout.piece_person, scatola, false);
-        scatola.addView(vistaIndi);
-        TextView vistaRuolo = vistaIndi.findViewById(R.id.person_info);
-        if (ruolo == null) vistaRuolo.setVisibility(View.GONE);
-        else vistaRuolo.setText(ruolo);
-        TextView vistaNome = vistaIndi.findViewById(R.id.person_name);
-        String nome = properName(persona);
-        if (nome.isEmpty() && ruolo != null) vistaNome.setVisibility(View.GONE);
-        else vistaNome.setText(nome);
-        TextView vistaTitolo = vistaIndi.findViewById(R.id.person_title);
-        String titolo = titolo(persona);
-        if (titolo.isEmpty()) vistaTitolo.setVisibility(View.GONE);
-        else vistaTitolo.setText(titolo);
-        details(persona, vistaIndi.findViewById(R.id.person_details));
-        F.showMainImageForPerson(Global.gc, persona, vistaIndi.findViewById(R.id.person_image));
-        if (!isDead(persona))
-            vistaIndi.findViewById(R.id.person_mourning).setVisibility(View.GONE);
-        if (Gender.isMale(persona))
-            vistaIndi.findViewById(R.id.person_border).setBackgroundResource(R.drawable.casella_bordo_maschio);
-        else if (Gender.isFemale(persona))
-            vistaIndi.findViewById(R.id.person_border).setBackgroundResource(R.drawable.casella_bordo_femmina);
-        vistaIndi.setTag(persona.getId());
-        return vistaIndi;
+    /**
+     * Inflates in layout a person card with their main details.
+     */
+    public static View placePerson(LinearLayout layout, Person person, String role) {
+        View personView = LayoutInflater.from(layout.getContext()).inflate(R.layout.piece_person, layout, false);
+        layout.addView(personView);
+        TextView roleView = personView.findViewById(R.id.person_info);
+        if (role == null) roleView.setVisibility(View.GONE);
+        else roleView.setText(role);
+        TextView nameView = personView.findViewById(R.id.person_name);
+        String name = properName(person);
+        if (name.isEmpty() && role != null) nameView.setVisibility(View.GONE);
+        else nameView.setText(name);
+        TextView titleView = personView.findViewById(R.id.person_title);
+        String title = titolo(person);
+        if (title.isEmpty()) titleView.setVisibility(View.GONE);
+        else titleView.setText(title);
+        details(person, personView.findViewById(R.id.person_details));
+        FileUtil.INSTANCE.selectMainImage(person, personView.findViewById(R.id.person_image));
+        if (!isDead(person))
+            personView.findViewById(R.id.person_mourning).setVisibility(View.GONE);
+        if (Gender.isMale(person))
+            personView.findViewById(R.id.person_border).setBackgroundResource(R.drawable.casella_bordo_maschio);
+        else if (Gender.isFemale(person))
+            personView.findViewById(R.id.person_border).setBackgroundResource(R.drawable.casella_bordo_femmina);
+        personView.setTag(person.getId());
+        return personView;
     }
 
     // Place all the notes of an object
@@ -774,18 +779,25 @@ public class U {
         return capi.toArray();
     }
 
-    // Elenca tutti i media di un object contenitore
-    public static void placeMedia(LinearLayout layout, Object container, boolean detailed) {
-        RecyclerView griglia = new MediaAdapter.RiciclaVista(layout.getContext(), detailed);
-        griglia.setHasFixedSize(true);
-        RecyclerView.LayoutManager gestoreLayout = new GridLayoutManager(layout.getContext(), detailed ? 2 : 3);
-        griglia.setLayoutManager(gestoreLayout);
-        List<MediaContainerList.MedCont> listaMedia = new ArrayList<>();
-        for (Media med : ((MediaContainer)container).getAllMedia(Global.gc))
-            listaMedia.add(new MediaContainerList.MedCont(med, container));
-        MediaAdapter adattatore = new MediaAdapter(listaMedia, detailed);
-        griglia.setAdapter(adattatore);
-        layout.addView(griglia);
+    /**
+     * Lists all media of a container object and adds them to the layout.
+     *
+     * @param detailed More or less details displayed
+     */
+    public static void placeMedia(LinearLayout layout, MediaContainer container, boolean detailed) {
+        List<Media> allMedia = container.getAllMedia(Global.gc);
+        if (!allMedia.isEmpty()) {
+            RecyclerView recyclerView = new MediaAdapter.UnclickableRecyclerView(layout.getContext(), detailed);
+            recyclerView.setHasFixedSize(true);
+            RecyclerView.LayoutManager layoutManager = new GridLayoutManager(layout.getContext(), detailed ? 2 : 3);
+            recyclerView.setLayoutManager(layoutManager);
+            List<MediaContainerList.MedCont> mediaList = new ArrayList<>();
+            for (Media media : allMedia)
+                mediaList.add(new MediaContainerList.MedCont(media, container));
+            MediaAdapter adapter = new MediaAdapter(mediaList, detailed);
+            recyclerView.setAdapter(adapter);
+            layout.addView(recyclerView);
+        }
     }
 
     // Di un object inserisce le citazioni alle fonti
@@ -869,10 +881,10 @@ public class U {
      * Creates into layout a small card of a person, linked to the person profile.
      * Used by Cabinet and SharingActivity.
      */
-    public static View placePerson(LinearLayout layout, Person person) {
+    public static View placeSmallPerson(LinearLayout layout, Person person) {
         View personView = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_individuo_piccolo, layout, false);
         layout.addView(personView);
-        F.showMainImageForPerson(Global.gc, person, personView.findViewById(R.id.collega_foto));
+        FileUtil.INSTANCE.selectMainImage(person, personView.findViewById(R.id.collega_foto));
         ((TextView)personView.findViewById(R.id.collega_nome)).setText(properName(person));
         String dates = twoDates(person, false);
         TextView detailView = personView.findViewById(R.id.collega_dati);
@@ -922,17 +934,17 @@ public class U {
         });
     }
 
-    // Usato da dispensa
-    static void linkaMedia(LinearLayout scatola, Media media) {
-        View vistaMedia = LayoutInflater.from(scatola.getContext()).inflate(R.layout.pezzo_media, scatola, false);
-        scatola.addView(vistaMedia);
-        MediaAdapter.arredaMedia(media, vistaMedia.findViewById(R.id.media_testo), vistaMedia.findViewById(R.id.media_num));
-        LinearLayout.LayoutParams parami = (LinearLayout.LayoutParams)vistaMedia.getLayoutParams();
-        parami.height = dpToPx(80);
-        F.showImage(media, vistaMedia.findViewById(R.id.media_img), vistaMedia.findViewById(R.id.media_circolo));
-        vistaMedia.setOnClickListener(v -> {
+    // Used by cabinet
+    static void placeMedia(LinearLayout layout, Media media) {
+        View mediaView = LayoutInflater.from(layout.getContext()).inflate(R.layout.pezzo_media, layout, false);
+        layout.addView(mediaView);
+        MediaUtil.INSTANCE.furnishMedia(media, mediaView.findViewById(R.id.media_testo), mediaView.findViewById(R.id.media_num));
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)mediaView.getLayoutParams();
+        params.height = dpToPx(80);
+        FileUtil.INSTANCE.showImage(media, mediaView.findViewById(R.id.media_img), 0, mediaView.findViewById(R.id.media_circolo));
+        mediaView.setOnClickListener(v -> {
             Memory.setLeader(media);
-            scatola.getContext().startActivity(new Intent(scatola.getContext(), MediaActivity.class));
+            layout.getContext().startActivity(new Intent(layout.getContext(), MediaActivity.class));
         });
     }
 
@@ -965,28 +977,30 @@ public class U {
         layout.addView(cabinetView);
         LinearLayout cabinet = cabinetView.findViewById(R.id.dispensa_scatola);
         if (object instanceof Object[]) {
-            for (Object o : (Object[])object)
-                mettiQualsiasi(cabinet, o);
+            for (Object obj : (Object[])object)
+                placeObject(cabinet, obj);
         } else
-            mettiQualsiasi(cabinet, object);
+            placeObject(cabinet, object);
     }
 
-    // Riconosce il tipo di record e aggiunge il link appropriato alla scatola
-    static void mettiQualsiasi(LinearLayout scatola, Object record) {
+    /**
+     * Recognizes the record type and adds the appropriate link to the cabinet.
+     */
+    static void placeObject(LinearLayout layout, Object record) {
         if (record instanceof Person)
-            placePerson(scatola, (Person)record);
+            placeSmallPerson(layout, (Person)record);
         else if (record instanceof Source)
-            placeSource(scatola, (Source)record, false);
+            placeSource(layout, (Source)record, false);
         else if (record instanceof Family)
-            linkaFamiglia(scatola, (Family)record);
+            linkaFamiglia(layout, (Family)record);
         else if (record instanceof Repository)
-            RepositoryRefActivity.putRepository(scatola, (Repository)record);
+            RepositoryRefActivity.putRepository(layout, (Repository)record);
         else if (record instanceof Note)
-            placeNote(scatola, (Note)record, true);
+            placeNote(layout, (Note)record, true);
         else if (record instanceof Media)
-            linkaMedia(scatola, (Media)record);
+            placeMedia(layout, (Media)record);
         else if (record instanceof Submitter)
-            linkAutore(scatola, (Submitter)record);
+            linkAutore(layout, (Submitter)record);
     }
 
     // Aggiunge al layout il pezzo con la data e tempo di Cambiamento

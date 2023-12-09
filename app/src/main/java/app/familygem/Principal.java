@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Random;
 
 import app.familygem.constant.Choice;
+import app.familygem.constant.Image;
 import app.familygem.list.FamiliesFragment;
 import app.familygem.list.MediaFragment;
 import app.familygem.list.NotesFragment;
@@ -39,6 +40,7 @@ import app.familygem.list.PersonsFragment;
 import app.familygem.list.RepositoriesFragment;
 import app.familygem.list.SourcesFragment;
 import app.familygem.list.SubmittersFragment;
+import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.MediaList;
 import app.familygem.visitor.NoteList;
@@ -157,13 +159,13 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
         imageView.setVisibility(ImageView.GONE);
         mainTitle.setText("");
         if (Global.gc != null) {
-            MediaList cercaMedia = new MediaList(Global.gc, 3);
-            Global.gc.accept(cercaMedia);
-            if (cercaMedia.list.size() > 0) {
-                int caso = new Random().nextInt(cercaMedia.list.size());
-                for (Media med : cercaMedia.list)
-                    if (--caso < 0) { // arriva a -1
-                        F.showImage(med, imageView, null);
+            MediaList mediaList = new MediaList(Global.gc, 3);
+            Global.gc.accept(mediaList);
+            if (mediaList.list.size() > 0) {
+                int random = new Random().nextInt(mediaList.list.size());
+                for (Media media : mediaList.list)
+                    if (--random < 0) { // Reaches -1
+                        FileUtil.INSTANCE.showImage(media, imageView, Image.DARK);
                         imageView.setVisibility(ImageView.VISIBLE);
                         break;
                     }
@@ -186,9 +188,9 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
                         count = gc.getFamilies().size();
                         break;
                     case 3:
-                        MediaList mediaList = new MediaList(gc, 0);
-                        gc.accept(mediaList);
-                        count = mediaList.list.size();
+                        MediaList mediaList1 = new MediaList(gc, 0);
+                        gc.accept(mediaList1);
+                        count = mediaList1.list.size();
                         break;
                     case 4:
                         NoteList notesList = new NoteList();

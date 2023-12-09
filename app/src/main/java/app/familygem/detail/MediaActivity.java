@@ -28,14 +28,17 @@ import app.familygem.ImageActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.constant.Extra;
+import app.familygem.constant.Type;
 import app.familygem.list.MediaFragment;
 import app.familygem.util.ChangeUtils;
+import app.familygem.util.FileUtil;
 import app.familygem.visitor.MediaReferences;
 
 public class MediaActivity extends DetailActivity {
 
     Media media;
-    View imageView;
+    View imageLayout;
 
     @Override
     protected void format() {
@@ -51,7 +54,7 @@ public class MediaActivity extends DetailActivity {
         place(getString(R.string.title), "Title");
         place(getString(R.string.type), "Type", false, 0); // Tag '_TYPE' not GEDCOM standard
         // TODO: File string should be max 259 characters according to GEDCOM 5.5.5 specs
-        place(getString(R.string.file), "File", Global.settings.expert, InputType.TYPE_CLASS_TEXT); // File name, visible only with advanced tools
+        place(getString(R.string.file), "File", true, InputType.TYPE_CLASS_TEXT); // File name
         place(getString(R.string.format), "Format", Global.settings.expert, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS); // File format, e.g. 'JPEG'
         place(getString(R.string.primary), "Primary"); // Tag '_PRIM' not GEDCOM standard, but used to select main media
         place(getString(R.string.scrapbook), "Scrapbook", false, 0); // Scrapbook that contains the Media record, not GEDCOM standard
@@ -65,23 +68,22 @@ public class MediaActivity extends DetailActivity {
         MediaReferences mediaReferences = new MediaReferences(gc, media, false);
         if (mediaReferences.leaders.size() > 0)
             U.placeCabinet(box, mediaReferences.leaders.toArray(), R.string.used_by);
-        else if (((Activity)box.getContext()).getIntent().getBooleanExtra("daSolo", false))
+        else if (((Activity)box.getContext()).getIntent().getBooleanExtra(Extra.ALONE, false))
             U.placeCabinet(box, Memory.getLeaderObject(), R.string.into);
     }
 
-    void displayMedia(Media media, int position) {
-        imageView = LayoutInflater.from(this).inflate(R.layout.immagine_immagine, box, false);
-        box.addView(imageView, position);
-        ImageView imageView = this.imageView.findViewById(R.id.immagine_foto);
-        F.showImage(media, imageView, this.imageView.findViewById(R.id.immagine_circolo));
-        this.imageView.setOnClickListener(vista -> {
-            String path = (String)imageView.getTag(R.id.tag_percorso);
+    private void displayMedia(Media media, int position) {
+        imageLayout = LayoutInflater.from(this).inflate(R.layout.image_layout, box, false);
+        box.addView(imageLayout, position);
+        ImageView imageView = imageLayout.findViewById(R.id.image_picture);
+        FileUtil.INSTANCE.showImage(media, imageView, 0, imageLayout.findViewById(R.id.image_progress));
+        imageLayout.setOnClickListener(view -> {
+            String path = (String)imageView.getTag(R.id.tag_path);
             Uri uri = (Uri)imageView.getTag(R.id.tag_uri);
-            int fileType = (int)imageView.getTag(R.id.tag_file_type);
-            if (fileType == 0) { // Placeholder instead of image, the media has to be found
+            Type fileType = (Type)imageView.getTag(R.id.tag_file_type);
+            if (fileType == Type.NONE || fileType == Type.PLACEHOLDER) { // Placeholder instead of image, the media is loading or doesn't exist
                 F.displayImageCaptureDialog(this, null, 5173, null);
-            } else if (fileType == 2 || fileType == 3) { // Open the media with some other app
-                // TODO: if the type is 3 but it is a url (web page without images) tries to open it as a file://
+            } else if (fileType == Type.PREVIEW || fileType == Type.DOCUMENT) { // Opens the media with some other app
                 if (path != null) {
                     File file = new File(path);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
@@ -110,19 +112,19 @@ public class MediaActivity extends DetailActivity {
                 startActivity(intent);
             } else { // Proper image that can be zoomed
                 Intent intent = new Intent(MediaActivity.this, ImageActivity.class);
-                intent.putExtra("path", path);
+                intent.putExtra(Extra.PATH, path);
                 if (uri != null)
-                    intent.putExtra("uri", uri.toString());
+                    intent.putExtra(Extra.URI, uri.toString());
                 startActivity(intent);
             }
         });
-        this.imageView.setTag(R.id.tag_object, 43614 /* TODO: magic number */); // For the image context menu
-        registerForContextMenu(this.imageView);
+        imageLayout.setTag(R.id.tag_object, 43614 /* TODO: magic number */); // For the image context menu
+        registerForContextMenu(imageLayout);
     }
 
     public void updateImage() {
-        int position = box.indexOfChild(imageView);
-        box.removeView(imageView);
+        int position = box.indexOfChild(imageLayout);
+        box.removeView(imageLayout);
         displayMedia(media, position);
     }
 

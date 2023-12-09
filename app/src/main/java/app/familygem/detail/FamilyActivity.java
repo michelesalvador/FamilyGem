@@ -67,7 +67,7 @@ public class FamilyActivity extends DetailActivity {
     void addMember(SpouseRef sr, Relation relation) {
         Person p = sr.getPerson(gc);
         if (p == null) return;
-        View personView = U.placeIndividual(box, p, getRole(p, family, relation, true) + writeLineage(p, family));
+        View personView = U.placePerson(box, p, getRole(p, family, relation, true) + writeLineage(p, family));
         personView.setTag(R.id.tag_object, p); // For the context menu in DetailActivity
 
         /* Ref inside the individual towards the family.

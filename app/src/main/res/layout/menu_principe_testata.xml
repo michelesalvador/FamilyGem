@@ -9,7 +9,6 @@
         android:id="@+id/menu_immagine"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.75"
         android:scaleType="centerCrop" />
 
     <TextView

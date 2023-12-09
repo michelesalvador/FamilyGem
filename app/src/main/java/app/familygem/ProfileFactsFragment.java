@@ -20,6 +20,7 @@ import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.GedcomTag;
+import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
@@ -184,7 +185,7 @@ public class ProfileFactsFragment extends Fragment {
         eventView.setTag(R.id.tag_object, object);
         registerForContextMenu(eventView);
         if (object instanceof Name) {
-            U.placeMedia(otherLayout, object, false);
+            U.placeMedia(otherLayout, (MediaContainer)object, false);
             eventView.setOnClickListener(v -> {
                 // If it is a complex name, suggests expert mode
                 if (!Global.settings.expert && isNameComplex((Name)object)) {
@@ -229,7 +230,7 @@ public class ProfileFactsFragment extends Fragment {
                             TreeUtils.INSTANCE.save(true, one);
                         }).show());
             } else { // All other events
-                U.placeMedia(otherLayout, object, false);
+                U.placeMedia(otherLayout, (MediaContainer)object, false);
                 eventView.setOnClickListener(v -> {
                     Memory.add(object);
                     startActivity(new Intent(getContext(), EventActivity.class));

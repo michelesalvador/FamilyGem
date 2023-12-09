@@ -12,6 +12,7 @@ import app.familygem.Settings.Tree
 import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.constant.Gender
+import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtils
 import app.familygem.visitor.ListOfSourceCitations
 import app.familygem.visitor.MediaContainersGuarded
@@ -210,7 +211,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         val mediaPaths: MutableMap<Media, String> = HashMap()
         val extSourceDir = context.getExternalFilesDir(sourceId.toString())!!.path
         for (media in mediaList.list) {
-            val path = F.mediaPath(sourceId, media)
+            val path = FileUtil.getPathFromMedia(media, sourceId)
             if (path != null && path.startsWith(extSourceDir)) mediaPaths[media] = path
         }
         // Copies the files to media folder of destination tree, renaming them if necessary
@@ -225,8 +226,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 val path = entry.value
                 val media = entry.key
                 val sourceFile = File(path)
-                val destinationFile = F.nextAvailableFileName(
-                        extDestinationDir.path, path.substring(path.lastIndexOf('/') + 1))
+                val destinationFile = F.nextAvailableFileName(extDestinationDir, path.substring(path.lastIndexOf('/') + 1))
                 try {
                     val sourceStream = FileInputStream(sourceFile)
                     FileUtils.copyInputStreamToFile(sourceStream, destinationFile)

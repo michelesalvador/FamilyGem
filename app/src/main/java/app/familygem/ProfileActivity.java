@@ -3,13 +3,12 @@ package app.familygem;
 import static app.familygem.Global.gc;
 
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,7 +20,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -31,8 +29,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import org.folg.gedcom.model.EventFact;
@@ -45,7 +41,6 @@ import org.folg.gedcom.model.NoteRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +48,9 @@ import java.util.List;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
+import app.familygem.constant.Image;
 import app.familygem.constant.Relation;
+import app.familygem.constant.Type;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
@@ -61,8 +58,8 @@ import app.familygem.list.MediaFragment;
 import app.familygem.list.NotesFragment;
 import app.familygem.list.PersonsFragment;
 import app.familygem.list.SourcesFragment;
+import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
-import jp.wasabeef.picasso.transformations.BlurTransformation;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -446,29 +443,29 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays an image in the profile header.
-     * The blurred background image is displayed in most cases (jpg, png, gif...).
-     * TODO: but not in case of a video preview, or image downloaded from the web with F.DownloadImage()
+     * Displays two images in the profile header: a regular one and the same blurred on background.
      */
     private void setImages() {
         ImageView imageView = findViewById(R.id.profile_image);
-        Media media = F.showMainImageForPerson(Global.gc, one, imageView);
+        Media media = FileUtil.INSTANCE.selectMainImage(one, imageView);
         // Same image blurred on background
         ImageView backImageView = findViewById(R.id.profile_background);
         if (media != null) {
-            String path = F.mediaPath(Global.settings.openTree, media);
-            Uri uri = null;
-            if (path == null)
-                uri = F.mediaUri(Global.settings.openTree, media);
-            if (path != null || uri != null) {
-                RequestCreator creator;
-                backImageView.setColorFilter(ContextCompat.getColor(this, R.color.primary_grayed), PorterDuff.Mode.MULTIPLY);
-                if (path != null) creator = Picasso.get().load(new File(path));
-                else creator = Picasso.get().load(uri);
-                creator.resize(200, 200).centerCrop()
-                        .transform(new BlurTransformation(Global.context, 5, 1)).into(backImageView);
-            }
-        } else backImageView.setImageBitmap(null);
+            // imageView waits for the image to be loaded
+            imageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    Type type = (Type)imageView.getTag(R.id.tag_file_type);
+                    if (type == Type.CROPPABLE || type == Type.PREVIEW) {
+                        FileUtil.INSTANCE.showImage(media, backImageView, Image.BLUR | Image.DARK);
+                        backImageView.setVisibility(View.VISIBLE);
+                    } else backImageView.setVisibility(View.GONE);
+                    if (type != Type.NONE) {
+                        imageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+                }
+            });
+        } else backImageView.setVisibility(View.GONE);
     }
 
     /**

@@ -37,7 +37,7 @@ public class Notifier {
         Settings.Tree tree = Global.settings.getTree(treeId);
 
         // With custom fixed date is nonsense to create birthday notifications
-        if (tree.settings.customDate && toDo != What.DELETE) return;
+        if (tree != null && tree.settings.customDate && toDo != What.DELETE) return;
 
         // Creates the notification channel, necessary only on API 26+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

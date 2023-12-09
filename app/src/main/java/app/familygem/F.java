@@ -11,25 +11,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,35 +33,26 @@ import androidx.core.content.FileProvider;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
-import com.google.gson.JsonPrimitive;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
+import com.bumptech.glide.Glide;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
-import org.folg.gedcom.model.Person;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import app.familygem.detail.MediaActivity;
 import app.familygem.list.MediaFragment;
+import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
-import app.familygem.visitor.MediaList;
 
 /**
  * Static functions to manage files and media.
@@ -166,7 +149,7 @@ public class F {
      * Receives a URI tree obtained with ACTION_OPEN_DOCUMENT_TREE and tries to return the path of the folder,
      * otherwise returns null.
      */
-    public static String uriFolderPath(Uri uri) {
+    public static String getFolderPathFromUri(Uri uri) {
         if (uri == null) return null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             String treeDocId = DocumentsContract.getTreeDocumentId(uri);
@@ -228,378 +211,11 @@ public class F {
             fragment.startActivityForResult(intent, requestCode);
     }
 
-    // Methods for displaying images:
-
-    /**
-     * Receives a Person and chooses the main Media from which to get the image.
-     */
-    public static Media showMainImageForPerson(Gedcom gedcom, Person person, ImageView imageView) {
-        return showMainImageForPerson(gedcom, 0, person, imageView);
-    }
-
-    public static Media showMainImageForPerson(Gedcom gedcom, int treeId, Person person, ImageView imageView) {
-        MediaList mediaList = new MediaList(gedcom, 0);
-        person.accept(mediaList);
-        Media media = null;
-        for (Media med : mediaList.list) { // Looks for a media with Primary value "Y"
-            if (med.getPrimary() != null && med.getPrimary().equals("Y")) {
-                showImage(med, imageView, null, treeId);
-                media = med;
-                break;
-            }
-        }
-        if (media == null) { // Alternatively, returns the first one it finds
-            for (Media med : mediaList.list) {
-                showImage(med, imageView, null, treeId);
-                media = med;
-                break;
-            }
-        }
-        imageView.setVisibility(media != null ? View.VISIBLE : View.GONE);
-        return media;
-    }
-
-    /**
-     * Shows a picture with Picasso.
-     */
-    public static void showImage(Media media, ImageView imageView, ProgressBar progressBar) {
-        showImage(media, imageView, progressBar, 0);
-    }
-
-    public static void showImage(Media media, ImageView imageView, ProgressBar progressBar, int treeId) {
-        if (treeId == 0) treeId = Global.settings.openTree;
-        String path = mediaPath(treeId, media);
-        Uri[] uri = new Uri[1];
-        if (path == null)
-            uri[0] = mediaUri(treeId, media);
-        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
-        imageView.setTag(R.id.tag_file_type, 0);
-        if (path != null || uri[0] != null) {
-            RequestCreator creator;
-            if (path != null)
-                creator = Picasso.get().load(new File(path));
-            else
-                creator = Picasso.get().load(uri[0]);
-            creator.placeholder(R.drawable.image).fit().centerInside()
-                    .into(imageView, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            if (progressBar != null) progressBar.setVisibility(View.GONE);
-                            imageView.setTag(R.id.tag_file_type, 1);
-                            imageView.setTag(R.id.tag_percorso, path); // 'path' or 'uri' one of the 2 is valid, the other is null
-                            imageView.setTag(R.id.tag_uri, uri[0]);
-                            // On MediaActivity reloads the options menu to show the Crop command
-                            if (imageView.getId() == R.id.immagine_foto) {
-                                if (imageView.getContext() instanceof Activity) // In KitKat it is instance of TintContextWrapper
-                                    ((Activity)imageView.getContext()).invalidateOptionsMenu();
-                            }
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-                            // Maybe it's a video to make a thumbnail from
-                            Bitmap bitmap = null;
-                            try { // To avoid crashing of video thumbnail generators
-                                bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MINI_KIND);
-                                // Via the URI
-                                if (bitmap == null && uri[0] != null) {
-                                    MediaMetadataRetriever mMR = new MediaMetadataRetriever();
-                                    mMR.setDataSource(Global.context, uri[0]);
-                                    bitmap = mMR.getFrameAtTime();
-                                }
-                            } catch (Exception ignored) {
-                            }
-                            imageView.setTag(R.id.tag_file_type, 2);
-                            if (bitmap == null) {
-                                // A local file with no preview
-                                String format = media.getFormat();
-                                if (format == null)
-                                    format = path != null ? MimeTypeMap.getFileExtensionFromUrl(path.replaceAll("[^a-zA-Z0-9./]", "_")) : "";
-                                // Removes whitespace that does not make find the file extension
-                                if (format.isEmpty() && uri[0] != null)
-                                    format = MimeTypeMap.getFileExtensionFromUrl(uri[0].getLastPathSegment());
-                                bitmap = generateIcon(imageView, R.layout.media_file, format);
-                                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                                if (imageView.getParent() instanceof RelativeLayout && // Ugly but effective
-                                        ((RelativeLayout)imageView.getParent()).findViewById(R.id.media_testo) != null) {
-                                    RelativeLayout.LayoutParams param = new RelativeLayout.LayoutParams(
-                                            RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-                                    param.addRule(RelativeLayout.ABOVE, R.id.media_testo);
-                                    imageView.setLayoutParams(param);
-                                }
-                                imageView.setTag(R.id.tag_file_type, 3);
-                            }
-                            imageView.setImageBitmap(bitmap);
-                            imageView.setTag(R.id.tag_percorso, path);
-                            imageView.setTag(R.id.tag_uri, uri[0]);
-                            if (progressBar != null) progressBar.setVisibility(View.GONE);
-                        }
-                    });
-        } else if (media.getFile() != null && !media.getFile().isEmpty()) { // Maybe it's an image on the internet
-            String filePath = media.getFile();
-            Picasso.get().load(filePath).fit()
-                    .placeholder(R.drawable.image).centerInside()
-                    .into(imageView, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            if (progressBar != null) progressBar.setVisibility(View.GONE);
-                            imageView.setTag(R.id.tag_file_type, 1);
-                            try {
-                                new CacheImage(media).execute(new URL(filePath));
-                            } catch (Exception ignored) {
-                            }
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-                            // Let's try a web page
-                            new DownloadImage(imageView, progressBar, media).execute(filePath);
-                        }
-                    });
-        } else { // Media without a link to a file
-            if (progressBar != null) progressBar.setVisibility(View.GONE);
-            imageView.setImageResource(R.drawable.image);
-        }
-    }
-
-    /**
-     * It receives a Media and looks for the file on the device with different path combinations.
-     */
-    public static String mediaPath(int treeId, Media m) {
-        String file = m.getFile();
-        if (file != null && !file.isEmpty()) {
-            String name = file.replace("\\", "/");
-            // File path as written in the Gedcom
-            if (new File(name).canRead())
-                return name;
-            for (String dir : Global.settings.getTree(treeId).dirs) {
-                // Media folder + File path
-                String path = dir + '/' + name;
-                File test = new File(path);
-                /* TODO: Sometimes File.isFile() produces an ANR, like https://stackoverflow.com/questions/224756
-                 *  I tried with various non-existent paths, such as the removed SD card, or with absurd characters,
-                 *  but they all simply return false.
-                 *  Probably the ANR is when the path points to an existing resource that waits indefinitely. */
-                if (test.isFile() && test.canRead())
-                    return path;
-                // Media folder + filename
-                path = dir + '/' + new File(name).getName();
-                test = new File(path);
-                if (test.isFile() && test.canRead())
-                    return path;
-            }
-            Object string = m.getExtension("cache");
-            // Sometimes it is String sometimes JsonPrimitive, I don't quite understand why
-            if (string != null) {
-                String cachePath;
-                if (string instanceof String)
-                    cachePath = (String)string;
-                else
-                    cachePath = ((JsonPrimitive)string).getAsString();
-                if (new File(cachePath).isFile())
-                    return cachePath;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Receives a Media, looks for the file in the device with any tree-URIs and returns the URI
-     */
-    public static Uri mediaUri(int treeId, Media m) {
-        String file = m.getFile();
-        if (file != null && !file.isEmpty()) {
-            // OBJE.FILE is never a Uri, always a path (Windows or Android)
-            String filename = new File(file.replace("\\", "/")).getName();
-            for (String uri : Global.settings.getTree(treeId).uris) {
-                DocumentFile documentDir = DocumentFile.fromTreeUri(Global.context, Uri.parse(uri));
-                DocumentFile docFile = documentDir.findFile(filename);
-                if (docFile != null && docFile.isFile())
-                    return docFile.getUri();
-            }
-        }
-        return null;
-    }
-
-    static Bitmap generateIcon(ImageView view, int icon, String text) {
-        LayoutInflater inflater = (LayoutInflater)view.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View inflated = inflater.inflate(icon, null);
-        RelativeLayout frameLayout = inflated.findViewById(R.id.icona);
-        ((TextView)frameLayout.findViewById(R.id.icona_testo)).setText(text);
-        frameLayout.setDrawingCacheEnabled(true);
-        frameLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        frameLayout.layout(0, 0, frameLayout.getMeasuredWidth(), frameLayout.getMeasuredHeight());
-        frameLayout.buildDrawingCache(true);
-        return frameLayout.getDrawingCache();
-    }
-
-    /**
-     * Cache an image found on the internet for reuse
-     * TODO: maybe it might not even be an asynchronous task but a simple function
-     */
-    static class CacheImage extends AsyncTask<URL, Void, String> {
-        Media media;
-
-        CacheImage(Media media) {
-            this.media = media;
-        }
-
-        protected String doInBackground(URL... url) {
-            try {
-                File cacheFolder = new File(Global.context.getCacheDir(), String.valueOf(Global.settings.openTree));
-                // new File() does not create the folder if it doesn't exist
-                if (!cacheFolder.exists()) {
-                    // Deletes the "cache" extension from all Media
-                    MediaList mediaList = new MediaList(Global.gc, 0);
-                    Global.gc.accept(mediaList);
-                    for (Media media : mediaList.list)
-                        if (media.getExtension("cache") != null)
-                            media.putExtension("cache", null);
-                    cacheFolder.mkdir();
-                }
-                String extension = FilenameUtils.getName(url[0].getPath());
-                if (extension.lastIndexOf('.') > 0)
-                    extension = extension.substring(extension.lastIndexOf('.') + 1);
-                String ext;
-                switch (extension) {
-                    case "png":
-                        ext = "png";
-                        break;
-                    case "gif":
-                        ext = "gif";
-                        break;
-                    case "bmp":
-                        ext = "bmp";
-                        break;
-                    case "jpg":
-                    case "jpeg":
-                    default:
-                        ext = "jpg";
-                }
-                File cache = nextAvailableFileName(cacheFolder.getPath(), "img." + ext);
-                FileUtils.copyURLToFile(url[0], cache);
-                return cache.getPath();
-            } catch (Exception ignored) {
-            }
-            return null;
-        }
-
-        protected void onPostExecute(String path) {
-            if (path != null)
-                media.putExtension("cache", path);
-        }
-    }
-
-    /**
-     * Asynchronously downloads an image from an internet page.
-     */
-    static class DownloadImage extends AsyncTask<String, Integer, Bitmap> {
-        ImageView imageView;
-        ProgressBar progressBar;
-        Media media;
-        URL url;
-        int fileTypeTag = 0; // setTag must be in the main thread, not in the doInBackground.
-        int imageViewWidth; // ditto
-
-        DownloadImage(ImageView imageView, ProgressBar progressBar, Media media) {
-            this.imageView = imageView;
-            this.progressBar = progressBar;
-            this.media = media;
-            imageViewWidth = imageView.getWidth();
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... params) {
-            Bitmap bitmap;
-            try {
-                Connection connection = Jsoup.connect(params[0]);
-                //if (connection.equals(bitmap)) {	// TODO: verify that an address is associated with the hostname
-                Document doc = connection.get();
-                List<Element> list = doc.select("img");
-                if (list.isEmpty()) { // Web page found but without images
-                    fileTypeTag = 3;
-                    url = new URL(params[0]);
-                    return generateIcon(imageView, R.layout.media_mondo, url.getProtocol());    // returns a bitmap
-                }
-                int maxDimensionsWithAlt = 1;
-                int maxDimensions = 1;
-                int maxLengthAlt = 0;
-                int maxLengthSrc = 0;
-                Element imgHeightWithAlt = null;
-                Element imgHeight = null;
-                Element imgLengthAlt = null;
-                Element imgLengthSrc = null;
-                for (Element img : list) {
-                    int width, height;
-                    if (img.attr("width").isEmpty()) width = 1;
-                    else width = Integer.parseInt(img.attr("width"));
-                    if (img.attr("height").isEmpty()) height = 1;
-                    else height = Integer.parseInt(img.attr("height"));
-                    if (width * height > maxDimensionsWithAlt && !img.attr("alt").isEmpty()) { // The largest image with alt
-                        imgHeightWithAlt = img;
-                        maxDimensionsWithAlt = width * height;
-                    }
-                    if (width * height > maxDimensions) { // The largest image even without alt
-                        imgHeight = img;
-                        maxDimensions = width * height;
-                    }
-                    if (img.attr("alt").length() > maxLengthAlt) { // The image with the longest alt
-                        imgLengthAlt = img;
-                        maxLengthAlt = img.attr("alt").length();
-                    }
-                    if (img.attr("src").length() > maxLengthSrc) { // The image with the longest src
-                        imgLengthSrc = img;
-                        maxLengthSrc = img.attr("src").length();
-                    }
-                }
-                String path = null;
-                if (imgHeightWithAlt != null)
-                    path = imgHeightWithAlt.absUrl("src"); // Absolute URL on src
-                else if (imgHeight != null)
-                    path = imgHeight.absUrl("src");
-                else if (imgLengthAlt != null)
-                    path = imgLengthAlt.absUrl("src");
-                else if (imgLengthSrc != null)
-                    path = imgLengthSrc.absUrl("src");
-                url = new URL(path);
-                InputStream inputStream = url.openConnection().getInputStream();
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true; // it just takes the info of the image without downloading it
-                BitmapFactory.decodeStream(inputStream, null, options);
-                // Finally try to load the actual image by resizing it
-                if (options.outWidth > imageViewWidth)
-                    options.inSampleSize = options.outWidth / (imageViewWidth + 1);
-                inputStream = url.openConnection().getInputStream();
-                options.inJustDecodeBounds = false;    // Download the image
-                bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-                fileTypeTag = 1;
-            } catch (Exception e) {
-                return null;
-            }
-            return bitmap;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            imageView.setTag(R.id.tag_file_type, fileTypeTag);
-            if (bitmap != null) {
-                imageView.setImageBitmap(bitmap);
-                imageView.setTag(R.id.tag_percorso, url.toString()); // Used by MediaActivity
-                if (fileTypeTag == 1)
-                    new CacheImage(media).execute(url);
-            }
-            if (progressBar != null) // Maybe we have already leaved the activity and the ProgressBar of the image no longer exists
-                progressBar.setVisibility(View.GONE);
-        }
-    }
-
     public static int checkMultiplePermissions(final Context context, final String... permissions) {
         int result = PackageManager.PERMISSION_GRANTED;
         for (String permission : permissions) {
             result |= ContextCompat.checkSelfPermission(context, permission);
         }
-
         return result;
     }
 
@@ -671,7 +287,7 @@ public class F {
                     // Set up a URI in which to put the photo taken by the camera app
                     if (intent.getAction() != null && intent.getAction().equals(MediaStore.ACTION_IMAGE_CAPTURE)) {
                         File dir = context.getExternalFilesDir(String.valueOf(Global.settings.openTree)); // Creates dir if it doesn't exist
-                        File photoFile = nextAvailableFileName(dir.getAbsolutePath(), "image.jpg");
+                        File photoFile = nextAvailableFileName(dir, "image.jpg");
                         Global.pathOfCameraDestination = photoFile.getAbsolutePath(); // Saves it to retake it after the photo is taken
                         Uri photoUri;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
@@ -776,7 +392,7 @@ public class F {
                 } else if (path.indexOf('.') < 0) { // File title without extension
                     path += "." + extension;
                 }
-                fileMedia[0] = nextAvailableFileName(externalFilesDir.getAbsolutePath(), path);
+                fileMedia[0] = nextAvailableFileName(externalFilesDir, path);
                 FileUtils.copyInputStreamToFile(input, fileMedia[0]); // Creates the folder if doesn't exist
             } catch (Exception e) {
                 String msg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : context.getString(R.string.something_wrong);
@@ -796,7 +412,7 @@ public class F {
                     .setNeutralButton(R.string.no, (dialog, which) -> finishProposeCropping(context, fragment))
                     .setOnCancelListener(dialog -> finishProposeCropping(context, fragment)) // Click out of the dialog
                     .show();
-            showImage(media, alert.findViewById(R.id.crop_image), null);
+            FileUtil.INSTANCE.showImage(media, alert.findViewById(R.id.crop_image));
         } else {
             saveFolderInSettings();
         }
@@ -848,8 +464,10 @@ public class F {
      */
     static void cropImage(Context context, File fileMedia, Uri uriMedia, Fragment fragment) {
         // Origin
-        if (uriMedia == null)
-            uriMedia = Uri.fromFile(fileMedia);
+        String path = fileMedia != null ? fileMedia.getAbsolutePath() : uriMedia.getPath();
+        int cropped = Global.croppedPaths.containsKey(path) ? Global.croppedPaths.get(path) : 0;
+        Global.croppedPaths.put(path, cropped + 1);
+        if (uriMedia == null) uriMedia = Uri.fromFile(fileMedia);
         // Destination
         File externalFilesDir = context.getExternalFilesDir(String.valueOf(Global.settings.openTree));
         File destinationFile;
@@ -861,14 +479,15 @@ public class F {
                 name = fileMedia.getName();
             else // URI
                 name = DocumentFile.fromSingleUri(context, uriMedia).getName();
-            destinationFile = nextAvailableFileName(externalFilesDir.getAbsolutePath(), name);
+            destinationFile = nextAvailableFileName(externalFilesDir, name);
         }
+        // Cropping
         Intent intent = CropImage.activity(uriMedia)
                 .setOutputUri(Uri.fromFile(destinationFile)) // Folder in external memory
                 .setGuidelines(CropImageView.Guidelines.OFF)
-                .setBorderLineThickness(1)
-                .setBorderCornerThickness(6)
-                .setBorderCornerOffset(-3)
+                .setBorderLineThickness(U.dpToPx(1))
+                .setBorderCornerThickness(U.dpToPx(6))
+                .setBorderCornerOffset(U.dpToPx(-3))
                 .setCropMenuCropButtonTitle(context.getText(R.string.done))
                 .getIntent(context);
         if (fragment != null)
@@ -878,30 +497,46 @@ public class F {
     }
 
     /**
-     * If a file with that name already exists in that folder, increment it appending 1 2 3...
+     * If a file with that name already exists in that folder, increments it appending (1) (2) (3)...
      */
-    public static File nextAvailableFileName(String dir, String name) {
-        File file = new File(dir, name);
-        int increment = 0;
+    public static File nextAvailableFileName(File folder, String fileName) {
+        File file = new File(folder, fileName);
         while (file.exists()) {
-            increment++;
-            file = new File(dir, name.substring(0, name.lastIndexOf('.'))
-                    + increment + name.substring(name.lastIndexOf('.')));
+            Pattern pattern = Pattern.compile("(.*)\\((\\d+)\\)\\s*(\\.\\w+$|$)");
+            Matcher match = pattern.matcher(fileName);
+            if (match.matches()) { // Filename terminates with digits between parenthesis e.g. "image (34).jpg"
+                int number = Integer.parseInt(match.group(2)) + 1;
+                fileName = match.group(1) + "(" + number + ")" + match.group(3);
+            } else {
+                pattern = Pattern.compile("(.+)(\\..+)");
+                match = pattern.matcher(fileName);
+                if (match.matches()) { // Filename with extension e.g. "image.jpg"
+                    fileName = match.group(1) + " (1)" + match.group(2);
+
+                } else fileName += " (1)"; // Filename without extension e.g. ".image"
+            }
+            file = new File(folder, fileName);
         }
         return file;
     }
 
     /**
-     * Ends the cropping procedure of an image.
+     * Terminates the cropping procedure of an image.
      */
     public static void endImageCropping(Intent data) {
         CropImage.ActivityResult result = CropImage.getActivityResult(data);
         Uri uri = result.getUri(); // E.g. 'file:///storage/emulated/0/Android/data/app.familygem/files/5/anna.webp'
-        Picasso.get().invalidate(uri); // Clears from the cache any image that has the same path
         String path = getFilePathFromUri(uri);
         Global.croppedMedia.setFile(path);
         Global.mediaFolderPath = path.substring(0, path.lastIndexOf('/'));
         saveFolderInSettings();
+        // Clears any image from the Glide cache
+        new Thread() {
+            @Override
+            public void run() {
+                Glide.get(Global.context).clearDiskCache();
+            }
+        }.start();
     }
 
     /**

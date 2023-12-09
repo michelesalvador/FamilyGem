@@ -115,11 +115,8 @@ public class MediaFoldersActivity extends BaseActivity {
                 name = documentDir.getName();
             ((TextView)uriView.findViewById(R.id.cartella_nome)).setText(name);
             TextView urlView = uriView.findViewById(R.id.cartella_url);
-            if (Global.settings.expert) {
-                urlView.setSingleLine(false);
-                urlView.setText(uriString);
-            } else
-                urlView.setText(Uri.decode(uriString)); // lo mostra decodificato cioè un po' più leggibile
+            if (Global.settings.expert) urlView.setSingleLine(false);
+            urlView.setText(Uri.decode(uriString)); // Shows it decoded, a little more readable
             uriView.findViewById(R.id.cartella_elimina).setOnClickListener(v -> {
                 new AlertDialog.Builder(this).setMessage(R.string.sure_delete)
                         .setPositiveButton(R.string.yes, (di, id) -> {
@@ -180,7 +177,7 @@ public class MediaFoldersActivity extends BaseActivity {
                         save();
                     }
                 } else if (requestCode == 123) {
-                    String path = F.uriFolderPath(uri);
+                    String path = F.getFolderPathFromUri(uri);
                     if (path != null) {
                         dirs.add(path);
                         save();
@@ -190,12 +187,10 @@ public class MediaFoldersActivity extends BaseActivity {
                         if (docDir != null && docDir.canRead()) {
                             uris.add(uri.toString());
                             save();
-                        } else
-                            Toast.makeText(this, "Could not read this position.", Toast.LENGTH_SHORT).show();
+                        } else Toast.makeText(this, "Could not read this position.", Toast.LENGTH_LONG).show();
                     }
                 }
-            } else
-                Toast.makeText(this, R.string.something_wrong, Toast.LENGTH_SHORT).show();
+            } else Toast.makeText(this, R.string.cant_understand_uri, Toast.LENGTH_LONG).show();
         }
     }
 

@@ -9,6 +9,7 @@ import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.Settings.ZippedTree
 import app.familygem.util.ChangeUtils.actualDateTime
+import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtils
 import app.familygem.visitor.MediaList
 import org.apache.commons.io.FileUtils
@@ -126,8 +127,8 @@ class Exporter(private val context: Context) {
         val mediaList = MediaList(gedcom, 0)
         gedcom!!.accept(mediaList)
         var numFiles = 0
-        for (med in mediaList.list) {
-            if (F.mediaPath(treeId, med) != null || F.mediaUri(treeId, med) != null) numFiles++
+        for (media in mediaList.list) {
+            if (FileUtil.getPathFromMedia(media, treeId) != null || FileUtil.getUriFromMedia(media, treeId) != null) numFiles++
         }
         return numFiles
     }
@@ -165,10 +166,10 @@ class Exporter(private val context: Context) {
                 val media = Media()
                 media.file = path
                 // Paths
-                val mediaPath = F.mediaPath(treeId, media)
+                val mediaPath = FileUtil.getPathFromMedia(media, treeId)
                 if (mediaPath != null) collection[DocumentFile.fromFile(File(mediaPath))] = Type.MEDIA // TODO: canRead()?
                 else { // URIs
-                    val mediaUri = F.mediaUri(treeId, media)
+                    val mediaUri = FileUtil.getUriFromMedia(media, treeId)
                     if (mediaUri != null) collection[DocumentFile.fromSingleUri(context, mediaUri)] = Type.MEDIA
                 }
             }

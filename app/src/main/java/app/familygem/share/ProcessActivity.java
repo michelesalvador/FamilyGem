@@ -28,11 +28,11 @@ import org.folg.gedcom.model.Submitter;
 
 import app.familygem.BaseActivity;
 import app.familygem.DetailActivity;
-import app.familygem.F;
 import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Extra;
+import app.familygem.util.FileUtil;
 
 /**
  * Evaluates a record of the imported tree, with possible comparison with the corresponding record of the old tree.
@@ -153,7 +153,7 @@ public class ProcessActivity extends BaseActivity {
             text = media.getFile();
             date = getDateTime(media.getChange());
             imageView.setVisibility(View.VISIBLE);
-            F.showImage(media, imageView, null, treeId);
+            FileUtil.INSTANCE.showImage(media, imageView, 0, null, treeId);
         } else if (obj instanceof Source) {
             writeType(R.string.source);
             Source source = (Source)obj;
@@ -169,8 +169,7 @@ public class ProcessActivity extends BaseActivity {
             title = U.properName(person);
             text = U.details(person, null);
             date = getDateTime(person.getChange());
-            imageView.setVisibility(View.VISIBLE);
-            F.showMainImageForPerson(gedcom, treeId, person, imageView);
+            FileUtil.INSTANCE.selectMainImage(person, imageView, 0, gedcom, treeId);
         } else if (obj instanceof Family) {
             writeType(R.string.family);
             Family family = (Family)obj;

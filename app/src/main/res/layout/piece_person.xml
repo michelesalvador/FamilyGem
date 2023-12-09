@@ -1,67 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:layout_marginBottom="3dp"
-	android:layout_marginTop="3dp"
-	android:background="@drawable/casella_sfondo_base">
-	<View
-		android:id="@+id/person_border"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:background="@drawable/casella_bordo_neutro"/>
-	<RelativeLayout
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:background="?android:attr/selectableItemBackground"
-		android:clipToPadding="false"
-		android:padding="8dp">
-		<TextView
-			android:id="@+id/person_info"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textAllCaps="true"
-			android:textSize="14sp"
-			android:textColor="@color/gray_text"/>
-		<TextView
-			android:id="@+id/person_name"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_below="@+id/person_info"
-			android:layout_toStartOf="@+id/person_image"
-			android:textSize="17sp"/>
-		<TextView
-			android:id="@+id/person_title"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_below="@+id/person_name"
-			android:textSize="15sp"
-			android:textStyle="italic" />
-		<TextView
-			android:id="@+id/person_details"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_below="@+id/person_title"
-			android:layout_toStartOf="@+id/person_image"
-			android:textSize="14sp"
-			android:textColor="@color/gray_text"/>
-		<ImageView
-			android:id="@+id/person_image"
-			android:layout_width="65dp"
-			android:layout_height="80dp"
-			android:layout_alignParentEnd="true"
-			android:layout_marginStart="8dp"
-			android:scaleType="centerCrop" />
-		<ImageView
-			android:id="@+id/person_mourning"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentEnd="true"
-			android:layout_marginEnd="-8dp"
-			android:layout_marginTop="-8dp"
-			android:autoMirrored="true"
-			app:srcCompat="@drawable/defunto" />
-	</RelativeLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
+    android:background="@drawable/casella_sfondo_base">
+
+    <View
+        android:id="@+id/person_border"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/casella_bordo_neutro" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clipToPadding="false"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/person_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAllCaps="true"
+            android:textColor="@color/gray_text"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/person_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/person_info"
+            android:layout_toStartOf="@+id/person_image"
+            android:textSize="17sp" />
+
+        <TextView
+            android:id="@+id/person_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/person_name"
+            android:textSize="15sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/person_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/person_title"
+            android:layout_toStartOf="@+id/person_image"
+            android:textColor="@color/gray_text"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/person_image"
+            android:layout_width="65dp"
+            android:layout_height="80dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="8dp"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/person_mourning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="-8dp"
+            android:layout_marginEnd="-8dp"
+            android:autoMirrored="true"
+            app:srcCompat="@drawable/defunto" />
+    </RelativeLayout>
 </FrameLayout>

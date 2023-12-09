@@ -33,6 +33,7 @@ import app.familygem.R;
 import app.familygem.Settings;
 import app.familygem.TreesActivity;
 import app.familygem.U;
+import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
 import app.familygem.util.TreeUtilsKt;
 import app.familygem.visitor.ListOfSourceCitations;
@@ -271,19 +272,19 @@ public class ConfirmationActivity extends BaseActivity {
     }
 
     void copyFiles(Media media) {
-        String origin = F.mediaPath(Global.treeId2, media);
+        String origin = FileUtil.INSTANCE.getPathFromMedia(media, Global.treeId2);
         if (origin != null) {
             File originFile = new File(origin);
             File externalDir = getExternalFilesDir(String.valueOf(Global.settings.openTree));
             String fileName = origin.substring(origin.lastIndexOf('/') + 1);
-            File twinFile = new File(externalDir.getAbsolutePath(), fileName);
+            File twinFile = new File(externalDir, fileName);
             if (twinFile.isFile() // If the corresponding file already exists
                     && twinFile.lastModified() == originFile.lastModified() // and has the same date
                     && twinFile.length() == originFile.length()) { // and the same size
                 // Then use the already existing file
                 media.setFile(twinFile.getAbsolutePath());
             } else { // Otherwise copies the new file
-                File destinationFile = F.nextAvailableFileName(externalDir.getAbsolutePath(), fileName);
+                File destinationFile = F.nextAvailableFileName(externalDir, fileName);
                 try {
                     FileUtils.copyFile(originFile, destinationFile);
                 } catch (IOException e) {

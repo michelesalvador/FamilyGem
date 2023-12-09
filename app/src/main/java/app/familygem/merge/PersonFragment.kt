@@ -6,9 +6,14 @@ import android.text.Html
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import app.familygem.*
+import app.familygem.DetailActivity
+import app.familygem.GedcomDateConverter
+import app.familygem.ProfileFactsFragment
+import app.familygem.R
+import app.familygem.U
 import app.familygem.constant.Gender
 import app.familygem.databinding.MergePersonFragmentBinding
+import app.familygem.util.FileUtil
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Person
 
@@ -34,7 +39,7 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
         // Image
         val gedcom: Gedcom = if (position) model.secondGedcom else model.firstGedcom
         val treeId: Int = if (position) model.secondNum.value!! else model.firstNum
-        F.showMainImageForPerson(gedcom, treeId, person, binding.mergeImage)
+        FileUtil.selectMainImage(person, binding.mergeImage, 0, gedcom, treeId)
         // Death ribbon
         binding.mergeMourn.visibility = if (U.isDead(person)) View.VISIBLE else View.GONE
         // Personal events

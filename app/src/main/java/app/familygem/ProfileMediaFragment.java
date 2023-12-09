@@ -57,7 +57,7 @@ public class ProfileMediaFragment extends Fragment {
     @Override
     public void onCreateContextMenu(@NonNull ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
         media = (Media)view.getTag(R.id.tag_object);
-        container = view.getTag(R.id.tag_contenitore);
+        container = view.getTag(R.id.tag_container);
         /* Changing configuration (e.g. rotating the screen) this fragment is recreated
            and mediaVisitor here becomes null: really strange, because in onCreateView it is OK.
            And moreover when recreated mediaList is empty. */

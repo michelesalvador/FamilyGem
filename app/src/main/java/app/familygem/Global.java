@@ -16,7 +16,9 @@ import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class Global extends MultiDexApplication {
 
@@ -40,6 +42,10 @@ public class Global extends MultiDexApplication {
      */
     public static String mediaFolderPath;
     public static Media croppedMedia; // Temporary parking of the Media in the cropping process
+    /**
+     * File path of cropped files to invalidate Glide cache.
+     */
+    public static Map<String, Integer> croppedPaths = new HashMap<>();
     public static Gedcom gc2; // A shared tree, for comparison of updates
     public static int treeId2; // ID of the shared tree
 

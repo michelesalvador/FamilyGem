@@ -89,7 +89,7 @@ public class ProfileRelativesFragment extends Fragment {
 
     void createCard(final Person person, Relation relation, Family family) {
         LinearLayout layout = relativesView.findViewById(R.id.profile_page);
-        View personView = U.placeIndividual(layout, person,
+        View personView = U.placePerson(layout, person,
                 FamilyActivity.getRole(person, family, relation, false) + FamilyActivity.writeLineage(person, family));
         personView.setOnClickListener(view -> {
             getActivity().finish(); // Removes the current activity from the stack

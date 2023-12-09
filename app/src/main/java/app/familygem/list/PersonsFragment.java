@@ -47,7 +47,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import app.familygem.DiagramFragment;
-import app.familygem.F;
 import app.familygem.GedcomDateConverter;
 import app.familygem.Global;
 import app.familygem.Memory;
@@ -63,6 +62,7 @@ import app.familygem.constant.Extra;
 import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
+import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
 import app.familygem.util.Utils;
 
@@ -217,7 +217,7 @@ public class PersonsFragment extends Fragment {
             personView.findViewById(R.id.person_border).setBackgroundResource(border);
 
             U.details(person, personView.findViewById(R.id.person_details));
-            F.showMainImageForPerson(gc, person, personView.findViewById(R.id.person_image));
+            FileUtil.INSTANCE.selectMainImage(person, personView.findViewById(R.id.person_image));
             personView.findViewById(R.id.person_mourning).setVisibility(U.isDead(person) ? View.VISIBLE : View.GONE);
         }
 
