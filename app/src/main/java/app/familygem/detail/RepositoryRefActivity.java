@@ -19,7 +19,7 @@ import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 
 public class RepositoryRefActivity extends DetailActivity {
 
@@ -64,7 +64,7 @@ public class RepositoryRefActivity extends DetailActivity {
         // Delete the citation from the archive and update the date of the source that contained it
         Source container = (Source)Memory.getSecondToLastObject();
         container.setRepositoryRef(null);
-        ChangeUtils.INSTANCE.updateChangeDate(container);
+        ChangeUtil.INSTANCE.updateChangeDate(container);
         Memory.setInstanceAndAllSubsequentToNull(repoRef);
     }
 }

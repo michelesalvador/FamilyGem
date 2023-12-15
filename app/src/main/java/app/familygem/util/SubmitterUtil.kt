@@ -1,7 +1,7 @@
 package app.familygem.util
 
 import app.familygem.R
-import app.familygem.util.Utils.string
+import app.familygem.util.Util.string
 import org.folg.gedcom.model.Submitter
 
 fun Submitter.writeName(): String {

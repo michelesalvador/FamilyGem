@@ -38,7 +38,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.util.TreeUtils;
-import app.familygem.util.Utils;
+import app.familygem.util.Util;
 
 public class FamiliesFragment extends Fragment {
 
@@ -264,7 +264,7 @@ public class FamiliesFragment extends Fragment {
             for (Family family : gc.getFamilies())
                 familyList.add(new FamilyWrapper(family));
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(familyList.size() + " "
-                    + Utils.INSTANCE.caseString(familyList.size() == 1 ? R.string.family : R.string.families));
+                    + Util.INSTANCE.caseString(familyList.size() == 1 ? R.string.family : R.string.families));
             sortFamilies();
         } else if (toDo == What.UPDATE) { // Updates the content of existing family wrappers
             for (FamilyWrapper wrapper : familyList)

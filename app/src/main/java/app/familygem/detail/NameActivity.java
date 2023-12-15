@@ -13,7 +13,7 @@ import app.familygem.Memory;
 import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 
 public class NameActivity extends DetailActivity {
 
@@ -64,7 +64,7 @@ public class NameActivity extends DetailActivity {
     public void delete() {
         Person currentPerson = gc.getPerson(Global.indi);
         currentPerson.getNames().remove(name);
-        ChangeUtils.INSTANCE.updateChangeDate(currentPerson);
+        ChangeUtil.INSTANCE.updateChangeDate(currentPerson);
         Memory.setInstanceAndAllSubsequentToNull(name);
     }
 }

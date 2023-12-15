@@ -45,7 +45,7 @@ import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.detail.SourceActivity;
 import app.familygem.util.TreeUtils;
-import app.familygem.util.Utils;
+import app.familygem.util.Util;
 import app.familygem.visitor.ListOfSourceCitations;
 
 /**
@@ -63,7 +63,7 @@ public class SourcesFragment extends Fragment {
         if (gc != null) {
             sourceList = gc.getSources();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(sourceList.size() + " " +
-                    Utils.INSTANCE.caseString(sourceList.size() == 1 ? R.string.source : R.string.sources));
+                    Util.INSTANCE.caseString(sourceList.size() == 1 ? R.string.source : R.string.sources));
             if (sourceList.size() > 1) setHasOptionsMenu(true);
             RecyclerView recyclerView = view.findViewById(R.id.sources_recycler);
             adapter = new SourcesAdapter();

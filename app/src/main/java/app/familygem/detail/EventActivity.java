@@ -13,7 +13,7 @@ import app.familygem.Memory;
 import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 
 public class EventActivity extends DetailActivity {
 
@@ -61,7 +61,7 @@ public class EventActivity extends DetailActivity {
     @Override
     public void delete() {
         ((PersonFamilyCommonContainer)Memory.getSecondToLastObject()).getEventsFacts().remove(event);
-        ChangeUtils.INSTANCE.updateChangeDate(Memory.getLeaderObject());
+        ChangeUtil.INSTANCE.updateChangeDate(Memory.getLeaderObject());
         Memory.setInstanceAndAllSubsequentToNull(event);
     }
 

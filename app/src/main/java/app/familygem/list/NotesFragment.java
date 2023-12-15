@@ -33,7 +33,7 @@ import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.detail.NoteActivity;
 import app.familygem.util.TreeUtils;
-import app.familygem.util.Utils;
+import app.familygem.util.Util;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.NoteList;
 
@@ -76,7 +76,7 @@ public class NotesFragment extends Fragment implements NotesAdapter.ItemClickLis
 
     private void furnishToolbar() {
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(allNotes.size() + " "
-                + Utils.INSTANCE.caseString(allNotes.size() == 1 ? R.string.note : R.string.notes));
+                + Util.INSTANCE.caseString(allNotes.size() == 1 ? R.string.note : R.string.notes));
         setHasOptionsMenu(allNotes.size() > 1);
     }
 

@@ -16,7 +16,7 @@ import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.util.TreeUtils
-import app.familygem.util.Utils
+import app.familygem.util.Util
 import app.familygem.util.getBasicData
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -58,7 +58,7 @@ class CompareActivity : BaseActivity() {
             Global.gc = TreeUtils.openGedcomTemporarily(idTree1, true)
             Global.gc2 = TreeUtils.openGedcomTemporarily(idTree2, false)
             if (Global.gc == null || Global.gc2 == null) {
-                Utils.toast(R.string.no_useful_data)
+                Util.toast(R.string.no_useful_data)
                 onBackPressedDispatcher.onBackPressed()
                 return@launch
             }

@@ -102,7 +102,7 @@ import app.familygem.list.MediaAdapter;
 import app.familygem.list.PersonsFragment;
 import app.familygem.list.SourcesFragment;
 import app.familygem.list.SubmittersFragment;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.util.MediaUtil;
 import app.familygem.util.TreeUtils;
@@ -1375,13 +1375,13 @@ public class U {
                             Media media = (Media)record;
                             MediaContainers mediaContainers = new MediaContainers(Global.gc, media, newId);
                             media.setId(newId);
-                            ChangeUtils.INSTANCE.updateChangeDate(media);
+                            ChangeUtil.INSTANCE.updateChangeDate(media);
                             TreeUtils.INSTANCE.save(true, mediaContainers.containers.toArray());
                         } else if (record instanceof Note) {
                             Note note = (Note)record;
                             NoteContainers noteContainers = new NoteContainers(Global.gc, note, newId);
                             note.setId(newId);
-                            ChangeUtils.INSTANCE.updateChangeDate(note);
+                            ChangeUtil.INSTANCE.updateChangeDate(note);
                             TreeUtils.INSTANCE.save(true, noteContainers.containers.toArray());
                         } else if (record instanceof Source) {
                             ListOfSourceCitations citations = new ListOfSourceCitations(Global.gc, oldId);
@@ -1389,7 +1389,7 @@ public class U {
                                 triple.citation.setRef(newId);
                             Source source = (Source)record;
                             source.setId(newId);
-                            ChangeUtils.INSTANCE.updateChangeDate(source);
+                            ChangeUtil.INSTANCE.updateChangeDate(source);
                             TreeUtils.INSTANCE.save(true, citations.getProgenitors());
                         } else if (record instanceof Repository) {
                             Set<Source> modified = new HashSet<>();
@@ -1402,7 +1402,7 @@ public class U {
                             }
                             Repository repo = (Repository)record;
                             repo.setId(newId);
-                            ChangeUtils.INSTANCE.updateChangeDate(repo);
+                            ChangeUtil.INSTANCE.updateChangeDate(repo);
                             TreeUtils.INSTANCE.save(true, modified.toArray());
                         } else if (record instanceof Submitter) {
                             for (Settings.Share share : Global.settings.getCurrentTree().shares)

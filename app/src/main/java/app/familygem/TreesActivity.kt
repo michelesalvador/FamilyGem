@@ -31,7 +31,7 @@ import app.familygem.util.TreeUtils
 import app.familygem.util.TreeUtils.deleteTree
 import app.familygem.util.TreeUtils.openGedcom
 import app.familygem.util.TreeUtils.readJson
-import app.familygem.util.Utils
+import app.familygem.util.Util
 import app.familygem.util.getBasicData
 import app.familygem.visitor.MediaList
 import com.android.installreferrer.api.InstallReferrerClient
@@ -396,7 +396,7 @@ class TreesActivity : AppCompatActivity() {
                         } else {
                             F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
                         }
-                    } else Utils.toast(exporter.errorMessage)
+                    } else Util.toast(exporter.errorMessage)
                 }
             } else if (id == 9) { // Export ZIP backup
                 lifecycleScope.launch(IO) {
@@ -531,9 +531,9 @@ class TreesActivity : AppCompatActivity() {
                         // Exports ZIP backup
                         Code.ZIP_BACKUP -> result = exporter.exportZipBackup(null, -1, uri)
                     }
-                    if (result) Utils.toast(exporter.successMessage)
-                    else Utils.toast(exporter.errorMessage)
-                } else Utils.toast(R.string.cant_understand_uri)
+                    if (result) Util.toast(exporter.successMessage)
+                    else Util.toast(exporter.errorMessage)
+                } else Util.toast(R.string.cant_understand_uri)
                 withContext(Main) { progress.visibility = View.GONE }
             }
         }

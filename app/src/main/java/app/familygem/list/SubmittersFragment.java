@@ -29,10 +29,10 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.detail.SubmitterActivity;
-import app.familygem.util.ChangeUtils;
-import app.familygem.util.SubmitterUtilsKt;
+import app.familygem.util.ChangeUtil;
+import app.familygem.util.SubmitterUtilKt;
 import app.familygem.util.TreeUtils;
-import app.familygem.util.Utils;
+import app.familygem.util.Util;
 
 public class SubmittersFragment extends Fragment {
 
@@ -42,13 +42,13 @@ public class SubmittersFragment extends Fragment {
         if (gc != null) {
             List<Submitter> submitterList = gc.getSubmitters();
             ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(submitterList.size() + " " +
-                    Utils.INSTANCE.caseString(submitterList.size() == 1 ? R.string.submitter : R.string.submitters));
+                    Util.INSTANCE.caseString(submitterList.size() == 1 ? R.string.submitter : R.string.submitters));
             setHasOptionsMenu(true);
             LinearLayout layout = view.findViewById(R.id.scrollview_layout);
             for (final Submitter submitter : submitterList) {
                 View submView = inflater.inflate(R.layout.scrollview_item, layout, false);
                 layout.addView(submView);
-                ((TextView)submView.findViewById(R.id.item_name)).setText(SubmitterUtilsKt.writeName(submitter));
+                ((TextView)submView.findViewById(R.id.item_name)).setText(SubmitterUtilKt.writeName(submitter));
                 submView.findViewById(R.id.item_num).setVisibility(View.GONE);
                 submView.setOnClickListener(v -> {
                     Memory.setLeader(submitter);
@@ -84,7 +84,7 @@ public class SubmittersFragment extends Fragment {
         Submitter subm = new Submitter();
         subm.setId(U.newID(gc, Submitter.class));
         subm.setName("");
-        ChangeUtils.INSTANCE.updateChangeDate(subm);
+        ChangeUtil.INSTANCE.updateChangeDate(subm);
         gc.addSubmitter(subm);
         if (context != null) {
             Memory.setLeader(subm);

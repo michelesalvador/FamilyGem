@@ -85,7 +85,7 @@ import app.familygem.list.PersonsFragment;
 import app.familygem.list.RepositoriesFragment;
 import app.familygem.list.SourcesFragment;
 import app.familygem.list.SubmittersFragment;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 import app.familygem.util.TreeUtils;
 import app.familygem.visitor.FindStack;
 
@@ -1084,7 +1084,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 18: // Unlink family member
                 FamilyActivity.disconnect((SpouseFamilyRef)pieceView.getTag(R.id.tag_spouse_family_ref),
                         (SpouseRef)pieceView.getTag(R.id.tag_spouse_ref));
-                ChangeUtils.INSTANCE.updateChangeDate(person);
+                ChangeUtil.INSTANCE.updateChangeDate(person);
                 findAnotherRepresentativeOfTheFamily(person);
                 break;
             case 19: // Delete family member

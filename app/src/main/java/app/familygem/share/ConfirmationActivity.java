@@ -35,7 +35,7 @@ import app.familygem.TreesActivity;
 import app.familygem.U;
 import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
-import app.familygem.util.TreeUtilsKt;
+import app.familygem.util.TreeUtilKt;
 import app.familygem.visitor.ListOfSourceCitations;
 import app.familygem.visitor.MediaContainers;
 import app.familygem.visitor.MediaList;
@@ -56,7 +56,7 @@ public class ConfirmationActivity extends BaseActivity {
             CardView card = findViewById(R.id.confirmation_old);
             Settings.Tree tree = Global.settings.getTree(Global.settings.openTree);
             ((TextView)card.findViewById(R.id.compare_title)).setText(tree.title);
-            String txt = TreeUtilsKt.getBasicData(tree);
+            String txt = TreeUtilKt.getBasicData(tree);
             ((TextView)card.findViewById(R.id.compare_text)).setText(txt);
             card.findViewById(R.id.compare_date).setVisibility(View.GONE);
 

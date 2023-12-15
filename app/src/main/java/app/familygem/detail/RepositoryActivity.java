@@ -13,7 +13,7 @@ import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.list.RepositoriesFragment;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 
 public class RepositoryActivity extends DetailActivity {
 
@@ -48,6 +48,6 @@ public class RepositoryActivity extends DetailActivity {
 
     @Override
     public void delete() {
-        ChangeUtils.INSTANCE.updateChangeDate((Object[])RepositoriesFragment.delete(repository));
+        ChangeUtil.INSTANCE.updateChangeDate((Object[])RepositoriesFragment.delete(repository));
     }
 }

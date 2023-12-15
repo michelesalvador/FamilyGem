@@ -4,7 +4,7 @@ import org.folg.gedcom.model.Change
 import org.folg.gedcom.model.DateTime
 import java.util.*
 
-object ChangeUtils {
+object ChangeUtil {
 
     /**
      * Updates change date of any object.

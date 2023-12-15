@@ -59,7 +59,7 @@ import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.list.PersonsFragment;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtils;
 import graph.gedcom.Bond;
@@ -816,7 +816,7 @@ public class DiagramFragment extends Fragment {
             }
             Family[] modifiedArray = modificate.toArray(new Family[0]);
             U.controllaFamiglieVuote(getContext(), this::refreshAll, false, modifiedArray);
-            ChangeUtils.INSTANCE.updateChangeDate(pers);
+            ChangeUtil.INSTANCE.updateChangeDate(pers);
             TreeUtils.INSTANCE.save(true, (Object[])modifiedArray);
             refreshAll();
         } else if (id == 7) { // Delete

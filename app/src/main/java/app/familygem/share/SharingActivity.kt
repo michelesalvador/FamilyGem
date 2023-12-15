@@ -27,11 +27,11 @@ import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
 import app.familygem.list.SubmittersFragment
-import app.familygem.util.ChangeUtils.actualDateTime
-import app.familygem.util.ChangeUtils.updateChangeDate
+import app.familygem.util.ChangeUtil.actualDateTime
+import app.familygem.util.ChangeUtil.updateChangeDate
 import app.familygem.util.TreeUtils
 import app.familygem.util.TreeUtils.createHeader
-import app.familygem.util.Utils
+import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -265,7 +265,7 @@ class SharingActivity : BaseActivity() {
                 } else throw Exception(exporter.errorMessage)
             } else throw Exception(line)
         } catch (exception: Exception) {
-            Utils.toast(exception.localizedMessage)
+            Util.toast(exception.localizedMessage)
             restoreSuspended()
         }
     }
@@ -291,14 +291,14 @@ class SharingActivity : BaseActivity() {
                 ftpClient.logout()
                 ftpClient.disconnect()
                 if (successfulUpload) {
-                    Utils.toast(R.string.correctly_uploaded)
+                    Util.toast(R.string.correctly_uploaded)
                     concludeShare()
                 } else throw Exception(getString(R.string.something_wrong))
             } catch (exception: Exception) {
                 exception.printStackTrace()
-                Utils.toast(exception.localizedMessage)
+                Util.toast(exception.localizedMessage)
             }
-        } else Utils.toast(R.string.something_wrong)
+        } else Util.toast(R.string.something_wrong)
         restoreSuspended()
     }
 

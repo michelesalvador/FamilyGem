@@ -31,7 +31,7 @@ import app.familygem.U;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Type;
 import app.familygem.list.MediaFragment;
-import app.familygem.util.ChangeUtils;
+import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.visitor.MediaReferences;
 
@@ -130,6 +130,6 @@ public class MediaActivity extends DetailActivity {
 
     @Override
     public void delete() {
-        ChangeUtils.INSTANCE.updateChangeDate(MediaFragment.deleteMedia(media, null));
+        ChangeUtil.INSTANCE.updateChangeDate(MediaFragment.deleteMedia(media, null));
     }
 }

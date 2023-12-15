@@ -16,8 +16,8 @@ import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
 import app.familygem.share.CompareActivity
-import app.familygem.util.Utils.caseString
-import app.familygem.util.Utils.string
+import app.familygem.util.Util.caseString
+import app.familygem.util.Util.string
 import app.familygem.visitor.MediaList
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers.IO
@@ -117,11 +117,11 @@ object TreeUtils {
                 Notifier(Global.context, gedcom, treeId, Notifier.What.CREATE)
             }
         } catch (exception: Exception) {
-            Utils.toast(exception.localizedMessage)
+            Util.toast(exception.localizedMessage)
             return null
         } catch (error: Error) {
             val message = if (error is OutOfMemoryError) string(R.string.not_memory_tree) else error.localizedMessage
-            Utils.toast(message)
+            Util.toast(message)
             return null
         }
         return gedcom
@@ -162,7 +162,7 @@ object TreeUtils {
      */
     fun save(refresh: Boolean, vararg objects: Any) {
         if (refresh) Global.edited = true
-        objects.forEach { ChangeUtils.updateChangeDate(it) }
+        objects.forEach { ChangeUtil.updateChangeDate(it) }
         // On the first save adds an extension to submitters
         if (Global.settings.currentTree.grade == 9) {
             Global.gc.submitters.forEach { it.putExtension("passed", true) }
@@ -184,7 +184,7 @@ object TreeUtils {
         // Only if header is by Family Gem
         if (h != null && h.generator != null && h.generator.value != null && h.generator.value == "FAMILY_GEM") {
             // Updates date and time
-            h.dateTime = ChangeUtils.actualDateTime()
+            h.dateTime = ChangeUtil.actualDateTime()
             // If necessary updates the version of Family Gem
             if (h.generator.version != null && h.generator.version != BuildConfig.VERSION_NAME || h.generator.version == null)
                 h.generator.version = BuildConfig.VERSION_NAME
@@ -192,7 +192,7 @@ object TreeUtils {
         try {
             FileUtils.writeStringToFile(File(Global.context.filesDir, "$treeId.json"), JsonParser().toJson(gedcom), "UTF-8")
         } catch (e: IOException) {
-            Utils.toast(e.localizedMessage)
+            Util.toast(e.localizedMessage)
         }
         Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
     }
@@ -244,7 +244,7 @@ object TreeUtils {
         //Resources.getSystem().getConfiguration().locale.getLanguage() // Returns the same 'en', 'it'...
         header.language = locale.getDisplayLanguage(Locale.ENGLISH) // The system language in English, not in the local language
         // A GEDCOM header has two date fields: TRANSMISSION_DATE can somewhat forcibly contain the last modification date
-        header.dateTime = ChangeUtils.actualDateTime()
+        header.dateTime = ChangeUtil.actualDateTime()
         return header
     }
 
@@ -422,7 +422,7 @@ object TreeUtils {
      * Negative conclusion of the above method.
      */
     private suspend fun downloadFailed(message: String?, onFail: () -> Unit?) {
-        Utils.toast(message)
+        Util.toast(message)
         withContext(Main) { onFail() }
     }
 
@@ -475,11 +475,11 @@ object TreeUtils {
                 tree.grade = 20 // Marks it as derived
             }
             Global.settings.save()
-            Utils.toast(R.string.tree_imported_ok)
+            Util.toast(R.string.tree_imported_ok)
             withContext(Main) { onSuccess() }
             return
         } catch (e: Exception) {
-            Utils.toast(e.localizedMessage)
+            Util.toast(e.localizedMessage)
         }
         withContext(Main) { onFail() }
     }

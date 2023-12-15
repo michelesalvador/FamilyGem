@@ -9,7 +9,7 @@ import java.util.Locale
 /**
  * The most generic utilities.
  */
-object Utils {
+object Util {
 
     fun string(id: Int): String {
         return Global.context.getString(id)
