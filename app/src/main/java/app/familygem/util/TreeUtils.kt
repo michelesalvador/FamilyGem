@@ -216,17 +216,10 @@ object TreeUtils {
         val treeFile = File(Global.context.filesDir, "$treeId.json")
         treeFile.delete()
         val mediaDir = Global.context.getExternalFilesDir(treeId.toString())
-        if (mediaDir != null) deleteFilesAndDirs(mediaDir)
+        if (mediaDir != null) FileUtil.deleteFilesAndDirs(mediaDir)
         if (Global.settings.openTree == treeId) Global.gc = null
         Notifier(Global.context, null, treeId, Notifier.What.DELETE)
         Global.settings.deleteTree(treeId)
-    }
-
-    private fun deleteFilesAndDirs(fileOrDirectory: File) {
-        if (fileOrDirectory.isDirectory) {
-            for (child in fileOrDirectory.listFiles()!!) deleteFilesAndDirs(child)
-        }
-        fileOrDirectory.delete()
     }
 
     /**
@@ -363,7 +356,6 @@ object TreeUtils {
                                 onSuccessWithMessage()
                             }.setNegativeButton(android.R.string.cancel) { _, _ -> onSuccessWithMessage() }
                             .show()
-
                 } else onSuccessWithMessage()
             }
         } catch (exception: Exception) {

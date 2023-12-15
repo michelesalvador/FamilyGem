@@ -6,6 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
+/**
+ * The most generic utilities.
+ */
 object Utils {
 
     fun string(id: Int): String {

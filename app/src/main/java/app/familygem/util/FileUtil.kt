@@ -259,4 +259,11 @@ object FileUtil {
         }
         return null
     }
+
+    fun deleteFilesAndDirs(fileOrDirectory: File) {
+        if (fileOrDirectory.isDirectory) {
+            for (child in fileOrDirectory.listFiles()!!) deleteFilesAndDirs(child)
+        }
+        fileOrDirectory.delete()
+    }
 }
