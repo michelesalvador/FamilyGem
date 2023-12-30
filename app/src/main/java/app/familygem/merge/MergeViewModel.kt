@@ -624,6 +624,12 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             setState(State.ACTIVE)
             copyMediaFiles(context, secondGedcom, secondNum.value!!, firstNum)
             doMerge()
+            if (Global.settings.openTree == firstNum) Global.gc = firstGedcom // We don't want to modify Global.settings.openTree here
+            else {
+                firstTree.persons = firstGedcom.people.size
+                firstTree.generations = TreeUtils.countGenerations(firstGedcom, U.getRootId(firstGedcom, firstTree))
+                firstTree.media += secondTree.media
+            }
             if (isActive) TreeUtils.saveJson(firstGedcom, firstNum) // Saves also Global.settings through Notifier
             setState(if (isActive) State.COMPLETE else State.QUIET)
         }

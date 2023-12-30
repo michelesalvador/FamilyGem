@@ -255,7 +255,7 @@ object TreeUtils {
     /**
      * @return Total number of generations of the tree starting from a root person
      */
-    private fun countGenerations(gedcom: Gedcom, root: String?): Int {
+    fun countGenerations(gedcom: Gedcom, root: String?): Int {
         if (gedcom.people.isEmpty()) return 0
         generationMin = 0
         generationMax = 0

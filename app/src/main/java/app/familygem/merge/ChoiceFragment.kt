@@ -20,7 +20,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = MergeChoiceFragmentBinding.bind(view)
-        setupTreeView(binding.mergeFirstTree, model.firstTree)
+        setupTreeView(binding.mergeFirstTree.root, model.firstTree)
         // Places available trees into layout
         for (tree in model.trees) {
             val treeView = layoutInflater.inflate(R.layout.merge_tree_layout, binding.mergeList, false)
@@ -57,7 +57,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
                     treeView.findViewById<RadioButton>(R.id.merge_radio).isEnabled = false
                 }
                 binding.mergeNext.isEnabled = false
-                binding.mergeWheel.visibility = View.VISIBLE
+                binding.mergeWheel.root.visibility = View.VISIBLE
             } else if (it == State.RESET) {
                 for (i in 0 until binding.mergeList.childCount) {
                     val treeView: View = binding.mergeList.getChildAt(i)
@@ -65,7 +65,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
                     treeView.findViewById<RadioButton>(R.id.merge_radio).isEnabled = true
                 }
                 binding.mergeNext.isEnabled = true
-                binding.mergeWheel.visibility = View.GONE
+                binding.mergeWheel.root.visibility = View.GONE
                 model.state.value = State.QUIET
             } else if (it == State.COMPLETE) {
                 if (model.personMatches.any())

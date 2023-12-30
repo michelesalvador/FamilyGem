@@ -392,5 +392,6 @@
     <string name="more_premium">More about Premium</string>
     <string name="get_premium">Get Premium</string>
     <string name="premium_activated">Premium activated.</string>
+    <string name="premium_deactivated">Premium deactivated.</string>
     <string name="update_playstore">Please update Play Store app.</string>
 </resources>

@@ -7,10 +7,10 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import app.familygem.BuildConfig
 import app.familygem.Global
-import app.familygem.PurchaseActivity
 import app.familygem.R
 import app.familygem.constant.Extra
 import app.familygem.databinding.MergeResultFragmentBinding
+import app.familygem.purchase.PurchaseActivity
 
 class ResultFragment : BaseFragment(R.layout.merge_result_fragment) {
 
@@ -19,8 +19,8 @@ class ResultFragment : BaseFragment(R.layout.merge_result_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bind = MergeResultFragmentBinding.bind(view)
-        setupTreeView(bind.mergeFirstTree, model.firstTree)
-        setupTreeView(bind.mergeSecondTree, model.secondTree)
+        setupTreeView(bind.mergeFirstTree.root, model.firstTree)
+        setupTreeView(bind.mergeSecondTree.root, model.secondTree)
         // Setups radio buttons
         bind.mergeRadioAnnex.text = getString(R.string.merge_into, model.firstTree.title, model.secondTree.title)
         bind.mergeRetitle.setText("${model.firstTree.title} ${model.secondTree.title}")
@@ -42,7 +42,6 @@ class ResultFragment : BaseFragment(R.layout.merge_result_fragment) {
                     activity?.findViewById<ProgressBar>(R.id.progress_wheel)?.visibility = View.VISIBLE
                 }
                 State.COMPLETE -> {
-                    Global.gc = if (Global.settings.openTree == model.firstNum) model.firstGedcom else null
                     requireActivity().finish()
                     Toast.makeText(context, R.string.merge_complete, Toast.LENGTH_LONG).show()
                 }
