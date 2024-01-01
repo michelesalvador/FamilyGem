@@ -94,17 +94,4 @@
     <style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
         <item name="android:backgroundTint">@color/primary_light</item>
     </style>
-
-    <attr name="spouseColor" format="reference|color" />
-    <attr name="linesColor" format="reference|color" />
-
-    <style name="diagramScreen" parent="AppTheme">
-        <item name="spouseColor">@color/partner_screen</item>
-        <item name="linesColor">@color/diagram_lines_screen</item>
-    </style>
-
-    <style name="diagramPrint" parent="AppTheme">
-        <item name="spouseColor">@color/partner_print</item>
-        <item name="linesColor">@color/diagram_lines_print</item>
-    </style>
 </resources>

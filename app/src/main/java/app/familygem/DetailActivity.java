@@ -610,10 +610,18 @@ public abstract class DetailActivity extends AppCompatActivity {
                 Memory.add(object);
                 startActivity(new Intent(this, EventActivity.class));
             };
-            // Family EventFacts can have notes and media
+            // Family EventFacts can have notes, media and source count
             LinearLayout noteLayout = pieceView.findViewById(R.id.event_other);
             U.placeNotes(noteLayout, object, false);
             U.placeMedia(noteLayout, (MediaContainer)object, false);
+            if (Global.settings.expert) {
+                List<SourceCitation> sourceCitations = ((SourceCitationContainer)object).getSourceCitations();
+                TextView sourceView = pieceView.findViewById(R.id.event_sources);
+                if (!sourceCitations.isEmpty()) {
+                    sourceView.setText(String.valueOf(sourceCitations.size()));
+                    sourceView.setVisibility(View.VISIBLE);
+                }
+            }
         } else if (object instanceof GedcomTag) { // Extension
             click = v -> {
                 Memory.add(object);

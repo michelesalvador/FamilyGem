@@ -1,46 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:background="?android:attr/selectableItemBackground" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground">
 
-	<TextView
-		android:id="@+id/evento_titolo"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="8dp"
-		style="@style/AppTheme.LittleTitle"/>
+    <TextView
+        android:id="@+id/evento_titolo"
+        style="@style/AppTheme.LittleTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        tools:text="Event title" />
 
-	<TextView
-		android:id="@+id/evento_testo"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_below="@+id/evento_titolo"
-		android:textSize="17sp" />
+    <TextView
+        android:id="@+id/evento_testo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/evento_titolo"
+        android:textSize="17sp"
+        tools:text="Event content text."/>
 
-	<LinearLayout
-		android:id="@+id/evento_altro"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_below="@+id/evento_testo"
-		android:orientation="vertical" />
+    <LinearLayout
+        android:id="@+id/evento_altro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/evento_testo"
+        android:orientation="vertical" />
 
-	<TextView
-		android:id="@+id/evento_fonti"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:layout_alignParentEnd="true"
-		android:layout_marginBottom="8dp"
-		android:background="@color/source_citation"
-		android:padding="4dp"
-		android:visibility="gone" />
+    <TextView
+        android:id="@+id/evento_fonti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:background="@color/source_citation"
+        android:padding="4dp"
+        android:visibility="gone"
+        tools:text="3"/>
 
-	<View
-		android:layout_width="match_parent"
-		android:layout_height="1dp"
-		android:layout_below="@+id/evento_altro"
-		android:layout_marginTop="8dp"
-		android:background="@color/primary" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/evento_altro"
+        android:layout_marginTop="8dp"
+        android:background="@color/primary" />
 </RelativeLayout>
