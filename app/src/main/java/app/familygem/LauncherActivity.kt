@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
 import app.familygem.util.TreeUtils
+import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -84,8 +85,8 @@ class LauncherActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.IO) {
                 val credential = U.getCredential(Json.GEO_NAMES)
                 if (credential != null) {
-                    val editor = U.getSharedPreferences(this@LauncherActivity).edit()
-                    editor.putString(PlaceFinderTextView.GEONAMES_USER, credential.getString(Json.USER)).apply()
+                    val editor = Util.getSharedPreferences(this@LauncherActivity)?.edit()
+                    editor?.putString(PlaceFinderTextView.GEONAMES_USER, credential.getString(Json.USER))?.apply()
                 }
             }
         }

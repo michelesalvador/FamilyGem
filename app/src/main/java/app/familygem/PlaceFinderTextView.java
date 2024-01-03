@@ -1,6 +1,7 @@
 package app.familygem;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.widget.ArrayAdapter;
@@ -18,6 +19,8 @@ import org.geonames.WebService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import app.familygem.util.Util;
 
 /**
  * TextView that suggests place names fetching them from GeoNames, formatted in GEDCOM style.
@@ -42,7 +45,11 @@ public class PlaceFinderTextView extends AppCompatAutoCompleteTextView {
         //searchCriteria.setFuzzy(0.9); // Not with setNameStartsWith
         //searchCriteria.setFeatureClass(FeatureClass.A); // One or the other one
         //searchCriteria.setFeatureClass(FeatureClass.P);
-        String userName = U.getSharedPreferences(getContext()).getString(GEONAMES_USER, "demo");
+        SharedPreferences preferences = Util.INSTANCE.getSharedPreferences(getContext());
+        String userName = "demo";
+        if (preferences != null) {
+            userName = preferences.getString(GEONAMES_USER, userName);
+        }
         WebService.setUserName(userName);
     }
 

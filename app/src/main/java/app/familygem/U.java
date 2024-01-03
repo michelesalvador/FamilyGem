@@ -5,7 +5,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,8 +29,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.JsonPrimitive;
@@ -1508,27 +1505,6 @@ public class U {
             // Usually no connection to internet
         }
         return null;
-    }
-
-    /**
-     * Returns encrypted shared preferences for API 23+, otherwise normal shared preferences.
-     */
-    static SharedPreferences getSharedPreferences(Context context) {
-        String fileName = "credential";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                MasterKey masterKey = new MasterKey.Builder(context)
-                        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build();
-                return EncryptedSharedPreferences.create(
-                        context, fileName, masterKey,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            return context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
-        }
     }
 
     /**
