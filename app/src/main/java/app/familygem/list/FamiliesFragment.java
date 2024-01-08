@@ -315,7 +315,8 @@ public class FamiliesFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        SubMenu subMenu = menu.addSubMenu(R.string.order_by);
+        inflater.inflate(R.menu.sort_by, menu);
+        SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
         if (Global.settings.expert)
             subMenu.add(0, 1, 0, R.string.id);
         subMenu.add(0, 2, 0, R.string.surname);

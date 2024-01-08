@@ -20,6 +20,7 @@ import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -150,12 +151,13 @@ public class PersonsFragment extends Fragment {
 
     // Title and options in toolbar
     private void furnishToolbar() {
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(allPeople.size() + " "
+        ((AppCompatActivity)requireActivity()).getSupportActionBar().setTitle(allPeople.size() + " "
                 + Util.INSTANCE.caseString(allPeople.size() == 1 ? R.string.person : R.string.persons));
         setHasOptionsMenu(allPeople.size() > 1);
     }
 
     private class PersonsAdapter extends RecyclerView.Adapter<PersonHolder> implements Filterable {
+        @NonNull
         @Override
         public PersonHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View personView = LayoutInflater.from(parent.getContext()).inflate(R.layout.piece_person, parent, false);
@@ -394,7 +396,7 @@ public class PersonsFragment extends Fragment {
                     if (wrapper2.age == Integer.MAX_VALUE) return -1;
                     return wrapper2.age - wrapper1.age;
                 case BIRTHDAY_ASC: // Sorts by days to person's next birthday
-                    if (wrapper2.birthday == 0) return 1; // Otherwhise with wrapper1 MIN_VALUE returns -2147483648
+                    if (wrapper2.birthday == 0) return 1; // Otherwise with wrapper1 MIN_VALUE returns -2147483648
                     return wrapper2.birthday - wrapper1.birthday;
                 case BIRTHDAY_DESC:
                     if (wrapper1.birthday == Integer.MIN_VALUE) return 1; // Those without birthday go to the bottom
@@ -583,16 +585,6 @@ public class PersonsFragment extends Fragment {
     // Options menu in toolbar
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-        SubMenu subMenu = menu.addSubMenu(R.string.order_by);
-        if (Global.settings.expert)
-            subMenu.add(0, 1, 0, R.string.id);
-        subMenu.add(0, 2, 0, R.string.surname);
-        subMenu.add(0, 3, 0, R.string.date);
-        subMenu.add(0, 4, 0, R.string.age);
-        subMenu.add(0, 5, 0, R.string.birthday);
-        subMenu.add(0, 6, 0, R.string.number_relatives);
-
         // Search in PersonsFragment
         inflater.inflate(R.menu.search, menu); // This only makes appear the lens with the search field
         searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
@@ -609,6 +601,16 @@ public class PersonsFragment extends Fragment {
                 return false;
             }
         });
+        // Sort by menu
+        inflater.inflate(R.menu.sort_by, menu);
+        SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
+        if (Global.settings.expert)
+            subMenu.add(0, 1, 0, R.string.id);
+        subMenu.add(0, 2, 0, R.string.surname);
+        subMenu.add(0, 3, 0, R.string.date);
+        subMenu.add(0, 4, 0, R.string.age);
+        subMenu.add(0, 5, 0, R.string.birthday);
+        subMenu.add(0, 6, 0, R.string.number_relatives);
     }
 
     @Override
@@ -672,7 +674,7 @@ public class PersonsFragment extends Fragment {
         } else if (id == 4) { // Edit ID
             U.editId(getContext(), gc.getPerson(personId), adapter::notifyDataSetChanged);
         } else if (id == 5) { // Delete person
-            new AlertDialog.Builder(getContext()).setMessage(R.string.really_delete_person)
+            new AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete, (dialog, i) -> {
                         Family[] families = deletePerson(getContext(), personId);
                         selectedPeople.remove(position);

@@ -1,6 +1,7 @@
 package app.familygem;
 
 import static app.familygem.Global.gc;
+import static app.familygem.Logger.l;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -314,19 +315,5 @@ public class Principal /*TODO Main?*/ extends AppCompatActivity implements Navig
     private boolean isCurrentFragment(Class<?> aClass) {
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment);
         return aClass.isInstance(currentFragment);
-    }
-
-    // Automatically opens the 'Sort by' sub-menu
-    @Override
-    public boolean onMenuOpened(int featureId, Menu menu) {
-        MenuItem item0 = menu.getItem(0);
-        if (item0.getTitle().equals(getString(R.string.order_by))) {
-            item0.setVisible(false); // a little hack to prevent options menu to appear
-            new Handler().post(() -> {
-                item0.setVisible(true);
-                menu.performIdentifierAction(item0.getItemId(), 0);
-            });
-        }
-        return super.onMenuOpened(featureId, menu);
     }
 }

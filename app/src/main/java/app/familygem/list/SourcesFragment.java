@@ -312,12 +312,6 @@ public class SourcesFragment extends Fragment {
     // menu opzioni nella toolbar
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        SubMenu subMenu = menu.addSubMenu(R.string.order_by);
-        if (Global.settings.expert)
-            subMenu.add(0, 1, 0, R.string.id);
-        subMenu.add(0, 2, 0, R.string.title);
-        subMenu.add(0, 3, 0, R.string.citations);
-
         // Search in SourcesFragment
         inflater.inflate(R.menu.search, menu);
         final SearchView vistaCerca = (SearchView)menu.findItem(R.id.search_item).getActionView();
@@ -334,6 +328,13 @@ public class SourcesFragment extends Fragment {
                 return false;
             }
         });
+        // Sort by menu
+        inflater.inflate(R.menu.sort_by, menu);
+        SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
+        if (Global.settings.expert)
+            subMenu.add(0, 1, 0, R.string.id);
+        subMenu.add(0, 2, 0, R.string.title);
+        subMenu.add(0, 3, 0, R.string.citations);
     }
 
     @Override
