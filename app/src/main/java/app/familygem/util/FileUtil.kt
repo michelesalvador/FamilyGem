@@ -229,7 +229,7 @@ object FileUtil {
             val name = file.replace("\\", "/")
             // File path as written in the Media
             if (File(name).canRead()) return name
-            for (dir in Global.settings.getTree(treeId).dirs) {
+            for (dir in Global.settings.getTree(treeId).dirs.filterNot { it == null }) {
                 // Media folder + File path
                 var path = "$dir/$name"
                 var test = File(path)
@@ -251,7 +251,7 @@ object FileUtil {
         if (file != null && file.isNotEmpty()) {
             // OBJE.FILE is never a Uri, always a file path (Windows or Android) or a single filename
             val filename = File(file.replace("\\", "/")).name
-            for (uri in Global.settings.getTree(treeId).uris) {
+            for (uri in Global.settings.getTree(treeId).uris.filterNot { it == null }) {
                 val documentDir = DocumentFile.fromTreeUri(Global.context, Uri.parse(uri))
                 val docFile = documentDir!!.findFile(filename)
                 if (docFile != null && docFile.isFile) return docFile.uri

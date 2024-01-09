@@ -74,7 +74,7 @@ public class MediaList extends Visitor {
         if (path != null) {
             int index = path.lastIndexOf('.');
             if (index > 0) {
-                String extension = path.substring(index + 1);
+                String extension = path.substring(index + 1).toLowerCase();
                 switch (extension) {
                     case "jpg":
                     case "jpeg":

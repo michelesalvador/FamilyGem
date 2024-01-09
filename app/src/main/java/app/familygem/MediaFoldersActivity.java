@@ -81,6 +81,7 @@ public class MediaFoldersActivity extends BaseActivity {
         LinearLayout layout = findViewById(R.id.cartelle_scatola);
         layout.removeAllViews();
         for (String dir : dirs) {
+            if (dir == null) continue; // Sometimes a null dir is stored in settings
             View folderView = getLayoutInflater().inflate(R.layout.pezzo_cartella, layout, false);
             layout.addView(folderView);
             TextView nameView = folderView.findViewById(R.id.cartella_nome);
@@ -107,6 +108,7 @@ public class MediaFoldersActivity extends BaseActivity {
             registerForContextMenu(folderView);
         }
         for (String uriString : uris) {
+            if (uriString == null) continue;
             View uriView = getLayoutInflater().inflate(R.layout.pezzo_cartella, layout, false);
             layout.addView(uriView);
             DocumentFile documentDir = DocumentFile.fromTreeUri(this, Uri.parse(uriString));
@@ -120,16 +122,18 @@ public class MediaFoldersActivity extends BaseActivity {
             uriView.findViewById(R.id.cartella_elimina).setOnClickListener(v -> {
                 new AlertDialog.Builder(this).setMessage(R.string.sure_delete)
                         .setPositiveButton(R.string.yes, (di, id) -> {
-                            // Revoca il permesso per questo uri, se l'uri non è usato in nessun altro albero
-                            boolean uriEsisteAltrove = false;
-                            for (Settings.Tree albero : Global.settings.trees) {
-                                for (String uri : albero.uris)
-                                    if (uri.equals(uriString) && albero.id != treeId) {
-                                        uriEsisteAltrove = true;
-                                        break;
+                            // Revokes permission for this URI, if the URI is not used in any other tree
+                            boolean uriExistsElsewhere = false;
+                            outer:
+                            for (Settings.Tree tree : Global.settings.trees) {
+                                for (String uri : tree.uris) {
+                                    if (uri != null && uri.equals(uriString) && tree.id != treeId) {
+                                        uriExistsElsewhere = true;
+                                        break outer;
                                     }
+                                }
                             }
-                            if (!uriEsisteAltrove)
+                            if (!uriExistsElsewhere)
                                 revokeUriPermission(Uri.parse(uriString), Intent.FLAG_GRANT_READ_URI_PERMISSION);
                             uris.remove(uriString);
                             save();
