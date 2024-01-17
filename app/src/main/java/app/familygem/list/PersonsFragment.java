@@ -551,25 +551,25 @@ public class PersonsFragment extends Fragment {
             }
             if (start != null && start.isSingleKind()) {
                 Settings.TreeSettings treeSettings = Global.settings.getCurrentTree().settings;
-                LocalDate startDate = new LocalDate(start.data1.date);
+                LocalDate startDate = new LocalDate(start.firstDate.date);
                 LocalDate now;
                 if (treeSettings.customDate) now = new LocalDate(treeSettings.fixedDate);
                 else now = LocalDate.now();
                 boolean living = !U.isDead(person) && Years.yearsBetween(startDate, now).getYears() <= treeSettings.lifeSpan;
                 // Calculates the person age in days
-                if (!start.data1.isFormat(Format.D_M)) {
+                if (!start.firstDate.isFormat(Format.D_M)) {
                     if (living && end == null && (startDate.isBefore(now) || startDate.isEqual(now))) {
                         end = new GedcomDateConverter(now.toDate());
                     }
-                    if (end != null && end.isSingleKind() && !end.data1.isFormat(Format.D_M)) {
-                        LocalDate endDate = new LocalDate(end.data1.date);
+                    if (end != null && end.isSingleKind() && !end.firstDate.isFormat(Format.D_M)) {
+                        LocalDate endDate = new LocalDate(end.firstDate.date);
                         if (startDate.isBefore(endDate) || startDate.isEqual(endDate)) {
                             age = Days.daysBetween(startDate, endDate).getDays();
                         }
                     }
                 }
                 // Counts the days remaining to the person next birthday
-                if (living && !(start.data1.isFormat(Format.Y) || start.data1.isFormat(Format.M_Y))) {
+                if (living && !(start.firstDate.isFormat(Format.Y) || start.firstDate.isFormat(Format.M_Y))) {
                     int ageYears = new Period(startDate, now).getYears();
                     LocalDate nextBirthday = startDate.plusYears(ageYears);
                     if (nextBirthday.isBefore(now)) nextBirthday = startDate.plusYears(ageYears + 1);

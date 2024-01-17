@@ -100,8 +100,8 @@ public class Notifier {
             for (EventFact event : person.getEventsFacts()) {
                 if (event.getTag().equals("BIRT") && event.getDate() != null) {
                     GedcomDateConverter dater = new GedcomDateConverter(event.getDate());
-                    if (dater.isSingleKind() && dater.data1.isFormat(Format.D_M_Y)) {
-                        return dater.data1.date;
+                    if (dater.isSingleKind() && dater.firstDate.isFormat(Format.D_M_Y)) {
+                        return dater.firstDate.date;
                     }
                 }
             }

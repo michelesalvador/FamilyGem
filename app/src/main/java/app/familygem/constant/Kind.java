@@ -11,7 +11,7 @@ public enum Kind {
     FROM("FROM"), TO("TO"), FROM_TO("FROM"),
     PHRASE("("); // TODO: Manage also the "INT" (interpreted) prefix.
 
-    public String prefix;
+    public final String prefix;
 
     Kind(String prefix) {
         this.prefix = prefix;

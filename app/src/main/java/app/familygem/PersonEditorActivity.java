@@ -114,12 +114,10 @@ public class PersonEditorActivity extends AppCompatActivity {
 
         disableDeath();
 
-        birthDateEditor.initialize(birthDate);
         isDeadSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (checked) enableDeath();
             else disableDeath();
         });
-        deathDateEditor.initialize(deathDate);
         deathPlace.setOnEditorActionListener((vista, actionId, keyEvent) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) save();
             return false;
@@ -229,6 +227,8 @@ public class PersonEditorActivity extends AppCompatActivity {
                         deathPlace.setText(fact.getPlace().trim());
                 }
             }
+            birthDateEditor.initialize(birthDate);
+            deathDateEditor.initialize(deathDate);
         }
     }
 

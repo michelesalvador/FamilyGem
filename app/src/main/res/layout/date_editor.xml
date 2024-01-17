@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <CheckBox
+        android:id="@+id/dateEditor_approximate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/approximate" />
+
+    <LinearLayout
+        android:id="@+id/dateEditor_firstExpert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/dateEditor_kinds"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/dateEditor_firstNegative"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="B.C." />
+
+        <CheckBox
+            android:id="@+id/dateEditor_firstDouble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/double_date" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dateEditor_first"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layoutDirection="ltr"
+        android:orientation="horizontal">
+
+        <NumberPicker
+            android:id="@+id/dateEditor_firstDay"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:theme="@style/AppTheme.Wheel" />
+
+        <NumberPicker
+            android:id="@+id/dateEditor_firstMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginLeft="8dp"
+            android:theme="@style/AppTheme.Wheel" />
+
+        <NumberPicker
+            android:id="@+id/dateEditor_firstCentury"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginLeft="8dp"
+            android:theme="@style/AppTheme.Wheel" />
+
+        <NumberPicker
+            android:id="@+id/dateEditor_firstYear"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginLeft="8dp"
+            android:theme="@style/AppTheme.Wheel" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dateEditor_secondExpert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <CheckBox
+            android:id="@+id/dateEditor_secondNegative"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="B.C." />
+
+        <CheckBox
+            android:id="@+id/dateEditor_secondDouble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/double_date" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dateEditor_second"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layoutDirection="ltr"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <NumberPicker
+            android:id="@+id/dateEditor_secondDay"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:theme="@style/AppTheme.Wheel" />
+
+        <NumberPicker
+            android:id="@+id/dateEditor_secondMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginLeft="8dp"
+            android:theme="@style/AppTheme.Wheel" />
+
+        <NumberPicker
+            android:id="@+id/dateEditor_secondCentury"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginLeft="8dp"
+            android:theme="@style/AppTheme.Wheel" />
+
+        <NumberPicker
+            android:id="@+id/dateEditor_secondYear"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginLeft="8dp"
+            android:theme="@style/AppTheme.Wheel" />
+    </LinearLayout>
+</LinearLayout>

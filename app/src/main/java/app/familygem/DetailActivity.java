@@ -431,7 +431,7 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Reload the contents of the detail, including the change date.
+     * Reloads the contents of the detail, including the change date.
      */
     public void refresh() {
         box.removeAllViews();
@@ -598,6 +598,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             // If it is a date
             if (object.equals("Date")) {
                 dateEditor = pieceView.findViewById(R.id.event_date);
+                editText.setText(text); // To pass the date to DateEditorLayout
                 dateEditor.initialize(editText);
             }
         } else if (object instanceof Address) { // Address
@@ -780,8 +781,8 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         CharSequence text = textView.getText();
         editText.setText(text);
-        editText.requestFocus();
-        editText.setSelection(text.length()); // Cursor at the end
+        editText.requestFocus(); // In case of phrase date, parentheses will be removed
+        editText.setSelection(editText.getText().length()); // Cursor at the end
         if (showInput) {
             editText.postDelayed(() -> {
                 InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -790,10 +791,10 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
 
         // Intercepts the 'Done' and 'Next' on the keyboard
-        editText.setOnEditorActionListener((vista, actionId, keyEvent) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE)
+        editText.setOnEditorActionListener((view, actionId, keyEvent) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
                 save(pieceView);
-            else if (actionId == EditorInfo.IME_ACTION_NEXT) {
+            } else if (actionId == EditorInfo.IME_ACTION_NEXT) {
                 if (!editText.getText().toString().equals(textView.getText().toString()))
                     save(pieceView);
                 else
@@ -820,10 +821,10 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     void save(View pieceView) {
-        if (dateEditor != null)
+        Object pieceObject = pieceView.getTag(R.id.tag_object);
+        if (pieceObject.equals("Date"))
             dateEditor.finishEditing();
         String text = editText.getText().toString().trim();
-        Object pieceObject = pieceView.getTag(R.id.tag_object);
         if (pieceObject instanceof Integer) { // Saves given name and surname on non-expert mode
             String givenName = "";
             String surname = "";
@@ -946,7 +947,7 @@ public abstract class DetailActivity extends AppCompatActivity {
     // Contextual menu
     View pieceView; // Editable text, notes, citations, media...
     Object pieceObject;
-    Person person; // as it is used a lot, we make it a pieceObject in its own right
+    Person person; // As it is used a lot, we make it a pieceObject in its own right
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) { // info is null
