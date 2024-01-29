@@ -36,8 +36,8 @@ import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.FamilyActivity;
-import app.familygem.list.FamiliesFragment;
-import app.familygem.util.TreeUtils;
+import app.familygem.main.FamiliesFragment;
+import app.familygem.util.TreeUtil;
 
 public class PersonEditorActivity extends AppCompatActivity {
 
@@ -131,7 +131,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         toolbar.setCustomView(actionBar);
         toolbar.setDisplayShowCustomEnabled(true);
 
-        if (TreeUtils.INSTANCE.isGlobalGedcomOk(this::populateFields)) populateFields();
+        if (TreeUtil.INSTANCE.isGlobalGedcomOk(this::populateFields)) populateFields();
     }
 
     private void populateFields() {
@@ -227,9 +227,9 @@ public class PersonEditorActivity extends AppCompatActivity {
                         deathPlace.setText(fact.getPlace().trim());
                 }
             }
-            birthDateEditor.initialize(birthDate);
-            deathDateEditor.initialize(deathDate);
         }
+        birthDateEditor.initialize(birthDate);
+        deathDateEditor.initialize(deathDate);
     }
 
     private void disableDeath() {
@@ -252,7 +252,7 @@ public class PersonEditorActivity extends AppCompatActivity {
     }
 
     private void save() {
-        if (!TreeUtils.INSTANCE.isGlobalGedcomOk(this::save)) return; // A crash occurred because gc was null here
+        if (!TreeUtil.INSTANCE.isGlobalGedcomOk(this::save)) return; // A crash occurred because gc was null here
 
         // Name
         String givenName = givenNameView.getText().toString().trim();
@@ -383,7 +383,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                 modifications = addRelative(personId, newId, familyId, relation, getIntent().getStringExtra(Extra.DESTINATION));
         } else
             Global.indi = person.getId(); // To show the person then in DiagramFragment
-        TreeUtils.INSTANCE.save(true, modifications);
+        TreeUtil.INSTANCE.save(true, modifications);
         getOnBackPressedDispatcher().onBackPressed();
     }
 
@@ -394,7 +394,7 @@ public class PersonEditorActivity extends AppCompatActivity {
      * @param placing  Summarizes how the family was identified and therefore what to do with the people involved
      * @return An array of modified records
      */
-    static Object[] addRelative(String pivotId, String newId, String familyId, Relation relation, String placing) {
+    public static Object[] addRelative(String pivotId, String newId, String familyId, Relation relation, String placing) {
         Global.indi = pivotId;
         Person newPerson = gc.getPerson(newId);
         // A new family is created in which both pivot and newPerson end up

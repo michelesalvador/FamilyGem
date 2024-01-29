@@ -13,7 +13,7 @@ import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.constant.Gender
 import app.familygem.util.FileUtil
-import app.familygem.util.TreeUtils
+import app.familygem.util.TreeUtil
 import app.familygem.visitor.ListOfSourceCitations
 import app.familygem.visitor.MediaContainersGuarded
 import app.familygem.visitor.MediaList
@@ -113,12 +113,12 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     fun findMatches() {
         coroutine = viewModelScope.launch(Dispatchers.Default) {
             setState(State.ACTIVE)
-            var tempGedcom = TreeUtils.readJson(firstNum)
+            var tempGedcom = TreeUtil.readJson(firstNum)
             if (tempGedcom != null) firstGedcom = tempGedcom else {
                 setState(State.RESET)
                 return@launch
             }
-            if (isActive) tempGedcom = TreeUtils.readJson(secondNum.value!!) else return@launch
+            if (isActive) tempGedcom = TreeUtil.readJson(secondNum.value!!) else return@launch
             if (tempGedcom != null) secondGedcom = tempGedcom else {
                 setState(State.RESET)
                 return@launch
@@ -627,10 +627,10 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             if (Global.settings.openTree == firstNum) Global.gc = firstGedcom // We don't want to modify Global.settings.openTree here
             else {
                 firstTree.persons = firstGedcom.people.size
-                firstTree.generations = TreeUtils.countGenerations(firstGedcom, U.getRootId(firstGedcom, firstTree))
+                firstTree.generations = TreeUtil.countGenerations(firstGedcom, U.getRootId(firstGedcom, firstTree))
                 firstTree.media += secondTree.media
             }
-            if (isActive) TreeUtils.saveJson(firstGedcom, firstNum) // Saves also Global.settings through Notifier
+            if (isActive) TreeUtil.saveJson(firstGedcom, firstNum) // Saves also Global.settings through Notifier
             setState(if (isActive) State.COMPLETE else State.QUIET)
         }
     }
@@ -648,7 +648,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             copyMediaFiles(context, firstGedcom, firstNum, newNum)
             copyMediaFiles(context, secondGedcom, secondNum.value!!, newNum)
             doMerge()
-            if (isActive) TreeUtils.saveJson(firstGedcom, newNum)
+            if (isActive) TreeUtil.saveJson(firstGedcom, newNum)
             setState(if (isActive) State.COMPLETE else State.QUIET)
         }
     }

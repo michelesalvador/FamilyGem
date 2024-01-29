@@ -15,7 +15,7 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import app.familygem.util.FileUtil
-import app.familygem.util.TreeUtils
+import app.familygem.util.TreeUtil
 import kotlinx.coroutines.test.runTest
 import org.apache.commons.io.FileUtils
 import org.junit.Assert.*
@@ -66,7 +66,7 @@ class ExportTest {
         FileOutputStream(gedcomFile).use { inputStream.copyTo(it) }
         assertTrue(gedcomFile.isFile)
         // This import fails on Android 4, 5 and 6 throwing a strange OutOfMemory error
-        TreeUtils.importGedcom(appContext, Uri.fromFile(gedcomFile), {}, {})
+        TreeUtil.importGedcom(appContext, Uri.fromFile(gedcomFile), {}, {})
         Espresso.pressBack()
         assertEquals(Global.settings.trees.size, 1)
         val mediaTree = Global.settings.trees[Global.settings.trees.size - 1]

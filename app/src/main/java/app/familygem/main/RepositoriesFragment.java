@@ -1,4 +1,4 @@
-package app.familygem.list;
+package app.familygem.main;
 
 import static app.familygem.Global.gc;
 
@@ -17,8 +17,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.ActionBar;
 
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Repository;
@@ -36,19 +35,21 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.detail.RepositoryActivity;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 
 /**
  * Fragment with a list of all repositories of the tree.
  */
-public class RepositoriesFragment extends Fragment {
+public class RepositoriesFragment extends BaseFragment {
 
     LinearLayout layout;
+    List<Repository> repositories;
     int order; // For sorting
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+        super.onCreateView(inflater, container, bundle);
         View view = inflater.inflate(R.layout.scrollview, container, false);
         layout = view.findViewById(R.id.scrollview_layout);
         view.findViewById(R.id.fab).setOnClickListener(v -> newRepository(getContext(), null));
@@ -56,59 +57,56 @@ public class RepositoriesFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if (gc != null) {
-            List<Repository> repos = gc.getRepositories();
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(repos.size() + " "
-                    + Util.INSTANCE.caseString(repos.size() == 1 ? R.string.repository : R.string.repositories));
-            if (repos.size() > 1)
-                setHasOptionsMenu(true);
-            Collections.sort(repos, (r1, r2) -> {
-                switch (order) {
-                    case 1: // Ordina per id
-                        return U.extractNum(r1.getId()) - U.extractNum(r2.getId());
-                    case 2: // Ordine alfabetico
-                        return r1.getName().compareToIgnoreCase(r2.getName());
-                    case 3: // Ordina per numero di fonti
-                        return countSources(gc, r2) - countSources(gc, r1);
-                    default:
-                        return 0;
+    public void showContent() {
+        listRepositories();
+    }
+
+    private void listRepositories() {
+        repositories = gc.getRepositories();
+        Collections.sort(repositories, (r1, r2) -> {
+            switch (order) {
+                case 1: // Ordina per id
+                    return U.extractNum(r1.getId()) - U.extractNum(r2.getId());
+                case 2: // Ordine alfabetico
+                    return r1.getName().compareToIgnoreCase(r2.getName());
+                case 3: // Ordina per numero di fonti
+                    return countSources(gc, r2) - countSources(gc, r1);
+                default:
+                    return 0;
+            }
+        });
+        layout.removeAllViews();
+        for (Repository repo : repositories) {
+            View repoView = getLayoutInflater().inflate(R.layout.scrollview_item, layout, false);
+            layout.addView(repoView);
+            ((TextView)repoView.findViewById(R.id.item_name)).setText(repo.getName());
+            ((TextView)repoView.findViewById(R.id.item_num)).setText(String.valueOf(countSources(gc, repo)));
+            repoView.setOnClickListener(v -> {
+                if (getActivity().getIntent().getBooleanExtra(Choice.REPOSITORY, false)) {
+                    Intent intent = new Intent();
+                    intent.putExtra("repoId", repo.getId());
+                    getActivity().setResult(Activity.RESULT_OK, intent);
+                    getActivity().finish();
+                } else {
+                    Memory.setLeader(repo);
+                    startActivity(new Intent(getContext(), RepositoryActivity.class));
                 }
             });
-            layout.removeAllViews();
-            for (Repository repo : repos) {
-                View repoView = getLayoutInflater().inflate(R.layout.scrollview_item, layout, false);
-                layout.addView(repoView);
-                ((TextView)repoView.findViewById(R.id.item_name)).setText(repo.getName());
-                ((TextView)repoView.findViewById(R.id.item_num)).setText(String.valueOf(countSources(gc, repo)));
-                repoView.setOnClickListener(v -> {
-                    if (getActivity().getIntent().getBooleanExtra(Choice.REPOSITORY, false)) {
-                        Intent intent = new Intent();
-                        intent.putExtra("repoId", repo.getId());
-                        getActivity().setResult(Activity.RESULT_OK, intent);
-                        getActivity().finish();
-                    } else {
-                        Memory.setLeader(repo);
-                        startActivity(new Intent(getContext(), RepositoryActivity.class));
-                    }
-                });
-                registerForContextMenu(repoView);
-                repoView.setTag(repo);
+            registerForContextMenu(repoView);
+            repoView.setTag(repo);
 
-                // Extension "fonti" is removed from version 0.9.1
-                if (repo.getExtension("fonti") != null)
-                    repo.putExtension("fonti", null);
-                if (repo.getExtensions().isEmpty())
-                    repo.setExtensions(null);
-            }
+            // Extension "fonti" is removed from version 0.9.1
+            if (repo.getExtension("fonti") != null)
+                repo.putExtension("fonti", null);
+            if (repo.getExtensions().isEmpty())
+                repo.setExtensions(null);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().getIntent().removeExtra(Choice.REPOSITORY);
+        requireActivity().getIntent().removeExtra(Choice.REPOSITORY);
     }
 
     // Count how many sources are present in a repository
@@ -136,7 +134,7 @@ public class RepositoriesFragment extends Fragment {
             repoRef.setRef(repo.getId());
             source.setRepositoryRef(repoRef);
         }
-        TreeUtils.INSTANCE.save(true, repo);
+        TreeUtil.INSTANCE.save(true, repo);
         Memory.setLeader(repo);
         context.startActivity(new Intent(context, RepositoryActivity.class));
     }
@@ -157,50 +155,41 @@ public class RepositoriesFragment extends Fragment {
         return sources.toArray(new Source[0]);
     }
 
-    // overflow menu in toolbar
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        SubMenu subMenu = menu.addSubMenu(R.string.order_by);
-        if (Global.settings.expert)
-            subMenu.add(0, 1, 0, R.string.id);
-        subMenu.add(0, 2, 0, R.string.name);
-        subMenu.add(0, 3, 0, R.string.sources_number);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case 1:
-                order = 1;
-                break;
-            case 2:
-                order = 2;
-                break;
-            case 3:
-                order = 3;
-                break;
-            default:
-                return false;
+    public void updateToolbar(ActionBar bar, Menu menu, MenuInflater inflater) {
+        bar.setTitle(repositories.size() + " " + Util.INSTANCE.caseString(repositories.size() == 1 ? R.string.repository : R.string.repositories));
+        if (repositories.size() > 1) {
+            inflater.inflate(R.menu.sort_by, menu);
+            SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
+            if (Global.settings.expert)
+                subMenu.add(0, 1, 0, R.string.id);
+            subMenu.add(0, 2, 0, R.string.name);
+            subMenu.add(0, 3, 0, R.string.sources_number);
         }
-        onStart();
-        return true;
     }
 
-    // Menu contestuale
+    @Override
+    public void selectItem(int id) {
+        order = id;
+        showContent();
+    }
+
+    // Context menu
     Repository repository;
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
         repository = (Repository)vista.getTag();
-        menu.add(0, 0, 0, R.string.delete);
+        menu.add(6, 0, 0, R.string.delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        if (item.getItemId() == 0) {
-            Source[] fonti = delete(repository);
-            TreeUtils.INSTANCE.save(false, (Object[])fonti);
-            getActivity().recreate();
+        if (item.getGroupId() == 6 && item.getItemId() == 0) {
+            Source[] sources = delete(repository);
+            TreeUtil.INSTANCE.save(false, (Object[])sources);
+            showContent();
+            ((MainActivity)requireActivity()).refreshInterface();
             return true;
         }
         return false;

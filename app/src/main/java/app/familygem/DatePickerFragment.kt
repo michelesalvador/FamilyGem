@@ -6,6 +6,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
+import app.familygem.main.TreeSettingsFragment
 import org.joda.time.LocalDate
 import java.util.Calendar
 

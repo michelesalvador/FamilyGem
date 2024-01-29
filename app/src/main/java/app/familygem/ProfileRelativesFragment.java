@@ -26,8 +26,9 @@ import java.util.List;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
-import app.familygem.list.PersonsFragment;
-import app.familygem.util.TreeUtils;
+import app.familygem.main.PersonsFragment;
+import app.familygem.util.PersonUtilKt;
+import app.familygem.util.TreeUtil;
 
 public class ProfileRelativesFragment extends Fragment {
 
@@ -104,7 +105,7 @@ public class ProfileRelativesFragment extends Fragment {
 
     private void moveFamilyRef(int direction) {
         Collections.swap(one.getSpouseFamilyRefs(), familyPosition, familyPosition + direction);
-        TreeUtils.INSTANCE.save(true, one);
+        TreeUtil.INSTANCE.save(true, one);
         refreshAll();
     }
 
@@ -126,9 +127,9 @@ public class ProfileRelativesFragment extends Fragment {
                 if (ref.getRef().equals(family.getId()))
                     familyPosition = familyRefs.indexOf(ref);
         }
-        // Better to use numbers that do not conflict with the context menus of other profile pages
+        // Better to use item IDs that do not conflict with the context menus of other profile pages
         menu.add(0, 300, 0, R.string.diagram);
-        String[] familyLabels = DiagramFragment.getFamilyLabels(getContext(), person, family);
+        String[] familyLabels = PersonUtilKt.getFamilyLabels(person, requireContext(), family);
         if (familyLabels[0] != null)
             menu.add(0, 301, 0, familyLabels[0]);
         if (familyLabels[1] != null)
@@ -166,7 +167,7 @@ public class ProfileRelativesFragment extends Fragment {
             FamilyActivity.chooseLineage(getContext(), person, family);
         } else if (id == 307) { // Unlink
             FamilyActivity.disconnect(personId, family);
-            TreeUtils.INSTANCE.save(true, family, person);
+            TreeUtil.INSTANCE.save(true, family, person);
             refreshAll();
             U.controllaFamiglieVuote(getContext(), this::refreshOptionsMenu, false, family);
         } else if (id == 308) { // Delete

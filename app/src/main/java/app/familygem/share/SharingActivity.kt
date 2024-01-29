@@ -18,7 +18,6 @@ import app.familygem.BaseActivity
 import app.familygem.BuildConfig
 import app.familygem.Exporter
 import app.familygem.Global
-import app.familygem.Principal
 import app.familygem.R
 import app.familygem.Settings
 import app.familygem.Settings.Share
@@ -26,11 +25,12 @@ import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
-import app.familygem.list.SubmittersFragment
+import app.familygem.main.MainActivity
+import app.familygem.main.SubmittersFragment
 import app.familygem.util.ChangeUtil.actualDateTime
 import app.familygem.util.ChangeUtil.updateChangeDate
-import app.familygem.util.TreeUtils
-import app.familygem.util.TreeUtils.createHeader
+import app.familygem.util.TreeUtil
+import app.familygem.util.TreeUtil.createHeader
 import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
@@ -157,7 +157,7 @@ class SharingActivity : BaseActivity() {
                 }
                 submitterId = submitter!!.id
                 GlobalScope.launch(IO) {
-                    TreeUtils.saveJson(gedcom!!, tree.id) // Possibly bypassing the preference not to save automatically
+                    TreeUtil.saveJson(gedcom!!, tree.id) // Possibly bypassing the preference not to save automatically
                 }
 
                 // Tree accessibility for app developer
@@ -196,7 +196,7 @@ class SharingActivity : BaseActivity() {
             rootLayout.removeView(rootView)
             rootView = U.placeSmallPerson(rootLayout, person)
             rootView!!.setOnClickListener {
-                val intent = Intent(this, Principal::class.java)
+                val intent = Intent(this, MainActivity::class.java)
                 intent.putExtra(Choice.PERSON, true)
                 startActivityForResult(intent, 5007)
             }

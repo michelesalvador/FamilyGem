@@ -25,12 +25,10 @@ import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Code
 import app.familygem.constant.Extra
 import app.familygem.constant.Gender
+import app.familygem.main.MainActivity
 import app.familygem.merge.MergeActivity
 import app.familygem.share.SharingActivity
-import app.familygem.util.TreeUtils
-import app.familygem.util.TreeUtils.deleteTree
-import app.familygem.util.TreeUtils.openGedcom
-import app.familygem.util.TreeUtils.readJson
+import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.getBasicData
 import app.familygem.visitor.MediaList
@@ -111,7 +109,7 @@ class TreesActivity : AppCompatActivity() {
                     treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.accent_medium, null))
                     detailView.setTextColor(ResourcesCompat.getColor(resources, R.color.text, null))
                     treeView.setOnClickListener {
-                        if (!TreeUtils.compareTrees(this@TreesActivity, tree, true)) {
+                        if (!TreeUtil.compareTrees(this@TreesActivity, tree, true)) {
                             tree.grade = 10 // It is downgraded
                             Global.settings.save()
                             updateList()
@@ -122,7 +120,7 @@ class TreesActivity : AppCompatActivity() {
                     treeLayout.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.consumed, null))
                     titleView.setTextColor(ResourcesCompat.getColor(resources, R.color.gray_text, null))
                     treeView.setOnClickListener {
-                        if (!TreeUtils.compareTrees(this@TreesActivity, tree, true)) {
+                        if (!TreeUtil.compareTrees(this@TreesActivity, tree, true)) {
                             tree.grade = 10 // It is downgraded
                             Global.settings.save()
                             updateList()
@@ -134,11 +132,11 @@ class TreesActivity : AppCompatActivity() {
                     treeView.setOnClickListener {
                         progress.visibility = View.VISIBLE
                         if (Global.gc != null && treeId == Global.settings.openTree) { // Tree already opened
-                            startActivity(Intent(this@TreesActivity, Principal::class.java))
+                            startActivity(Intent(this@TreesActivity, MainActivity::class.java))
                         } else {
                             lifecycleScope.launch(IO) {
-                                if (openGedcom(treeId, true))
-                                    startActivity(Intent(this@TreesActivity, Principal::class.java))
+                                if (TreeUtil.openGedcom(treeId, true))
+                                    startActivity(Intent(this@TreesActivity, MainActivity::class.java))
                                 else withContext(Main) { progress.visibility = View.GONE }
                             }
                         }
@@ -284,9 +282,9 @@ class TreesActivity : AppCompatActivity() {
                         && intent.getBooleanExtra(Extra.AUTO_LOAD_TREE, false)) && Global.settings.openTree > 0) {
             progress.visibility = View.VISIBLE
             lifecycleScope.launch(IO) {
-                if (openGedcom(Global.settings.openTree, false)) {
+                if (TreeUtil.openGedcom(Global.settings.openTree, false)) {
                     autoOpenedTree = true
-                    startActivity(Intent(this@TreesActivity, Principal::class.java))
+                    startActivity(Intent(this@TreesActivity, MainActivity::class.java))
                 } else withContext(Main) { progress.visibility = View.GONE }
             }
         }
@@ -304,7 +302,7 @@ class TreesActivity : AppCompatActivity() {
                 .setPositiveButton(R.string.download) { _, _ ->
                     progress.visibility = View.VISIBLE
                     lifecycleScope.launch(IO) {
-                        TreeUtils.downloadSharedTree(this@TreesActivity, dateId, {
+                        TreeUtil.downloadSharedTree(this@TreesActivity, dateId, {
                             progress.visibility = View.GONE
                             updateList()
                         }, { progress.visibility = View.GONE })
@@ -316,13 +314,13 @@ class TreesActivity : AppCompatActivity() {
         override fun onMenuItemClick(item: MenuItem): Boolean {
             val id = item.itemId
             if (id == -1) { // Save
-                GlobalScope.launch(IO) { TreeUtils.saveJson(Global.gc, treeId) }
+                GlobalScope.launch(IO) { TreeUtil.saveJson(Global.gc, treeId) }
                 Global.shouldSave = false
             } else if (id == 0) { // Open a derived tree
                 progress.visibility = View.VISIBLE
                 lifecycleScope.launch(IO) {
-                    if (openGedcom(treeId, true))
-                        startActivity(Intent(this@TreesActivity, Principal::class.java))
+                    if (TreeUtil.openGedcom(treeId, true))
+                        startActivity(Intent(this@TreesActivity, MainActivity::class.java))
                     else withContext(Main) { progress.visibility = View.GONE }
                 }
             } else if (id == 1) { // Tree info
@@ -367,7 +365,7 @@ class TreesActivity : AppCompatActivity() {
                         .putExtra(Extra.TREE_ID, treeId))
             } else if (id == 7) { // Compare with existing trees
                 val tree = Global.settings.getTree(treeId)
-                if (TreeUtils.compareTrees(this@TreesActivity, tree, false)) {
+                if (TreeUtil.compareTrees(this@TreesActivity, tree, false)) {
                     tree.grade = 20
                     updateList()
                 } else Toast.makeText(this@TreesActivity, R.string.no_results, Toast.LENGTH_LONG).show()
@@ -406,7 +404,7 @@ class TreesActivity : AppCompatActivity() {
             } else if (id == 10) { // Delete tree
                 AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
                         .setPositiveButton(R.string.delete) { _, _ ->
-                            deleteTree(treeId)
+                            TreeUtil.deleteTree(treeId)
                             updateList()
                         }.setNeutralButton(R.string.cancel, null).show()
             } else {
@@ -448,10 +446,10 @@ class TreesActivity : AppCompatActivity() {
         if (treeId > 0 && !consumedNotifications.contains(notifyId)) {
             progress.visibility = View.VISIBLE
             lifecycleScope.launch(IO) {
-                if (openGedcom(treeId, true)) {
+                if (TreeUtil.openGedcom(treeId, true)) {
                     Global.indi = intent.getStringExtra(Notifier.PERSON_ID_KEY)
                     consumedNotifications.add(notifyId)
-                    startActivity(Intent(this@TreesActivity, Principal::class.java))
+                    startActivity(Intent(this@TreesActivity, MainActivity::class.java))
                     Notifier(this@TreesActivity, Global.gc, treeId, Notifier.What.DEFAULT) // Actually deletes present notification
                 } else withContext(Main) { progress.visibility = View.GONE }
             }
@@ -508,7 +506,7 @@ class TreesActivity : AppCompatActivity() {
             item["title"] = tree.title
             // If GEDCOM is already open, updates the data
             if (Global.gc != null && Global.settings.openTree == tree.id)
-                TreeUtils.refreshData(Global.gc, tree)
+                TreeUtil.refreshData(Global.gc, tree)
             item["data"] = tree.getBasicData()
             treeList.add(item)
         }
@@ -549,7 +547,7 @@ class TreesActivity : AppCompatActivity() {
     suspend fun findErrors(treeId: Int, correct: Boolean): Gedcom? {
         errorList.clear()
         val gedcom = if (Global.shouldSave && treeId == Global.settings.openTree && Global.gc != null) Global.gc
-        else readJson(treeId) ?: return null
+        else TreeUtil.readJson(treeId) ?: return null
 
         // Root in settings
         val tree = Global.settings.getTree(treeId)
@@ -892,7 +890,7 @@ class TreesActivity : AppCompatActivity() {
                     lifecycleScope.launch(Default) {
                         val correctGedcom = findErrors(treeId, true)
                         if (correctGedcom != null) {
-                            TreeUtils.saveJson(correctGedcom, treeId)
+                            TreeUtil.saveJson(correctGedcom, treeId)
                             Global.shouldSave = false // Just in case
                             if (treeId == Global.settings.openTree && Global.gc != null) Global.gc = correctGedcom
                             else Global.gc = null // Resets it to reload corrected

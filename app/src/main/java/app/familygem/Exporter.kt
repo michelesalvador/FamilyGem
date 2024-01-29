@@ -10,7 +10,7 @@ import androidx.documentfile.provider.DocumentFile
 import app.familygem.Settings.ZippedTree
 import app.familygem.util.ChangeUtil.actualDateTime
 import app.familygem.util.FileUtil
-import app.familygem.util.TreeUtils
+import app.familygem.util.TreeUtil
 import app.familygem.visitor.MediaList
 import org.apache.commons.io.FileUtils
 import org.folg.gedcom.model.Gedcom
@@ -39,7 +39,7 @@ class Exporter(private val context: Context) {
      */
     suspend fun openTree(treeId: Int): Boolean {
         this.treeId = treeId
-        gedcom = TreeUtils.openGedcomTemporarily(treeId, true)
+        gedcom = TreeUtil.openGedcomTemporarily(treeId, true)
         return if (gedcom == null) {
             error(R.string.no_useful_data)
         } else true
@@ -64,7 +64,7 @@ class Exporter(private val context: Context) {
             return error(e.localizedMessage)
         }
         makeFileVisible(targetUri)
-        Global.gc = TreeUtils.readJson(treeId) // Resets the changes
+        Global.gc = TreeUtil.readJson(treeId) // Resets the changes
         return success(R.string.gedcom_exported_ok)
     }
 
@@ -91,7 +91,7 @@ class Exporter(private val context: Context) {
         collection[gedcomDocument] = Type.KEEP_NAME
         if (!createZipFile(collection)) return false
         makeFileVisible(targetUri)
-        Global.gc = TreeUtils.readJson(treeId)
+        Global.gc = TreeUtil.readJson(treeId)
         return success(R.string.zip_exported_ok)
     }
 
@@ -179,7 +179,7 @@ class Exporter(private val context: Context) {
 
     private fun updateHeader(gedcomFilename: String) {
         val header = gedcom!!.header
-        if (header == null) gedcom!!.header = TreeUtils.createHeader(gedcomFilename) else {
+        if (header == null) gedcom!!.header = TreeUtil.createHeader(gedcomFilename) else {
             header.file = gedcomFilename
             header.dateTime = actualDateTime()
         }

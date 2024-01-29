@@ -5,7 +5,7 @@ import android.text.InputType;
 import org.folg.gedcom.model.Submitter;
 
 import app.familygem.DetailActivity;
-import app.familygem.list.SubmittersFragment;
+import app.familygem.main.SubmittersFragment;
 import app.familygem.R;
 import app.familygem.U;
 

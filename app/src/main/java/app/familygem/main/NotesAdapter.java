@@ -1,4 +1,4 @@
-package app.familygem.list;
+package app.familygem.main;
 
 import android.content.Context;
 import android.view.ContextMenu;
@@ -107,7 +107,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             selectedNote = (Note)v.getTag();
-            menu.add(0, 0, 0, R.string.delete);
+            menu.add(4, 0, 0, R.string.delete);
         }
     }
 

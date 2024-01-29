@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
-import app.familygem.util.TreeUtils
+import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +51,7 @@ class LauncherActivity : AppCompatActivity() {
             if (dateId != null) {
                 if (BuildConfig.PASS_KEY.isNotEmpty()) {
                     lifecycleScope.launch(Dispatchers.IO) {
-                        TreeUtils.downloadSharedTree(this@LauncherActivity, dateId, {
+                        TreeUtil.downloadSharedTree(this@LauncherActivity, dateId, {
                             // Successful conclusion of download
                             startActivity(treesIntent)
                         }, { // Unsuccessful conclusion of download
@@ -65,7 +65,7 @@ class LauncherActivity : AppCompatActivity() {
             } // The URI comes from a click on a .ged file
             else if (uri.scheme == "file" || uri.scheme == "content") {
                 lifecycleScope.launch(Dispatchers.Default) {
-                    TreeUtils.importGedcom(this@LauncherActivity, uri,
+                    TreeUtil.importGedcom(this@LauncherActivity, uri,
                             { startActivity(treesIntent) }, { startActivity(treesIntent) })
                 }
             } else {

@@ -1,4 +1,4 @@
-package app.familygem.list;
+package app.familygem.main;
 
 import static app.familygem.Global.gc;
 
@@ -15,9 +15,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.ParentFamilyRef;
@@ -33,14 +32,13 @@ import java.util.Set;
 
 import app.familygem.Global;
 import app.familygem.Memory;
-import app.familygem.Principal;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.detail.FamilyActivity;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 
-public class FamiliesFragment extends Fragment {
+public class FamiliesFragment extends BaseFragment {
 
     private LinearLayout layout;
     private List<FamilyWrapper> familyList = new ArrayList<>();
@@ -51,18 +49,23 @@ public class FamiliesFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+        super.onCreateView(inflater, container, bundle);
         View view = inflater.inflate(R.layout.scrollview, container, false);
         layout = view.findViewById(R.id.scrollview_layout);
         // FAB
         view.findViewById(R.id.fab).setOnClickListener(v -> {
             Family newFamily = newFamily(true); // TODO: Crashes if Global.gc is null
-            TreeUtils.INSTANCE.save(true, newFamily);
+            TreeUtil.INSTANCE.save(true, newFamily);
             // If the user returns immediately back to this fragment, the new empty family is displayed in the list
             Memory.setLeader(newFamily);
             startActivity(new Intent(getContext(), FamilyActivity.class));
         });
-        if (TreeUtils.INSTANCE.isGlobalGedcomOk(() -> refresh(What.RELOAD))) refresh(What.RELOAD);
         return view;
+    }
+
+    @Override
+    public void showContent() {
+        refresh(FamiliesFragment.What.RELOAD);
     }
 
     void placeFamily(LinearLayout layout, FamilyWrapper wrapper) {
@@ -157,7 +160,7 @@ public class FamiliesFragment extends Fragment {
         gc.createIndexes(); // Necessary to update persons
         Memory.setInstanceAndAllSubsequentToNull(family);
         Global.familyNum = 0; // In the case that is deleted exactly the family referenced in Global.familyNum
-        TreeUtils.INSTANCE.save(true, members.toArray(new Object[0]));
+        TreeUtil.INSTANCE.save(true, members.toArray(new Object[0]));
     }
 
     public static Family newFamily(boolean addToGedcom) {
@@ -174,12 +177,13 @@ public class FamiliesFragment extends Fragment {
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
         selected = gc.getFamily((String)view.getTag());
         if (Global.settings.expert)
-            menu.add(0, 0, 0, R.string.edit_id);
-        menu.add(0, 1, 0, R.string.delete);
+            menu.add(2, 0, 0, R.string.edit_id);
+        menu.add(2, 1, 0, R.string.delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        if (item.getGroupId() != 2) return false;
         if (item.getItemId() == 0) { // Edit ID
             U.editId(getContext(), selected, () -> this.refresh(What.UPDATE));
         } else if (item.getItemId() == 1) { // Delete
@@ -188,12 +192,12 @@ public class FamiliesFragment extends Fragment {
                         .setPositiveButton(android.R.string.yes, (dialog, i) -> {
                             deleteFamily(selected);
                             refresh(What.RELOAD);
-                            ((Principal)requireActivity()).furnishMenu();
+                            ((MainActivity)requireActivity()).refreshInterface();
                         }).setNeutralButton(android.R.string.cancel, null).show();
             } else {
                 deleteFamily(selected);
                 refresh(What.RELOAD);
-                ((Principal)requireActivity()).furnishMenu();
+                ((MainActivity)requireActivity()).refreshInterface();
             }
         } else {
             return false;
@@ -254,17 +258,18 @@ public class FamiliesFragment extends Fragment {
             List<Family> sortedFamilies = new ArrayList<>();
             for (FamilyWrapper wrapper : familyList) sortedFamilies.add(wrapper.family);
             gc.setFamilies(sortedFamilies);
-            TreeUtils.INSTANCE.save(false); // Immediately saves families sorting
+            TreeUtil.INSTANCE.save(false); // Immediately saves families sorting
         }
     }
 
+    /**
+     * Updates the content of this fragment.
+     */
     public void refresh(What toDo) {
         if (toDo == What.RELOAD) { // Reloads all families from Global.gc
             familyList.clear();
             for (Family family : gc.getFamilies())
                 familyList.add(new FamilyWrapper(family));
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(familyList.size() + " "
-                    + Util.INSTANCE.caseString(familyList.size() == 1 ? R.string.family : R.string.families));
             sortFamilies();
         } else if (toDo == What.UPDATE) { // Updates the content of existing family wrappers
             for (FamilyWrapper wrapper : familyList)
@@ -274,7 +279,6 @@ public class FamiliesFragment extends Fragment {
         for (FamilyWrapper wrapper : familyList)
             placeFamily(layout, wrapper);
         idsAreNumeric = verifyIdsAreNumeric();
-        setHasOptionsMenu(familyList.size() > 1);
     }
 
     private class FamilyWrapper {
@@ -314,18 +318,20 @@ public class FamiliesFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.sort_by, menu);
-        SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
-        if (Global.settings.expert)
-            subMenu.add(0, 1, 0, R.string.id);
-        subMenu.add(0, 2, 0, R.string.surname);
-        subMenu.add(0, 3, 0, R.string.number_members);
+    public void updateToolbar(ActionBar bar, Menu menu, MenuInflater inflater) {
+        bar.setTitle(familyList.size() + " " + Util.INSTANCE.caseString(familyList.size() == 1 ? R.string.family : R.string.families));
+        if (familyList.size() > 1) {
+            inflater.inflate(R.menu.sort_by, menu);
+            SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
+            if (Global.settings.expert)
+                subMenu.add(0, 1, 0, R.string.id);
+            subMenu.add(0, 2, 0, R.string.surname);
+            subMenu.add(0, 3, 0, R.string.number_members);
+        }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+    public void selectItem(int id) {
         if (id > 0 && id <= 3) {
             if (order == id * 2 - 1)
                 order++;
@@ -335,8 +341,6 @@ public class FamiliesFragment extends Fragment {
                 order = id * 2 - 1;
             sortFamilies();
             refresh(What.BASIC);
-            return true;
         }
-        return false;
     }
 }

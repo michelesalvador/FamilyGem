@@ -6,13 +6,13 @@
     android:background="@drawable/menu_sfondo">
 
     <ImageView
-        android:id="@+id/menu_immagine"
+        android:id="@+id/menuHeader_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
     <TextView
-        android:id="@+id/menu_titolo"
+        android:id="@+id/menuHeader_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -28,10 +28,10 @@
         android:textSize="26sp" />
 
     <LinearLayout
-        android:id="@+id/menu_alberi"
+        android:id="@+id/menuHeader_trees"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/menu_titolo"
+        android:layout_above="@+id/menuHeader_title"
         android:layout_marginBottom="8dp"
         android:background="@drawable/menu_alberi_sfondo"
         android:foreground="?android:attr/selectableItemBackground"
@@ -56,7 +56,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/menu_number"
+        android:id="@+id/menuHeader_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -68,11 +68,11 @@
         android:visibility="gone" />
 
     <Button
-        android:id="@+id/menu_salva"
+        android:id="@+id/menuHeader_save"
         style="@style/AppTheme.BottoneColorato"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/menu_titolo"
+        android:layout_above="@+id/menuHeader_title"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"

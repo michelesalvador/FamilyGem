@@ -15,7 +15,7 @@
     <string name="extension">Altro</string>
     <string name="new_family_of">Nuova famiglia di %s</string>
     <string name="existing_family">Famiglia già esistente</string>
-    <!-- Principal -->
+    <!-- MainActivity -->
     <string name="drawer_open">Apri pannello di navigazione</string>
     <string name="drawer_close">Chiudi pannello di navigazione</string>
     <string name="revert">Annulla modifiche</string>

@@ -24,7 +24,7 @@ android {
         minSdk 19
         targetSdk 34
         versionCode 25
-        versionName '1.0.0.10'
+        versionName '1.0.0.11'
         vectorDrawables.useSupportLibrary = true
         resourceConfigurations += ['ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh']
         def passKey = ''
@@ -79,7 +79,7 @@ dependencies {
     implementation 'com.android.billingclient:billing-ktx:6.1.0'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
-    implementation files('libs/gedcomgraph-3.3.jar')
+    implementation files('libs/gedcomgraph-3.4.jar')
     implementation 'joda-time:joda-time:2.12.1'
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
     implementation 'com.otaliastudios:zoomlayout:1.9.0'

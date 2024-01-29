@@ -6,46 +6,46 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_diagram"
+            android:id="@+id/menu_diagram"
             android:icon="@drawable/menu_diagramma"
             android:title="@string/diagram" />
         <item
-            android:id="@+id/nav_persons"
+            android:id="@+id/menu_persons"
             android:icon="@drawable/menu_persona"
             android:title="@string/persons"
             app:actionLayout="@layout/menu_item_extra" />
         <item
-            android:id="@+id/nav_families"
+            android:id="@+id/menu_families"
             android:icon="@drawable/menu_famiglia"
             android:title="@string/families"
             app:actionLayout="@layout/menu_item_extra" />
         <item
-            android:id="@+id/nav_media"
+            android:id="@+id/menu_media"
             android:icon="@drawable/menu_ritratto"
             android:title="@string/media"
             app:actionLayout="@layout/menu_item_extra" />
         <item
-            android:id="@+id/nav_notes"
+            android:id="@+id/menu_notes"
             android:icon="@drawable/menu_nota"
             android:title="@string/notes"
             app:actionLayout="@layout/menu_item_extra" />
         <item
-            android:id="@+id/nav_sources"
+            android:id="@+id/menu_sources"
             android:icon="@drawable/menu_fonte"
             android:title="@string/sources"
             app:actionLayout="@layout/menu_item_extra" />
         <item
-            android:id="@+id/nav_repositories"
+            android:id="@+id/menu_repositories"
             android:icon="@drawable/menu_tempio"
             android:title="@string/repositories"
             app:actionLayout="@layout/menu_item_extra" />
         <item
-            android:id="@+id/nav_submitters"
+            android:id="@+id/menu_submitters"
             android:icon="@drawable/menu_autore"
             android:title="@string/submitters"
             app:actionLayout="@layout/menu_item_extra" />
         <item
-            android:id="@+id/nav_settings"
+            android:id="@+id/menu_settings"
             android:icon="@drawable/gear"
             android:title="@string/tree_settings" />
     </group>

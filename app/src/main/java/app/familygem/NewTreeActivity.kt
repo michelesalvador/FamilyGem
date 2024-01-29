@@ -21,7 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import app.familygem.util.TreeUtils
+import app.familygem.util.TreeUtil
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -51,7 +51,7 @@ class NewTreeActivity : BaseActivity() {
             downloadShared.setOnClickListener {
                 progress.visibility = View.VISIBLE
                 lifecycleScope.launch(IO) {
-                    TreeUtils.downloadSharedTree(this@NewTreeActivity, referrer,
+                    TreeUtil.downloadSharedTree(this@NewTreeActivity, referrer,
                             { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
                             { progress.visibility = View.GONE })
                 }
@@ -102,7 +102,7 @@ class NewTreeActivity : BaseActivity() {
                 if (uri != null) {
                     progress.visibility = View.VISIBLE
                     lifecycleScope.launch(IO) {
-                        TreeUtils.importGedcom(this@NewTreeActivity, uri, {
+                        TreeUtil.importGedcom(this@NewTreeActivity, uri, {
                             // Successful import
                             onBackPressedDispatcher.onBackPressed()
                         }, { // Unsuccessful import
@@ -132,7 +132,7 @@ class NewTreeActivity : BaseActivity() {
                         }
                         if (isValidBackup) {
                             lifecycleScope.launch(Default) {
-                                TreeUtils.unZipTree(this@NewTreeActivity, null, uri,
+                                TreeUtil.unZipTree(this@NewTreeActivity, null, uri,
                                         { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
                                         { progress.visibility = View.GONE })
                             }
@@ -166,7 +166,7 @@ class NewTreeActivity : BaseActivity() {
         val num = Global.settings.max() + 1
         val jsonFile = File(filesDir, "$num.json")
         Global.gc = Gedcom()
-        Global.gc.header = TreeUtils.createHeader(jsonFile.name)
+        Global.gc.header = TreeUtil.createHeader(jsonFile.name)
         Global.gc.createIndexes()
         val parser = JsonParser()
         try {
@@ -214,7 +214,7 @@ class NewTreeActivity : BaseActivity() {
                         }
                         DownloadManager.STATUS_SUCCESSFUL -> {
                             finishDownload = true
-                            TreeUtils.unZipTree(this, zipFile.path, null,
+                            TreeUtil.unZipTree(this, zipFile.path, null,
                                     { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
                                     { progress.visibility = View.GONE; downloadButton.isEnabled = true })
                         }

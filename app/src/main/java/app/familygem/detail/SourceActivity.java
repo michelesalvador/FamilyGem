@@ -17,7 +17,7 @@ import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.list.SourcesFragment;
+import app.familygem.main.SourcesFragment;
 import app.familygem.util.ChangeUtil;
 import app.familygem.visitor.ListOfSourceCitations;
 

@@ -57,7 +57,7 @@ fun Tree.getBasicData(): String {
 /**
  * Functions about the general tree shared across many classes.
  */
-object TreeUtils {
+object TreeUtil {
     /**
      * Standard opening of a stored GEDCOM to edit it.
      */
@@ -73,9 +73,6 @@ object TreeUtils {
         Global.shouldSave = false // Resets it in case was true
         return true
     }
-
-    // Temporary hack for Java
-    fun openGedcomAsync(treeId: Int, saveSettings: Boolean) = GlobalScope.launch(IO) { openGedcom(treeId, saveSettings) }
 
     /**
      *  Lightly opens a stored GEDCOM for different purposes.

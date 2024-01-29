@@ -12,7 +12,7 @@ import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.U;
-import app.familygem.list.RepositoriesFragment;
+import app.familygem.main.RepositoriesFragment;
 import app.familygem.util.ChangeUtil;
 
 public class RepositoryActivity extends DetailActivity {

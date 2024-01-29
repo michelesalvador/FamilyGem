@@ -25,6 +25,8 @@ import java.util.Objects;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Relation;
+import app.familygem.main.DiagramFragment;
+import app.familygem.main.MainActivity;
 
 /**
  * Dialog to connect a relative (parent, sibling, partner or child) to a person in expert mode,
@@ -110,7 +112,7 @@ public class NewRelativeDialog extends DialogFragment {
                 startActivity(intent);
             } else { // Link existing person
                 intent.putExtra(Choice.PERSON, true);
-                intent.setClass(requireContext(), Principal.class);
+                intent.setClass(requireContext(), MainActivity.class);
                 if (fragment != null)
                     ((DiagramFragment)fragment).choosePersonLauncher.launch(intent);
                 else

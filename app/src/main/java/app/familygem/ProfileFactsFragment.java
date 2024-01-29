@@ -39,7 +39,7 @@ import app.familygem.constant.Gender;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
 import app.familygem.detail.NameActivity;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 
 public class ProfileFactsFragment extends Fragment {
 
@@ -227,7 +227,7 @@ public class ProfileFactsFragment extends Fragment {
                             updateSpouseRoles(one);
                             dialog.dismiss();
                             refresh();
-                            TreeUtils.INSTANCE.save(true, one);
+                            TreeUtil.INSTANCE.save(true, one);
                         }).show());
             } else { // All other events
                 U.placeMedia(otherLayout, (MediaContainer)object, false);
@@ -365,7 +365,7 @@ public class ProfileFactsFragment extends Fragment {
                 break;
             case 227: // Delete
                 Object[] leaders = U.deleteNote((Note)pieceObject, null);
-                TreeUtils.INSTANCE.save(true, leaders);
+                TreeUtil.INSTANCE.save(true, leaders);
                 refresh();
                 return true;
             // Source citation
@@ -383,7 +383,7 @@ public class ProfileFactsFragment extends Fragment {
             default:
                 return false;
         }
-        TreeUtils.INSTANCE.save(true, one);
+        TreeUtil.INSTANCE.save(true, one);
         refresh();
         return true;
     }

@@ -30,7 +30,7 @@ import app.familygem.U;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.constant.Status;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 
 public class FamilyActivity extends DetailActivity {
@@ -269,7 +269,7 @@ public class FamilyActivity extends DetailActivity {
                     ((ProfileActivity)context).refresh();
                 else if (context instanceof FamilyActivity)
                     ((FamilyActivity)context).refresh();
-                TreeUtils.INSTANCE.save(true, person);
+                TreeUtil.INSTANCE.save(true, person);
             }).show();
         }
     }

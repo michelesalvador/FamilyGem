@@ -1,6 +1,4 @@
-// List of submitters
-
-package app.familygem.list;
+package app.familygem.main;
 
 import static app.familygem.Global.gc;
 
@@ -9,60 +7,77 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.ActionBar;
 
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Submitter;
 
+import java.util.Collections;
 import java.util.List;
 
 import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.databinding.ScrollviewBinding;
 import app.familygem.detail.SubmitterActivity;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.SubmitterUtilKt;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 
-public class SubmittersFragment extends Fragment {
+/**
+ * The list of submitters.
+ */
+public class SubmittersFragment extends BaseFragment {
+
+    ScrollviewBinding binding;
+    List<Submitter> submitters = Collections.emptyList();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-        View view = inflater.inflate(R.layout.scrollview, container, false);
-        if (gc != null) {
-            List<Submitter> submitterList = gc.getSubmitters();
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(submitterList.size() + " " +
-                    Util.INSTANCE.caseString(submitterList.size() == 1 ? R.string.submitter : R.string.submitters));
-            setHasOptionsMenu(true);
-            LinearLayout layout = view.findViewById(R.id.scrollview_layout);
-            for (final Submitter submitter : submitterList) {
-                View submView = inflater.inflate(R.layout.scrollview_item, layout, false);
-                layout.addView(submView);
-                ((TextView)submView.findViewById(R.id.item_name)).setText(SubmitterUtilKt.writeName(submitter));
-                submView.findViewById(R.id.item_num).setVisibility(View.GONE);
-                submView.setOnClickListener(v -> {
-                    Memory.setLeader(submitter);
-                    startActivity(new Intent(getContext(), SubmitterActivity.class));
-                });
-                registerForContextMenu(submView);
-                submView.setTag(submitter);
-            }
-            view.findViewById(R.id.fab).setOnClickListener(v -> {
-                createSubmitter(getContext());
-                TreeUtils.INSTANCE.save(true);
+        super.onCreateView(inflater, container, bundle);
+        binding = ScrollviewBinding.inflate(inflater, container, false);
+        binding.scrollviewFab.getRoot().setOnClickListener(v -> {
+            createSubmitter(getContext());
+            TreeUtil.INSTANCE.save(true);
+        });
+        return binding.getRoot();
+    }
+
+    @Override
+    public void showContent() {
+        displayList();
+    }
+
+    private void displayList() {
+        submitters = gc.getSubmitters();
+        binding.scrollviewLayout.removeAllViews();
+        for (Submitter submitter : submitters) {
+            View submView = getLayoutInflater().inflate(R.layout.scrollview_item, binding.scrollviewLayout, false);
+            binding.scrollviewLayout.addView(submView);
+            ((TextView)submView.findViewById(R.id.item_name)).setText(SubmitterUtilKt.writeName(submitter));
+            submView.findViewById(R.id.item_num).setVisibility(View.GONE);
+            submView.setOnClickListener(v -> {
+                Memory.setLeader(submitter);
+                startActivity(new Intent(getContext(), SubmitterActivity.class));
             });
+            registerForContextMenu(submView);
+            submView.setTag(submitter);
         }
-        return view;
+    }
+
+    @Override
+    public void updateToolbar(@NonNull ActionBar bar, @NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+        bar.setTitle(submitters.size() + " " + Util.INSTANCE.caseString(submitters.size() == 1 ? R.string.submitter : R.string.submitters));
     }
 
     // Delete one submitter
@@ -96,11 +111,11 @@ public class SubmittersFragment extends Fragment {
     public static void mainSubmitter(Submitter submitter) {
         Header header = gc.getHeader();
         if (header == null) {
-            header = TreeUtils.INSTANCE.createHeader(Global.settings.openTree + ".json");
+            header = TreeUtil.INSTANCE.createHeader(Global.settings.openTree + ".json");
             gc.setHeader(header);
         }
         header.setSubmitterRef(submitter.getId());
-        TreeUtils.INSTANCE.save(false, submitter);
+        TreeUtil.INSTANCE.save(false, submitter);
     }
 
     Submitter submitter;
@@ -109,24 +124,27 @@ public class SubmittersFragment extends Fragment {
     public void onCreateContextMenu(@NonNull ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
         submitter = (Submitter)vista.getTag();
         if (gc.getHeader() == null || gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(submitter))
-            menu.add(0, 0, 0, R.string.make_default);
+            menu.add(7, 0, 0, R.string.make_default);
         if (!U.submitterHasShared(submitter)) // Can be deleted only if he has never shared
-            menu.add(0, 1, 0, R.string.delete);
+            menu.add(7, 1, 0, R.string.delete);
         // todo spiegare perché non può essere eliminato?
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case 0:
-                mainSubmitter(submitter);
-                return true;
-            case 1:
-                // Todo conferma elimina
-                deleteSubmitter(submitter);
-                TreeUtils.INSTANCE.save(false);
-                requireActivity().recreate();
-                return true;
+        if (item.getGroupId() == 7) {
+            switch (item.getItemId()) {
+                case 0:
+                    mainSubmitter(submitter);
+                    return true;
+                case 1:
+                    // Todo conferma elimina
+                    deleteSubmitter(submitter);
+                    TreeUtil.INSTANCE.save(true);
+                    showContent();
+                    ((MainActivity)requireActivity()).refreshInterface();
+                    return true;
+            }
         }
         return false;
     }

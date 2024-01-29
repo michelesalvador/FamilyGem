@@ -1,4 +1,4 @@
-package app.familygem;
+package app.familygem.main;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.OverScroller;
 
+import app.familygem.U;
 import graph.gedcom.Graph;
 
 /**

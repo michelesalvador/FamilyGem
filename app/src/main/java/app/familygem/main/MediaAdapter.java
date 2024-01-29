@@ -1,4 +1,4 @@
-package app.familygem.list;
+package app.familygem.main;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,7 +21,6 @@ import java.util.List;
 import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.Memory;
-import app.familygem.Principal;
 import app.familygem.ProfileActivity;
 import app.familygem.R;
 import app.familygem.U;
@@ -93,8 +92,8 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
                 final AppCompatActivity activity = (AppCompatActivity)view.getContext();
                 if (activity instanceof ProfileActivity) // ProfileMediaFragment
                     ((ProfileActivity)activity).getPageFragment(0).registerForContextMenu(view);
-                else if (activity instanceof Principal) // MediaFragment
-                    activity.getSupportFragmentManager().findFragmentById(R.id.contenitore_fragment).registerForContextMenu(view);
+                else if (activity instanceof MainActivity) // MediaFragment
+                    activity.getSupportFragmentManager().findFragmentById(R.id.main_fragment).registerForContextMenu(view);
                 else // DetailActivity
                     activity.registerForContextMenu(view);
             } else {
@@ -126,7 +125,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
                     Memory.add(media);
                 } else { // Simple media from MediaFragment, or sub-level media from ProfileMediaFragment
                     new FindStack(Global.gc, media);
-                    if (activity instanceof Principal) // In MediaFragment only
+                    if (activity instanceof MainActivity) // In MediaFragment only
                         intent.putExtra(Extra.ALONE, true); // To make MediaActivity display the cabinet
                 }
                 view.getContext().startActivity(intent);

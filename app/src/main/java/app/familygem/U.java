@@ -94,15 +94,17 @@ import app.familygem.detail.RepositoryRefActivity;
 import app.familygem.detail.SourceActivity;
 import app.familygem.detail.SourceCitationActivity;
 import app.familygem.detail.SubmitterActivity;
-import app.familygem.list.FamiliesFragment;
-import app.familygem.list.MediaAdapter;
-import app.familygem.list.PersonsFragment;
-import app.familygem.list.SourcesFragment;
-import app.familygem.list.SubmittersFragment;
+import app.familygem.main.DiagramFragment;
+import app.familygem.main.FamiliesFragment;
+import app.familygem.main.MainActivity;
+import app.familygem.main.MediaAdapter;
+import app.familygem.main.PersonsFragment;
+import app.familygem.main.SourcesFragment;
+import app.familygem.main.SubmittersFragment;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.util.MediaUtil;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.ListOfSourceCitations;
 import app.familygem.visitor.MediaContainerList;
@@ -164,7 +166,7 @@ public class U {
         return properName(person, false);
     }
 
-    static String properName(Person person, boolean multiLines) {
+    public static String properName(Person person, boolean multiLines) {
         if (person != null && !person.getNames().isEmpty())
             return firstAndLastName(person.getNames().get(0), multiLines ? "\n" : " ");
         return "[" + s(R.string.no_name) + "]";
@@ -310,7 +312,7 @@ public class U {
      * @param vertical Dates and age could result on multiple lines
      * @return A string with date of birth an death
      */
-    static String twoDates(Person person, boolean vertical) {
+    public static String twoDates(Person person, boolean vertical) {
         StringBuilder builder = new StringBuilder();
         String endDateStr = "";
         GedcomDateConverter start = null, end = null;
@@ -1051,7 +1053,7 @@ public class U {
         else return ((JsonPrimitive)unknown).getAsString();
     }
 
-    static float pxToDp(float pixels) {
+    public static float pxToDp(float pixels) {
         return pixels / Global.context.getResources().getDisplayMetrics().density;
     }
 
@@ -1063,7 +1065,7 @@ public class U {
      * Evaluates whether there are people connectable with respect to a given person.
      * Used to decide whether to show 'Link existing person' menu item.
      */
-    static boolean linkablePersons(Person person) {
+    public static boolean linkablePersons(Person person) {
         int total = Global.gc.getPeople().size();
         if (total > 0 && (Global.settings.expert // Expert user can always
                 || person == null)) // In an empty family oneFamilyMember is null
@@ -1073,17 +1075,17 @@ public class U {
     }
 
     // Chiede se referenziare un autore nell'header dell'albero
-    static void autorePrincipale(Context contesto, final String idAutore) {
-        final Header[] testa = {Global.gc.getHeader()};
-        if (testa[0] == null || testa[0].getSubmitterRef() == null) {
-            new AlertDialog.Builder(contesto).setMessage(R.string.make_main_submitter)
+    static void autorePrincipale(Context context, final String submitterId) {
+        final Header[] header = {Global.gc.getHeader()};
+        if (header[0] == null || header[0].getSubmitterRef() == null) {
+            new AlertDialog.Builder(context).setMessage(R.string.make_main_submitter)
                     .setPositiveButton(android.R.string.yes, (dialog, id) -> {
-                        if (testa[0] == null) {
-                            testa[0] = TreeUtils.INSTANCE.createHeader(Global.settings.openTree + ".json");
-                            Global.gc.setHeader(testa[0]);
+                        if (header[0] == null) {
+                            header[0] = TreeUtil.INSTANCE.createHeader(Global.settings.openTree + ".json");
+                            Global.gc.setHeader(header[0]);
                         }
-                        testa[0].setSubmitterRef(idAutore);
-                        TreeUtils.INSTANCE.save(true);
+                        header[0].setSubmitterRef(submitterId);
+                        TreeUtil.INSTANCE.save(true);
                     }).setNegativeButton(R.string.no, null).show();
         }
     }
@@ -1103,7 +1105,7 @@ public class U {
     }
 
     // Elenco di stringhe dei membri rappresentativi delle famiglie
-    static String[] elencoFamiglie(List<Family> listaFamiglie) {
+    public static String[] elencoFamiglie(List<Family> listaFamiglie) {
         List<String> famigliePerno = new ArrayList<>();
         for (Family fam : listaFamiglie) {
             String etichetta = testoFamiglia(Global.context, Global.gc, fam, true);
@@ -1116,7 +1118,7 @@ public class U {
      * May ask which family to show of a person who is child in more than one family.
      *
      * @param whatToOpen Activity/Fragment to open:
-     *                   0: diagram of the previous family, without asking which family (first click on Diagram)
+     *                   0: never used, for null person only
      *                   1: diagram possibly asking which family
      *                   2: family possibly asking which family
      */
@@ -1124,15 +1126,14 @@ public class U {
         if (person == null) {
             finishParentSelection(context, null, 1, 0);
         } else {
-            List<Family> famiglie = person.getParentFamilies(Global.gc);
-            if (famiglie.size() > 1 && whatToOpen > 0) {
+            List<Family> families = person.getParentFamilies(Global.gc);
+            if (families.size() > 1) {
                 new AlertDialog.Builder(context).setTitle(R.string.which_family)
-                        .setItems(elencoFamiglie(famiglie), (dialog, quale) -> {
-                            finishParentSelection(context, person, whatToOpen, quale);
+                        .setItems(elencoFamiglie(families), (dialog, which) -> {
+                            finishParentSelection(context, person, whatToOpen, which);
                         }).show();
             } else finishParentSelection(context, person, whatToOpen, 0);
         }
-
     }
 
     private static void finishParentSelection(Context context, Person person, int whatToOpen, int whichFamily) {
@@ -1141,15 +1142,21 @@ public class U {
         if (whatToOpen > 0) // Sets the family to show
             Global.familyNum = whichFamily; // Normally it is 0
         if (whatToOpen < 2) { // Displays the diagram
-            if (context instanceof Principal) { // DiagramFragment, PersonsFragment or Principal itself
-                FragmentManager fm = ((AppCompatActivity)context).getSupportFragmentManager();
-                // Previous fragment in the backstack
-                Fragment previousFragment = fm.getFragments().get(fm.getFragments().size() - 1);
-                if (previousFragment instanceof DiagramFragment)
-                    fm.popBackStack(); // Clicking on Diagram removes the previous diagram fragment from the backstack
-                fm.beginTransaction().replace(R.id.contenitore_fragment, new DiagramFragment()).addToBackStack(null).commit();
+            if (context instanceof MainActivity) { // DiagramFragment, PersonsFragment or MainActivity itself
+                // Recycles previous diagram from the backstack
+                FragmentManager manager = ((AppCompatActivity)context).getSupportFragmentManager();
+                DiagramFragment diagram = new DiagramFragment();
+                for (Fragment fragment : manager.getFragments()) {
+                    if (fragment instanceof DiagramFragment) {
+                        manager.beginTransaction().remove(fragment).commit();
+                        diagram = (DiagramFragment)fragment;
+                    }
+                }
+                ((MainActivity)context).showFragment(diagram);
             } else { // From ProfileActivity or from FamilyActivity
-                context.startActivity(new Intent(context, Principal.class));
+                Intent intent = new Intent(context, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Creates a clear new back stack
+                context.startActivity(intent);
             }
         } else { // The family is shown
             Family family = person.getParentFamilies(Global.gc).get(whichFamily);
@@ -1196,7 +1203,7 @@ public class U {
      *
      * @return True if a dialog is shown
      */
-    static boolean checkMultiMarriages(Intent intent, Context context, Fragment fragment) {
+    public static boolean checkMultiMarriages(Intent intent, Context context, Fragment fragment) {
         String pivotId = intent.getStringExtra(Extra.PERSON_ID);
         Person pivot = Global.gc.getPerson(pivotId);
         List<Family> parentFamilies = pivot.getParentFamilies(Global.gc);
@@ -1350,7 +1357,7 @@ public class U {
                                         modified.add(family);
                                     }
                             }
-                            TreeUtils.INSTANCE.save(true, modified.toArray());
+                            TreeUtil.INSTANCE.save(true, modified.toArray());
                             Settings.Tree tree = Global.settings.getCurrentTree();
                             if (oldId.equals(tree.root)) {
                                 tree.root = newId;
@@ -1374,19 +1381,19 @@ public class U {
                                         modified.add(person);
                                     }
                             }
-                            TreeUtils.INSTANCE.save(true, modified.toArray());
+                            TreeUtil.INSTANCE.save(true, modified.toArray());
                         } else if (record instanceof Media) {
                             Media media = (Media)record;
                             MediaContainers mediaContainers = new MediaContainers(Global.gc, media, newId);
                             media.setId(newId);
                             ChangeUtil.INSTANCE.updateChangeDate(media);
-                            TreeUtils.INSTANCE.save(true, mediaContainers.containers.toArray());
+                            TreeUtil.INSTANCE.save(true, mediaContainers.containers.toArray());
                         } else if (record instanceof Note) {
                             Note note = (Note)record;
                             NoteContainers noteContainers = new NoteContainers(Global.gc, note, newId);
                             note.setId(newId);
                             ChangeUtil.INSTANCE.updateChangeDate(note);
-                            TreeUtils.INSTANCE.save(true, noteContainers.containers.toArray());
+                            TreeUtil.INSTANCE.save(true, noteContainers.containers.toArray());
                         } else if (record instanceof Source) {
                             ListOfSourceCitations citations = new ListOfSourceCitations(Global.gc, oldId);
                             for (ListOfSourceCitations.Triplet triple : citations.list)
@@ -1394,7 +1401,7 @@ public class U {
                             Source source = (Source)record;
                             source.setId(newId);
                             ChangeUtil.INSTANCE.updateChangeDate(source);
-                            TreeUtils.INSTANCE.save(true, citations.getProgenitors());
+                            TreeUtil.INSTANCE.save(true, citations.getProgenitors());
                         } else if (record instanceof Repository) {
                             Set<Source> modified = new HashSet<>();
                             for (Source source : Global.gc.getSources()) {
@@ -1407,18 +1414,21 @@ public class U {
                             Repository repo = (Repository)record;
                             repo.setId(newId);
                             ChangeUtil.INSTANCE.updateChangeDate(repo);
-                            TreeUtils.INSTANCE.save(true, modified.toArray());
+                            TreeUtil.INSTANCE.save(true, modified.toArray());
                         } else if (record instanceof Submitter) {
-                            for (Settings.Share share : Global.settings.getCurrentTree().shares)
-                                if (oldId.equals(share.submitter))
-                                    share.submitter = newId;
-                            Global.settings.save();
+                            List<Settings.Share> shares = Global.settings.getCurrentTree().shares;
+                            if (shares != null) {
+                                for (Settings.Share share : shares)
+                                    if (oldId.equals(share.submitter))
+                                        share.submitter = newId;
+                                Global.settings.save();
+                            }
                             Header header = Global.gc.getHeader();
                             if (oldId.equals(header.getSubmitterRef()))
                                 header.setSubmitterRef(newId);
                             Submitter submitter = (Submitter)record;
                             submitter.setId(newId);
-                            TreeUtils.INSTANCE.save(true, submitter);
+                            TreeUtil.INSTANCE.save(true, submitter);
                         }
                         Global.gc.createIndexes();
                         refresh.run();

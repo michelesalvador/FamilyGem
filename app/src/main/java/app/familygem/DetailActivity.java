@@ -78,15 +78,16 @@ import app.familygem.detail.MediaActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.detail.SourceCitationActivity;
-import app.familygem.list.FamiliesFragment;
-import app.familygem.list.MediaFragment;
-import app.familygem.list.NotesFragment;
-import app.familygem.list.PersonsFragment;
-import app.familygem.list.RepositoriesFragment;
-import app.familygem.list.SourcesFragment;
-import app.familygem.list.SubmittersFragment;
+import app.familygem.main.FamiliesFragment;
+import app.familygem.main.MainActivity;
+import app.familygem.main.MediaFragment;
+import app.familygem.main.NotesFragment;
+import app.familygem.main.PersonsFragment;
+import app.familygem.main.RepositoriesFragment;
+import app.familygem.main.SourcesFragment;
+import app.familygem.main.SubmittersFragment;
 import app.familygem.util.ChangeUtil;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
 
 public abstract class DetailActivity extends AppCompatActivity {
@@ -126,7 +127,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         object = Memory.getLastObject();
         if (object == null) {
             onBackPressed(); // Skip all previous details without object
-        } else if (TreeUtils.INSTANCE.isGlobalGedcomOk(this::setupInterface)) {
+        } else if (TreeUtil.INSTANCE.isGlobalGedcomOk(this::setupInterface)) {
             setupInterface();
         }
     }
@@ -271,7 +272,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else if (id == 101) { // TODO: code smell: use of magic numbers
             RepositoriesFragment.newRepository(this, (Source)object);
         } else if (id == 102) {
-            Intent intent = new Intent(this, Principal.class);
+            Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.REPOSITORY, true);
             startActivityForResult(intent, 4562);
         } else if (id == 103) { // New note
@@ -284,7 +285,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else if (id == 104) { // New shared note
             NotesFragment.newNote(this, object);
         } else if (id == 105) { // Link shared note
-            Intent intent = new Intent(this, Principal.class);
+            Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.NOTE, true);
             startActivityForResult(intent, 7074);
         } else if (id == 106) { // Search for local media
@@ -292,7 +293,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else if (id == 107) { // Search for shared media
             F.displayImageCaptureDialog(this, null, 4174, (MediaContainer)object);
         } else if (id == 108) { // Link shared media
-            Intent intent = new Intent(this, Principal.class);
+            Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.MEDIA, true);
             startActivityForResult(intent, 43616);
         } else if (id == 109) { // New note-source (source citation without reference to a source)
@@ -306,7 +307,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else if (id == 110) { // New source
             SourcesFragment.newSource(this, object);
         } else if (id == 111) { // Link existing source
-            Intent intent = new Intent(this, Principal.class);
+            Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.SOURCE, true);
             startActivityForResult(intent, 5065);
         } else if (id == 120 || id == 121) { // Create new family member
@@ -316,7 +317,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             intent.putExtra(Extra.FROM_FAMILY, true);
             startActivity(intent);
         } else if (id == 122 || id == 123) { // Link existing person
-            Intent intent = new Intent(this, Principal.class);
+            Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.PERSON, true);
             intent.putExtra(Extra.RELATION, Relation.get(id - 120));
             startActivityForResult(intent, 34417);
@@ -345,7 +346,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             refresh();
             toBeSaved = true;
         }
-        if (toBeSaved) TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
+        if (toBeSaved) TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
         return true;
     };
 
@@ -360,7 +361,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             if (requestCode == 34417) { // Family member chosen in PersonsFragment
                 Person personToBeAdded = gc.getPerson(data.getStringExtra(Extra.RELATIVE_ID));
                 FamilyActivity.connect(personToBeAdded, (Family)object, (Relation)data.getSerializableExtra(Extra.RELATION));
-                TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
+                TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
                 SourceCitation sourceCitation = new SourceCitation();
@@ -379,7 +380,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             } else if (requestCode == 4174) { // File coming from SAF or other app becomes shared media
                 Media media = MediaFragment.newSharedMedia(object);
                 if (F.setFileAndProposeCropping(this, null, data, media))
-                    TreeUtils.INSTANCE.save(true, media, Memory.getLeaderObject());
+                    TreeUtil.INSTANCE.save(true, media, Memory.getLeaderObject());
                 return;
             } else if (requestCode == 43616) { // Media from MediaFragment
                 MediaRef mediaRef = new MediaRef();
@@ -401,7 +402,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ((SourceCitation)object).setRef(data.getStringExtra(Extra.SOURCE_ID));
             }
             // 'true' indicates to reload both this Detail thanks to the following onRestart(), and all previous activities
-            TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
+            TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             F.saveFolderInSettings();
         }
@@ -851,7 +852,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
         ((TextView)pieceView.findViewById(R.id.event_text)).setText(text);
         restore(pieceView);
-        TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
+        TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
 		/*if( Memory.getStepStack().size() == 1 ) {
 			refresh(); // TODO: The record change date should be updated, but perhaps without reloading everything
 		}*/
@@ -928,7 +929,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else if (id == 5) { // All the others objects
             // TODO: confirm deletion of all objects
             delete();
-            TreeUtils.INSTANCE.save(true); // The update of the change dates takes place in the Overrides of delete()
+            TreeUtil.INSTANCE.save(true); // The update of the change dates takes place in the overrides of delete()
             onBackPressed();
         } else if (id == android.R.id.home) {
             onBackPressed();
@@ -1112,7 +1113,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 break;
             case 22: // Delete note
                 Object[] leaders = U.deleteNote((Note)pieceObject, pieceView);
-                TreeUtils.INSTANCE.save(true, leaders);
+                TreeUtil.INSTANCE.save(true, leaders);
                 return true;
             case 30: // Copy source citation
                 U.copyToClipboard(getText(R.string.source_citation),
@@ -1145,7 +1146,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 break;
             case 41: // Delete media
                 Object[] mediaLeaders = MediaFragment.deleteMedia((Media)pieceObject, null);
-                TreeUtils.INSTANCE.save(true, mediaLeaders); // A shared media may need to update the dates of multiple leaders
+                TreeUtil.INSTANCE.save(true, mediaLeaders); // A shared media may need to update the dates of multiple leaders
                 refresh();
                 return true;
             case 51: // Delete address
@@ -1170,7 +1171,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.copyToClipboard(getText(R.string.source), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
                 return true;
             case 71: // Choose source in SourcesFragment
-                Intent inte = new Intent(this, Principal.class);
+                Intent inte = new Intent(this, MainActivity.class);
                 inte.putExtra(Choice.SOURCE, true);
                 startActivityForResult(inte, 7047);
                 return true;
@@ -1187,7 +1188,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.copyToClipboard(getText(R.string.repository), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
                 return true;
             case 91: // Choose repository in RepositoriesFragment
-                Intent intn = new Intent(this, Principal.class);
+                Intent intn = new Intent(this, MainActivity.class);
                 intn.putExtra(Choice.REPOSITORY, true);
                 startActivityForResult(intn, 5390);
                 return true;
@@ -1200,7 +1201,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             default:
                 return false;
         }
-        TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
+        TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
         refresh();
         return true;
     }

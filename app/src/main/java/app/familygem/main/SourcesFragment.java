@@ -1,4 +1,4 @@
-package app.familygem.list;
+package app.familygem.main;
 
 import static app.familygem.Global.gc;
 
@@ -18,9 +18,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.folg.gedcom.model.EventFact;
@@ -44,33 +43,34 @@ import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.detail.SourceActivity;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 import app.familygem.visitor.ListOfSourceCitations;
 
 /**
  * List of all sources of the tree.
  */
-public class SourcesFragment extends Fragment {
+public class SourcesFragment extends BaseFragment {
 
-    private List<Source> sourceList;
+    private List<Source> sourceList = Collections.emptyList();
     private SourcesAdapter adapter;
     private int order;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
-        View view = inflater.inflate(R.layout.sources, container, false);
-        if (gc != null) {
-            sourceList = gc.getSources();
-            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(sourceList.size() + " " +
-                    Util.INSTANCE.caseString(sourceList.size() == 1 ? R.string.source : R.string.sources));
-            if (sourceList.size() > 1) setHasOptionsMenu(true);
-            RecyclerView recyclerView = view.findViewById(R.id.sources_recycler);
-            adapter = new SourcesAdapter();
-            recyclerView.setAdapter(adapter);
-            view.findViewById(R.id.fab).setOnClickListener(v -> newSource(getContext(), null));
-        }
+        super.onCreateView(inflater, container, bundle);
+        View view = inflater.inflate(R.layout.recyclerview, container, false);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        adapter = new SourcesAdapter();
+        recyclerView.setAdapter(adapter);
+        view.findViewById(R.id.fab).setOnClickListener(v -> newSource(getContext(), null));
         return view;
+    }
+
+    @Override
+    public void showContent() {
+        sourceList = gc.getSources();
+        adapter.notifyDataSetChanged();
     }
 
     public class SourcesAdapter extends RecyclerView.Adapter<SourceHolder> implements Filterable {
@@ -267,7 +267,7 @@ public class SourcesFragment extends Fragment {
             if (container instanceof Note) ((Note)container).addSourceCitation(sourceCitation);
             else ((SourceCitationContainer)container).addSourceCitation(sourceCitation);
         }
-        TreeUtils.INSTANCE.save(true, source);
+        TreeUtil.INSTANCE.save(true, source);
         Memory.setLeader(source);
         context.startActivity(new Intent(context, SourceActivity.class));
     }
@@ -309,37 +309,38 @@ public class SourcesFragment extends Fragment {
         return citazioni.getProgenitors();
     }
 
-    // menu opzioni nella toolbar
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Search in SourcesFragment
-        inflater.inflate(R.menu.search, menu);
-        final SearchView vistaCerca = (SearchView)menu.findItem(R.id.search_item).getActionView();
-        vistaCerca.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextChange(String query) {
-                adapter.getFilter().filter(query);
-                return true;
-            }
+    public void updateToolbar(ActionBar bar, Menu menu, MenuInflater inflater) {
+        bar.setTitle(sourceList.size() + " " + Util.INSTANCE.caseString(sourceList.size() == 1 ? R.string.source : R.string.sources));
+        if (sourceList.size() > 1) {
+            // Search in SourcesFragment
+            inflater.inflate(R.menu.search, menu);
+            final SearchView searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextChange(String query) {
+                    adapter.getFilter().filter(query);
+                    return true;
+                }
 
-            @Override
-            public boolean onQueryTextSubmit(String q) {
-                vistaCerca.clearFocus();
-                return false;
-            }
-        });
-        // Sort by menu
-        inflater.inflate(R.menu.sort_by, menu);
-        SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
-        if (Global.settings.expert)
-            subMenu.add(0, 1, 0, R.string.id);
-        subMenu.add(0, 2, 0, R.string.title);
-        subMenu.add(0, 3, 0, R.string.citations);
+                @Override
+                public boolean onQueryTextSubmit(String q) {
+                    searchView.clearFocus();
+                    return false;
+                }
+            });
+            // Sort by menu
+            inflater.inflate(R.menu.sort_by, menu);
+            SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
+            if (Global.settings.expert)
+                subMenu.add(0, 1, 0, R.string.id);
+            subMenu.add(0, 2, 0, R.string.title);
+            subMenu.add(0, 3, 0, R.string.citations);
+        }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+    public void selectItem(int id) {
         if (id > 0 && id <= 3) {
             if (order == id * 2 - 1)
                 order++;
@@ -349,9 +350,7 @@ public class SourcesFragment extends Fragment {
                 order = id * 2 - 1;
             ordinaFonti();
             adapter.notifyDataSetChanged();
-            return true;
         }
-        return false;
     }
 
     private Source source;
@@ -360,21 +359,23 @@ public class SourcesFragment extends Fragment {
     public void onCreateContextMenu(ContextMenu menu, View vista, ContextMenu.ContextMenuInfo info) {
         source = gc.getSource(((TextView)vista.findViewById(R.id.source_id)).getText().toString());
         if (Global.settings.expert)
-            menu.add(0, 0, 0, R.string.edit_id);
-        menu.add(0, 1, 0, R.string.delete);
+            menu.add(5, 0, 0, R.string.edit_id);
+        menu.add(5, 1, 0, R.string.delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        if (item.getItemId() == 0) { // Edit source ID
-            U.editId(getContext(), source, getActivity()::recreate);
-        } else if (item.getItemId() == 1) { // Delete source
-            Object[] objects = deleteSource(source);
-            TreeUtils.INSTANCE.save(false, objects);
-            getActivity().recreate();
-        } else {
-            return false;
+        if (item.getGroupId() == 5) {
+            if (item.getItemId() == 0) { // Edit source ID
+                U.editId(getContext(), source, this::showContent);
+            } else if (item.getItemId() == 1) { // Delete source
+                Object[] objects = deleteSource(source);
+                TreeUtil.INSTANCE.save(false, objects);
+                showContent();
+                ((MainActivity)requireActivity()).refreshInterface();
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 }

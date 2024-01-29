@@ -52,16 +52,17 @@ object FileUtil {
      * Receives a Person and returns the primary media from which to get the image, or a random media, or null.
      * @param imageView Where the image will appear
      * @param options Bitwise selection of [Image] constants
+     * @param show Calls showImage() or not
      */
     @JvmOverloads
-    fun selectMainImage(person: Person, imageView: ImageView, options: Int = 0, gedcom: Gedcom? = null, treeId: Int = 0): Media? {
+    fun selectMainImage(person: Person, imageView: ImageView, options: Int = 0, gedcom: Gedcom? = null, treeId: Int = 0, show: Boolean = true): Media? {
         val mediaList = MediaList(gedcom ?: Global.gc, 0)
         person.accept(mediaList)
         var media: Media? = null
         // Looks for a media with Primary value "Y"
         for (media1 in mediaList.list) {
             if (media1.primary != null && media1.primary == "Y") {
-                showImage(media1, imageView, options, null, treeId)
+                if (show) showImage(media1, imageView, options, null, treeId)
                 media = media1
                 break
             }
@@ -69,7 +70,7 @@ object FileUtil {
         // Alternatively, returns a random one
         if (media == null && mediaList.list.isNotEmpty()) {
             media = mediaList.list.random()
-            showImage(media, imageView, options, null, treeId)
+            if (show) showImage(media, imageView, options, null, treeId)
         }
         imageView.visibility = if (media != null) View.VISIBLE else View.GONE
         return media
@@ -91,6 +92,7 @@ object FileUtil {
 
         fun completeDisplay() {
             if (progressWheel != null) progressWheel.visibility = View.GONE
+            imageView.tag = R.id.tag_object // Used by DiagramFragment to check the image finish loading
         }
 
         imageView.setTag(R.id.tag_file_type, Type.NONE)

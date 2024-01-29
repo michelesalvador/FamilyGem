@@ -1,4 +1,4 @@
-package app.familygem.list;
+package app.familygem.main;
 
 import static app.familygem.Global.gc;
 
@@ -21,11 +21,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lb.fast_scroller_and_recycler_view_fixes_library.FastScrollerEx;
@@ -47,12 +47,10 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import app.familygem.DiagramFragment;
 import app.familygem.GedcomDateConverter;
 import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.PersonEditorActivity;
-import app.familygem.Principal;
 import app.familygem.ProfileActivity;
 import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
@@ -64,10 +62,11 @@ import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.util.FileUtil;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.PersonUtilKt;
+import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 
-public class PersonsFragment extends Fragment {
+public class PersonsFragment extends BaseFragment {
 
     private final List<PersonWrapper> allPeople = new ArrayList<>(); // The immutable complete list of people
     private List<PersonWrapper> selectedPeople = new ArrayList<>(); // Some persons selected by the search feature
@@ -96,6 +95,7 @@ public class PersonsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle bundle) {
+        super.onCreateView(inflater, container, bundle);
         View view = inflater.inflate(R.layout.recyclerview, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setPadding(12, 12, 12, recyclerView.getPaddingBottom());
@@ -107,8 +107,15 @@ public class PersonsFragment extends Fragment {
         Drawable lineDrawable = ContextCompat.getDrawable(getContext(), R.drawable.empty);
         new FastScrollerEx(recyclerView, thumbDrawable, lineDrawable, thumbDrawable, lineDrawable,
                 U.dpToPx(40), U.dpToPx(100), 0, true, U.dpToPx(80));
-        if (TreeUtils.INSTANCE.isGlobalGedcomOk(this::refresh)) establishPeople();
         return view;
+    }
+
+    @Override
+    public void showContent() {
+        // Recreates the lists for some person added or removed
+        establishPeople();
+        // Updates content of existing views
+        adapter.notifyDataSetChanged();
     }
 
     // Put all the people inside the lists
@@ -146,14 +153,6 @@ public class PersonsFragment extends Fragment {
                 }
             }
         }.start();
-        furnishToolbar();
-    }
-
-    // Title and options in toolbar
-    private void furnishToolbar() {
-        ((AppCompatActivity)requireActivity()).getSupportActionBar().setTitle(allPeople.size() + " "
-                + Util.INSTANCE.caseString(allPeople.size() == 1 ? R.string.person : R.string.persons));
-        setHasOptionsMenu(allPeople.size() > 1);
     }
 
     private class PersonsAdapter extends RecyclerView.Adapter<PersonHolder> implements Filterable {
@@ -328,19 +327,11 @@ public class PersonsFragment extends Fragment {
         }
     }
 
-    // Updates all the contents onBackPressed()
-    public void refresh() {
-        // Recreates the lists for some person added or removed
-        establishPeople();
-        // Updates content of existing views
-        adapter.notifyDataSetChanged();
-    }
-
-    // Reset the extra if leaving this fragment without choosing a person
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().getIntent().removeExtra(Choice.PERSON);
+        // Resets the extra in case of leaving this fragment without choosing a person
+        requireActivity().getIntent().removeExtra(Choice.PERSON);
     }
 
     /**
@@ -582,40 +573,41 @@ public class PersonsFragment extends Fragment {
         }
     }
 
-    // Options menu in toolbar
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Search in PersonsFragment
-        inflater.inflate(R.menu.search, menu); // This only makes appear the lens with the search field
-        searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextChange(String query) {
-                adapter.getFilter().filter(query);
-                return true;
-            }
+    public void updateToolbar(ActionBar bar, @NonNull Menu menu, @NonNull MenuInflater inflater) {
+        bar.setTitle(allPeople.size() + " " + Util.INSTANCE.caseString(allPeople.size() == 1 ? R.string.person : R.string.persons));
+        if (allPeople.size() > 1) {
+            // Search in PersonsFragment
+            inflater.inflate(R.menu.search, menu); // This only makes appear the lens with the search field
+            searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextChange(String query) {
+                    adapter.getFilter().filter(query);
+                    return true;
+                }
 
-            @Override
-            public boolean onQueryTextSubmit(String q) {
-                searchView.clearFocus();
-                return false;
-            }
-        });
-        // Sort by menu
-        inflater.inflate(R.menu.sort_by, menu);
-        SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
-        if (Global.settings.expert)
-            subMenu.add(0, 1, 0, R.string.id);
-        subMenu.add(0, 2, 0, R.string.surname);
-        subMenu.add(0, 3, 0, R.string.date);
-        subMenu.add(0, 4, 0, R.string.age);
-        subMenu.add(0, 5, 0, R.string.birthday);
-        subMenu.add(0, 6, 0, R.string.number_relatives);
+                @Override
+                public boolean onQueryTextSubmit(String q) {
+                    searchView.clearFocus();
+                    return false;
+                }
+            });
+            // Sort by menu
+            inflater.inflate(R.menu.sort_by, menu);
+            SubMenu subMenu = menu.findItem(R.id.sortBy).getSubMenu();
+            if (Global.settings.expert)
+                subMenu.add(0, 1, 0, R.string.id);
+            subMenu.add(0, 2, 0, R.string.surname);
+            subMenu.add(0, 3, 0, R.string.date);
+            subMenu.add(0, 4, 0, R.string.age);
+            subMenu.add(0, 5, 0, R.string.birthday);
+            subMenu.add(0, 6, 0, R.string.number_relatives);
+        }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+    public void selectItem(int id) {
         if (id > 0 && id <= 6) {
             // Clicking twice the same menu item switches sorting ASC and DESC
             if (order == Order.values()[id * 2 - 1])
@@ -631,11 +623,9 @@ public class PersonsFragment extends Fragment {
                 List<Person> sortedPeople = new ArrayList<>();
                 for (PersonWrapper wrapper : selectedPeople) sortedPeople.add(wrapper.person);
                 gc.setPeople(sortedPeople);
-                TreeUtils.INSTANCE.save(false); // Too much?
+                TreeUtil.INSTANCE.save(false); // Too much?
             }
-            return true;
         }
-        return false;
     }
 
     // Context menu
@@ -646,20 +636,21 @@ public class PersonsFragment extends Fragment {
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
         personId = (String)view.getTag(R.id.tag_id);
         position = (int)view.getTag(R.id.tag_position);
-        menu.add(0, 0, 0, R.string.diagram);
-        String[] familyLabels = DiagramFragment.getFamilyLabels(getContext(), gc.getPerson(personId), null);
+        menu.add(1, 0, 0, R.string.diagram);
+        String[] familyLabels = PersonUtilKt.getFamilyLabels(gc.getPerson(personId), requireContext(), null);
         if (familyLabels[0] != null)
-            menu.add(0, 1, 0, familyLabels[0]);
+            menu.add(1, 1, 0, familyLabels[0]);
         if (familyLabels[1] != null)
-            menu.add(0, 2, 0, familyLabels[1]);
-        menu.add(0, 3, 0, R.string.modify);
+            menu.add(1, 2, 0, familyLabels[1]);
+        menu.add(1, 3, 0, R.string.modify);
         if (Global.settings.expert)
-            menu.add(0, 4, 0, R.string.edit_id);
-        menu.add(0, 5, 0, R.string.delete);
+            menu.add(1, 4, 0, R.string.edit_id);
+        menu.add(1, 5, 0, R.string.delete);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        if (item.getGroupId() != 1) return false;
         int id = item.getItemId();
         if (id == 0) { // Display diagram
             U.whichParentsToShow(getContext(), gc.getPerson(personId), 1);
@@ -681,8 +672,7 @@ public class PersonsFragment extends Fragment {
                         allPeople.remove(position);
                         adapter.notifyItemRemoved(position);
                         adapter.notifyItemRangeChanged(position, selectedPeople.size() - position);
-                        furnishToolbar();
-                        ((Principal)requireActivity()).furnishMenu();
+                        ((MainActivity)requireActivity()).refreshInterface();
                         U.controllaFamiglieVuote(getContext(), null, false, families);
                     }).setNeutralButton(R.string.cancel, null).show();
         } else {
@@ -739,7 +729,7 @@ public class PersonsFragment extends Fragment {
         if (Global.indi != null && Global.indi.equals(personId))
             Global.indi = newRootId;
         Toast.makeText(context, R.string.person_deleted, Toast.LENGTH_SHORT).show();
-        TreeUtils.INSTANCE.save(true, (Object[])families);
+        TreeUtil.INSTANCE.save(true, (Object[])families);
         return families;
     }
 }

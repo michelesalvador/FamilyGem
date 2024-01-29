@@ -47,7 +47,7 @@ public class Settings {
     public boolean expert;
     public boolean shareAgreement;
     public boolean premium;
-    DiagramSettings diagram;
+    public DiagramSettings diagram;
 
     /**
      * Initializes first boot values.
@@ -135,13 +135,13 @@ public class Settings {
         return null;
     }
 
-    static class DiagramSettings {
-        int ancestors;
-        int uncles;
-        int descendants;
-        int siblings;
-        int cousins;
-        boolean spouses;
+    public static class DiagramSettings {
+        public int ancestors;
+        public int uncles;
+        public int descendants;
+        public int siblings;
+        public int cousins;
+        public boolean spouses;
 
         // Default values
         DiagramSettings init() {

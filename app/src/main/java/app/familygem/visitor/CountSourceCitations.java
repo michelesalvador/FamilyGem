@@ -8,7 +8,7 @@ import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.Visitor;
 
-import app.familygem.list.SourcesFragment;
+import app.familygem.main.SourcesFragment;
 
 /**
  * Counter of citations of a source.

@@ -50,9 +50,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import app.familygem.detail.MediaActivity;
-import app.familygem.list.MediaFragment;
+import app.familygem.main.MediaFragment;
 import app.familygem.util.FileUtil;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 
 /**
  * Static functions to manage files and media.
@@ -195,7 +195,7 @@ public class F {
     /**
      * Saves a document (PDF, GEDCOM, ZIP) with SAF.
      */
-    static void saveDocument(Activity activity, Fragment fragment, int treeId, String mime, String ext, int requestCode) {
+    public static void saveDocument(Activity activity, Fragment fragment, int treeId, String mime, String ext, int requestCode) {
         String name = Global.settings.getTree(treeId).title;
         // A GEDCOM must specify the extension, other file types put it according to the mime type
         ext = ext.equals("ged") ? ".ged" : "";
@@ -310,7 +310,7 @@ public class F {
                         }
                         med.setFile("");
                         context.startActivity(intent);
-                        TreeUtils.INSTANCE.save(true, Memory.getLeaderObject());
+                        TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
                     } else if (fragment != null)
                         fragment.startActivityForResult(intent, code); // Thus the result returns to the fragment
                     else
@@ -450,7 +450,7 @@ public class F {
      */
     static void finishProposeCropping(Context context, Fragment fragment) {
         if (fragment instanceof MediaFragment)
-            ((MediaFragment)fragment).refresh();
+            ((MediaFragment)fragment).showContent();
         else if (context instanceof DetailActivity)
             ((DetailActivity)context).refresh();
         else if (context instanceof ProfileActivity)

@@ -34,7 +34,7 @@ import app.familygem.Settings;
 import app.familygem.TreesActivity;
 import app.familygem.U;
 import app.familygem.util.FileUtil;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.TreeUtil;
 import app.familygem.util.TreeUtilKt;
 import app.familygem.visitor.ListOfSourceCitations;
 import app.familygem.visitor.MediaContainers;
@@ -154,7 +154,7 @@ public class ConfirmationActivity extends BaseActivity {
                         }
                     }
                 }
-                if (changed) TreeUtils.INSTANCE.saveJsonAsync(Global.gc2, Global.treeId2);
+                if (changed) TreeUtil.INSTANCE.saveJsonAsync(Global.gc2, Global.treeId2);
 
                 // Regular addition / replacement / deletion of records from tree2 to tree
                 for (Comparison.Front front : Comparison.getList()) {
@@ -214,7 +214,7 @@ public class ConfirmationActivity extends BaseActivity {
                             }
                     }
                 }
-                TreeUtils.INSTANCE.saveJsonAsync(Global.gc, Global.settings.openTree);
+                TreeUtil.INSTANCE.saveJsonAsync(Global.gc, Global.settings.openTree);
 
                 // If all updates are imported proposes to delete the shared tree
                 boolean allOk = true;
@@ -229,7 +229,7 @@ public class ConfirmationActivity extends BaseActivity {
                     new AlertDialog.Builder(ConfirmationActivity.this)
                             .setMessage(R.string.all_imported_delete)
                             .setPositiveButton(android.R.string.ok, (d, i) -> {
-                                TreeUtils.INSTANCE.deleteTree(Global.treeId2);
+                                TreeUtil.INSTANCE.deleteTree(Global.treeId2);
                                 done();
                             }).setNegativeButton(R.string.no, (d, i) -> done())
                             .setOnCancelListener(dialog -> done()).show();

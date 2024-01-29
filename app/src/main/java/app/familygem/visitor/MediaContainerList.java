@@ -35,8 +35,8 @@ public class MediaContainerList extends Visitor {
     private boolean visitInternal(Object object) {
         if (requestAll && object instanceof MediaContainer) {
             MediaContainer container = (MediaContainer)object;
-            for (Media med : container.getAllMedia(gedcom)) { // Media objects and local media of each record
-                MedCont medCont = new MedCont(med, object);
+            for (Media media : container.getAllMedia(gedcom)) { // Media objects and local media of each record
+                MedCont medCont = new MedCont(media, object);
                 if (!mediaList.contains(medCont))
                     mediaList.add(medCont);
             }
@@ -45,40 +45,41 @@ public class MediaContainerList extends Visitor {
     }
 
     @Override
-    public boolean visit(Gedcom gc) {
-        for (Media med : gc.getMedia())
-            mediaList.add(new MedCont(med, gc)); // Collects the media objects
+    public boolean visit(Gedcom gedcom) {
+        for (Media media : gedcom.getMedia())
+            mediaList.add(new MedCont(media, gedcom)); // Collects the media objects
+        if (this.gedcom == null) this.gedcom = gedcom; // Just in case
         return true;
     }
 
     @Override
-    public boolean visit(Person p) {
-        return visitInternal(p);
+    public boolean visit(Person person) {
+        return visitInternal(person);
     }
 
     @Override
-    public boolean visit(Family f) {
-        return visitInternal(f);
+    public boolean visit(Family family) {
+        return visitInternal(family);
     }
 
     @Override
-    public boolean visit(EventFact e) {
-        return visitInternal(e);
+    public boolean visit(EventFact eventFact) {
+        return visitInternal(eventFact);
     }
 
     @Override
-    public boolean visit(Name n) {
-        return visitInternal(n);
+    public boolean visit(Name name) {
+        return visitInternal(name);
     }
 
     @Override
-    public boolean visit(SourceCitation c) {
-        return visitInternal(c);
+    public boolean visit(SourceCitation sourceCitation) {
+        return visitInternal(sourceCitation);
     }
 
     @Override
-    public boolean visit(Source s) {
-        return visitInternal(s);
+    public boolean visit(Source source) {
+        return visitInternal(source);
     }
 
     /**

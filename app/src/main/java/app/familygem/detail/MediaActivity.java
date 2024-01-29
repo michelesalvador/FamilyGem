@@ -30,7 +30,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Type;
-import app.familygem.list.MediaFragment;
+import app.familygem.main.MediaFragment;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.visitor.MediaReferences;

@@ -13,8 +13,7 @@ import androidx.core.text.TextUtilsCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
-import app.familygem.util.TreeUtils
-import app.familygem.util.TreeUtils.createHeader
+import app.familygem.util.TreeUtil
 import app.familygem.util.writeName
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -51,7 +50,7 @@ class InfoActivity : BaseActivity() {
         } else {
             if (Global.settings.expert) row(getText(R.string.file), file.absolutePath)
             lifecycleScope.launch(IO) {
-                gedcom = TreeUtils.openGedcomTemporarily(treeId, false)
+                gedcom = TreeUtil.openGedcomTemporarily(treeId, false)
                 if (gedcom == null) {
                     withContext(Main) {
                         val wrong = getString(R.string.something_wrong)
@@ -59,7 +58,7 @@ class InfoActivity : BaseActivity() {
                         textView.text = getString(R.string.no_useful_data)
                     }
                 } else {
-                    TreeUtils.refreshData(gedcom!!, tree)
+                    TreeUtil.refreshData(gedcom!!, tree)
                     row2(getText(R.string.persons), tree.persons.toString())
                     row2(getText(R.string.families), gedcom!!.families.size.toString())
                     row2(getText(R.string.media), tree.media.toString())
@@ -121,9 +120,9 @@ class InfoActivity : BaseActivity() {
         if (h == null) {
             headerButton.setText(R.string.create_header)
             headerButton.setOnClickListener {
-                gedcom!!.header = createHeader(file.name)
+                gedcom!!.header = TreeUtil.createHeader(file.name)
                 GlobalScope.launch(IO) {
-                    TreeUtils.saveJson(gedcom!!, treeId)
+                    TreeUtil.saveJson(gedcom!!, treeId)
                     withContext(Main) { recreate() }
                 }
             }
@@ -209,7 +208,7 @@ class InfoActivity : BaseActivity() {
                 gedcomVersion.form = "LINEAGE-LINKED"
                 h.destination = null
                 GlobalScope.launch(IO) {
-                    TreeUtils.saveJson(gedcom!!, treeId)
+                    TreeUtil.saveJson(gedcom!!, treeId)
                     withContext(Main) { recreate() }
                 }
             }

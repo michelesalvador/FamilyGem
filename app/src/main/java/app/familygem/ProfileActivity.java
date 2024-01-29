@@ -54,12 +54,14 @@ import app.familygem.constant.Type;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
-import app.familygem.list.MediaFragment;
-import app.familygem.list.NotesFragment;
-import app.familygem.list.PersonsFragment;
-import app.familygem.list.SourcesFragment;
+import app.familygem.main.MainActivity;
+import app.familygem.main.MediaFragment;
+import app.familygem.main.NotesFragment;
+import app.familygem.main.PersonsFragment;
+import app.familygem.main.SourcesFragment;
 import app.familygem.util.FileUtil;
-import app.familygem.util.TreeUtils;
+import app.familygem.util.PersonUtilKt;
+import app.familygem.util.TreeUtil;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -150,13 +152,13 @@ public class ProfileActivity extends AppCompatActivity {
                         data.getStringExtra(Extra.FAMILY_ID),
                         (Relation)data.getSerializableExtra(Extra.RELATION),
                         data.getStringExtra(Extra.DESTINATION));
-                TreeUtils.INSTANCE.save(true, modified);
+                TreeUtil.INSTANCE.save(true, modified);
                 refresh(); // To display the result in Relatives fragment
             }
         });
         // One person
         one = (Person)Memory.getLeaderObject();
-        if (TreeUtils.INSTANCE.isGlobalGedcomOk(() -> {
+        if (TreeUtil.INSTANCE.isGlobalGedcomOk(() -> {
             setOne(bundle);
             refresh();
         })) setOne(bundle);
@@ -323,7 +325,7 @@ public class ProfileActivity extends AppCompatActivity {
                         F.displayImageCaptureDialog(this, null, 2174, one);
                         break;
                     case 12: // Link media from MediaFragment
-                        Intent intent1 = new Intent(this, Principal.class);
+                        Intent intent1 = new Intent(this, MainActivity.class);
                         intent1.putExtra(Choice.MEDIA, true);
                         startActivityForResult(intent1, 43614);
                         break;
@@ -334,7 +336,7 @@ public class ProfileActivity extends AppCompatActivity {
                         one.addName(name);
                         Memory.add(name);
                         startActivity(new Intent(this, NameActivity.class));
-                        TreeUtils.INSTANCE.save(true, one);
+                        TreeUtil.INSTANCE.save(true, one);
                         break;
                     case 21: // Create sex
                         String[] sexNames = {getString(R.string.male), getString(R.string.female), getString(R.string.unknown)};
@@ -348,7 +350,7 @@ public class ProfileActivity extends AppCompatActivity {
                                     dialog.dismiss();
                                     ProfileFactsFragment.updateSpouseRoles(one);
                                     refresh();
-                                    TreeUtils.INSTANCE.save(true, one);
+                                    TreeUtil.INSTANCE.save(true, one);
                                 }).show();
                         break;
                     case 22: // Create note
@@ -358,13 +360,13 @@ public class ProfileActivity extends AppCompatActivity {
                         Memory.add(note);
                         startActivity(new Intent(this, NoteActivity.class));
                         // TODO: maybe make it editable with DetailActivity.edit(value);
-                        TreeUtils.INSTANCE.save(true, one);
+                        TreeUtil.INSTANCE.save(true, one);
                         break;
                     case 23: // Create shared note
                         NotesFragment.newNote(this, one);
                         break;
                     case 24: // Link shared note
-                        Intent intent2 = new Intent(this, Principal.class);
+                        Intent intent2 = new Intent(this, MainActivity.class);
                         intent2.putExtra(Choice.NOTE, true);
                         startActivityForResult(intent2, 4074);
                         break;
@@ -372,7 +374,7 @@ public class ProfileActivity extends AppCompatActivity {
                         SourcesFragment.newSource(this, one);
                         break;
                     case 26: // Link existing source
-                        Intent intent3 = new Intent(this, Principal.class);
+                        Intent intent3 = new Intent(this, MainActivity.class);
                         intent3.putExtra(Choice.SOURCE, true);
                         startActivityForResult(intent3, 50473);
                         break;
@@ -396,7 +398,7 @@ public class ProfileActivity extends AppCompatActivity {
                             new NewRelativeDialog(one, null, null, false, null).show(getSupportFragmentManager(), null);
                         } else {
                             builder.setItems(relatives, (dialog, selected) -> {
-                                Intent intent5 = new Intent(getApplication(), Principal.class);
+                                Intent intent5 = new Intent(getApplication(), MainActivity.class);
                                 intent5.putExtra(Choice.PERSON, true);
                                 intent5.putExtra(Extra.PERSON_ID, one.getId());
                                 intent5.putExtra(Extra.RELATION, Relation.get(selected));
@@ -435,7 +437,7 @@ public class ProfileActivity extends AppCompatActivity {
                         one.addEventFact(event);
                         Memory.add(event);
                         startActivity(new Intent(this, EventActivity.class));
-                        TreeUtils.INSTANCE.save(true, one);
+                        TreeUtil.INSTANCE.save(true, one);
                 }
                 return true;
             });
@@ -503,30 +505,30 @@ public class ProfileActivity extends AppCompatActivity {
                 media.setFileTag("FILE");
                 one.addMedia(media);
                 if (F.setFileAndProposeCropping(this, null, data, media))
-                    TreeUtils.INSTANCE.save(true, one);
+                    TreeUtil.INSTANCE.save(true, one);
             } else if (requestCode == 2174) { // Shared media
                 Media sharedMedia = MediaFragment.newSharedMedia(one);
                 if (F.setFileAndProposeCropping(this, null, data, sharedMedia))
-                    TreeUtils.INSTANCE.save(true, sharedMedia, one);
+                    TreeUtil.INSTANCE.save(true, sharedMedia, one);
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // Gets the image cropped by Android Image Cropper
                 F.endImageCropping(data);
-                TreeUtils.INSTANCE.save(true); // The change date for shared media is already saved in the previous step
+                TreeUtil.INSTANCE.save(true); // The change date for shared media is already saved in the previous step
                 // TODO: pass Global.croppedMedia?
             } else if (requestCode == 43614) { // Media from MediaFragment
                 MediaRef mediaRef = new MediaRef();
                 mediaRef.setRef(data.getStringExtra(Extra.MEDIA_ID));
                 one.addMediaRef(mediaRef);
-                TreeUtils.INSTANCE.save(true, one);
+                TreeUtil.INSTANCE.save(true, one);
             } else if (requestCode == 4074) { // Note
                 NoteRef noteRef = new NoteRef();
                 noteRef.setRef(data.getStringExtra(Extra.NOTE_ID));
                 one.addNoteRef(noteRef);
-                TreeUtils.INSTANCE.save(true, one);
+                TreeUtil.INSTANCE.save(true, one);
             } else if (requestCode == 50473) { // Source
                 SourceCitation citation = new SourceCitation();
                 citation.setRef(data.getStringExtra(Extra.SOURCE_ID));
                 one.addSourceCitation(citation);
-                TreeUtils.INSTANCE.save(true, one);
+                TreeUtil.INSTANCE.save(true, one);
             }
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // After back arrow in Image Cropper
             F.saveFolderInSettings();
@@ -543,7 +545,7 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         if (gc == null || one == null) return false;
         menu.add(0, 0, 0, R.string.diagram);
-        String[] familyLabels = DiagramFragment.getFamilyLabels(this, one, null);
+        String[] familyLabels = PersonUtilKt.getFamilyLabels(one, this, null);
         if (familyLabels[0] != null)
             menu.add(0, 1, 0, familyLabels[0]);
         if (familyLabels[1] != null)

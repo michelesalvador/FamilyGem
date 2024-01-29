@@ -126,7 +126,7 @@
             android:label="@string/new_tree"
             android:parentActivityName=".TreesActivity" />
         <activity
-            android:name=".Principal"
+            android:name=".main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SettingsActivity"
@@ -166,7 +166,7 @@
         <activity
             android:name=".DiagramSettingsActivity"
             android:label="@string/diagram_settings"
-            android:parentActivityName=".Principal" />
+            android:parentActivityName=".main.MainActivity" />
         <activity
             android:name=".ProfileActivity"
             android:configChanges="orientation|screenSize|screenLayout"

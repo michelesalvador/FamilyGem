@@ -1,21 +1,28 @@
-package app.familygem
+package app.familygem.main
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
+import app.familygem.DatePickerFragment
+import app.familygem.Global
+import app.familygem.Notifier
+import app.familygem.R
+import app.familygem.U
+import app.familygem.databinding.TreeSettingsFragmentBinding
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
+class TreeSettingsFragment : BaseFragment(R.layout.tree_settings_fragment) {
 
-class TreeSettingsFragment : Fragment(R.layout.tree_settings_activity) {
-
+    private lateinit var binding: TreeSettingsFragmentBinding
     private val treeSettings = Global.settings.currentTree.settings
     private lateinit var yearsEdit: EditText
     private lateinit var dateGroup: RadioGroup
@@ -23,19 +30,24 @@ class TreeSettingsFragment : Fragment(R.layout.tree_settings_activity) {
     var date: LocalDate? = null
     var edited = false
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = TreeSettingsFragmentBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.tree_settings)
 
         // Life span
-        yearsEdit = requireActivity().findViewById(R.id.treeSettings_years)
+        yearsEdit = binding.treeSettingsYears
         yearsEdit.setText(treeSettings.lifeSpan.toString())
         yearsEdit.addTextChangedListener {
             edited = true
         }
 
         // Current date
-        dateGroup = requireActivity().findViewById(R.id.treeSettings_currentDate)
-        dateView = requireActivity().findViewById(R.id.treeSettings_date)
+        dateGroup = binding.treeSettingsCurrentDate
+        dateView = binding.treeSettingsDate
         dateGroup.check(if (treeSettings.customDate) R.id.treeSettings_fixedDate else R.id.treeSettings_deviceDate)
         dateGroup.setOnCheckedChangeListener { _, selected ->
             val fixed = selected == R.id.treeSettings_fixedDate

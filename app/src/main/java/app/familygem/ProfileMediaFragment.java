@@ -19,9 +19,9 @@ import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Person;
 
-import app.familygem.list.MediaAdapter;
-import app.familygem.list.MediaFragment;
-import app.familygem.util.TreeUtils;
+import app.familygem.main.MediaAdapter;
+import app.familygem.main.MediaFragment;
+import app.familygem.util.TreeUtil;
 import app.familygem.visitor.MediaContainerList;
 
 public class ProfileMediaFragment extends Fragment {
@@ -77,19 +77,19 @@ public class ProfileMediaFragment extends Fragment {
                 medCont.media.setPrimary(null);
             media.setPrimary("Y");
             if (media.getId() != null) // To update the change date in the Media record rather than in the Person
-                TreeUtils.INSTANCE.save(true, media);
+                TreeUtil.INSTANCE.save(true, media);
             else
-                TreeUtils.INSTANCE.save(true, one);
+                TreeUtil.INSTANCE.save(true, one);
             refresh();
             return true;
         } else if (id == 1) { // Unlink
             MediaFragment.disconnectMedia(media.getId(), (MediaContainer)container);
-            TreeUtils.INSTANCE.save(true, one);
+            TreeUtil.INSTANCE.save(true, one);
             refresh();
             return true;
         } else if (id == 2) { // Delete
             Object[] leaders = MediaFragment.deleteMedia(media, null);
-            TreeUtils.INSTANCE.save(true, leaders);
+            TreeUtil.INSTANCE.save(true, leaders);
             refresh();
             return true;
         }

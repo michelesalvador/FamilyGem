@@ -15,7 +15,7 @@ import app.familygem.Global
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Extra
-import app.familygem.util.TreeUtils
+import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.getBasicData
 import kotlinx.coroutines.Dispatchers.IO
@@ -55,8 +55,8 @@ class CompareActivity : BaseActivity() {
         idTree2 = intent.getIntExtra(Extra.TREE_ID_2, 1) // New tree received in sharing
         Global.treeId2 = idTree2 // It will be used by ProcessActivity and ConfirmationActivity
         lifecycleScope.launch(IO) {
-            Global.gc = TreeUtils.openGedcomTemporarily(idTree1, true)
-            Global.gc2 = TreeUtils.openGedcomTemporarily(idTree2, false)
+            Global.gc = TreeUtil.openGedcomTemporarily(idTree1, true)
+            Global.gc2 = TreeUtil.openGedcomTemporarily(idTree2, false)
             if (Global.gc == null || Global.gc2 == null) {
                 Util.toast(R.string.no_useful_data)
                 onBackPressedDispatcher.onBackPressed()
@@ -139,7 +139,7 @@ class CompareActivity : BaseActivity() {
         } else {
             button1.setText(R.string.delete_imported_tree)
             button1.setOnClickListener { _ ->
-                TreeUtils.deleteTree(idTree2)
+                TreeUtil.deleteTree(idTree2)
                 onBackPressedDispatcher.onBackPressed()
             }
             button2.visibility = View.GONE

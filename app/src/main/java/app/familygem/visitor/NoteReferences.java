@@ -25,7 +25,7 @@ public class NoteReferences extends TotalVisitor {
     public NoteReferences(Gedcom gedcom, String id, boolean deleteRefs) {
         this.id = id;
         this.deleteRefs = deleteRefs;
-        gedcom.accept(this);
+        if (gedcom != null) gedcom.accept(this);
     }
 
     @Override
