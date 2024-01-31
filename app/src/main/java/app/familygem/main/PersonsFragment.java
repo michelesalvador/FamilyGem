@@ -540,7 +540,7 @@ public class PersonsFragment extends BaseFragment {
                     break;
                 }
             }
-            if (start != null && start.isSingleKind()) {
+            if (start != null && start.isSingleKind() && !start.firstDate.isFormat(Format.OTHER)) {
                 Settings.TreeSettings treeSettings = Global.settings.getCurrentTree().settings;
                 LocalDate startDate = new LocalDate(start.firstDate.date);
                 LocalDate now;
@@ -624,6 +624,7 @@ public class PersonsFragment extends BaseFragment {
                 for (PersonWrapper wrapper : selectedPeople) sortedPeople.add(wrapper.person);
                 gc.setPeople(sortedPeople);
                 TreeUtil.INSTANCE.save(false); // Too much?
+                if (Global.shouldSave) ((MainActivity)requireActivity()).furnishMenu(); // Displays the Save button
             }
         }
     }

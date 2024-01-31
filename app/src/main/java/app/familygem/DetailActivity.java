@@ -87,6 +87,7 @@ import app.familygem.main.RepositoriesFragment;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.EventUtilKt;
 import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
 
@@ -361,7 +362,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             if (requestCode == 34417) { // Family member chosen in PersonsFragment
                 Person personToBeAdded = gc.getPerson(data.getStringExtra(Extra.RELATIVE_ID));
                 FamilyActivity.connect(personToBeAdded, (Family)object, (Relation)data.getSerializableExtra(Extra.RELATION));
-                TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
+                TreeUtil.INSTANCE.save(true, personToBeAdded, Memory.getLeaderObject());
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
                 SourceCitation sourceCitation = new SourceCitation();
@@ -427,6 +428,12 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     protected abstract void format();
+
+    /**
+     * Updates the title in the toolbar.
+     */
+    protected void setTitle() {
+    }
 
     public void delete() {
     }
@@ -863,7 +870,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         else if (object instanceof Submitter)
             U.autorePrincipale(this, ((Submitter)object).getId());
         else if (this instanceof NameActivity || this instanceof EventActivity)
-            refresh(); // To update the title bar
+            setTitle();
     }
 
     /**
@@ -940,8 +947,6 @@ public abstract class DetailActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (object instanceof EventFact)
-            EventActivity.cleanUpTag((EventFact)object);
         Memory.stepBack();
     }
 
@@ -1237,11 +1242,14 @@ public abstract class DetailActivity extends AppCompatActivity {
         F.cropImage(this, mediaFile, mediaUri, null);
     }
 
-    // When activity goes on background, saves data that could be on editing
     @Override
     protected void onPause() {
         super.onPause();
+        // When activity goes on background, saves data that could be on editing
         concludeActivePieces();
+        if (object instanceof EventFact && EventUtilKt.cleanUpFields((EventFact)object)) {
+            TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
+        }
     }
 
     @Override

@@ -757,32 +757,34 @@ public class U {
             view.setVisibility(View.GONE);
     }
 
-    // Elimina una Nota inlinea o condivisa
-    // Restituisce un array dei capostipiti modificati
+    /**
+     * Deletes a note, simple or shared.
+     *
+     * @return An array of the modified container records
+     */
     public static Object[] deleteNote(Note note, View view) {
-        Set<Object> capi;
-        if (note.getId() != null) { // OBJECT note
-            // Prima rimuove i ref alla nota con un bel Visitor
-            NoteReferences eliminatoreNote = new NoteReferences(Global.gc, note.getId(), true);
-            Global.gc.accept(eliminatoreNote);
-            Global.gc.getNotes().remove(note); // ok la rimuove se è un'object note
-            capi = eliminatoreNote.leaders;
+        Set<Object> leaders;
+        if (note.getId() != null) { // Shared note record
+            // First removes the references to the note with a visitor
+            NoteReferences noteReferences = new NoteReferences(Global.gc, note.getId(), true);
+            Global.gc.accept(noteReferences);
+            Global.gc.getNotes().remove(note); // Removes it if it is a shared note
+            leaders = noteReferences.leaders;
             if (Global.gc.getNotes().isEmpty())
                 Global.gc.setNotes(null);
-        } else { // LOCAL note
+        } else { // Simple inline note
             new FindStack(Global.gc, note);
-            NoteContainer nc = (NoteContainer)Memory.getSecondToLastObject();
-            nc.getNotes().remove(note); // rimuove solo se è una nota locale, non se object note
-            if (nc.getNotes().isEmpty())
-                nc.setNotes(null);
-            capi = new HashSet<>();
-            capi.add(Memory.getLeaderObject());
+            NoteContainer container = (NoteContainer)Memory.getSecondToLastObject();
+            container.getNotes().remove(note); // Removes only if it is a simple note, not if a shared note
+            if (container.getNotes().isEmpty())
+                container.setNotes(null);
+            leaders = new HashSet<>();
+            leaders.add(Memory.getLeaderObject());
             Memory.stepBack();
         }
         Memory.setInstanceAndAllSubsequentToNull(note);
-        if (view != null)
-            view.setVisibility(View.GONE);
-        return capi.toArray();
+        if (view != null) view.setVisibility(View.GONE);
+        return leaders.toArray();
     }
 
     /**

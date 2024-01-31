@@ -10,6 +10,7 @@
         android:id="@+id/image_zoomLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layoutDirection="ltr"
         app:hasClickableChildren="false"
         app:maxZoom="10"
         app:maxZoomType="realZoom"

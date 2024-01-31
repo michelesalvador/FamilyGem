@@ -112,7 +112,8 @@ public class MediaFragment extends BaseFragment {
 
     /**
      * Deletes a shared or local media and removes the references in container records.
-     * Returns an array with the modified leader objects.
+     *
+     * @return An array with the modified leader objects
      */
     public static Object[] deleteMedia(Media media, View view) {
         Set<Object> leaders;

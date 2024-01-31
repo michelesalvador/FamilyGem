@@ -259,6 +259,7 @@ public class FamiliesFragment extends BaseFragment {
             for (FamilyWrapper wrapper : familyList) sortedFamilies.add(wrapper.family);
             gc.setFamilies(sortedFamilies);
             TreeUtil.INSTANCE.save(false); // Immediately saves families sorting
+            if (Global.shouldSave) ((MainActivity)requireActivity()).furnishMenu(); // Displays the Save button
         }
     }
 

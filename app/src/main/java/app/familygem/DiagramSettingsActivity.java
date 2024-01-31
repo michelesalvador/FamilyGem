@@ -62,7 +62,7 @@ public class DiagramSettingsActivity extends BaseActivity {
             }
         });
 
-        // Number of uncles, linked to ancestors
+        // Number of uncles and great-uncles
         uncles = findViewById(R.id.settings_great_uncles);
         uncles.setProgress(decode(Global.settings.diagram.uncles));
         uncles.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -71,6 +71,10 @@ public class DiagramSettingsActivity extends BaseActivity {
                 if (i > ancestors.getProgress()) {
                     ancestors.setProgress(i);
                     Global.settings.diagram.ancestors = convert(i);
+                }
+                if (i > 0 && cousins.getProgress() == 0) {
+                    cousins.setProgress(1);
+                    Global.settings.diagram.cousins = 1;
                 }
                 indicator(seekBar);
             }
@@ -86,7 +90,7 @@ public class DiagramSettingsActivity extends BaseActivity {
             }
         });
 
-        // Display siblings
+        // Displays partners
         SwitchCompat spouses = findViewById(R.id.settings_spouses);
         spouses.setChecked(Global.settings.diagram.spouses);
         spouses.setOnCheckedChangeListener((button, active) -> {
@@ -138,7 +142,7 @@ public class DiagramSettingsActivity extends BaseActivity {
             }
         });
 
-        // Number of uncles and cousins, linked to ancestors
+        // Number of uncles and cousins
         cousins = findViewById(R.id.settings_uncles_cousins);
         cousins.setProgress(decode(Global.settings.diagram.cousins));
         cousins.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -147,6 +151,10 @@ public class DiagramSettingsActivity extends BaseActivity {
                 if (i > 0 && ancestors.getProgress() == 0) {
                     ancestors.setProgress(1);
                     Global.settings.diagram.ancestors = 1;
+                }
+                if (i > 0 && uncles.getProgress() == 0) {
+                    uncles.setProgress(1);
+                    Global.settings.diagram.uncles = 1;
                 }
                 indicator(seekBar);
             }

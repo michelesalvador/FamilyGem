@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -34,9 +35,9 @@ import java.util.Set;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
-import app.familygem.detail.EventActivity;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.main.FamiliesFragment;
+import app.familygem.util.EventUtilKt;
 import app.familygem.util.TreeUtil;
 
 public class PersonEditorActivity extends AppCompatActivity {
@@ -127,7 +128,10 @@ public class PersonEditorActivity extends AppCompatActivity {
         ActionBar toolbar = getSupportActionBar();
         View actionBar = getLayoutInflater().inflate(R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
         actionBar.findViewById(R.id.edita_annulla).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-        actionBar.findViewById(R.id.edita_salva).setOnClickListener(v -> save());
+        actionBar.findViewById(R.id.edita_salva).setOnClickListener(button -> {
+            button.setEnabled(false); // To avoid multiple clicks
+            save();
+        });
         toolbar.setCustomView(actionBar);
         toolbar.setDisplayShowCustomEnabled(true);
 
@@ -210,14 +214,18 @@ public class PersonEditorActivity extends AppCompatActivity {
                     sexUnknown.setChecked(true);
             }
             lastChecked = radioGroup.getCheckedRadioButtonId();
-            // Birth and death
+            // Birth
             for (EventFact fact : person.getEventsFacts()) {
                 if (fact.getTag().equals("BIRT")) {
                     if (fact.getDate() != null)
                         birthDate.setText(fact.getDate().trim());
                     if (fact.getPlace() != null)
                         birthPlace.setText(fact.getPlace().trim());
+                    break;
                 }
+            }
+            // Death
+            for (EventFact fact : person.getEventsFacts()) {
                 if (fact.getTag().equals("DEAT")) {
                     isDeadSwitch.setChecked(true);
                     enableDeath();
@@ -225,6 +233,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                         deathDate.setText(fact.getDate().trim());
                     if (fact.getPlace() != null)
                         deathPlace.setText(fact.getPlace().trim());
+                    break;
                 }
             }
         }
@@ -257,27 +266,31 @@ public class PersonEditorActivity extends AppCompatActivity {
         // Name
         String givenName = givenNameView.getText().toString().trim();
         String surname = surnameView.getText().toString().trim();
-        Name name;
+        Name name = null;
         if (person.getNames().isEmpty()) {
-            List<Name> names = new ArrayList<>();
-            name = new Name();
-            names.add(name);
-            person.setNames(names);
-        } else
-            name = person.getNames().get(0);
-
-        if (nameFromPieces) {
-            name.setGiven(givenName);
-            name.setSurname(surname);
-        } else {
-            String value = "";
-            if (!surname.isEmpty()) value = "/" + surname + "/";
-            if (surnameBefore) value += " " + givenName;
-            else {
-                value = givenName + " " + value;
-                if (!nameSuffix.isEmpty()) value += " " + nameSuffix;
+            if (!givenName.isEmpty() || !surname.isEmpty()) {
+                List<Name> names = new ArrayList<>();
+                name = new Name();
+                names.add(name);
+                person.setNames(names);
             }
-            name.setValue(value.trim());
+        } else {
+            name = person.getNames().get(0);
+        }
+        if (name != null) {
+            if (nameFromPieces) {
+                name.setGiven(givenName);
+                name.setSurname(surname);
+            } else {
+                String value = "";
+                if (!surname.isEmpty()) value = "/" + surname + "/";
+                if (surnameBefore) value += " " + givenName;
+                else {
+                    value = givenName + " " + value;
+                    if (!nameSuffix.isEmpty()) value += " " + nameSuffix;
+                }
+                name.setValue(value.trim());
+            }
         }
 
         // Sex
@@ -319,14 +332,14 @@ public class PersonEditorActivity extends AppCompatActivity {
         boolean found = false;
         for (EventFact fact : person.getEventsFacts()) {
             if (fact.getTag().equals("BIRT")) {
-                /* TODO:
-                   if (date.isEmpty() && place.isEmpty() && tagAllEmpty(fact))
-                      p.getEventsFacts().remove(fact);
-                   More generally, delete a tag when it is empty */
+                /* TODO: delete an EventsFact if it is completly empty
+                    if (date.isEmpty() && place.isEmpty() && ...isEmpty())
+                        person.getEventsFacts().remove(fact); */
                 fact.setDate(date);
                 fact.setPlace(place);
-                EventActivity.cleanUpTag(fact);
+                EventUtilKt.cleanUpFields(fact);
                 found = true;
+                break;
             }
         }
         // If there is any data to save, creates the tag
@@ -335,7 +348,7 @@ public class PersonEditorActivity extends AppCompatActivity {
             birth.setTag("BIRT");
             birth.setDate(date);
             birth.setPlace(place);
-            EventActivity.cleanUpTag(birth);
+            EventUtilKt.cleanUpFields(birth);
             person.addEventFact(birth);
         }
 
@@ -351,7 +364,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                 } else {
                     fact.setDate(date);
                     fact.setPlace(place);
-                    EventActivity.cleanUpTag(fact);
+                    EventUtilKt.cleanUpFields(fact);
                 }
                 found = true;
                 break;
@@ -362,7 +375,7 @@ public class PersonEditorActivity extends AppCompatActivity {
             death.setTag("DEAT");
             death.setDate(date);
             death.setPlace(place);
-            EventActivity.cleanUpTag(death);
+            EventUtilKt.cleanUpFields(death);
             person.addEventFact(death);
         }
 

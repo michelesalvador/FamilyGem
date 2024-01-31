@@ -223,6 +223,12 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 FileUtil.showImage(it.first, it.second)
             }
         }
+        withContext(Dispatchers.Main) {
+            // To stop waiting for images to be loaded
+            binding.diagramWheel.root.setOnClickListener {
+                loadingImages.forEach { it.second.tag = R.id.tag_object }
+            }
+        }
         // Waits for images to be loaded
         if (loadingImages.size > 0) {
             do {
@@ -293,7 +299,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     }
 
     /**
-     * Updates visible position of nodes and lines.
+     * Place cards on their final position and updates glow and lines.
      */
     private fun displaceDiagram() {
         // Position of the nodes from dips to pixels

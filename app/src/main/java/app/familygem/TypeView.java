@@ -38,6 +38,7 @@ public class TypeView extends AppCompatAutoCompleteTextView {
         setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         setOnItemClickListener((parent, view, position, id) -> {
             setText((String)types.keySet().toArray()[position]);
+            setSelection(getText().length()); // Cursor at the end
         });
         setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus)

@@ -157,9 +157,9 @@ object TreeUtil {
      * @param refresh Will refresh also other activities
      * @param objects Record(s) to which update the change date
      */
-    fun save(refresh: Boolean, vararg objects: Any) {
+    fun save(refresh: Boolean, vararg objects: Any?) {
         if (refresh) Global.edited = true
-        objects.forEach { ChangeUtil.updateChangeDate(it) }
+        ChangeUtil.updateChangeDate(*objects)
         // On the first save adds an extension to submitters
         if (Global.settings.currentTree.grade == 9) {
             Global.gc.submitters.forEach { it.putExtension("passed", true) }

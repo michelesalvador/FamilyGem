@@ -86,6 +86,7 @@ class TreeSettingsFragment : BaseFragment(R.layout.tree_settings_fragment) {
                 Global.settings.currentTree.birthdays.clear()
             }
             Global.settings.save()
+            Global.edited = true
         }
     }
 }

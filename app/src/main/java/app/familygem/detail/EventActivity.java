@@ -28,10 +28,7 @@ public class EventActivity extends DetailActivity {
     @Override
     protected void format() {
         event = (EventFact)cast(EventFact.class);
-        if (Memory.getLeaderObject() instanceof Family)
-            setTitle(writeEventTitle((Family)Memory.getLeaderObject(), event));
-        else
-            setTitle(ProfileFactsFragment.writeEventTitle(event)); // The title includes event.getDisplayType()
+        setTitle();
         placeSlug(event.getTag());
         if (Arrays.asList(eventTags).contains(event.getTag())) // It's an event (without Value)
             place(getString(R.string.value), "Value", false, 0);
@@ -59,28 +56,17 @@ public class EventActivity extends DetailActivity {
     }
 
     @Override
+    protected void setTitle() {
+        if (Memory.getLeaderObject() instanceof Family)
+            setTitle(writeEventTitle((Family)Memory.getLeaderObject(), event));
+        else
+            setTitle(ProfileFactsFragment.writeEventTitle(event)); // The title includes event.getDisplayType()
+    }
+
+    @Override
     public void delete() {
         ((PersonFamilyCommonContainer)Memory.getSecondToLastObject()).getEventsFacts().remove(event);
         ChangeUtil.INSTANCE.updateChangeDate(Memory.getLeaderObject());
         Memory.setInstanceAndAllSubsequentToNull(event);
-    }
-
-    /**
-     * Deletes the main empty tags and possibly sets 'Y' as value.
-     */
-    public static void cleanUpTag(EventFact ef) {
-        if (ef.getType() != null && ef.getType().isEmpty()) ef.setType(null);
-        if (ef.getDate() != null && ef.getDate().isEmpty()) ef.setDate(null);
-        if (ef.getPlace() != null && ef.getPlace().isEmpty()) ef.setPlace(null);
-        String tag = ef.getTag();
-        if (tag != null && (tag.equals("BIRT") || tag.equals("CHR") || tag.equals("DEAT")
-                || tag.equals("MARR") || tag.equals("DIV"))) {
-            if (ef.getType() == null && ef.getDate() == null && ef.getPlace() == null
-                    && ef.getAddress() == null && ef.getCause() == null)
-                ef.setValue("Y");
-            else
-                ef.setValue(null);
-        }
-        if (ef.getValue() != null && ef.getValue().isEmpty()) ef.setValue(null);
     }
 }

@@ -23,7 +23,7 @@ public class NameActivity extends DetailActivity {
     protected void format() {
         placeSlug("NAME", null);
         name = (Name)cast(Name.class);
-        setTitle(ProfileFactsFragment.writeNameTitle(name));
+        setTitle();
         int capWords = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS;
         if (Global.settings.expert)
             place(getString(R.string.value), "Value", true, capWords);
@@ -58,6 +58,11 @@ public class NameActivity extends DetailActivity {
         U.placeNotes(box, name, true);
         U.placeMedia(box, name, true); // Per GEDCOM 5.5.1 a Name should not contain Media
         U.placeSourceCitations(box, name);
+    }
+
+    @Override
+    protected void setTitle() {
+        setTitle(ProfileFactsFragment.writeNameTitle(name));
     }
 
     @Override

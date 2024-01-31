@@ -22,7 +22,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.util.TreeUtil
-import kotlinx.coroutines.Dispatchers.Default
+import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -125,31 +125,33 @@ class NewTreeActivity : BaseActivity() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = result.data?.data
                 if (uri != null) {
-                    try {
-                        val isValidBackup = ZipInputStream(contentResolver.openInputStream(uri)).use { zipInputStream ->
-                            generateSequence { zipInputStream.nextEntry }.filterNot { it.isDirectory }.map { it.name }
-                                    .toList().containsAll(listOf("settings.json", "tree.json"))
-                        }
-                        if (isValidBackup) {
-                            lifecycleScope.launch(Default) {
+                    progress.visibility = View.VISIBLE
+                    lifecycleScope.launch(IO) {
+                        try {
+                            val isValidBackup = ZipInputStream(contentResolver.openInputStream(uri)).use { zipInputStream ->
+                                generateSequence { zipInputStream.nextEntry }.filterNot { it.isDirectory }.map { it.name }
+                                        .toList().containsAll(listOf("settings.json", "tree.json"))
+                            }
+                            if (isValidBackup) {
                                 TreeUtil.unZipTree(this@NewTreeActivity, null, uri,
                                         { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
                                         { progress.visibility = View.GONE })
-                            }
-                            /* TODO: nello strano caso che viene importato col backup ZIP lo stesso albero suggerito dal referrer
-                                bisognerebbe annullare il referrer:
-                                if( unZip( this, null, uri ) ){
-                                String idData = Esportatore.estraiNome(uri); // che però non è statico
-                                if( Global.preferenze.referrer.equals(idData) ) {
-                                    Global.preferenze.referrer = null;
-                                    Global.preferenze.salva();
-                                }}
-                             */
-                        } else Toast.makeText(this@NewTreeActivity, R.string.backup_invalid, Toast.LENGTH_LONG).show()
-                    } catch (e: Exception) {
-                        Toast.makeText(this@NewTreeActivity, e.localizedMessage, Toast.LENGTH_LONG).show()
+                                /* TODO: nello strano caso che viene importato col backup ZIP lo stesso albero suggerito dal referrer
+                                    bisognerebbe annullare il referrer:
+                                    if( unZip( this, null, uri ) ){
+                                    String idData = Esportatore.estraiNome(uri); // che però non è statico
+                                    if( Global.preferenze.referrer.equals(idData) ) {
+                                        Global.preferenze.referrer = null;
+                                        Global.preferenze.salva();
+                                    }}
+                                */
+                            } else Util.toast(R.string.backup_invalid)
+                        } catch (e: Exception) {
+                            Util.toast(e.localizedMessage)
+                        }
+                        withContext(Main) { progress.visibility = View.GONE }
                     }
-                }
+                } else Toast.makeText(this@NewTreeActivity, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
             }
         }
         findViewById<Button>(R.id.new_recover_backup).setOnClickListener {

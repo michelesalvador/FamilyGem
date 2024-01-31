@@ -59,7 +59,7 @@ abstract class BaseFragment(layout: Int) : Fragment(layout) {
             val mainActivity = requireActivity() as MainActivity
             if ((Global.edited || mayShow) && this == mainActivity.frontFragment) {
                 showContent()
-                mainActivity.furnishMenu()
+                mainActivity.refreshInterface()
                 if (mainActivity.manager.fragments.size <= 1) Global.edited = false // Reset when first fragment of the stack is displayed
                 mayShow = false
             }
