@@ -546,7 +546,9 @@ public class F {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             displayImageCaptureDialog(context, fragment, code, container);
         } else {
-            String permission = permissions[0].substring(permissions[0].lastIndexOf('.') + 1);
+            String permission = "Read media";
+            if (permissions.length > 0) // From Android 13 permissions is sometimes empty
+                permission = permissions[0].substring(permissions[0].lastIndexOf('.') + 1);
             Toast.makeText(context, context.getString(R.string.not_granted, permission), Toast.LENGTH_LONG).show();
         }
     }

@@ -173,6 +173,8 @@ object TreeUtil {
         }
     }
 
+    private var activeNotifier = false // To avoid ConcurrentModificationException on Notifier
+
     /**
      * Saves the GEDCOM tree as JSON.
      */
@@ -191,7 +193,11 @@ object TreeUtil {
         } catch (e: IOException) {
             Util.toast(e.localizedMessage)
         }
-        Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
+        if (!activeNotifier) {
+            activeNotifier = true
+            Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
+            activeNotifier = false
+        }
     }
 
     // Temporary hack to call a suspend function from Java

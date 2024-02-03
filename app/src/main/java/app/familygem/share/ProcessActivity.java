@@ -127,36 +127,36 @@ public class ProcessActivity extends BaseActivity {
         CardView cardView = findViewById(cardId);
         ImageView imageView = cardView.findViewById(R.id.compare_image);
         if (obj instanceof Note) {
-            writeType(R.string.shared_note);
             Note note = (Note)obj;
+            writeHeading(R.string.shared_note, note.getId());
             text = note.getValue();
             date = getDateTime(note.getChange());
         } else if (obj instanceof Submitter) {
-            writeType(R.string.submitter);
             Submitter submitter = (Submitter)obj;
+            writeHeading(R.string.submitter, submitter.getId());
             title = submitter.getName();
             if (submitter.getEmail() != null) text += submitter.getEmail() + "\n";
             if (submitter.getAddress() != null) text += DetailActivity.writeAddress(submitter.getAddress(), true);
             date = getDateTime(submitter.getChange());
         } else if (obj instanceof Repository) {
-            writeType(R.string.repository);
             Repository repository = (Repository)obj;
+            writeHeading(R.string.repository, repository.getId());
             title = repository.getName();
             if (repository.getAddress() != null)
                 text += DetailActivity.writeAddress(repository.getAddress(), true) + "\n";
             if (repository.getEmail() != null) text += repository.getEmail();
             date = getDateTime(repository.getChange());
         } else if (obj instanceof Media) {
-            writeType(R.string.shared_media);
             Media media = (Media)obj;
+            writeHeading(R.string.shared_media, media.getId());
             if (media.getTitle() != null) title = media.getTitle();
             text = media.getFile();
             date = getDateTime(media.getChange());
             imageView.setVisibility(View.VISIBLE);
             FileUtil.INSTANCE.showImage(media, imageView, 0, null, treeId);
         } else if (obj instanceof Source) {
-            writeType(R.string.source);
             Source source = (Source)obj;
+            writeHeading(R.string.source, source.getId());
             if (source.getTitle() != null) title = source.getTitle();
             else if (source.getAbbreviation() != null) title = source.getAbbreviation();
             if (source.getAuthor() != null) text = source.getAuthor() + "\n";
@@ -164,15 +164,15 @@ public class ProcessActivity extends BaseActivity {
             if (source.getText() != null) text += source.getText();
             date = getDateTime(source.getChange());
         } else if (obj instanceof Person) {
-            writeType(R.string.person);
             Person person = (Person)obj;
+            writeHeading(R.string.person, person.getId());
             title = U.properName(person);
             text = U.details(person, null);
             date = getDateTime(person.getChange());
             FileUtil.INSTANCE.selectMainImage(person, imageView, 0, gedcom, treeId);
         } else if (obj instanceof Family) {
-            writeType(R.string.family);
             Family family = (Family)obj;
+            writeHeading(R.string.family, family.getId());
             text = U.testoFamiglia(this, gedcom, family, false);
             date = getDateTime(family.getChange());
         }
@@ -203,10 +203,13 @@ public class ProcessActivity extends BaseActivity {
     }
 
     /**
-     * Writes the page title.
+     * Writes the type and the ID of the processed objects.
      */
-    private void writeType(int string) {
-        ((TextView)findViewById(R.id.process_type)).setText(getString(string));
+    private void writeHeading(int type, String id) {
+        ((TextView)findViewById(R.id.process_type)).setText(getString(type));
+        TextView idView = findViewById(R.id.process_id);
+        if (Global.settings.expert) idView.setText(id);
+        else idView.setVisibility(View.GONE);
     }
 
     String getDateTime(Change change) {

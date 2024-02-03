@@ -72,10 +72,6 @@ public class DiagramSettingsActivity extends BaseActivity {
                     ancestors.setProgress(i);
                     Global.settings.diagram.ancestors = convert(i);
                 }
-                if (i > 0 && cousins.getProgress() == 0) {
-                    cousins.setProgress(1);
-                    Global.settings.diagram.cousins = 1;
-                }
                 indicator(seekBar);
             }
 
@@ -85,7 +81,12 @@ public class DiagramSettingsActivity extends BaseActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Global.settings.diagram.uncles = convert(seekBar.getProgress());
+                int progress = seekBar.getProgress();
+                if (progress > 0 && cousins.getProgress() == 0) {
+                    cousins.setProgress(1);
+                    Global.settings.diagram.cousins = 1;
+                }
+                Global.settings.diagram.uncles = convert(progress);
                 save();
             }
         });
@@ -152,10 +153,6 @@ public class DiagramSettingsActivity extends BaseActivity {
                     ancestors.setProgress(1);
                     Global.settings.diagram.ancestors = 1;
                 }
-                if (i > 0 && uncles.getProgress() == 0) {
-                    uncles.setProgress(1);
-                    Global.settings.diagram.uncles = 1;
-                }
                 indicator(seekBar);
             }
 
@@ -165,7 +162,12 @@ public class DiagramSettingsActivity extends BaseActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Global.settings.diagram.cousins = convert(seekBar.getProgress());
+                int progress = seekBar.getProgress();
+                if (progress > 0 && uncles.getProgress() == 0) {
+                    uncles.setProgress(1);
+                    Global.settings.diagram.uncles = 1;
+                }
+                Global.settings.diagram.cousins = convert(progress);
                 save();
             }
         });

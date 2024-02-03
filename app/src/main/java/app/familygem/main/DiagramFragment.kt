@@ -217,31 +217,27 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.AT_MOST)
             it.layout(0, 0, it.measuredWidth, it.measuredHeight)
         }
-        // Loads images
         withContext(Dispatchers.Main) {
+            // Loads images
             loadingImages.forEach {
                 FileUtil.showImage(it.first, it.second)
             }
-        }
-        withContext(Dispatchers.Main) {
             // To stop waiting for images to be loaded
             binding.diagramWheel.root.setOnClickListener {
                 loadingImages.forEach { it.second.tag = R.id.tag_object }
             }
         }
         // Waits for images to be loaded
-        if (loadingImages.size > 0) {
-            do {
-                delay(200)
-                var imageToLoad = false
-                for (it in loadingImages) {
-                    if (it.second.tag != R.id.tag_object) {
-                        imageToLoad = true
-                        break
-                    }
+        do {
+            delay(100) // Anyway a little delay is useful to correctly calculate lines and pan to fulcrum
+            var imageToLoad = false
+            for (it in loadingImages) {
+                if (it.second.tag != R.id.tag_object) {
+                    imageToLoad = true
+                    break
                 }
-            } while (imageToLoad)
-        }
+            }
+        } while (imageToLoad)
         // Only one person in the diagram
         if (graphicNodes.size == 1 && !printPDF) {
             withContext(Dispatchers.Main) {
@@ -258,8 +254,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                         glowParams.bottomToBottom = R.id.tag_fulcrum
                         glowParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
                         glowParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-                        fulcrumView!!.metric.width = toDp(singleNode.width.toFloat())
-                        fulcrumView!!.metric.height = toDp(singleNode.height.toFloat())
+                        fulcrumView!!.metric.width = toDp(singleNode.width)
+                        fulcrumView!!.metric.height = toDp(singleNode.height)
                         popupLayout.addView(FulcrumGlow(context), 0, glowParams)
                     }
                 }
@@ -270,8 +266,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             graphicNodes.forEach {
                 // Second measurement to get final card size
                 it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
-                it.metric.width = toDp(it.measuredWidth.toFloat())
-                it.metric.height = toDp(it.measuredHeight.toFloat())
+                it.metric.width = toDp(it.measuredWidth)
+                it.metric.height = toDp(it.measuredHeight)
             }
             graph.initNodes() // Initializes nodes and lines
             // Adds bond nodes
@@ -563,16 +559,16 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         override fun invalidate() {
             paint.color = ResourcesCompat.getColor(resources, if (printPDF) R.color.diagram_lines_print else R.color.diagram_lines_screen, null)
             paths.clear() // In case of PDF print
-            val width = toPx(graph.width).toFloat()
+            val width = toPxFloat(graph.width)
             // Put the lines in one or more paths
             for ((pathNum, lineGroup) in lineGroups.withIndex()) {
                 if (pathNum >= paths.size) paths.add(Path())
                 val path = paths[pathNum]
                 for (line in lineGroup) {
-                    var x1 = toPx(line.x1).toFloat()
-                    val y1 = toPx(line.y1).toFloat()
-                    var x2 = toPx(line.x2).toFloat()
-                    val y2 = toPx(line.y2).toFloat()
+                    var x1 = toPxFloat(line.x1)
+                    val y1 = toPxFloat(line.y1)
+                    var x2 = toPxFloat(line.x2)
+                    val y2 = toPxFloat(line.y2)
                     if (!leftToRight) {
                         x1 = width - x1
                         x2 = width - x2
@@ -655,12 +651,16 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    private fun toDp(pixels: Float): Float {
+    private fun toDp(pixels: Int): Float {
         return pixels / density
     }
 
     private fun toPx(dips: Float): Int {
         return (dips * density + 0.5f).toInt()
+    }
+
+    private fun toPxFloat(dips: Float): Float {
+        return dips * density + 0.5F
     }
 
     private lateinit var person: Person
@@ -786,7 +786,13 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 fulcrumView!!.findViewById<View>(R.id.card_background).setBackgroundResource(R.drawable.casella_sfondo_base)
                 // Creates PDF
                 val document = PdfDocument()
-                val pageInfo = PdfDocument.PageInfo.Builder(box.width, box.height, 1).create()
+                val width = box.width
+                val height = box.height
+                if (width <= 0 || height <= 0) { // Sometimes sizes are zero (or negative) for unknown reasons
+                    Toast.makeText(context, R.string.something_wrong, Toast.LENGTH_LONG).show()
+                    return
+                }
+                val pageInfo = PdfDocument.PageInfo.Builder(width, height, 1).create()
                 val page = document.startPage(pageInfo)
                 box.draw(page.canvas)
                 document.finishPage(page)

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/bava_goccia"
-	style="@style/AppTheme.Slug"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:layout_marginEnd="6dp"
-	android:layout_marginBottom="6dp"/>
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bava_goccia"
+    style="@style/AppTheme.Slug"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="6dp"
+    android:layout_marginBottom="6dp"
+    tools:text="INDI 123" />
