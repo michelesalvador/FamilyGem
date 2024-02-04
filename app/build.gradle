@@ -79,7 +79,7 @@ dependencies {
     implementation 'com.android.billingclient:billing-ktx:6.1.0'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
-    implementation files('libs/gedcomgraph-3.4.jar')
+    implementation files('libs/gedcomgraph-3.5.jar')
     implementation 'joda-time:joda-time:2.12.1'
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
     implementation 'com.otaliastudios:zoomlayout:1.9.0'

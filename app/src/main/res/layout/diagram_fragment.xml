@@ -8,7 +8,8 @@
         android:id="@+id/diagram_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/diagram_background">
+        android:background="@drawable/diagram_background"
+        android:layoutDirection="ltr">
 
         <RelativeLayout
             android:id="@+id/diagram_box"
@@ -16,6 +17,7 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:layoutDirection="ltr"
             android:padding="50dp" />
     </app.familygem.main.MoveLayout>
 

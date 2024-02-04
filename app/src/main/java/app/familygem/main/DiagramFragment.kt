@@ -122,7 +122,6 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             }
         }
         moveLayout = binding.diagramFrame
-        moveLayout.leftToRight = leftToRight
         moveLayout.graph = graph
         box = binding.diagramBox
 
@@ -183,7 +182,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             binding.diagramWheel.root.visibility = View.VISIBLE
             lifecycleScope.launch(Dispatchers.Default) {
                 Global.indi = fulcrum.id // Confirms it just in case
-                graph.setGedcom(Global.gc)
+                graph.setGedcom(Global.gc).setLayoutDirection(leftToRight)
                         .maxAncestors(Global.settings.diagram.ancestors)
                         .maxGreatUncles(Global.settings.diagram.uncles)
                         .displaySpouses(Global.settings.diagram.spouses)
@@ -301,15 +300,13 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         // Position of the nodes from dips to pixels
         graphicNodes.forEach {
             val params = it.layoutParams as RelativeLayout.LayoutParams
-            if (leftToRight) params.leftMargin = toPx(it.metric.x)
-            else params.rightMargin = toPx(it.metric.x)
+            params.leftMargin = toPx(it.metric.x)
             params.topMargin = toPx(it.metric.y)
             box.addView(it)
         }
         // The glow follows fulcrum
         val glowParams = glow!!.layoutParams as RelativeLayout.LayoutParams
-        if (leftToRight) glowParams.leftMargin = toPx(fulcrumView!!.metric.x) - glowSpace
-        else glowParams.rightMargin = toPx(fulcrumView!!.metric.x) - glowSpace
+        glowParams.leftMargin = toPx(fulcrumView!!.metric.x) - glowSpace
         glowParams.topMargin = toPx(fulcrumView!!.metric.y) - glowSpace
         moveLayout.childWidth = toPx(graph.width) + box.paddingStart * 2
         moveLayout.childHeight = toPx(graph.height) + box.paddingTop * 2
@@ -320,8 +317,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         // Pans to fulcrum
         val scale = moveLayout.minimumScale()
         val padding = box.paddingTop * scale
-        moveLayout.panTo((if (leftToRight) toPx(fulcrumView!!.metric.centerX()) * scale - moveLayout.width / 2 + padding
-        else moveLayout.width / 2 - toPx(fulcrumView!!.metric.centerX()) * scale - padding).toInt(),
+        moveLayout.panTo((toPx(fulcrumView!!.metric.centerX()) * scale - moveLayout.width / 2 + padding).toInt(),
                 (toPx(fulcrumView!!.metric.centerY()) * scale - moveLayout.height / 2 + padding).toInt())
     }
 
@@ -440,6 +436,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             val data = U.twoDates(person, true)
             if (data.isEmpty()) dataView.visibility = GONE else dataView.text = data
             if (!U.isDead(person)) view.findViewById<View>(R.id.card_mourn).visibility = GONE
+            layoutDirection = View.LAYOUT_DIRECTION_LOCALE
             registerForContextMenu(this)
             setOnClickListener {
                 if (person.id == Global.indi) {
@@ -569,10 +566,6 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                     val y1 = toPxFloat(line.y1)
                     var x2 = toPxFloat(line.x2)
                     val y2 = toPxFloat(line.y2)
-                    if (!leftToRight) {
-                        x1 = width - x1
-                        x2 = width - x2
-                    }
                     path.moveTo(x1, y1)
                     if (line is CurveLine) {
                         path.cubicTo(x1, y2, x2, y1, x2, y2)
@@ -668,10 +661,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private var parentFam: Family? = null // Displayed family in which the person is child
     private var spouseFam: Family? = null // Selected family in which the person is spouse
 
-    override fun onCreateContextMenu(menu: ContextMenu, vista: View, info: ContextMenu.ContextMenuInfo?) {
+    override fun onCreateContextMenu(menu: ContextMenu, view: View, info: ContextMenu.ContextMenuInfo?) {
         lateinit var personNode: PersonNode
-        if (vista is GraphicPerson) personNode = vista.metric as PersonNode
-        else if (vista is Asterisk) personNode = vista.metric as PersonNode
+        if (view is GraphicPerson) personNode = view.metric as PersonNode
+        else if (view is Asterisk) personNode = view.metric as PersonNode
         person = personNode.person
         if (personNode.origin != null) parentFam = personNode.origin.spouseFamily
         spouseFam = personNode.spouseFamily

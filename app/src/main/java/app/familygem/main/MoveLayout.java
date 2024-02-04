@@ -31,7 +31,6 @@ public class MoveLayout extends FrameLayout {
     private int mendX, mendY; // Position correction for the child with scaled size
     float scale = .7f;
     boolean scaling; // the screen has been touched with two fingers
-    boolean leftToRight; // LTR (otherwise RTL)
 
     public MoveLayout(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
@@ -49,11 +48,7 @@ public class MoveLayout extends FrameLayout {
                 child.setScaleY(scale);
                 calcOverScroll(true);
                 // Corrects scroll while scaling
-                float distX;
-                if (leftToRight)
-                    distX = childWidth / 2f - getScrollX() - scaleGestureDetector.getFocusX();
-                else
-                    distX = width - (getScrollX() + childWidth / 2f) - scaleGestureDetector.getFocusX();
+                float distX = childWidth / 2f - getScrollX() - scaleGestureDetector.getFocusX();
                 distX -= distX * scaleFactor;
                 float distY = childHeight / 2f - getScrollY() - scaleGestureDetector.getFocusY();
                 distY -= distY * scaleFactor;
@@ -124,17 +119,10 @@ public class MoveLayout extends FrameLayout {
                 int scrollX = (int)(lastX + downX - event.getX());
                 int scrollY = (int)(lastY + downY - event.getY());
                 // Horizontal limits
-                if (leftToRight) {
-                    if (scrollX < mendX - overX) // Left
-                        scrollX = mendX - overX;
-                    else if (scrollX > childWidth - width + overX - mendX) // Right
-                        scrollX = childWidth - width + overX - mendX;
-                } else { // RTL
-                    if (scrollX > overX - mendX) // Right
-                        scrollX = overX - mendX;
-                    else if (scrollX < width - childWidth - overX + mendX) // Left
-                        scrollX = width - childWidth - overX + mendX;
-                }
+                if (scrollX < mendX - overX) // Left
+                    scrollX = mendX - overX;
+                else if (scrollX > childWidth - width + overX - mendX) // Right
+                    scrollX = childWidth - width + overX - mendX;
                 // Vertical limits
                 if (scrollY < mendY - overY) // Top
                     scrollY = mendY - overY;
@@ -148,19 +136,11 @@ public class MoveLayout extends FrameLayout {
                 return true;
             case MotionEvent.ACTION_UP:
                 scaling = false;
-                if (leftToRight) {
-                    scroller.fling(getScrollX(), getScrollY(),
-                            (int)-velocityTracker.getXVelocity(), (int)-velocityTracker.getYVelocity(),
-                            mendX, childWidth - width - mendX,
-                            mendY, childHeight - height - mendY,
-                            overX, overY);
-                } else {
-                    scroller.fling(getScrollX(), getScrollY(),
-                            (int)-velocityTracker.getXVelocity(), (int)-velocityTracker.getYVelocity(),
-                            width - childWidth + mendX, -mendX,
-                            mendY, childHeight - height - mendY,
-                            overX, overY);
-                }
+                scroller.fling(getScrollX(), getScrollY(),
+                        (int)-velocityTracker.getXVelocity(), (int)-velocityTracker.getYVelocity(),
+                        mendX, childWidth - width - mendX,
+                        mendY, childHeight - height - mendY,
+                        overX, overY);
                 postInvalidate(); //invalidate(); superfluo?
                 //velocityTracker.recycle(); // Provoca IllegalStateException: Already in the pool!
                 return false;
@@ -207,26 +187,18 @@ public class MoveLayout extends FrameLayout {
             y = (int)(childHeight * scale - height);
         if (y < 0) // There is space above
             y = Math.min(0, (int)(childHeight * scale - height) / 2);
-        if (leftToRight) {
-            if (childWidth * scale - x < width) // There is space on the right
-                x = (int)(childWidth * scale - width);
-            if (x < 0) // There is space on the left
-                x = Math.min(0, (int)(childWidth * scale - width) / 2);
-            scrollTo(x + mendX, y + mendY);
-        } else { // RTL
-            if (childWidth * scale + x < width) // There is space on the left
-                x = -(int)(childWidth * scale - width);
-            if (x > 0) // There is space on the right
-                x = Math.max(0, -(int)(childWidth * scale - width) / 2);
-            scrollTo(x - mendX, y + mendY);
-        }
+        if (childWidth * scale - x < width) // There is space on the right
+            x = (int)(childWidth * scale - width);
+        if (x < 0) // There is space on the left
+            x = Math.min(0, (int)(childWidth * scale - width) / 2);
+        scrollTo(x + mendX, y + mendY);
     }
 
     void displayAll() {
         scale = 0;
         minimumScale();
         calcOverScroll(true);
-        scrollTo(leftToRight ? mendX : -mendX, mendY);
+        scrollTo(mendX, mendY);
     }
 
     @Override
