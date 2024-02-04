@@ -386,4 +386,6 @@
     <string name="select_tree">انتخاب درختواره برای ادغام:</string>
     <string name="gedcom_media_zip">GEDCOM با %d مدیا در یک فایل فشرده</string>
     <string name="gedcom_only">فقط فایل GEDCOM</string>
+    <string name="error_found">یک خطا پیدا شد.</string>
+    <string name="next">بعدی</string>
 </resources>

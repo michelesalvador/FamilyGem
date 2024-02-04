@@ -2,7 +2,7 @@
 <resources>
     <string name="download">डाउनलोड</string>
     <string name="you_can_download">तुमच्याशी सामायिक केलेली वंशावळ तुम्ही आता डाउनलोड करू शकता.</string>
-    <string name="a_new_tree">नवीन वंशावळ</string>
+    <string name="a_new_tree">नवीन वंशावळ</string>
     <string name="family_gem_example">Family Gem उदाहरण</string>
     <string name="simpsons_tree">सिम्पन्सन्सची वंशावळ</string>
     <string name="tree">वंशावळ</string>
@@ -20,7 +20,7 @@
     <string name="complex_tree_advanced_tools">ही वंशावळ खूपच गुंतागुंतीची दिसते.
 \nअधिक चांगल्या प्रकारे व्यवस्थापित करण्यासाठी, आपण प्रगत साधने दर्शवू इच्छिता\?</string>
     <string name="download_shared_tree">शेअर केलेली वंशावळ डाउनलोड करा</string>
-    <string name="new_tree">नवीन वंशावळ</string>
+    <string name="new_tree">नवीन वंशावळ</string>
     <string name="submitters">प्रस्तुतक</string>
     <string name="version_name">आवृत्ती %s</string>
     <string name="repositories">भांडार</string>

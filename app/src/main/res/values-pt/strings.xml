@@ -98,7 +98,7 @@
     <string name="version_name">Versão %s</string>
     <string name="cant_understand_uri">Não foi possível entender o URI recebido.</string>
     <string name="something_wrong">Algo deu errado.</string>
-    <string name="change_date">Mudar data</string>
+    <string name="change_date">Data da mudança</string>
     <string name="done">Feito</string>
     <string name="cancel">Cancelar</string>
     <string name="delete">Apagar</string>
@@ -318,7 +318,7 @@
     <string name="shared_medias">Mídia compartilhada</string>
     <string name="sent_by">Enviado por %s</string>
     <string name="tree_news_imported">A árvore antiga acima pode receber %d atualizações da árvore importada:</string>
-    <string name="tree_without_news">Árvore com atualizações</string>
+    <string name="tree_without_news">Árvore sem atualizações</string>
     <string name="tree_with_news">Árvore com atualizações</string>
     <string name="sharing_completed">Compartilhamento concluído.</string>
     <string name="app_storage">Armazenamento do aplicativo</string>
@@ -389,4 +389,13 @@
     <string name="error_found">Um erro encontrado.</string>
     <string name="are_same_person">São a mesma pessoa\?</string>
     <string name="next">Seguinte</string>
+    <string name="help">Ajuda</string>
+    <string name="device_date">Data do dispositivo</string>
+    <string name="birthday">Aniversário</string>
+    <string name="years">Anos</string>
+    <string name="max_life_span">Duração máxima de vida</string>
+    <string name="tree_settings">Configurações da árvore</string>
+    <string name="fixed_date">Data fixa</string>
+    <string name="current_date">Data actual</string>
+    <string name="premium_deactivated">Premium desativado.</string>
 </resources>

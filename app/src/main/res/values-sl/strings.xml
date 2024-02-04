@@ -132,7 +132,7 @@
     <string name="auto_save">Samodejno shranjevanje</string>
     <string name="show_advanced_functions">Prikaži več orodij</string>
     <string name="system_language">Sistemski jezik</string>
-    <string name="root">Glavna oseba</string>
+    <string name="root">Koren</string>
     <string name="shares">Souporaba</string>
     <string name="refresh">Posodobiti</string>
     <string name="header">Glava</string>
@@ -174,7 +174,7 @@
     <string name="ignore">Preskočiti</string>
     <string name="confirm_news">Potrditi posodobitve</string>
     <string name="confirm">Potrditi</string>
-    <string name="birthdays">Rojstni dan</string>
+    <string name="birthdays">Rojstni dnevi</string>
     <string name="turns_years_old">%s ima danes %d let.</string>
     <string name="card">Profil</string>
     <string name="export_pdf">Izvoziti datoteko PDF</string>
@@ -341,7 +341,7 @@
     <string name="sharing_completed">Skupna raba je končana.</string>
     <string name="tree_news_imported">Izvirno drevo zgoraj lahko sprejme %d posodobitev iz uvoženega drevesa:</string>
     <string name="sent_by">Poslal %s</string>
-    <string name="characrter_set">Charset</string>
+    <string name="characrter_set">Kodiranje</string>
     <string name="empty_tree">Ustvariti prazno drevo</string>
     <string name="import_backup">Obnoviti varnostno kopijo ZIP</string>
     <string name="tree_imported_ok">Drevo uspešno uvoženo.</string>
@@ -387,4 +387,15 @@
     <string name="gedcom_only">Samo datoteka GEDCOM</string>
     <string name="gedcom_media_zip">GEDCOM z %d mediji v datoteki ZIP</string>
     <string name="error_found">Najdena ena napaka.</string>
+    <string name="are_same_person">Ali gre za isto osebo\?</string>
+    <string name="next">Naslednja</string>
+    <string name="help">Pomoč</string>
+    <string name="device_date">Datum naprave</string>
+    <string name="birthday">Rojstni dan</string>
+    <string name="years">Leta</string>
+    <string name="max_life_span">Najdaljša življenjska doba</string>
+    <string name="tree_settings">Nastavitve drevesa</string>
+    <string name="fixed_date">Določen datum</string>
+    <string name="current_date">Aktualni datum</string>
+    <string name="premium_deactivated">Premium deaktiviran.</string>
 </resources>

@@ -4,7 +4,7 @@
     <string name="sure_delete">Er du sikker\?</string>
     <string name="cancel">Annuller</string>
     <string name="done">Færdig</string>
-    <string name="change_date">Ret dato</string>
+    <string name="change_date">Dato for ændring</string>
     <string name="something_wrong">Noget gik galt.</string>
     <string name="cant_understand_uri">Kunne ikke forstå den modtagne URI.</string>
     <string name="version_name">Version %s</string>
@@ -154,7 +154,7 @@
     <string name="mother">Mor</string>
     <string name="sibling">Søskende</string>
     <string name="spouse">Ægtefælle</string>
-    <string name="husband">Mand</string>
+    <string name="husband">Ægtemand</string>
     <string name="wife">Kone</string>
     <string name="child">Barn</string>
     <string name="son">Søn</string>
@@ -389,4 +389,13 @@
     <string name="error_found">En fejl fundet.</string>
     <string name="next">Følgende</string>
     <string name="are_same_person">Er de den samme person\?</string>
+    <string name="help">Hjælp</string>
+    <string name="device_date">Dato for enhed</string>
+    <string name="birthday">Fødselsdag</string>
+    <string name="years">År</string>
+    <string name="max_life_span">Maksimal levetid</string>
+    <string name="tree_settings">Indstillinger for træ</string>
+    <string name="fixed_date">Fast dato</string>
+    <string name="current_date">Aktuel dato</string>
+    <string name="premium_deactivated">Premium deaktiveret.</string>
 </resources>

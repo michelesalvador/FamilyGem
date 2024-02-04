@@ -4,7 +4,7 @@
     <string name="delete">Usuń</string>
     <string name="cancel">Anuluj</string>
     <string name="done">Gotowe</string>
-    <string name="change_date">Zmień datę</string>
+    <string name="change_date">Data zmiany</string>
     <string name="something_wrong">Coś poszło nie tak.</string>
     <string name="cant_understand_uri">Nie rozumiem otrzymanego adresu URI.</string>
     <string name="version_name">Wersja %s</string>
@@ -17,13 +17,13 @@
     <string name="drawer_open">Otwórz szufladę nawigacji</string>
     <string name="drawer_close">Zamknij szufladę nawigacji</string>
     <string name="revert">Cofnij zmiany</string>
-    <string name="trees">Drzewo</string>
+    <string name="trees">Drzewa</string>
     <string name="diagram">Diagram</string>
     <string name="media">Multimedia</string>
     <string name="sources">Źródła</string>
     <string name="notes">Notes</string>
     <string name="families">Rodziny</string>
-    <string name="repositories">Repozytorium</string>
+    <string name="repositories">Repozytoria</string>
     <string name="submitters">Udostępniający</string>
     <string name="new_tree">Nowe drzewo</string>
     <string name="empty_tree">Uruchom puste drzewo</string>
@@ -83,7 +83,7 @@
     <string name="date">Data</string>
     <string name="submitter">Udostępniający</string>
     <string name="submission">Podległość</string>
-    <string name="form">Format</string>
+    <string name="form">Forma</string>
     <string name="destination">Docelowy</string>
     <string name="time">Czas</string>
     <string name="please_title">Wpisz tytuł.</string>
@@ -153,7 +153,7 @@
     <string name="yes">Tak</string>
     <string name="sex">Płeć</string>
     <string name="event">Wydarzenie</string>
-    <string name="birth">Urodziny</string>
+    <string name="birth">Urodzenie</string>
     <string name="baptism">Chrzest</string>
     <string name="residence">Miejsce zamieszkania</string>
     <string name="occupation">Zawód</string>
@@ -164,7 +164,7 @@
     <string name="new_note">Nowa notatka</string>
     <string name="new_shared_note">Nowa notatka udostępniona</string>
     <string name="link_shared_note">Link notatki udostępnionej</string>
-    <string name="source">Źródła</string>
+    <string name="source">Źródło</string>
     <string name="new_source">Nowe źródło</string>
     <string name="link_source">Link do źródeł</string>
     <string name="primary_media">Główne multimedia</string>
@@ -287,9 +287,9 @@
     <string name="after">Po</string>
     <string name="before">Przed</string>
     <string name="between_and">Pomiędzy… i</string>
-    <string name="from">Z</string>
+    <string name="from">Od</string>
     <string name="to">Do</string>
-    <string name="from_to">Z… do</string>
+    <string name="from_to">Od… do</string>
     <string name="date_phrase">Wyrażenie</string>
     <string name="no_name">Brak nazwy</string>
     <string name="empty_name">Pusta nazwa</string>
@@ -380,7 +380,16 @@
     <string name="get_premium">Uzyskaj Premium</string>
     <string name="gedcom_media_zip">GEDCOM z %d mediami w pliku ZIP</string>
     <string name="gedcom_only">Tylko plik GEDCOM</string>
-    <string name="next">Dalej</string>
+    <string name="next">Następna</string>
     <string name="are_same_person">Czy to ta sama osoba\?</string>
     <string name="error_found">Znaleziono jeden błąd.</string>
+    <string name="help">Pomoc</string>
+    <string name="device_date">Data urządzenia</string>
+    <string name="years">Lata</string>
+    <string name="max_life_span">Maksymalna długość życia</string>
+    <string name="tree_settings">Ustawienia drzewa</string>
+    <string name="fixed_date">Ustalona data</string>
+    <string name="current_date">Aktualna data</string>
+    <string name="birthday">Urodziny</string>
+    <string name="premium_deactivated">Premium dezaktywowany.</string>
 </resources>

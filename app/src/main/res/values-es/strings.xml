@@ -4,7 +4,7 @@
     <string name="delete">Eliminar</string>
     <string name="cancel">Cancelar</string>
     <string name="done">Hecho</string>
-    <string name="change_date">Fecha modificación</string>
+    <string name="change_date">Fecha de modificación</string>
     <string name="something_wrong">Algo no ha funcionado.</string>
     <string name="drawer_open">Abrir el menú</string>
     <string name="drawer_close">Cerrar el menú</string>
@@ -310,7 +310,7 @@
     <string name="married">Casado/a</string>
     <string name="maiden">Soltera</string>
     <string name="number_members">Número de miembros</string>
-    <string name="update_header">Cabecera de la actualización</string>
+    <string name="update_header">Actualizar encabezado</string>
     <string name="tap_add_tree">Pulse para añadir un árbol genealógico.</string>
     <string name="download">Descárgate</string>
     <string name="you_can_download">Ahora puede descargar el árbol compartido con usted.</string>
@@ -354,7 +354,7 @@
     <string name="partner">Pareja</string>
     <string name="age">Edad</string>
     <string name="uncles_cousins">Tíos y primos</string>
-    <string name="partners">Pareja</string>
+    <string name="partners">Parejas</string>
     <string name="family_as">Familia (como %s)</string>
     <string name="living_apart_together">Viviente aparte junto</string>
     <string name="system_language">Lenguaje del sistema</string>
@@ -383,4 +383,13 @@
     <string name="next">Siguiente</string>
     <string name="are_same_person">¿Son la misma persona\?</string>
     <string name="error_found">Un error encontrado.</string>
+    <string name="help">Ayuda</string>
+    <string name="device_date">Fecha del dispositivo</string>
+    <string name="years">Años</string>
+    <string name="max_life_span">Vida útil máxima</string>
+    <string name="tree_settings">Ajustes del árbol</string>
+    <string name="fixed_date">Fecha establecida</string>
+    <string name="current_date">Fecha actual</string>
+    <string name="birthday">Cumpleaños</string>
+    <string name="premium_deactivated">Premium desactivado.</string>
 </resources>

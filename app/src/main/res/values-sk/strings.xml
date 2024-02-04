@@ -2,7 +2,7 @@
 <resources>
     <string name="want_crop_image">Orezať tento obrázok\?</string>
     <string name="saved">Uložené.</string>
-    <string name="dead">Úmrtie</string>
+    <string name="dead">Smrť</string>
     <string name="publication_facts">Publikácia</string>
     <string name="make_main_submitter">Chcete, aby tento zadávateľ bol hlavným zadávateľom stromu\?</string>
     <string name="make_root">Označiť ako hlavnú osobu</string>
@@ -145,7 +145,7 @@
     <string name="new_shared_note">Nová zdieľaná poznámka</string>
     <string name="new_note">Nová poznámka</string>
     <string name="note">Poznámka</string>
-    <string name="other">Iné</string>
+    <string name="other">Ďalšie</string>
     <string name="burial">Pochovanie</string>
     <string name="occupation">Povolanie</string>
     <string name="residence">Bydlisko</string>
@@ -283,7 +283,7 @@
     <string name="create_header">Vytvoriť hlavičku</string>
     <string name="header">Záhlavie</string>
     <string name="refresh">Aktualizovať</string>
-    <string name="root">Hlavná osoba</string>
+    <string name="root">Koreň</string>
     <string name="item_exists_but_file">Položka stromu je v zozname, ale súvisiaci súbor chýba:</string>
     <string name="about">O aplikácii</string>
     <string name="load_tree_startup">Pri spustení načítať naposledy otvorený strom</string>
@@ -388,4 +388,14 @@
     <string name="gedcom_media_zip">GEDCOM s %d médiami v súbore ZIP</string>
     <string name="are_same_person">Sú to tie isté osoby\?</string>
     <string name="error_found">Nájdená jedna chyba.</string>
+    <string name="next">Ďalšia</string>
+    <string name="help">Pomoc</string>
+    <string name="device_date">Dátum zariadenia</string>
+    <string name="years">Roky</string>
+    <string name="max_life_span">Maximálna dĺžka života</string>
+    <string name="tree_settings">Nastavenia stromu</string>
+    <string name="fixed_date">Stanovený dátum</string>
+    <string name="current_date">Aktuálny dátum</string>
+    <string name="birthday">Narodeniny</string>
+    <string name="premium_deactivated">Premium deaktivovaný.</string>
 </resources>

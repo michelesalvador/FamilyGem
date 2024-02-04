@@ -158,7 +158,7 @@
     <string name="header">Hlavička</string>
     <string name="refresh">Aktualizovat</string>
     <string name="shares">Sdílení</string>
-    <string name="root">Hlavní osoba</string>
+    <string name="root">Kořen</string>
     <string name="item_exists_but_file">Položka stromu je v seznamu, ale související soubor chybí:</string>
     <string name="about">O aplikaci</string>
     <string name="show_advanced_functions">Zobrazit další nástroje</string>
@@ -216,7 +216,7 @@
     <string name="new_shared_note">Nová sdílená poznámka</string>
     <string name="new_note">Nová poznámka</string>
     <string name="note">Poznámka</string>
-    <string name="other">Jiné</string>
+    <string name="other">Další</string>
     <string name="burial">Pohřbení</string>
     <string name="death">Úmrtí</string>
     <string name="occupation">Povolání</string>
@@ -388,4 +388,14 @@
     <string name="gedcom_media_zip">GEDCOM s %d médii v souboru ZIP</string>
     <string name="are_same_person">Jsou to stejné osoby\?</string>
     <string name="error_found">Nalezena jedna chyba.</string>
+    <string name="next">Další</string>
+    <string name="help">Pomoc</string>
+    <string name="device_date">Datum zařízení</string>
+    <string name="years">Roky</string>
+    <string name="max_life_span">Maximální délka života</string>
+    <string name="tree_settings">Nastavení stromu</string>
+    <string name="fixed_date">Stanovené datum</string>
+    <string name="current_date">Aktuální datum</string>
+    <string name="birthday">Narozeniny</string>
+    <string name="premium_deactivated">Premium deaktivován.</string>
 </resources>

@@ -364,4 +364,10 @@
     <string name="birth_date">Tanggal lahir</string>
     <string name="not_granted">%s tidak diberikan.</string>
     <string name="system_language">Bahasa sistem</string>
+    <string name="select_tree">Pilih pohon untuk digabungkan:</string>
+    <string name="error_found">Satu error ditemukan.</string>
+    <string name="gedcom_media_zip">GEDCOM dengan media %d dalam file ZIP</string>
+    <string name="gedcom_only">Hanya file GEDCOM</string>
+    <string name="merge_tree">Gabungkan pohon</string>
+    <string name="merge">Gabungkan</string>
 </resources>

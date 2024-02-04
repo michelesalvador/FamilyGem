@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sharing_completed">Поделение завершено.</string>
+    <string name="sharing_completed">Отправка завершена.</string>
     <string name="sharing_tree">Совместное использование семейного дерева</string>
     <string name="shares">Совместное использование</string>
-    <string name="from_to">От… до</string>
-    <string name="to">До</string>
+    <string name="from_to">С… к</string>
+    <string name="to">К</string>
     <string name="shared_notes">Общие заметки</string>
-    <string name="blob">Блоб</string>
+    <string name="blob">Бинарный объект</string>
     <string name="scrapbook">Записки</string>
     <string name="repository_note">Репозиторий-примечание</string>
     <string name="inexistent_repository_citation">Отсутствующая ссылка на репозиторий</string>
@@ -46,17 +46,17 @@
     <string name="empty_media">Пустые медиа</string>
     <string name="not_granted">%s не предоставлено.</string>
     <string name="no">Нет</string>
-    <string name="want_crop_image">Вы хотите обрезать это изображение\?</string>
+    <string name="want_crop_image">Вы хотите обрезать изображение\?</string>
     <string name="days">дни</string>
     <string name="months">месяцы</string>
     <string name="empty_name">Пустое имя</string>
     <string name="no_name">Без имени</string>
     <string name="date_phrase">Словами</string>
-    <string name="from">Из</string>
+    <string name="from">С</string>
     <string name="between_and">Между… и</string>
     <string name="before">До</string>
     <string name="after">После</string>
-    <string name="estimated">Примерна</string>
+    <string name="estimated">Примерно</string>
     <string name="calculated">Рассчитанная</string>
     <string name="exact">Точно</string>
     <string name="approximate">Приблизительно</string>
@@ -73,15 +73,15 @@
     <string name="february">Февраль</string>
     <string name="january">Январь</string>
     <string name="double_date">Двойная</string>
-    <string name="which_family_add_child">В какую семью следует добавить ребенка\?</string>
-    <string name="which_family_add_spouse">В какую семью следует добавить супруга\?</string>
-    <string name="which_family_add_sibling">В какую семью следует добавить брата или сестру\?</string>
-    <string name="which_family_add_parent">В какую семью следует добавить родителя\?</string>
+    <string name="which_family_add_child">В какую семью добавить ребенка\?</string>
+    <string name="which_family_add_spouse">В какую семью добавить супруга\?</string>
+    <string name="which_family_add_sibling">В какую семью добавить брата или сестру\?</string>
+    <string name="which_family_add_parent">В какую семью добавить родителя\?</string>
     <string name="new_family">Новая семья</string>
     <string name="saved">Сохранено.</string>
     <string name="death_place">Место смерти</string>
     <string name="death_date">Дата смерти</string>
-    <string name="dead">Мертв</string>
+    <string name="dead">Умер</string>
     <string name="birth_place">Место рождения</string>
     <string name="birth_date">Дата рождения</string>
     <string name="unknown">Неизвестный</string>
@@ -96,7 +96,7 @@
     <string name="divorce">Развод</string>
     <string name="marriage">Брак</string>
     <string name="family">Семья</string>
-    <string name="num_children">%d детей</string>
+    <string name="num_children">детей: %d</string>
     <string name="number_members">Количество участников</string>
     <string name="country">Страна</string>
     <string name="state">Штат/область</string>
@@ -137,7 +137,7 @@
     <string name="prefix">Префикс</string>
     <string name="type">Тип</string>
     <string name="value">Значение</string>
-    <string name="make_main_submitter">Хотите ли вы, чтобы этот податель был главным подателем дерева\?</string>
+    <string name="make_main_submitter">Установить человека главным подателем дерева\?</string>
     <string name="copy">Копировать текст</string>
     <string name="crop">Обрезать</string>
     <string name="choose_file">Выбрать файл</string>
@@ -164,7 +164,7 @@
     <string name="source">Источник</string>
     <string name="new_note">Новая заметка</string>
     <string name="note">Заметка</string>
-    <string name="other">Другое</string>
+    <string name="other">Другие</string>
     <string name="burial">Погребение</string>
     <string name="death">Смерть</string>
     <string name="occupation">Профессия</string>
@@ -183,7 +183,7 @@
     <string name="download_shared_tree">Скачать общее дерево</string>
     <string name="submitters">Податели</string>
     <string name="existing_family">Семья уже существует</string>
-    <string name="new_family_of">Новая семья особы %s</string>
+    <string name="new_family_of">Новая семья для %s</string>
     <string name="person_deleted">Человек удален.</string>
     <string name="really_delete_person">Хотите удалить этого человека\?</string>
     <string name="number_relatives">Количество родственников</string>
@@ -268,7 +268,7 @@
     <string name="correct">Исправить</string>
     <string name="errors_found">Найдено ошибок: %d.</string>
     <string name="all_ok">Все в порядке.</string>
-    <string name="really_delete_tree">Действительно хотите удалить это дерево\?</string>
+    <string name="really_delete_tree">Вы хотите удалить это дерево\?</string>
     <string name="no_results">Нет результатов.</string>
     <string name="export_gedcom">Экспорт файла GEDCOM</string>
     <string name="compare">Сравнить</string>
@@ -282,7 +282,7 @@
     <string name="no_useful_data">Неможно получить никаких полезных данных.</string>
     <string name="generations">Поколения</string>
     <string name="generation">Поколение</string>
-    <string name="persons">Особы</string>
+    <string name="persons">Персоны</string>
     <string name="tap_add_tree">Нажмите, чтобы добавить семейное дерево.</string>
     <string name="download">Скачать</string>
     <string name="you_can_download">Теперь вы можете скачать дерево, которым с вами поделились.</string>
@@ -315,7 +315,7 @@
     <string name="sources_number">Количество источников</string>
     <string name="citations">Цитаты</string>
     <string name="version_name">Версия %s</string>
-    <string name="something_wrong">Что-то пошло не так.</string>
+    <string name="something_wrong">Неизвестная ошибка.</string>
     <string name="change_date">Дата изменения</string>
     <string name="done">Готово</string>
     <string name="cancel">Отменить</string>
@@ -334,12 +334,12 @@
     <string name="birthday_notified_midday">О дне рождения каждого человека сообщат в полдень.</string>
     <string name="birthdays">Дни рождения</string>
     <string name="allow_developer_access">Разрешить разработчику программы доступ к общему дереву</string>
-    <string name="remind_later">Напомни мне позже</string>
+    <string name="remind_later">Напомните мне позже</string>
     <string name="aware_upload_server">Имейте в виду, что вы собираетесь загрузить все дерево на сервер онлайн.</string>
     <string name="share_sensitive">Совместное использование конфиденциальных данных</string>
     <string name="not_memory_tree">Недостаточно памяти для этого дерева.</string>
-    <string name="and">и</string>
-    <string name="between">между</string>
+    <string name="and">И</string>
+    <string name="between">Между</string>
     <string name="separation">Разделение</string>
     <string name="common_law_marriage">По общему праву</string>
     <string name="religious_marriage">Церковный</string>
@@ -388,4 +388,14 @@
     <string name="gedcom_media_zip">GEDCOM с %d медиа в ZIP-файле</string>
     <string name="error_found">Найдена одна ошибка.</string>
     <string name="next">Следующий</string>
+    <string name="are_same_person">Это один и тот же человек\?</string>
+    <string name="help">Помощь</string>
+    <string name="device_date">Дата устройства</string>
+    <string name="years">Годы</string>
+    <string name="max_life_span">Максимальная продолжительность жизни</string>
+    <string name="tree_settings">Настройки дерева</string>
+    <string name="fixed_date">Установленная дата</string>
+    <string name="current_date">Текущая дата</string>
+    <string name="birthday">День рождения</string>
+    <string name="premium_deactivated">Premium деактивирован.</string>
 </resources>
