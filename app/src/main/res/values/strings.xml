@@ -82,7 +82,6 @@
     <string name="item_exists_but_file">The tree entry is in the index, but for some reason the related file is missing:</string>
     <string name="root">Root</string>
     <string name="shares">Shares</string>
-    <string name="refresh">Refresh</string>
     <string name="header">Header</string>
     <string name="create_header">Create header</string>
     <string name="update_header">Update header</string>

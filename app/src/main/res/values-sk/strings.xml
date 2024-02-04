@@ -282,7 +282,6 @@
     <string name="file">Súbor</string>
     <string name="create_header">Vytvoriť hlavičku</string>
     <string name="header">Záhlavie</string>
-    <string name="refresh">Aktualizovať</string>
     <string name="root">Koreň</string>
     <string name="item_exists_but_file">Položka stromu je v zozname, ale súvisiaci súbor chýba:</string>
     <string name="about">O aplikácii</string>

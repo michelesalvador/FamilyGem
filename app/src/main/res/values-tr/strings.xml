@@ -76,7 +76,6 @@
     <string name="open">Aç</string>
     <string name="export_gedcom">GEDCOM olarak ver</string>
     <string name="root">Kök</string>
-    <string name="refresh">Yenile</string>
     <string name="item_exists_but_file">Soyağacı girişi içindekiler kısmında görünüyor, ancak ilgili dosya bir şekilde kaybolmuş:</string>
     <string name="help">Yardım</string>
     <string name="error_found">Bir hata bulundu.</string>

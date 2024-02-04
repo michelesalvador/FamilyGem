@@ -60,7 +60,6 @@
     <string name="item_exists_but_file">家谱的条目在索引中，但由于某种原因相关的文件不见了:</string>
     <string name="root">Root</string>
     <string name="shares">共享的</string>
-    <string name="refresh">刷新</string>
     <string name="header">文件头</string>
     <string name="create_header">建立文件头</string>
     <string name="update_header">更新文件头</string>

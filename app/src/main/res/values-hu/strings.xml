@@ -61,7 +61,6 @@
     <string name="auto_save">Automatikus mentés</string>
     <string name="load_tree_startup">Utoljára megnyitott fa betöltése indításkor</string>
     <string name="about">Névjegy</string>
-    <string name="refresh">Frissítés</string>
     <string name="header">Fejléc</string>
     <string name="update_header">Fejléc frissítése</string>
     <string name="file">Fájl</string>

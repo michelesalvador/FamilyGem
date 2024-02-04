@@ -121,7 +121,6 @@
     <string name="file">Файл</string>
     <string name="create_header">Створити заголовок</string>
     <string name="header">Заголовок</string>
-    <string name="refresh">Оновити</string>
     <string name="media_folders">Медіапапки</string>
     <string name="root">Корінь</string>
     <string name="item_exists_but_file">Запис дерева знаходиться в індексі, але з якоїсь причини пов\'язаний файл відсутній:</string>

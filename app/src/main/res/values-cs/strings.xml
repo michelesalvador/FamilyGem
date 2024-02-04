@@ -156,7 +156,6 @@
     <string name="update_header">Aktualizovat hlavičku</string>
     <string name="create_header">Vytvořit hlavičku</string>
     <string name="header">Hlavička</string>
-    <string name="refresh">Aktualizovat</string>
     <string name="shares">Sdílení</string>
     <string name="root">Kořen</string>
     <string name="item_exists_but_file">Položka stromu je v seznamu, ale související soubor chybí:</string>

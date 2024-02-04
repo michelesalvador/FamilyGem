@@ -86,7 +86,6 @@
     <string name="item_exists_but_file">Esiste la voce nell\'indice degli alberi, ma per qualche ragione è scomparso il file corrispondente:</string>
     <string name="root">Radice</string>
     <string name="shares">Condivisioni</string>
-    <string name="refresh">Aggiorna</string>
     <string name="header">Intestazione</string>
     <string name="create_header">Crea l\'intestazione</string>
     <string name="update_header">Aggiorna l\'intestazione</string>

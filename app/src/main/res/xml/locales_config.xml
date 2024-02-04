@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
-    <locale android:name="ar" />
+    <locale
+        android:name="ar"
+        percent="93" />
     <locale
         android:name="ckb"
         percent="17" />
@@ -16,12 +18,15 @@
     <locale android:name="hu" />
     <locale
         android:name="in"
-        percent="93" />
+        percent="92" />
     <locale android:name="it" />
     <locale android:name="iw" />
     <locale
         android:name="kn"
         percent="17" />
+    <locale
+        android:name="lt"
+        percent="72" />
     <locale
         android:name="mr"
         percent="12" />
@@ -38,7 +43,9 @@
         percent="5" />
     <locale
         android:name="tr"
-        percent="20" />
+        percent="29" />
     <locale android:name="uk" />
-    <locale android:name="zh" />
+    <locale
+        android:name="zh"
+        percent="92" />
 </locale-config>

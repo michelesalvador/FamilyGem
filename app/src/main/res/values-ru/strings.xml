@@ -256,7 +256,6 @@
     <string name="update_header">Обновить заголовок</string>
     <string name="create_header">Создать заголовок</string>
     <string name="header">Заголовок</string>
-    <string name="refresh">Обновить</string>
     <string name="media_folders">Медиа папки</string>
     <string name="root">Корень</string>
     <string name="item_exists_but_file">Элемент дерева есть в индексе, но по какой-то причине связанный файл отсутствует:</string>

@@ -165,7 +165,6 @@
     <string name="file">Bestand</string>
     <string name="create_header">Maak een koptekst</string>
     <string name="header">Koptekst</string>
-    <string name="refresh">Vernieuwen</string>
     <string name="media_folders">Mediamappen</string>
     <string name="root">Root</string>
     <string name="item_exists_but_file">De boomvermelding staat in de index, maar om een of andere reden ontbreekt het gerelateerde bestand:</string>

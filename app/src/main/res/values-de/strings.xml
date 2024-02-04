@@ -257,7 +257,6 @@
     <string name="version">Version</string>
     <string name="characrter_set">Zeichensatz</string>
     <string name="file">Datei</string>
-    <string name="refresh">Neu laden</string>
     <string name="shares">Geteiltes</string>
     <string name="root">Wurzel</string>
     <string name="item_exists_but_file">Der Stammbaum Eintrag ist vorhanden, aber die zugehörige Datei fehlt:</string>

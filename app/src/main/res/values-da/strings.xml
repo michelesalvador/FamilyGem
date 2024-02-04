@@ -76,7 +76,6 @@
     <string name="date">Dato</string>
     <string name="time">Tid</string>
     <string name="shares">Deling</string>
-    <string name="refresh">Opdater</string>
     <string name="header">Overskrift</string>
     <string name="create_header">Opret header</string>
     <string name="update_header">Opdater header</string>

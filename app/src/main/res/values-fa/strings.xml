@@ -149,7 +149,6 @@
     <string name="about">درباره</string>
     <string name="item_exists_but_file">اطلاعات درخت در فهرست موجود است، اما به دلایلی فایل مرتبط وجود ندارد:</string>
     <string name="shares">اشتراک‌گذاری‌ها</string>
-    <string name="refresh">رفرش</string>
     <string name="header">سربرگ</string>
     <string name="create_header">ایجاد سربرگ</string>
     <string name="update_header">به‌روزرسانی سربرگ</string>
