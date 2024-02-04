@@ -129,20 +129,20 @@
     <string name="generations">Generasjoner</string>
     <string name="generation">Generasjon</string>
     <string name="persons">Personer</string>
-    <string name="simpsons_tree">Simpsons-familietreet</string>
+    <string name="simpsons_tree">Simpsons-slektstreet</string>
     <string name="tree">Tre</string>
     <string name="invalid_gedcom">Ugyldig GEDCOM.</string>
     <string name="tree_created">Nytt tre opprettet.</string>
     <string name="create">Opprett</string>
     <string name="name_of_tree">Treets navn</string>
     <string name="import_gedcom">Importer en GEDCOM-fil</string>
-    <string name="download_example">Last ned et eksempe</string>
+    <string name="download_example">Last ned et eksempel</string>
     <string name="empty_tree">Start et tomt tre</string>
     <string name="new_tree">Nytt tre</string>
     <string name="submitters">Innsendere</string>
     <string name="families">Familier</string>
     <string name="notes">Notater</string>
-    <string name="sources">Kider</string>
+    <string name="sources">Kilder</string>
     <string name="media">Media</string>
     <string name="trees">Trær</string>
     <string name="revert">Angre endringer</string>
@@ -155,11 +155,11 @@
     <string name="citations">Siteringer</string>
     <string name="version_name">Versjon %s</string>
     <string name="something_wrong">Noe gikk galt.</string>
-    <string name="change_date">Endre dato</string>
+    <string name="change_date">Dato for endring</string>
     <string name="done">Ferdig</string>
     <string name="cancel">Avbryt</string>
     <string name="delete">Slett</string>
-    <string name="tagline">Opprett ditt familietre</string>
+    <string name="tagline">Opprett ditt slektstre</string>
     <string name="import_backup">Gjenopprett en ZIP-sikkerhetskopi</string>
     <string name="simple_notes">Enkle merknader</string>
     <string name="simple_note">Enkel merknad</string>
@@ -188,8 +188,8 @@
 \nTrykk for å åpne profilen.</string>
     <string name="sibling">Søsken</string>
     <string name="sharing_completed">Andel fullført.</string>
-    <string name="click_this_link">Klikk denne lenken for å se mitt familietre: %s</string>
-    <string name="sharing_tree">Deling av et familietre</string>
+    <string name="click_this_link">Klikk denne lenken for å se mitt slektstre: %s</string>
+    <string name="sharing_tree">Deling av et slektstre</string>
     <string name="ideally_recipient">Helst mottageren av delingen.</string>
     <string name="item_exists_but_file">Dette slektstreet er i indeksen, men av en eller annen grunn mangler de tilhørende filene:</string>
     <string name="make_backup">Lagre ZIP-sikkerhetskopi</string>
@@ -236,7 +236,7 @@
     <string name="correctly_uploaded">Treet ble lastet opp.</string>
     <string name="refresh">Gjenoppfrisk</string>
     <string name="tree_imported_ok">Slektstre importert.</string>
-    <string name="modify_later">Senere kan du redigere det.</string>
+    <string name="modify_later">Etterpå kan du redigere det.</string>
     <string name="accepted_news">Du godtok %d oppdateringer:
 \n\t%d tillegg
 \n\t%d erstatninger
@@ -278,7 +278,7 @@
     <string name="scrapbook">Utklippsbok</string>
     <string name="primary">Primær</string>
     <string name="shared_media">Delte medier</string>
-    <string name="repository">Depot</string>
+    <string name="repository">Arkiv</string>
     <string name="repository_note">Notis-kodelager</string>
     <string name="inexistent_repository_citation">Mangler depotet sitat</string>
     <string name="repository_citation">Depotet sitat</string>
@@ -314,13 +314,13 @@
     <string name="update_header">Oppdatering header</string>
     <string name="create_header">Lage header</string>
     <string name="header">Topptekst</string>
-    <string name="tap_add_tree">Trykk for å legge til en familie tre.</string>
+    <string name="tap_add_tree">Trykk for å legge til et slektstre.</string>
     <string name="download">Laste</string>
     <string name="you_can_download">Du kan nå laste ned treet felles med deg.</string>
     <string name="a_new_tree">Family Gem example</string>
     <string name="family_gem_example">Familien Gem eksempel</string>
-    <string name="download_shared_tree">Last ned den delte treet</string>
-    <string name="repositories">Depot</string>
+    <string name="download_shared_tree">Last ned det delte treet</string>
+    <string name="repositories">Arkiver</string>
     <string name="app_storage">Programlager</string>
     <string name="sure_delete">Er du sikker\?</string>
     <string name="pdf_exported_ok">PDF eksportert.</string>
@@ -332,9 +332,9 @@
     <string name="female_partner">Partner</string>
     <string name="ex_spouse">Eks-ektemake</string>
     <string name="religious_marriage">Religiøst</string>
-    <string name="common_law_marriage">Samvittighetsekteskap</string>
-    <string name="living_apart_together">Fraboere</string>
-    <string name="civil_marriage">Registrert partnerskap</string>
+    <string name="common_law_marriage">Samboerskap</string>
+    <string name="living_apart_together">Separert hjemme</string>
+    <string name="civil_marriage">Borgerlig ekteskap</string>
     <string name="separation">Separert</string>
     <string name="relationship">Relasjon</string>
     <string name="and">Og</string>
@@ -374,4 +374,28 @@
     <string name="gedcom_media_zip">GEDCOM med %d medier i en ZIP fil</string>
     <string name="gedcom_only">Kun GEDCOM-fil</string>
     <string name="error_found">Én feil funnet.</string>
+    <string name="next">Neste</string>
+    <string name="more_premium">Mer om Premium</string>
+    <string name="premium_activated">Premium aktivert.</string>
+    <string name="are_same_person">Er vedkommende samme person\?</string>
+    <string name="get_premium">Skaff Premium</string>
+    <string name="unlock_function">Denne funksjonen kan låses opp med Family Gem Premium.</string>
+    <string name="lifetime">Livstid</string>
+    <string name="merge">Slå sammen</string>
+    <string name="select_tree">Velg treet som skal slås sammen:</string>
+    <string name="choose_output">Velg mål:</string>
+    <string name="merge_tree">Slå sammen trærne</string>
+    <string name="merge_into">Flett %2$s inn i %1$s</string>
+    <string name="generate_new">Generer et nytt tre fra de to</string>
+    <string name="merge_complete">Fletting fullført.</string>
+    <string name="update_playstore">Oppdater appen Play Butikk.</string>
+    <string name="help">Hjelp</string>
+    <string name="device_date">Dato for enhet</string>
+    <string name="birthday">Geburtsdag</string>
+    <string name="years">År</string>
+    <string name="max_life_span">Maksimal levetid</string>
+    <string name="tree_settings">Treinnstillinger</string>
+    <string name="fixed_date">Fast dato</string>
+    <string name="current_date">Aktuell dato</string>
+    <string name="premium_deactivated">Premium deaktivert.</string>
 </resources>

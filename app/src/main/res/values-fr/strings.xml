@@ -273,8 +273,8 @@
     <string name="type">Type</string>
     <string name="choose_file">Choisir le fichier</string>
     <string name="choose_source">Choisir la source</string>
-    <string name="move_after">Après</string>
-    <string name="move_before">Avant</string>
+    <string name="move_after">Déplacer après</string>
+    <string name="move_before">Déplacer avant</string>
     <string name="move_down">Descendre</string>
     <string name="move_up">Monter</string>
     <string name="primary_media">Média principal</string>
@@ -389,4 +389,13 @@
     <string name="error_found">Une erreur trouvée.</string>
     <string name="next">Suivant</string>
     <string name="are_same_person">Sont-ils la même personne \?</string>
+    <string name="help">Aide</string>
+    <string name="device_date">Date du dispositif</string>
+    <string name="birthday">Anniversaire</string>
+    <string name="years">Années</string>
+    <string name="max_life_span">Durée maximale de vie</string>
+    <string name="tree_settings">Paramètres de l\'arbre</string>
+    <string name="fixed_date">Date fixe</string>
+    <string name="current_date">Date actuelle</string>
+    <string name="premium_deactivated">Premium désactivé.</string>
 </resources>

@@ -17,7 +17,7 @@
     <string name="slideshow">Dijaprojekcija</string>
     <string name="num_children">%d djece</string>
     <string name="husband">Muž</string>
-    <string name="characrter_set">Kodna stranica</string>
+    <string name="characrter_set">Kodiranje</string>
     <string name="media_folders">Mape medija</string>
     <string name="done">Gotovo</string>
     <string name="occupation">Zanimanje</string>
@@ -119,11 +119,11 @@
     <string name="share_with">Dijeli s</string>
     <string name="unknown">Nepoznato</string>
     <string name="email">E-mail</string>
-    <string name="estimated">Približno</string>
+    <string name="estimated">Procijenjeni</string>
     <string name="call_number">Pozivni broj</string>
     <string name="repository">Spremište</string>
     <string name="diagram_settings">Postavke dijagrama</string>
-    <string name="other">Ostalo</string>
+    <string name="other">Ostali</string>
     <string name="invalid_gedcom">Neispravan GEDCOM.</string>
     <string name="which_family_add_sibling">Kojoj obitelji dodati brata/sestru\?</string>
     <string name="usually_your_name">Tvoje ime i prezime.</string>
@@ -205,10 +205,10 @@
     <string name="complex_tree_advanced_tools">Ovo stablo izgleda prilično složeno.
 \nŽeliš li vidjeti napredne alate koji olakšavaju upravljanje stablom\?</string>
     <string name="cant_understand_uri">Nerazumljena primljena URI adresa.</string>
-    <string name="tree_info">Podaci</string>
+    <string name="tree_info">Informacije</string>
     <string name="new_person">Stvori novu osobu.</string>
     <string name="name_of_tree">Naslov stabla</string>
-    <string name="change_date">Promijeni datum</string>
+    <string name="change_date">Datum promjene</string>
     <string name="download_example">Preuzmi primjer</string>
     <string name="before">Prije</string>
     <string name="no">Ne</string>
@@ -277,7 +277,7 @@
 \n\tBrisanja: %d</string>
     <string name="version">Verzija</string>
     <string name="choose_source">Odaberi izvor</string>
-    <string name="root">Glavna osoba</string>
+    <string name="root">Korijen</string>
     <string name="abbreviation">Kratki naslov</string>
     <string name="add">Dodaj</string>
     <string name="card">Profil</string>
@@ -307,7 +307,7 @@
     <string name="accept_all">Prihvati sve</string>
     <string name="this_is_root">%s je glavna osoba stabla.</string>
     <string name="shared_note">Dijeljena napomena</string>
-    <string name="primary">Primarno</string>
+    <string name="primary">Primarna</string>
     <string name="value">Vrijednost</string>
     <string name="certainty">Pouzdanost</string>
     <string name="simple_notes">Jednostavne napomene</string>
@@ -360,7 +360,7 @@
     <string name="female_partner">Partnerica</string>
     <string name="male_partner">Partner</string>
     <string name="partner">Partner</string>
-    <string name="age">Dob</string>
+    <string name="age">Vijek</string>
     <string name="uncles_cousins">Stričevi i rođaci</string>
     <string name="partners">Partneri</string>
     <string name="system_language">Jezik sustava</string>
@@ -387,6 +387,15 @@
     <string name="gedcom_only">Samo GEDCOM datoteka</string>
     <string name="gedcom_media_zip">GEDCOM s %d medijima u ZIP datoteci</string>
     <string name="are_same_person">Jesu li te osobe iste\?</string>
-    <string name="next">Dalje</string>
+    <string name="next">Sljedeća</string>
     <string name="error_found">Pronađena jedna greška.</string>
+    <string name="help">Pomoć</string>
+    <string name="device_date">Datum uređaja</string>
+    <string name="birthday">Rođendan</string>
+    <string name="years">Godine</string>
+    <string name="max_life_span">Maksimalni životni vijek</string>
+    <string name="tree_settings">Postavke stabla</string>
+    <string name="fixed_date">Fiksni datum</string>
+    <string name="current_date">Trenutni datum</string>
+    <string name="premium_deactivated">Premium deaktiviran.</string>
 </resources>

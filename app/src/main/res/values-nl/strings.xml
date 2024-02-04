@@ -25,7 +25,7 @@
     <string name="surname_prefix">Achternaam voorvoegsel</string>
     <string name="nickname">Bijnaam</string>
     <string name="given">Voornaam</string>
-    <string name="prefix">Titel</string>
+    <string name="prefix">Prefix</string>
     <string name="type">Type</string>
     <string name="value">Waarde</string>
     <string name="make_main_submitter">Wilt u dat deze indiener de hoofdpersoon van de boom is\?</string>
@@ -309,7 +309,7 @@
     <string name="maiden">Ongetrouwd</string>
     <string name="married">Getrouwd</string>
     <string name="change_date">Datum wijziging</string>
-    <string name="done">Gedaan</string>
+    <string name="done">Klaar</string>
     <string name="cancel">Annuleren</string>
     <string name="delete">Verwijderen</string>
     <string name="tagline">Maak uw eigen stamboom</string>
@@ -389,4 +389,13 @@
     <string name="error_found">Eén fout gevonden.</string>
     <string name="next">Volgende</string>
     <string name="are_same_person">Zijn ze dezelfde persoon\?</string>
+    <string name="help">Hulp</string>
+    <string name="device_date">Apparaatdatum</string>
+    <string name="birthday">Verjaardag</string>
+    <string name="years">Jaren</string>
+    <string name="max_life_span">Maximale levensduur</string>
+    <string name="tree_settings">Boominstellingen</string>
+    <string name="fixed_date">Vaste datum</string>
+    <string name="current_date">Actuele datum</string>
+    <string name="premium_deactivated">Premium gedeactiveerd.</string>
 </resources>

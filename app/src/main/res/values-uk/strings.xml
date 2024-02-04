@@ -23,7 +23,7 @@
     <string name="new_shared_note">Нова спільна примітка</string>
     <string name="new_note">Нова примітка</string>
     <string name="note">Примітка</string>
-    <string name="other">Інше</string>
+    <string name="other">Інші</string>
     <string name="burial">Поховання</string>
     <string name="death">Смерть</string>
     <string name="occupation">Професія</string>
@@ -123,7 +123,7 @@
     <string name="header">Заголовок</string>
     <string name="refresh">Оновити</string>
     <string name="media_folders">Медіапапки</string>
-    <string name="root">Головна особа</string>
+    <string name="root">Корінь</string>
     <string name="item_exists_but_file">Запис дерева знаходиться в індексі, але з якоїсь причини пов\'язаний файл відсутній:</string>
     <string name="about">Про</string>
     <string name="show_advanced_functions">Показати розширені інструменти</string>
@@ -331,8 +331,8 @@
     <string name="to">До</string>
     <string name="family_as">Сім\'я (як %s)</string>
     <string name="turns_years_old">%s сьогодні виповнюється %d років.</string>
-    <string name="birthday_notified_midday">День народження кожної особи буде повідомлено опівдні.</string>
-    <string name="birthdays">День народження</string>
+    <string name="birthday_notified_midday">Уродини кожної особи буде повідомлено опівдні.</string>
+    <string name="birthdays">Уродини</string>
     <string name="allow_developer_access">Дозволити розробнику програми отримати доступ до спільного дерева</string>
     <string name="remind_later">Нагадати пізніше</string>
     <string name="aware_upload_server">Майте на увазі, що ви збираєтесь завантажити все дерево на сервер в Інтернеті.</string>
@@ -387,4 +387,15 @@
     <string name="gedcom_only">Тільки файл GEDCOM</string>
     <string name="gedcom_media_zip">GEDCOM з %d медіа у ZIP-файлі</string>
     <string name="error_found">Знайдена одна помилка.</string>
+    <string name="next">Наступна</string>
+    <string name="are_same_person">Це одна і та ж особа\?</string>
+    <string name="help">Допомога</string>
+    <string name="device_date">Дата пристрою</string>
+    <string name="years">Роки</string>
+    <string name="max_life_span">Максимальна тривалість життя</string>
+    <string name="tree_settings">Налаштування дерева</string>
+    <string name="fixed_date">Фіксована дата</string>
+    <string name="current_date">Актуальна дата</string>
+    <string name="birthday">Уродини</string>
+    <string name="premium_deactivated">Premium деактивований.</string>
 </resources>

@@ -50,8 +50,8 @@
     <string name="empty_name">Leerer Name</string>
     <string name="no_name">Kein Name</string>
     <string name="date_phrase">Phrase</string>
-    <string name="from_to">Von… zu</string>
-    <string name="to">Zu</string>
+    <string name="from_to">Von… bis</string>
+    <string name="to">Bis</string>
     <string name="from">Von</string>
     <string name="between_and">Zwischen… und</string>
     <string name="before">Vor</string>
@@ -154,7 +154,7 @@
     <string name="daughter">Tochter</string>
     <string name="half_sister">Halbschwester</string>
     <string name="half_brother">Halbbruder</string>
-    <string name="half_sibling">Halbschwester</string>
+    <string name="half_sibling">Halbgeschwister</string>
     <string name="brother">Bruder</string>
     <string name="sister">Schwester</string>
     <string name="husband">Ehemann</string>
@@ -173,7 +173,7 @@
     <string name="move_up">Nach oben verschieben</string>
     <string name="link_source">Verbundene Quelle</string>
     <string name="new_source">Neue Quelle</string>
-    <string name="source">Quellen</string>
+    <string name="source">Quelle</string>
     <string name="other">Anderes</string>
     <string name="burial">Beerdigung</string>
     <string name="death">Tod</string>
@@ -306,7 +306,7 @@
     <string name="extension">Erweiterung</string>
     <string name="sources_number">Anzahl der Quellen</string>
     <string name="citations">Zitate</string>
-    <string name="change_date">Datum ändern</string>
+    <string name="change_date">Datum der Änderung</string>
     <string name="done">Fertig</string>
     <string name="cancel">Abbrechen</string>
     <string name="delete">Löschen</string>
@@ -389,4 +389,13 @@
     <string name="next">Nächste</string>
     <string name="error_found">Ein Fehler gefunden.</string>
     <string name="are_same_person">Handelt es sich um dieselbe Person\?</string>
+    <string name="help">Hilfe</string>
+    <string name="device_date">Datum des Geräts</string>
+    <string name="years">Jahre</string>
+    <string name="max_life_span">Maximale Lebensspanne</string>
+    <string name="tree_settings">Stambaum Einstellungen</string>
+    <string name="fixed_date">Festes Datum</string>
+    <string name="current_date">Aktuelles Datum</string>
+    <string name="birthday">Geburtstag</string>
+    <string name="premium_deactivated">Premium deaktiviert.</string>
 </resources>

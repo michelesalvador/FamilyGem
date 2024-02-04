@@ -3,7 +3,7 @@
     <string name="sure_delete">Biztos vagy benne\?</string>
     <string name="cancel">Mégse</string>
     <string name="done">Kész</string>
-    <string name="change_date">Dátum módosítása</string>
+    <string name="change_date">Változás dátuma</string>
     <string name="something_wrong">Valami elromlott.</string>
     <string name="cant_understand_uri">A kapott URI nem értelmezhető.</string>
     <string name="version_name">Verzió %s</string>
@@ -141,7 +141,7 @@
     <string name="baptism">Keresztelés</string>
     <string name="residence">Lakóhely</string>
     <string name="occupation">Foglalkozás</string>
-    <string name="death">Elhunyt</string>
+    <string name="death">Halál</string>
     <string name="burial">Temetés</string>
     <string name="note">Megjegyzés</string>
     <string name="new_note">Új megjegyzés</string>
@@ -224,7 +224,7 @@
     <string name="shared_notes">Megosztott megjegyzések</string>
     <string name="simple_note">Egyszerű megjegyzés</string>
     <string name="common_law_marriage">Szokásjog</string>
-    <string name="separation">Válás</string>
+    <string name="separation">Különválás</string>
     <string name="shared_note">Megosztott megjegyzés</string>
     <string name="written_in">Beírva</string>
     <string name="shared_by">Használva</string>
@@ -389,4 +389,13 @@
     <string name="error_found">Egy hiba található.</string>
     <string name="next">Következő</string>
     <string name="are_same_person">Ők ugyanaz az ember\?</string>
+    <string name="help">Segítség</string>
+    <string name="device_date">Készülék dátuma</string>
+    <string name="birthday">Születésnap</string>
+    <string name="years">Évek</string>
+    <string name="max_life_span">Maximális élettartam</string>
+    <string name="tree_settings">Fa beállítások</string>
+    <string name="fixed_date">Fix dátum</string>
+    <string name="current_date">Aktuális dátum</string>
+    <string name="premium_deactivated">Premium deaktiválva.</string>
 </resources>
