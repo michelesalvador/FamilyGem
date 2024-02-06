@@ -181,12 +181,14 @@ object FileUtil {
             }).into(imageView)
         } else if (media.file != null) { // Path and Uri are both null
             // Maybe is an image online
-            val builder = glide.load(media.file)
+            var filePath = media.file
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) filePath = filePath.replace("https://", "http://")
+            val builder = glide.load(filePath)
             applyOptions(builder)
             builder.placeholder(R.drawable.image).listener(object : RequestListener<Drawable> {
                 override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
                     imageView.setTag(R.id.tag_file_type, Type.CROPPABLE)
-                    imageView.setTag(R.id.tag_path, media.file) // TODO: but CropImage doesn't handle a web URL
+                    imageView.setTag(R.id.tag_path, filePath) // TODO: but CropImage doesn't handle a web URL
                     completeDisplay()
                     return false
                 }

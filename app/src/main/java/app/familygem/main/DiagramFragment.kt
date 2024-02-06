@@ -63,9 +63,11 @@ import graph.gedcom.Metric
 import graph.gedcom.PersonNode
 import graph.gedcom.Util
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Person
@@ -88,6 +90,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private var popup: View? = null // Suggestion balloon
     private var printPDF = false // We are exporting a PDF
     private val leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR
+    private var diagramJob: Job? = null
     private val graphicNodes: MutableList<GraphicMetric> = ArrayList()
     private val loadingImages: MutableList<Pair<Media, ImageView>> = ArrayList()
     lateinit var choosePersonLauncher: ActivityResultLauncher<Intent>
@@ -180,7 +183,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             if (!Global.settings.expert) binding.diagramOptions.visibility = View.GONE
         } else {
             binding.diagramWheel.root.visibility = View.VISIBLE
-            lifecycleScope.launch(Dispatchers.Default) {
+            diagramJob = lifecycleScope.launch(Dispatchers.Default) {
                 Global.indi = fulcrum.id // Confirms it just in case
                 graph.setGedcom(Global.gc).setLayoutDirection(leftToRight)
                         .maxAncestors(Global.settings.diagram.ancestors)
@@ -205,6 +208,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         loadingImages.clear()
         // Place various type of graphic nodes in 'graphicNodes' list
         for (personNode in graph.personNodes) {
+            yield()
             if (personNode.person.id == Global.indi && !personNode.isFulcrumNode)
                 graphicNodes.add(Asterisk(context(), personNode))
             else if (personNode.mini)
@@ -213,6 +217,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
         // First layout of cards
         graphicNodes.forEach {
+            yield()
             it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.AT_MOST)
             it.layout(0, 0, it.measuredWidth, it.measuredHeight)
         }
@@ -228,6 +233,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
         // Waits for images to be loaded
         do {
+            yield()
             delay(100) // Anyway a little delay is useful to correctly calculate lines and pan to fulcrum
             var imageToLoad = false
             for (it in loadingImages) {
@@ -263,6 +269,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         } else { // Two or more persons in the diagram or PDF print
             // Gets the dimensions of each node converting from pixel to dip
             graphicNodes.forEach {
+                yield()
                 // Second measurement to get final card size
                 it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
                 it.metric.width = toDp(it.measuredWidth)
@@ -327,6 +334,11 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private fun refreshAll() {
         startDiagram()
         (requireActivity() as MainActivity).furnishMenu()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (diagramJob != null && diagramJob!!.isActive) diagramJob!!.cancel()
     }
 
     /**
@@ -556,15 +568,14 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         override fun invalidate() {
             paint.color = ResourcesCompat.getColor(resources, if (printPDF) R.color.diagram_lines_print else R.color.diagram_lines_screen, null)
             paths.clear() // In case of PDF print
-            val width = toPxFloat(graph.width)
             // Put the lines in one or more paths
             for ((pathNum, lineGroup) in lineGroups.withIndex()) {
                 if (pathNum >= paths.size) paths.add(Path())
                 val path = paths[pathNum]
                 for (line in lineGroup) {
-                    var x1 = toPxFloat(line.x1)
+                    val x1 = toPxFloat(line.x1)
                     val y1 = toPxFloat(line.y1)
-                    var x2 = toPxFloat(line.x2)
+                    val x2 = toPxFloat(line.x2)
                     val y2 = toPxFloat(line.y2)
                     path.moveTo(x1, y1)
                     if (line is CurveLine) {
@@ -637,7 +648,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         Global.familyNum = whichFamily
         box.removeAllViews()
         binding.diagramWheel.root.visibility = View.VISIBLE
-        lifecycleScope.launch(Dispatchers.Default) {
+        diagramJob = lifecycleScope.launch(Dispatchers.Default) {
             graph.showFamily(Global.familyNum)
             graph.startFrom(fulcrum)
             drawDiagram()
