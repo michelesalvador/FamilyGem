@@ -32,6 +32,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.TextUtilsCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
@@ -64,10 +65,11 @@ import graph.gedcom.PersonNode
 import graph.gedcom.Util
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Person
@@ -154,7 +156,14 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     override fun onResume() {
         // Reasons why we should continue, especially things that have changed
         mayShow = mayShow || graph.fulcrum == null || graph.fulcrum.id != Global.indi || graph.whichFamily != Global.familyNum
-        super.onResume() // Must stay at the end to apply mayShow value
+        super.onResume() // Must stay here to apply mayShow value
+        // Sometimes MainActivity calls onPause() during the creation of the diagram, e.g. on entering multi window
+        // therefore we need to check this state and in case restart diagram
+        box.postDelayed({
+            if (binding.diagramWheel.root.isVisible && diagramJob != null && diagramJob!!.isCancelled) {
+                startDiagram()
+            }
+        }, 1000)
     }
 
     override fun showContent() {
@@ -162,10 +171,9 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     }
 
     /**
-     * Identifies the fulcrum person to start from, shows any button 'Add the first person' or starts the diagram.
+     * Identifies the fulcrum person to start from, shows the button 'Add the first person' or starts the diagram.
      */
     private fun startDiagram() {
-        box.removeAllViews()
         // Finds fulcrum
         val ids = arrayOf(Global.indi, Global.settings.currentTree.root, U.findRootId(Global.gc))
         var fulcrum: Person? = null
@@ -175,6 +183,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
         // Empty diagram
         if (fulcrum == null) {
+            box.removeAllViews()
             val button = LayoutInflater.from(context()).inflate(R.layout.diagram_button, null)
             button.findViewById<View>(R.id.diagram_new).setOnClickListener {
                 startActivity(Intent(context(), PersonEditorActivity::class.java))
@@ -203,12 +212,12 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
      * Creates cards, waits for all images loaded, detects card sizes and adds other elements to layout.
      * Called each time the fragment starts and clicking on a card.
      */
-    private suspend fun drawDiagram() {
+    private suspend fun drawDiagram() = coroutineScope {
         graphicNodes.clear()
         loadingImages.clear()
         // Place various type of graphic nodes in 'graphicNodes' list
         for (personNode in graph.personNodes) {
-            yield()
+            ensureActive()
             if (personNode.person.id == Global.indi && !personNode.isFulcrumNode)
                 graphicNodes.add(Asterisk(context(), personNode))
             else if (personNode.mini)
@@ -217,7 +226,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
         // First layout of cards
         graphicNodes.forEach {
-            yield()
+            ensureActive()
             it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.AT_MOST)
             it.layout(0, 0, it.measuredWidth, it.measuredHeight)
         }
@@ -233,7 +242,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
         // Waits for images to be loaded
         do {
-            yield()
+            ensureActive()
             delay(100) // Anyway a little delay is useful to correctly calculate lines and pan to fulcrum
             var imageToLoad = false
             for (it in loadingImages) {
@@ -249,6 +258,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 // Puts the card under the suggestion balloon
                 val singleNode = graphicNodes[0]
                 singleNode.id = R.id.tag_fulcrum
+                box.removeAllViews()
                 val popupLayout: ConstraintLayout = SuggestionBalloon(context(), singleNode, R.string.long_press_menu)
                 // Adds the glow to the fulcrum card
                 if (fulcrumView != null) {
@@ -269,7 +279,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         } else { // Two or more persons in the diagram or PDF print
             // Gets the dimensions of each node converting from pixel to dip
             graphicNodes.forEach {
-                yield()
+                ensureActive()
                 // Second measurement to get final card size
                 it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
                 it.metric.width = toDp(it.measuredWidth)
@@ -283,6 +293,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             graph.placeNodes() // Calculates final position
             // Other diagram elements
             withContext(Dispatchers.Main) {
+                box.removeAllViews()
                 // Adds the lines
                 lines = Lines(context(), graph.lines, false)
                 box.addView(lines, 0)
@@ -451,11 +462,13 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             layoutDirection = View.LAYOUT_DIRECTION_LOCALE
             registerForContextMenu(this)
             setOnClickListener {
-                if (person.id == Global.indi) {
-                    Memory.setLeader(person)
-                    startActivity(Intent(getContext(), ProfileActivity::class.java))
-                } else {
-                    clickCard(person)
+                if (!diagramJob!!.isActive) { // Avoids multiple clicks
+                    if (person.id == Global.indi) {
+                        Memory.setLeader(person)
+                        startActivity(Intent(getContext(), ProfileActivity::class.java))
+                    } else {
+                        clickCard(person)
+                    }
                 }
             }
         }
@@ -526,7 +539,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 layout = miniCard.findViewById(R.id.minicard)
                 layout!!.setBackgroundResource(R.drawable.casella_sfondo_sposo)
             }
-            miniCard.setOnClickListener { clickCard(personNode.person) }
+            miniCard.setOnClickListener { if (!diagramJob!!.isActive) clickCard(personNode.person) }
         }
 
         override fun invalidate() {
@@ -646,7 +659,6 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private fun completeSelect(fulcrum: Person, whichFamily: Int) {
         Global.indi = fulcrum.id
         Global.familyNum = whichFamily
-        box.removeAllViews()
         binding.diagramWheel.root.visibility = View.VISIBLE
         diagramJob = lifecycleScope.launch(Dispatchers.Default) {
             graph.showFamily(Global.familyNum)
