@@ -27,11 +27,11 @@ import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.Submitter;
 
 import app.familygem.BaseActivity;
-import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Extra;
+import app.familygem.util.AddressUtilKt;
 import app.familygem.util.FileUtil;
 
 /**
@@ -136,14 +136,14 @@ public class ProcessActivity extends BaseActivity {
             writeHeading(R.string.submitter, submitter.getId());
             title = submitter.getName();
             if (submitter.getEmail() != null) text += submitter.getEmail() + "\n";
-            if (submitter.getAddress() != null) text += DetailActivity.writeAddress(submitter.getAddress(), true);
+            if (submitter.getAddress() != null) text += AddressUtilKt.toString(submitter.getAddress(), true);
             date = getDateTime(submitter.getChange());
         } else if (obj instanceof Repository) {
             Repository repository = (Repository)obj;
             writeHeading(R.string.repository, repository.getId());
             title = repository.getName();
             if (repository.getAddress() != null)
-                text += DetailActivity.writeAddress(repository.getAddress(), true) + "\n";
+                text += AddressUtilKt.toString(repository.getAddress(), true) + "\n";
             if (repository.getEmail() != null) text += repository.getEmail();
             date = getDateTime(repository.getChange());
         } else if (obj instanceof Media) {

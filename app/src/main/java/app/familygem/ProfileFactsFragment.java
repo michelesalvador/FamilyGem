@@ -39,6 +39,7 @@ import app.familygem.constant.Gender;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
 import app.familygem.detail.NameActivity;
+import app.familygem.util.AddressUtilKt;
 import app.familygem.util.TreeUtil;
 
 public class ProfileFactsFragment extends Fragment {
@@ -153,7 +154,7 @@ public class ProfileFactsFragment extends Fragment {
             txt += new GedcomDateConverter(event.getDate()).writeDateLong() + "\n";
         if (event.getPlace() != null) txt += event.getPlace() + "\n";
         Address address = event.getAddress();
-        if (address != null) txt += DetailActivity.writeAddress(address, true) + "\n";
+        if (address != null) txt += AddressUtilKt.toString(address, true) + "\n";
         if (event.getCause() != null) txt += event.getCause() + "\n";
         if (event.getWww() != null) txt += event.getWww() + "\n";
         if (event.getEmail() != null) txt += event.getEmail() + "\n";

@@ -6,7 +6,6 @@ import android.text.Html
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import app.familygem.DetailActivity
 import app.familygem.GedcomDateConverter
 import app.familygem.ProfileFactsFragment
 import app.familygem.R
@@ -14,6 +13,7 @@ import app.familygem.U
 import app.familygem.constant.Gender
 import app.familygem.databinding.MergePersonFragmentBinding
 import app.familygem.util.FileUtil
+import app.familygem.util.toString
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Person
 
@@ -52,7 +52,7 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
             }
             if (event.date != null) data += "${GedcomDateConverter(event.date).writeDateLong()} "
             if (event.place != null) data += "${event.place} "
-            if (event.address != null) data += "${DetailActivity.writeAddress(event.address, true)} "
+            if (event.address != null) data += "${event.address.toString(true)} "
             if (event.cause != null) data += event.cause
             data += "<br>"
         }

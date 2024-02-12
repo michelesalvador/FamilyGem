@@ -86,6 +86,7 @@ import app.familygem.main.PersonsFragment;
 import app.familygem.main.RepositoriesFragment;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
+import app.familygem.util.AddressUtilKt;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.EventUtilKt;
 import app.familygem.util.TreeUtil;
@@ -573,7 +574,8 @@ public abstract class DetailActivity extends AppCompatActivity {
     public void place(String title, Address address) {
         Address addressNotNull = address == null ? new Address() : address;
         new Egg(title, addressNotNull, true, 0);
-        placePiece(title, writeAddress(address, false), addressNotNull, 0);
+        // TODO: simplify in Kotlin: address?.toString(false)
+        placePiece(title, address == null ? null : AddressUtilKt.toString(address, false), addressNotNull, 0);
     }
 
     /**
@@ -649,30 +651,6 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
     }
 
-    public static String writeAddress(Address adr, boolean oneLine) {
-        if (adr == null) return null;
-        String txt = ""; // TODO: use StringBuilder
-        String br = oneLine ? ", " : "\n";
-        if (adr.getValue() != null)
-            txt = adr.getValue() + br;
-        if (adr.getAddressLine1() != null)
-            txt += adr.getAddressLine1() + br;
-        if (adr.getAddressLine2() != null)
-            txt += adr.getAddressLine2() + br;
-        if (adr.getAddressLine3() != null)
-            txt += adr.getAddressLine3() + br;
-        if (adr.getPostalCode() != null) txt += adr.getPostalCode() + " ";
-        if (adr.getCity() != null) txt += adr.getCity() + " ";
-        if (adr.getState() != null) txt += adr.getState();
-        if (adr.getPostalCode() != null || adr.getCity() != null || adr.getState() != null)
-            txt += br;
-        if (adr.getCountry() != null)
-            txt += adr.getCountry();
-        if (txt.endsWith(br))
-            txt = txt.substring(0, txt.length() - br.length()).trim();
-        return txt;
-    }
-
     /**
      * Delete an address from the 3 possible containers.
      */
@@ -731,7 +709,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             txt += ef.getPlace() + "\n";
         Address address = ef.getAddress();
         if (address != null)
-            txt += writeAddress(address, true) + "\n";
+            txt += AddressUtilKt.toString(address, true) + "\n";
         if (txt.endsWith("\n"))
             txt = txt.substring(0, txt.length() - 1);
         return txt;
