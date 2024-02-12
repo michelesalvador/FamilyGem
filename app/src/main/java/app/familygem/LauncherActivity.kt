@@ -90,5 +90,8 @@ class LauncherActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // Just to create the folder /storage/emulated/0/Android/media/app.familygem if it doesn't exist
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) externalMediaDirs
     }
 }

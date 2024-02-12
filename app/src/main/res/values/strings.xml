@@ -104,8 +104,9 @@
     <string name="time">Time</string>
     <string name="media_folders">Media folders</string>
     <string name="media_searched_list">Media files are searched inside these folders:</string>
-    <string name="app_storage">App storage</string>
     <string name="add_device_folder">Add a folder from this device.</string>
+    <string name="app_storage">App storage</string>
+    <string name="choose_folder">Choose folder</string>
     <string name="share_sensitive">Sharing sensitive data</string>
     <string name="aware_upload_server">Please be aware that you are going to upload the whole tree to a server online.</string>
     <string name="remind_later">Remind me later</string>

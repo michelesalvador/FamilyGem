@@ -108,8 +108,9 @@
     <!-- MediaFoldersActivity -->
     <string name="media_folders">Cartelle media</string>
     <string name="media_searched_list">I file media vengono cercati dentro a queste cartelle:</string>
-    <string name="app_storage">Archiviazione app</string>
     <string name="add_device_folder">Aggiungi una cartella da questo dispositivo.</string>
+    <string name="app_storage">Archiviazione app</string>
+    <string name="choose_folder">Scegli cartella</string>
     <!-- SharingActivity -->
     <string name="share_sensitive">Condivisione di dati sensibili</string>
     <string name="aware_upload_server">Tieni presente che stai per caricare l\'intero albero su un server online.</string>

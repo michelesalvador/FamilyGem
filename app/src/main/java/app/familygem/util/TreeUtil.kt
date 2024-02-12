@@ -437,7 +437,7 @@ object TreeUtil {
         val treeNumber = Global.settings.max() + 1
         var mediaDir = context.getExternalFilesDir(treeNumber.toString())
         val sourceDir = context.applicationInfo.sourceDir
-        if (!sourceDir.startsWith("/data/")) { // App installed not in internal memory (hopefully moved to SD-card)
+        if (!sourceDir.startsWith("/data/")) { // App installed not in internal memory (maybe moved to SD-card)
             val externalFilesDirs = context.getExternalFilesDirs(treeNumber.toString())
             if (externalFilesDirs.size > 1) {
                 mediaDir = externalFilesDirs[1]

@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
 
@@ -23,12 +25,15 @@ import java.util.List;
 
 import app.familygem.constant.Extra;
 
-// Activity where you can see the list of media folders, add them, delete them
+/**
+ * Here user can see the list of media folders, add them, delete them.
+ */
 public class MediaFoldersActivity extends BaseActivity {
 
     int treeId;
     List<String> dirs;
     List<String> uris;
+    String treeSpecificDir; // /storage/emulated/0/Android/data/app.familygem/files/# is the default folder for tree media files
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -37,33 +42,56 @@ public class MediaFoldersActivity extends BaseActivity {
         treeId = getIntent().getIntExtra(Extra.TREE_ID, 0);
         dirs = new ArrayList<>(Global.settings.getTree(treeId).dirs);
         uris = new ArrayList<>(Global.settings.getTree(treeId).uris);
+        treeSpecificDir = getExternalFilesDir(String.valueOf(treeId)).getAbsolutePath(); // Creates it if doesn't exist
         updateList();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        findViewById(R.id.fab).setOnClickListener(v -> {
-            final String[] requiredPermissions;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requiredPermissions = new String[]{
-                        Manifest.permission.READ_MEDIA_IMAGES,
-                        Manifest.permission.READ_MEDIA_VIDEO,
-                        Manifest.permission.READ_MEDIA_AUDIO,
-                };
+        findViewById(R.id.fab).setOnClickListener(view -> {
+            if (dirs.contains(treeSpecificDir)) {
+                checkPermissions();
             } else {
-                requiredPermissions = new String[]{
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                };
+                PopupMenu popup = new PopupMenu(this, view);
+                Menu menu = popup.getMenu();
+                menu.add(0, 0, 0, R.string.app_storage);
+                menu.add(0, 1, 0, R.string.choose_folder);
+                popup.show();
+                popup.setOnMenuItemClickListener(item -> {
+                    switch (item.getItemId()) {
+                        case 0: // Add app storage
+                            dirs.add(treeSpecificDir);
+                            save();
+                            break;
+                        case 1: // Choose folder
+                            checkPermissions();
+                    }
+                    return true;
+                });
             }
-
-            final int perm = F.checkMultiplePermissions(this, requiredPermissions);
-            if (perm == PackageManager.PERMISSION_DENIED)
-                ActivityCompat.requestPermissions(this, requiredPermissions, 3517);
-            else if (perm == PackageManager.PERMISSION_GRANTED)
-                chooseFolder();
         });
         if (Global.settings.getTree(treeId).dirs.isEmpty() && Global.settings.getTree(treeId).uris.isEmpty())
             new SpeechBubble(this, R.string.add_device_folder).show();
     }
 
-    void chooseFolder() {
+    private void checkPermissions() {
+        final String[] requiredPermissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requiredPermissions = new String[]{
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO,
+            };
+        } else {
+            requiredPermissions = new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+            };
+        }
+        final int perm = F.checkMultiplePermissions(this, requiredPermissions);
+        if (perm == PackageManager.PERMISSION_DENIED)
+            ActivityCompat.requestPermissions(this, requiredPermissions, 3517);
+        else if (perm == PackageManager.PERMISSION_GRANTED)
+            chooseFolder();
+    }
+
+    private void chooseFolder() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
             intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
@@ -77,7 +105,7 @@ public class MediaFoldersActivity extends BaseActivity {
         }
     }
 
-    void updateList() {
+    private void updateList() {
         LinearLayout layout = findViewById(R.id.cartelle_scatola);
         layout.removeAllViews();
         for (String dir : dirs) {
@@ -87,24 +115,16 @@ public class MediaFoldersActivity extends BaseActivity {
             TextView nameView = folderView.findViewById(R.id.cartella_nome);
             TextView urlView = folderView.findViewById(R.id.cartella_url);
             urlView.setText(dir);
-            if (Global.settings.expert)
-                urlView.setSingleLine(false);
-            View deleteButton = folderView.findViewById(R.id.cartella_elimina);
-            // La cartella '/storage/.../Android/data/app.familygem/files/X' va preservata inquanto è quella di default dei media copiati
-            // Oltretutto in Android 11 non è più raggiungibile dall'utente con SAF
-            if (dir.equals(getExternalFilesDir(null) + "/" + treeId)) {
-                nameView.setText(R.string.app_storage);
-                deleteButton.setVisibility(View.GONE);
-            } else {
-                nameView.setText(folderName(dir));
-                deleteButton.setOnClickListener(v -> {
-                    new AlertDialog.Builder(this).setMessage(R.string.sure_delete)
-                            .setPositiveButton(R.string.yes, (di, id) -> {
-                                dirs.remove(dir);
-                                save();
-                            }).setNeutralButton(R.string.cancel, null).show();
-                });
-            }
+            if (Global.settings.expert) urlView.setSingleLine(false);
+            if (dir.equals(treeSpecificDir)) nameView.setText(R.string.app_storage);
+            else nameView.setText(folderName(dir));
+            folderView.findViewById(R.id.cartella_elimina).setOnClickListener(v -> {
+                new AlertDialog.Builder(this).setMessage(R.string.sure_delete)
+                        .setPositiveButton(R.string.yes, (di, id) -> {
+                            dirs.remove(dir);
+                            save();
+                        }).setNeutralButton(R.string.cancel, null).show();
+            });
             registerForContextMenu(folderView);
         }
         for (String uriString : uris) {
@@ -143,13 +163,13 @@ public class MediaFoldersActivity extends BaseActivity {
         }
     }
 
-    String folderName(String url) {
+    private String folderName(String url) {
         if (url.lastIndexOf('/') > 0)
             return url.substring(url.lastIndexOf('/') + 1);
         return url;
     }
 
-    void save() {
+    private void save() {
         Global.settings.getTree(treeId).dirs.clear();
         for (String path : dirs)
             Global.settings.getTree(treeId).dirs.add(path);

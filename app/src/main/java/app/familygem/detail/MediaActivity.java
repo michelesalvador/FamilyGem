@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 
 import org.folg.gedcom.model.Media;
@@ -86,8 +87,7 @@ public class MediaActivity extends DetailActivity {
             } else if (fileType == Type.PREVIEW || fileType == Type.DOCUMENT) { // Opens the media with some other app
                 if (path != null) {
                     File file = new File(path);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                            && path.startsWith(getExternalFilesDir(null).getPath())) // An app can be a file provider only of its folders
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && isOwnedDirectory(path)) // File provider of its own folders
                         uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file);
                     else // Under KitKat all folders can be accessed
                         uri = Uri.fromFile(file);
@@ -120,6 +120,17 @@ public class MediaActivity extends DetailActivity {
         });
         imageLayout.setTag(R.id.tag_object, 43614 /* TODO: magic number */); // For the image context menu
         registerForContextMenu(imageLayout);
+    }
+
+    /**
+     * Checks if a path points to an external storage folder owned by the app.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private boolean isOwnedDirectory(String path) {
+        if (path.startsWith(getExternalFilesDir(null).getAbsolutePath())) return true;
+        for (File mediaDir : getExternalMediaDirs())
+            if (path.startsWith(mediaDir.getAbsolutePath())) return true;
+        return false;
     }
 
     public void updateImage() {
