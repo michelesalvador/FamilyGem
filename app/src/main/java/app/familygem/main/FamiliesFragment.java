@@ -93,17 +93,17 @@ public class FamiliesFragment extends BaseFragment {
         }
         StringBuilder parents = new StringBuilder();
         for (Person husband : wrapper.family.getHusbands(gc))
-            parents.append(U.properName(husband)).append("\n");
+            parents.append(U.properName(husband)).append(",\n");
         for (Person wife : wrapper.family.getWives(gc))
-            parents.append(U.properName(wife)).append("\n");
+            parents.append(U.properName(wife)).append(",\n");
         if (parents.length() > 0)
-            parents = new StringBuilder(parents.substring(0, parents.length() - 1)); // Just to remove the final '\n' TODO: does StringBuilder has .trim()?
+            parents = new StringBuilder(parents.substring(0, parents.length() - 2)); // Just to remove the final ',\n'
         ((TextView)familyView.findViewById(R.id.family_parents)).setText(parents.toString());
         StringBuilder children = new StringBuilder();
         for (Person child : wrapper.family.getChildren(gc))
-            children.append(U.properName(child)).append("\n");
+            children.append(U.properName(child)).append(",\n");
         if (children.length() > 0)
-            children = new StringBuilder(children.substring(0, children.length() - 1));
+            children = new StringBuilder(children.substring(0, children.length() - 2));
         TextView childrenView = familyView.findViewById(R.id.family_children);
         if (children.length() == 0) {
             familyView.findViewById(R.id.family_strut).setVisibility(View.GONE);
