@@ -367,13 +367,15 @@ public class PersonsFragment extends BaseFragment {
                     else
                         return p2.getId().compareToIgnoreCase(p1.getId());
                 case SURNAME_ASC: // Sorts by surname
-                    if (wrapper1.surname == null) return 1; // Null surnames go to the bottom
-                    if (wrapper2.surname == null) return -1;
-                    return wrapper1.surname.compareTo(wrapper2.surname);
+                    if (wrapper1.name == null && wrapper2.name == null) return 0;
+                    else if (wrapper1.name == null) return 1; // Null names go to the bottom
+                    else if (wrapper2.name == null) return -1;
+                    return wrapper1.name.compareTo(wrapper2.name);
                 case SURNAME_DESC:
-                    if (wrapper1.surname == null) return 1;
-                    if (wrapper2.surname == null) return -1;
-                    return wrapper2.surname.compareTo(wrapper1.surname);
+                    if (wrapper1.name == null && wrapper2.name == null) return 0;
+                    else if (wrapper1.name == null) return 1;
+                    else if (wrapper2.name == null) return -1;
+                    return wrapper2.name.compareTo(wrapper1.name);
                 case DATE_ASC: // Sorts by person's main date
                     return wrapper1.date - wrapper2.date;
                 case DATE_DESC:
@@ -403,10 +405,10 @@ public class PersonsFragment extends BaseFragment {
     }
 
     /**
-     * Writes a string with surname and first name concatenated.
+     * Writes a string with surname and given name concatenated.
      * E.g. 'salvadormichele ' or 'vallefrancesco maria ' or ' donatella '.
      */
-    private String getSurnameFirstname(Person person) {
+    private String getSurnameGivenName(Person person) {
         List<Name> names = person.getNames();
         if (!names.isEmpty()) {
             Name name = names.get(0);
@@ -418,9 +420,14 @@ public class PersonsFragment extends BaseFragment {
                     if (value.replace('/', ' ').trim().isEmpty()) // Empty value
                         return null;
                     if (value.indexOf('/') > 0)
-                        given = value.substring(0, value.indexOf('/')); // Take the given name before '/'
+                        given = value.substring(0, value.indexOf('/')); // Given name before '/'
+                    else if (value.indexOf('/') < 0)
+                        given = value; // Name only without any '/'
+                    else if (value.lastIndexOf('/') >= 0 && value.lastIndexOf('/') < value.length() - 1)
+                        given = value.substring(value.lastIndexOf('/') + 1).trim(); // Something after last '/'
                     if (value.lastIndexOf('/') - value.indexOf('/') > 1) // If there is a surname between two '/'
-                        surname = value.substring(value.indexOf('/') + 1, value.lastIndexOf("/"));
+                        surname = value.substring(value.indexOf('/') + 1, value.lastIndexOf('/'));
+                    else if (name.getSurname() != null) surname = name.getSurname();
                     // Only the given name coming from the value could have a prefix,
                     // from getGiven() no, because it is already only the given name.
                     String prefix = name.getPrefix();
@@ -492,7 +499,7 @@ public class PersonsFragment extends BaseFragment {
 
         final Person person;
         String text; // Single string with all names and events for search
-        String surname; // Surname and name of the person
+        String name; // Surname and given name of the person
         int date = Integer.MAX_VALUE; // Date in the format YYYYMMDD
         int age = Integer.MAX_VALUE; // Age in days
         int birthday = Integer.MIN_VALUE; // Negative days to the next birthday
@@ -514,8 +521,8 @@ public class PersonsFragment extends BaseFragment {
             }
             text = builder.toString().toLowerCase();
 
-            // Surname and first name concatenated
-            surname = getSurnameFirstname(person);
+            // Surname and given name concatenated
+            name = getSurnameGivenName(person);
 
             // Finds the first date of the person's life
             for (EventFact event : person.getEventsFacts()) {
