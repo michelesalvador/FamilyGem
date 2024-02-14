@@ -22,7 +22,7 @@ public class EventActivity extends DetailActivity {
      * List of event tags useful to avoid putting the Value of the EventFact.
      */
     String[] eventTags = {"BIRT", "CHR", "DEAT", "BURI", "CREM", "ADOP", "BAPM", "BARM", "BASM", "BLES", // Individual events
-            "CHRA", "CONF", "FCOM", "ORDN", "NATU", "EMIG", "IMMI", "CENS", "PROB", "WILL", "GRAD", "RETI",
+            "CHRA", "CONF", "FCOM", "ORDN", "NATU", "EMIG", "IMMI", "CENS", "PROB", "WILL", "GRAD", "RETI", "RESI",
             "ANUL", "DIV", "DIVF", "ENGA", "MARB", "MARC", "MARR", "MARL", "MARS"}; // Family events
 
     @Override

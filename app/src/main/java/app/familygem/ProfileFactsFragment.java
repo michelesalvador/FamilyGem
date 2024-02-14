@@ -112,8 +112,8 @@ public class ProfileFactsFragment extends Fragment {
             case "BIRT":
                 str = R.string.birth;
                 break;
-            case "BAPM":
-                str = R.string.baptism;
+            case "CHR":
+                str = R.string.christening;
                 break;
             case "BURI":
                 str = R.string.burial;

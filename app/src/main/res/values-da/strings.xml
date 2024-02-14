@@ -142,7 +142,7 @@
     <string name="name">Navn</string>
     <string name="yes">Ja</string>
     <string name="birth">Fødsel</string>
-    <string name="baptism">Dåb</string>
+    <string name="christening">Barnedåb</string>
     <string name="residence">Opholdssted</string>
     <string name="occupation">Beskæftigelse</string>
     <string name="death">Død</string>

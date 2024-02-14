@@ -209,7 +209,7 @@
     <string name="sex">Sesso</string>
     <string name="event">Evento</string>
     <string name="birth">Nascita</string>
-    <string name="baptism">Battesimo</string>
+    <string name="christening">Battesimo</string>
     <string name="residence">Residenza</string>
     <string name="occupation">Occupazione</string>
     <string name="death">Morte</string>

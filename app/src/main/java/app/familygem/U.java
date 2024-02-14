@@ -430,6 +430,7 @@ public class U {
                         case "BIRT":
                             places[0] = place;
                             break;
+                        case "CHR":
                         case "BAPM":
                             places[1] = place;
                             break;

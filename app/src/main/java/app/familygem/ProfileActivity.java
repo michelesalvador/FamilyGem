@@ -70,7 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
     private final Fragment[] pages = new Fragment[3];
     private PagesAdapter adapter;
     private FloatingActionButton fabView;
-    private final String[] mainEventTags = {"BIRT", "BAPM", "RESI", "OCCU", "DEAT", "BURI"};
+    private final String[] mainEventTags = {"BIRT", "CHR", "RESI", "OCCU", "DEAT", "BURI"};
     private List<Pair<String, String>> otherEvents; // List of tag + label
     ActivityResultLauncher<Intent> choosePersonLauncher;
 
@@ -125,7 +125,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (bundle == null) tabLayout.getTabAt(getIntent().getIntExtra(Extra.PAGE, 1)).select();
 
         // List of other events
-        String[] otherEventTags = {"CHR", "CREM", "ADOP", "BARM", "BATM", "BLES", "CONF", "FCOM", "ORDN", //Events
+        String[] otherEventTags = {"CREM", "ADOP", "BAPM", "BARM", "BATM", "BLES", "CONF", "FCOM", "ORDN", //Events
                 "NATU", "EMIG", "IMMI", "CENS", "PROB", "WILL", "GRAD", "RETI", "EVEN",
                 "CAST", "DSCR", "EDUC", "NATI", "NCHI", "PROP", "RELI", "SSN", "TITL", // Attributes
                 "_MILT"}; // User-defined
@@ -278,7 +278,8 @@ public class ProfileActivity extends AppCompatActivity {
                         menu.add(0, 21, 0, R.string.sex);
                     // Main events
                     SubMenu eventSubMenu = menu.addSubMenu(R.string.event);
-                    CharSequence[] mainEventLabels = {getText(R.string.birth), getText(R.string.baptism), getText(R.string.residence), getText(R.string.occupation), getText(R.string.death), getText(R.string.burial)};
+                    CharSequence[] mainEventLabels = {getText(R.string.birth), getText(R.string.christening), getText(R.string.residence),
+                            getText(R.string.occupation), getText(R.string.death), getText(R.string.burial)};
                     int i;
                     for (i = 0; i < mainEventLabels.length; i++) {
                         CharSequence label = mainEventLabels[i];
@@ -419,6 +420,9 @@ public class ProfileActivity extends AppCompatActivity {
                         EventFact event = new EventFact();
                         event.setTag(keyTag);
                         switch (keyTag) {
+                            case "EVEN":
+                                event.setType("");
+                                event.setDate("");
                             case "OCCU":
                             case "TITL":
                                 event.setValue("");

@@ -195,7 +195,7 @@
     <string name="birth">Rojstvo</string>
     <string name="occupation">Poklic</string>
     <string name="death">Smrt</string>
-    <string name="baptism">Krst</string>
+    <string name="christening">Krst</string>
     <string name="other">Drugi</string>
     <string name="note">Opomba</string>
     <string name="link_shared_note">Povezati skupno opombo</string>
