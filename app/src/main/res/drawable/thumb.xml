@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:left="30dp" android:right="-3dp">
-		<!--android:width="12dp" -->
-		<shape>
-			<corners android:radius="6dp" />
-			<solid android:color="@color/accent" />
-		</shape>
-	</item>
+    <item>
+        <shape>
+            <corners android:radius="5dp" />
+            <size
+                android:width="10dp"
+                android:height="100dp" />
+            <solid android:color="@color/accent" />
+        </shape>
+    </item>
 </layer-list>

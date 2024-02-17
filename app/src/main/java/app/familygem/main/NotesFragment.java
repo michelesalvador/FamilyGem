@@ -66,6 +66,7 @@ public class NotesFragment extends BaseFragment implements NotesAdapter.ItemClic
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
+        setupFastScroller(recyclerView);
         view.findViewById(R.id.fab).setOnClickListener(v -> newNote(getContext(), null));
         return view;
     }

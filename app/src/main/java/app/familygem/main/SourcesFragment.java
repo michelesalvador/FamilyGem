@@ -63,6 +63,7 @@ public class SourcesFragment extends BaseFragment {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         adapter = new SourcesAdapter();
         recyclerView.setAdapter(adapter);
+        setupFastScroller(recyclerView);
         view.findViewById(R.id.fab).setOnClickListener(v -> newSource(getContext(), null));
         return view;
     }

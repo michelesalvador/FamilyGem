@@ -62,6 +62,7 @@ public class MediaFragment extends BaseFragment {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new MediaAdapter(mediaVisitor.mediaList, true);
         recyclerView.setAdapter(adapter);
+        setupFastScroller(recyclerView);
         return view;
     }
 

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
 
-    <uses-sdk tools:overrideLibrary="androidx.security, jp.wasabeef.glide.transformations" />
+    <uses-sdk tools:overrideLibrary="androidx.security, jp.wasabeef.glide.transformations, me.zhanghai.android.fastscroll" />
 
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"

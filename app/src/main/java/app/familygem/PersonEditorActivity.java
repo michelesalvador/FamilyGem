@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -36,8 +35,8 @@ import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
-import app.familygem.main.FamiliesFragment;
 import app.familygem.util.EventUtilKt;
+import app.familygem.util.FamilyUtil;
 import app.familygem.util.TreeUtil;
 
 public class PersonEditorActivity extends AppCompatActivity {
@@ -425,7 +424,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         else if (familyId != null) {
             pivotId = null; // Pivot is already present in his family and should not be added again
         }
-        Family family = familyId != null ? gc.getFamily(familyId) : FamiliesFragment.newFamily(true);
+        Family family = familyId != null ? gc.getFamily(familyId) : FamilyUtil.INSTANCE.newFamily();
         Person pivot = gc.getPerson(pivotId);
         SpouseRef refSpouse1 = new SpouseRef(), refSposo2 = new SpouseRef();
         ChildRef refChild1 = new ChildRef(), refFiglio2 = new ChildRef();

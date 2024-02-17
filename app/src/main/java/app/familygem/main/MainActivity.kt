@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 binding.mainToolbar.apply {
                     visibility = if (frontFragment is DiagramFragment) View.GONE else View.VISIBLE
                     post { // Because sometimes onCreateMenu() is called before the fragment creation
+                        menu.clear()
                         if (Global.gc != null) frontFragment.updateToolbar(supportActionBar!!, menu, inflater)
                     }
                 }

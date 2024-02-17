@@ -4,8 +4,6 @@ import static app.familygem.Global.gc;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -25,10 +23,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.lb.fast_scroller_and_recycler_view_fixes_library.FastScrollerEx;
 
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -52,7 +47,6 @@ import app.familygem.Global;
 import app.familygem.Memory;
 import app.familygem.PersonEditorActivity;
 import app.familygem.ProfileActivity;
-import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
 import app.familygem.Settings;
 import app.familygem.U;
@@ -61,6 +55,7 @@ import app.familygem.constant.Extra;
 import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
+import app.familygem.util.EventUtilKt;
 import app.familygem.util.FileUtil;
 import app.familygem.util.PersonUtilKt;
 import app.familygem.util.TreeUtil;
@@ -98,15 +93,11 @@ public class PersonsFragment extends BaseFragment {
         super.onCreateView(inflater, container, bundle);
         View view = inflater.inflate(R.layout.recyclerview, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
-        recyclerView.setPadding(12, 12, 12, recyclerView.getPaddingBottom());
+        int padding = U.dpToPx(8);
+        recyclerView.setPadding(padding, padding, padding, recyclerView.getPaddingBottom());
         recyclerView.setAdapter(adapter);
-        // FAB
         view.findViewById(R.id.fab).setOnClickListener(v -> startActivity(new Intent(getContext(), PersonEditorActivity.class)));
-        // Fast scroller
-        StateListDrawable thumbDrawable = (StateListDrawable)ContextCompat.getDrawable(getContext(), R.drawable.scroll_thumb);
-        Drawable lineDrawable = ContextCompat.getDrawable(getContext(), R.drawable.empty);
-        new FastScrollerEx(recyclerView, thumbDrawable, lineDrawable, thumbDrawable, lineDrawable,
-                U.dpToPx(40), U.dpToPx(100), 0, true, U.dpToPx(80));
+        setupFastScroller(recyclerView);
         return view;
     }
 
@@ -513,11 +504,11 @@ public class PersonsFragment extends BaseFragment {
             // Writes one string concatenating all names and personal events
             StringBuilder builder = new StringBuilder();
             for (Name name : person.getNames()) {
-                builder.append(U.firstAndLastName(name, " ")).append(" ");
+                builder.append(U.firstAndLastName(name, " ")).append(' ');
             }
             for (EventFact event : person.getEventsFacts()) {
                 if (!("SEX".equals(event.getTag()) || "Y".equals(event.getValue()))) // Sex and 'Yes' excluded
-                    builder.append(ProfileFactsFragment.writeEventText(event)).append(" ");
+                    builder.append(EventUtilKt.writeContent(event)).append(' ');
             }
             text = builder.toString().toLowerCase();
 

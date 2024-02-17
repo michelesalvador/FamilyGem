@@ -95,13 +95,13 @@ import app.familygem.detail.SourceActivity;
 import app.familygem.detail.SourceCitationActivity;
 import app.familygem.detail.SubmitterActivity;
 import app.familygem.main.DiagramFragment;
-import app.familygem.main.FamiliesFragment;
 import app.familygem.main.MainActivity;
 import app.familygem.main.MediaAdapter;
 import app.familygem.main.PersonsFragment;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.FamilyUtilKt;
 import app.familygem.util.FileUtil;
 import app.familygem.util.MediaUtil;
 import app.familygem.util.TreeUtil;
@@ -1316,7 +1316,7 @@ public class U {
             new AlertDialog.Builder(contesto).setMessage(R.string.empty_family_delete)
                     .setPositiveButton(android.R.string.yes, (dialog, i) -> {
                         for (Family fam : vuote)
-                            FamiliesFragment.deleteFamily(fam); // Così capita di salvare più volte insieme... ma vabè
+                            FamilyUtilKt.delete(fam); // Così capita di salvare più volte insieme... ma vabè
                         if (cheFare != null) cheFare.run();
                     }).setNeutralButton(android.R.string.cancel, (dialog, i) -> {
                         if (ancheKo) cheFare.run();

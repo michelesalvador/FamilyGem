@@ -78,7 +78,6 @@ import app.familygem.detail.MediaActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.detail.SourceCitationActivity;
-import app.familygem.main.FamiliesFragment;
 import app.familygem.main.MainActivity;
 import app.familygem.main.MediaFragment;
 import app.familygem.main.NotesFragment;
@@ -89,6 +88,7 @@ import app.familygem.main.SubmittersFragment;
 import app.familygem.util.AddressUtilKt;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.EventUtilKt;
+import app.familygem.util.FamilyUtilKt;
 import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
 
@@ -900,15 +900,15 @@ public abstract class DetailActivity extends AppCompatActivity {
         } else if (id == 3) { // Image: choose
             F.displayImageCaptureDialog(this, null, 5173, null);
         } else if (id == 4) { // Family
-            Family fam = (Family)object;
-            if (fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size() > 0) {
+            Family family = (Family)object;
+            if (family.getHusbandRefs().size() + family.getWifeRefs().size() + family.getChildRefs().size() > 0) {
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_family)
                         .setPositiveButton(android.R.string.yes, (dialog, i) -> {
-                            FamiliesFragment.deleteFamily(fam);
+                            FamilyUtilKt.delete(family);
                             onBackPressed();
                         }).setNeutralButton(android.R.string.cancel, null).show();
             } else {
-                FamiliesFragment.deleteFamily(fam);
+                FamilyUtilKt.delete(family);
                 onBackPressed();
             }
         } else if (id == 5) { // All the others objects

@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.GedcomTag;
@@ -39,7 +38,7 @@ import app.familygem.constant.Gender;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
 import app.familygem.detail.NameActivity;
-import app.familygem.util.AddressUtilKt;
+import app.familygem.util.EventUtilKt;
 import app.familygem.util.TreeUtil;
 
 public class ProfileFactsFragment extends Fragment {
@@ -57,7 +56,7 @@ public class ProfileFactsFragment extends Fragment {
                     placeEvent(layout, writeNameTitle(name), U.firstAndLastName(name, " "), name);
                 }
                 for (EventFact event : one.getEventsFacts()) {
-                    placeEvent(layout, writeEventTitle(event), writeEventText(event), event);
+                    placeEvent(layout, writeEventTitle(event), EventUtilKt.writeContent(event), event);
                 }
                 for (Extension extension : U.findExtensions(one)) {
                     placeEvent(layout, extension.name, extension.text, extension.gedcomTag);
@@ -138,29 +137,6 @@ public class ProfileFactsFragment extends Fragment {
         if (event.getType() != null)
             txt += " (" + event.getType() + ")";
         return txt;
-    }
-
-    public static String writeEventText(EventFact event) {
-        String txt = "";
-        if (event.getValue() != null) {
-            if (event.getValue().equals("Y") && event.getTag() != null &&
-                    (event.getTag().equals("BIRT") || event.getTag().equals("CHR") || event.getTag().equals("DEAT")))
-                txt = Global.context.getString(R.string.yes);
-            else txt = event.getValue();
-            txt += "\n";
-        }
-        //if (event.getType() != null) txt += event.getType() + "\n"; // Included in event title
-        if (event.getDate() != null)
-            txt += new GedcomDateConverter(event.getDate()).writeDateLong() + "\n";
-        if (event.getPlace() != null) txt += event.getPlace() + "\n";
-        Address address = event.getAddress();
-        if (address != null) txt += AddressUtilKt.toString(address, true) + "\n";
-        if (event.getCause() != null) txt += event.getCause() + "\n";
-        if (event.getWww() != null) txt += event.getWww() + "\n";
-        if (event.getEmail() != null) txt += event.getEmail() + "\n";
-        if (event.getPhone() != null) txt += event.getPhone() + "\n";
-        if (event.getFax() != null) txt += event.getFax();
-        return txt.trim();
     }
 
     private int chosenSex;

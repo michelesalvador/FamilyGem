@@ -1,6 +1,31 @@
 package app.familygem.util
 
+import app.familygem.GedcomDateConverter
+import app.familygem.Global
+import app.familygem.R
 import org.folg.gedcom.model.EventFact
+
+/**
+ * @return All event fields in a multi-line string
+ */
+fun EventFact.writeContent(): String {
+    val builder = StringBuilder()
+    if (value != null) {
+        if (value == "Y" && tag != null && (tag == "BIRT" || tag == "CHR" || tag == "DEAT"))
+            builder.append(Global.context.getString(R.string.yes)).append("\n")
+        else builder.append(value).append("\n")
+    }
+    //if (type != null) builder.append(type).append("\n") // Included in event title
+    if (date != null) builder.append(GedcomDateConverter(date).writeDateLong()).append("\n")
+    if (place != null) builder.append(place).append("\n")
+    if (address != null) builder.append(address.toString(true)).append("\n")
+    if (cause != null) builder.append(cause).append("\n")
+    if (www != null) builder.append(www).append("\n")
+    if (email != null) builder.append(email).append("\n")
+    if (phone != null) builder.append(phone).append("\n")
+    if (fax != null) builder.append(fax)
+    return builder.toString().trim()
+}
 
 /**
  * Deletes the main empty fields and possibly sets 'Y' as value.

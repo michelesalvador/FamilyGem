@@ -1,5 +1,6 @@
 package app.familygem.main
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -7,9 +8,13 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.ActionBar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import app.familygem.Global
+import app.familygem.R
 import app.familygem.util.TreeUtil
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 
 abstract class BaseFragment(layout: Int) : Fragment(layout) {
 
@@ -39,6 +44,15 @@ abstract class BaseFragment(layout: Int) : Fragment(layout) {
      * Displays the fragment content only (not the toolbar).
      */
     open fun showContent() {
+    }
+
+    fun setupFastScroller(recyclerView: RecyclerView) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val thumbDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.thumb)
+            val lineDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.empty)
+            FastScrollerBuilder(recyclerView).setPadding(0, 0, 0, resources.getDimensionPixelSize(R.dimen.bottom_padding))
+                    .setThumbDrawable(thumbDrawable!!).setTrackDrawable(lineDrawable!!).build()
+        }
     }
 
     // Called almost every time a fragment is displayed, except onBackPressed from another BaseFragment
