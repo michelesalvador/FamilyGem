@@ -167,8 +167,7 @@
             android:parentActivityName=".share.CompareActivity" />
         <activity
             android:name=".DiagramSettingsActivity"
-            android:label="@string/diagram_settings"
-            android:parentActivityName=".main.MainActivity" />
+            android:label="@string/diagram_settings" />
         <activity
             android:name=".ProfileActivity"
             android:configChanges="orientation|screenSize|screenLayout"
