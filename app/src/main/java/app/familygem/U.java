@@ -1294,7 +1294,7 @@ public class U {
         if (intent.getBooleanExtra(Choice.PERSON, false)) {
             // Opens PersonsFragment
             if (fragment != null)
-                ((DiagramFragment)fragment).choosePersonLauncher.launch(intent);
+                ((DiagramFragment)fragment).getChoosePersonLauncher().launch(intent);
             else
                 ((ProfileActivity)context).choosePersonLauncher.launch(intent);
         } else // Opens PersonEditorActivity

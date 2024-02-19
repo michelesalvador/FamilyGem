@@ -22,7 +22,6 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -37,7 +36,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import app.familygem.DiagramSettingsActivity
-import app.familygem.F
 import app.familygem.GedcomDateConverter
 import app.familygem.Global
 import app.familygem.Memory
@@ -70,9 +68,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.apache.commons.io.FileUtils
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Person
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Locale
 
 class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
@@ -90,12 +91,11 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private var lineDash = 0 // Dashed lines interval
     private var glowSpace = 0 // Space to display glow around cards
     private var popup: View? = null // Suggestion balloon
-    private var printPDF = false // We are exporting a PDF
+    private var printPdf = false // We are generating a PDF
     private val leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR
     private var diagramJob: Job? = null
     private val graphicNodes: MutableList<GraphicMetric> = ArrayList()
     private val loadingImages: MutableList<Pair<Media, ImageView>> = ArrayList()
-    lateinit var choosePersonLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -120,7 +120,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                     // Diagram settings
                     0 -> startActivity(Intent(context(), DiagramSettingsActivity::class.java))
                     // Export PDF
-                    1 -> F.saveDocument(null, this, Global.settings.openTree, "application/pdf", "pdf", 903)
+                    1 -> generatePdf()
                     else -> return@setOnMenuItemClickListener false
                 }
                 true
@@ -129,22 +129,6 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         moveLayout = binding.diagramFrame
         moveLayout.graph = graph
         box = binding.diagramBox
-
-        // Adds the relative who has been chosen in PersonsFragment
-        choosePersonLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                val data = result.data
-                if (data != null) {
-                    val modified = PersonEditorActivity.addRelative(
-                            data.getStringExtra(Extra.PERSON_ID), // Corresponds to 'personId', which however is annulled in case of a configuration change
-                            data.getStringExtra(Extra.RELATIVE_ID),
-                            data.getStringExtra(Extra.FAMILY_ID),
-                            data.getSerializableExtra(Extra.RELATION) as Relation,
-                            data.getStringExtra(Extra.DESTINATION))
-                    TreeUtil.save(true, *modified)
-                }
-            }
-        }
         return binding.root
     }
 
@@ -253,7 +237,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             }
         } while (imageToLoad)
         // Only one person in the diagram
-        if (graphicNodes.size == 1 && !printPDF) {
+        if (graphicNodes.size == 1) {
             withContext(Dispatchers.Main) {
                 // Puts the card under the suggestion balloon
                 val singleNode = graphicNodes[0]
@@ -355,7 +339,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     /**
      * Puts a view under the suggestion balloon.
      */
-    inner class SuggestionBalloon(context: Context, childView: View, suggestion: Int) : ConstraintLayout(context) {
+    inner class SuggestionBalloon(context: Context, private val childView: View, suggestion: Int) : ConstraintLayout(context) {
         init {
             val popupView = layoutInflater.inflate(R.layout.popup, this, true)
             box.addView(popupView)
@@ -384,9 +368,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPDF) {
+            if (printPdf) {
                 popup!!.visibility = GONE
                 glow?.visibility = GONE
+                childView.invalidate()
             }
         }
     }
@@ -413,7 +398,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPDF) {
+            if (printPdf) {
                 visibility = GONE
             }
         }
@@ -475,8 +460,11 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
 
         override fun invalidate() {
             // Changes background color for PDF export
-            if (printPDF && (metric as PersonNode).acquired) {
-                background.setBackgroundResource(R.drawable.casella_sfondo_sposo_stampa)
+            if (printPdf) {
+                if ((metric as PersonNode).acquired)
+                    background.setBackgroundResource(R.drawable.casella_sfondo_sposo_stampa)
+                if (this == fulcrumView)
+                    background.setBackgroundResource(R.drawable.casella_sfondo_base)
             }
         }
     }
@@ -516,7 +504,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPDF && hearth != null) {
+            if (printPdf && hearth != null) {
                 hearth!!.setBackgroundResource(R.drawable.diagram_hearth_print)
             }
         }
@@ -543,7 +531,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPDF && layout != null) {
+            if (printPdf && layout != null) {
                 layout!!.setBackgroundResource(R.drawable.casella_sfondo_sposo_stampa)
             }
         }
@@ -579,7 +567,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            paint.color = ResourcesCompat.getColor(resources, if (printPDF) R.color.diagram_lines_print else R.color.diagram_lines_screen, null)
+            paint.color = ResourcesCompat.getColor(resources, if (printPdf) R.color.diagram_lines_print else R.color.diagram_lines_screen, null)
             paths.clear() // In case of PDF print
             // Put the lines in one or more paths
             for ((pathNum, lineGroup) in lineGroups.withIndex()) {
@@ -790,42 +778,69 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         return true
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == AppCompatActivity.RESULT_OK) {
-            // Exports diagram to PDF
-            if (requestCode == 903) {
-                // Stylizes diagram for print
-                printPDF = true
-                for (i in 0 until box.childCount) {
-                    box.getChildAt(i).invalidate()
-                }
-                fulcrumView!!.findViewById<View>(R.id.card_background).setBackgroundResource(R.drawable.casella_sfondo_base)
-                // Creates PDF
-                val document = PdfDocument()
-                val width = box.width
-                val height = box.height
-                if (width <= 0 || height <= 0) { // Sometimes sizes are zero (or negative) for unknown reasons
-                    Toast.makeText(context, R.string.something_wrong, Toast.LENGTH_LONG).show()
-                    return
-                }
-                val pageInfo = PdfDocument.PageInfo.Builder(width, height, 1).create()
-                val page = document.startPage(pageInfo)
-                box.draw(page.canvas)
-                document.finishPage(page)
-                printPDF = false
-                // Writes PDF
-                val uri = data!!.data
-                try {
-                    val out = context().contentResolver.openOutputStream(uri!!)
-                    document.writeTo(out)
-                    out!!.flush()
-                    out.close()
-                } catch (e: Exception) {
-                    Toast.makeText(context, e.localizedMessage, Toast.LENGTH_LONG).show()
-                    return
-                }
-                Toast.makeText(context, R.string.pdf_exported_ok, Toast.LENGTH_LONG).show()
+    /**
+     * Adds the relative who has been chosen in PersonsFragment.
+     */
+    val choosePersonLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            val data = result.data
+            if (data != null) {
+                val modified = PersonEditorActivity.addRelative(
+                        data.getStringExtra(Extra.PERSON_ID), // Corresponds to 'personId', which however is annulled in case of a configuration change
+                        data.getStringExtra(Extra.RELATIVE_ID),
+                        data.getStringExtra(Extra.FAMILY_ID),
+                        data.getSerializableExtra(Extra.RELATION) as Relation,
+                        data.getStringExtra(Extra.DESTINATION))
+                TreeUtil.save(true, *modified)
             }
         }
+    }
+
+    /**
+     * Exports the present diagram to a temporary PDF file and asks where to save it.
+     */
+    private fun generatePdf() {
+        binding.diagramWheel.root.visibility = View.VISIBLE
+        // Stylizes diagram for print
+        printPdf = true
+        for (i in 0 until box.childCount) {
+            box.getChildAt(i).invalidate()
+        }
+        printPdf = false
+        lifecycleScope.launch(Dispatchers.IO) {
+            delay(50) // Just to wait for previous invalidate to take effect, especially on single-card diagram
+            // Creates PDF
+            val document = PdfDocument()
+            val pageInfo = PdfDocument.PageInfo.Builder(box.width, box.height, 1).create()
+            val page = document.startPage(pageInfo)
+            box.draw(page.canvas)
+            document.finishPage(page)
+            // Writes PDF
+            try {
+                val outputStream = FileOutputStream(File(context().cacheDir, "temp.pdf"))
+                document.writeTo(outputStream)
+                outputStream.flush()
+                outputStream.close()
+            } catch (e: Exception) {
+                app.familygem.util.Util.toast(e.localizedMessage)
+                return@launch
+            }
+            FileUtil.openSaf(Global.settings.openTree, "application/pdf", "pdf", savePdfLauncher)
+        }
+    }
+
+    /**
+     * Copies the temporary PDF file to its final destination.
+     */
+    private val savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            val uri = result.data?.data
+            if (uri != null) {
+                val outputStream = context().contentResolver.openOutputStream(uri)
+                FileUtils.copyFile(File(context().cacheDir, "temp.pdf"), outputStream)
+                Toast.makeText(context, R.string.pdf_exported_ok, Toast.LENGTH_LONG).show()
+            } else Toast.makeText(context, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
+        }
+        binding.diagramWheel.root.visibility = View.GONE
     }
 }

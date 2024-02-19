@@ -2,6 +2,7 @@ package app.familygem.util
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -18,6 +19,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.Global
@@ -262,6 +264,21 @@ object FileUtil {
             }
         }
         return null
+    }
+
+    /**
+     * Opens the Storage Access Framework to save a document (PDF, GEDCOM, ZIP).
+     */
+    fun openSaf(treeId: Int, mimeType: String, extension: String, launcher: ActivityResultLauncher<Intent>) {
+        // Replaces dangerous characters for the Android filesystem that are not replaced by Android itself
+        val name = Global.settings.getTree(treeId).title.replace("[$']".toRegex(), "_")
+        // A GEDCOM must specify the extension, other file types put it according to the mime type
+        val extension = if (extension == "ged") ".ged" else ""
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .setType(mimeType)
+                .putExtra(Intent.EXTRA_TITLE, name + extension)
+        launcher.launch(intent)
     }
 
     fun deleteFilesAndDirs(fileOrDirectory: File) {

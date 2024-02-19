@@ -114,7 +114,7 @@ public class NewRelativeDialog extends DialogFragment {
                 intent.putExtra(Choice.PERSON, true);
                 intent.setClass(requireContext(), MainActivity.class);
                 if (fragment != null)
-                    ((DiagramFragment)fragment).choosePersonLauncher.launch(intent);
+                    ((DiagramFragment)fragment).getChoosePersonLauncher().launch(intent);
                 else
                     ((ProfileActivity)requireActivity()).choosePersonLauncher.launch(intent);
             }
