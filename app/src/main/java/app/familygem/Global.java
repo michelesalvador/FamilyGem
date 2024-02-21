@@ -1,12 +1,10 @@
 package app.familygem;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.multidex.MultiDexApplication;
 
 import com.google.gson.Gson;
@@ -17,7 +15,6 @@ import org.folg.gedcom.model.Media;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public class Global extends MultiDexApplication {
@@ -55,10 +52,13 @@ public class Global extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        // Exception handler
         defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
-        context = getApplicationContext();
-
+        // App context
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) context = getApplicationContext();
+        else context = ContextCompat.getContextForLanguage(getApplicationContext()); // Context with app locale
+        // App settings
         File settingsFile = new File(context.getFilesDir(), "settings.json");
         // Renames "preferenze.json" to "settings.json" (introduced in version 0.8)
         File preferencesFile = new File(context.getFilesDir(), "preferenze.json");
@@ -139,7 +139,6 @@ public class Global extends MultiDexApplication {
 
                 // Italian translated to English (version 0.8)
                 .replace("\"alberi\":", "\"trees\":")
-                .replace("\"alberi\":", "\"trees\":")
                 .replace("\"idAprendo\":", "\"openTree\":")
                 .replace("\"autoSalva\":", "\"autoSave\":")
                 .replace("\"caricaAlbero\":", "\"loadTree\":")
@@ -153,21 +152,5 @@ public class Global extends MultiDexApplication {
                 .replace("\"radiceCondivisione\":", "\"shareRoot\":")
                 .replace("\"grado\":", "\"grade\":")
                 .replace("\"data\":", "\"dateId\":");
-    }
-
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) { // Tiramisu doesn't need this
-            // Keeps the app locale if system language is changed while the app is running
-            Locale appLocale = AppCompatDelegate.getApplicationLocales().get(0);
-            if (appLocale != null) {
-                // Doesn't update directly 'newConfig' because it would create a configuration change loop
-                Configuration resConfig = getResources().getConfiguration();
-                resConfig.setLocale(appLocale);
-                // Keeps locale for static global context
-                getApplicationContext().getResources().updateConfiguration(resConfig, null);
-            }
-        }
-        super.onConfigurationChanged(newConfig);
     }
 }

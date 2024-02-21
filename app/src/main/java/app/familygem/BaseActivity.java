@@ -10,12 +10,10 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Renews activity title when in-app language is changed
+        // Updates activity title when one in-app language is selected
         try {
-            int label = getPackageManager().getActivityInfo(getComponentName(), 0).labelRes;
-            if (label != 0) {
-                setTitle(label);
-            }
+            int title = getPackageManager().getActivityInfo(getComponentName(), 0).labelRes;
+            if (title != 0) setTitle(title);
         } catch (Exception ignored) {
         }
     }
