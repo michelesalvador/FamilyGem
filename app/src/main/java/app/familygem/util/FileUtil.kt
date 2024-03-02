@@ -69,9 +69,9 @@ object FileUtil {
                 break
             }
         }
-        // Alternatively, returns a random one
+        // Alternatively, uses the first one
         if (media == null && mediaList.list.isNotEmpty()) {
-            media = mediaList.list.random()
+            media = mediaList.list.first()
             if (show) showImage(media, imageView, options, null, treeId)
         }
         imageView.visibility = if (media != null) View.VISIBLE else View.GONE
