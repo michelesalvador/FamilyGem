@@ -75,6 +75,7 @@ import org.folg.gedcom.model.Person
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
+import android.graphics.Bitmap
 
 class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
 
@@ -113,7 +114,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             val settings = PopupMenu(context(), it)
             val menu = settings.menu
             menu.add(0, 0, 0, R.string.diagram_settings)
-            if (Global.gc.people.size > 0) menu.add(0, 1, 0, R.string.export_pdf)
+            if (Global.gc.people.size > 0) {
+                menu.add(0, 1, 0, R.string.export_pdf)
+                menu.add(0, 2, 0, R.string.export_png)
+            }
             settings.show()
             settings.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -121,6 +125,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                     0 -> startActivity(Intent(context(), DiagramSettingsActivity::class.java))
                     // Export PDF
                     1 -> generatePdf()
+                    2 -> generatePng()
                     else -> return@setOnMenuItemClickListener false
                 }
                 true
@@ -797,6 +802,48 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     }
 
     /**
+     * Exports the present diagram to a temporary PNG file and asks where to save it.
+     */
+    private fun generatePng() {
+        binding.diagramWheel.root.visibility = View.VISIBLE
+
+        // Stylizes diagram for print
+        printPdf = true
+        for (i in 0 until box.childCount) {
+            box.getChildAt(i).invalidate()
+        }
+        printPdf = false
+
+        // Delay to ensure previous invalidate takes effect, especially on single-card diagram
+        lifecycleScope.launch(Dispatchers.IO) {
+            delay(50)
+
+            // Creates Bitmap with the same dimensions as the view
+            val bitmap = Bitmap.createBitmap(box.width, box.height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+
+            // Draws the content of the view onto the Bitmap
+            box.draw(canvas)
+
+            // Saves the Bitmap as a PNG file
+            try {
+                val outputStream = FileOutputStream(File(context().cacheDir, "temp.png"))
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+                outputStream.close()
+            } catch (e: Exception) {
+                // Handle exceptions
+                app.familygem.util.Util.toast(e.localizedMessage)
+                return@launch
+            }
+
+            // Open the PNG file
+            FileUtil.openSaf(Global.settings.openTree, "image/png", "png", savePngLauncher)
+        }
+    }
+
+
+    /**
      * Exports the present diagram to a temporary PDF file and asks where to save it.
      */
     private fun generatePdf() {
@@ -843,4 +890,23 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
         binding.diagramWheel.root.visibility = View.GONE
     }
+
+    /**
+     * Copies the temporary PNG file to its final destination.
+     */
+    private val savePngLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            val uri = result.data?.data
+            if (uri != null) {
+                val outputStream = context().contentResolver.openOutputStream(uri)
+                FileUtils.copyFile(File(context().cacheDir, "temp.png"), outputStream)
+                Toast.makeText(context, R.string.png_exported_ok, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(context, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
+            }
+        }
+        binding.diagramWheel.root.visibility = View.GONE
+    }
+
+
 }
