@@ -95,10 +95,10 @@
     <string name="sex">Sexo</string>
     <string name="event">Evento</string>
     <string name="birth">Nacimiento</string>
-    <string name="christening">Bautizo</string>
+    <string name="christening">Bautismo</string>
     <string name="residence">Residencia</string>
     <string name="occupation">Empleo</string>
-    <string name="death">Defunción</string>
+    <string name="death">Muerte</string>
     <string name="burial">Sepultura</string>
     <string name="other">Otros</string>
     <string name="note">Nota</string>
@@ -391,4 +391,7 @@
     <string name="current_date">Fecha actual</string>
     <string name="birthday">Cumpleaños</string>
     <string name="premium_deactivated">Premium desactivado.</string>
+    <string name="choose_folder">Elegir carpeta</string>
+    <string name="export_png">Exportar PNG</string>
+    <string name="png_exported_ok">PNG exportado.</string>
 </resources>

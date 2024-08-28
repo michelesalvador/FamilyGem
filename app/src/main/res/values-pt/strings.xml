@@ -44,8 +44,8 @@
     <string name="generation">Geração</string>
     <string name="persons">Pessoas</string>
     <string name="tap_add_tree">Toque para adicionar uma árvore genealógica.</string>
-    <string name="download">Baixar</string>
-    <string name="you_can_download">Agora você pode baixar a árvore compartilhada com você.</string>
+    <string name="download">Descarregar</string>
+    <string name="you_can_download">Agora pode descarregar a árvore compartilhada consigo.</string>
     <string name="a_new_tree">Uma nova árvore genealógica</string>
     <string name="family_gem_example">Exemplo Family Gem</string>
     <string name="simpsons_tree">A árvore genealógica dos Simpsons</string>
@@ -61,9 +61,9 @@
     <string name="modify_later">Mais tarde você pode editá-lo.</string>
     <string name="import_backup">Recuperar um backup ZIP</string>
     <string name="import_gedcom">Importar um ficheiro GEDCOM</string>
-    <string name="download_example">Baixe um exemplo</string>
+    <string name="download_example">Descarregue um exemplo</string>
     <string name="empty_tree">Comece uma árvore vazia</string>
-    <string name="download_shared_tree">Baixe a árvore compartilhada</string>
+    <string name="download_shared_tree">Descarregue a árvore compartilhada</string>
     <string name="new_tree">Nova árvore</string>
     <string name="submitters">Submissores</string>
     <string name="repositories">Repositórios</string>
@@ -254,14 +254,14 @@
     <string name="new_note">Nova nota</string>
     <string name="note">Nota</string>
     <string name="other">De outros</string>
-    <string name="burial">Enterro</string>
+    <string name="burial">Sepultura</string>
     <string name="death">Morte</string>
     <string name="occupation">Ocupação</string>
     <string name="residence">Residência</string>
     <string name="christening">Batismo</string>
     <string name="birth">Nascimento</string>
     <string name="event">Evento</string>
-    <string name="sex">Gênero</string>
+    <string name="sex">Sexo</string>
     <string name="yes">Sim</string>
     <string name="name">Nome</string>
     <string name="link_shared_media">Link para mídia compartilhada</string>
@@ -397,4 +397,5 @@
     <string name="fixed_date">Data fixa</string>
     <string name="current_date">Data actual</string>
     <string name="premium_deactivated">Premium desativado.</string>
+    <string name="choose_folder">Escolher pasta</string>
 </resources>

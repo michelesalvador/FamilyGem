@@ -118,7 +118,7 @@
     <string name="media_type">Тип медиа</string>
     <string name="italic">Курсив</string>
     <string name="author">Автор</string>
-    <string name="title">Название</string>
+    <string name="title">Титул</string>
     <string name="abbreviation">Краткое название</string>
     <string name="text">Текст</string>
     <string name="page">Страница</string>
@@ -165,7 +165,7 @@
     <string name="new_note">Новая заметка</string>
     <string name="note">Заметка</string>
     <string name="other">Другие</string>
-    <string name="burial">Погребение</string>
+    <string name="burial">Захоронение</string>
     <string name="death">Смерть</string>
     <string name="occupation">Профессия</string>
     <string name="residence">Проживание</string>
@@ -224,7 +224,7 @@
     <string name="add">Добавить</string>
     <string name="person">Особа</string>
     <string name="import_news">Импортировать обновление</string>
-    <string name="updates_replace_add">Вы должны выбрать, должны ли обновления заменять существующие элементы или добавляться как новые.</string>
+    <string name="updates_replace_add">Вам нужно выбрать, будут ли обновления заменять существующие элементы или добавляться как новые.</string>
     <string name="many_updates_choice">Обновлений требующих выбора: %d</string>
     <string name="one_update_choice">Одно обновление требует выбора</string>
     <string name="delete_imported_tree">Удалить импортированное дерево</string>
@@ -374,7 +374,7 @@
     <string name="merge">Объединить</string>
     <string name="select_tree">Выберите дерево для объединения:</string>
     <string name="merge_complete">Объединение завершено.</string>
-    <string name="choose_output">Выберите направление:</string>
+    <string name="choose_output">Выбрать местоположение:</string>
     <string name="generate_new">Создать новое дерево из двух</string>
     <string name="lifetime">Пожизненно</string>
     <string name="more_premium">Узнать больше о Premium</string>
@@ -397,4 +397,5 @@
     <string name="current_date">Текущая дата</string>
     <string name="birthday">День рождения</string>
     <string name="premium_deactivated">Premium деактивирован.</string>
+    <string name="choose_folder">Выбрать папку</string>
 </resources>

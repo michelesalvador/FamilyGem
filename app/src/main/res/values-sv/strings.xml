@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delete">Radera</string>
+    <string name="sure_delete">Är du säker?</string>
+    <string name="tagline">Skapa ditt släktträd</string>
+</resources>

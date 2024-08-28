@@ -33,7 +33,7 @@
     <string name="crop">Bijsnijden</string>
     <string name="choose_file">Kies bestand</string>
     <string name="choose_repository">Kies opslagplaats</string>
-    <string name="choose_source">Kies een bron</string>
+    <string name="choose_source">Kies bron</string>
     <string name="link_repository">Link opslagplaats</string>
     <string name="new_repository">Nieuwe opslagplaats</string>
     <string name="son">Zoon</string>
@@ -60,7 +60,7 @@
     <string name="new_note">Nieuwe notitie</string>
     <string name="other">Andere</string>
     <string name="burial">Begrafenis</string>
-    <string name="death">Overlijden</string>
+    <string name="death">Dood</string>
     <string name="occupation">Beroep</string>
     <string name="residence">Woonplaats</string>
     <string name="christening">Doop</string>
@@ -397,4 +397,5 @@
     <string name="fixed_date">Vaste datum</string>
     <string name="current_date">Actuele datum</string>
     <string name="premium_deactivated">Premium gedeactiveerd.</string>
+    <string name="choose_folder">Kies map</string>
 </resources>

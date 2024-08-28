@@ -122,7 +122,7 @@
     <string name="italic">Kurzíva</string>
     <string name="call_number">Referenčné číslo</string>
     <string name="author">Autor</string>
-    <string name="title">Názov</string>
+    <string name="title">Titul</string>
     <string name="abbreviation">Skrátený názov</string>
     <string name="user_id">ID používateľa</string>
     <string name="rin">ID automatizovaného záznamu</string>
@@ -249,7 +249,7 @@
     <string name="mother">Matka</string>
     <string name="father">Otec</string>
     <string name="link_source">Prepojiť zdroj</string>
-    <string name="death">Úmrtie</string>
+    <string name="death">Smrť</string>
     <string name="sex">Pohlavie</string>
     <string name="yes">Áno</string>
     <string name="name">Meno</string>
@@ -397,4 +397,5 @@
     <string name="current_date">Aktuálny dátum</string>
     <string name="birthday">Narodeniny</string>
     <string name="premium_deactivated">Premium deaktivovaný.</string>
+    <string name="choose_folder">Vybrať priečinok</string>
 </resources>

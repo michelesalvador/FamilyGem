@@ -388,4 +388,14 @@
     <string name="next">הבא</string>
     <string name="are_same_person">זה אותו אדם\?</string>
     <string name="error_found">נמצאה שגיאה אחת.</string>
+    <string name="tree_settings">הגדרות עץ</string>
+    <string name="max_life_span">אורך חיים מרבי</string>
+    <string name="fixed_date">תאריך קבוע</string>
+    <string name="birthday">יום הולדת</string>
+    <string name="years">שנים</string>
+    <string name="device_date">תאריך ההתקן</string>
+    <string name="help">עזרה</string>
+    <string name="current_date">תאריך נוכחי</string>
+    <string name="premium_deactivated">הפרימיום הושבת.</string>
+    <string name="choose_folder">בחירת תיקייה</string>
 </resources>

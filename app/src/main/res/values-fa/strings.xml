@@ -38,7 +38,7 @@
     <string name="family_as_spouse">خانواده (در نقش همسر)</string>
     <string name="uncles_cousins">عموها و عموزاده ها</string>
     <string name="age">سن</string>
-    <string name="death">وفات</string>
+    <string name="death">مرگ</string>
     <string name="husband">شوهر</string>
     <string name="link_source">اتصال مبدا</string>
     <string name="parent">والد</string>
@@ -386,4 +386,7 @@
     <string name="gedcom_only">فقط فایل GEDCOM</string>
     <string name="error_found">یک خطا پیدا شد.</string>
     <string name="next">بعدی</string>
+    <string name="christening">مراسم تعمید و نامگذاری بچه</string>
+    <string name="help">راهنمایی</string>
+    <string name="choose_folder">انتخاب پوشه</string>
 </resources>
