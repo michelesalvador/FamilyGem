@@ -2,6 +2,7 @@ package app.familygem.main
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.DashPathEffect
@@ -75,7 +76,6 @@ import org.folg.gedcom.model.Person
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
-import android.graphics.Bitmap
 
 class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
 
@@ -92,7 +92,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private var lineDash = 0 // Dashed lines interval
     private var glowSpace = 0 // Space to display glow around cards
     private var popup: View? = null // Suggestion balloon
-    private var printPdf = false // We are generating a PDF
+    private var printing = false // We are generating a PNG or PDF
     private val leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR
     private var diagramJob: Job? = null
     private val graphicNodes: MutableList<GraphicMetric> = ArrayList()
@@ -115,17 +115,15 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             val menu = settings.menu
             menu.add(0, 0, 0, R.string.diagram_settings)
             if (Global.gc.people.size > 0) {
-                menu.add(0, 1, 0, R.string.export_pdf)
-                menu.add(0, 2, 0, R.string.export_png)
+                menu.add(0, 1, 0, R.string.export_png)
+                menu.add(0, 2, 0, R.string.export_pdf)
             }
             settings.show()
             settings.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    // Diagram settings
-                    0 -> startActivity(Intent(context(), DiagramSettingsActivity::class.java))
-                    // Export PDF
-                    1 -> generatePdf()
-                    2 -> generatePng()
+                    0 -> startActivity(Intent(context(), DiagramSettingsActivity::class.java)) // Diagram settings
+                    1 -> generatePng() // Export PNG
+                    2 -> generatePdf() // Export PDF
                     else -> return@setOnMenuItemClickListener false
                 }
                 true
@@ -373,7 +371,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPdf) {
+            if (printing) {
                 popup!!.visibility = GONE
                 glow?.visibility = GONE
                 childView.invalidate()
@@ -403,7 +401,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPdf) {
+            if (printing) {
                 visibility = GONE
             }
         }
@@ -464,8 +462,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            // Changes background color for PDF export
-            if (printPdf) {
+            // Changes background color for PNG or PDF export
+            if (printing) {
                 if ((metric as PersonNode).acquired)
                     background.setBackgroundResource(R.drawable.casella_sfondo_sposo_stampa)
                 if (this == fulcrumView)
@@ -509,7 +507,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPdf && hearth != null) {
+            if (printing && hearth != null) {
                 hearth!!.setBackgroundResource(R.drawable.diagram_hearth_print)
             }
         }
@@ -536,7 +534,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            if (printPdf && layout != null) {
+            if (printing && layout != null) {
                 layout!!.setBackgroundResource(R.drawable.casella_sfondo_sposo_stampa)
             }
         }
@@ -572,8 +570,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
 
         override fun invalidate() {
-            paint.color = ResourcesCompat.getColor(resources, if (printPdf) R.color.diagram_lines_print else R.color.diagram_lines_screen, null)
-            paths.clear() // In case of PDF print
+            paint.color = ResourcesCompat.getColor(resources, if (printing) R.color.diagram_lines_print else R.color.diagram_lines_screen, null)
+            paths.clear() // In case of PNG or PDF print
             // Put the lines in one or more paths
             for ((pathNum, lineGroup) in lineGroups.withIndex()) {
                 if (pathNum >= paths.size) paths.add(Path())
@@ -802,46 +800,55 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     }
 
     /**
-     * Exports the present diagram to a temporary PNG file and asks where to save it.
+     * Prepares present diagram for export as PNG.
      */
     private fun generatePng() {
         binding.diagramWheel.root.visibility = View.VISIBLE
-
         // Stylizes diagram for print
-        printPdf = true
+        printing = true
         for (i in 0 until box.childCount) {
             box.getChildAt(i).invalidate()
         }
-        printPdf = false
-
-        // Delay to ensure previous invalidate takes effect, especially on single-card diagram
+        printing = false
+        // Starts the export process
         lifecycleScope.launch(Dispatchers.IO) {
-            delay(50)
-
-            // Creates Bitmap with the same dimensions as the view
-            val bitmap = Bitmap.createBitmap(box.width, box.height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-
-            // Draws the content of the view onto the Bitmap
-            box.draw(canvas)
-
-            // Saves the Bitmap as a PNG file
-            try {
-                val outputStream = FileOutputStream(File(context().cacheDir, "temp.png"))
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                outputStream.flush()
-                outputStream.close()
-            } catch (e: Exception) {
-                // Handle exceptions
-                app.familygem.util.Util.toast(e.localizedMessage)
-                return@launch
-            }
-
-            // Open the PNG file
-            FileUtil.openSaf(Global.settings.openTree, "image/png", "png", savePngLauncher)
+            createBitmap(1F)
         }
     }
 
+    /**
+     * Recursively generates a bitmap of acceptable size.
+     * Exports the bitmap to a temporary PNG file and asks where to save it.
+     */
+    private suspend fun createBitmap(scale: Float) {
+        try {
+            // Creates Bitmap with the scaled dimensions
+            val bitmap = Bitmap.createBitmap((box.width * scale).toInt(), (box.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            // Scales also the canvas
+            if (scale < 1) {
+                val scaleMatrix = Matrix()
+                scaleMatrix.setScale(scale, scale, 0F, 0F)
+                canvas.setMatrix(scaleMatrix)
+            }
+            // Draws the content of the view onto the Bitmap
+            box.draw(canvas)
+            // Saves the Bitmap as a PNG file
+            val outputStream = FileOutputStream(File(context().cacheDir, "temp.png"))
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+        } catch (exception: Exception) {
+            generateFail(exception.localizedMessage)
+            return
+        } catch (error: Error) {
+            if (error is OutOfMemoryError) createBitmap(scale * 0.99F)
+            else generateFail(error.localizedMessage)
+            return
+        }
+        // Open SAF to choose where to save the PNG file
+        FileUtil.openSaf(Global.settings.openTree, "image/png", "png", savePngLauncher)
+    }
 
     /**
      * Exports the present diagram to a temporary PDF file and asks where to save it.
@@ -849,11 +856,11 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private fun generatePdf() {
         binding.diagramWheel.root.visibility = View.VISIBLE
         // Stylizes diagram for print
-        printPdf = true
+        printing = true
         for (i in 0 until box.childCount) {
             box.getChildAt(i).invalidate()
         }
-        printPdf = false
+        printing = false
         lifecycleScope.launch(Dispatchers.IO) {
             delay(50) // Just to wait for previous invalidate to take effect, especially on single-card diagram
             // Creates PDF
@@ -869,7 +876,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 outputStream.flush()
                 outputStream.close()
             } catch (e: Exception) {
-                app.familygem.util.Util.toast(e.localizedMessage)
+                generateFail(e.localizedMessage)
                 return@launch
             }
             FileUtil.openSaf(Global.settings.openTree, "application/pdf", "pdf", savePdfLauncher)
@@ -877,18 +884,13 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     }
 
     /**
-     * Copies the temporary PDF file to its final destination.
+     * Bad conclusion of previous two functions.
      */
-    private val savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            val uri = result.data?.data
-            if (uri != null) {
-                val outputStream = context().contentResolver.openOutputStream(uri)
-                FileUtils.copyFile(File(context().cacheDir, "temp.pdf"), outputStream)
-                Toast.makeText(context, R.string.pdf_exported_ok, Toast.LENGTH_LONG).show()
-            } else Toast.makeText(context, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
+    private suspend fun generateFail(message: String?) {
+        withContext(Dispatchers.Main) {
+            message?.let { Toast.makeText(context(), it, Toast.LENGTH_LONG).show() }
+            binding.diagramWheel.root.visibility = View.GONE
         }
-        binding.diagramWheel.root.visibility = View.GONE
     }
 
     /**
@@ -908,5 +910,18 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         binding.diagramWheel.root.visibility = View.GONE
     }
 
-
+    /**
+     * Copies the temporary PDF file to its final destination.
+     */
+    private val savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            val uri = result.data?.data
+            if (uri != null) {
+                val outputStream = context().contentResolver.openOutputStream(uri)
+                FileUtils.copyFile(File(context().cacheDir, "temp.pdf"), outputStream)
+                Toast.makeText(context, R.string.pdf_exported_ok, Toast.LENGTH_LONG).show()
+            } else Toast.makeText(context, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
+        }
+        binding.diagramWheel.root.visibility = View.GONE
+    }
 }

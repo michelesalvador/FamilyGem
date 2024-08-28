@@ -175,7 +175,9 @@
     <string name="unlink">Scollega</string>
     <string name="long_press_menu">Tieni premuto per mostrare il menu.
 \nTocca per aprire il profilo.</string>
+    <string name="export_png">Esporta PNG</string>
     <string name="export_pdf">Esporta PDF</string>
+    <string name="png_exported_ok">PNG esportata.</string>
     <string name="pdf_exported_ok">PDF esportato.</string>
     <!-- DiagramSettingsActivity -->
     <string name="diagram_settings">Impostazioni diagramma</string>
