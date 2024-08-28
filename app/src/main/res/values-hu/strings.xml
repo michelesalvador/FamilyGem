@@ -104,7 +104,7 @@
     <string name="replace">Cserélje ki</string>
     <string name="ignore">Kihagyás</string>
     <string name="confirm_news">Frissítések megerősítése</string>
-    <string name="confirm">megerősít</string>
+    <string name="confirm">Megerősít</string>
     <string name="all_imported_delete">Minden frissítés importálva.
 \nTörli az importált fát\?</string>
     <string name="birthdays">Születésnapok</string>
@@ -147,7 +147,7 @@
     <string name="new_shared_note">Új megosztott megjegyzés</string>
     <string name="source">Forrás</string>
     <string name="new_source">Új forrás</string>
-    <string name="sex">Neme</string>
+    <string name="sex">Nem</string>
     <string name="move_up">Mozgatás felfelé</string>
     <string name="move_down">Mozgatás lefelé</string>
     <string name="parent">Szülő</string>
@@ -397,4 +397,5 @@
     <string name="fixed_date">Fix dátum</string>
     <string name="current_date">Aktuális dátum</string>
     <string name="premium_deactivated">Premium deaktiválva.</string>
+    <string name="choose_folder">Válassza ki a mappát</string>
 </resources>

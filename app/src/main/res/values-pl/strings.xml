@@ -157,8 +157,8 @@
     <string name="christening">Chrzest</string>
     <string name="residence">Miejsce zamieszkania</string>
     <string name="occupation">Zawód</string>
-    <string name="death">Zgon</string>
-    <string name="burial">Pogrzeb</string>
+    <string name="death">Śmierć</string>
+    <string name="burial">Pochówek</string>
     <string name="other">Inne</string>
     <string name="note">Notatki</string>
     <string name="new_note">Nowa notatka</string>
@@ -391,4 +391,5 @@
     <string name="current_date">Aktualna data</string>
     <string name="birthday">Urodziny</string>
     <string name="premium_deactivated">Premium dezaktywowany.</string>
+    <string name="choose_folder">Wybierz folder</string>
 </resources>

@@ -397,4 +397,5 @@
     <string name="fixed_date">Določen datum</string>
     <string name="current_date">Aktualni datum</string>
     <string name="premium_deactivated">Premium deaktiviran.</string>
+    <string name="choose_folder">Izbirati mapo</string>
 </resources>

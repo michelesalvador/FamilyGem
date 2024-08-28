@@ -205,10 +205,10 @@
     <string name="yes">نعم</string>
     <string name="sex">الجنس</string>
     <string name="event">الحدث</string>
-    <string name="birth">الميلاد</string>
+    <string name="birth">الولادة</string>
     <string name="residence">الإقامة</string>
     <string name="occupation">المهنة</string>
-    <string name="death">الوفاة</string>
+    <string name="death">الموت</string>
     <string name="burial">الدفن</string>
     <string name="other">أخرى</string>
     <string name="note">ملاحظة</string>
@@ -272,7 +272,7 @@
     <string name="text">النص</string>
     <string name="certainty">الاحتمالية</string>
     <string name="abbreviation">عنوان قصير</string>
-    <string name="title">العنوان</string>
+    <string name="title">عنوان</string>
     <string name="publication_facts">حقائق الاصدارات</string>
     <string name="call_number">رقم الاتصال</string>
     <string name="parentheses">أقواس</string>
@@ -369,4 +369,5 @@
     <string name="edit_id">حرر المعرف</string>
     <string name="invalid_id">معرف غير صالح</string>
     <string name="existing_id">معرف موجود مسبقا</string>
+    <string name="christening">التعميد</string>
 </resources>

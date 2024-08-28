@@ -397,4 +397,5 @@
     <string name="fixed_date">Date fixe</string>
     <string name="current_date">Date actuelle</string>
     <string name="premium_deactivated">Premium désactivé.</string>
+    <string name="choose_folder">Choisir le dossier</string>
 </resources>

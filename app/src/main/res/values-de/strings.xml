@@ -375,7 +375,7 @@
     <string name="merge_into">%2$s in %1$s zusammenführen</string>
     <string name="merge_complete">Zusammenführung abgeschlossen.</string>
     <string name="select_tree">Wählen Sie einen Stammbaum zum Zusammenführen aus:</string>
-    <string name="choose_output">Wählen Sie einen Standort:</string>
+    <string name="choose_output">Wähle einen Standort:</string>
     <string name="generate_new">Erstellen eines neuen Stammbaums aus zwei</string>
     <string name="unlock_function">Diese Funktion kann mit Family Gem Premium freigeschaltet werden.</string>
     <string name="lifetime">Lebenslang</string>
@@ -397,4 +397,5 @@
     <string name="current_date">Aktuelles Datum</string>
     <string name="birthday">Geburtstag</string>
     <string name="premium_deactivated">Premium deaktiviert.</string>
+    <string name="choose_folder">Wähle einen Ordner</string>
 </resources>

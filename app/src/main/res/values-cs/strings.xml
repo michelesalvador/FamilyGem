@@ -122,7 +122,7 @@
     <string name="call_number">Referenční číslo</string>
     <string name="publication_facts">Publikace</string>
     <string name="author">Autor</string>
-    <string name="title">Název</string>
+    <string name="title">Titul</string>
     <string name="certainty">Hodnověrnost</string>
     <string name="text">Text</string>
     <string name="page">Strana</string>
@@ -217,7 +217,7 @@
     <string name="note">Poznámka</string>
     <string name="other">Další</string>
     <string name="burial">Pohřbení</string>
-    <string name="death">Úmrtí</string>
+    <string name="death">Smrt</string>
     <string name="occupation">Povolání</string>
     <string name="residence">Bydliště</string>
     <string name="christening">Křest</string>
@@ -397,4 +397,5 @@
     <string name="current_date">Aktuální datum</string>
     <string name="birthday">Narozeniny</string>
     <string name="premium_deactivated">Premium deaktivován.</string>
+    <string name="choose_folder">Zvolit složku</string>
 </resources>

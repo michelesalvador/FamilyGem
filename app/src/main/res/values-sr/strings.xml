@@ -89,7 +89,7 @@
     <string name="call_number">Pozivni broj</string>
     <string name="publication_facts">Podaci publikacije</string>
     <string name="author">Autor</string>
-    <string name="title">Naslov</string>
+    <string name="title">Titula</string>
     <string name="abbreviation">Kratki naslov</string>
     <string name="certainty">Pouzdanost</string>
     <string name="text">Tekst</string>
@@ -149,7 +149,7 @@
     <string name="new_note">Nova napomena</string>
     <string name="note">Napomena</string>
     <string name="other">Ostalo</string>
-    <string name="burial">Sahrana</string>
+    <string name="burial">Pokop</string>
     <string name="death">Smrt</string>
     <string name="occupation">Zanimanje</string>
     <string name="residence">Prebivalište</string>
@@ -373,7 +373,7 @@
     <string name="merge_tree">Spojiti stablo</string>
     <string name="merge">Spojiti</string>
     <string name="select_tree">Izaberite stablo za spajanje:</string>
-    <string name="choose_output">Izaberite odredište:</string>
+    <string name="choose_output">Odaberite odredište:</string>
     <string name="generate_new">Generišiti novo stablo od njih dvoje</string>
     <string name="merge_complete">Spajanje je završeno.</string>
     <string name="unlock_function">Ova funkcija se može otključati uz Family Gem Premium.</string>
@@ -397,4 +397,5 @@
     <string name="fixed_date">Fiksni datum</string>
     <string name="current_date">Trenutni datum</string>
     <string name="premium_deactivated">Premium deaktiviran.</string>
+    <string name="choose_folder">Odaberite fasciklu</string>
 </resources>

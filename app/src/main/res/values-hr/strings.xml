@@ -13,7 +13,7 @@
     <string name="new_tree">Novo stablo</string>
     <string name="settings">Postavke</string>
     <string name="one_update_choice">Jedno aktualiziranje treba izbor</string>
-    <string name="title">Naslov</string>
+    <string name="title">Titula</string>
     <string name="slideshow">Dijaprojekcija</string>
     <string name="num_children">%d djece</string>
     <string name="husband">Muž</string>
@@ -397,4 +397,5 @@
     <string name="fixed_date">Fiksni datum</string>
     <string name="current_date">Trenutni datum</string>
     <string name="premium_deactivated">Premium deaktiviran.</string>
+    <string name="choose_folder">Odaberi mapu</string>
 </resources>

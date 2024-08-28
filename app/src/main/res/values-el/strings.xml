@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sure_delete">Είσαι σίγουρος?</string>
+    <string name="cancel">Ακύρωση</string>
+    <string name="done">Τέλος</string>
+    <string name="change_date">Αλλαγή ημερομηνίας</string>
+    <string name="cant_understand_uri">Το URI που λήφθηκε δεν έγινε κατανοητό.</string>
+    <string name="tagline">Δημιούργησε το δικό σου οικογενειακό δέντρο</string>
+    <string name="delete">Διαγραφή</string>
+    <string name="something_wrong">Κάτι πήγε στραβά.</string>
+    <string name="version_name">Έκδοση %s</string>
+</resources>

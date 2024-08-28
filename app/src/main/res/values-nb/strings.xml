@@ -210,7 +210,7 @@
     <string name="new_shared_note">Ny delt merknad</string>
     <string name="new_note">Ny merknad</string>
     <string name="note">Merknad</string>
-    <string name="burial">Gravferd</string>
+    <string name="burial">Begravelse</string>
     <string name="occupation">Yrke</string>
     <string name="christening">Dåp</string>
     <string name="birth">Fødselsdag</string>
@@ -397,4 +397,5 @@
     <string name="fixed_date">Fast dato</string>
     <string name="current_date">Aktuell dato</string>
     <string name="premium_deactivated">Premium deaktivert.</string>
+    <string name="choose_folder">Velg mappe</string>
 </resources>

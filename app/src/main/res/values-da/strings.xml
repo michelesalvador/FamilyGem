@@ -397,4 +397,5 @@
     <string name="fixed_date">Fast dato</string>
     <string name="current_date">Aktuel dato</string>
     <string name="premium_deactivated">Premium deaktiveret.</string>
+    <string name="choose_folder">Vælg mappe</string>
 </resources>

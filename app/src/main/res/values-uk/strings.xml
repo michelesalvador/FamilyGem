@@ -256,7 +256,7 @@
     <string name="media_type">Тип медіа</string>
     <string name="italic">Курсив</string>
     <string name="author">Автор</string>
-    <string name="title">Назва</string>
+    <string name="title">Титул</string>
     <string name="abbreviation">Коротка назва</string>
     <string name="certainty">Достовірність</string>
     <string name="text">Текст</string>
@@ -397,4 +397,5 @@
     <string name="current_date">Актуальна дата</string>
     <string name="birthday">Уродини</string>
     <string name="premium_deactivated">Premium деактивований.</string>
+    <string name="choose_folder">Оберіть папку</string>
 </resources>

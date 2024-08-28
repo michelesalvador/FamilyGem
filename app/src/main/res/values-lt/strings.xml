@@ -36,7 +36,7 @@
     <string name="birth_place">Gimimo vieta</string>
     <string name="registered_partnership">Registruota partnerystė</string>
     <string name="id">ID</string>
-    <string name="maiden"/>
+    <string name="maiden">Netekėjusi</string>
     <string name="birth">Gimimas</string>
     <string name="trees">Medžiai</string>
     <string name="brother">Brolis</string>
@@ -84,7 +84,7 @@
     <string name="www">Svetainė</string>
     <string name="year">Metai</string>
     <string name="half_sister">Netikra sesuo</string>
-    <string name="death">Mirimas</string>
+    <string name="death">Mirtis</string>
     <string name="fax">Faksas</string>
     <string name="years">Metai</string>
     <string name="zip_exported_ok">ZIP išeksportuotas.</string>
@@ -239,7 +239,7 @@
     <string name="sex">Lytis</string>
     <string name="simple_note">Paprasta pastaba</string>
     <string name="existing_family">Tokia šeima jau yra</string>
-    <string name="after"/>
+    <string name="after">Po</string>
     <string name="shares">Bendrinimai</string>
     <string name="a_new_tree">Naujas šeimos medis</string>
     <string name="share_with">Bendrinti su</string>
@@ -283,4 +283,5 @@
     <string name="january">Sausis</string>
     <string name="premium_deactivated">Premium deaktyvuota.</string>
     <string name="move_after">Perkelti paskui</string>
+    <string name="title">Titulas</string>
 </resources>
