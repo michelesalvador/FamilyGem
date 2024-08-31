@@ -1301,27 +1301,26 @@ public class U {
             context.startActivity(intent);
     }
 
-    // Controlla che una o più famiglie siano vuote e propone di eliminarle
-    // 'ancheKo' dice di eseguire 'cheFare' anche cliccando Cancel o fuori dal dialogo
-    public static boolean controllaFamiglieVuote(Context contesto, Runnable cheFare, boolean ancheKo, Family... famiglie) {
-        List<Family> vuote = new ArrayList<>();
-        for (Family fam : famiglie) {
-            int membri = fam.getHusbandRefs().size() + fam.getWifeRefs().size() + fam.getChildRefs().size();
-            if (membri <= 1 && fam.getEventsFacts().isEmpty() && fam.getAllMedia(Global.gc).isEmpty()
-                    && fam.getAllNotes(Global.gc).isEmpty() && fam.getSourceCitations().isEmpty()) {
-                vuote.add(fam);
-            }
+    /**
+     * Checks if one or more families are empty and suggests deleting them.
+     *
+     * @param onCancelToo Says to run 'whatTotDo' even when clicking Cancel or out of the dialog
+     */
+    public static boolean deleteEmptyFamilies(Context context, Runnable whatTotDo, boolean onCancelToo, Family... families) {
+        List<Family> emptyFamilies = new ArrayList<>();
+        for (Family family : families) {
+            if (FamilyUtilKt.isEmpty(family)) emptyFamilies.add(family);
         }
-        if (vuote.size() > 0) {
-            new AlertDialog.Builder(contesto).setMessage(R.string.empty_family_delete)
+        if (!emptyFamilies.isEmpty()) {
+            new AlertDialog.Builder(context).setMessage(R.string.empty_family_delete)
                     .setPositiveButton(android.R.string.yes, (dialog, i) -> {
-                        for (Family fam : vuote)
-                            FamilyUtilKt.delete(fam); // Così capita di salvare più volte insieme... ma vabè
-                        if (cheFare != null) cheFare.run();
+                        for (Family family : emptyFamilies)
+                            FamilyUtilKt.delete(family); // TODO So it happens that we save multiple times at once
+                        if (whatTotDo != null) whatTotDo.run();
                     }).setNeutralButton(android.R.string.cancel, (dialog, i) -> {
-                        if (ancheKo) cheFare.run();
+                        if (onCancelToo) whatTotDo.run();
                     }).setOnCancelListener(dialog -> {
-                        if (ancheKo) cheFare.run();
+                        if (onCancelToo) whatTotDo.run();
                     }).show();
             return true;
         }

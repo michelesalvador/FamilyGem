@@ -38,7 +38,7 @@ public class FamilyActivity extends DetailActivity {
     Family family;
     static String[] lineageTexts = {U.s(R.string.undefined) + " (" + Util.INSTANCE.caseString(R.string.birth) + ")",
             U.s(R.string.birth), U.s(R.string.adopted), U.s(R.string.foster)};
-    static String[] lineageTypes = {null, "birth", "adopted", "foster"};
+    public static String[] lineageTypes = {null, "birth", "adopted", "foster"};
 
     @Override
     protected void format() {

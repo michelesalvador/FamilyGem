@@ -6,6 +6,12 @@ import app.familygem.U
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
 
+fun Family.isEmpty(): Boolean {
+    val members = this.husbandRefs.size + this.wifeRefs.size + this.childRefs.size
+    return members <= 1 && this.eventsFacts.isEmpty() && this.getAllMedia(Global.gc).isEmpty()
+            && this.getAllNotes(Global.gc).isEmpty() && this.sourceCitations.isEmpty()
+}
+
 fun Family.delete() {
     val members: MutableSet<Person> = HashSet()
     // Removes references from family members towards the family

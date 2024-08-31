@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp">
+
+    <View
+        android:id="@+id/group_trail"
+        android:layout_width="6dp"
+        android:layout_height="3dp"
+        android:background="@color/primary_light"
+        app:layout_constraintBottom_toBottomOf="@id/group_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/group_title" />
+
+    <TextView
+        android:id="@+id/group_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/primary_light"
+        android:paddingStart="8dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="3dp"
+        android:textColor="#fff"
+        android:textSize="15sp"
+        app:layout_constraintStart_toEndOf="@id/group_trail"
+        app:layout_constraintTop_toTopOf="parent"
+        tool:text="Origin family" />
+
+    <ImageView
+        android:id="@+id/group_tab"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/group_title"
+        app:layout_constraintDimensionRatio="H,2:1"
+        app:layout_constraintStart_toEndOf="@id/group_title"
+        app:layout_constraintTop_toTopOf="@+id/group_title"
+        app:srcCompat="@drawable/triangle_tab" />
+
+    <LinearLayout
+        android:id="@+id/group_list"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/group_title"
+        app:layout_constraintTop_toBottomOf="@+id/group_title" />
+</androidx.constraintlayout.widget.ConstraintLayout>

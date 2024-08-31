@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp">
+
+    <TextView
+        android:id="@+id/group_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/primary_light"
+        android:paddingStart="8dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="3dp"
+        android:textColor="#fff"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tool:text="Origin family" />
+
+    <ImageView
+        android:id="@+id/group_tab"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/group_title"
+        app:layout_constraintDimensionRatio="H,2:1"
+        app:layout_constraintStart_toEndOf="@id/group_title"
+        app:layout_constraintTop_toTopOf="@+id/group_title"
+        app:srcCompat="@drawable/triangle_tab" />
+
+    <View
+        android:id="@+id/group_column"
+        android:layout_width="3dp"
+        android:layout_height="0dp"
+        android:background="@color/primary_light"
+        app:layout_constraintBottom_toTopOf="@id/group_cap"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/group_title" />
+
+    <ImageView
+        android:id="@+id/group_cap"
+        android:layout_width="3dp"
+        android:layout_height="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/group_list"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/triangle_cap" />
+
+    <LinearLayout
+        android:id="@+id/group_list"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/group_column"
+        app:layout_constraintTop_toBottomOf="@+id/group_title" />
+</androidx.constraintlayout.widget.ConstraintLayout>

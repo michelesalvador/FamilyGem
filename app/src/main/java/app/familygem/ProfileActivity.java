@@ -587,7 +587,7 @@ public class ProfileActivity extends AppCompatActivity {
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
                         .setPositiveButton(R.string.delete, (dialog, i) -> {
                             Family[] families = PersonsFragment.deletePerson(this, one.getId());
-                            if (!U.controllaFamiglieVuote(this, this::onBackPressed, true, families))
+                            if (!U.deleteEmptyFamilies(this, this::onBackPressed, true, families))
                                 onBackPressed();
                         }).setNeutralButton(R.string.cancel, null).show();
                 return true;

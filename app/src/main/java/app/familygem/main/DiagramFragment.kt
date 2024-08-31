@@ -766,7 +766,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 modified.add(spouseFam!!)
             }
             val modifiedArray = modified.toTypedArray()
-            U.controllaFamiglieVuote(context(), { refreshAll() }, false, *modifiedArray)
+            U.deleteEmptyFamilies(context(), { refreshAll() }, false, *modifiedArray)
             ChangeUtil.updateChangeDate(person)
             TreeUtil.save(true, *modifiedArray)
             refreshAll()
@@ -775,7 +775,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                     .setPositiveButton(R.string.delete) { _, _ ->
                         val families = PersonsFragment.deletePerson(context, personId)
                         refreshAll()
-                        U.controllaFamiglieVuote(context, { refreshAll() }, false, *families)
+                        U.deleteEmptyFamilies(context, { refreshAll() }, false, *families)
                     }.setNeutralButton(R.string.cancel, null).show()
         } else return false
         return true

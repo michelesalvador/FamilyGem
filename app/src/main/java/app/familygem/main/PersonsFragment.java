@@ -672,7 +672,7 @@ public class PersonsFragment extends BaseFragment {
                         adapter.notifyItemRemoved(position);
                         adapter.notifyItemRangeChanged(position, selectedPeople.size() - position);
                         ((MainActivity)requireActivity()).refreshInterface();
-                        U.controllaFamiglieVuote(getContext(), null, false, families);
+                        U.deleteEmptyFamilies(getContext(), null, false, families);
                     }).setNeutralButton(R.string.cancel, null).show();
         } else {
             return false;
