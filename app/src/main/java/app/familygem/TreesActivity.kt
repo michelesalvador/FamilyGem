@@ -64,11 +64,12 @@ class TreesActivity : AppCompatActivity() {
     private lateinit var welcome: SpeechBubble
     private lateinit var exporter: Exporter
     private var autoOpenedTree = false // To open automatically the tree at startup only once
-    private var consumedNotifications = ArrayList<Int>() // The birthday notification IDs are stored to display the corresponding person only once
+    private var consumedNotifications =
+        ArrayList<Int>() // The birthday notification IDs are stored to display the corresponding person only once
     private var draggedTreeId = 0
 
-    override fun onCreate(savedState: Bundle?) {
-        super.onCreate(savedState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.trees_activity)
         val listView = findViewById<ListView>(R.id.trees_list)
         progress = findViewById(R.id.progress_wheel)
@@ -84,15 +85,16 @@ class TreesActivity : AppCompatActivity() {
         } // If there are no trees
         else if (Global.settings.trees.isEmpty()) welcome.show()
 
-        if (savedState != null) {
-            autoOpenedTree = savedState.getBoolean("autoOpenedTree")
-            consumedNotifications = savedState.getIntegerArrayList("consumedNotifications")!!
+        if (savedInstanceState != null) {
+            autoOpenedTree = savedInstanceState.getBoolean("autoOpenedTree")
+            consumedNotifications = savedInstanceState.getIntegerArrayList("consumedNotifications")!!
         }
 
         if (Global.settings.trees == null) return
         treeList = ArrayList()
-        adapter = object : SimpleAdapter(this, treeList, R.layout.tree_view,
-                arrayOf("title", "data"), intArrayOf(R.id.tree_title, R.id.tree_data)) {
+        adapter = object : SimpleAdapter(
+            this, treeList, R.layout.tree_view, arrayOf("title", "data"), intArrayOf(R.id.tree_title, R.id.tree_data)
+        ) {
             // Returns a view of the tree list
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val treeView = super.getView(position, convertView, parent)
@@ -165,8 +167,8 @@ class TreesActivity : AppCompatActivity() {
                     if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1)
                         menu.add(0, 6, 0, R.string.merge_tree)
                     if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1
-                            && tree.shares != null && tree.grade != 0) // Must be 9 or 10
-                        menu.add(0, 7, 0, R.string.compare)
+                        && tree.shares != null && tree.grade != 0 // Must be 9 or 10
+                    ) menu.add(0, 7, 0, R.string.compare)
                     if (exists && Global.settings.expert && !exhausted)
                         menu.add(0, 8, 0, R.string.export_gedcom)
                     if (exists && Global.settings.expert)
@@ -278,8 +280,9 @@ class TreesActivity : AppCompatActivity() {
         }
 
         // Automatic load of last opened tree of previous session
-        if ((!birthdayNotifyTapped(intent) && !autoOpenedTree
-                        && intent.getBooleanExtra(Extra.AUTO_LOAD_TREE, false)) && Global.settings.openTree > 0) {
+        if ((!birthdayNotifyTapped(intent) && !autoOpenedTree && intent.getBooleanExtra(Extra.AUTO_LOAD_TREE, false))
+            && Global.settings.openTree > 0
+        ) {
             progress.visibility = View.VISIBLE
             lifecycleScope.launch(IO) {
                 if (TreeUtil.openGedcom(Global.settings.openTree, false)) {
@@ -295,19 +298,19 @@ class TreesActivity : AppCompatActivity() {
      */
     private fun showSharedTreeDialog(dateId: String, onCancel: () -> Unit) {
         AlertDialog.Builder(this)
-                .setTitle(R.string.a_new_tree)
-                .setMessage(R.string.you_can_download)
-                .setNeutralButton(R.string.cancel) { _, _ -> onCancel() }
-                .setOnCancelListener { onCancel() }
-                .setPositiveButton(R.string.download) { _, _ ->
-                    progress.visibility = View.VISIBLE
-                    lifecycleScope.launch(IO) {
-                        TreeUtil.downloadSharedTree(this@TreesActivity, dateId, {
-                            progress.visibility = View.GONE
-                            updateList()
-                        }, { progress.visibility = View.GONE })
-                    }
-                }.show()
+            .setTitle(R.string.a_new_tree)
+            .setMessage(R.string.you_can_download)
+            .setNeutralButton(R.string.cancel) { _, _ -> onCancel() }
+            .setOnCancelListener { onCancel() }
+            .setPositiveButton(R.string.download) { _, _ ->
+                progress.visibility = View.VISIBLE
+                lifecycleScope.launch(IO) {
+                    TreeUtil.downloadSharedTree(this@TreesActivity, dateId, {
+                        progress.visibility = View.GONE
+                        updateList()
+                    }, { progress.visibility = View.GONE })
+                }
+            }.show()
     }
 
     inner class MenuItemClickListener(val position: Int, val treeId: Int) : PopupMenu.OnMenuItemClickListener {
@@ -332,11 +335,11 @@ class TreesActivity : AppCompatActivity() {
                 val titleEdit = renameView.findViewById<EditText>(R.id.treeTitle_edit)
                 titleEdit.setText(treeList[position]["title"])
                 val dialog = AlertDialog.Builder(this@TreesActivity)
-                        .setView(renameView).setTitle(R.string.title)
-                        .setPositiveButton(R.string.rename) { _, _ ->
-                            Global.settings.renameTree(treeId, titleEdit.text.toString())
-                            updateList()
-                        }.setNeutralButton(R.string.cancel, null).create()
+                    .setView(renameView).setTitle(R.string.title)
+                    .setPositiveButton(R.string.rename) { _, _ ->
+                        Global.settings.renameTree(treeId, titleEdit.text.toString().trim())
+                        updateList()
+                    }.setNeutralButton(R.string.cancel, null).create()
                 titleEdit.setOnEditorActionListener { _, action, _ ->
                     if (action == EditorInfo.IME_ACTION_DONE) dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
                     false
@@ -349,8 +352,7 @@ class TreesActivity : AppCompatActivity() {
                     inputMethodManager.showSoftInput(titleEdit, InputMethodManager.SHOW_IMPLICIT)
                 }, 300)
             } else if (id == 3) { // Media folders
-                startActivity(Intent(this@TreesActivity, MediaFoldersActivity::class.java)
-                        .putExtra(Extra.TREE_ID, treeId))
+                startActivity(Intent(this@TreesActivity, MediaFoldersActivity::class.java).putExtra(Extra.TREE_ID, treeId))
             } else if (id == 4) { // Find errors
                 progress.visibility = View.VISIBLE
                 lifecycleScope.launch(Default) {
@@ -358,11 +360,9 @@ class TreesActivity : AppCompatActivity() {
                         withContext(Main) { progress.visibility = View.GONE }
                 }
             } else if (id == 5) { // Share tree
-                startActivity(Intent(this@TreesActivity, SharingActivity::class.java)
-                        .putExtra(Extra.TREE_ID, treeId))
+                startActivity(Intent(this@TreesActivity, SharingActivity::class.java).putExtra(Extra.TREE_ID, treeId))
             } else if (id == 6) { // Merge with another tree
-                startActivity(Intent(this@TreesActivity, MergeActivity::class.java)
-                        .putExtra(Extra.TREE_ID, treeId))
+                startActivity(Intent(this@TreesActivity, MergeActivity::class.java).putExtra(Extra.TREE_ID, treeId))
             } else if (id == 7) { // Compare with existing trees
                 val tree = Global.settings.getTree(treeId)
                 if (TreeUtil.compareTrees(this@TreesActivity, tree, false)) {
@@ -380,16 +380,16 @@ class TreesActivity : AppCompatActivity() {
                             withContext(Main) {
                                 val choices = arrayOf(getString(R.string.gedcom_media_zip, totMedia), getString(R.string.gedcom_only))
                                 AlertDialog.Builder(this@TreesActivity)
-                                        .setTitle(R.string.export_gedcom)
-                                        .setSingleChoiceItems(choices, -1) { dialog, selected ->
-                                            if (selected == 0) {
-                                                mime = "application/zip"
-                                                extension = "zip"
-                                                code = Code.ZIPPED_GEDCOM_FILE
-                                            }
-                                            F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
-                                            dialog.dismiss()
-                                        }.show()
+                                    .setTitle(R.string.export_gedcom)
+                                    .setSingleChoiceItems(choices, -1) { dialog, selected ->
+                                        if (selected == 0) {
+                                            mime = "application/zip"
+                                            extension = "zip"
+                                            code = Code.ZIPPED_GEDCOM_FILE
+                                        }
+                                        F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
+                                        dialog.dismiss()
+                                    }.show()
                             }
                         } else {
                             F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
@@ -403,10 +403,10 @@ class TreesActivity : AppCompatActivity() {
                 }
             } else if (id == 10) { // Delete tree
                 AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
-                        .setPositiveButton(R.string.delete) { _, _ ->
-                            TreeUtil.deleteTree(treeId)
-                            updateList()
-                        }.setNeutralButton(R.string.cancel, null).show()
+                    .setPositiveButton(R.string.delete) { _, _ ->
+                        TreeUtil.deleteTree(treeId)
+                        updateList()
+                    }.setNeutralButton(R.string.cancel, null).show()
             } else {
                 return false
             }
@@ -439,7 +439,9 @@ class TreesActivity : AppCompatActivity() {
         birthdayNotifyTapped(intent)
     }
 
-    // If a birthday notification was tapped loads the relative tree and returns true
+    /**
+     * If a birthday notification was tapped, loads the corresponding tree and returns true.
+     */
     private fun birthdayNotifyTapped(intent: Intent): Boolean {
         val treeId = intent.getIntExtra(Notifier.TREE_ID_KEY, 0)
         val notifyId = intent.getIntExtra(Notifier.NOTIFY_ID_KEY, 0)
@@ -458,8 +460,10 @@ class TreesActivity : AppCompatActivity() {
         return false
     }
 
-    // Tries to retrieve the dateID from the Play Store in case the app was installed after a sharing
-    // If finds the dateID proposes to download the shared tree
+    /**
+     * Tries to retrieve the dateID from the Play Store in case the app was installed after a sharing.
+     * If finds the dateID proposes to download the shared tree.
+     */
     private fun retrieveReferrer() {
         val client = InstallReferrerClient.newBuilder(this).build()
         client.startConnection(object : InstallReferrerStateListener {
@@ -541,8 +545,9 @@ class TreesActivity : AppCompatActivity() {
     private var errorList: LinkedHashMap<String, Int> = LinkedHashMap()
 
     /**
-     * Looks for some errors and returns the fixed GEDCOM or null.
+     * Looks for some errors in a tree.
      * @param correct Fix the errors or add error messages to [errorList]
+     * @return The fixed GEDCOM or null
      */
     suspend fun findErrors(treeId: Int, correct: Boolean): Gedcom? {
         errorList.clear()
@@ -615,46 +620,46 @@ class TreesActivity : AppCompatActivity() {
         // Duplicated IDs
         val doneIds: MutableSet<String> = mutableSetOf()
         gedcom.people.filterNot { it.id == null }.filter { person -> gedcom.people.count { it.id == person.id } > 1 }
-                .filterNot { doneIds.add(it.id) }.forEach {
-                    if (correct) it.id = U.newID(gedcom, Person::class.java)
-                    else addError("Multiple INDI with ID ${it.id}")
-                }
+            .filterNot { doneIds.add(it.id) }.forEach {
+                if (correct) it.id = U.newID(gedcom, Person::class.java)
+                else addError("Multiple INDI with ID ${it.id}")
+            }
         doneIds.clear()
         gedcom.families.filterNot { it.id == null }.filter { family -> gedcom.families.count { it.id == family.id } > 1 }
-                .filterNot { doneIds.add(it.id) }.forEach {
-                    if (correct) it.id = U.newID(gedcom, Family::class.java)
-                    else addError("Multiple FAM with ID ${it.id}")
-                }
+            .filterNot { doneIds.add(it.id) }.forEach {
+                if (correct) it.id = U.newID(gedcom, Family::class.java)
+                else addError("Multiple FAM with ID ${it.id}")
+            }
         doneIds.clear()
         gedcom.media.filterNot { it.id == null }.filter { media -> gedcom.media.count { it.id == media.id } > 1 }
-                .filterNot { doneIds.add(it.id) }.forEach {
-                    if (correct) it.id = U.newID(gedcom, Media::class.java)
-                    else addError("Multiple OBJE with ID ${it.id}")
-                }
+            .filterNot { doneIds.add(it.id) }.forEach {
+                if (correct) it.id = U.newID(gedcom, Media::class.java)
+                else addError("Multiple OBJE with ID ${it.id}")
+            }
         doneIds.clear()
         gedcom.notes.filterNot { it.id == null }.filter { note -> gedcom.notes.count { it.id == note.id } > 1 }
-                .filterNot { doneIds.add(it.id) }.forEach {
-                    if (correct) it.id = U.newID(gedcom, Note::class.java)
-                    else addError("Multiple NOTE with ID ${it.id}")
-                }
+            .filterNot { doneIds.add(it.id) }.forEach {
+                if (correct) it.id = U.newID(gedcom, Note::class.java)
+                else addError("Multiple NOTE with ID ${it.id}")
+            }
         doneIds.clear()
         gedcom.sources.filterNot { it.id == null }.filter { source -> gedcom.sources.count { it.id == source.id } > 1 }
-                .filterNot { doneIds.add(it.id) }.forEach {
-                    if (correct) it.id = U.newID(gedcom, Source::class.java)
-                    else addError("Multiple SOUR with ID ${it.id}")
-                }
+            .filterNot { doneIds.add(it.id) }.forEach {
+                if (correct) it.id = U.newID(gedcom, Source::class.java)
+                else addError("Multiple SOUR with ID ${it.id}")
+            }
         doneIds.clear()
         gedcom.repositories.filterNot { it.id == null }.filter { repo -> gedcom.repositories.count { it.id == repo.id } > 1 }
-                .filterNot { doneIds.add(it.id) }.forEach {
-                    if (correct) it.id = U.newID(gedcom, Repository::class.java)
-                    else addError("Multiple REPO with ID ${it.id}")
-                }
+            .filterNot { doneIds.add(it.id) }.forEach {
+                if (correct) it.id = U.newID(gedcom, Repository::class.java)
+                else addError("Multiple REPO with ID ${it.id}")
+            }
         doneIds.clear()
         gedcom.submitters.filterNot { it.id == null }.filter { submitter -> gedcom.submitters.count { it.id == submitter.id } > 1 }
-                .filterNot { doneIds.add(it.id) }.forEach {
-                    if (correct) it.id = U.newID(gedcom, Submitter::class.java)
-                    else addError("Multiple SUBM with ID ${it.id}")
-                }
+            .filterNot { doneIds.add(it.id) }.forEach {
+                if (correct) it.id = U.newID(gedcom, Submitter::class.java)
+                else addError("Multiple SUBM with ID ${it.id}")
+            }
 
         // After modification of IDs it's necessary to refresh the indexes
         if (correct) gedcom.createIndexes()
@@ -664,7 +669,8 @@ class TreesActivity : AppCompatActivity() {
         while (familyIterator.hasNext()) {
             val family = familyIterator.next()
             if (family.eventsFacts.isEmpty() && family.notes.isEmpty() && family.noteRefs.isEmpty() && family.media.isEmpty()
-                    && family.mediaRefs.isEmpty() && family.sourceCitations.isEmpty() && family.extensions.isEmpty()) {
+                && family.mediaRefs.isEmpty() && family.sourceCitations.isEmpty() && family.extensions.isEmpty()
+            ) {
                 val members = family.husbandRefs.size + family.wifeRefs.size + family.childRefs.size
                 if (members <= 1) {
                     if (correct) familyIterator.remove()
@@ -721,8 +727,7 @@ class TreesActivity : AppCompatActivity() {
                     else addError("Broken FAMS $familyId in $personId")
                 } else {
                     val family = gedcom.getFamily(familyId)
-                    if (family.husbandRefs.none { it.ref == person.id }
-                            && family.wifeRefs.none { it.ref == person.id }) {
+                    if (family.husbandRefs.none { it.ref == person.id } && family.wifeRefs.none { it.ref == person.id }) {
                         val female = Gender.isFemale(person)
                         if (correct) {
                             val spouseRef = SpouseRef()
