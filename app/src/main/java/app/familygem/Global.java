@@ -133,6 +133,10 @@ public class Global extends MultiDexApplication {
      * Modifications to the text coming from files/settings.json
      */
     private static String updateSettings(String json) {
+        // Little numbers in diagram settings (introduced in version 1.1)
+        if (!(json.contains("\"numbers\":true") || json.contains("\"numbers\":false"))) {
+            json = json.replace("\"diagram\":{", "\"diagram\":{\"numbers\":true,");
+        }
         return json // Version 0.8 added new settings for the diagram
                 .replace("\"siblings\":true", "siblings:2,cousins:2,spouses:true")
                 .replace("\"siblings\":false", "siblings:0,cousins:0,spouses:true")

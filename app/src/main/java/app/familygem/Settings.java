@@ -142,6 +142,7 @@ public class Settings {
         public int siblings;
         public int cousins;
         public boolean spouses;
+        public boolean numbers;
 
         // Default values
         DiagramSettings init() {
@@ -151,6 +152,7 @@ public class Settings {
             siblings = 2;
             cousins = 1;
             spouses = true;
+            numbers = true;
             return this;
         }
     }

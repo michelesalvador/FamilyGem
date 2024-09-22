@@ -99,6 +99,13 @@
             android:max="9"
             android:mirrorForRtl="true" />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/diagramSettings_numbers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/numbers" />
+
         <LinearLayout
             android:id="@+id/diagramSettings_indicator"
             android:layout_width="50dp"

@@ -10,7 +10,6 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.text.TextUtilsCompat
-import androidx.core.view.ViewCompat
 import app.familygem.databinding.DiagramSettingsActivityBinding
 import java.util.Locale
 
@@ -26,18 +25,19 @@ class DiagramSettingsActivity : BaseActivity() {
     private lateinit var descendants: SeekBar
     private lateinit var siblings: SeekBar
     private lateinit var cousins: SeekBar
+    private lateinit var numbers: SwitchCompat
     private lateinit var indicator: LinearLayout
     private lateinit var animator: AnimatorSet
     private var leftToRight = true
     private var maySave = false
 
-    override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         binding = DiagramSettingsActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         indicator = binding.diagramSettingsIndicator
-        leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR
+        leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == View.LAYOUT_DIRECTION_LTR
         // Number of ancestors
         ancestors = binding.diagramSettingsAncestors
         ancestors.progress = decode(Global.settings.diagram.ancestors)
@@ -133,6 +133,12 @@ class DiagramSettingsActivity : BaseActivity() {
                 maySave = true
             }
         })
+        // Displays little numbers
+        numbers = binding.diagramSettingsNumbers
+        numbers.isChecked = Global.settings.diagram.numbers
+        numbers.setOnCheckedChangeListener { _, _ ->
+            maySave = true
+        }
         val alphaIn = ObjectAnimator.ofFloat(indicator, View.ALPHA, 1F)
         alphaIn.duration = 0
         val alphaOut = ObjectAnimator.ofFloat(indicator, View.ALPHA, 1F, 0F)
@@ -191,6 +197,7 @@ class DiagramSettingsActivity : BaseActivity() {
                 diagram.descendants = convert(descendants.progress)
                 diagram.siblings = convert(siblings.progress)
                 diagram.cousins = convert(cousins.progress)
+                diagram.numbers = numbers.isChecked
                 save()
             }
             Global.edited = true

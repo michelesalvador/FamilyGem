@@ -188,6 +188,7 @@
     <string name="descendants">Discendenti</string>
     <string name="siblings_nephews">Fratelli e nipoti</string>
     <string name="uncles_cousins">Zii e cugini</string>
+    <string name="numbers">Numeri</string>
     <!-- PersonsFragment -->
     <string name="order_by">Ordina per</string>
     <string name="id">ID</string>

@@ -31,7 +31,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.TextUtilsCompat
 import androidx.core.view.GravityCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.DialogFragment
@@ -93,7 +92,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private var glowSpace = 0 // Space to display glow around cards
     private var popup: View? = null // Suggestion balloon
     private var printing = false // We are generating a PNG or PDF
-    private val leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR
+    private val leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == View.LAYOUT_DIRECTION_LTR
     private var diagramJob: Job? = null
     private val graphicNodes: MutableList<GraphicMetric> = ArrayList()
     private val loadingImages: MutableList<Pair<Media, ImageView>> = ArrayList()
@@ -181,15 +180,17 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             binding.diagramWheel.root.visibility = View.VISIBLE
             diagramJob = lifecycleScope.launch(Dispatchers.Default) {
                 Global.indi = fulcrum.id // Confirms it just in case
+                val settings = Global.settings.diagram
                 graph.setGedcom(Global.gc).setLayoutDirection(leftToRight)
-                        .maxAncestors(Global.settings.diagram.ancestors)
-                        .maxGreatUncles(Global.settings.diagram.uncles)
-                        .displaySpouses(Global.settings.diagram.spouses)
-                        .maxDescendants(Global.settings.diagram.descendants)
-                        .maxSiblingsNephews(Global.settings.diagram.siblings)
-                        .maxUnclesCousins(Global.settings.diagram.cousins)
-                        .showFamily(Global.familyNum)
-                        .startFrom(fulcrum)
+                    .maxAncestors(settings.ancestors)
+                    .maxGreatUncles(settings.uncles)
+                    .displaySpouses(settings.spouses)
+                    .maxDescendants(settings.descendants)
+                    .maxSiblingsNephews(settings.siblings)
+                    .maxUnclesCousins(settings.cousins)
+                    .displayNumbers(settings.numbers)
+                    .showFamily(Global.familyNum)
+                    .startFrom(fulcrum)
                 drawDiagram()
             }
         }
@@ -250,8 +251,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 // Adds the glow to the fulcrum card
                 if (fulcrumView != null) {
                     box.post {
-                        val glowParams = ConstraintLayout.LayoutParams(
-                                singleNode.width + glowSpace * 2, singleNode.height + glowSpace * 2)
+                        val glowParams = ConstraintLayout.LayoutParams(singleNode.width + glowSpace * 2, singleNode.height + glowSpace * 2)
                         glowParams.topToTop = R.id.tag_fulcrum
                         glowParams.bottomToBottom = R.id.tag_fulcrum
                         glowParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
@@ -288,8 +288,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 box.addView(backLines, 0)
                 // Adds the glow
                 val fulcrumNode = fulcrumView!!.metric as PersonNode
-                val glowParams = RelativeLayout.LayoutParams(
-                        toPx(fulcrumNode.width) + glowSpace * 2, toPx(fulcrumNode.height) + glowSpace * 2)
+                val glowParams = RelativeLayout.LayoutParams(toPx(fulcrumNode.width) + glowSpace * 2, toPx(fulcrumNode.height) + glowSpace * 2)
                 glowParams.rightMargin = -glowSpace
                 glowParams.bottomMargin = -glowSpace
                 box.addView(FulcrumGlow(context()), 0, glowParams)
@@ -322,8 +321,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         // Pans to fulcrum
         val scale = moveLayout.minimumScale()
         val padding = box.paddingTop * scale
-        moveLayout.panTo((toPx(fulcrumView!!.metric.centerX()) * scale - moveLayout.width / 2 + padding).toInt(),
-                (toPx(fulcrumView!!.metric.centerY()) * scale - moveLayout.height / 2 + padding).toInt())
+        moveLayout.panTo(
+            (toPx(fulcrumView!!.metric.centerX()) * scale - moveLayout.width / 2 + padding).toInt(),
+            (toPx(fulcrumView!!.metric.centerY()) * scale - moveLayout.height / 2 + padding).toInt()
+        )
     }
 
     /**
@@ -395,9 +396,11 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             paint.color = ResourcesCompat.getColor(resources, R.color.accent, null)
             paint.maskFilter = bmf
             setLayerType(LAYER_TYPE_SOFTWARE, paint)
-            canvas.drawRect((glowSpace - extend).toFloat(), (glowSpace - extend).toFloat(),
-                    (toPx(fulcrumView!!.metric.width) + glowSpace + extend).toFloat(),
-                    (toPx(fulcrumView!!.metric.height) + glowSpace + extend).toFloat(), paint)
+            canvas.drawRect(
+                (glowSpace - extend).toFloat(), (glowSpace - extend).toFloat(),
+                (toPx(fulcrumView!!.metric.width) + glowSpace + extend).toFloat(),
+                (toPx(fulcrumView!!.metric.height) + glowSpace + extend).toFloat(), paint
+            )
         }
 
         override fun invalidate() {
@@ -638,7 +641,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         val families = fulcrum!!.getParentFamilies(Global.gc)
         if (families.size > 1) {
             AlertDialog.Builder(context()).setTitle(R.string.which_family)
-                    .setItems(U.elencoFamiglie(families)) { _, which: Int -> completeSelect(fulcrum, which) }.show()
+                .setItems(U.elencoFamiglie(families)) { _, which: Int -> completeSelect(fulcrum, which) }.show()
         } else {
             completeSelect(fulcrum, 0)
         }
@@ -704,8 +707,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         if (item.groupId != 0) return false
-        val relatives = arrayOf(getText(R.string.parent), getText(R.string.sibling),
-                getText(R.string.partner), getText(R.string.child))
+        val relatives = arrayOf(getText(R.string.parent), getText(R.string.sibling), getText(R.string.partner), getText(R.string.child))
         val id = item.itemId
         if (id == -1) { // Diagram for fulcrum child in many families
             if (person.getParentFamilies(Global.gc).size > 2) // More than two families
@@ -728,8 +730,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             } else {
                 AlertDialog.Builder(context()).setItems(relatives) { _, selected ->
                     val intent = Intent(context, PersonEditorActivity::class.java)
-                            .putExtra(Extra.PERSON_ID, personId)
-                            .putExtra(Extra.RELATION, Relation.get(selected))
+                        .putExtra(Extra.PERSON_ID, personId)
+                        .putExtra(Extra.RELATION, Relation.get(selected))
                     if (U.checkMultiMarriages(intent, context, null)) return@setItems
                     startActivity(intent)
                 }.show()
@@ -741,9 +743,9 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             } else {
                 AlertDialog.Builder(context()).setItems(relatives) { _, selected ->
                     val intent = Intent(context, MainActivity::class.java)
-                            .putExtra(Choice.PERSON, true)
-                            .putExtra(Extra.PERSON_ID, personId)
-                            .putExtra(Extra.RELATION, Relation.get(selected))
+                        .putExtra(Choice.PERSON, true)
+                        .putExtra(Extra.PERSON_ID, personId)
+                        .putExtra(Extra.RELATION, Relation.get(selected))
                     if (U.checkMultiMarriages(intent, context, this@DiagramFragment)) return@setItems
                     choosePersonLauncher.launch(intent)
                 }.show()
@@ -772,11 +774,11 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             refreshAll()
         } else if (id == 7) { // Delete
             AlertDialog.Builder(context()).setMessage(R.string.really_delete_person)
-                    .setPositiveButton(R.string.delete) { _, _ ->
-                        val families = PersonsFragment.deletePerson(context, personId)
-                        refreshAll()
-                        U.deleteEmptyFamilies(context, { refreshAll() }, false, *families)
-                    }.setNeutralButton(R.string.cancel, null).show()
+                .setPositiveButton(R.string.delete) { _, _ ->
+                    val families = PersonsFragment.deletePerson(context, personId)
+                    refreshAll()
+                    U.deleteEmptyFamilies(context, { refreshAll() }, false, *families)
+                }.setNeutralButton(R.string.cancel, null).show()
         } else return false
         return true
     }
@@ -789,11 +791,12 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             val data = result.data
             if (data != null) {
                 val modified = PersonEditorActivity.addRelative(
-                        data.getStringExtra(Extra.PERSON_ID), // Corresponds to 'personId', which however is annulled in case of a configuration change
-                        data.getStringExtra(Extra.RELATIVE_ID),
-                        data.getStringExtra(Extra.FAMILY_ID),
-                        data.getSerializableExtra(Extra.RELATION) as Relation,
-                        data.getStringExtra(Extra.DESTINATION))
+                    data.getStringExtra(Extra.PERSON_ID), // Corresponds to 'personId', which however is annulled in case of a configuration change
+                    data.getStringExtra(Extra.RELATIVE_ID),
+                    data.getStringExtra(Extra.FAMILY_ID),
+                    data.getSerializableExtra(Extra.RELATION) as Relation,
+                    data.getStringExtra(Extra.DESTINATION)
+                )
                 TreeUtil.save(true, *modified)
             }
         }

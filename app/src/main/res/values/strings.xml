@@ -175,6 +175,7 @@
     <string name="descendants">Descendants</string>
     <string name="siblings_nephews">Siblings and nephews</string>
     <string name="uncles_cousins">Uncles and cousins</string>
+    <string name="numbers">Numbers</string>
     <string name="order_by">Sort by</string>
     <string name="id">ID</string>
     <string name="surname">Surname</string>
