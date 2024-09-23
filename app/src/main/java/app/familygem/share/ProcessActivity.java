@@ -32,6 +32,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Extra;
 import app.familygem.util.AddressUtilKt;
+import app.familygem.util.FamilyUtil;
 import app.familygem.util.FileUtil;
 
 /**
@@ -173,7 +174,7 @@ public class ProcessActivity extends BaseActivity {
         } else if (obj instanceof Family) {
             Family family = (Family)obj;
             writeHeading(R.string.family, family.getId());
-            text = U.testoFamiglia(this, gedcom, family, false);
+            text = FamilyUtil.INSTANCE.writeMembers(this, gedcom, family, true);
             date = getDateTime(family.getChange());
         }
         // Title
@@ -192,7 +193,7 @@ public class ProcessActivity extends BaseActivity {
         // Change date
         View changeView = cardView.findViewById(R.id.compare_date);
         if (date.isEmpty()) changeView.setVisibility(View.GONE);
-        else ((TextView)changeView.findViewById(R.id.cambi_testo)).setText(date);
+        else ((TextView)changeView.findViewById(R.id.changeDate_text)).setText(date);
         // Background color
         if (cardId == R.id.process_new) {
             cardView.setCardBackgroundColor(getResources().getColor(R.color.accent_medium));

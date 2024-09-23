@@ -51,6 +51,7 @@ import app.familygem.constant.Relation
 import app.familygem.databinding.DiagramFragmentBinding
 import app.familygem.detail.FamilyActivity
 import app.familygem.util.ChangeUtil
+import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.getFamilyLabels
@@ -641,7 +642,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         val families = fulcrum!!.getParentFamilies(Global.gc)
         if (families.size > 1) {
             AlertDialog.Builder(context()).setTitle(R.string.which_family)
-                .setItems(U.elencoFamiglie(families)) { _, which: Int -> completeSelect(fulcrum, which) }.show()
+                .setItems(FamilyUtil.listFamilies(families)) { _, which: Int -> completeSelect(fulcrum, which) }.show()
         } else {
             completeSelect(fulcrum, 0)
         }

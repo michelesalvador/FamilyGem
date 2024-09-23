@@ -38,6 +38,7 @@ import app.familygem.constant.Gender;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
 import app.familygem.detail.NameActivity;
+import app.familygem.util.ChangeUtil;
 import app.familygem.util.EventUtilKt;
 import app.familygem.util.TreeUtil;
 
@@ -63,7 +64,7 @@ public class ProfileFactsFragment extends Fragment {
                 }
                 U.placeNotes(layout, one, true);
                 U.placeSourceCitations(layout, one);
-                U.placeChangeDate(layout, one.getChange());
+                ChangeUtil.INSTANCE.placeChangeDate(layout, one.getChange());
             }
         }
         return factsView;
@@ -348,8 +349,8 @@ public class ProfileFactsFragment extends Fragment {
             // Source citation
             case 230: // Copy text
                 U.copyToClipboard(getText(R.string.source_citation),
-                        ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
-                                + ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
+                        ((TextView)pieceView.findViewById(R.id.source_text)).getText() + "\n"
+                                + ((TextView)pieceView.findViewById(R.id.sourceCitation_text)).getText());
                 return true;
             case 231: // Delete
                 // TODO: Confirm : Do you want to delete this source citation? The source will continue to exist.

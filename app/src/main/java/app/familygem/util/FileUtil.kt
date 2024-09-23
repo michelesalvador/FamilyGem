@@ -172,7 +172,7 @@ object FileUtil {
                     }
                     if (options and Image.GALLERY != 0) { // File icon inside MediaAdapter
                         imageView.scaleType = ImageView.ScaleType.FIT_CENTER
-                        (imageView.layoutParams as RelativeLayout.LayoutParams).addRule(RelativeLayout.ABOVE, R.id.media_testo)
+                        (imageView.layoutParams as RelativeLayout.LayoutParams).addRule(RelativeLayout.ABOVE, R.id.media_caption)
                     }
                     imageView.setTag(R.id.tag_file_type, Type.DOCUMENT)
                     imageView.setTag(R.id.tag_path, path)

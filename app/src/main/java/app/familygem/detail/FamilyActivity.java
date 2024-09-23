@@ -30,6 +30,7 @@ import app.familygem.U;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.constant.Status;
+import app.familygem.util.ChangeUtil;
 import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 
@@ -58,7 +59,7 @@ public class FamilyActivity extends DetailActivity {
         U.placeNotes(box, family, true);
         U.placeMedia(box, family, true);
         U.placeSourceCitations(box, family);
-        U.placeChangeDate(box, family.getChange());
+        ChangeUtil.INSTANCE.placeChangeDate(box, family.getChange());
     }
 
     /**

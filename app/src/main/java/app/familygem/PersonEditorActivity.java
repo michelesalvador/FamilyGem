@@ -424,7 +424,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         else if (familyId != null) {
             pivotId = null; // Pivot is already present in his family and should not be added again
         }
-        Family family = familyId != null ? gc.getFamily(familyId) : FamilyUtil.INSTANCE.newFamily();
+        Family family = familyId != null ? gc.getFamily(familyId) : FamilyUtil.INSTANCE.createNewFamily();
         Person pivot = gc.getPerson(pivotId);
         SpouseRef refSpouse1 = new SpouseRef(), refSposo2 = new SpouseRef();
         ChildRef refChild1 = new ChildRef(), refFiglio2 = new ChildRef();

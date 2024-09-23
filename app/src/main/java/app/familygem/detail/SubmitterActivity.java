@@ -5,9 +5,9 @@ import android.text.InputType;
 import org.folg.gedcom.model.Submitter;
 
 import app.familygem.DetailActivity;
-import app.familygem.main.SubmittersFragment;
 import app.familygem.R;
-import app.familygem.U;
+import app.familygem.main.SubmittersFragment;
+import app.familygem.util.ChangeUtil;
 
 public class SubmitterActivity extends DetailActivity {
 
@@ -28,7 +28,7 @@ public class SubmitterActivity extends DetailActivity {
         place(getString(R.string.language), "Language");
         place(getString(R.string.rin), "Rin", false, 0);
         placeExtensions(submitter);
-        U.placeChangeDate(box, submitter.getChange());
+        ChangeUtil.INSTANCE.placeChangeDate(box, submitter.getChange());
     }
 
     @Override

@@ -48,7 +48,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
 
     @Override
     public MediaViewHolder onCreateViewHolder(ViewGroup parent, int type) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.pezzo_media, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.media_layout, parent, false);
         return new MediaViewHolder(view, detail);
     }
 
@@ -75,9 +75,9 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
             super(view);
             this.view = view;
             this.detail = detail;
-            imageView = view.findViewById(R.id.media_img);
-            textView = view.findViewById(R.id.media_testo);
-            numberView = view.findViewById(R.id.media_num);
+            imageView = view.findViewById(R.id.media_image);
+            textView = view.findViewById(R.id.media_caption);
+            numberView = view.findViewById(R.id.media_number);
         }
 
         void setupMedia(int position) {
@@ -104,7 +104,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
                 textView.setVisibility(View.GONE);
                 numberView.setVisibility(View.GONE);
             }
-            FileUtil.INSTANCE.showImage(media, imageView, Image.GALLERY, view.findViewById(R.id.media_circolo));
+            FileUtil.INSTANCE.showImage(media, imageView, Image.GALLERY, view.findViewById(R.id.media_progress));
         }
 
         @Override

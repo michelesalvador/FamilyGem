@@ -34,7 +34,7 @@ public class RepositoryActivity extends DetailActivity {
         place(getString(R.string.rin), "Rin", false, 0);
         placeExtensions(repository);
         U.placeNotes(box, repository, true);
-        U.placeChangeDate(box, repository.getChange());
+        ChangeUtil.INSTANCE.placeChangeDate(box, repository.getChange());
 
         // Collects and displays the sources citing this Repository
         List<Source> citingSources = new ArrayList<>();
@@ -43,7 +43,7 @@ public class RepositoryActivity extends DetailActivity {
                     && source.getRepositoryRef().getRef().equals(repository.getId()))
                 citingSources.add(source);
         if (!citingSources.isEmpty())
-            U.placeCabinet(box, citingSources.toArray(), R.string.sources);
+            placeCabinet(citingSources.toArray(), R.string.sources);
     }
 
     @Override

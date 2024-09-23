@@ -27,6 +27,7 @@ import app.familygem.constant.Extra;
 import app.familygem.constant.Relation;
 import app.familygem.main.DiagramFragment;
 import app.familygem.main.MainActivity;
+import app.familygem.util.FamilyUtil;
 
 /**
  * Dialog to connect a relative (parent, sibling, partner or child) to a person in expert mode,
@@ -266,7 +267,7 @@ public class NewRelativeDialog extends DialogFragment {
         @Override
         public String toString() {
             if (family != null)
-                return U.testoFamiglia(context, Global.gc, family, true);
+                return FamilyUtil.INSTANCE.writeMembers(context, Global.gc, family, false);
             else if (parent != null)
                 return context.getString(R.string.new_family_of, U.properName(parent));
             else if (existing)

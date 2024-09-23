@@ -64,13 +64,13 @@ public class MediaActivity extends DetailActivity {
         //m.getFileTag(); // The tag, could be 'FILE' or '_FILE'
         placeExtensions(media);
         U.placeNotes(box, media, true);
-        U.placeChangeDate(box, media.getChange());
+        ChangeUtil.INSTANCE.placeChangeDate(box, media.getChange());
         // List of records in which the media is used
         MediaReferences mediaReferences = new MediaReferences(gc, media, false);
-        if (mediaReferences.leaders.size() > 0)
-            U.placeCabinet(box, mediaReferences.leaders.toArray(), R.string.used_by);
+        if (!mediaReferences.leaders.isEmpty())
+            placeCabinet(mediaReferences.leaders.toArray(), R.string.used_by);
         else if (((Activity)box.getContext()).getIntent().getBooleanExtra(Extra.ALONE, false))
-            U.placeCabinet(box, Memory.getLeaderObject(), R.string.into);
+            placeCabinet(Memory.getLeaderObject(), R.string.into);
     }
 
     private void displayMedia(Media media, int position) {
@@ -106,7 +106,7 @@ public class MediaActivity extends DetailActivity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     try {
                         StrictMode.class.getMethod("disableDeathOnFileUriExposure").invoke(null); // TODO: don't use reflection to use functions you shouldn't!
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                     }
                 }
                 startActivity(intent);

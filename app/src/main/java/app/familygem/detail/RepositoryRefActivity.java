@@ -20,6 +20,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.RepositoryUtil;
 
 public class RepositoryRefActivity extends DetailActivity {
 
@@ -31,7 +32,7 @@ public class RepositoryRefActivity extends DetailActivity {
         repoRef = (RepositoryRef)cast(RepositoryRef.class);
         if (repoRef.getRepository(gc) != null) { // An actual repository is referenced
             setTitle(R.string.repository_citation);
-            View repositoryCard = putRepository(box, repoRef.getRepository(gc));
+            View repositoryCard = RepositoryUtil.INSTANCE.placeRepository(box, repoRef.getRepository(gc));
             repositoryCard.setTag(R.id.tag_object, repoRef.getRepository(gc)); // For the context menu TODO: still needed?
             registerForContextMenu(repositoryCard);
         } else if (repoRef.getRef() != null) { // Ref to a non-existent repository (perhaps deleted)
@@ -44,19 +45,6 @@ public class RepositoryRefActivity extends DetailActivity {
         place(getString(R.string.media_type), "MediaType");
         placeExtensions(repoRef);
         U.placeNotes(box, repoRef, true);
-    }
-
-    public static View putRepository(LinearLayout layout, final Repository repo) {
-        final Context context = layout.getContext();
-        View repoView = LayoutInflater.from(context).inflate(R.layout.pezzo_fonte, layout, false);
-        layout.addView(repoView);
-        ((TextView)repoView.findViewById(R.id.fonte_testo)).setText(repo.getName());
-        ((CardView)repoView).setCardBackgroundColor(context.getResources().getColor(R.color.repository));
-        repoView.setOnClickListener(v -> {
-            Memory.setLeader(repo);
-            context.startActivity(new Intent(context, RepositoryActivity.class));
-        });
-        return repoView;
     }
 
     @Override

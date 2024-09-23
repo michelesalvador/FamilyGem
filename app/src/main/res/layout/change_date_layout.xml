@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:foreground="?android:selectableItemBackground">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="6dp"
+        android:layout_toStartOf="@id/changeDate_text"
+        android:text="@string/change_date"
+        android:textColor="@color/text_veiled"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/changeDate_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:textColor="@color/text_veiled"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:id="@+id/changeDate_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/changeDate_text"
+        android:orientation="vertical" />
+</RelativeLayout>

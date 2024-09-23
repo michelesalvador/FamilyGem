@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.util.Pair;
 
@@ -78,6 +79,7 @@ import app.familygem.detail.MediaActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.detail.SourceCitationActivity;
+import app.familygem.detail.SubmitterActivity;
 import app.familygem.main.MainActivity;
 import app.familygem.main.MediaFragment;
 import app.familygem.main.NotesFragment;
@@ -88,7 +90,15 @@ import app.familygem.main.SubmittersFragment;
 import app.familygem.util.AddressUtilKt;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.EventUtilKt;
+import app.familygem.util.FamilyUtil;
 import app.familygem.util.FamilyUtilKt;
+import app.familygem.util.FileUtil;
+import app.familygem.util.MediaUtil;
+import app.familygem.util.NoteUtil;
+import app.familygem.util.PersonUtil;
+import app.familygem.util.PersonUtilKt;
+import app.familygem.util.RepositoryUtil;
+import app.familygem.util.SourceUtil;
 import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
 
@@ -208,7 +218,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 i++;
             }
         }
-        if (object instanceof Source && findViewById(R.id.citazione_fonte) == null) { // TODO: doubt: shouldn't it be citation_REPOSITORY?
+        if (object instanceof Source && findViewById(R.id.sourceCitation) == null) {
             SubMenu subRepository = menu.addSubMenu(0, 100, 0, R.string.repository);
             subRepository.add(0, 101, 0, R.string.new_repository);
             if (!gc.getRepositories().isEmpty())
@@ -588,7 +598,7 @@ public abstract class DetailActivity extends AppCompatActivity {
 
     public View placePiece(String title, String text, Object object, int inputType) {
         if (text == null) return null;
-        View pieceView = LayoutInflater.from(box.getContext()).inflate(R.layout.event_view, box, false);
+        View pieceView = LayoutInflater.from(this).inflate(R.layout.event_view, box, false);
         box.addView(pieceView);
         ((TextView)pieceView.findViewById(R.id.event_title)).setText(title);
         ((TextView)pieceView.findViewById(R.id.event_text)).setText(text);
@@ -649,6 +659,80 @@ public abstract class DetailActivity extends AppCompatActivity {
         for (Extension ext : U.findExtensions(container)) {
             placePiece(ext.name, ext.text, ext.gedcomTag, 0);
         }
+    }
+
+    /**
+     * Adds to the Layout a box containing a list of assorted items linked to related detail activities.
+     *
+     * @param object Can be a single or an array of GEDCOM records
+     * @param title  Title above the cabinet
+     */
+    protected void placeCabinet(Object object, int title) {
+        View cabinetView = LayoutInflater.from(this).inflate(R.layout.cabinet_layout, box, false);
+        TextView titleView = cabinetView.findViewById(R.id.cabinet_title);
+        titleView.setText(title);
+        titleView.setBackground(AppCompatResources.getDrawable(this, R.drawable.sghembo)); // For KitKat
+        box.addView(cabinetView);
+        LinearLayout cabinetBox = cabinetView.findViewById(R.id.cabinet_box);
+        if (object instanceof Object[]) {
+            for (Object obj : (Object[])object)
+                placeObject(cabinetBox, obj);
+        } else
+            placeObject(cabinetBox, object);
+    }
+
+    /**
+     * Recognizes the record type and adds the appropriate link to the cabinet.
+     */
+    private void placeObject(LinearLayout layout, Object record) {
+        if (record instanceof Person) {
+            View personView = PersonUtil.INSTANCE.placeSmallPerson(layout, (Person)record);
+            personView.setOnClickListener(view -> {
+                Memory.setLeader(record);
+                Intent intent = new Intent(this, ProfileActivity.class);
+                intent.putExtra(Extra.PAGE, 1);
+                startActivity(intent);
+            });
+            personView.setTag(R.id.tag_object, record);
+            registerForContextMenu(personView);
+        } else if (record instanceof Family)
+            FamilyUtil.INSTANCE.placeFamily(layout, (Family)record);
+        else if (record instanceof Media)
+            placeMedia(layout, (Media)record);
+        else if (record instanceof Note)
+            NoteUtil.INSTANCE.placeNote(layout, (Note)record, true);
+        else if (record instanceof Source)
+            SourceUtil.INSTANCE.placeSource(layout, (Source)record, false);
+        else if (record instanceof Repository)
+            RepositoryUtil.INSTANCE.placeRepository(layout, (Repository)record);
+        else if (record instanceof Submitter)
+            placeSubmitter(layout, (Submitter)record); // TODO I think this is never used
+    }
+
+    private void placeMedia(LinearLayout layout, Media media) {
+        View mediaView = LayoutInflater.from(this).inflate(R.layout.media_layout, layout, false);
+        layout.addView(mediaView);
+        MediaUtil.INSTANCE.furnishMedia(media, mediaView.findViewById(R.id.media_caption), mediaView.findViewById(R.id.media_number));
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)mediaView.getLayoutParams();
+        params.height = U.dpToPx(80);
+        FileUtil.INSTANCE.showImage(media, mediaView.findViewById(R.id.media_image), 0, mediaView.findViewById(R.id.media_progress));
+        mediaView.setOnClickListener(v -> {
+            Memory.setLeader(media);
+            startActivity(new Intent(this, MediaActivity.class));
+        });
+    }
+
+    // TODO: Probably never used, may be deleted
+    private void placeSubmitter(LinearLayout layout, Submitter submitter) {
+        View view = LayoutInflater.from(this).inflate(R.layout.note_layout, layout, false);
+        layout.addView(view);
+        TextView textView = view.findViewById(R.id.note_text);
+        textView.setText(submitter.getName());
+        view.findViewById(R.id.note_sources).setVisibility(View.GONE);
+        view.setOnClickListener(v -> {
+            Memory.setLeader(submitter);
+            startActivity(new Intent(this, SubmitterActivity.class));
+        });
     }
 
     /**
@@ -870,7 +954,7 @@ public abstract class DetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (whichMenu == 1) { // Standard bar menu//Menu standard della barra
+        if (whichMenu == 1) { // Standard bar menu
             if (object instanceof Submitter && (gc.getHeader() == null || // Non-main submitter
                     gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(object)))
                 menu.add(0, 1, 0, R.string.make_default);
@@ -938,7 +1022,16 @@ public abstract class DetailActivity extends AppCompatActivity {
         if (whichMenu != 0) { // If we are in edit mode shows the editor menu with 'Cancel' and 'Done' buttons
             pieceView = view;
             pieceObject = view.getTag(R.id.tag_object);
-            if (pieceObject instanceof Person) {
+            if (view.getId() == R.id.smallPerson) { // Small person inside cabinet
+                person = (Person)pieceObject;
+                menu.add(0, 10, 0, R.string.diagram);
+                String[] familyLabels = PersonUtilKt.getFamilyLabels(person, this, null);
+                if (familyLabels[0] != null)
+                    menu.add(0, 12, 0, familyLabels[0]);
+                if (familyLabels[1] != null)
+                    menu.add(0, 13, 0, familyLabels[1]);
+                menu.add(0, 16, 0, R.string.modify);
+            } else if (pieceObject instanceof Person) { // Regular person in family
                 person = (Person)pieceObject;
                 Family fam = (Family)object;
                 // Generates labels for "Family..." entries (such as child and partner)
@@ -1044,7 +1137,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 10: // Diagram
                 U.whichParentsToShow(this, person, 1);
                 return true;
-            case 11: // Person card
+            case 11: // Person profile
                 Memory.setLeader(person);
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;
@@ -1084,8 +1177,8 @@ public abstract class DetailActivity extends AppCompatActivity {
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
                         .setPositiveButton(R.string.delete, (dialog, id) -> {
                             PersonsFragment.deletePerson(this, person.getId());
-                            box.removeView(pieceView);
                             findAnotherRepresentativeOfTheFamily(person);
+                            refresh();
                         }).setNeutralButton(R.string.cancel, null).show();
                 return true;
             case 20: // Copy note text
@@ -1100,8 +1193,8 @@ public abstract class DetailActivity extends AppCompatActivity {
                 return true;
             case 30: // Copy source citation
                 U.copyToClipboard(getText(R.string.source_citation),
-                        ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
-                                + ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
+                        ((TextView)pieceView.findViewById(R.id.source_text)).getText() + "\n"
+                                + ((TextView)pieceView.findViewById(R.id.sourceCitation_text)).getText());
                 return true;
             case 31: // Move up source citation
                 List<SourceCitation> sourceCitations1;
@@ -1151,7 +1244,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.deleteExtension((GedcomTag)pieceObject, object, null);
                 break;
             case 70: // Copy source text
-                U.copyToClipboard(getText(R.string.source), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
+                U.copyToClipboard(getText(R.string.source), ((TextView)pieceView.findViewById(R.id.source_text)).getText());
                 return true;
             case 71: // Choose source in SourcesFragment
                 Intent inte = new Intent(this, MainActivity.class);
@@ -1160,15 +1253,15 @@ public abstract class DetailActivity extends AppCompatActivity {
                 return true;
             case 80: // Copy repository citation text
                 U.copyToClipboard(getText(R.string.repository_citation),
-                        ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText() + "\n"
-                                + ((TextView)pieceView.findViewById(R.id.citazione_testo)).getText());
+                        ((TextView)pieceView.findViewById(R.id.source_text)).getText() + "\n"
+                                + ((TextView)pieceView.findViewById(R.id.sourceCitation_text)).getText());
                 return true;
             case 81: // Delete repository citation
                 ((Source)object).setRepositoryRef(null);
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject);
                 break;
             case 90: // Copy repository text
-                U.copyToClipboard(getText(R.string.repository), ((TextView)pieceView.findViewById(R.id.fonte_testo)).getText());
+                U.copyToClipboard(getText(R.string.repository), ((TextView)pieceView.findViewById(R.id.source_text)).getText());
                 return true;
             case 91: // Choose repository in RepositoriesFragment
                 Intent intn = new Intent(this, MainActivity.class);

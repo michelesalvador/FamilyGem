@@ -2,9 +2,12 @@ package app.familygem;
 
 import org.folg.gedcom.model.GedcomTag;
 
+/**
+ * Represents the name and text of an extension.
+ */
 public class Extension {
-    String name;
-    String text;
+    public String name;
+    public String text;
     GedcomTag gedcomTag;
 
     public Extension(String name, String text, GedcomTag gedcomTag) {

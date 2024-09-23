@@ -64,7 +64,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
         binding.recyclerView.adapter = adapter
         // FAB
         binding.recyclerFab.root.setOnClickListener {
-            val newFamily = FamilyUtil.newFamily() // TODO: Crashes if Global.gc is null
+            val newFamily = FamilyUtil.createNewFamily() // TODO: Crashes if Global.gc is null
             TreeUtil.save(true, newFamily)
             Memory.setLeader(newFamily)
             startActivity(Intent(context, FamilyActivity::class.java))

@@ -29,6 +29,7 @@ import app.familygem.main.MainActivity
 import app.familygem.main.SubmittersFragment
 import app.familygem.util.ChangeUtil.actualDateTime
 import app.familygem.util.ChangeUtil.updateChangeDate
+import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.TreeUtil.createHeader
 import app.familygem.util.Util
@@ -112,11 +113,11 @@ class SharingActivity : BaseActivity() {
         // Displays an alert for the acknowledgment of sharing
         if (!Global.settings.shareAgreement) {
             AlertDialog.Builder(this).setTitle(R.string.share_sensitive)
-                    .setMessage(R.string.aware_upload_server)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        Global.settings.shareAgreement = true
-                        Global.settings.save()
-                    }.setNeutralButton(R.string.remind_later, null).show()
+                .setMessage(R.string.aware_upload_server)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    Global.settings.shareAgreement = true
+                    Global.settings.save()
+                }.setNeutralButton(R.string.remind_later, null).show()
         }
 
         // Collects sharing data and posts to database
@@ -194,7 +195,7 @@ class SharingActivity : BaseActivity() {
             val rootLayout = findViewById<LinearLayout>(R.id.share_root)
             rootLayout.visibility = View.VISIBLE
             rootLayout.removeView(rootView)
-            rootView = U.placeSmallPerson(rootLayout, person)
+            rootView = PersonUtil.placeSmallPerson(rootLayout, person)
             rootView!!.setOnClickListener {
                 val intent = Intent(this, MainActivity::class.java)
                 intent.putExtra(Choice.PERSON, true)
@@ -309,8 +310,7 @@ class SharingActivity : BaseActivity() {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.sharing_tree))
-        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.click_this_link,
-                "https://www.familygem.app/share.php?tree=$dateId"))
+        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.click_this_link, "https://www.familygem.app/share.php?tree=$dateId"))
         /* Tornando indietro da una app di messaggistica il requestCode 35417 arriva sempre corretto
             Invece il resultCode può essere RESULT_OK o RESULT_CANCELED a capocchia
             Ad esempio da Gmail ritorna indietro sempre con RESULT_CANCELED sia che l'email è stata inviata o no

@@ -31,13 +31,13 @@ public class NoteActivity extends DetailActivity {
         place(getString(R.string.rin), "Rin", false, 0);
         placeExtensions(note);
         U.placeSourceCitations(box, note);
-        U.placeChangeDate(box, note.getChange());
+        ChangeUtil.INSTANCE.placeChangeDate(box, note.getChange());
         if (note.getId() != null) {
             NoteReferences noteRefs = new NoteReferences(Global.gc, note.getId(), false);
             if (noteRefs.count > 0)
-                U.placeCabinet(box, noteRefs.leaders.toArray(), R.string.shared_by);
+                placeCabinet(noteRefs.leaders.toArray(), R.string.shared_by);
         } else if (((Activity)box.getContext()).getIntent().getBooleanExtra("fromNotes", false)) {
-            U.placeCabinet(box, Memory.getLeaderObject(), R.string.written_in);
+            placeCabinet(Memory.getLeaderObject(), R.string.written_in);
         }
     }
 

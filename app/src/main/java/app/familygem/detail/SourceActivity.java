@@ -51,22 +51,22 @@ public class SourceActivity extends DetailActivity {
 
         // Places the citation to the repository
         if (source.getRepositoryRef() != null) {
-            View refView = LayoutInflater.from(this).inflate(R.layout.pezzo_citazione_fonte, box, false);
+            View refView = LayoutInflater.from(this).inflate(R.layout.source_citation_layout, box, false);
             box.addView(refView);
             refView.setBackgroundColor(getResources().getColor(R.color.repository_citation));
             final RepositoryRef repositoryRef = source.getRepositoryRef();
             if (repositoryRef.getRepository(gc) != null) {
-                ((TextView)refView.findViewById(R.id.fonte_testo)).setText(repositoryRef.getRepository(gc).getName());
-                ((CardView)refView.findViewById(R.id.citazione_fonte)).setCardBackgroundColor(getResources().getColor(R.color.repository));
-            } else refView.findViewById(R.id.citazione_fonte).setVisibility(View.GONE);
+                ((TextView)refView.findViewById(R.id.source_text)).setText(repositoryRef.getRepository(gc).getName());
+                ((CardView)refView.findViewById(R.id.sourceCitation)).setCardBackgroundColor(getResources().getColor(R.color.repository));
+            } else refView.findViewById(R.id.sourceCitation).setVisibility(View.GONE);
             String txt = "";
             if (repositoryRef.getValue() != null) txt += repositoryRef.getValue() + "\n";
             if (repositoryRef.getCallNumber() != null) txt += repositoryRef.getCallNumber() + "\n";
             if (repositoryRef.getMediaType() != null) txt += repositoryRef.getMediaType() + "\n";
-            TextView textView = refView.findViewById(R.id.citazione_testo);
+            TextView textView = refView.findViewById(R.id.sourceCitation_text);
             if (txt.isEmpty()) textView.setVisibility(View.GONE);
             else textView.setText(txt.substring(0, txt.length() - 1));
-            U.placeNotes(refView.findViewById(R.id.citazione_note), repositoryRef, false);
+            U.placeNotes(refView.findViewById(R.id.sourceCitation_box), repositoryRef, false);
             refView.setOnClickListener(v -> {
                 Memory.add(repositoryRef);
                 startActivity(new Intent(SourceActivity.this, RepositoryRefActivity.class));
@@ -76,9 +76,9 @@ public class SourceActivity extends DetailActivity {
         }
         U.placeNotes(box, source, true);
         U.placeMedia(box, source, true);
-        U.placeChangeDate(box, source.getChange());
+        ChangeUtil.INSTANCE.placeChangeDate(box, source.getChange());
         if (!citations.list.isEmpty())
-            U.placeCabinet(box, citations.getProgenitors(), R.string.cited_by);
+            placeCabinet(citations.getProgenitors(), R.string.cited_by);
     }
 
     @Override

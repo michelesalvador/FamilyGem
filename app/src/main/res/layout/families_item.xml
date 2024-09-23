@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:foreground="?android:attr/selectableItemBackground"
-    app:cardCornerRadius="3dp"
+    app:cardCornerRadius="5dp"
     app:cardElevation="3dp"
     app:cardUseCompatPadding="true"
     app:contentPadding="6dp"
@@ -19,7 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/gray_text"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="Info" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,7 +34,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                tools:text="Father Name,\nMother Name" />
 
             <View
                 android:id="@+id/family_strut"
@@ -47,7 +50,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                tools:text="Child Name,\nChild Name" />
         </LinearLayout>
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

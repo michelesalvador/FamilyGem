@@ -13,6 +13,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.SourceUtil;
 
 public class SourceCitationActivity extends DetailActivity {
 
@@ -24,7 +25,7 @@ public class SourceCitationActivity extends DetailActivity {
         citation = (SourceCitation)cast(SourceCitation.class);
         if (citation.getSource(gc) != null) { // Citation of an existing source
             setTitle(R.string.source_citation);
-            U.placeSource(box, citation.getSource(gc), true);
+            SourceUtil.INSTANCE.placeSource(box, citation.getSource(gc), true);
         } else if (citation.getRef() != null) { // Citation of a non-existent source (maybe deleted)
             setTitle(R.string.inexistent_source_citation); // TODO: maybe this can be removed
         } else { // Note-source
