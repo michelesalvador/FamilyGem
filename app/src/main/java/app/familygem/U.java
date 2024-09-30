@@ -88,7 +88,6 @@ import app.familygem.detail.SourceCitationActivity;
 import app.familygem.main.DiagramFragment;
 import app.familygem.main.MainActivity;
 import app.familygem.main.MediaAdapter;
-import app.familygem.main.PersonsFragment;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
 import app.familygem.util.ChangeUtil;
@@ -96,6 +95,7 @@ import app.familygem.util.FamilyUtil;
 import app.familygem.util.FamilyUtilKt;
 import app.familygem.util.FileUtil;
 import app.familygem.util.NoteUtil;
+import app.familygem.util.PersonUtilKt;
 import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.ListOfSourceCitations;
@@ -850,8 +850,7 @@ public class U {
         if (total > 0 && (Global.settings.expert // Expert user can always
                 || person == null)) // In an empty family oneFamilyMember is null
             return true;
-        int kinship = PersonsFragment.countRelatives(person);
-        return total > kinship + 1;
+        return total > PersonUtilKt.countRelatives(person) + 1;
     }
 
     // Chiede se referenziare un autore nell'header dell'albero

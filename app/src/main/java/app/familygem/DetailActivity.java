@@ -82,8 +82,6 @@ import app.familygem.detail.SourceCitationActivity;
 import app.familygem.detail.SubmitterActivity;
 import app.familygem.main.MainActivity;
 import app.familygem.main.MediaFragment;
-import app.familygem.main.NotesFragment;
-import app.familygem.main.PersonsFragment;
 import app.familygem.main.RepositoriesFragment;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
@@ -295,7 +293,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             startActivity(new Intent(this, NoteActivity.class));
             toBeSaved = true;
         } else if (id == 104) { // New shared note
-            NotesFragment.newNote(this, object);
+            NoteUtil.INSTANCE.createSharedNote(this, (NoteContainer)object);
         } else if (id == 105) { // Link shared note
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.NOTE, true);
@@ -1176,7 +1174,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 19: // Delete family member
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
                         .setPositiveButton(R.string.delete, (dialog, id) -> {
-                            PersonsFragment.deletePerson(this, person.getId());
+                            PersonUtilKt.delete(person);
                             findAnotherRepresentativeOfTheFamily(person);
                             refresh();
                         }).setNeutralButton(R.string.cancel, null).show();

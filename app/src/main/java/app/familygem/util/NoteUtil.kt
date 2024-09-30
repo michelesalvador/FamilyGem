@@ -1,5 +1,6 @@
 package app.familygem.util
 
+import android.content.Context
 import android.content.Intent
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -7,13 +8,38 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.ProfileActivity
 import app.familygem.R
+import app.familygem.U
 import app.familygem.detail.NoteActivity
+import app.familygem.util.TreeUtil.save
 import org.folg.gedcom.model.Note
+import org.folg.gedcom.model.NoteContainer
+import org.folg.gedcom.model.NoteRef
 
 object NoteUtil {
+
+    /**
+     * Creates a new shared note, attached or not to a given container.
+     * @param container If not null the Note will be attached to it
+     */
+    fun createSharedNote(context: Context, container: NoteContainer?) {
+        val note = Note()
+        val id = U.newID(Global.gc, Note::class.java)
+        note.id = id
+        note.value = ""
+        Global.gc.addNote(note)
+        if (container != null) {
+            val noteRef = NoteRef()
+            noteRef.ref = id
+            container.addNoteRef(noteRef)
+        }
+        save(true, note)
+        Memory.setLeader(note)
+        context.startActivity(Intent(context, NoteActivity::class.java))
+    }
 
     /**
      * Places on a layout a single note detailed or not.

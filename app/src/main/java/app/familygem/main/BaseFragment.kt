@@ -46,6 +46,13 @@ abstract class BaseFragment(layout: Int) : Fragment(layout) {
     open fun showContent() {
     }
 
+    /**
+     * Returns true if there is an active search.
+     */
+    open fun isSearching(): Boolean {
+        return false
+    }
+
     fun setupFastScroller(recyclerView: RecyclerView) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val thumbDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.thumb)

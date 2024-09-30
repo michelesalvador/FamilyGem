@@ -56,10 +56,9 @@ import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.main.MainActivity;
 import app.familygem.main.MediaFragment;
-import app.familygem.main.NotesFragment;
-import app.familygem.main.PersonsFragment;
 import app.familygem.main.SourcesFragment;
 import app.familygem.util.FileUtil;
+import app.familygem.util.NoteUtil;
 import app.familygem.util.PersonUtilKt;
 import app.familygem.util.TreeUtil;
 
@@ -364,7 +363,7 @@ public class ProfileActivity extends AppCompatActivity {
                         TreeUtil.INSTANCE.save(true, one);
                         break;
                     case 23: // Create shared note
-                        NotesFragment.newNote(this, one);
+                        NoteUtil.INSTANCE.createSharedNote(this, one);
                         break;
                     case 24: // Link shared note
                         Intent intent2 = new Intent(this, MainActivity.class);
@@ -586,7 +585,7 @@ public class ProfileActivity extends AppCompatActivity {
             case 5: // Delete
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
                         .setPositiveButton(R.string.delete, (dialog, i) -> {
-                            Family[] families = PersonsFragment.deletePerson(this, one.getId());
+                            Family[] families = PersonUtilKt.delete(one);
                             if (!U.deleteEmptyFamilies(this, this::onBackPressed, true, families))
                                 onBackPressed();
                         }).setNeutralButton(R.string.cancel, null).show();

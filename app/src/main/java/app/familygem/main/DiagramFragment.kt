@@ -54,6 +54,7 @@ import app.familygem.util.ChangeUtil
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
+import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
 import graph.gedcom.Bond
 import graph.gedcom.CurveLine
@@ -776,7 +777,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         } else if (id == 7) { // Delete
             AlertDialog.Builder(context()).setMessage(R.string.really_delete_person)
                 .setPositiveButton(R.string.delete) { _, _ ->
-                    val families = PersonsFragment.deletePerson(context, personId)
+                    val families = person.delete()
                     refreshAll()
                     U.deleteEmptyFamilies(context, { refreshAll() }, false, *families)
                 }.setNeutralButton(R.string.cancel, null).show()

@@ -5,12 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import app.familygem.Global
+import app.familygem.Memory
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.detail.FamilyActivity
+import app.familygem.util.TreeUtil.save
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
 
@@ -28,6 +31,74 @@ fun Person.getFamilyLabels(context: Context, family: Family?): Array<String?> {
     if (spouseFams.size > 0) labels[1] = if (parentFams.isEmpty()) context.getString(R.string.family)
     else context.getString(R.string.family_as, FamilyActivity.getRole(this, family, Relation.PARTNER, true))
     return labels
+}
+
+/**
+ * Counts how many near relatives one person has: parents, siblings, half-siblings, spouses and children.
+ * @return Number of near relatives (person excluded)
+ */
+fun Person.countRelatives(): Int {
+    var count = 0
+    val parentFamilies = getParentFamilies(Global.gc)
+    parentFamilies.forEach { family ->
+        // Parents
+        count += family.husbandRefs.size
+        count += family.wifeRefs.size
+        // Siblings
+        count += family.getChildren(Global.gc).count { it != this }
+        // Half-sibling
+        family.getHusbands(Global.gc).forEach { father ->
+            father.getSpouseFamilies(Global.gc).filter { !parentFamilies.contains(it) }.forEach { count += it.childRefs.size }
+        }
+        family.getWives(Global.gc).forEach { mother ->
+            mother.getSpouseFamilies(Global.gc).filter { !parentFamilies.contains(it) }.forEach { count += it.childRefs.size }
+        }
+    }
+    getSpouseFamilies(Global.gc).forEach { family ->
+        // Partners
+        count += family.wifeRefs.size
+        count += family.husbandRefs.size
+        count-- // Minus their self
+        // Children
+        count += family.childRefs.size
+    }
+    return count
+}
+
+/**
+ * Deletes a person from the tree, possibly finding the new root.
+ * @return An array of modified families
+ */
+fun Person.delete(): Array<Family> {
+    // Deletes all references from families to person
+    val modifiedFamilies: MutableSet<Family> = HashSet()
+    getParentFamilies(Global.gc).forEach {
+        it.childRefs.removeAt(it.getChildren(Global.gc).indexOf(this))
+        modifiedFamilies.add(it)
+    }
+    getSpouseFamilies(Global.gc).forEach {
+        if (it.getHusbands(Global.gc).contains(this)) {
+            it.husbandRefs.removeAt(it.getHusbands(Global.gc).indexOf(this))
+            modifiedFamilies.add(it)
+        }
+        if (it.getWives(Global.gc).contains(this)) {
+            it.wifeRefs.removeAt(it.getWives(Global.gc).indexOf(this))
+            modifiedFamilies.add(it)
+        }
+    }
+    Memory.setInstanceAndAllSubsequentToNull(this)
+    Global.gc.people.remove(this)
+    Global.gc.createIndexes() // Necessary
+    val newRootId = U.findRootId(Global.gc) // TODO: could be "find next of kin"
+    if (Global.settings.currentTree.root != null && Global.settings.currentTree.root == id) {
+        Global.settings.currentTree.root = newRootId
+        Global.settings.save()
+    }
+    if (Global.indi != null && Global.indi == id) Global.indi = newRootId
+    val families = modifiedFamilies.toTypedArray<Family>()
+    save(true, *families)
+    Toast.makeText(Global.context, R.string.person_deleted, Toast.LENGTH_LONG).show()
+    return families
 }
 
 object PersonUtil {

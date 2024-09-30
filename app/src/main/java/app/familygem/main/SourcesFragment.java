@@ -54,6 +54,7 @@ public class SourcesFragment extends BaseFragment {
 
     private List<Source> sourceList = Collections.emptyList();
     private SourcesAdapter adapter;
+    private SearchView searchView;
     private int order;
 
     @Override
@@ -71,7 +72,13 @@ public class SourcesFragment extends BaseFragment {
     @Override
     public void showContent() {
         sourceList = gc.getSources();
+        adapter.getFilter().filter(searchView != null ? searchView.getQuery() : "");
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean isSearching() {
+        return searchView != null && searchView.getQuery().length() > 0;
     }
 
     public class SourcesAdapter extends RecyclerView.Adapter<SourceHolder> implements Filterable {
@@ -150,13 +157,13 @@ public class SourcesFragment extends BaseFragment {
 
         @Override
         public void onClick(View v) {
-            // Restituisce l'id di una fonte a ProfileActivity e Dettaglio
+            // Returns a source ID to ProfileActivity or to DetailActivity
             if (getActivity().getIntent().getBooleanExtra(Choice.SOURCE, false)) {
                 Intent intent = new Intent();
                 intent.putExtra(Extra.SOURCE_ID, idView.getText().toString());
                 getActivity().setResult(Activity.RESULT_OK, intent);
                 getActivity().finish();
-            } else {
+            } else { // Regular source opening
                 Source source = gc.getSource(idView.getText().toString());
                 Memory.setLeader(source);
                 startActivity(new Intent(getContext(), SourceActivity.class));
@@ -316,7 +323,7 @@ public class SourcesFragment extends BaseFragment {
         if (sourceList.size() > 1) {
             // Search in SourcesFragment
             inflater.inflate(R.menu.search, menu);
-            final SearchView searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
+            searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextChange(String query) {

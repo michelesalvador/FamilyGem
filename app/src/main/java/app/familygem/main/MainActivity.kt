@@ -45,11 +45,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var _frontFragment: BaseFragment? = null // The fragment visible on the main view
     val frontFragment
         get() = _frontFragment ?: manager.findFragmentById(R.id.main_fragment) as BaseFragment
-    private val menuIds: List<Int> = listOf(R.id.menu_diagram, R.id.menu_persons, R.id.menu_families,
-            R.id.menu_media, R.id.menu_notes, R.id.menu_sources, R.id.menu_repositories, R.id.menu_submitters, R.id.menu_settings)
-    private val fragments = listOf<Class<*>>(DiagramFragment::class.java, PersonsFragment::class.java, FamiliesFragment::class.java,
-            MediaFragment::class.java, NotesFragment::class.java, SourcesFragment::class.java, RepositoriesFragment::class.java,
-            SubmittersFragment::class.java, TreeSettingsFragment::class.java)
+    private val menuIds: List<Int> = listOf(
+        R.id.menu_diagram, R.id.menu_persons, R.id.menu_families, R.id.menu_media, R.id.menu_notes,
+        R.id.menu_sources, R.id.menu_repositories, R.id.menu_submitters, R.id.menu_settings
+    )
+    private val fragments = listOf<Class<*>>(
+        DiagramFragment::class.java, PersonsFragment::class.java, FamiliesFragment::class.java,
+        MediaFragment::class.java, NotesFragment::class.java, SourcesFragment::class.java, RepositoriesFragment::class.java,
+        SubmittersFragment::class.java, TreeSettingsFragment::class.java
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -185,7 +189,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * Updates both toolbar and main menu.
      */
     fun refreshInterface() {
-        refreshToolbar()
+        if (!frontFragment.isSearching()) refreshToolbar()
         furnishMenu()
     }
 

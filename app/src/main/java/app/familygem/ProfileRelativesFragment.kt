@@ -366,7 +366,7 @@ class ProfileRelativesFragment : Fragment() {
             316 -> { // Delete
                 AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete) { _, _ ->
-                        PersonsFragment.deletePerson(context, selectedId)
+                        selected.delete()
                         refreshAll()
                         U.deleteEmptyFamilies(context, { this.refreshOptionsMenu() }, false, family)
                     }.setNeutralButton(R.string.cancel, null).show()

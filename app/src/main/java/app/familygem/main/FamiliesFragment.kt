@@ -10,7 +10,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
@@ -27,10 +26,9 @@ import app.familygem.util.Util
 import app.familygem.util.delete
 import app.familygem.util.writeContent
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.folg.gedcom.model.Family
+import kotlin.concurrent.timer
 
 /**
  * List of all families of the tree.
@@ -41,8 +39,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
     private val allFamilies = ArrayList<FamilyWrapper>()
     val filteredFamilies = ArrayList<FamilyWrapper>()
     private val adapter = FamiliesAdapter(this)
-    private lateinit var searchView: SearchView
-    private var prepareJob: Job? = null
+    private var searchView: SearchView? = null
     private var idsAreNumeric = false
     var order = Order.NONE
 
@@ -50,11 +47,11 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
         NONE, ID_ASC, ID_DESC, SURNAME_ASC, SURNAME_DESC, MEMBERS_ASC, MEMBERS_DESC;
 
         fun next(): Order {
-            return Order.values()[ordinal + 1]
+            return entries[ordinal + 1]
         }
 
         fun prev(): Order {
-            return Order.values()[ordinal - 1]
+            return entries[ordinal - 1]
         }
     }
 
@@ -75,15 +72,22 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
 
     override fun showContent() {
         binding.recyclerWheel.root.visibility = View.VISIBLE
-        prepareJob = lifecycleScope.launch(Dispatchers.Default) {
+        val prepareJob = lifecycleScope.launch(Dispatchers.Default) {
             allFamilies.clear()
             Global.gc.families.forEach { allFamilies.add(FamilyWrapper(it)) }
-            filteredFamilies.clear()
-            filteredFamilies.addAll(allFamilies)
-            withContext(Dispatchers.Main) { adapter.notifyDataSetChanged() }
             idsAreNumeric = verifyIdsAreNumeric()
             allFamilies.forEach { it.completeFields() } // This could be time-consuming
-            withContext(Dispatchers.Main) { binding.recyclerWheel.root.visibility = View.GONE }
+        }
+        timer(period = 800) {
+            lifecycleScope.launch(Dispatchers.Main) {
+                filterFamilies(searchView?.query ?: "")
+                sortFamilies()
+                adapter.notifyDataSetChanged()
+                if (prepareJob.isCompleted) {
+                    binding.recyclerWheel.root.visibility = View.GONE
+                    cancel()
+                }
+            }
         }
     }
 
@@ -94,14 +98,15 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
             // Search view
             inflater.inflate(R.menu.search, menu)
             searchView = menu.findItem(R.id.search_item).actionView as SearchView
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            searchView!!.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextChange(query: String): Boolean {
                     filterFamilies(query)
+                    adapter.notifyDataSetChanged()
                     return true
                 }
 
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    searchView.clearFocus()
+                    searchView!!.clearFocus()
                     return false
                 }
             })
@@ -114,13 +119,17 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
         }
     }
 
+    override fun isSearching(): Boolean {
+        return searchView != null && searchView!!.query.isNotBlank()
+    }
+
     /**
      * Searches all the words of the query and displays filtered families.
      */
-    private fun filterFamilies(query: String) {
-        val queries = query.trim().lowercase().split("\\s+".toRegex())
+    private fun filterFamilies(query: CharSequence) {
+        val queries = query.trim().toString().lowercase().split("\\s+".toRegex()).dropWhile { it.isBlank() }
         filteredFamilies.clear()
-        if (queries[0].isEmpty()) {
+        if (queries.isEmpty()) {
             filteredFamilies.addAll(allFamilies)
         } else {
             outer@ for (wrapper in allFamilies) {
@@ -130,22 +139,24 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
                 filteredFamilies.add(wrapper)
             }
         }
-        adapter.notifyDataSetChanged()
     }
 
     override fun selectItem(id: Int) {
         if (id in 1..3) {
-            if (prepareJob != null && prepareJob!!.isCompleted) {
-                // Clicking twice the same menu item switches sorting ASC and DESC
-                order = when (order) {
-                    Order.values()[id * 2 - 1] -> order.next()
-                    Order.values()[id * 2] -> order.prev()
-                    else -> Order.values()[id * 2 - 1]
-                }
-                sortFamilies()
-                filterFamilies(searchView.query.toString())
-                adapter.notifyDataSetChanged()
-            } else Toast.makeText(context, "Please wait.", Toast.LENGTH_SHORT).show()
+            // Clicking twice the same menu item switches sorting ASC and DESC
+            order = when (order) {
+                Order.entries[id * 2 - 1] -> order.next()
+                Order.entries[id * 2] -> order.prev()
+                else -> Order.entries[id * 2 - 1]
+            }
+            sortFamilies()
+            adapter.notifyDataSetChanged()
+            // Updates families sorting in global GEDCOM
+            if (filteredFamilies.size == Global.gc.families.size) {
+                Global.gc.families = filteredFamilies.map { it.family }
+                TreeUtil.save(false) // Immediately saves families sorting
+                if (Global.shouldSave) (requireActivity() as MainActivity).furnishMenu() // Displays the Save button
+            }
         }
     }
 
@@ -164,38 +175,31 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
     }
 
     private fun sortFamilies() {
-        allFamilies.sortWith(Comparator { f1: FamilyWrapper, f2: FamilyWrapper ->
-            when (order) {
+        filteredFamilies.sortWith { f1: FamilyWrapper, f2: FamilyWrapper ->
+            return@sortWith when (order) {
                 // Sorts by ID
-                Order.ID_ASC -> if (idsAreNumeric) return@Comparator U.extractNum(f1.id) - U.extractNum(f2.id)
-                else return@Comparator f1.id.compareTo(f2.id, ignoreCase = true)
-                Order.ID_DESC -> if (idsAreNumeric) return@Comparator U.extractNum(f2.id) - U.extractNum(f1.id)
-                else return@Comparator f2.id.compareTo(f1.id, ignoreCase = true)
+                Order.ID_ASC -> if (idsAreNumeric) U.extractNum(f1.id) - U.extractNum(f2.id)
+                else f1.id.compareTo(f2.id, ignoreCase = true)
+                Order.ID_DESC -> if (idsAreNumeric) U.extractNum(f2.id) - U.extractNum(f1.id)
+                else f2.id.compareTo(f1.id, ignoreCase = true)
                 // Sorts by surname
                 Order.SURNAME_ASC -> {
-                    if (f1.lowerSurname == null) // null names go to the bottom
-                        return@Comparator if (f2.lowerSurname == null) 0 else 1
-                    if (f2.lowerSurname == null) return@Comparator -1
-                    return@Comparator f1.lowerSurname!!.compareTo(f2.lowerSurname!!)
+                    if (f1.lowerSurname == null && f2.lowerSurname == null) 0
+                    else if (f1.lowerSurname == null) 1 // null names go to the bottom
+                    else if (f2.lowerSurname == null) -1
+                    else f1.lowerSurname!!.compareTo(f2.lowerSurname!!)
                 }
                 Order.SURNAME_DESC -> {
-                    if (f1.lowerSurname == null)
-                        return@Comparator if (f2.lowerSurname == null) 0 else 1
-                    if (f2.lowerSurname == null) return@Comparator -1
-                    return@Comparator f2.lowerSurname!!.compareTo(f1.lowerSurname!!)
+                    if (f1.lowerSurname == null && f2.lowerSurname == null) 0
+                    else if (f1.lowerSurname == null) 1
+                    else if (f2.lowerSurname == null) -1
+                    else f2.lowerSurname!!.compareTo(f1.lowerSurname!!)
                 }
                 // Sorts by number of family members
-                Order.MEMBERS_ASC -> return@Comparator f1.members - f2.members
-                Order.MEMBERS_DESC -> return@Comparator f2.members - f1.members
-                else -> return@Comparator 0
+                Order.MEMBERS_ASC -> f1.members - f2.members
+                Order.MEMBERS_DESC -> f2.members - f1.members
+                else -> 0
             }
-        })
-        // Updates families sorting in global GEDCOM
-        val sortedFamilies = allFamilies.map { it.family }
-        if (sortedFamilies != Global.gc.families) {
-            Global.gc.families = sortedFamilies
-            TreeUtil.save(false) // Immediately saves families sorting
-            if (Global.shouldSave) (requireActivity() as MainActivity).furnishMenu() // Displays the Save button
         }
     }
 
@@ -222,8 +226,8 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
                     }
                     if (selected.husbandRefs.size + selected.wifeRefs.size + selected.childRefs.size > 0) {
                         AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_family)
-                                .setPositiveButton(android.R.string.ok) { _, _ -> deleteFamily() }
-                                .setNeutralButton(android.R.string.cancel, null).show()
+                            .setPositiveButton(android.R.string.ok) { _, _ -> deleteFamily() }
+                            .setNeutralButton(android.R.string.cancel, null).show()
                     } else {
                         deleteFamily()
                     }
@@ -285,7 +289,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
             family.getHusbands(Global.gc).forEach { builder.append(U.properName(it)).append(' ') }
             family.getWives(Global.gc).forEach { builder.append(U.properName(it)).append(' ') }
             family.getChildren(Global.gc).forEach { builder.append(U.properName(it)).append(' ') }
-            family.eventsFacts.filterNot { it.value == "Y" }.forEach { builder.append(it.writeContent()).append(' ') } // This could be time-consuming
+            family.eventsFacts.filterNot { it.value == "Y" }.forEach { builder.append(it.writeContent()).append(' ') } // Time-consuming
             text = builder.toString().lowercase()
         }
     }
