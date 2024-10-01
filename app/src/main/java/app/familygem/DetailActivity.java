@@ -36,7 +36,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import org.folg.gedcom.model.Address;
-import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Family;
@@ -1014,6 +1013,8 @@ public abstract class DetailActivity extends AppCompatActivity {
     View pieceView; // Editable text, notes, citations, media...
     Object pieceObject;
     Person person; // As it is used a lot, we make it a pieceObject in its own right
+    int husbandRefIndex; // Husband index between same-sex partners
+    int wifeRefIndex; // Wife index between same-sex partners
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) { // info is null
@@ -1044,20 +1045,27 @@ public abstract class DetailActivity extends AppCompatActivity {
                     menu.add(0, 12, 0, famLabels[0]);
                 if (famLabels[1] != null)
                     menu.add(0, 13, 0, famLabels[1]);
+                husbandRefIndex = fam.getHusbands(gc).indexOf(person);
+                wifeRefIndex = fam.getWives(gc).indexOf(person);
+                if (husbandRefIndex > 0 || wifeRefIndex > 0)
+                    menu.add(0, 14, 0, R.string.move_up);
+                if (husbandRefIndex >= 0 && husbandRefIndex < fam.getHusbandRefs().size() - 1
+                        || wifeRefIndex >= 0 && wifeRefIndex < fam.getWifeRefs().size() - 1)
+                    menu.add(0, 15, 0, R.string.move_down);
                 if (fam.getChildren(gc).indexOf(person) > 0)
-                    menu.add(0, 14, 0, R.string.move_before);
+                    menu.add(0, 16, 0, R.string.move_before);
                 if (fam.getChildren(gc).indexOf(person) < fam.getChildren(gc).size() - 1 && fam.getChildren(gc).contains(person))
-                    menu.add(0, 15, 0, R.string.move_after);
-                menu.add(0, 16, 0, R.string.modify);
+                    menu.add(0, 17, 0, R.string.move_after);
+                menu.add(0, 18, 0, R.string.modify);
                 if (FamilyActivity.findParentFamilyRef(person, fam) != null)
-                    menu.add(0, 17, 0, R.string.lineage);
-                menu.add(0, 18, 0, R.string.unlink);
-                menu.add(0, 19, 0, R.string.delete);
+                    menu.add(0, 19, 0, R.string.lineage);
+                menu.add(0, 20, 0, R.string.unlink);
+                menu.add(0, 21, 0, R.string.delete);
             } else if (pieceObject instanceof Note) {
-                menu.add(0, 20, 0, R.string.copy);
+                menu.add(0, 25, 0, R.string.copy);
                 if (((Note)pieceObject).getId() != null)
-                    menu.add(0, 21, 0, R.string.unlink);
-                menu.add(0, 22, 0, R.string.delete);
+                    menu.add(0, 26, 0, R.string.unlink);
+                menu.add(0, 27, 0, R.string.delete);
             } else if (pieceObject instanceof SourceCitation) {
                 menu.add(0, 30, 0, R.string.copy);
                 List<SourceCitation> sourceCitations;
@@ -1145,33 +1153,33 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 13: // Family (as partner)
                 U.whichSpousesToShow(this, person, null);
                 return true;
-            case 14: // Move up child
-                Family fa = (Family)object;
-                ChildRef childRef1 = fa.getChildRefs().get(fa.getChildren(gc).indexOf(person));
-                fa.getChildRefs().add(fa.getChildRefs().indexOf(childRef1) - 1, childRef1);
-                fa.getChildRefs().remove(fa.getChildRefs().lastIndexOf(childRef1));
+            case 14: // Move partner up
+                swapPartners(-1);
                 break;
-            case 15: // Move down child
-                Family f = (Family)object;
-                ChildRef childRef = f.getChildRefs().get(f.getChildren(gc).indexOf(person));
-                f.getChildRefs().add(f.getChildRefs().indexOf(childRef) + 2, childRef);
-                f.getChildRefs().remove(f.getChildRefs().indexOf(childRef)); // TODO: can this be optimized to use removal by object?
+            case 15: // Move partner down
+                swapPartners(1);
                 break;
-            case 16: // Edit
+            case 16: // Move child before
+                swapChildren(-1);
+                break;
+            case 17: // Move child after
+                swapChildren(1);
+                break;
+            case 18: // Edit
                 Intent i = new Intent(this, PersonEditorActivity.class);
                 i.putExtra(Extra.PERSON_ID, person.getId());
                 startActivity(i);
                 return true;
-            case 17: // Lineage
+            case 19: // Lineage
                 FamilyActivity.chooseLineage(this, person, (Family)object);
                 break;
-            case 18: // Unlink family member
+            case 20: // Unlink family member
                 FamilyActivity.disconnect((SpouseFamilyRef)pieceView.getTag(R.id.tag_spouse_family_ref),
                         (SpouseRef)pieceView.getTag(R.id.tag_spouse_ref));
                 ChangeUtil.INSTANCE.updateChangeDate(person);
                 findAnotherRepresentativeOfTheFamily(person);
                 break;
-            case 19: // Delete family member
+            case 21: // Delete family member
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
                         .setPositiveButton(R.string.delete, (dialog, id) -> {
                             PersonUtilKt.delete(person);
@@ -1179,13 +1187,13 @@ public abstract class DetailActivity extends AppCompatActivity {
                             refresh();
                         }).setNeutralButton(R.string.cancel, null).show();
                 return true;
-            case 20: // Copy note text
+            case 25: // Copy note text
                 U.copyToClipboard(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.note_text)).getText());
                 return true;
-            case 21: // Unlink note
+            case 26: // Unlink note
                 U.disconnectNote((Note)pieceObject, object, null);
                 break;
-            case 22: // Delete note
+            case 27: // Delete note
                 Object[] leaders = U.deleteNote((Note)pieceObject, pieceView);
                 TreeUtil.INSTANCE.save(true, leaders);
                 return true;
@@ -1278,6 +1286,24 @@ public abstract class DetailActivity extends AppCompatActivity {
         TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
         refresh();
         return true;
+    }
+
+    /**
+     * Swaps position of same-sex partners.
+     */
+    private void swapPartners(int direction) {
+        Family family = (Family)object;
+        if (husbandRefIndex >= 0) {
+            Collections.swap(family.getHusbandRefs(), husbandRefIndex, husbandRefIndex + direction);
+        } else if (wifeRefIndex >= 0) {
+            Collections.swap(family.getWifeRefs(), wifeRefIndex, wifeRefIndex + direction);
+        }
+    }
+
+    private void swapChildren(int direction) {
+        Family family = (Family)object;
+        int index = family.getChildren(gc).indexOf(person);
+        Collections.swap(family.getChildRefs(), index, index + direction);
     }
 
     /**
