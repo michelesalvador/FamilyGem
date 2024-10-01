@@ -19,7 +19,6 @@ import androidx.fragment.app.FragmentActivity
 import app.familygem.constant.Extra
 import app.familygem.constant.Relation
 import app.familygem.detail.FamilyActivity
-import app.familygem.main.PersonsFragment
 import app.familygem.util.TreeUtil.save
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
@@ -44,7 +43,7 @@ class ProfileRelativesFragment : Fragment() {
         mutableListOf<GroupData>() // Own families
     )
 
-    private class ParentItem(val parent: Person) {
+    private class ParentItem(val parent: Person?) {
         val groups = mutableListOf<GroupData>()
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -85,9 +84,22 @@ class ProfileRelativesFragment : Fragment() {
             parentFamilies.forEachIndexed { lineageIndex, parentFamily ->
                 val lineageItem = Pair(mutableListOf<ParentItem>(), mutableListOf<ParentItem>())
                 groupTree.first.add(lineageItem)
+                // Origin family without parents
+                if (parentFamily.husbandRefs.isEmpty() && parentFamily.wifeRefs.isEmpty()) {
+                    val members = findGroupMembers(parentFamily, FamilyType.ORIGIN)
+                    if (members.isNotEmpty()) {
+                        val parentItem = ParentItem(null)
+                        val groupData = GroupData(parentFamily, members, FamilyType.ORIGIN, Branch.ANY, listIndex++, lineageIndex)
+                        lineageItem.first.add(parentItem)
+                        parentItem.groups.add(groupData)
+                        groupList.add(groupData)
+                    }
+                }
+                // Paternal families
                 parentFamily.getHusbands(Global.gc).forEachIndexed { parentIndex, father ->
                     listIndex = createParentItem(parentFamilies, lineageItem, father, Branch.PATERNAL, listIndex, lineageIndex, parentIndex)
                 }
+                // Maternal families
                 parentFamily.getWives(Global.gc).forEachIndexed { parentIndex, mother ->
                     listIndex = createParentItem(parentFamilies, lineageItem, mother, Branch.MATERNAL, listIndex, lineageIndex, parentIndex)
                 }
@@ -169,7 +181,7 @@ class ProfileRelativesFragment : Fragment() {
             val groupTitle = groupView.findViewById<TextView>(R.id.group_title)
             groupTitle.text = U.properName(parentItem.parent)
             groupTitle.setTypeface(null, Typeface.BOLD)
-            groupTitle.setOnClickListener { clickRelative(parentItem.parent) }
+            groupTitle.setOnClickListener { clickRelative(parentItem.parent!!) }
             if (parentItem.groups.last().members.isEmpty()) {
                 val cap = groupView.findViewById<ImageView>(R.id.group_cap)
                 (cap.layoutParams as ConstraintLayout.LayoutParams).bottomMargin = U.dpToPx(7F)
@@ -263,15 +275,15 @@ class ProfileRelativesFragment : Fragment() {
             FamilyType.ORIGIN -> {
                 family.getHusbands(Global.gc).forEach { add(it, Relation.PARENT) }
                 family.getWives(Global.gc).forEach { add(it, Relation.PARENT) }
-                family.getChildren(Global.gc).forEach { if (it != person) add(it, Relation.SIBLING) }
+                family.getChildren(Global.gc).filterNot { it == person }.forEach { add(it, Relation.SIBLING) }
             }
             FamilyType.HALF -> {
                 family.getChildren(Global.gc).forEach { add(it, Relation.HALF_SIBLING) }
             }
             FamilyType.ORIGIN_SMALL -> {}
             FamilyType.OWN -> {
-                family.getHusbands(Global.gc).forEach { if (it != person) add(it, Relation.PARTNER) }
-                family.getWives(Global.gc).forEach { if (it != person) add(it, Relation.PARTNER) }
+                family.getHusbands(Global.gc).filterNot { it == person }.forEach { add(it, Relation.PARTNER) }
+                family.getWives(Global.gc).filterNot { it == person }.forEach { add(it, Relation.PARTNER) }
                 family.getChildren(Global.gc).forEach { add(it, Relation.CHILD) }
             }
         }
@@ -299,12 +311,12 @@ class ProfileRelativesFragment : Fragment() {
                     menu.add(0, 301, 0, R.string.move_before)
                 }
                 // Move lineage family after
-                if (data.listIndex < groupList.size - 1 && groupList[data.listIndex + 1].lineageIndex != data.lineageIndex) {
+                if (data.listIndex < groupList.size - groupTree.second.size - 1 && groupList[data.listIndex + 1].lineageIndex != data.lineageIndex) {
                     menu.add(0, 302, 0, R.string.move_after)
                 }
                 // Move origin or half family after
-                val actualParent = if (data.branch == Branch.PATERNAL) groupTree.first[data.lineageIndex].first[data.parentIndex]
-                else groupTree.first[data.lineageIndex].second[data.parentIndex]
+                val actualParent = if (data.branch == Branch.MATERNAL) groupTree.first[data.lineageIndex].second[data.parentIndex]
+                else groupTree.first[data.lineageIndex].first[data.parentIndex] // PATERNAL or ANY branch
                 if (data.groupIndex in 0..<actualParent.groups.lastIndex) {
                     menu.add(0, 303, 0, R.string.move_after)
                 }
