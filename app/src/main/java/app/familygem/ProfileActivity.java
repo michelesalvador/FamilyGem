@@ -52,6 +52,7 @@ import app.familygem.constant.Image;
 import app.familygem.constant.Relation;
 import app.familygem.constant.Type;
 import app.familygem.detail.EventActivity;
+import app.familygem.detail.MediaActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
 import app.familygem.main.MainActivity;
@@ -61,6 +62,7 @@ import app.familygem.util.FileUtil;
 import app.familygem.util.NoteUtil;
 import app.familygem.util.PersonUtilKt;
 import app.familygem.util.TreeUtil;
+import app.familygem.visitor.FindStack;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -253,6 +255,12 @@ public class ProfileActivity extends AppCompatActivity {
         toolbarLayout.setTitle(U.properName(one));
         toolbarLayout.setExpandedTitleTextAppearance(R.style.AppTheme_ExpandedAppBar);
         toolbarLayout.setCollapsedTitleTextAppearance(R.style.AppTheme_CollapsedAppBar);
+        toolbarLayout.setOnClickListener(v -> { // Not only the name view but all the expanded toolbar
+            if (!one.getNames().isEmpty()) {
+                Memory.add(one.getNames().get(0));
+                startActivity(new Intent(this, NameActivity.class));
+            }
+        });
         setImages();
         if (Global.edited) {
             adapter.notifyPagesChanged();
@@ -456,6 +464,10 @@ public class ProfileActivity extends AppCompatActivity {
         // Same image blurred on background
         ImageView backImageView = findViewById(R.id.profile_background);
         if (media != null) {
+            imageView.setOnClickListener(v -> {
+                new FindStack(Global.gc, media);
+                startActivity(new Intent(this, MediaActivity.class));
+            });
             // imageView waits for the image to be loaded
             imageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
