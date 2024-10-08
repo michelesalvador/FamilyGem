@@ -11,7 +11,6 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -42,6 +41,10 @@ public class Settings {
      */
     boolean loadTree;
     /**
+     * Birthday notification time, for example "01:05".
+     */
+    String notifyTime;
+    /**
      * Used to display or hide all advanced tools.
      */
     public boolean expert;
@@ -57,6 +60,7 @@ public class Settings {
         referrer = "start";
         trees = new ArrayList<>();
         autoSave = true;
+        notifyTime = "12:00";
         diagram = new DiagramSettings().init();
     }
 
@@ -183,7 +187,7 @@ public class Settings {
          * </ol>
          */
         public int grade;
-        public Set<Birthday> birthdays;
+        public List<Birthday> birthdays;
 
         public Tree(int id, String title, String dir, int persons, int generations, String root,
                     TreeSettings settings, List<Share> shares, int grade) {
@@ -198,7 +202,7 @@ public class Settings {
             this.settings = settings != null ? settings : new TreeSettings();
             this.shares = shares;
             this.grade = grade;
-            birthdays = new HashSet<>();
+            birthdays = new ArrayList<>();
         }
 
         public void addShare(Share share) {

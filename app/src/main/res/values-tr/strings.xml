@@ -85,7 +85,6 @@
     <string name="link_shared_media">Paylaşımlı fotoğraf linki</string>
     <string name="new_note">Yeni not</string>
     <string name="click_this_link">Soyağacını görmek için buraya tıklayın: %s</string>
-    <string name="birthday_notified_midday">Her kişinin doğum tarihi öğle vaktinde duyurulacaktır.</string>
     <string name="form">Form</string>
     <string name="sent_by">%s tarafından gönderildi</string>
     <string name="remind_later">Daha sonra hatırlat</string>

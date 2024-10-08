@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -25,18 +26,22 @@ public class NotifyReceiver extends BroadcastReceiver {
         } else { // Creates notification
             Intent notifyIntent = new Intent(context, TreesActivity.class)
                     .putExtra(Notifier.TREE_ID_KEY, intent.getIntExtra(Extra.TREE_ID, 0))
-                    .putExtra(Notifier.PERSON_ID_KEY, intent.getStringExtra(Extra.PERSON_ID))
-                    .putExtra(Notifier.NOTIFY_ID_KEY, intent.getIntExtra(Extra.ID, 1));
+                    .putExtra(Notifier.PERSON_ID_KEY, intent.getStringExtra(Extra.PERSON_ID));
             PendingIntent pendingIntent = PendingIntent.getActivity(context, intent.getIntExtra(Extra.ID, 1),
                     notifyIntent, PendingIntent.FLAG_IMMUTABLE);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Notifier.CHANNEL_ID)
-                    .setSmallIcon(R.drawable.albero_cherokee)
                     .setContentTitle(intent.getStringExtra(Extra.TITLE))
                     .setContentText(intent.getStringExtra(Extra.TEXT))
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
                     .setCategory(NotificationCompat.CATEGORY_EVENT);
+            // KitKat does not support XML icons
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                builder.setSmallIcon(R.drawable.small_tree);
+            } else {
+                builder.setSmallIcon(R.drawable.albero_cherokee);
+            }
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(intent.getIntExtra(Extra.ID, 1), builder.build());

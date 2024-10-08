@@ -326,7 +326,7 @@
     <string name="gedcom_exported_ok">GEDCOM exportado.</string>
     <string name="share_sensitive">Intercambio de datos sensibles</string>
     <string name="not_memory_tree">No hay suficiente memoria para este árbol.</string>
-    <string name="birthday_notified_midday">El cumpleaños de cada persona se notificará al mediodía.</string>
+    <string name="person_birthday">El cumpleaños de cada persona viva.</string>
     <string name="birthdays">Cumpleaños</string>
     <string name="allow_developer_access">Permitir al programador de la applicación de acceder al árbol compartido</string>
     <string name="remind_later">Recordarlo después</string>

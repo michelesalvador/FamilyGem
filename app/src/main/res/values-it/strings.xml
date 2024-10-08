@@ -80,6 +80,7 @@
     <string name="auto_save">Salvataggio automatico</string>
     <string name="load_tree_startup">All\'avvio carica l\'ultimo albero aperto</string>
     <string name="show_advanced_functions">Mostra le funzioni avanzate</string>
+    <string name="notification_time">Orario notifica compleanni</string>
     <string name="system_language">Lingua di sistema</string>
     <string name="about">Informazioni</string>
     <!-- InfoActivity -->
@@ -161,7 +162,7 @@
     <string name="merge_complete">Unione completata.</string>
     <!-- Notifier -->
     <string name="birthdays">Compleanni</string>
-    <string name="birthday_notified_midday">Il compleanno di ogni persona sarà notificato a mezzogiorno.</string>
+    <string name="person_birthday">Il compleanno di ogni persona vivente.</string>
     <string name="turns_years_old">%s compie %d anni oggi.</string>
     <!-- DiagramFragment -->
     <string name="new_person">Aggiungi la prima persona.</string>

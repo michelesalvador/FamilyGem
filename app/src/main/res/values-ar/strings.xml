@@ -166,7 +166,6 @@
     <string name="all_imported_delete">استوردت كل التحديثات
 \nأتريدحذف الشجرة المستوردة؟</string>
     <string name="birthdays">تواريخ الميلاد</string>
-    <string name="birthday_notified_midday">سَيُذكر بتاريخ ميلاد كل شخص في منتصف النهار.</string>
     <string name="turns_years_old">اليوم أصبح عمر %s %d سنة.</string>
     <string name="new_person">أضف الشخص الأول.</string>
     <string name="card">لمحة</string>

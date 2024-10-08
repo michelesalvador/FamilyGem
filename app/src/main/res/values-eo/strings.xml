@@ -356,7 +356,6 @@
     <string name="family_as">Familio (kiel %s)</string>
     <string name="turns_years_old">%s havas %d jarojn hodiaŭ.</string>
     <string name="birthdays">Naskiĝtago</string>
-    <string name="birthday_notified_midday">La naskiĝtago de ĉiu persono estos anoncita tagmeze.</string>
     <string name="allow_developer_access">Permesu al la programisto aliri la komunan arbon</string>
     <string name="remind_later">Rememorigi al mi poste</string>
     <string name="aware_upload_server">Konsciu, ke vi alŝutos la tutan arbon al interreta servilo.</string>

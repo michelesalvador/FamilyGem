@@ -330,7 +330,6 @@
     <string name="gedcom_exported_ok">Файл GEDCOM экспортирован.</string>
     <string name="family_as">Семья (как %s)</string>
     <string name="turns_years_old">%s сегодня исполняется %d лет.</string>
-    <string name="birthday_notified_midday">О дне рождения каждого человека сообщат в полдень.</string>
     <string name="birthdays">Дни рождения</string>
     <string name="allow_developer_access">Разрешить разработчику программы доступ к общему дереву</string>
     <string name="remind_later">Напомните мне позже</string>

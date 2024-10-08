@@ -355,7 +355,6 @@
     <string name="partners">Partneri</string>
     <string name="family_as">Porodica (kao %s)</string>
     <string name="turns_years_old">%s danas puni %d godina.</string>
-    <string name="birthday_notified_midday">O rođendanu svake osobe biće obavešteno u podne.</string>
     <string name="birthdays">Rođendani</string>
     <string name="allow_developer_access">Dozvolite razvijaču aplikacija da pristupi zajedničkom drvetu</string>
     <string name="remind_later">Podseti me kasnije</string>

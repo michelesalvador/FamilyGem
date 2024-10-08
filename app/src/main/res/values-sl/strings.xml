@@ -336,7 +336,6 @@
     <string name="about">O aplikaciji</string>
     <string name="item_exists_but_file">Vpis drevesa je na seznamu, vendar manjka povezana datoteka:</string>
     <string name="tree_without_news">Drevo brez posodobitev</string>
-    <string name="birthday_notified_midday">Rojstni dan vsake osebe bo obveščen o poldnevu.</string>
     <string name="sharing_completed">Skupna raba je končana.</string>
     <string name="tree_news_imported">Izvirno drevo zgoraj lahko sprejme %d posodobitev iz uvoženega drevesa:</string>
     <string name="sent_by">Poslal %s</string>

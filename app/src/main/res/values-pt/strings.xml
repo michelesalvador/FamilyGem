@@ -352,7 +352,7 @@
     <string name="partners">Parceiros</string>
     <string name="family_as">Família (como %s)</string>
     <string name="turns_years_old">%s completa %d anos hoje.</string>
-    <string name="birthday_notified_midday">O aniversário de cada pessoa será avisado ao meio-dia.</string>
+    <string name="person_birthday">O aniversário de cada pessoa viva.</string>
     <string name="birthdays">Aniversários</string>
     <string name="allow_developer_access">Permitir que o desenvolvedor do aplicativo acesse a árvore compartilhada</string>
     <string name="remind_later">Lembrar mais tarde</string>

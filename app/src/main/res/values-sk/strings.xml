@@ -330,7 +330,6 @@
     <string name="cancel">Zrušiť</string>
     <string name="family_as">Rodina (ako %s)</string>
     <string name="turns_years_old">%s má dnes %d rokov.</string>
-    <string name="birthday_notified_midday">Narodeniny každej osoby budú oznámené na poludnie.</string>
     <string name="birthdays">Narodeniny</string>
     <string name="allow_developer_access">Povoliť vývojárovi aplikácie prístup k zdieľanému stromu</string>
     <string name="remind_later">Pripomenúť neskôr</string>

@@ -353,7 +353,6 @@
     <string name="age">Alter</string>
     <string name="family_as">Familie (als %s)</string>
     <string name="turns_years_old">%s wird heute %d Jahre alt.</string>
-    <string name="birthday_notified_midday">Der Geburtstag jeder Person wird am Mittag bekannt gegeben.</string>
     <string name="birthdays">Geburtstage</string>
     <string name="allow_developer_access">Erlaube dem Entwickler dieser App den Zugriff auf den freigegebenen Stammbaum</string>
     <string name="remind_later">Erinnere mich später</string>

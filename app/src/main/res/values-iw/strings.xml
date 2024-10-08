@@ -184,7 +184,6 @@
     <string name="all_imported_delete">כל העדכונים ייובאו.
 \nלמחוק את העץ שייובא\?</string>
     <string name="birthdays">ימי הולדת</string>
-    <string name="birthday_notified_midday">יום ההולדת של כל אדם יקפיץ התראה באמצע היום.</string>
     <string name="turns_years_old">הגיל של %s יהיה %d שנים היום.</string>
     <string name="card">פרופיל</string>
     <string name="family_as_child">משפחה (כילד)</string>

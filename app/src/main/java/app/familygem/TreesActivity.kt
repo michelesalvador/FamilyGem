@@ -64,8 +64,6 @@ class TreesActivity : AppCompatActivity() {
     private lateinit var welcome: SpeechBubble
     private lateinit var exporter: Exporter
     private var autoOpenedTree = false // To open automatically the tree at startup only once
-    private var consumedNotifications =
-        ArrayList<Int>() // The birthday notification IDs are stored to display the corresponding person only once
     private var draggedTreeId = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +85,6 @@ class TreesActivity : AppCompatActivity() {
 
         if (savedInstanceState != null) {
             autoOpenedTree = savedInstanceState.getBoolean("autoOpenedTree")
-            consumedNotifications = savedInstanceState.getIntegerArrayList("consumedNotifications")!!
         }
 
         if (Global.settings.trees == null) return
@@ -423,7 +420,6 @@ class TreesActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putBoolean("autoOpenedTree", autoOpenedTree)
-        outState.putIntegerArrayList("consumedNotifications", consumedNotifications)
         super.onSaveInstanceState(outState)
     }
 
@@ -444,13 +440,11 @@ class TreesActivity : AppCompatActivity() {
      */
     private fun birthdayNotifyTapped(intent: Intent): Boolean {
         val treeId = intent.getIntExtra(Notifier.TREE_ID_KEY, 0)
-        val notifyId = intent.getIntExtra(Notifier.NOTIFY_ID_KEY, 0)
-        if (treeId > 0 && !consumedNotifications.contains(notifyId)) {
+        if (treeId > 0) {
             progress.visibility = View.VISIBLE
             lifecycleScope.launch(IO) {
                 if (TreeUtil.openGedcom(treeId, true)) {
                     Global.indi = intent.getStringExtra(Notifier.PERSON_ID_KEY)
-                    consumedNotifications.add(notifyId)
                     startActivity(Intent(this@TreesActivity, MainActivity::class.java))
                     Notifier(this@TreesActivity, Global.gc, treeId, Notifier.What.DEFAULT) // Actually deletes present notification
                 } else withContext(Main) { progress.visibility = View.GONE }

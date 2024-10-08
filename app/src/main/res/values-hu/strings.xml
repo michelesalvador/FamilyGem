@@ -291,7 +291,6 @@
 \n%d kiegészítés
 \n%d csere
 \n%d törlés</string>
-    <string name="birthday_notified_midday">Minden személy születésnapjáról délben értesítjük.</string>
     <string name="pdf_exported_ok">PDF exportálva.</string>
     <string name="age">Kor</string>
     <string name="this_is_root">%s a fa fő személye.</string>

@@ -1,16 +1,21 @@
 package app.familygem
 
+import android.app.AlarmManager
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.LocaleManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.os.LocaleListCompat
 import app.familygem.databinding.SettingsActivityBinding
+import org.joda.time.LocalTime
+import org.joda.time.format.DateTimeFormat
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
@@ -32,8 +37,8 @@ class SettingsActivity : BaseActivity() {
             return languages[0]
         }
 
-    override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         binding = SettingsActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -61,6 +66,22 @@ class SettingsActivity : BaseActivity() {
             Global.settings.save()
         }
 
+        // Birthday notification time
+        writeNotifyTime()
+        binding.settingsNotifyTime.setOnClickListener {
+            TimePickerFragment(this).show(supportFragmentManager, "timePicker")
+        }
+
+        // Alarms & reminders permission button
+        if (!isExactAlarmsGranted()) {
+            val button = binding.settingsAlarms
+            button.visibility = View.VISIBLE
+            button.setOnClickListener {
+                // Opens the exact alarm page in system settings
+                startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+            }
+        }
+
         // Language picker
         languages = ArrayList()
         languages.add(Language(null, 0)) // System language
@@ -80,31 +101,50 @@ class SettingsActivity : BaseActivity() {
         val languageArray = languages.map { it.toString() }.toTypedArray()
         languageView.setOnClickListener { view: View ->
             AlertDialog.Builder(view.context)
-                    .setSingleChoiceItems(languageArray, languages.indexOf(actual)) { dialog, item ->
-                        // Sets app locale and store it for the future
-                        val appLocale = LocaleListCompat.forLanguageTags(languages[item].code)
-                        AppCompatDelegate.setApplicationLocales(appLocale)
-                        // Updates app global context for this session only
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                            binding.settingsLayout.postDelayed({
-                                Global.context = ContextCompat.getContextForLanguage(applicationContext)
-                            }, 50) // Waits just a bit to get the correct locale
-                        }
-                        // Removes switches to force KitKat to update their language
-                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                            val layout = binding.settingsLayout
-                            layout.removeView(saveSwitch)
-                            layout.removeView(loadSwitch)
-                            layout.removeView(expertSwitch)
-                            recreate()
-                        }
-                        dialog.dismiss()
-                    }.show()
+                .setSingleChoiceItems(languageArray, languages.indexOf(actual)) { dialog, item ->
+                    // Sets app locale and store it for the future
+                    val appLocale = LocaleListCompat.forLanguageTags(languages[item].code)
+                    AppCompatDelegate.setApplicationLocales(appLocale)
+                    // Updates app global context for this session only
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                        binding.settingsLayout.postDelayed({
+                            Global.context = ContextCompat.getContextForLanguage(applicationContext)
+                        }, 50) // Waits just a bit to get the correct locale
+                    }
+                    // Removes switches to force KitKat to update their language
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                        val layout = binding.settingsLayout
+                        layout.removeView(saveSwitch)
+                        layout.removeView(loadSwitch)
+                        layout.removeView(expertSwitch)
+                        recreate()
+                    }
+                    dialog.dismiss()
+                }.show()
         }
 
         // About
         binding.settingsAbout.setOnClickListener {
             startActivity(Intent(this@SettingsActivity, AboutActivity::class.java))
+        }
+    }
+
+    fun writeNotifyTime() {
+        val localTime = LocalTime.parse(Global.settings.notifyTime)
+        val format = DateTimeFormat.shortTime()
+        binding.settingsNotifyTime.text = localTime.toString(format).replace("^0".toRegex(), "")
+    }
+
+    private fun isExactAlarmsGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getSystemService<AlarmManager>()!!.canScheduleExactAlarms()
+        } else true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isExactAlarmsGranted()) {
+            binding.settingsAlarms.visibility = View.GONE
         }
     }
 

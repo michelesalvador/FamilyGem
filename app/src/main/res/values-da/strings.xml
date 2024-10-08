@@ -300,7 +300,6 @@
     <string name="replace">Udskift</string>
     <string name="all_imported_delete">Alle opdateringer er blevet importeret.
 \nØnsker du at slette det importerede træ\?</string>
-    <string name="birthday_notified_midday">Hver persons fødselsdag vil blive meddelt ved middagstid.</string>
     <string name="unlink">Afbryd</string>
     <string name="diagram_settings">Diagramindstillinger</string>
     <string name="generations_display_diagram">Vælg, hvor mange generationer der skal vises i diagrammet:</string>

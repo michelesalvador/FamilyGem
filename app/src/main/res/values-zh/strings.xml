@@ -351,7 +351,6 @@
 \n\t%d被删减</string>
     <string name="all_imported_delete">所有的更新都已导入。
 \n你想删除导入的家谱吗？</string>
-    <string name="birthday_notified_midday">每个人的生日将在中午被通知。</string>
     <string name="turns_years_old">今天，%s%d岁了。</string>
     <string name="name">名字</string>
     <string name="burial">葬</string>

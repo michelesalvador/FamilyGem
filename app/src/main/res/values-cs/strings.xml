@@ -330,7 +330,6 @@
     <string name="sure_delete">Opravdu odstranit\?</string>
     <string name="family_as">Rodina (jako %s)</string>
     <string name="turns_years_old">%s má dnes %d let.</string>
-    <string name="birthday_notified_midday">Narozeniny každé osoby budou oznámeny v poledne.</string>
     <string name="birthdays">Narozeniny</string>
     <string name="allow_developer_access">Povolit přístup vývojáři aplikace ke sdílenému stromu</string>
     <string name="remind_later">Připomenout později</string>

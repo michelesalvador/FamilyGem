@@ -101,20 +101,25 @@ public class Global extends MultiDexApplication {
                 settings.referrer = null;
             settings.save();
         }
-        // Tree settings were introduced in version 1.0.1
         boolean toBeSaved = false;
+        // Diagram settings were (probably) introduced in version 0.7.4
+        if (settings.diagram == null) {
+            settings.diagram = new Settings.DiagramSettings().init();
+            toBeSaved = true;
+        }
+        // Tree settings were introduced in version 1.0.1
         for (Settings.Tree tree : settings.trees) {
             if (tree.settings == null) {
                 tree.settings = new Settings.TreeSettings();
                 toBeSaved = true;
             }
         }
-        if (toBeSaved) settings.save();
-        // Diagram settings were (probably) introduced in version 0.7.4
-        if (settings.diagram == null) {
-            settings.diagram = new Settings.DiagramSettings().init();
-            settings.save();
+        // Birthday notification time was introduced in version 1.1
+        if (settings.notifyTime == null) {
+            settings.notifyTime = "12:00";
+            toBeSaved = true;
         }
+        if (toBeSaved) settings.save();
     }
 
     /**

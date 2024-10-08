@@ -359,7 +359,7 @@
     <string name="uncles_cousins">Oncles et cousins</string>
     <string name="partners">Partenaires</string>
     <string name="turns_years_old">%s fête ses %d ans aujourd\'hui.</string>
-    <string name="birthday_notified_midday">L\'anniversaire de chaque personne sera communiqué à midi.</string>
+    <string name="person_birthday">L\'anniversaire de chaque personne vivante.</string>
     <string name="birthdays">Anniversaires</string>
     <string name="share_sensitive">Partage de données sensibles</string>
     <string name="system_language">Langue du système</string>

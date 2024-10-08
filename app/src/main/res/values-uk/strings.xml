@@ -330,7 +330,6 @@
     <string name="to">До</string>
     <string name="family_as">Сім\'я (як %s)</string>
     <string name="turns_years_old">%s сьогодні виповнюється %d років.</string>
-    <string name="birthday_notified_midday">Уродини кожної особи буде повідомлено опівдні.</string>
     <string name="birthdays">Уродини</string>
     <string name="allow_developer_access">Дозволити розробнику програми отримати доступ до спільного дерева</string>
     <string name="remind_later">Нагадати пізніше</string>

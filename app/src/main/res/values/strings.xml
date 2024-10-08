@@ -77,6 +77,7 @@
     <string name="auto_save">Auto save</string>
     <string name="load_tree_startup">Load last opened tree at startup</string>
     <string name="show_advanced_functions">Show advanced tools</string>
+    <string name="notification_time">Birthday notification time</string>
     <string name="system_language">System language</string>
     <string name="about">About</string>
     <string name="item_exists_but_file">The tree entry is in the index, but for some reason the related file is missing:</string>
@@ -151,7 +152,7 @@
     <string name="generate_new">Generate a new tree from the two</string>
     <string name="merge_complete">Merge completed.</string>
     <string name="birthdays">Birthdays</string>
-    <string name="birthday_notified_midday">The birthday of each person will be notified at midday.</string>
+    <string name="person_birthday">The birthday of every living person.</string>
     <string name="turns_years_old">%s turns %d years old today.</string>
     <string name="new_person">Add the first person.</string>
     <string name="card">Profile</string>

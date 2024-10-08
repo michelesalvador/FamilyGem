@@ -330,7 +330,6 @@
     <string name="add_device_folder">Dodaj mapu ovog uređaja.</string>
     <string name="family_as">Obitelj (kao %s)</string>
     <string name="turns_years_old">%s danas puni %d godina.</string>
-    <string name="birthday_notified_midday">Rođendan svake osobe bit će obaviješten u podne.</string>
     <string name="birthdays">Rođendani</string>
     <string name="allow_developer_access">Omogući razvojnom programeru aplikacije pristup zajedničkom stablu</string>
     <string name="remind_later">Podsjeti kasnije</string>

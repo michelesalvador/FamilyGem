@@ -158,7 +158,6 @@
     <string name="all_imported_delete">Semua pembaruan telah diimpor.
 \nApakah Anda ingin menghapus silsilah yang diimpor\?</string>
     <string name="birthdays">Ulang tahun</string>
-    <string name="birthday_notified_midday">Ulang tahun setiap orang akan diberitahu pada tengah hari.</string>
     <string name="new_person">Tambahkan orang pertama.</string>
     <string name="family_as">Keluarga (sebagai %s)</string>
     <string name="link_person">Tautkan orang yang ada</string>
