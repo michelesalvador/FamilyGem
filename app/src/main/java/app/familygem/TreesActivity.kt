@@ -10,7 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.RelativeLayout
@@ -54,9 +56,7 @@ import org.folg.gedcom.model.SpouseRef
 import org.folg.gedcom.model.Submitter
 import java.io.File
 
-/**
- * First activity visible in the app, listing all available trees.
- */
+/** First activity visible in the app, listing all available trees. */
 class TreesActivity : AppCompatActivity() {
     private lateinit var treeList: MutableList<Map<String, String>>
     private lateinit var adapter: SimpleAdapter
@@ -258,6 +258,22 @@ class TreesActivity : AppCompatActivity() {
         listView.adapter = adapter
         updateList()
 
+        // Banner to choose backup folder or to disable backup
+        if (Global.settings.backupUri == BackupViewModel.NO_URI && Global.settings.backup
+            && Global.settings.trees.isNotEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+        ) {
+            val bannerView = layoutInflater.inflate(R.layout.banner_layout, listView, false)
+            bannerView.findViewById<Button>(R.id.banner_choose).setOnClickListener {
+                startActivity(Intent(this, BackupActivity::class.java))
+            }
+            bannerView.findViewById<Button>(R.id.banner_disable).setOnClickListener {
+                Global.settings.backup = false
+                Global.settings.save()
+                listView.removeHeaderView(bannerView)
+            }
+            listView.addHeaderView(bannerView)
+        }
+
         // Custom actionbar
         val bar = supportActionBar
         val treesBar = layoutInflater.inflate(R.layout.trees_bar, listView, false)
@@ -415,6 +431,12 @@ class TreesActivity : AppCompatActivity() {
     // but obviously only if TreesActivity has called onStop (doing it fast only calls onPause)
     override fun onRestart() {
         super.onRestart()
+        // Removes backup banner if needed
+        findViewById<FrameLayout>(R.id.banner_layout)?.let { banner ->
+            if (Global.settings.backupUri != BackupViewModel.NO_URI || !Global.settings.backup) {
+                findViewById<ListView>(R.id.trees_list).removeHeaderView(banner)
+            }
+        }
         updateList()
     }
 

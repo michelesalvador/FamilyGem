@@ -6,7 +6,7 @@
 
 	<Button
 		android:id="@+id/edita_annulla"
-		style="@style/AppTheme.BottoneNormale"
+		style="@style/AppTheme.NormalButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
@@ -14,7 +14,7 @@
 
 	<Button
 		android:id="@+id/edita_salva"
-		style="@style/AppTheme.BottoneColorato"
+		style="@style/AppTheme.ColoredButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_weight="2"

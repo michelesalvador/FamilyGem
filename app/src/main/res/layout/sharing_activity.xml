@@ -82,7 +82,7 @@
 
             <Button
                 android:id="@+id/share_button"
-                style="@style/AppTheme.BottoneColorato"
+                style="@style/AppTheme.ColoredButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"

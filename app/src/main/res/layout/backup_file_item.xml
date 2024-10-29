@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/backup_fileName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gray_text"
+        android:textSize="18sp"
+        tools:text="Backup filename.zip" />
+
+    <TextView
+        android:id="@+id/backup_treeTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/backup_fileName"
+        tools:text="Tree title also long and 用某种外国亚洲语言写成" />
+
+    <TextView
+        android:id="@+id/backup_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/backup_treeTitle"
+        android:textColor="@color/gray_text"
+        tools:text="1 hour ago" />
+
+    <TextView
+        android:id="@+id/backup_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/backup_treeTitle"
+        android:layout_alignParentEnd="true"
+        android:textColor="@color/gray_text"
+        tools:text="123 KB" />
+
+    <RelativeLayout
+        android:id="@+id/backup_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/backup_date"
+        android:layout_marginTop="5dp">
+
+        <Button
+            android:id="@+id/backup_delete"
+            style="@style/AppTheme.NormalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/backup_recover"
+            android:text="@string/delete" />
+
+        <Button
+            android:id="@+id/backup_recover"
+            style="@style/AppTheme.ColoredButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/recover" />
+    </RelativeLayout>
+</RelativeLayout>

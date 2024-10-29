@@ -410,16 +410,12 @@ class ProfileRelativesFragment : Fragment() {
         refreshAll()
     }
 
-    /**
-     * Refreshes all the content.
-     */
+    /** Refreshes all the content. */
     private fun refreshAll() {
-        (requireActivity() as ProfileActivity).refresh()
+        getActivity()?.let { (it as ProfileActivity).refresh() } // getActivity() may return null
     }
 
-    /**
-     * Refreshes options menu only.
-     */
+    /** Refreshes options menu only. */
     private fun refreshOptionsMenu() {
         activity.invalidateOptionsMenu() // Can't call requireActivity() here because the fragment is already detached
     }

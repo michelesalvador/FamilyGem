@@ -63,7 +63,7 @@
 
         <Button
             android:id="@+id/info_headerButton"
-            style="@style/AppTheme.BottoneNormale"
+            style="@style/AppTheme.NormalButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

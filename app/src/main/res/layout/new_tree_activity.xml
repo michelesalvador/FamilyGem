@@ -18,7 +18,7 @@
 
             <Button
                 android:id="@+id/new_download_shared"
-                style="@style/AppTheme.BottoneColorato"
+                style="@style/AppTheme.ColoredButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -27,7 +27,7 @@
 
             <Button
                 android:id="@+id/new_empty_tree"
-                style="@style/AppTheme.BottoneColorato"
+                style="@style/AppTheme.ColoredButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -36,7 +36,7 @@
 
             <Button
                 android:id="@+id/new_download_example"
-                style="@style/AppTheme.BottoneNormale"
+                style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -45,7 +45,7 @@
 
             <Button
                 android:id="@+id/new_import_gedcom"
-                style="@style/AppTheme.BottoneNormale"
+                style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -54,7 +54,7 @@
 
             <Button
                 android:id="@+id/new_recover_backup"
-                style="@style/AppTheme.BottoneNormale"
+                style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="350dp"

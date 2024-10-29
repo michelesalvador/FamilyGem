@@ -14,7 +14,6 @@ import app.familygem.ProfileActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.detail.NoteActivity
-import app.familygem.util.TreeUtil.save
 import org.folg.gedcom.model.Note
 import org.folg.gedcom.model.NoteContainer
 import org.folg.gedcom.model.NoteRef
@@ -36,7 +35,7 @@ object NoteUtil {
             noteRef.ref = id
             container.addNoteRef(noteRef)
         }
-        save(true, note)
+        TreeUtil.save(true, note)
         Memory.setLeader(note)
         context.startActivity(Intent(context, NoteActivity::class.java))
     }

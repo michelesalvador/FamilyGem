@@ -135,6 +135,10 @@
             android:label="@string/settings"
             android:parentActivityName=".TreesActivity" />
         <activity
+            android:name=".BackupActivity"
+            android:label="@string/local_backup"
+            android:parentActivityName=".SettingsActivity" />
+        <activity
             android:name=".AboutActivity"
             android:label="@string/about"
             android:parentActivityName=".SettingsActivity" />

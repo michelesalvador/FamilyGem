@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import app.familygem.BackupViewModel
 import app.familygem.BuildConfig
 import app.familygem.F
 import app.familygem.Global
@@ -40,7 +41,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileReader
-import java.io.IOException
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.zip.ZipInputStream
@@ -58,9 +58,8 @@ fun Tree.getBasicData(): String {
  * Functions about the general tree shared across many classes.
  */
 object TreeUtil {
-    /**
-     * Standard opening of a stored GEDCOM to edit it.
-     */
+
+    /** Standard opening of a stored GEDCOM to edit it. */
     suspend fun openGedcom(treeId: Int, saveSettings: Boolean): Boolean {
         Global.gc = readJson(treeId)
         if (Global.gc == null) return false
@@ -74,9 +73,7 @@ object TreeUtil {
         return true
     }
 
-    /**
-     *  Lightly opens a stored GEDCOM for different purposes.
-     */
+    /** Lightly opens a stored GEDCOM for different purposes. */
     suspend fun openGedcomTemporarily(treeId: Int, putInGlobal: Boolean): Gedcom? {
         val gedcom: Gedcom?
         if (Global.gc != null && Global.settings.openTree == treeId) gedcom = Global.gc
@@ -90,9 +87,7 @@ object TreeUtil {
         return gedcom
     }
 
-    /**
-     * Reads the tree JSON and returns a GEDCOM or null.
-     */
+    /** Reads the tree JSON and returns a GEDCOM or null. */
     suspend fun readJson(treeId: Int): Gedcom? {
         val gedcom: Gedcom?
         val file = File(Global.context.filesDir, "$treeId.json")
@@ -153,7 +148,6 @@ object TreeUtil {
 
     /**
      * Saves the currently opened tree.
-     *
      * @param refresh Will refresh also other activities
      * @param objects Record(s) to which update the change date
      */
@@ -174,10 +168,9 @@ object TreeUtil {
     }
 
     private var activeNotifier = false // To avoid ConcurrentModificationException on Notifier
+    private val backupViewModel = BackupViewModel(Global.application)
 
-    /**
-     * Saves the GEDCOM tree as JSON.
-     */
+    /** Saves the GEDCOM tree as JSON. */
     suspend fun saveJson(gedcom: Gedcom, treeId: Int) {
         val h = gedcom.header
         // Only if header is by Family Gem
@@ -190,22 +183,25 @@ object TreeUtil {
         }
         try {
             FileUtils.writeStringToFile(File(Global.context.filesDir, "$treeId.json"), JsonParser().toJson(gedcom), "UTF-8")
-        } catch (e: IOException) {
-            Util.toast(e.localizedMessage)
+        } catch (exception: Exception) {
+            Util.toast(exception.localizedMessage)
+        } catch (error: Error) {
+            val message = if (error is OutOfMemoryError) string(R.string.not_memory_tree)
+            else error.localizedMessage ?: string(R.string.something_wrong)
+            Util.toast(message)
         }
         if (!activeNotifier) {
             activeNotifier = true
             Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
             activeNotifier = false
         }
+        if (Global.settings.backup) backupViewModel.backupDelayed(treeId)
     }
 
     // Temporary hack to call a suspend function from Java
     fun saveJsonAsync(gedcom: Gedcom, treeId: Int) = GlobalScope.launch(IO) { saveJson(gedcom, treeId) }
 
-    /**
-     * Refreshes the data displayed below the tree title in TreesActivity list.
-     */
+    /** Refreshes the data displayed below the tree title in TreesActivity list. */
     fun refreshData(gedcom: Gedcom, treeItem: Tree) {
         treeItem.persons = gedcom.people.size
         treeItem.generations = countGenerations(gedcom, U.getRootId(gedcom, treeItem))
@@ -225,9 +221,7 @@ object TreeUtil {
         Global.settings.deleteTree(treeId)
     }
 
-    /**
-     * Creates a GEDCOM header that represents this app.
-     */
+    /** Creates a GEDCOM header that represents this app. */
     fun createHeader(fileName: String): Header {
         val header = Header()
         val app = Generator()
@@ -255,58 +249,50 @@ object TreeUtil {
     private var generationMax = 0
     private const val GENERATION = "gen"
 
-    /**
-     * @return Total number of generations of the tree starting from a root person
-     */
-    fun countGenerations(gedcom: Gedcom, root: String?): Int {
+    /** @return Total number of generations of the tree starting from a root person */
+    fun countGenerations(gedcom: Gedcom, rootId: String?): Int {
         if (gedcom.people.isEmpty()) return 0
         generationMin = 0
         generationMax = 0
-        ascendGenerations(gedcom.getPerson(root), gedcom, 0)
-        descendGenerations(gedcom.getPerson(root), gedcom, 0)
+        val root = gedcom.getPerson(rootId)
+        ascendGenerations(root, gedcom, 0)
+        descendGenerations(root, gedcom, 0)
         // Removes from persons the GENERATION extension to allow later counting
-        for (person in gedcom.people) {
-            person.extensions.remove(GENERATION)
-            if (person.extensions.isEmpty()) person.extensions = null
+        gedcom.people.forEach {
+            it.extensions.remove(GENERATION)
+            if (it.extensions.isEmpty()) it.extensions = null
         }
         return 1 - generationMin + generationMax
     }
 
-    // Receives a person and finds the number of the earliest generation of ancestors
+    /** Receives a person and finds the number of the earliest generation of ancestors. */
     private fun ascendGenerations(person: Person, gedcom: Gedcom, generation: Int) {
         if (generation < generationMin) generationMin = generation
         // Adds the extension to indicate that passed by this person
         person.putExtension(GENERATION, generation)
         // If person is a progenitor, goes to count the generations of descendants
         if (person.getParentFamilies(gedcom).isEmpty()) descendGenerations(person, gedcom, generation)
-        for (family in person.getParentFamilies(gedcom)) {
-            for (sibling in family.getChildren(gedcom)) // Intercepts also any siblings
-                if (sibling.getExtension(GENERATION) == null) descendGenerations(sibling, gedcom, generation)
-            for (father in family.getHusbands(gedcom))
-                if (father.getExtension(GENERATION) == null) ascendGenerations(father, gedcom, generation - 1)
-            for (mother in family.getWives(gedcom))
-                if (mother.getExtension(GENERATION) == null) ascendGenerations(mother, gedcom, generation - 1)
+        person.getParentFamilies(gedcom).forEach { family ->
+            // Intercepts also any siblings
+            family.getChildren(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { descendGenerations(it, gedcom, generation) }
+            family.getHusbands(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation - 1) }
+            family.getWives(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation - 1) }
         }
     }
 
-    // Receives a person and finds the number of the earliest generation of descendants
+    /** Receives a person and finds the number of the earliest generation of descendants. */
     private fun descendGenerations(person: Person, gedcom: Gedcom, generation: Int) {
         if (generation > generationMax) generationMax = generation
         person.putExtension(GENERATION, generation)
-        for (family in person.getSpouseFamilies(gedcom)) {
+        person.getSpouseFamilies(gedcom).forEach { family ->
             // Identifies also other spouses
-            for (wife in family.getWives(gedcom))
-                if (wife.getExtension(GENERATION) == null) ascendGenerations(wife, gedcom, generation)
-            for (husband in family.getHusbands(gedcom))
-                if (husband.getExtension(GENERATION) == null) ascendGenerations(husband, gedcom, generation)
-            for (child in family.getChildren(gedcom))
-                if (child.getExtension(GENERATION) == null) descendGenerations(child, gedcom, generation + 1)
+            family.getWives(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation) }
+            family.getHusbands(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation) }
+            family.getChildren(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { descendGenerations(it, gedcom, generation + 1) }
         }
     }
 
-    /**
-     * Imports a GEDCOM provided by an URI.
-     */
+    /** Imports a GEDCOM provided by an URI. */
     suspend fun importGedcom(context: Context, uri: Uri, onSuccess: () -> Unit, onFail: () -> Unit) {
         val onSuccessWithMessage = {
             Toast.makeText(context, R.string.tree_imported_ok, Toast.LENGTH_LONG).show()
@@ -346,19 +332,20 @@ object TreeUtil {
                 treeName = treeName.substring(0, treeName.lastIndexOf('.'))
             // Saves the settings
             val rootId = U.findRootId(gedcom)
-            Global.settings.addTree(Tree(newNumber, treeName, folderPath,
-                    gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, null, 0))
+            Global.settings.addTree(
+                Tree(newNumber, treeName, folderPath, gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, null, 0)
+            )
             Notifier(context, gedcom, newNumber, Notifier.What.CREATE)
             withContext(Main) {
                 // If necessary propose to show advanced tools
                 if (gedcom.sources.isNotEmpty() && !Global.settings.expert) {
                     AlertDialog.Builder(context).setMessage(R.string.complex_tree_advanced_tools)
-                            .setPositiveButton(android.R.string.ok) { _, _ ->
-                                Global.settings.expert = true
-                                Global.settings.save()
-                                onSuccessWithMessage()
-                            }.setNegativeButton(android.R.string.cancel) { _, _ -> onSuccessWithMessage() }
-                            .show()
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            Global.settings.expert = true
+                            Global.settings.save()
+                            onSuccessWithMessage()
+                        }.setNegativeButton(android.R.string.cancel) { _, _ -> onSuccessWithMessage() }
+                        .show()
                 } else onSuccessWithMessage()
             }
         } catch (exception: Exception) {
@@ -369,17 +356,14 @@ object TreeUtil {
         } catch (error: Error) {
             withContext(Main) {
                 val message = if (error is OutOfMemoryError) context.getString(R.string.not_memory_tree)
-                else if (error.localizedMessage != null) error.localizedMessage
-                else context.getString(R.string.something_wrong)
+                else error.localizedMessage ?: context.getString(R.string.something_wrong)
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 onFail()
             }
         }
     }
 
-    /**
-     * Connects to the server and downloads the ZIP file to import it.
-     */
+    /** Connects to the server and downloads the ZIP file to import it. */
     suspend fun downloadSharedTree(context: Context, dateId: String, onSuccess: () -> Unit, onFail: () -> Unit) {
         val credential = U.getCredential(Json.FTP)
         if (credential != null) {
@@ -421,9 +405,7 @@ object TreeUtil {
             downloadFailed(context.getString(R.string.something_wrong), onFail)
     }
 
-    /**
-     * Negative conclusion of the above method.
-     */
+    /** Negative conclusion of the above method. */
     private suspend fun downloadFailed(message: String?, onFail: () -> Unit?) {
         Util.toast(message)
         withContext(Main) { onFail() }
@@ -469,8 +451,10 @@ object TreeUtil {
             json = updateSettingsLanguage(json)
             val gson = Gson()
             val zipped = gson.fromJson(json, Settings.ZippedTree::class.java)
-            val tree = Tree(treeNumber, zipped.title, mediaDir!!.path,
-                    zipped.persons, zipped.generations, zipped.root, zipped.settings, zipped.shares, zipped.grade)
+            val tree = Tree(
+                treeNumber, zipped.title, mediaDir!!.path,
+                zipped.persons, zipped.generations, zipped.root, zipped.settings, zipped.shares, zipped.grade
+            )
             Global.settings.addTree(tree)
             settingsFile.delete()
             // Tree coming from sharing intended for comparison
@@ -516,10 +500,12 @@ object TreeUtil {
                         val share = tree.shares[i]
                         for (share2 in tree2.shares)
                             if (share.dateId != null && share.dateId == share2.dateId) {
-                                if (startCompare) context.startActivity(Intent(context, CompareActivity::class.java)
+                                if (startCompare) context.startActivity(
+                                    Intent(context, CompareActivity::class.java)
                                         .putExtra(Extra.TREE_ID, tree.id)
                                         .putExtra(Extra.TREE_ID_2, tree2.id)
-                                        .putExtra(Extra.DATE_ID, share.dateId))
+                                        .putExtra(Extra.DATE_ID, share.dateId)
+                                )
                                 return true
                             }
                     }

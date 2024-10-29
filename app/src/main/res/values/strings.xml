@@ -80,6 +80,12 @@
     <string name="notification_time">Birthday notification time</string>
     <string name="system_language">System language</string>
     <string name="about">About</string>
+    <string name="local_backup">Local backup</string>
+    <string name="choose_disable_backup">Choose a backup folder or disable local backup.\nYou can activate it later.</string>
+    <string name="disable">Disable</string>
+    <string name="backup_folder">Backup folder</string>
+    <string name="recover">Recover</string>
+    <string name="backup_trees">Backup selected trees</string>
     <string name="item_exists_but_file">The tree entry is in the index, but for some reason the related file is missing:</string>
     <string name="root">Root</string>
     <string name="shares">Shares</string>

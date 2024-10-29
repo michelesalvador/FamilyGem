@@ -34,15 +34,25 @@ class Exporter(private val context: Context) {
 
     private enum class Type { KEEP_NAME, JSON_TREE, MEDIA } // Types of collected DocumentFiles
 
-    /**
-     * Opens the Json tree and returns true if successful.
-     */
+    /** Opens the JSON tree and returns true if successful. */
     suspend fun openTree(treeId: Int): Boolean {
         this.treeId = treeId
         gedcom = TreeUtil.openGedcomTemporarily(treeId, true)
         return if (gedcom == null) {
             error(R.string.no_useful_data)
         } else true
+    }
+
+    /** Opens the JSON tree and returns true if successful, following more strict rules to obtain a valid tree. */
+    suspend fun openTreeStrict(treeId: Int): Boolean {
+        this.treeId = treeId
+        val treeFile = File(context.filesDir, "$treeId.json")
+        if (!treeFile.exists()) return error("Tree file doesn't exist")
+        if (treeFile.length() == 0L) return error("Tree file is empty")
+        gedcom = TreeUtil.openGedcomTemporarily(treeId, false)
+        if (gedcom == null) return error(R.string.no_useful_data)
+        if (gedcom!!.header == null) return error("GEDCOM without header")
+        return true
     }
 
     /**
@@ -271,7 +281,7 @@ class Exporter(private val context: Context) {
         }
     }
 
-    fun success(message: Int): Boolean {
+    private fun success(message: Int): Boolean {
         successMessage = context.getString(message)
         return true
     }

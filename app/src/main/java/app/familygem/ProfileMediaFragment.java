@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -98,6 +99,7 @@ public class ProfileMediaFragment extends Fragment {
 
     // Refreshes the activity content
     void refresh() {
-        ((ProfileActivity)requireActivity()).refresh();
+        FragmentActivity activity = getActivity();
+        if (activity != null) ((ProfileActivity)activity).refresh();
     }
 }

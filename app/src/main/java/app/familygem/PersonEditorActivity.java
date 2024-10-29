@@ -331,7 +331,7 @@ public class PersonEditorActivity extends AppCompatActivity {
         boolean found = false;
         for (EventFact fact : person.getEventsFacts()) {
             if (fact.getTag().equals("BIRT")) {
-                /* TODO: delete an EventsFact if it is completly empty
+                /* TODO: delete an EventsFact if it is completely empty
                     if (date.isEmpty() && place.isEmpty() && ...isEmpty())
                         person.getEventsFacts().remove(fact); */
                 fact.setDate(date);

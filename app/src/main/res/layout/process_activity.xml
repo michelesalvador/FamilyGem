@@ -78,7 +78,7 @@
 
             <Button
                 android:id="@+id/process_ignoreButton"
-                style="@style/AppTheme.BottoneNormale"
+                style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

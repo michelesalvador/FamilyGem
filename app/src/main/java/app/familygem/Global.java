@@ -1,5 +1,6 @@
 package app.familygem;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ public class Global extends MultiDexApplication {
     private Thread.UncaughtExceptionHandler defaultExceptionHandler;
     public static Gedcom gc;
     public static Context context;
+    public static Application application;
     public static Settings settings;
     public static String indi; // ID of the selected person displayed across the app
     /**
@@ -58,6 +60,7 @@ public class Global extends MultiDexApplication {
         // App context
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) context = getApplicationContext();
         else context = ContextCompat.getContextForLanguage(getApplicationContext()); // Context with app locale
+        application = this;
         // App settings
         File settingsFile = new File(context.getFilesDir(), "settings.json");
         // Renames "preferenze.json" to "settings.json" (introduced in version 0.8)
@@ -117,6 +120,13 @@ public class Global extends MultiDexApplication {
         // Birthday notification time was introduced in version 1.1
         if (settings.notifyTime == null) {
             settings.notifyTime = "12:00";
+            toBeSaved = true;
+        }
+        // Local backup was introduced in version 1.1
+        if (settings.backupUri == null) {
+            settings.backup = true;
+            settings.backupUri = BackupViewModel.NO_URI;
+            for (Settings.Tree tree : settings.trees) tree.backup = true;
             toBeSaved = true;
         }
         if (toBeSaved) settings.save();

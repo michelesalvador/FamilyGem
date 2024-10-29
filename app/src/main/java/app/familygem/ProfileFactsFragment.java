@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -368,6 +369,8 @@ public class ProfileFactsFragment extends Fragment {
 
     // Updates activity content
     void refresh() {
-        ((ProfileActivity)requireActivity()).refresh();
+        // Sometimes this fragment is no more attached to the activity, which therefore is null
+        FragmentActivity activity = getActivity();
+        if (activity != null) ((ProfileActivity)activity).refresh();
     }
 }

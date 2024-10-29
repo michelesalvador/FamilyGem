@@ -31,7 +31,7 @@
 
     <ImageButton
         android:id="@+id/diagram_options"
-        style="@style/TintaBianca"
+        style="@style/AppTheme.WhiteTint"
         android:layout_width="?attr/actionBarSize"
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="end"

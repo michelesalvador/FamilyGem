@@ -13,7 +13,6 @@ import app.familygem.U
 import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.detail.FamilyActivity
-import app.familygem.util.TreeUtil.save
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
 
@@ -96,16 +95,14 @@ fun Person.delete(): Array<Family> {
     }
     if (Global.indi != null && Global.indi == id) Global.indi = newRootId
     val families = modifiedFamilies.toTypedArray<Family>()
-    save(true, *families)
+    TreeUtil.save(true, *families)
     Toast.makeText(Global.context, R.string.person_deleted, Toast.LENGTH_LONG).show()
     return families
 }
 
 object PersonUtil {
 
-    /**
-     * Creates into layout a small card of a person and returns the created view.
-     */
+    /** Creates into layout a small card of a person and returns the created view. */
     fun placeSmallPerson(layout: LinearLayout, person: Person): View {
         val personView = LayoutInflater.from(layout.context).inflate(R.layout.small_person_layout, layout, false)
         layout.addView(personView)

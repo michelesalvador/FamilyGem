@@ -64,11 +64,18 @@
 
         <Button
             android:id="@+id/settings_alarms"
-            style="@style/AppTheme.BottoneNormale"
+            style="@style/AppTheme.NormalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Alarms &amp; reminders"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/settings_backup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="36dp"
+            android:text="@string/local_backup" />
 
         <TextView
             android:id="@+id/settings_language"

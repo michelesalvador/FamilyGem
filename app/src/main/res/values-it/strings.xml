@@ -83,6 +83,13 @@
     <string name="notification_time">Orario notifica compleanni</string>
     <string name="system_language">Lingua di sistema</string>
     <string name="about">Informazioni</string>
+    <!-- BackupActivity -->
+    <string name="local_backup">Backup locale</string>
+    <string name="choose_disable_backup">Scegli una cartella di backup o disabilita il backup locale.\nPotrai attivarlo in seguito.</string>
+    <string name="disable">Disabilita</string>
+    <string name="backup_folder">Cartella di backup</string>
+    <string name="recover">Recupera</string>
+    <string name="backup_trees">Salva backup degli alberi selezionati</string>
     <!-- InfoActivity -->
     <string name="item_exists_but_file">Esiste la voce nell\'indice degli alberi, ma per qualche ragione è scomparso il file corrispondente:</string>
     <string name="root">Radice</string>
@@ -397,7 +404,8 @@
     <string name="after">Dopo</string>
     <string name="before">Prima</string>
     <string name="between_and">Tra… e</string>
-    <string name="between">Tra</string>  <string name="and">E</string>
+    <string name="between">Tra</string>
+    <string name="and">E</string>
     <string name="from_to">Da… a</string>
     <string name="from">Da</string>
     <string name="to">A</string>

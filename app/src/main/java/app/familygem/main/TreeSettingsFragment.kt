@@ -18,7 +18,6 @@ import app.familygem.U
 import app.familygem.databinding.TreeSettingsFragmentBinding
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 
 class TreeSettingsFragment : BaseFragment(R.layout.tree_settings_fragment) {
 
@@ -69,7 +68,7 @@ class TreeSettingsFragment : BaseFragment(R.layout.tree_settings_fragment) {
     }
 
     fun writeDate() {
-        val formatter: DateTimeFormatter = DateTimeFormat.forPattern("d MMMM y")
+        val formatter = DateTimeFormat.forPattern("d MMMM y")
         dateView.text = if (date == null) LocalDate.now().toString(formatter)
         else date!!.toString(formatter)
     }

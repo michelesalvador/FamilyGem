@@ -45,7 +45,15 @@ public class Settings {
      */
     String notifyTime;
     /**
-     * Used to display or hide all advanced tools.
+     * General switch to perform backup of trees.
+     */
+    public boolean backup;
+    /**
+     * Folder where to store backup files.
+     */
+    public String backupUri;
+    /**
+     * Displays or hides all advanced tools.
      */
     public boolean expert;
     public boolean shareAgreement;
@@ -61,6 +69,8 @@ public class Settings {
         trees = new ArrayList<>();
         autoSave = true;
         notifyTime = "12:00";
+        backup = true;
+        backupUri = BackupViewModel.NO_URI;
         diagram = new DiagramSettings().init();
     }
 
@@ -187,6 +197,7 @@ public class Settings {
          * </ol>
          */
         public int grade;
+        boolean backup;
         public List<Birthday> birthdays;
 
         public Tree(int id, String title, String dir, int persons, int generations, String root,
@@ -202,6 +213,7 @@ public class Settings {
             this.settings = settings != null ? settings : new TreeSettings();
             this.shares = shares;
             this.grade = grade;
+            backup = true;
             birthdays = new ArrayList<>();
         }
 

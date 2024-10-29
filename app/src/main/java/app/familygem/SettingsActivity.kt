@@ -82,6 +82,14 @@ class SettingsActivity : BaseActivity() {
             }
         }
 
+        // Local backup
+        // Not available on KitKat, because it's hard there to emulate ACTION_OPEN_DOCUMENT_TREE
+        binding.settingsBackup.run {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                setOnClickListener { startActivity(Intent(this@SettingsActivity, BackupActivity::class.java)) }
+            else visibility = View.GONE
+        }
+
         // Language picker
         languages = ArrayList()
         languages.add(Language(null, 0)) // System language

@@ -13,6 +13,7 @@
         <!-- PopupMenu, options menu item -->
         <item name="android:itemTextAppearance">@style/AppTheme.BasicText</item>
         <item name="textAppearancePopupMenuHeader">@style/AppTheme.LittleTitle</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="AppTheme.BasicText">
@@ -76,7 +77,7 @@
         <item name="android:textColorPrimary">#FFF</item> <!-- Text -->
     </style>
 
-    <style name="TintaBianca" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+    <style name="AppTheme.WhiteTint" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:tint">@android:color/white</item>
     </style>
 
@@ -87,11 +88,11 @@
         <item name="colorControlNormal">@android:color/transparent</item>
     </style>
 
-    <style name="AppTheme.BottoneColorato" parent="Widget.AppCompat.Button.Colored">
-        <item name="android:textColor">#FFF</item>
+    <style name="AppTheme.ColoredButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">@drawable/button_text_color</item>
     </style>
 
-    <style name="AppTheme.BottoneNormale" parent="AppTheme.BottoneColorato">
-        <item name="android:backgroundTint">@color/primary_light</item>
+    <style name="AppTheme.NormalButton" parent="AppTheme.ColoredButton">
+        <item name="backgroundTint">@drawable/button_background_color</item>
     </style>
 </resources>
