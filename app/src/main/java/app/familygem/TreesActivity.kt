@@ -1,5 +1,6 @@
 package app.familygem
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -19,17 +20,20 @@ import android.widget.RelativeLayout
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
-import app.familygem.constant.Code
 import app.familygem.constant.Extra
+import app.familygem.constant.FileType
 import app.familygem.constant.Gender
 import app.familygem.main.MainActivity
 import app.familygem.merge.MergeActivity
 import app.familygem.share.SharingActivity
+import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.getBasicData
@@ -166,10 +170,10 @@ class TreesActivity : AppCompatActivity() {
                     if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1
                         && tree.shares != null && tree.grade != 0 // Must be 9 or 10
                     ) menu.add(0, 7, 0, R.string.compare)
-                    if (exists && Global.settings.expert && !exhausted)
-                        menu.add(0, 8, 0, R.string.export_gedcom)
                     if (exists && Global.settings.expert)
-                        menu.add(0, 9, 0, R.string.make_backup)
+                        menu.add(0, 8, 0, R.string.make_backup)
+                    if (exists && Global.settings.expert && !exhausted)
+                        menu.add(0, 9, 0, R.string.export_gedcom)
                     menu.add(0, 10, 0, R.string.delete)
                     popup.setOnMenuItemClickListener(MenuItemClickListener(position, treeId))
                     popup.show()
@@ -326,6 +330,37 @@ class TreesActivity : AppCompatActivity() {
             }.show()
     }
 
+    val zipBackupLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        finalizeExport(it, FileType.ZIP_BACKUP)
+    }
+    val zippedGedcomLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        finalizeExport(it, FileType.ZIPPED_GEDCOM)
+    }
+    val gedcomLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        finalizeExport(it, FileType.GEDCOM)
+    }
+
+    /** Finalizes the process of exporting a tree. */
+    private fun finalizeExport(result: ActivityResult, fileType: FileType) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.data
+            if (uri != null) {
+                progress.visibility = View.VISIBLE
+                lifecycleScope.launch(IO) {
+                    val answer = when (fileType) {
+                        FileType.GEDCOM -> exporter.exportGedcom(uri) // GEDCOM file only
+                        FileType.ZIPPED_GEDCOM -> exporter.exportGedcomToZip(uri) // GEDCOM with media in a ZIP file
+                        FileType.ZIP_BACKUP -> exporter.exportZipBackup(null, -1, uri) // ZIP backup
+                        else -> false
+                    }
+                    if (answer) Util.toast(exporter.successMessage)
+                    else Util.toast(exporter.errorMessage)
+                    withContext(Main) { progress.visibility = View.GONE }
+                }
+            } else Toast.makeText(this, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
+        }
+    }
+
     inner class MenuItemClickListener(val position: Int, val treeId: Int) : PopupMenu.OnMenuItemClickListener {
         override fun onMenuItemClick(item: MenuItem): Boolean {
             val id = item.itemId
@@ -382,12 +417,14 @@ class TreesActivity : AppCompatActivity() {
                     tree.grade = 20
                     updateList()
                 } else Toast.makeText(this@TreesActivity, R.string.no_results, Toast.LENGTH_LONG).show()
-            } else if (id == 8) { // Export GEDCOM
+            } else if (id == 8) { // Export ZIP backup
+                lifecycleScope.launch(IO) {
+                    exporter.openTree(treeId)
+                    FileUtil.openSaf(treeId, FileType.ZIP_BACKUP, zipBackupLauncher)
+                }
+            } else if (id == 9) { // Export GEDCOM
                 lifecycleScope.launch(IO) {
                     if (exporter.openTree(treeId)) {
-                        var mime = "application/octet-stream"
-                        var extension = "ged"
-                        var code = Code.GEDCOM_FILE
                         val totMedia = exporter.countMediaFilesToAttach()
                         if (totMedia > 0) {
                             withContext(Main) {
@@ -395,24 +432,15 @@ class TreesActivity : AppCompatActivity() {
                                 AlertDialog.Builder(this@TreesActivity)
                                     .setTitle(R.string.export_gedcom)
                                     .setSingleChoiceItems(choices, -1) { dialog, selected ->
-                                        if (selected == 0) {
-                                            mime = "application/zip"
-                                            extension = "zip"
-                                            code = Code.ZIPPED_GEDCOM_FILE
-                                        }
-                                        F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
+                                        if (selected == 0) FileUtil.openSaf(treeId, FileType.ZIPPED_GEDCOM, zippedGedcomLauncher)
+                                        else FileUtil.openSaf(treeId, FileType.GEDCOM, gedcomLauncher)
                                         dialog.dismiss()
                                     }.show()
                             }
                         } else {
-                            F.saveDocument(this@TreesActivity, null, treeId, mime, extension, code)
+                            FileUtil.openSaf(treeId, FileType.GEDCOM, gedcomLauncher)
                         }
                     } else Util.toast(exporter.errorMessage)
-                }
-            } else if (id == 9) { // Export ZIP backup
-                lifecycleScope.launch(IO) {
-                    exporter.openTree(treeId)
-                    F.saveDocument(this@TreesActivity, null, treeId, "application/zip", "zip", Code.ZIP_BACKUP)
                 }
             } else if (id == 10) { // Delete tree
                 AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
@@ -533,31 +561,7 @@ class TreesActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            progress.visibility = View.VISIBLE
-            lifecycleScope.launch(IO) {
-                val uri = data!!.data
-                if (uri != null) {
-                    var result = false
-                    when (requestCode) {
-                        // Exports GEDCOM file only
-                        Code.GEDCOM_FILE -> result = exporter.exportGedcom(uri)
-                        // Exports GEDCOM with media in a ZIP file
-                        Code.ZIPPED_GEDCOM_FILE -> result = exporter.exportGedcomToZip(uri)
-                        // Exports ZIP backup
-                        Code.ZIP_BACKUP -> result = exporter.exportZipBackup(null, -1, uri)
-                    }
-                    if (result) Util.toast(exporter.successMessage)
-                    else Util.toast(exporter.errorMessage)
-                } else Util.toast(R.string.cant_understand_uri)
-                withContext(Main) { progress.visibility = View.GONE }
-            }
-        }
-    }
-
-    // List of error messages with occurrence count
+    /** List of error messages with occurrence count. */
     private var errorList: LinkedHashMap<String, Int> = LinkedHashMap()
 
     /**

@@ -269,9 +269,7 @@ class Exporter(private val context: Context) {
         return true
     }
 
-    /**
-     * Makes the just created file visible from Windows file explorer.
-     */
+    /** Makes the just created file visible from Windows file explorer. */
     private fun makeFileVisible(uri: Uri) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             val filePath = F.getFilePathFromUri(targetUri)

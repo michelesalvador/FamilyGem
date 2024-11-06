@@ -44,21 +44,21 @@
                 android:text="@string/download_example" />
 
             <Button
-                android:id="@+id/new_import_gedcom"
+                android:id="@+id/new_recover_backup"
                 style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:minWidth="350dp"
-                android:text="@string/import_gedcom" />
+                android:text="@string/import_backup" />
 
             <Button
-                android:id="@+id/new_recover_backup"
+                android:id="@+id/new_import_gedcom"
                 style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="350dp"
-                android:text="@string/import_backup" />
+                android:text="@string/import_gedcom" />
         </LinearLayout>
 
         <ProgressBar

@@ -23,6 +23,7 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -46,6 +47,7 @@ import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
+import app.familygem.constant.FileType
 import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.databinding.DiagramFragmentBinding
@@ -839,7 +841,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             // Draws the content of the view onto the Bitmap
             box.draw(canvas)
             // Saves the Bitmap as a PNG file
-            val outputStream = FileOutputStream(File(context().cacheDir, "temp.png"))
+            val outputStream = FileOutputStream(File(context().cacheDir, "temp"))
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
             outputStream.flush()
             outputStream.close()
@@ -852,7 +854,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             return
         }
         // Open SAF to choose where to save the PNG file
-        FileUtil.openSaf(Global.settings.openTree, "image/png", "png", savePngLauncher)
+        FileUtil.openSaf(Global.settings.openTree, FileType.PNG, savePngLauncher)
     }
 
     /**
@@ -876,7 +878,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             document.finishPage(page)
             // Writes PDF
             try {
-                val outputStream = FileOutputStream(File(context().cacheDir, "temp.pdf"))
+                val outputStream = FileOutputStream(File(context().cacheDir, "temp"))
                 document.writeTo(outputStream)
                 outputStream.flush()
                 outputStream.close()
@@ -884,7 +886,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 generateFail(e.localizedMessage)
                 return@launch
             }
-            FileUtil.openSaf(Global.settings.openTree, "application/pdf", "pdf", savePdfLauncher)
+            FileUtil.openSaf(Global.settings.openTree, FileType.PDF, savePdfLauncher)
         }
     }
 
@@ -898,35 +900,31 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Copies the temporary PNG file to its final destination.
-     */
-    private val savePngLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == AppCompatActivity.RESULT_OK) {
-            val uri = result.data?.data
-            if (uri != null) {
-                val outputStream = context().contentResolver.openOutputStream(uri)
-                FileUtils.copyFile(File(context().cacheDir, "temp.png"), outputStream)
-                Toast.makeText(context, R.string.png_exported_ok, Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(context, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
-            }
-        }
-        binding.diagramWheel.root.visibility = View.GONE
+    /** Copies the temporary PNG file to its final destination. */
+    private val savePngLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        finalizeExport(it, FileType.PNG)
     }
 
-    /**
-     * Copies the temporary PDF file to its final destination.
-     */
-    private val savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    /** Copies the temporary PDF file to its final destination. */
+    private val savePdfLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        finalizeExport(it, FileType.PDF)
+    }
+
+    private fun finalizeExport(result: ActivityResult, fileType: FileType) {
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val uri = result.data?.data
             if (uri != null) {
-                val outputStream = context().contentResolver.openOutputStream(uri)
-                FileUtils.copyFile(File(context().cacheDir, "temp.pdf"), outputStream)
-                Toast.makeText(context, R.string.pdf_exported_ok, Toast.LENGTH_LONG).show()
+                File(context().cacheDir, "temp").inputStream().use { input ->
+                    context().contentResolver.openOutputStream(uri).use { output ->
+                        if (output != null) {
+                            input.copyTo(output)
+                            val message = if (fileType == FileType.PNG) R.string.png_exported_ok else R.string.pdf_exported_ok
+                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             } else Toast.makeText(context, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
-        }
+        } // No need to handle RESULT_CANCELED
         binding.diagramWheel.root.visibility = View.GONE
     }
 }

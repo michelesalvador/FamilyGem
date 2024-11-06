@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers.IO
@@ -95,32 +96,7 @@ class NewTreeActivity : BaseActivity() {
             lifecycleScope.launch(IO) { downloadExample(it as Button) }
         }
 
-        // Imports a GEDCOM file chosen with SAF
-        val gedcomResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uri = result.data?.data
-                if (uri != null) {
-                    progress.visibility = View.VISIBLE
-                    lifecycleScope.launch(IO) {
-                        TreeUtil.importGedcom(this@NewTreeActivity, uri, {
-                            // Successful import
-                            onBackPressedDispatcher.onBackPressed()
-                        }, { // Unsuccessful import
-                            progress.visibility = View.GONE
-                        })
-                    }
-                }
-            }
-        }
-        findViewById<Button>(R.id.new_import_gedcom).setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            // KitKat disables .ged files in the Download folder if the type is 'application/*'
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) intent.type = "*/*"
-            else intent.type = "application/*"
-            gedcomResultLauncher.launch(intent)
-        }
-
-        // Tries to recover a ZIP backup chosen with SAF
+        /** Tries to recover a ZIP backup chosen with SAF. */
         val backupResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = result.data?.data
@@ -159,11 +135,34 @@ class NewTreeActivity : BaseActivity() {
             intent.type = "application/zip"
             backupResultLauncher.launch(intent)
         }
+
+        /** Imports a GEDCOM file chosen with SAF. */
+        val gedcomResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri = result.data?.data
+                if (uri != null) {
+                    progress.visibility = View.VISIBLE
+                    lifecycleScope.launch(IO) {
+                        TreeUtil.importGedcom(this@NewTreeActivity, uri, {
+                            // Successful import
+                            onBackPressedDispatcher.onBackPressed()
+                        }, { // Unsuccessful import
+                            progress.visibility = View.GONE
+                        })
+                    }
+                }
+            }
+        }
+        findViewById<Button>(R.id.new_import_gedcom).setOnClickListener {
+            val mimeTypes = FileUtil.gedcomMimeTypes
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+                .setType(mimeTypes[0])
+                .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            gedcomResultLauncher.launch(intent)
+        }
     }
 
-    /**
-     * Creates a brand new tree with the provided title.
-     */
+    /** Creates a brand new tree with the provided title. */
     private fun createNewTree(title: String) {
         val num = Global.settings.max() + 1
         val jsonFile = File(filesDir, "$num.json")

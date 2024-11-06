@@ -1,7 +1,6 @@
 package app.familygem;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -190,25 +189,6 @@ public class F {
             }
         }
         return null;
-    }
-
-    /**
-     * Saves a document (PDF, GEDCOM, ZIP) with SAF.
-     */
-    public static void saveDocument(Activity activity, Fragment fragment, int treeId, String mime, String ext, int requestCode) {
-        String name = Global.settings.getTree(treeId).title;
-        // A GEDCOM must specify the extension, other file types put it according to the mime type
-        ext = ext.equals("ged") ? ".ged" : "";
-        // Replaces dangerous characters for the Android filesystem that are not replaced by Android itself
-        name = name.replaceAll("[$']", "_");
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
-                .addCategory(Intent.CATEGORY_OPENABLE)
-                .setType(mime)
-                .putExtra(Intent.EXTRA_TITLE, name + ext);
-        if (activity != null)
-            activity.startActivityForResult(intent, requestCode);
-        else
-            fragment.startActivityForResult(intent, requestCode);
     }
 
     public static int checkMultiplePermissions(final Context context, final String... permissions) {

@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.Global
 import app.familygem.R
+import app.familygem.constant.FileType
 import app.familygem.constant.Image
 import app.familygem.constant.Type
 import app.familygem.visitor.MediaList
@@ -45,10 +46,11 @@ import org.folg.gedcom.model.Person
 import java.io.File
 
 
-/**
- * Methods for displaying images.
- */
+/** Functions to manage files and display images. */
 object FileUtil {
+
+    /** List of mime type to open and create GEDCOM files. */
+    val gedcomMimeTypes = arrayOf("text/vnd.familysearch.gedcom", "application/octet-stream", "vnd.android.document/file", "text/plain")
 
     /**
      * Receives a Person and returns the primary media from which to get the image, or a random media, or null.
@@ -57,7 +59,9 @@ object FileUtil {
      * @param show Calls showImage() or not
      */
     @JvmOverloads
-    fun selectMainImage(person: Person, imageView: ImageView, options: Int = 0, gedcom: Gedcom? = null, treeId: Int = 0, show: Boolean = true): Media? {
+    fun selectMainImage(
+        person: Person, imageView: ImageView, options: Int = 0, gedcom: Gedcom? = null, treeId: Int = 0, show: Boolean = true
+    ): Media? {
         val mediaList = MediaList(gedcom ?: Global.gc, 0)
         person.accept(mediaList)
         var media: Media? = null
@@ -148,7 +152,9 @@ object FileUtil {
                 builder.signature(ObjectKey(Global.croppedPaths[pathOrUri]!!))
             }
             builder.placeholder(R.drawable.image).listener(object : RequestListener<Drawable> {
-                override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                override fun onResourceReady(
+                    resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
+                ): Boolean {
                     // Maybe is a video
                     val videoExts = arrayOf(".mp4", ".3gp", ".webm", ".mkv")
                     val imageType = if (videoExts.any { pathOrUri.endsWith(it, true) }) Type.PREVIEW else Type.CROPPABLE
@@ -188,7 +194,9 @@ object FileUtil {
             val builder = glide.load(filePath)
             applyOptions(builder)
             builder.placeholder(R.drawable.image).listener(object : RequestListener<Drawable> {
-                override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                override fun onResourceReady(
+                    resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
+                ): Boolean {
                     imageView.setTag(R.id.tag_file_type, Type.CROPPABLE)
                     imageView.setTag(R.id.tag_path, filePath) // TODO: but CropImage doesn't handle a web URL
                     completeDisplay()
@@ -220,8 +228,9 @@ object FileUtil {
         val frameLayout = inflated.findViewById<RelativeLayout>(R.id.icona)
         frameLayout.findViewById<TextView>(R.id.media_text).text = format
         frameLayout.isDrawingCacheEnabled = true
-        frameLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        frameLayout.measure(
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
         frameLayout.layout(0, 0, frameLayout.measuredWidth, frameLayout.measuredHeight)
         return frameLayout.drawingCache
     }
@@ -266,18 +275,16 @@ object FileUtil {
         return null
     }
 
-    /**
-     * Opens the Storage Access Framework to save a document (PDF, GEDCOM, ZIP).
-     */
-    fun openSaf(treeId: Int, mimeType: String, extension: String, launcher: ActivityResultLauncher<Intent>) {
+    /** Opens the Storage Access Framework to save a document (PNG, PDF, GEDCOM, ZIP). */
+    fun openSaf(treeId: Int, fileType: FileType, launcher: ActivityResultLauncher<Intent>) {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).setType(fileType.mimeType)
         // Replaces dangerous characters for the Android filesystem that are not replaced by Android itself
-        val name = Global.settings.getTree(treeId).title.replace("[$']".toRegex(), "_")
-        // A GEDCOM must specify the extension, other file types put it according to the mime type
-        val extension = if (extension == "ged") ".ged" else ""
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-                .addCategory(Intent.CATEGORY_OPENABLE)
-                .setType(mimeType)
-                .putExtra(Intent.EXTRA_TITLE, name + extension)
+        var name = Global.settings.getTree(treeId).title.replace("[$']".toRegex(), "_")
+        if (fileType == FileType.GEDCOM) {
+            name += ".ged" // GEDCOM must specify the extension, because is generally not a known file type
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, gedcomMimeTypes)
+        }
+        intent.putExtra(Intent.EXTRA_TITLE, name)
         launcher.launch(intent)
     }
 
