@@ -6,29 +6,30 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import app.familygem.Global
 import app.familygem.Memory
+import app.familygem.ProfileActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Gender
 import app.familygem.constant.Relation
+import app.familygem.constant.Status
 import app.familygem.detail.FamilyActivity
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
 
-/**
- * Generates the 2 family labels (as child and as parent) for contextual menu.
- */
+/** Generates the 2 family labels (as child and as parent) for contextual menu. */
 fun Person.getFamilyLabels(context: Context, family: Family?): Array<String?> {
     var family = family
     val labels = arrayOf<String?>(null, null)
     val parentFams = getParentFamilies(Global.gc)
     val spouseFams = getSpouseFamilies(Global.gc)
     if (parentFams.size > 0) labels[0] = if (spouseFams.isEmpty()) context.getString(R.string.family)
-    else context.getString(R.string.family_as, FamilyActivity.getRole(this, null, Relation.CHILD, true))
+    else context.getString(R.string.family_as, PersonUtil.writeRole(this, null, Relation.CHILD, true))
     if (family == null && spouseFams.size == 1) family = spouseFams[0]
     if (spouseFams.size > 0) labels[1] = if (parentFams.isEmpty()) context.getString(R.string.family)
-    else context.getString(R.string.family_as, FamilyActivity.getRole(this, family, Relation.PARTNER, true))
+    else context.getString(R.string.family_as, PersonUtil.writeRole(this, family, Relation.PARTNER, true))
     return labels
 }
 
@@ -78,10 +79,12 @@ fun Person.delete(): Array<Family> {
     getSpouseFamilies(Global.gc).forEach {
         if (it.getHusbands(Global.gc).contains(this)) {
             it.husbandRefs.removeAt(it.getHusbands(Global.gc).indexOf(this))
+            FamilyUtil.updateSpouseRoles(it)
             modifiedFamilies.add(it)
         }
         if (it.getWives(Global.gc).contains(this)) {
             it.wifeRefs.removeAt(it.getWives(Global.gc).indexOf(this))
+            FamilyUtil.updateSpouseRoles(it)
             modifiedFamilies.add(it)
         }
     }
@@ -102,6 +105,12 @@ fun Person.delete(): Array<Family> {
 
 object PersonUtil {
 
+    private val lineageTexts = arrayOf(
+        U.s(R.string.undefined) + " (" + Util.caseString(R.string.birth) + ")",
+        U.s(R.string.birth), U.s(R.string.adopted), U.s(R.string.foster)
+    )
+    val lineageTypes = arrayOf(null, "birth", "adopted", "foster")
+
     /** Creates into layout a small card of a person and returns the created view. */
     fun placeSmallPerson(layout: LinearLayout, person: Person): View {
         val personView = LayoutInflater.from(layout.context).inflate(R.layout.small_person_layout, layout, false)
@@ -117,5 +126,81 @@ object PersonUtil {
         if (Gender.isMale(person)) borderView.setBackgroundResource(R.drawable.casella_bordo_maschio)
         else if (Gender.isFemale(person)) borderView.setBackgroundResource(R.drawable.casella_bordo_femmina)
         return personView
+    }
+
+    /**
+     * Returns a definition of the person's role from their relation with a family.
+     * @param family Can be null
+     * @param respectFamily The role to find is relative to the family (it becomes 'parent' when there are children)
+     */
+    fun writeRole(person: Person, family: Family?, relation: Relation, respectFamily: Boolean): String {
+        var relation = relation
+        if (respectFamily && relation == Relation.PARTNER && family != null && family.childRefs.isNotEmpty()) relation = Relation.PARENT
+        val status = Status.getStatus(family)
+        val role = if (Gender.isMale(person)) {
+            when (relation) {
+                Relation.PARENT -> R.string.father
+                Relation.SIBLING -> R.string.brother
+                Relation.HALF_SIBLING -> R.string.half_brother
+                Relation.PARTNER -> when (status) {
+                    Status.MARRIED -> R.string.husband
+                    Status.DIVORCED -> R.string.ex_husband
+                    Status.SEPARATED -> R.string.ex_male_partner
+                    else -> R.string.male_partner
+                }
+                Relation.CHILD -> R.string.son
+            }
+        } else if (Gender.isFemale(person)) {
+            when (relation) {
+                Relation.PARENT -> R.string.mother
+                Relation.SIBLING -> R.string.sister
+                Relation.HALF_SIBLING -> R.string.half_sister
+                Relation.PARTNER -> when (status) {
+                    Status.MARRIED -> R.string.wife
+                    Status.DIVORCED -> R.string.ex_wife
+                    Status.SEPARATED -> R.string.ex_female_partner
+                    else -> R.string.female_partner
+                }
+                Relation.CHILD -> R.string.daughter
+            }
+        } else { // Neutral roles
+            when (relation) {
+                Relation.PARENT -> R.string.parent
+                Relation.SIBLING -> R.string.sibling
+                Relation.HALF_SIBLING -> R.string.half_sibling
+                Relation.PARTNER -> when (status) {
+                    Status.MARRIED -> R.string.spouse
+                    Status.DIVORCED -> R.string.ex_spouse
+                    Status.SEPARATED -> R.string.ex_partner
+                    else -> R.string.partner
+                }
+                Relation.CHILD -> R.string.child
+            }
+        }
+        return Util.caseString(role)
+    }
+
+    /** Composes the lineage definition to be added to the role in a person card. */
+    fun writeLineage(person: Person, family: Family): String {
+        return person.parentFamilyRefs.firstOrNull { it.ref == family.id }.let { ref ->
+            lineageTypes.indexOf(ref?.relationshipType).let {
+                if (it > 0) " – ${lineageTexts[it]}" else ""
+            }
+        }
+    }
+
+    /** Displays an alert dialog to choose the lineage of one person. */
+    fun chooseLineage(context: Context, person: Person, family: Family) {
+        person.parentFamilyRefs.firstOrNull { it.ref == family.id }?.apply {
+            lineageTypes.indexOf(relationshipType).let {
+                AlertDialog.Builder(context).setSingleChoiceItems(lineageTexts, it) { dialog, selected ->
+                    relationshipType = lineageTypes[selected]
+                    dialog.dismiss()
+                    if (context is ProfileActivity) context.refresh()
+                    else if (context is FamilyActivity) context.refresh()
+                    TreeUtil.save(true, person)
+                }.show()
+            }
+        }
     }
 }

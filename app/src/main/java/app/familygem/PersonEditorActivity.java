@@ -34,7 +34,6 @@ import java.util.Set;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
-import app.familygem.detail.FamilyActivity;
 import app.familygem.util.EventUtilKt;
 import app.familygem.util.FamilyUtil;
 import app.familygem.util.TreeUtil;
@@ -314,7 +313,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                 sex.setValue(chosenGender);
                 person.addEventFact(sex);
             }
-            ProfileFactsFragment.updateSpouseRoles(person);
+            FamilyUtil.INSTANCE.updateSpouseRoles(person);
         } else { // Remove existing sex tag
             for (EventFact fact : person.getEventsFacts()) {
                 if (fact.getTag().equals("SEX")) {
@@ -389,7 +388,7 @@ public class PersonEditorActivity extends AppCompatActivity {
             Global.settings.save();
             if (fromFamilyActivity) { // Comes from FamilyActivity
                 Family family = gc.getFamily(familyId);
-                FamilyActivity.connect(person, family, relation);
+                FamilyUtil.INSTANCE.linkPerson(person, family, relation);
                 modifications[1] = family;
             } else if (relation != null) // Comes from DiagramFragment o ProfileRelativesFragment
                 modifications = addRelative(personId, newId, familyId, relation, getIntent().getStringExtra(Extra.DESTINATION));
@@ -402,21 +401,21 @@ public class PersonEditorActivity extends AppCompatActivity {
     /**
      * Adds a new person in family relation with 'pivot', possibly within the given family.
      *
-     * @param familyId Id of the target family. If it is null, a new family is created
-     * @param placing  Summarizes how the family was identified and therefore what to do with the people involved
+     * @param familyId    Id of the target family. If it is null, a new family is created
+     * @param destination Summarizes how the family was identified and therefore what to do with the people involved
      * @return An array of modified records
      */
-    public static Object[] addRelative(String pivotId, String newId, String familyId, Relation relation, String placing) {
+    public static Object[] addRelative(String pivotId, String newId, String familyId, Relation relation, String destination) {
         Global.indi = pivotId;
         Person newPerson = gc.getPerson(newId);
         // A new family is created in which both pivot and newPerson end up
-        if (placing != null && placing.startsWith("NEW_FAMILY_OF")) { // Contains the ID of the parent to create a new family of
-            pivotId = placing.substring(13); // The parent actually becomes the pivot
+        if (destination != null && destination.startsWith("NEW_FAMILY_OF")) { // Contains the ID of the parent to create a new family of
+            pivotId = destination.substring(13); // The parent actually becomes the pivot
             // Instead of a sibling to pivot, it is as if we were putting a child to the parent
             relation = relation == Relation.SIBLING ? Relation.CHILD : relation;
         }
-        // In ListOfPeopleActivity has been identified the family in which will end up the pivot
-        else if (placing != null && placing.equals("EXISTING_FAMILY")) {
+        // In PersonsFragment has been identified the family in which will end up the pivot
+        else if (destination != null && destination.equals("EXISTING_FAMILY")) {
             newId = null;
             newPerson = null;
         }
@@ -426,48 +425,48 @@ public class PersonEditorActivity extends AppCompatActivity {
         }
         Family family = familyId != null ? gc.getFamily(familyId) : FamilyUtil.INSTANCE.createNewFamily();
         Person pivot = gc.getPerson(pivotId);
-        SpouseRef refSpouse1 = new SpouseRef(), refSposo2 = new SpouseRef();
-        ChildRef refChild1 = new ChildRef(), refFiglio2 = new ChildRef();
+        SpouseRef spouseRef1 = new SpouseRef(), spouseRef2 = new SpouseRef();
+        ChildRef childRef1 = new ChildRef(), childRef2 = new ChildRef();
         ParentFamilyRef parentFamilyRef = new ParentFamilyRef();
         SpouseFamilyRef spouseFamilyRef = new SpouseFamilyRef();
         parentFamilyRef.setRef(family.getId());
         spouseFamilyRef.setRef(family.getId());
 
-        // Population of refs
+        // Populates the refs
         switch (relation) {
             case PARENT:
-                refSpouse1.setRef(newId);
-                refChild1.setRef(pivotId);
+                spouseRef1.setRef(newId);
+                childRef1.setRef(pivotId);
                 if (newPerson != null) newPerson.addSpouseFamilyRef(spouseFamilyRef);
                 if (pivot != null) pivot.addParentFamilyRef(parentFamilyRef);
                 break;
             case SIBLING:
-                refChild1.setRef(pivotId);
-                refFiglio2.setRef(newId);
+                childRef1.setRef(pivotId);
+                childRef2.setRef(newId);
                 if (pivot != null) pivot.addParentFamilyRef(parentFamilyRef);
                 if (newPerson != null) newPerson.addParentFamilyRef(parentFamilyRef);
                 break;
             case PARTNER:
-                refSpouse1.setRef(pivotId);
-                refSposo2.setRef(newId);
+                spouseRef1.setRef(pivotId);
+                spouseRef2.setRef(newId);
                 if (pivot != null) pivot.addSpouseFamilyRef(spouseFamilyRef);
                 if (newPerson != null) newPerson.addSpouseFamilyRef(spouseFamilyRef);
                 break;
             case CHILD:
-                refSpouse1.setRef(pivotId);
-                refChild1.setRef(newId);
+                spouseRef1.setRef(pivotId);
+                childRef1.setRef(newId);
                 if (pivot != null) pivot.addSpouseFamilyRef(spouseFamilyRef);
                 if (newPerson != null) newPerson.addParentFamilyRef(parentFamilyRef);
         }
 
-        if (refSpouse1.getRef() != null)
-            addSpouse(family, refSpouse1);
-        if (refSposo2.getRef() != null)
-            addSpouse(family, refSposo2);
-        if (refChild1.getRef() != null)
-            family.addChild(refChild1);
-        if (refFiglio2.getRef() != null)
-            family.addChild(refFiglio2);
+        if (spouseRef1.getRef() != null)
+            FamilyUtil.INSTANCE.addSpouse(family, spouseRef1);
+        if (spouseRef2.getRef() != null)
+            FamilyUtil.INSTANCE.addSpouse(family, spouseRef2);
+        if (childRef1.getRef() != null)
+            family.addChild(childRef1);
+        if (childRef2.getRef() != null)
+            family.addChild(childRef2);
 
         if (relation == Relation.PARENT || relation == Relation.SIBLING) // It will bring up the selected family
             Global.familyNum = gc.getPerson(Global.indi).getParentFamilies(gc).indexOf(family);
@@ -482,14 +481,5 @@ public class PersonEditorActivity extends AppCompatActivity {
         else if (newPerson != null)
             Collections.addAll(modified, family, newPerson);
         return modified.toArray();
-    }
-
-    /**
-     * Adds the spouse in a family: always and only on the basis of sex.
-     */
-    public static void addSpouse(Family family, SpouseRef sr) {
-        Person person = Global.gc.getPerson(sr.getRef());
-        if (Gender.isFemale(person)) family.addWife(sr);
-        else family.addHusband(sr);
     }
 }

@@ -184,7 +184,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             boolean hasChildren = !family.getChildRefs().isEmpty();
             SubMenu newMemberMenu = menu.addSubMenu(0, 100, 0, R.string.new_relative);
             // Inexpert can add maximum two parents, expert also more than two
-            if (Global.settings.expert || family.getHusbandRefs().size() + family.getWifeRefs().size() < 2)
+            if (family.getHusbandRefs().size() + family.getWifeRefs().size() < 2)
                 newMemberMenu.add(0, 120, 0, hasChildren ? R.string.parent : R.string.partner);
             newMemberMenu.add(0, 121, 0, R.string.child);
             // Inexpert can add people only not already member of the family
@@ -193,7 +193,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             members.addAll(family.getChildren(gc));
             if (Global.settings.expert || !members.containsAll(gc.getPeople())) {
                 SubMenu linkMemberMenu = menu.addSubMenu(0, 100, 0, R.string.link_person);
-                if (Global.settings.expert || family.getHusbandRefs().size() + family.getWifeRefs().size() < 2)
+                if (family.getHusbandRefs().size() + family.getWifeRefs().size() < 2)
                     linkMemberMenu.add(0, 122, 0, hasChildren ? R.string.parent : R.string.partner);
                 linkMemberMenu.add(0, 123, 0, R.string.child);
             }
@@ -369,7 +369,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             // From the 'Link...' submenu in FAB
             if (requestCode == 34417) { // Family member chosen in PersonsFragment
                 Person personToBeAdded = gc.getPerson(data.getStringExtra(Extra.RELATIVE_ID));
-                FamilyActivity.connect(personToBeAdded, (Family)object, (Relation)data.getSerializableExtra(Extra.RELATION));
+                FamilyUtil.INSTANCE.linkPerson(personToBeAdded, (Family)object, (Relation)data.getSerializableExtra(Extra.RELATION));
                 TreeUtil.INSTANCE.save(true, personToBeAdded, Memory.getLeaderObject());
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
@@ -1034,33 +1034,40 @@ public abstract class DetailActivity extends AppCompatActivity {
                 person = (Person)pieceObject;
                 Family fam = (Family)object;
                 // Generates labels for "Family..." entries (such as child and partner)
-                String[] famLabels = {null, null};
+                String[] familyLabels = {null, null};
                 if (person.getParentFamilies(gc).size() > 1 && person.getSpouseFamilies(gc).size() > 1) {
-                    famLabels[0] = getString(R.string.family_as_child);
-                    famLabels[1] = getString(R.string.family_as_spouse);
+                    familyLabels[0] = getString(R.string.family_as_child);
+                    familyLabels[1] = getString(R.string.family_as_spouse);
                 }
                 menu.add(0, 10, 0, R.string.diagram);
                 menu.add(0, 11, 0, R.string.card);
-                if (famLabels[0] != null)
-                    menu.add(0, 12, 0, famLabels[0]);
-                if (famLabels[1] != null)
-                    menu.add(0, 13, 0, famLabels[1]);
+                if (familyLabels[0] != null)
+                    menu.add(0, 12, 0, familyLabels[0]);
+                if (familyLabels[1] != null)
+                    menu.add(0, 13, 0, familyLabels[1]);
+                boolean homosexual = FamilyUtil.INSTANCE.areSpousesHomosexual(fam);
                 husbandRefIndex = fam.getHusbands(gc).indexOf(person);
                 wifeRefIndex = fam.getWives(gc).indexOf(person);
+                if (homosexual) {
+                    if (husbandRefIndex == 0) menu.add(0, 14, 0, R.string.move_down);
+                    else if (wifeRefIndex == 0) menu.add(0, 15, 0, R.string.move_up);
+                }
                 if (husbandRefIndex > 0 || wifeRefIndex > 0)
-                    menu.add(0, 14, 0, R.string.move_up);
-                if (husbandRefIndex >= 0 && husbandRefIndex < fam.getHusbandRefs().size() - 1
+                    menu.add(0, 16, 0, R.string.move_up);
+                if (!homosexual && husbandRefIndex == 0 && fam.getHusbandRefs().size() > 1
+                        || husbandRefIndex >= 1 && husbandRefIndex < fam.getHusbandRefs().size() - 1
                         || wifeRefIndex >= 0 && wifeRefIndex < fam.getWifeRefs().size() - 1)
-                    menu.add(0, 15, 0, R.string.move_down);
+                    menu.add(0, 17, 0, R.string.move_down);
                 if (fam.getChildren(gc).indexOf(person) > 0)
-                    menu.add(0, 16, 0, R.string.move_before);
+                    menu.add(0, 18, 0, R.string.move_before);
                 if (fam.getChildren(gc).indexOf(person) < fam.getChildren(gc).size() - 1 && fam.getChildren(gc).contains(person))
-                    menu.add(0, 17, 0, R.string.move_after);
-                menu.add(0, 18, 0, R.string.modify);
-                if (FamilyActivity.findParentFamilyRef(person, fam) != null)
-                    menu.add(0, 19, 0, R.string.lineage);
-                menu.add(0, 20, 0, R.string.unlink);
-                menu.add(0, 21, 0, R.string.delete);
+                    menu.add(0, 19, 0, R.string.move_after);
+                menu.add(0, 20, 0, R.string.modify);
+                // TODO: if (person.parentFamilyRefs.any { it.ref == fam.id })
+                if (FamilyUtil.INSTANCE.findParentFamilyRef(person, fam) != null)
+                    menu.add(0, 21, 0, R.string.lineage);
+                menu.add(0, 22, 0, R.string.unlink);
+                menu.add(0, 23, 0, R.string.delete);
             } else if (pieceObject instanceof Note) {
                 menu.add(0, 25, 0, R.string.copy);
                 if (((Note)pieceObject).getId() != null)
@@ -1153,33 +1160,38 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 13: // Family (as partner)
                 U.whichSpousesToShow(this, person, null);
                 return true;
-            case 14: // Move partner up
+            case 14: // Swap husband and wife
+            case 15:
+                swapSpouses();
+                break;
+            case 16: // Move partner up
                 swapPartners(-1);
                 break;
-            case 15: // Move partner down
+            case 17: // Move partner down
                 swapPartners(1);
                 break;
-            case 16: // Move child before
+            case 18: // Move child before
                 swapChildren(-1);
                 break;
-            case 17: // Move child after
+            case 19: // Move child after
                 swapChildren(1);
                 break;
-            case 18: // Edit
+            case 20: // Edit
                 Intent i = new Intent(this, PersonEditorActivity.class);
                 i.putExtra(Extra.PERSON_ID, person.getId());
                 startActivity(i);
                 return true;
-            case 19: // Lineage
-                FamilyActivity.chooseLineage(this, person, (Family)object);
+            case 21: // Lineage
+                PersonUtil.INSTANCE.chooseLineage(this, person, (Family)object);
                 break;
-            case 20: // Unlink family member
-                FamilyActivity.disconnect((SpouseFamilyRef)pieceView.getTag(R.id.tag_spouse_family_ref),
-                        (SpouseRef)pieceView.getTag(R.id.tag_spouse_ref));
+            case 22: // Unlink family member
+                FamilyUtil.INSTANCE.unlinkRefs((SpouseFamilyRef)pieceView.getTag(R.id.tag_family_ref),
+                        (SpouseRef)pieceView.getTag(R.id.tag_ref));
                 ChangeUtil.INSTANCE.updateChangeDate(person);
+                FamilyUtil.INSTANCE.updateSpouseRoles((Family)object);
                 findAnotherRepresentativeOfTheFamily(person);
                 break;
-            case 21: // Delete family member
+            case 23: // Delete family member
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
                         .setPositiveButton(R.string.delete, (dialog, id) -> {
                             PersonUtilKt.delete(person);
@@ -1289,7 +1301,18 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Swaps position of same-sex partners.
+     * Swaps husband and wife refs.
+     */
+    private void swapSpouses() {
+        Family family = (Family)object;
+        SpouseRef husbandRef = family.getHusbandRefs().remove(0);
+        SpouseRef wifeRef = family.getWifeRefs().remove(0);
+        family.getWifeRefs().add(0, husbandRef);
+        family.getHusbandRefs().add(0, wifeRef);
+    }
+
+    /**
+     * Swaps position of same-role partners.
      */
     private void swapPartners(int direction) {
         Family family = (Family)object;

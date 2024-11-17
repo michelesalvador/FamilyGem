@@ -146,7 +146,7 @@ public class NewRelativeDialog extends DialogFragment {
     /**
      * Tells whether there is empty space in a family to add one or two parents.
      */
-    private boolean checkPartnersShortage(Family family) {
+    private boolean checkSpouseRoom(Family family) {
         return family.getHusbandRefs().size() + family.getWifeRefs().size() < 2;
     }
 
@@ -158,11 +158,12 @@ public class NewRelativeDialog extends DialogFragment {
         switch (relation) {
             case PARENT:
                 for (Family family : pivot.getParentFamilies(Global.gc)) {
-                    addOption(new FamilyItem(getContext(), family));
-                    if ((family.equals(prefParentFamily) // Selects the preferred family in which is child
-                            || select < 0) // Or the first available
-                            && checkPartnersShortage(family)) // If there is empty parental space
-                        select = options.size() - 1;
+                    if (checkSpouseRoom(family)) { // If there is empty parental space
+                        addOption(new FamilyItem(getContext(), family));
+                        if (family.equals(prefParentFamily) // Selects the preferred family in which is child
+                                || select < 0) // Or the first available
+                            select = options.size() - 1;
+                    }
                 }
                 addOption(new FamilyItem(getContext(), false));
                 if (select < 0) select = options.size() - 1; // Selects "New family"
@@ -193,23 +194,27 @@ public class NewRelativeDialog extends DialogFragment {
                     }
                 break;
             case PARTNER:
-            case CHILD:
                 for (Family family : pivot.getSpouseFamilies(Global.gc)) {
-                    addOption(new FamilyItem(getContext(), family));
-                    if ((options.size() > 1 && family.equals(prefSpouseFamily)) // Selects preferred family as spouse (except first family)
-                            || (checkPartnersShortage(family) && select < 0)) // Selects the first family where spouses are missing
-                        select = options.size() - 1;
+                    if (checkSpouseRoom(family)) {
+                        addOption(new FamilyItem(getContext(), family));
+                        if (select < 0) select = 0; // Selects the first family where spouses are missing
+                    }
                 }
                 addOption(new FamilyItem(getContext(), pivot));
                 if (select < 0) select = options.size() - 1; // Selects "New family of..."
-                // For a child, selects the preferred family (if any), otherwise the first one
-                if (relation == Relation.CHILD) {
-                    select = 0;
-                    for (FamilyItem item : options)
-                        if (item.family != null && item.family.equals(prefSpouseFamily)) {
-                            select = options.indexOf(item);
-                            break;
-                        }
+                break;
+            case CHILD:
+                for (Family family : pivot.getSpouseFamilies(Global.gc)) {
+                    addOption(new FamilyItem(getContext(), family));
+                }
+                addOption(new FamilyItem(getContext(), pivot));
+                // Selects the preferred family (if any), otherwise the first one
+                select = 0;
+                for (FamilyItem item : options) {
+                    if (item.family != null && item.family.equals(prefSpouseFamily)) {
+                        select = options.indexOf(item);
+                        break;
+                    }
                 }
         }
         if (!newPerson) {
@@ -236,19 +241,25 @@ public class NewRelativeDialog extends DialogFragment {
         Person parent;
         boolean existing; // Pivot will try to join the already existing family
 
-        // Existing family
+        /**
+         * Existing family.
+         */
         FamilyItem(Context context, Family family) {
             this.context = context;
             this.family = family;
         }
 
-        // New family of a parent
+        /**
+         * New family of a parent.
+         */
         FamilyItem(Context context, Person parent) {
             this.context = context;
             this.parent = parent;
         }
 
-        // New empty family (false) or family that will be acquired from a recipient (true)
+        /**
+         * New empty family (false) or family that will be acquired from a recipient (true).
+         */
         FamilyItem(Context context, boolean existing) {
             this.context = context;
             this.existing = existing;

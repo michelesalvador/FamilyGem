@@ -58,6 +58,7 @@ import app.familygem.detail.NoteActivity;
 import app.familygem.main.MainActivity;
 import app.familygem.main.MediaFragment;
 import app.familygem.main.SourcesFragment;
+import app.familygem.util.FamilyUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.util.NoteUtil;
 import app.familygem.util.PersonUtilKt;
@@ -356,7 +357,7 @@ public class ProfileActivity extends AppCompatActivity {
                                     gender.setValue(sexValues[i]);
                                     one.addEventFact(gender);
                                     dialog.dismiss();
-                                    ProfileFactsFragment.updateSpouseRoles(one);
+                                    FamilyUtil.INSTANCE.updateSpouseRoles(one);
                                     refresh();
                                     TreeUtil.INSTANCE.save(true, one);
                                 }).show();

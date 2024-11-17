@@ -34,7 +34,6 @@ import androidx.core.text.TextUtilsCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import app.familygem.DiagramSettingsActivity
 import app.familygem.GedcomDateConverter
@@ -58,6 +57,7 @@ import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
+import app.familygem.util.getSpouseRefs
 import graph.gedcom.Bond
 import graph.gedcom.CurveLine
 import graph.gedcom.Graph
@@ -72,7 +72,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.apache.commons.io.FileUtils
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Person
@@ -160,16 +159,21 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         startDiagram()
     }
 
-    /**
-     * Identifies the fulcrum person to start from, shows the button 'Add the first person' or starts the diagram.
-     */
+    /** Identifies the fulcrum person to start from, shows the button 'Add the first person' or starts the diagram. */
     private fun startDiagram() {
         // Finds fulcrum
         val ids = arrayOf(Global.indi, Global.settings.currentTree.root, U.findRootId(Global.gc))
         var fulcrum: Person? = null
         for (id in ids) {
             fulcrum = Global.gc.getPerson(id)
-            if (fulcrum != null) break
+            if (fulcrum != null) {
+                // Checks if fulcrum is one of the first two spouses
+                val spouseRefs = fulcrum.getSpouseFamilies(Global.gc).firstOrNull()?.getSpouseRefs()
+                if (spouseRefs != null && spouseRefs.indexOfFirst { it.ref == id } >= 2) {
+                    fulcrum = Global.gc.getPerson(spouseRefs[0].ref)
+                    if (fulcrum != null) break
+                } else break
+            }
         }
         // Empty diagram
         if (fulcrum == null) {
@@ -729,7 +733,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             U.whichSpousesToShow(context, person, null)
         } else if (id == 3) { // Link new person
             if (Global.settings.expert) {
-                val dialog: DialogFragment = NewRelativeDialog(person, parentFam, spouseFam, true, null)
+                val dialog = NewRelativeDialog(person, parentFam, spouseFam, true, null)
                 dialog.show(requireActivity().supportFragmentManager, null)
             } else {
                 AlertDialog.Builder(context()).setItems(relatives) { _, selected ->
@@ -742,7 +746,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             }
         } else if (id == 4) { // Link existing person
             if (Global.settings.expert) {
-                val dialog: DialogFragment = NewRelativeDialog(person, parentFam, spouseFam, false, this@DiagramFragment)
+                val dialog = NewRelativeDialog(person, parentFam, spouseFam, false, this@DiagramFragment)
                 dialog.show(requireActivity().supportFragmentManager, null)
             } else {
                 AlertDialog.Builder(context()).setItems(relatives) { _, selected ->
@@ -759,16 +763,16 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             intent.putExtra(Extra.PERSON_ID, personId)
             startActivity(intent)
         } else if (id == 6) { // Unlink
-            /* TODO to be precise we should use FamilyActivity.disconnect(sfr, sr)
-               which removes exactly the single link instead of all links if a person is linked multiple times in the same family
-             */
-            val modified: MutableList<Family> = ArrayList()
+            /* TODO to be precise we should use FamilyUtil.unlinkRefs(sfr, sr)
+               which removes exactly the single link instead of all links if a person is linked multiple times in the same family */
+            val modified = ArrayList<Family>()
             if (parentFam != null) {
-                FamilyActivity.disconnect(personId, parentFam)
+                FamilyUtil.unlinkPerson(person, parentFam!!)
                 modified.add(parentFam!!)
             }
             if (spouseFam != null) {
-                FamilyActivity.disconnect(personId, spouseFam)
+                FamilyUtil.unlinkPerson(person, spouseFam!!)
+                FamilyUtil.updateSpouseRoles(spouseFam!!)
                 modified.add(spouseFam!!)
             }
             val modifiedArray = modified.toTypedArray()

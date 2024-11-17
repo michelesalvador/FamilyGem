@@ -33,6 +33,7 @@ import app.familygem.constant.Gender
 import app.familygem.main.MainActivity
 import app.familygem.merge.MergeActivity
 import app.familygem.share.SharingActivity
+import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
@@ -839,10 +840,13 @@ class TreesActivity : AppCompatActivity() {
                     }
                 }
             }
-            // Remove empty list of wife refs
+            // Removes empty list of wife refs
             if (family.wifeRefs.isEmpty() && correct) {
                 family.wifeRefs = null
             }
+            // Updates husband and wife roles
+            val errors = FamilyUtil.updateSpouseRoles(family, gedcom, correct)
+            if (!correct) errors.forEach { addError(it) }
             // Children refs
             val childIterator = family.childRefs.iterator()
             while (childIterator.hasNext()) {

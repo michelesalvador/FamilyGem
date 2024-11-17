@@ -908,8 +908,8 @@ public class U {
     private static void finishParentSelection(Context context, Person person, int whatToOpen, int whichFamily) {
         if (person != null)
             Global.indi = person.getId();
-        if (whatToOpen > 0) // Sets the family to show
-            Global.familyNum = whichFamily; // Normally it is 0
+        if (whatToOpen > 0) // Sets the parent family to show
+            Global.familyNum = whichFamily;
         if (whatToOpen < 2) { // Displays the diagram
             if (context instanceof MainActivity) { // DiagramFragment, PersonsFragment or MainActivity itself
                 // Recycles previous diagram from the backstack
@@ -981,17 +981,16 @@ public class U {
         ArrayAdapter<NewRelativeDialog.FamilyItem> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1);
 
         // Parents: there is already a family that has at least one empty space
-        if (relation == Relation.PARENT && parentFamilies.size() == 1
-                && (parentFamilies.get(0).getHusbandRefs().isEmpty() || parentFamilies.get(0).getWifeRefs().isEmpty()))
+        if (relation == Relation.PARENT && parentFamilies.size() == 1 && FamilyUtilKt.getSpouseRefs(parentFamilies.get(0)).size() < 2)
             intent.putExtra(Extra.FAMILY_ID, parentFamilies.get(0).getId()); // Adds 'FAMILY_ID' to the existing intent
         // If this unique family is already full of parents, FAMILY_ID remains null
         // then the recipient's existing family will be searched, or a new family will be created
 
         // Parents: there are many families
         if (relation == Relation.PARENT && parentFamilies.size() > 1) {
-            for (Family fam : parentFamilies)
-                if (fam.getHusbandRefs().isEmpty() || fam.getWifeRefs().isEmpty())
-                    adapter.add(new NewRelativeDialog.FamilyItem(context, fam));
+            for (Family family : parentFamilies)
+                if (FamilyUtilKt.getSpouseRefs(family).size() < 2)
+                    adapter.add(new NewRelativeDialog.FamilyItem(context, family));
             if (adapter.getCount() == 1)
                 intent.putExtra(Extra.FAMILY_ID, adapter.getItem(0).family.getId());
             else if (adapter.getCount() > 1) {
@@ -1016,11 +1015,11 @@ public class U {
         }
         // Partner
         else if (relation == Relation.PARTNER && spouseFamilies.size() == 1) {
-            if (spouseFamilies.get(0).getHusbandRefs().isEmpty() || spouseFamilies.get(0).getWifeRefs().isEmpty())
+            if (FamilyUtilKt.getSpouseRefs(spouseFamilies.get(0)).size() < 2)
                 intent.putExtra(Extra.FAMILY_ID, spouseFamilies.get(0).getId());
         } else if (relation == Relation.PARTNER && spouseFamilies.size() > 1) {
             for (Family family : spouseFamilies) {
-                if (family.getHusbandRefs().isEmpty() || family.getWifeRefs().isEmpty())
+                if (FamilyUtilKt.getSpouseRefs(family).size() < 2)
                     adapter.add(new NewRelativeDialog.FamilyItem(context, family));
             }
             // In the case of zero eligible families, FAMILY_ID remains null

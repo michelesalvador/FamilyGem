@@ -38,6 +38,7 @@ import app.familygem.util.Util.caseString
 import app.familygem.util.countRelatives
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
+import app.familygem.util.getSpouseRefs
 import app.familygem.util.writeContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -234,10 +235,8 @@ class PersonsFragment : BaseFragment() {
                     val familyId = when (intent.getSerializableExtra(Extra.RELATION) as Relation) {
                         Relation.PARENT -> relative.spouseFamilyRefs.firstOrNull { it.ref != null }?.ref
                         Relation.SIBLING -> relative.parentFamilyRefs.firstOrNull { it.ref != null }?.ref
-                        Relation.PARTNER -> relative.getSpouseFamilies(Global.gc)
-                            .firstOrNull { it.husbandRefs.isEmpty() || it.wifeRefs.isEmpty() }?.id
-                        Relation.CHILD -> relative.getParentFamilies(Global.gc)
-                            .firstOrNull { it.husbandRefs.isEmpty() || it.wifeRefs.isEmpty() }?.id
+                        Relation.PARTNER -> relative.getSpouseFamilies(Global.gc).firstOrNull { it.getSpouseRefs().size < 2 }?.id
+                        Relation.CHILD -> relative.getParentFamilies(Global.gc).firstOrNull { it.getSpouseRefs().size < 2 }?.id
                         else -> null
                     }
                     if (familyId != null) // addRelative() will use the found family

@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import org.folg.gedcom.model.EventFact;
-import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.GedcomTag;
 import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Name;
@@ -27,20 +26,18 @@ import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
-import org.folg.gedcom.model.SpouseRef;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import app.familygem.constant.Gender;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.EventUtilKt;
+import app.familygem.util.FamilyUtil;
 import app.familygem.util.TreeUtil;
 
 public class ProfileFactsFragment extends Fragment {
@@ -203,7 +200,7 @@ public class ProfileFactsFragment extends Fragment {
                 eventView.setOnClickListener(view -> new AlertDialog.Builder(view.getContext())
                         .setSingleChoiceItems(sexes.values().toArray(new String[0]), chosenSex, (dialog, item) -> {
                             ((EventFact)object).setValue(new ArrayList<>(sexes.keySet()).get(item));
-                            updateSpouseRoles(one);
+                            FamilyUtil.INSTANCE.updateSpouseRoles(one);
                             dialog.dismiss();
                             refresh();
                             TreeUtil.INSTANCE.save(true, one);
@@ -220,36 +217,6 @@ public class ProfileFactsFragment extends Fragment {
                 Memory.add(object);
                 startActivity(new Intent(getContext(), ExtensionActivity.class));
             });
-        }
-    }
-
-    /**
-     * Removes the spouse refs in all spouse families of the person and adds one corresponding to the gender.
-     * It is especially useful when exporting GEDCOM to have the HUSB and WIFE tags aligned with the gender.
-     */
-    static void updateSpouseRoles(Person person) {
-        SpouseRef spouseRef = new SpouseRef();
-        spouseRef.setRef(person.getId());
-        for (Family family : person.getSpouseFamilies(gc)) {
-            if (Gender.isFemale(person)) { // Female person will become a wife
-                Iterator<SpouseRef> iterator = family.getHusbandRefs().iterator();
-                while (iterator.hasNext()) {
-                    String husbandRef = iterator.next().getRef();
-                    if (husbandRef != null && husbandRef.equals(person.getId())) {
-                        iterator.remove();
-                        family.addWife(spouseRef);
-                    }
-                }
-            } else { // For all other genders person will become a husband
-                Iterator<SpouseRef> iterator = family.getWifeRefs().iterator();
-                while (iterator.hasNext()) {
-                    String wifeRef = iterator.next().getRef();
-                    if (wifeRef != null && wifeRef.equals(person.getId())) {
-                        iterator.remove();
-                        family.addHusband(spouseRef);
-                    }
-                }
-            }
         }
     }
 

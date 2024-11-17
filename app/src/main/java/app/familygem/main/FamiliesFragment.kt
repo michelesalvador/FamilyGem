@@ -24,6 +24,7 @@ import app.familygem.util.FamilyUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.delete
+import app.familygem.util.getSpouses
 import app.familygem.util.writeContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -259,15 +260,14 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
 
         private fun writeParents(): String {
             var parents = StringBuilder()
-            for (husband in family.getHusbands(Global.gc)) parents.append(U.properName(husband)).append(",\n")
-            for (wife in family.getWives(Global.gc)) parents.append(U.properName(wife)).append(",\n")
+            family.getSpouses().forEach { parents.append(U.properName(it)).append(",\n") }
             if (parents.isNotEmpty()) parents = StringBuilder(parents.substring(0, parents.length - 2)) // Just to remove the final ',\n'
             return parents.toString()
         }
 
         private fun writeChildren(): String {
             var children = java.lang.StringBuilder()
-            for (child in family.getChildren(Global.gc)) children.append(U.properName(child)).append(",\n")
+            family.getChildren(Global.gc).forEach { children.append(U.properName(it)).append(",\n") }
             if (children.isNotEmpty()) children = java.lang.StringBuilder(children.substring(0, children.length - 2))
             return children.toString()
         }

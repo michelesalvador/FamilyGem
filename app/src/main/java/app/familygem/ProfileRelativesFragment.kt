@@ -19,9 +19,12 @@ import androidx.fragment.app.FragmentActivity
 import app.familygem.constant.Extra
 import app.familygem.constant.Relation
 import app.familygem.detail.FamilyActivity
+import app.familygem.util.FamilyUtil
+import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil.save
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
+import app.familygem.util.getSpouses
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
 import java.util.Collections
@@ -204,10 +207,10 @@ class ProfileRelativesFragment : Fragment() {
         when (data.type) {
             FamilyType.ORIGIN, FamilyType.ORIGIN_SMALL -> {
                 // Title based on the lineage type
-                FamilyActivity.findParentFamilyRef(person, data.family).let {
-                    title = when (it.relationshipType) {
-                        FamilyActivity.lineageTypes[2] -> R.string.adoptive_family
-                        FamilyActivity.lineageTypes[3] -> R.string.foster_family
+                person.parentFamilyRefs.firstOrNull { it.ref == data.family.id }.let {
+                    title = when (it?.relationshipType) {
+                        PersonUtil.lineageTypes[2] -> R.string.adoptive_family
+                        PersonUtil.lineageTypes[3] -> R.string.foster_family
                         else -> R.string.origin_family
                     }
                 }
@@ -248,7 +251,7 @@ class ProfileRelativesFragment : Fragment() {
     private fun placeCard(relative: Person, relation: Relation, family: Family, groupLayout: LinearLayout) {
         val personView = U.placePerson(
             groupLayout, relative,
-            FamilyActivity.getRole(relative, family, relation, false) + FamilyActivity.writeLineage(relative, family)
+            PersonUtil.writeRole(relative, family, relation, false) + PersonUtil.writeLineage(relative, family)
         )
         personView.setOnClickListener { clickRelative(relative) }
         registerForContextMenu(personView)
@@ -273,8 +276,7 @@ class ProfileRelativesFragment : Fragment() {
         }
         when (type) {
             FamilyType.ORIGIN -> {
-                family.getHusbands(Global.gc).forEach { add(it, Relation.PARENT) }
-                family.getWives(Global.gc).forEach { add(it, Relation.PARENT) }
+                family.getSpouses().forEach { add(it, Relation.PARENT) }
                 family.getChildren(Global.gc).filterNot { it == person }.forEach { add(it, Relation.SIBLING) }
             }
             FamilyType.HALF -> {
@@ -282,8 +284,7 @@ class ProfileRelativesFragment : Fragment() {
             }
             FamilyType.ORIGIN_SMALL -> {}
             FamilyType.OWN -> {
-                family.getHusbands(Global.gc).filterNot { it == person }.forEach { add(it, Relation.PARTNER) }
-                family.getWives(Global.gc).filterNot { it == person }.forEach { add(it, Relation.PARTNER) }
+                family.getSpouses().filterNot { it == person }.forEach { add(it, Relation.PARTNER) }
                 family.getChildren(Global.gc).forEach { add(it, Relation.CHILD) }
             }
         }
@@ -302,31 +303,34 @@ class ProfileRelativesFragment : Fragment() {
             data = view.getTag(R.id.tag_object) as GroupData
             // Is a parent family
             if (data.type == FamilyType.ORIGIN || data.type == FamilyType.HALF || data.type == FamilyType.ORIGIN_SMALL) {
+                if (data.type == FamilyType.ORIGIN || data.type == FamilyType.ORIGIN_SMALL) {
+                    menu.add(0, 300, 0, R.string.lineage)
+                }
                 // Move lineage family before
                 if (data.listIndex > 0 && groupList[data.listIndex - 1].lineageIndex != data.lineageIndex) {
-                    menu.add(0, 300, 0, R.string.move_before)
+                    menu.add(0, 301, 0, R.string.move_before)
                 }
                 // Move origin or half family before
                 if (data.groupIndex > 0) {
-                    menu.add(0, 301, 0, R.string.move_before)
+                    menu.add(0, 302, 0, R.string.move_before)
                 }
                 // Move lineage family after
                 if (data.listIndex < groupList.size - groupTree.second.size - 1 && groupList[data.listIndex + 1].lineageIndex != data.lineageIndex) {
-                    menu.add(0, 302, 0, R.string.move_after)
+                    menu.add(0, 303, 0, R.string.move_after)
                 }
                 // Move origin or half family after
                 val actualParent = if (data.branch == Branch.MATERNAL) groupTree.first[data.lineageIndex].second[data.parentIndex]
                 else groupTree.first[data.lineageIndex].first[data.parentIndex] // PATERNAL or ANY branch
                 if (data.groupIndex in 0..<actualParent.groups.lastIndex) {
-                    menu.add(0, 303, 0, R.string.move_after)
+                    menu.add(0, 304, 0, R.string.move_after)
                 }
             } else { // Is an own family
                 if (person.spouseFamilyRefs.size > 1) {
-                    if (data.listIndex > 0) menu.add(0, 304, 0, R.string.move_before)
-                    if (data.listIndex >= 0 && data.listIndex < person.spouseFamilyRefs.size - 1) menu.add(0, 305, 0, R.string.move_after)
+                    if (data.listIndex > 0) menu.add(0, 305, 0, R.string.move_before)
+                    if (data.listIndex >= 0 && data.listIndex < person.spouseFamilyRefs.size - 1) menu.add(0, 306, 0, R.string.move_after)
                 }
             }
-            menu.add(0, 306, 0, R.string.delete)
+            menu.add(0, 307, 0, R.string.delete)
         } else { // Long press on a person
             selectedId = view.tag as String
             selected = Global.gc.getPerson(selectedId)
@@ -335,7 +339,7 @@ class ProfileRelativesFragment : Fragment() {
             if (familyLabels[0] != null) menu.add(0, 311, 0, familyLabels[0])
             if (familyLabels[1] != null) menu.add(0, 312, 0, familyLabels[1])
             menu.add(0, 313, 0, R.string.modify)
-            if (FamilyActivity.findParentFamilyRef(selected, family) != null) menu.add(0, 314, 0, R.string.lineage)
+            if (selected.parentFamilyRefs.any { it.ref == family.id }) menu.add(0, 314, 0, R.string.lineage)
             menu.add(0, 315, 0, R.string.unlink)
             if (selected != person) // Here cannot delete himself
                 menu.add(0, 316, 0, R.string.delete)
@@ -345,13 +349,14 @@ class ProfileRelativesFragment : Fragment() {
     override fun onContextItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             // Family
-            300 -> moveLineageFamilyRef(-1) // Move before
-            301 -> moveParentFamilyRef(-1)
-            302 -> moveLineageFamilyRef(1) // Move after
-            303 -> moveParentFamilyRef(1)
-            304 -> moveOwnFamilyRef(-1) // Move before
-            305 -> moveOwnFamilyRef(1) // Move after
-            306 -> { // Delete
+            300 -> PersonUtil.chooseLineage(requireContext(), person, family)
+            301 -> moveLineageFamilyRef(-1) // Move before
+            302 -> moveParentFamilyRef(-1)
+            303 -> moveLineageFamilyRef(1) // Move after
+            304 -> moveParentFamilyRef(1)
+            305 -> moveOwnFamilyRef(-1) // Move before
+            306 -> moveOwnFamilyRef(1) // Move after
+            307 -> { // Delete
                 AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_family)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         family.delete()
@@ -368,9 +373,10 @@ class ProfileRelativesFragment : Fragment() {
                 intent.putExtra(Extra.PERSON_ID, selectedId)
                 startActivity(intent)
             }
-            314 -> FamilyActivity.chooseLineage(context, selected, family) // Lineage
+            314 -> PersonUtil.chooseLineage(requireContext(), selected, family) // Lineage
             315 -> { // Unlink
-                FamilyActivity.disconnect(selectedId, family)
+                FamilyUtil.unlinkPerson(selected, family)
+                FamilyUtil.updateSpouseRoles(family)
                 save(true, family, selected)
                 refreshAll()
                 U.deleteEmptyFamilies(context, { this.refreshOptionsMenu() }, false, family)
