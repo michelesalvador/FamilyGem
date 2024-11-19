@@ -19,6 +19,7 @@ import app.familygem.R;
 import app.familygem.U;
 import app.familygem.main.SourcesFragment;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.NoteUtil;
 import app.familygem.visitor.ListOfSourceCitations;
 
 public class SourceActivity extends DetailActivity {
@@ -66,7 +67,7 @@ public class SourceActivity extends DetailActivity {
             TextView textView = refView.findViewById(R.id.sourceCitation_text);
             if (txt.isEmpty()) textView.setVisibility(View.GONE);
             else textView.setText(txt.substring(0, txt.length() - 1));
-            U.placeNotes(refView.findViewById(R.id.sourceCitation_box), repositoryRef, false);
+            NoteUtil.INSTANCE.placeNotes(refView.findViewById(R.id.sourceCitation_box), repositoryRef, false);
             refView.setOnClickListener(v -> {
                 Memory.add(repositoryRef);
                 startActivity(new Intent(SourceActivity.this, RepositoryRefActivity.class));
@@ -74,7 +75,7 @@ public class SourceActivity extends DetailActivity {
             registerForContextMenu(refView);
             refView.setTag(R.id.tag_object, repositoryRef); // For the context menu
         }
-        U.placeNotes(box, source, true);
+        NoteUtil.INSTANCE.placeNotes(box, source);
         U.placeMedia(box, source, true);
         ChangeUtil.INSTANCE.placeChangeDate(box, source.getChange());
         if (!citations.list.isEmpty())

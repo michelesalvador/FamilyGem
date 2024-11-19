@@ -10,10 +10,11 @@ import java.util.Arrays;
 
 import app.familygem.DetailActivity;
 import app.familygem.Memory;
-import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.EventUtilKt;
+import app.familygem.util.NoteUtil;
 
 public class EventActivity extends DetailActivity {
 
@@ -50,7 +51,7 @@ public class EventActivity extends DetailActivity {
         place(getString(R.string.user_id), "Uid", false, 0);
         // Other methods are "WwwTag", "EmailTag", "UidTag"
         placeExtensions(event);
-        U.placeNotes(box, event, true);
+        NoteUtil.INSTANCE.placeNotes(box, event);
         U.placeMedia(box, event, true);
         U.placeSourceCitations(box, event);
     }
@@ -60,7 +61,7 @@ public class EventActivity extends DetailActivity {
         if (Memory.getLeaderObject() instanceof Family)
             setTitle(writeEventTitle((Family)Memory.getLeaderObject(), event));
         else
-            setTitle(ProfileFactsFragment.writeEventTitle(event)); // The title includes event.getDisplayType()
+            setTitle(EventUtilKt.writeTitle(event)); // The title includes event.getDisplayType()
     }
 
     @Override

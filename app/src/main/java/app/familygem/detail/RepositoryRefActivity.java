@@ -2,24 +2,16 @@ package app.familygem.detail;
 
 import static app.familygem.Global.gc;
 
-import android.content.Context;
-import android.content.Intent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
-
-import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 
 import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
-import app.familygem.U;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.NoteUtil;
 import app.familygem.util.RepositoryUtil;
 
 public class RepositoryRefActivity extends DetailActivity {
@@ -44,7 +36,7 @@ public class RepositoryRefActivity extends DetailActivity {
         place(getString(R.string.call_number), "CallNumber");
         place(getString(R.string.media_type), "MediaType");
         placeExtensions(repoRef);
-        U.placeNotes(box, repoRef, true);
+        NoteUtil.INSTANCE.placeNotes(box, repoRef);
     }
 
     @Override

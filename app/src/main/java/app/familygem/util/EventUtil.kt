@@ -5,13 +5,29 @@ import app.familygem.Global
 import app.familygem.R
 import org.folg.gedcom.model.EventFact
 
-/**
- * @return All event fields in a multi-line string
- */
+/** Composes the title of an event fact. */
+fun EventFact.writeTitle(): String {
+    val string = when (tag) {
+        "BIRT" -> R.string.birth
+        "BURI" -> R.string.burial
+        "CHR" -> R.string.christening
+        "DEAT" -> R.string.death
+        "EVEN" -> R.string.event
+        "OCCU" -> R.string.occupation
+        "RESI" -> R.string.residence
+        "SEX" -> R.string.sex
+        else -> 0
+    }
+    var txt = if (string != 0) Global.context.getString(string) else displayType
+    if (type != null) txt += " ($type)"
+    return txt
+}
+
+/** Writes all event fields in a multi-line string. */
 fun EventFact.writeContent(): String {
     val builder = StringBuilder()
     if (value != null) {
-        if (value == "Y" && tag != null && (tag == "BIRT" || tag == "CHR" || tag == "DEAT"))
+        if (value == "Y" && tag != null && (tag == "BIRT" || tag == "CHR" || tag == "DEAT" || tag == "MARR" || tag == "DIV"))
             builder.append(Global.context.getString(R.string.yes)).append("\n")
         else builder.append(value).append("\n")
     }

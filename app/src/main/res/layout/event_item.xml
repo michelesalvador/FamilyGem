@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
     android:background="?android:attr/selectableItemBackground"
-    android:orientation="vertical"
-    android:paddingTop="10dp">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/event_title"
@@ -18,6 +18,7 @@
         android:id="@+id/event_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/event_title"
         android:textSize="17sp"
         tools:text="Event content text." />
 
@@ -25,6 +26,7 @@
         android:id="@+id/event_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/event_title"
         android:textSize="17sp"
         android:visibility="gone" />
 
@@ -32,22 +34,21 @@
         android:id="@+id/event_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/event_edit"
         android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/event_other"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/event_text"
         android:orientation="vertical" />
 
     <TextView
         android:id="@+id/event_sources"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="-25dp"
-        android:background="@color/source_citation"
-        android:padding="4dp"
+        style="@style/AppTheme.CitationsNumber"
+        android:layout_alignBottom="@id/event_text"
+        android:layout_alignParentEnd="true"
         android:visibility="gone"
         tools:text="3" />
-</LinearLayout>
+</RelativeLayout>

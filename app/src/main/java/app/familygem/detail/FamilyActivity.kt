@@ -9,6 +9,7 @@ import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Relation
 import app.familygem.util.ChangeUtil.placeChangeDate
+import app.familygem.util.NoteUtil
 import app.familygem.util.PersonUtil
 import app.familygem.util.getSpouseRefs
 import org.folg.gedcom.model.Family
@@ -24,7 +25,7 @@ class FamilyActivity : DetailActivity() {
         family.childRefs.forEach { placeMember(it, Relation.CHILD) }
         family.eventsFacts.forEach { place(writeEventTitle(family, it), it) }
         placeExtensions(family)
-        U.placeNotes(box, family, true)
+        NoteUtil.placeNotes(box, family)
         U.placeMedia(box, family, true)
         U.placeSourceCitations(box, family)
         placeChangeDate(box, family.change)

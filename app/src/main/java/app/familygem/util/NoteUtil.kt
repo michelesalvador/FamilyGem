@@ -14,6 +14,8 @@ import app.familygem.ProfileActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.detail.NoteActivity
+import app.familygem.visitor.NoteReferences
+import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Note
 import org.folg.gedcom.model.NoteContainer
 import org.folg.gedcom.model.NoteRef
@@ -40,18 +42,32 @@ object NoteUtil {
         context.startActivity(Intent(context, NoteActivity::class.java))
     }
 
+    /** Places into layout all the notes of a given note container. */
+    @JvmOverloads
+    fun placeNotes(layout: LinearLayout, container: NoteContainer, detailed: Boolean = true, gedcom: Gedcom = Global.gc) {
+        container.noteRefs.forEach { ref -> ref.getNote(gedcom)?.let { placeNote(layout, it, ref, detailed) } }
+        container.notes.forEach { placeNote(layout, it, null, detailed) }
+    }
+
     /**
-     * Places on a layout a single note detailed or not.
+     * Places into layout a single note detailed or not.
+     * @param ref Will be used by shared note context menu
      */
-    fun placeNote(layout: LinearLayout, note: Note, detailed: Boolean) {
+    fun placeNote(layout: LinearLayout, note: Note, ref: NoteRef?, detailed: Boolean) {
         val context = layout.context
         val noteView: View = LayoutInflater.from(context).inflate(R.layout.note_layout, layout, false)
         layout.addView(noteView)
         val textView = noteView.findViewById<TextView>(R.id.note_text)
         textView.text = note.value
+        val refsView = noteView.findViewById<TextView>(R.id.note_references)
+        if (detailed && note.id != null) {
+            val references = NoteReferences(Global.gc, note.id, false)
+            refsView.text = references.count.toString()
+            noteView.setTag(R.id.tag_ref, ref)
+        } else refsView.visibility = View.GONE
         val sourceCiteNum = note.sourceCitations.size
         val sourceCiteView = noteView.findViewById<TextView>(R.id.note_sources)
-        if (sourceCiteNum > 0 && detailed) sourceCiteView.text = sourceCiteNum.toString()
+        if (detailed && Global.settings.expert && sourceCiteNum > 0) sourceCiteView.text = sourceCiteNum.toString()
         else sourceCiteView.visibility = View.GONE
         textView.ellipsize = TextUtils.TruncateAt.END
         if (detailed) {
@@ -67,6 +83,7 @@ object NoteUtil {
                 context.startActivity(Intent(context, NoteActivity::class.java))
             }
         } else {
+            textView.textSize = 15F
             textView.maxLines = 3
         }
     }

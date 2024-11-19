@@ -32,6 +32,22 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="AppTheme.CitationsNumber">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:background">@color/source_citation</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingRight">5dp</item>
+        <item name="android:paddingBottom">2.5dp</item>
+    </style>
+
+    <style name="AppTheme.ReferencesNumber" parent="AppTheme.CitationsNumber">
+        <item name="android:textColor">#FFF</item>
+        <item name="android:background">@drawable/references_background</item>
+    </style>
+
     <style name="AppTheme.Suggestion">
         <item name="android:textColor">@color/text_veiled</item>
         <item name="android:textSize">15sp</item>

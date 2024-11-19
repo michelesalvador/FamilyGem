@@ -47,10 +47,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> 
             holder.countView.setVisibility(View.GONE);
         else {
             holder.countView.setVisibility(View.VISIBLE);
-            NoteReferences contaUso = new NoteReferences(Global.gc, note.getId(), false);
-            holder.countView.setText(String.valueOf(contaUso.count));
+            NoteReferences references = new NoteReferences(Global.gc, note.getId(), false);
+            holder.countView.setText(String.valueOf(references.count));
         }
-        holder.itemView.setTag(note); // per il menu contestuale Elimina
+        holder.itemView.setTag(note); // For the Delete context menu
         holder.textView.setText(note.getValue());
     }
 

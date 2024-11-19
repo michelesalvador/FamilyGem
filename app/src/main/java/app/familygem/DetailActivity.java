@@ -590,12 +590,12 @@ public abstract class DetailActivity extends AppCompatActivity {
      */
     public void place(String title, EventFact event) {
         EventFact eventNotNull = event == null ? new EventFact() : event;
-        placePiece(title, writeEvent(event), eventNotNull, 0);
+        placePiece(title, event == null ? null : EventUtilKt.writeContent(event), eventNotNull, 0);
     }
 
     public View placePiece(String title, String text, Object object, int inputType) {
         if (text == null) return null;
-        View pieceView = LayoutInflater.from(this).inflate(R.layout.event_view, box, false);
+        View pieceView = getLayoutInflater().inflate(R.layout.event_item, box, false);
         box.addView(pieceView);
         ((TextView)pieceView.findViewById(R.id.event_title)).setText(title);
         ((TextView)pieceView.findViewById(R.id.event_text)).setText(text);
@@ -630,7 +630,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             };
             // Family EventFacts can have notes, media and source count
             LinearLayout noteLayout = pieceView.findViewById(R.id.event_other);
-            U.placeNotes(noteLayout, object, false);
+            NoteUtil.INSTANCE.placeNotes(noteLayout, (NoteContainer)object, false);
             U.placeMedia(noteLayout, (MediaContainer)object, false);
             if (Global.settings.expert) {
                 List<SourceCitation> sourceCitations = ((SourceCitationContainer)object).getSourceCitations();
@@ -665,7 +665,7 @@ public abstract class DetailActivity extends AppCompatActivity {
      * @param title  Title above the cabinet
      */
     protected void placeCabinet(Object object, int title) {
-        View cabinetView = LayoutInflater.from(this).inflate(R.layout.cabinet_layout, box, false);
+        View cabinetView = getLayoutInflater().inflate(R.layout.cabinet_layout, box, false);
         TextView titleView = cabinetView.findViewById(R.id.cabinet_title);
         titleView.setText(title);
         titleView.setBackground(AppCompatResources.getDrawable(this, R.drawable.sghembo)); // For KitKat
@@ -697,7 +697,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         else if (record instanceof Media)
             placeMedia(layout, (Media)record);
         else if (record instanceof Note)
-            NoteUtil.INSTANCE.placeNote(layout, (Note)record, true);
+            NoteUtil.INSTANCE.placeNote(layout, (Note)record, null, true);
         else if (record instanceof Source)
             SourceUtil.INSTANCE.placeSource(layout, (Source)record, false);
         else if (record instanceof Repository)
@@ -770,32 +770,6 @@ public abstract class DetailActivity extends AppCompatActivity {
         return tit;
     }
 
-    /**
-     * Composes the text of an event of FamilyActivity.
-     */
-    public static String writeEvent(EventFact ef) {
-        if (ef == null) return null;
-        String txt = ""; // TODO: use StringBuilder
-        if (ef.getValue() != null) {
-            if (ef.getValue().equals("Y") && ef.getTag() != null
-                    && (ef.getTag().equals("MARR") || ef.getTag().equals("DIV")))
-                txt = Global.context.getString(R.string.yes);
-            else
-                txt = ef.getValue();
-            txt += "\n";
-        }
-        if (ef.getDate() != null)
-            txt += new GedcomDateConverter(ef.getDate()).writeDateLong() + "\n";
-        if (ef.getPlace() != null)
-            txt += ef.getPlace() + "\n";
-        Address address = ef.getAddress();
-        if (address != null)
-            txt += AddressUtilKt.toString(address, true) + "\n";
-        if (txt.endsWith("\n"))
-            txt = txt.substring(0, txt.length() - 1);
-        return txt;
-    }
-
     EditText editText;
     int whichMenu = 1; // Used to hide the options menu when entering editor mode TODO: replace with a boolean as 'editMode'
 
@@ -807,6 +781,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         Object pieceObject = pieceView.getTag(R.id.tag_object);
         boolean showInput = false;
         editText = pieceView.findViewById(R.id.event_edit);
+        ViewGroup.LayoutParams params = editText.getLayoutParams();
         // Place
         if (pieceObject.equals("Place")) {
             showInput = true;
@@ -817,7 +792,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 parent.removeView(editText);
                 editText = new PlaceFinderTextView(this, null);
                 editText.setId(R.id.event_edit);
-                parent.addView(editText, index);
+                parent.addView(editText, index, params);
             } else
                 editText.setVisibility(View.VISIBLE);
         } // Name type
@@ -826,7 +801,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ViewGroup parent = (ViewGroup)pieceView;
                 parent.removeView(editText);
                 editText = new TypeView(editText.getContext(), TypeView.Combo.NAME);
-                parent.addView(editText, parent.indexOfChild(editText));
+                parent.addView(editText, parent.indexOfChild(editText), params);
             } else
                 editText.setVisibility(View.VISIBLE);
         } // Marriage/relationship type
@@ -835,7 +810,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ViewGroup parent = (ViewGroup)pieceView;
                 parent.removeView(editText);
                 editText = new TypeView(editText.getContext(), TypeView.Combo.RELATIONSHIP);
-                parent.addView(editText, parent.indexOfChild(editText));
+                parent.addView(editText, parent.indexOfChild(editText), params);
             } else
                 editText.setVisibility(View.VISIBLE);
         } // Date
@@ -1015,6 +990,7 @@ public abstract class DetailActivity extends AppCompatActivity {
     Person person; // As it is used a lot, we make it a pieceObject in its own right
     int husbandRefIndex; // Husband index between same-sex partners
     int wifeRefIndex; // Wife index between same-sex partners
+    int sharedNoteIndex; // Index of the shared note in the container
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) { // info is null
@@ -1070,19 +1046,32 @@ public abstract class DetailActivity extends AppCompatActivity {
                 menu.add(0, 23, 0, R.string.delete);
             } else if (pieceObject instanceof Note) {
                 menu.add(0, 25, 0, R.string.copy);
-                if (((Note)pieceObject).getId() != null)
-                    menu.add(0, 26, 0, R.string.unlink);
-                menu.add(0, 27, 0, R.string.delete);
+                NoteContainer container = (NoteContainer)object;
+                Note note = (Note)pieceObject;
+                if (note.getId() != null) { // Shared note
+                    sharedNoteIndex = container.getNoteRefs().indexOf(view.getTag(R.id.tag_ref));
+                    if (sharedNoteIndex > 0)
+                        menu.add(0, 26, 0, R.string.move_up);
+                    if (sharedNoteIndex < container.getNoteRefs().size() - 1)
+                        menu.add(0, 27, 0, R.string.move_down);
+                    menu.add(0, 28, 0, R.string.unlink);
+                } else { // Inline note
+                    if (container.getNotes().indexOf(note) > 0)
+                        menu.add(0, 29, 0, R.string.move_up);
+                    if (container.getNotes().indexOf(note) < container.getNotes().size() - 1)
+                        menu.add(0, 30, 0, R.string.move_down);
+                }
+                menu.add(0, 31, 0, R.string.delete);
             } else if (pieceObject instanceof SourceCitation) {
-                menu.add(0, 30, 0, R.string.copy);
+                menu.add(0, 35, 0, R.string.copy);
                 List<SourceCitation> sourceCitations;
                 if (object instanceof Note) sourceCitations = ((Note)object).getSourceCitations();
                 else sourceCitations = ((SourceCitationContainer)object).getSourceCitations();
                 if (sourceCitations.indexOf(pieceObject) > 0)
-                    menu.add(0, 31, 0, R.string.move_up);
+                    menu.add(0, 36, 0, R.string.move_up);
                 if (sourceCitations.indexOf(pieceObject) < sourceCitations.size() - 1)
-                    menu.add(0, 32, 0, R.string.move_down);
-                menu.add(0, 33, 0, R.string.delete);
+                    menu.add(0, 37, 0, R.string.move_down);
+                menu.add(0, 38, 0, R.string.delete);
             } else if (pieceObject instanceof Media) {
                 if (((Media)pieceObject).getId() != null)
                     menu.add(0, 40, 0, R.string.unlink);
@@ -1202,33 +1191,45 @@ public abstract class DetailActivity extends AppCompatActivity {
             case 25: // Copy note text
                 U.copyToClipboard(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.note_text)).getText());
                 return true;
-            case 26: // Unlink note
-                U.disconnectNote((Note)pieceObject, object, null);
+            case 26: // Move up shared note
+                swapSharedNotes(-1);
                 break;
-            case 27: // Delete note
+            case 27: // Move down shared note
+                swapSharedNotes(1);
+                break;
+            case 28: // Unlink shared note
+                ((NoteContainer)object).getNoteRefs().remove(sharedNoteIndex);
+                break;
+            case 29: // Move up inline note
+                swapNotes(-1);
+                break;
+            case 30: // Move down inline note
+                swapNotes(1);
+                break;
+            case 31: // Delete note
                 Object[] leaders = U.deleteNote((Note)pieceObject, pieceView);
                 TreeUtil.INSTANCE.save(true, leaders);
                 return true;
-            case 30: // Copy source citation
+            case 35: // Copy source citation
                 U.copyToClipboard(getText(R.string.source_citation),
                         ((TextView)pieceView.findViewById(R.id.source_text)).getText() + "\n"
                                 + ((TextView)pieceView.findViewById(R.id.sourceCitation_text)).getText());
                 return true;
-            case 31: // Move up source citation
+            case 36: // Move up source citation
                 List<SourceCitation> sourceCitations1;
                 if (object instanceof Note) sourceCitations1 = ((Note)object).getSourceCitations();
                 else sourceCitations1 = ((SourceCitationContainer)object).getSourceCitations();
                 int index1 = sourceCitations1.indexOf(pieceObject);
                 Collections.swap(sourceCitations1, index1, index1 - 1);
                 break;
-            case 32: // Move down source citation
+            case 37: // Move down source citation
                 List<SourceCitation> sourceCitations2;
                 if (object instanceof Note) sourceCitations2 = ((Note)object).getSourceCitations();
                 else sourceCitations2 = ((SourceCitationContainer)object).getSourceCitations();
                 int index2 = sourceCitations2.indexOf(pieceObject);
                 Collections.swap(sourceCitations2, index2, index2 + 1);
                 break;
-            case 33: // Delete source citation
+            case 38: // Delete source citation
                 if (object instanceof Note)
                     ((Note)object).getSourceCitations().remove(pieceObject);
                 else
@@ -1327,6 +1328,15 @@ public abstract class DetailActivity extends AppCompatActivity {
         Family family = (Family)object;
         int index = family.getChildren(gc).indexOf(person);
         Collections.swap(family.getChildRefs(), index, index + direction);
+    }
+
+    private void swapSharedNotes(int direction) {
+        Collections.swap(((NoteContainer)object).getNoteRefs(), sharedNoteIndex, sharedNoteIndex + direction);
+    }
+
+    private void swapNotes(int direction) {
+        int index = ((NoteContainer)object).getNotes().indexOf(pieceObject);
+        Collections.swap(((NoteContainer)object).getNotes(), index, index + direction);
     }
 
     /**

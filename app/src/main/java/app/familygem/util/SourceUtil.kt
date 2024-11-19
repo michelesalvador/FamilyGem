@@ -29,7 +29,7 @@ object SourceUtil {
             if (source.publicationFacts != null) text += source.publicationFacts.replace("\n", " ") + "\n"
             if (source.text != null) text += source.text.replace("\n", " ")
             val otherBox = sourceView.findViewById<LinearLayout>(R.id.source_box)
-            U.placeNotes(otherBox, source, false)
+            NoteUtil.placeNotes(otherBox, source, false)
             U.placeMedia(otherBox, source, false)
             sourceView.setTag(R.id.tag_object, source)
             (layout.context as AppCompatActivity).registerForContextMenu(sourceView)

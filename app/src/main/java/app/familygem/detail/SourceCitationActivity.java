@@ -13,6 +13,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.NoteUtil;
 import app.familygem.util.SourceUtil;
 
 public class SourceCitationActivity extends DetailActivity {
@@ -41,7 +42,7 @@ public class SourceCitationActivity extends DetailActivity {
         //    U.place(box, "Data Tag Contents", c.getDataTagContents().toString()); // COMBINED DATA TEXT
         //place("Ref", "Ref", false, false); // The ID of the source, useless here
         placeExtensions(citation);
-        U.placeNotes(box, citation, true);
+        NoteUtil.INSTANCE.placeNotes(box, citation);
         U.placeMedia(box, citation, true);
     }
 

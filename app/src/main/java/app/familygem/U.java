@@ -43,7 +43,6 @@ import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
-import org.folg.gedcom.model.NoteRef;
 import org.folg.gedcom.model.ParentFamilyRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.PersonFamilyCommonContainer;
@@ -647,7 +646,7 @@ public class U {
      * Add a generic not editable title-text item to a Layout.
      */
     public static void place(LinearLayout layout, String title, String text) {
-        View pieceView = LayoutInflater.from(layout.getContext()).inflate(R.layout.event_view, layout, false);
+        View pieceView = LayoutInflater.from(layout.getContext()).inflate(R.layout.event_item, layout, false);
         layout.addView(pieceView);
         ((TextView)pieceView.findViewById(R.id.event_title)).setText(title);
         TextView textView = pieceView.findViewById(R.id.event_text);
@@ -704,27 +703,8 @@ public class U {
         return personView;
     }
 
-    // Place all the notes of an object
-    public static void placeNotes(LinearLayout layout, Object container, boolean detailed) {
-        for (final Note nota : ((NoteContainer)container).getAllNotes(Global.gc)) {
-            NoteUtil.INSTANCE.placeNote(layout, nota, detailed);
-        }
-    }
-
-    static void disconnectNote(Note note, Object container, View view) {
-        List<NoteRef> list = ((NoteContainer)container).getNoteRefs();
-        for (NoteRef ref : list)
-            if (ref.getNote(Global.gc).equals(note)) {
-                list.remove(ref);
-                break;
-            }
-        ((NoteContainer)container).setNoteRefs(list);
-        if (view != null)
-            view.setVisibility(View.GONE);
-    }
-
     /**
-     * Deletes a note, simple or shared.
+     * Deletes a note, shared or inline.
      *
      * @return An array of the modified container records
      */
@@ -774,52 +754,48 @@ public class U {
         }
     }
 
-    // Di un object inserisce le citazioni alle fonti
+    /**
+     * Places into layout the source citations of a given container.
+     */
     public static void placeSourceCitations(LinearLayout layout, Object container) {
         if (Global.settings.expert) {
-            List<SourceCitation> listaCitaFonti;
-            if (container instanceof Note) // Note non estende SourceCitationContainer
-                listaCitaFonti = ((Note)container).getSourceCitations();
-            else listaCitaFonti = ((SourceCitationContainer)container).getSourceCitations();
-            for (final SourceCitation citaz : listaCitaFonti) {
-                View vistaCita = LayoutInflater.from(layout.getContext()).inflate(R.layout.source_citation_layout, layout, false);
-                layout.addView(vistaCita);
-                if (citaz.getSource(Global.gc) != null) // source CITATION
-                    ((TextView)vistaCita.findViewById(R.id.source_text)).setText(SourcesFragment.titoloFonte(citaz.getSource(Global.gc)));
-                else // source NOTE, oppure Citazione di fonte che è stata eliminata
-                    vistaCita.findViewById(R.id.sourceCitation).setVisibility(View.GONE);
-                String t = "";
-                if (citaz.getValue() != null) t += citaz.getValue() + "\n";
-                if (citaz.getPage() != null) t += citaz.getPage() + "\n";
-                if (citaz.getDate() != null) t += new GedcomDateConverter(citaz.getDate()).writeDateLong() + "\n";
-                // Vale sia per sourceNote che per sourceCitation
-                if (citaz.getText() != null) t += citaz.getText() + "\n";
-                TextView vistaTesto = vistaCita.findViewById(R.id.sourceCitation_text);
-                if (t.isEmpty()) vistaTesto.setVisibility(View.GONE);
-                else vistaTesto.setText(t.substring(0, t.length() - 1));
-                // Tutto il resto
-                LinearLayout scatolaAltro = vistaCita.findViewById(R.id.sourceCitation_box);
-                placeNotes(scatolaAltro, citaz, false);
-                placeMedia(scatolaAltro, citaz, false);
-                vistaCita.setTag(R.id.tag_object, citaz);
+            List<SourceCitation> sourceCitations;
+            if (container instanceof Note) // Note doesn't extend SourceCitationContainer
+                sourceCitations = ((Note)container).getSourceCitations();
+            else sourceCitations = ((SourceCitationContainer)container).getSourceCitations();
+            for (SourceCitation citation : sourceCitations) {
+                View citationView = LayoutInflater.from(layout.getContext()).inflate(R.layout.source_citation_layout, layout, false);
+                layout.addView(citationView);
+                if (citation.getSource(Global.gc) != null) // source CITATION
+                    ((TextView)citationView.findViewById(R.id.source_text)).setText(SourcesFragment.titoloFonte(citation.getSource(Global.gc)));
+                else // source NOTE, or citation of source that has been deleted
+                    citationView.findViewById(R.id.sourceCitation).setVisibility(View.GONE);
+                String txt = "";
+                if (citation.getValue() != null) txt += citation.getValue() + "\n";
+                if (citation.getPage() != null) txt += citation.getPage() + "\n";
+                if (citation.getDate() != null)
+                    txt += new GedcomDateConverter(citation.getDate()).writeDateLong() + "\n";
+                // Valid for both sourceCitation and sourceNote
+                if (citation.getText() != null) txt += citation.getText() + "\n";
+                TextView textView = citationView.findViewById(R.id.sourceCitation_text);
+                if (txt.isEmpty()) textView.setVisibility(View.GONE);
+                else textView.setText(txt.substring(0, txt.length() - 1));
+                // All the rest
+                LinearLayout boxView = citationView.findViewById(R.id.sourceCitation_box);
+                NoteUtil.INSTANCE.placeNotes(boxView, citation, false);
+                placeMedia(boxView, citation, false);
+                citationView.setTag(R.id.tag_object, citation);
                 if (layout.getContext() instanceof ProfileActivity) { // ProfileFactsFragment
-                    ((ProfileActivity)layout.getContext()).getPageFragment(1).registerForContextMenu(vistaCita);
-                } else // AppCompatActivity
-                    ((AppCompatActivity)layout.getContext()).registerForContextMenu(vistaCita);
-
-                vistaCita.setOnClickListener(v -> {
+                    ((ProfileActivity)layout.getContext()).getPageFragment(1).registerForContextMenu(citationView);
+                } else // A detail activity
+                    ((AppCompatActivity)layout.getContext()).registerForContextMenu(citationView);
+                citationView.setOnClickListener(v -> {
                     Intent intent = new Intent(layout.getContext(), SourceCitationActivity.class);
-                    Memory.add(citaz);
+                    Memory.add(citation);
                     layout.getContext().startActivity(intent);
                 });
             }
         }
-    }
-
-    // Chiede conferma di eliminare un elemento.
-    public static boolean preserva(Object cosa) {
-        // todo Conferma elimina
-        return false;
     }
 
     public static int castJsonInt(Object unknown) {

@@ -11,9 +11,9 @@ import java.util.List;
 import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.R;
-import app.familygem.U;
 import app.familygem.main.RepositoriesFragment;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.NoteUtil;
 
 public class RepositoryActivity extends DetailActivity {
 
@@ -33,7 +33,7 @@ public class RepositoryActivity extends DetailActivity {
         place(getString(R.string.fax), "Fax", true, InputType.TYPE_CLASS_PHONE);
         place(getString(R.string.rin), "Rin", false, 0);
         placeExtensions(repository);
-        U.placeNotes(box, repository, true);
+        NoteUtil.INSTANCE.placeNotes(box, repository);
         ChangeUtil.INSTANCE.placeChangeDate(box, repository.getChange());
 
         // Collects and displays the sources citing this Repository

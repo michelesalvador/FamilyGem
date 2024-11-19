@@ -7,13 +7,13 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import app.familygem.GedcomDateConverter
-import app.familygem.ProfileFactsFragment
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Gender
 import app.familygem.databinding.MergePersonFragmentBinding
 import app.familygem.util.FileUtil
 import app.familygem.util.toString
+import app.familygem.util.writeTitle
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Person
 
@@ -45,7 +45,7 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
         // Personal events
         for (event in person.eventsFacts) {
             if (event.tag == "SEX") continue
-            data += "<b>${ProfileFactsFragment.writeEventTitle(event)}</b><br>"
+            data += "<b>${event.writeTitle()}</b><br>"
             if (event.value != null) {
                 data += if (event.value == "Y") "${getString(R.string.yes)} "
                 else "${event.value} "

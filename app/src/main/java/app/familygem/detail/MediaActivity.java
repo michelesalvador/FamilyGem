@@ -28,12 +28,12 @@ import app.familygem.Global;
 import app.familygem.ImageActivity;
 import app.familygem.Memory;
 import app.familygem.R;
-import app.familygem.U;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Type;
 import app.familygem.main.MediaFragment;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
+import app.familygem.util.NoteUtil;
 import app.familygem.visitor.MediaReferences;
 
 public class MediaActivity extends DetailActivity {
@@ -63,7 +63,7 @@ public class MediaActivity extends DetailActivity {
         place(getString(R.string.blob), "Blob", false, InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         //m.getFileTag(); // The tag, could be 'FILE' or '_FILE'
         placeExtensions(media);
-        U.placeNotes(box, media, true);
+        NoteUtil.INSTANCE.placeNotes(box, media);
         ChangeUtil.INSTANCE.placeChangeDate(box, media.getChange());
         // List of records in which the media is used
         MediaReferences mediaReferences = new MediaReferences(gc, media, false);

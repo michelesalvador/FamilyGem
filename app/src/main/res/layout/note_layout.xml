@@ -18,12 +18,17 @@
         tools:text="Note text." />
 
     <TextView
+        android:id="@+id/note_references"
+        style="@style/AppTheme.ReferencesNumber"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        tools:text="12" />
+
+    <TextView
         android:id="@+id/note_sources"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/AppTheme.CitationsNumber"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:background="@color/source_citation"
-        android:padding="4dp"
         tools:text="12" />
 </RelativeLayout>

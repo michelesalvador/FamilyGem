@@ -10,10 +10,11 @@ import org.folg.gedcom.model.Person;
 import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.Memory;
-import app.familygem.ProfileFactsFragment;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.NameUtilKt;
+import app.familygem.util.NoteUtil;
 
 public class NameActivity extends DetailActivity {
 
@@ -55,14 +56,14 @@ public class NameActivity extends DetailActivity {
         place(getString(R.string.phonetic), "Fone", Global.settings.expert,
                 InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS | InputType.TYPE_TEXT_VARIATION_PHONETIC);
         placeExtensions(name);
-        U.placeNotes(box, name, true);
+        NoteUtil.INSTANCE.placeNotes(box, name);
         U.placeMedia(box, name, true); // Per GEDCOM 5.5.1 a Name should not contain Media
         U.placeSourceCitations(box, name);
     }
 
     @Override
     protected void setTitle() {
-        setTitle(ProfileFactsFragment.writeNameTitle(name));
+        setTitle(NameUtilKt.writeTitle(name));
     }
 
     @Override

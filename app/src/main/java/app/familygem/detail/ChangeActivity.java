@@ -8,6 +8,7 @@ import org.folg.gedcom.model.DateTime;
 import app.familygem.DetailActivity;
 import app.familygem.R;
 import app.familygem.U;
+import app.familygem.util.NoteUtil;
 
 /**
  * Detail of the change date and time of a record.
@@ -30,7 +31,7 @@ public class ChangeActivity extends DetailActivity {
                 U.place(box, getString(R.string.time), dateTime.getTime());
         }
         placeExtensions(change);
-        U.placeNotes(box, change, true);
+        NoteUtil.INSTANCE.placeNotes(box, change);
     }
 
     // Options menu not needed

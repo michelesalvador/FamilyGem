@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class TypeView extends AppCompatAutoCompleteTextView {
 
-    enum Combo {NAME, RELATIONSHIP}
+    public enum Combo {NAME, RELATIONSHIP}
 
     List<String> completeTypes = new ArrayList<>();
 
@@ -118,7 +118,7 @@ public class TypeView extends AppCompatAutoCompleteTextView {
     /**
      * Finds the translation for predefined English types, or returns the provided type.
      */
-    static String getTranslatedType(String type, Combo combo) {
+    public static String getTranslatedType(String type, Combo combo) {
         Map<String, Integer> types = getTypes(combo);
         Integer translation = types.get(type.toLowerCase());
         return translation != null ? Global.context.getString(translation) : type;

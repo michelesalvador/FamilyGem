@@ -63,7 +63,7 @@ object ChangeUtil {
             }
             val otherBox = changeView.findViewById<LinearLayout>(R.id.changeDate_box)
             U.findExtensions(change).forEach { U.place(otherBox, it.name, it.text) }
-            U.placeNotes(otherBox, change, false)
+            NoteUtil.placeNotes(otherBox, change, false)
             changeView.setOnClickListener {
                 Memory.add(change)
                 layout.context.startActivity(Intent(layout.context, ChangeActivity::class.java))
