@@ -1,0 +1,38 @@
+package app.familygem
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.fragment.app.Fragment
+import org.folg.gedcom.model.Person
+
+abstract class ProfileBaseFragment : Fragment() {
+
+    lateinit var layout: LinearLayout
+    lateinit var person: Person
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val pageView = inflater.inflate(R.layout.profile_page_fragment, container, false)
+        layout = pageView.findViewById(R.id.profile_page)
+        createContent()
+        return pageView
+    }
+
+    /** Must be called at the beginning of [createContent] */
+    fun prepareContent(): Boolean {
+        if (Global.gc == null) return false
+        person = Global.gc.getPerson(Global.indi)
+        layout.removeAllViews()
+        return true
+    }
+
+    abstract fun createContent()
+
+    /** Updates all activity content. */
+    fun refresh() {
+        // Theoretically activity could be null
+        activity?.let { (it as ProfileActivity).refresh() }
+    }
+}

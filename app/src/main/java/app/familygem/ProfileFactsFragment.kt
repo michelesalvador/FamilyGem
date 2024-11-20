@@ -2,17 +2,13 @@ package app.familygem
 
 import android.content.DialogInterface
 import android.content.Intent
-import android.os.Bundle
 import android.view.ContextMenu
 import android.view.ContextMenu.ContextMenuInfo
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
 import app.familygem.detail.EventActivity
 import app.familygem.detail.ExtensionActivity
 import app.familygem.detail.NameActivity
@@ -28,30 +24,21 @@ import org.folg.gedcom.model.MediaContainer
 import org.folg.gedcom.model.Name
 import org.folg.gedcom.model.Note
 import org.folg.gedcom.model.NoteContainer
-import org.folg.gedcom.model.Person
 import org.folg.gedcom.model.SourceCitation
 import org.folg.gedcom.model.SourceCitationContainer
 import java.util.Collections
 
-class ProfileFactsFragment : Fragment() {
+class ProfileFactsFragment : ProfileBaseFragment() {
 
-    private var person: Person? = null
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val factsView = inflater.inflate(R.layout.profile_page_fragment, container, false)
-        if (Global.gc != null) {
-            val layout = factsView.findViewById<LinearLayout>(R.id.profile_page)
-            person = Global.gc.getPerson(Global.indi)
-            if (person != null) {
-                person!!.names.forEach { placeEvent(layout, it.writeTitle(), U.firstAndLastName(it, " "), it) }
-                person!!.eventsFacts.forEach { placeEvent(layout, it.writeTitle(), it.writeContent(), it) }
-                U.findExtensions(person).forEach { placeEvent(layout, it.name, it.text, it.gedcomTag) }
-                NoteUtil.placeNotes(layout, person!!)
-                U.placeSourceCitations(layout, person)
-                placeChangeDate(layout, person!!.change)
-            }
+    override fun createContent() {
+        if (prepareContent()) {
+            person.names.forEach { placeEvent(layout, it.writeTitle(), U.firstAndLastName(it, " "), it) }
+            person.eventsFacts.forEach { placeEvent(layout, it.writeTitle(), it.writeContent(), it) }
+            U.findExtensions(person).forEach { placeEvent(layout, it.name, it.text, it.gedcomTag) }
+            NoteUtil.placeNotes(layout, person)
+            U.placeSourceCitations(layout, person)
+            placeChangeDate(layout, person.change)
         }
-        return factsView
     }
 
     /** Finds out if it is a name with name pieces or a suffix in the value. */
@@ -129,7 +116,7 @@ class ProfileFactsFragment : Fragment() {
                     AlertDialog.Builder(requireContext())
                         .setSingleChoiceItems(sexes.values.toTypedArray<String>(), chosenSex) { dialog: DialogInterface, item: Int ->
                             obj.value = ArrayList(sexes.keys)[item]
-                            updateSpouseRoles(person!!)
+                            updateSpouseRoles(person)
                             dialog.dismiss()
                             refresh()
                             TreeUtil.save(true, person)
@@ -161,18 +148,18 @@ class ProfileFactsFragment : Fragment() {
         when (pieceObject) {
             is Name -> {
                 menu.add(0, 200, 0, R.string.copy)
-                if (person!!.names.indexOf(pieceObject) > 0)
+                if (person.names.indexOf(pieceObject) > 0)
                     menu.add(0, 201, 0, R.string.move_up)
-                if (person!!.names.indexOf(pieceObject) < person!!.names.size - 1)
+                if (person.names.indexOf(pieceObject) < person.names.size - 1)
                     menu.add(0, 202, 0, R.string.move_down)
                 menu.add(0, 203, 0, R.string.delete)
             }
             is EventFact -> {
                 if (view.findViewById<View>(R.id.profileFact_text).visibility == View.VISIBLE)
                     menu.add(0, 210, 0, R.string.copy)
-                if (person!!.eventsFacts.indexOf(pieceObject) > 0)
+                if (person.eventsFacts.indexOf(pieceObject) > 0)
                     menu.add(0, 211, 0, R.string.move_up)
-                if (person!!.eventsFacts.indexOf(pieceObject) < person!!.eventsFacts.size - 1)
+                if (person.eventsFacts.indexOf(pieceObject) < person.eventsFacts.size - 1)
                     menu.add(0, 212, 0, R.string.move_down)
                 menu.add(0, 213, 0, R.string.delete)
             }
@@ -185,25 +172,25 @@ class ProfileFactsFragment : Fragment() {
                     menu.add(0, 225, 0, R.string.copy)
                 val note = pieceObject as Note
                 if (note.id != null) { // Shared note
-                    sharedNoteIndex = person!!.noteRefs.indexOf(view.getTag(R.id.tag_ref))
+                    sharedNoteIndex = person.noteRefs.indexOf(view.getTag(R.id.tag_ref))
                     if (sharedNoteIndex > 0)
                         menu.add(0, 226, 0, R.string.move_up)
-                    if (sharedNoteIndex < person!!.noteRefs.size - 1)
+                    if (sharedNoteIndex < person.noteRefs.size - 1)
                         menu.add(0, 227, 0, R.string.move_down)
                     menu.add(0, 228, 0, R.string.unlink)
                 } else { // Simple note
-                    if (person!!.notes.indexOf(note) > 0)
+                    if (person.notes.indexOf(note) > 0)
                         menu.add(0, 229, 0, R.string.move_up)
-                    if (person!!.notes.indexOf(note) < person!!.notes.size - 1)
+                    if (person.notes.indexOf(note) < person.notes.size - 1)
                         menu.add(0, 230, 0, R.string.move_down)
                 }
                 menu.add(0, 231, 0, R.string.delete)
             }
             is SourceCitation -> {
                 menu.add(0, 240, 0, R.string.copy)
-                if (person!!.sourceCitations.indexOf(pieceObject) > 0)
+                if (person.sourceCitations.indexOf(pieceObject) > 0)
                     menu.add(0, 241, 0, R.string.move_up)
-                if (person!!.sourceCitations.indexOf(pieceObject) < person!!.sourceCitations.size - 1)
+                if (person.sourceCitations.indexOf(pieceObject) < person.sourceCitations.size - 1)
                     menu.add(0, 242, 0, R.string.move_down)
                 menu.add(0, 243, 0, R.string.delete)
             }
@@ -222,13 +209,13 @@ class ProfileFactsFragment : Fragment() {
             201 -> swapNames(-1)
             202 -> swapNames(1)
             203 -> return confirmDelete {
-                person!!.names.remove(pieceObject)
+                person.names.remove(pieceObject)
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject)
             }
             211 -> swapEvents(-1)
             212 -> swapEvents(1)
             213 -> return confirmDelete {
-                person!!.eventsFacts.remove(pieceObject)
+                person.eventsFacts.remove(pieceObject)
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject)
             }
             221 -> return confirmDelete { U.deleteExtension(pieceObject as GedcomTag, person, pieceView) }
@@ -238,7 +225,7 @@ class ProfileFactsFragment : Fragment() {
             }
             226 -> swapSharedNotes(-1)
             227 -> swapSharedNotes(1)
-            228 -> person!!.noteRefs.removeAt(sharedNoteIndex)
+            228 -> person.noteRefs.removeAt(sharedNoteIndex)
             229 -> swapNotes(-1)
             230 -> swapNotes(1)
             231 -> return confirmDelete(false) {
@@ -256,7 +243,7 @@ class ProfileFactsFragment : Fragment() {
             241 -> swapSourceCitations(-1)
             242 -> swapSourceCitations(1)
             243 -> return confirmDelete {
-                person!!.sourceCitations.remove(pieceObject)
+                person.sourceCitations.remove(pieceObject)
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject)
             }
             else -> return false
@@ -277,32 +264,26 @@ class ProfileFactsFragment : Fragment() {
     }
 
     private fun swapNames(direction: Int) {
-        val index = person!!.names.indexOf(pieceObject)
-        Collections.swap(person!!.names, index, index + direction)
+        val index = person.names.indexOf(pieceObject)
+        Collections.swap(person.names, index, index + direction)
     }
 
     private fun swapEvents(direction: Int) {
-        val index = person!!.eventsFacts.indexOf(pieceObject)
-        Collections.swap(person!!.eventsFacts, index, index + direction)
+        val index = person.eventsFacts.indexOf(pieceObject)
+        Collections.swap(person.eventsFacts, index, index + direction)
     }
 
     private fun swapSharedNotes(direction: Int) {
-        Collections.swap(person!!.noteRefs, sharedNoteIndex, sharedNoteIndex + direction)
+        Collections.swap(person.noteRefs, sharedNoteIndex, sharedNoteIndex + direction)
     }
 
     private fun swapNotes(direction: Int) {
-        val index = person!!.notes.indexOf(pieceObject)
-        Collections.swap(person!!.notes, index, index + direction)
+        val index = person.notes.indexOf(pieceObject)
+        Collections.swap(person.notes, index, index + direction)
     }
 
     private fun swapSourceCitations(direction: Int) {
-        val index = person!!.sourceCitations.indexOf(pieceObject)
-        Collections.swap(person!!.sourceCitations, index, index + direction)
-    }
-
-    /** Updates activity content. */
-    fun refresh() {
-        // Sometimes this fragment is no more attached to the activity, which therefore is null
-        activity?.let { (it as ProfileActivity).refresh() }
+        val index = person.sourceCitations.indexOf(pieceObject)
+        Collections.swap(person.sourceCitations, index, index + direction)
     }
 }

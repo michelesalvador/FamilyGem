@@ -182,9 +182,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private class PagesAdapter extends FragmentStateAdapter {
-        private final int PAGES_NUM = 3;
-        private int itemIdIncrement = PAGES_NUM;
-
         public PagesAdapter(@NonNull FragmentActivity fragmentActivity) {
             super(fragmentActivity);
         }
@@ -203,28 +200,15 @@ public class ProfileActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return PAGES_NUM;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            long id = super.getItemId(position);
-            if (itemIdIncrement > PAGES_NUM) id += itemIdIncrement;
-            return id;
-        }
-
-        @Override
-        public boolean containsItem(long itemId) {
-            return super.containsItem(itemId);
+            return 3;
         }
 
         /**
-         * Reloads the three pages.
+         * Reloads the content of the three pages.
          */
         public void notifyPagesChanged() {
-            itemIdIncrement += PAGES_NUM;
-            for (int i = 0; i < 3; i++) {
-                notifyItemChanged(i);
+            for (Fragment page : pages) {
+                if (page != null && page.isAdded()) ((ProfileBaseFragment)page).createContent();
             }
         }
     }

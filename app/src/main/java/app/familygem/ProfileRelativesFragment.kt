@@ -2,20 +2,16 @@ package app.familygem
 
 import android.content.Intent
 import android.graphics.Typeface
-import android.os.Bundle
 import android.view.ContextMenu
 import android.view.ContextMenu.ContextMenuInfo
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import app.familygem.constant.Extra
 import app.familygem.constant.Relation
 import app.familygem.detail.FamilyActivity
@@ -32,10 +28,7 @@ import java.util.Collections
 /**
  * Relatives of the profile person, organized under family groups.
  */
-class ProfileRelativesFragment : Fragment() {
-    private lateinit var relativesView: View
-    private lateinit var person: Person
-    private lateinit var activity: FragmentActivity
+class ProfileRelativesFragment : ProfileBaseFragment() {
 
     private enum class Branch { ANY, PATERNAL, MATERNAL }
     private enum class FamilyType { ORIGIN, HALF, ORIGIN_SMALL, OWN }
@@ -77,11 +70,12 @@ class ProfileRelativesFragment : Fragment() {
     // Same group data in a simple list
     private val groupList = mutableListOf<GroupData>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        relativesView = inflater.inflate(R.layout.profile_page_fragment, container, false)
-        if (Global.gc != null) {
-            person = Global.gc.getPerson(Global.indi)
+    override fun createContent() {
+        if (prepareContent()) {
             val parentFamilies = person.getParentFamilies(Global.gc)
+            groupTree.first.clear()
+            groupTree.second.clear()
+            groupList.clear()
             // Parents, siblings and half-siblings
             var listIndex = 0
             parentFamilies.forEachIndexed { lineageIndex, parentFamily ->
@@ -118,7 +112,6 @@ class ProfileRelativesFragment : Fragment() {
             }
 
             // Places the groups on layout
-            val layout = relativesView.findViewById<LinearLayout>(R.id.profile_page)
             if (Global.settings.expert) {
                 // Parent families
                 groupTree.first.forEach { parentFamily ->
@@ -131,8 +124,6 @@ class ProfileRelativesFragment : Fragment() {
                 groupList.forEach { data -> data.members.forEach { placeCard(it.first, it.second, data.family, layout) } }
             }
         }
-        activity = requireActivity()
-        return relativesView
     }
 
     /**
@@ -360,7 +351,7 @@ class ProfileRelativesFragment : Fragment() {
                 AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_family)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         family.delete()
-                        refreshAll()
+                        refresh()
                     }
                     .setNeutralButton(android.R.string.cancel, null).show()
             }
@@ -378,15 +369,15 @@ class ProfileRelativesFragment : Fragment() {
                 FamilyUtil.unlinkPerson(selected, family)
                 FamilyUtil.updateSpouseRoles(family)
                 save(true, family, selected)
-                refreshAll()
-                U.deleteEmptyFamilies(context, { this.refreshOptionsMenu() }, false, family)
+                refresh()
+                U.deleteEmptyFamilies(context, { this.refresh() }, false, family)
             }
             316 -> { // Delete
                 AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_person)
                     .setPositiveButton(R.string.delete) { _, _ ->
                         selected.delete()
-                        refreshAll()
-                        U.deleteEmptyFamilies(context, { this.refreshOptionsMenu() }, false, family)
+                        refresh()
+                        U.deleteEmptyFamilies(context, { this.refresh() }, false, family)
                     }.setNeutralButton(R.string.cancel, null).show()
             }
             else -> return false
@@ -397,7 +388,7 @@ class ProfileRelativesFragment : Fragment() {
     private fun moveLineageFamilyRef(direction: Int) {
         Collections.swap(person.parentFamilyRefs, data.lineageIndex, data.lineageIndex + direction)
         save(true, person)
-        refreshAll()
+        refresh()
     }
 
     private fun moveParentFamilyRef(direction: Int) {
@@ -407,22 +398,12 @@ class ProfileRelativesFragment : Fragment() {
         else if (data.branch == Branch.MATERNAL)
             Collections.swap(family.getWives(Global.gc)[data.parentIndex].spouseFamilyRefs, data.groupIndex, data.groupIndex + direction)
         save(true, person)
-        refreshAll()
+        refresh()
     }
 
     private fun moveOwnFamilyRef(direction: Int) {
         Collections.swap(person.spouseFamilyRefs, data.listIndex, data.listIndex + direction)
         save(true, person)
-        refreshAll()
-    }
-
-    /** Refreshes all the content. */
-    private fun refreshAll() {
-        getActivity()?.let { (it as ProfileActivity).refresh() } // getActivity() may return null
-    }
-
-    /** Refreshes options menu only. */
-    private fun refreshOptionsMenu() {
-        activity.invalidateOptionsMenu() // Can't call requireActivity() here because the fragment is already detached
+        refresh()
     }
 }
