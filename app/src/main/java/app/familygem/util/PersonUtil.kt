@@ -20,7 +20,7 @@ import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
 
 /** Generates the 2 family labels (as child and as parent) for contextual menu. */
-fun Person.getFamilyLabels(context: Context, family: Family?): Array<String?> {
+fun Person.getFamilyLabels(context: Context, family: Family? = null): Array<String?> {
     var family = family
     val labels = arrayOf<String?>(null, null)
     val parentFams = getParentFamilies(Global.gc)

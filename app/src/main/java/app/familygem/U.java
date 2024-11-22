@@ -511,7 +511,7 @@ public class U {
     // Genera il nuovo ID seguente a quelli già esistenti
     static int max;
 
-    public static String newID(Gedcom gc, Class classe) { // TODO: newId()
+    public static String newID(Gedcom gc, Class classe) { // TODO: getNewId()
         max = 0;
         String pre = "";
         if (classe == Note.class) {

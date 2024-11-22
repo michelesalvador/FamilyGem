@@ -132,7 +132,7 @@ object TreeUtil {
     }
 
     /**
-     * Checks if [Global.gc] is not null and in case reloads it asynchronously.
+     * Returns true if [Global.gc] is not null. In case reloads it asynchronously.
      * @param refresh Optional function executed on main thread after reloading
      */
     fun isGlobalGedcomOk(refresh: Runnable?): Boolean {

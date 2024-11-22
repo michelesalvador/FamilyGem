@@ -23,7 +23,7 @@ abstract class ProfileBaseFragment : Fragment() {
     /** Must be called at the beginning of [createContent] */
     fun prepareContent(): Boolean {
         if (Global.gc == null) return false
-        person = Global.gc.getPerson(Global.indi)
+        Memory.getLeaderObject()?.let { person = it as Person } ?: return false
         layout.removeAllViews()
         return true
     }
