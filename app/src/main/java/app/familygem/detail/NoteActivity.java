@@ -43,6 +43,6 @@ public class NoteActivity extends DetailActivity {
 
     @Override
     public void delete() {
-        ChangeUtil.INSTANCE.updateChangeDate(U.deleteNote(note, null));
+        ChangeUtil.INSTANCE.updateChangeDate(U.deleteNote(note));
     }
 }

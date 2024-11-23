@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import app.familygem.Global
+import app.familygem.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -18,9 +20,7 @@ object Util {
         return Global.context.getString(id)
     }
 
-    /**
-     * Lowercase string for all languages except German.
-     */
+    /** Lowercase string for all languages except German. */
     fun caseString(id: Int): String {
         return if (Locale.getDefault().language.equals("de")) Global.context.getString(id)
         else Global.context.getString(id).lowercase()
@@ -30,15 +30,17 @@ object Util {
         toast(string(message))
     }
 
-    /**
-     * Shows a toast message on the main coroutine context.
-     */
+    /** Shows a toast message on the main coroutine context. */
     suspend fun toast(message: String?) {
-        if (message != null) {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(Global.context, message, Toast.LENGTH_LONG).show()
-            }
+        withContext(Dispatchers.Main) {
+            Toast.makeText(Global.context, message ?: string(R.string.something_wrong), Toast.LENGTH_LONG).show()
         }
+    }
+
+    fun confirmDelete(context: Context, action: () -> Unit) {
+        AlertDialog.Builder(context).setMessage(R.string.sure_delete)
+            .setPositiveButton(R.string.yes) { _, _ -> action() }
+            .setNegativeButton(R.string.no, null).show()
     }
 
     /**
@@ -50,9 +52,11 @@ object Util {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
                 val masterKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
-                EncryptedSharedPreferences.create(context, fileName, masterKey,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
+                EncryptedSharedPreferences.create(
+                    context, fileName, masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
             } catch (e: Exception) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     context.deleteSharedPreferences(fileName) // Deletes them since they are probably invalid

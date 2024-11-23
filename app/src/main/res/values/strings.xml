@@ -301,6 +301,8 @@
     <string name="repository_note">Note-repository</string>
     <string name="repository">Repository</string>
     <string name="shared_media">Shared media</string>
+    <string name="make_shared_media">Make shared media</string>
+    <string name="make_media">Make media</string>
     <string name="format">Format</string>
     <string name="primary">Primary</string>
     <string name="scrapbook">Scrapbook</string>

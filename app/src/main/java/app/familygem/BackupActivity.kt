@@ -19,7 +19,6 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.ContextCompat.getDrawable
@@ -258,11 +257,10 @@ class BackupActivity : BaseActivity() {
                 val detailView = backupView.findViewById<RelativeLayout>(R.id.backup_detail)
                 val deleteButton = detailView.findViewById<Button>(R.id.backup_delete)
                 deleteButton.setOnClickListener {
-                    AlertDialog.Builder(requireContext()).setMessage(R.string.sure_delete)
-                        .setPositiveButton(R.string.yes) { _, _ ->
-                            viewModel.deleteBackupFile(file.documentFile)
-                            boxView.removeView(backupView)
-                        }.setNegativeButton(R.string.no, null).show()
+                    Util.confirmDelete(requireContext()) {
+                        viewModel.deleteBackupFile(file.documentFile)
+                        boxView.removeView(backupView)
+                    }
                 }
                 val recoverButton = detailView.findViewById<Button>(R.id.backup_recover)
                 if (file.invalid) {

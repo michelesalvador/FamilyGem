@@ -1,4 +1,4 @@
-package app.familygem
+package app.familygem.profile
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,9 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
+import app.familygem.Global
+import app.familygem.Memory
+import app.familygem.R
 import org.folg.gedcom.model.Person
 
-abstract class ProfileBaseFragment : Fragment() {
+abstract class BaseFragment : Fragment() {
 
     lateinit var layout: LinearLayout
     lateinit var person: Person

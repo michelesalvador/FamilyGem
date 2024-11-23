@@ -1,4 +1,4 @@
-package app.familygem
+package app.familygem.profile
 
 import android.content.DialogInterface
 import android.content.Intent
@@ -21,6 +21,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import app.familygem.F
+import app.familygem.Global
+import app.familygem.Memory
+import app.familygem.NewRelativeDialog
+import app.familygem.PersonEditorActivity
+import app.familygem.R
+import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.Gender
@@ -32,10 +39,10 @@ import app.familygem.detail.MediaActivity
 import app.familygem.detail.NameActivity
 import app.familygem.detail.NoteActivity
 import app.familygem.main.MainActivity
-import app.familygem.main.MediaFragment
 import app.familygem.main.SourcesFragment
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
+import app.familygem.util.MediaUtil
 import app.familygem.util.NoteUtil
 import app.familygem.util.TreeUtil.save
 import app.familygem.util.delete
@@ -68,7 +75,11 @@ class ProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.profile_activity)
-        onBackPressedDispatcher.addCallback(this) { goBack() }
+        onBackPressedDispatcher.addCallback(this) {
+            Memory.stepBack()
+            isEnabled = false // Disables this callback to avoid infinite loop
+            onBackPressedDispatcher.onBackPressed()
+        }
 
         // Toolbar
         val toolbar = findViewById<Toolbar>(R.id.profile_toolbar)
@@ -141,9 +152,9 @@ class ProfileActivity : AppCompatActivity() {
 
         override fun createFragment(position: Int): Fragment {
             pages[position] = when (position) {
-                0 -> ProfileMediaFragment()
-                1 -> ProfileFactsFragment()
-                else -> ProfileRelativesFragment()
+                0 -> MediaFragment()
+                1 -> FactsFragment()
+                else -> RelativesFragment()
             }
             return pages[position]!!
         }
@@ -153,7 +164,7 @@ class ProfileActivity : AppCompatActivity() {
         /** Reloads the content of the three pages. */
         fun notifyPagesChanged() {
             pages.filterNotNull().forEach {
-                if (it.isAdded) (it as ProfileBaseFragment).createContent()
+                if (it.isAdded) (it as BaseFragment).createContent()
             }
         }
     }
@@ -165,7 +176,7 @@ class ProfileActivity : AppCompatActivity() {
         isActivityRestarting = true
     }
 
-    // We need onResume because is executed after the ActivityResult launchers
+    // We need onResume instead of onRestart because it is executed after the ActivityResult launchers
     override fun onResume() {
         super.onResume()
         // Updates contents when coming back with onBackPressed()
@@ -185,7 +196,7 @@ class ProfileActivity : AppCompatActivity() {
         val backImageView = findViewById<ImageView>(R.id.profile_background)
         if (media != null) {
             imageView.setOnClickListener {
-                FindStack(Global.gc, media)
+                FindStack(Global.gc, media, true)
                 startActivity(Intent(this, MediaActivity::class.java))
             }
             // imageView waits for the image to be loaded
@@ -448,7 +459,7 @@ class ProfileActivity : AppCompatActivity() {
                 person?.addMedia(media)
                 if (F.setFileAndProposeCropping(this, null, data, media)) save(true, person)
             } else if (requestCode == 2174) { // Shared media
-                val sharedMedia = MediaFragment.newSharedMedia(person)
+                val sharedMedia = MediaUtil.newSharedMedia(person)
                 if (F.setFileAndProposeCropping(this, null, data, sharedMedia)) save(true, sharedMedia, person)
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // Gets the image cropped by Android Image Cropper
                 F.endImageCropping(data)
@@ -500,10 +511,7 @@ class ProfileActivity : AppCompatActivity() {
         return false
     }
 
-    private fun goBack() {
-        Memory.stepBack()
-        finish()
-    }
+    private fun goBack() = onBackPressedDispatcher.onBackPressed()
 
     override fun onRequestPermissionsResult(code: Int, permissions: Array<String>, results: IntArray) {
         super.onRequestPermissionsResult(code, permissions, results)

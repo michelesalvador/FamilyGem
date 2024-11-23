@@ -1,5 +1,7 @@
 package app.familygem.visitor;
 
+import androidx.annotation.NonNull;
+
 import org.folg.gedcom.model.Change;
 import org.folg.gedcom.model.EventFact;
 import org.folg.gedcom.model.Family;
@@ -18,49 +20,45 @@ import org.folg.gedcom.model.Visitable;
 import org.folg.gedcom.model.Visitor;
 
 import java.util.Iterator;
-import java.util.List;
 
 import app.familygem.Memory;
 
 /**
- * Visitor that produces for {@link Memory} a hierarchic stack of objects from a leader record to a given object (target).
+ * Visitor that produces for {@link Memory} a hierarchic stack of "weak" objects from a leader record to a given object (target).
  * E.g. Person > Simple Media
  * or Family > Simple Note > SourceCitation > Simple Note
  */
 public class FindStack extends Visitor {
 
-    private final List<Memory.Step> stack;
+    private final Memory.StepStack stack;
     private final Object target;
     private boolean found;
 
-    public FindStack(Gedcom gedcom, Object target) {
-        stack = Memory.addStack(); // In a new dedicated stack
+    public FindStack(Gedcom gedcom, Object target, boolean addToMemory) {
+        if (addToMemory) stack = Memory.addStack(); // Stack is added to Memory
+        else stack = new Memory.StepStack(); // Stack is only used here
         this.target = target;
         gedcom.accept(this);
     }
 
     private boolean addStep(Object object, String tag, boolean isLeader) {
         if (!found) {
-            if (isLeader)
-                stack.clear(); // A leader makes a stack start all over again
+            if (isLeader) stack.clear(); // A leader makes a stack start all over again
             Memory.Step step = new Memory.Step();
             step.object = object;
             step.tag = tag;
-            if (!isLeader)
-                step.deleteOnBackPressed = true; // Marks it to delete when onBackPressed()
+            if (!isLeader) step.weak = true; // Marks it to delete when onBackPressed()
             stack.add(step);
         }
         if (object.equals(target)) {
             // Eventually removes from the resulting stack the not relevant steps
             Iterator<Memory.Step> steps = stack.iterator();
             while (steps.hasNext()) {
-                CleanStack janitor = new CleanStack(target);
-                ((Visitable)steps.next().object).accept(janitor);
-                if (janitor.toDelete)
-                    steps.remove();
+                CleanStack cleaner = new CleanStack(target);
+                ((Visitable)steps.next().object).accept(cleaner);
+                if (cleaner.toDelete) steps.remove();
             }
             found = true;
-            //Memory.log("FindStack");
         }
         return true;
     }
@@ -140,4 +138,24 @@ public class FindStack extends Visitor {
         }
         return true;
     }*/
+
+    /**
+     * Returns first object of the stack.
+     */
+    public Object getLeaderObject() {
+        return stack.firstElement().object;
+    }
+
+    /**
+     * Returns penultimate object of the stack.
+     */
+    public Object getContainerObject() {
+        return stack.get(stack.size() - 2).object;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return stack.toString();
+    }
 }

@@ -8,7 +8,7 @@ import org.folg.gedcom.model.GedcomTag;
 public class Extension {
     public String name;
     public String text;
-    GedcomTag gedcomTag;
+    public GedcomTag gedcomTag;
 
     public Extension(String name, String text, GedcomTag gedcomTag) {
         this.name = name;

@@ -1,4 +1,4 @@
-package app.familygem
+package app.familygem.profile
 
 import android.content.DialogInterface
 import android.content.Intent
@@ -9,6 +9,10 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import app.familygem.Global
+import app.familygem.Memory
+import app.familygem.R
+import app.familygem.U
 import app.familygem.detail.EventActivity
 import app.familygem.detail.ExtensionActivity
 import app.familygem.detail.NameActivity
@@ -16,6 +20,7 @@ import app.familygem.util.ChangeUtil.placeChangeDate
 import app.familygem.util.FamilyUtil.updateSpouseRoles
 import app.familygem.util.NoteUtil
 import app.familygem.util.TreeUtil
+import app.familygem.util.Util
 import app.familygem.util.writeContent
 import app.familygem.util.writeTitle
 import org.folg.gedcom.model.EventFact
@@ -28,7 +33,7 @@ import org.folg.gedcom.model.SourceCitation
 import org.folg.gedcom.model.SourceCitationContainer
 import java.util.Collections
 
-class ProfileFactsFragment : ProfileBaseFragment() {
+class FactsFragment : BaseFragment() {
 
     override fun createContent() {
         if (prepareContent()) {
@@ -229,7 +234,7 @@ class ProfileFactsFragment : ProfileBaseFragment() {
             229 -> swapNotes(-1)
             230 -> swapNotes(1)
             231 -> return confirmDelete(false) {
-                val leaders = U.deleteNote(pieceObject as Note, null)
+                val leaders = U.deleteNote(pieceObject as Note)
                 TreeUtil.save(true, *leaders)
             }
             240 -> {
@@ -254,12 +259,11 @@ class ProfileFactsFragment : ProfileBaseFragment() {
     }
 
     private fun confirmDelete(save: Boolean = true, action: () -> Unit): Boolean {
-        AlertDialog.Builder(requireContext()).setMessage(R.string.sure_delete)
-            .setPositiveButton(R.string.yes) { _, _ ->
-                action()
-                if (save) TreeUtil.save(true, person)
-                refresh()
-            }.setNegativeButton(R.string.no) { _, _ -> }.show()
+        Util.confirmDelete(requireContext()) {
+            action()
+            if (save) TreeUtil.save(true, person)
+            refresh()
+        }
         return true
     }
 

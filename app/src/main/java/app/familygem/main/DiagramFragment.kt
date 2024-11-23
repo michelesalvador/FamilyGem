@@ -41,7 +41,6 @@ import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.NewRelativeDialog
 import app.familygem.PersonEditorActivity
-import app.familygem.ProfileActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Choice
@@ -51,6 +50,7 @@ import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.databinding.DiagramFragmentBinding
 import app.familygem.detail.FamilyActivity
+import app.familygem.profile.ProfileActivity
 import app.familygem.util.ChangeUtil
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil

@@ -21,13 +21,13 @@ import java.util.List;
 import app.familygem.DetailActivity;
 import app.familygem.Global;
 import app.familygem.Memory;
-import app.familygem.ProfileActivity;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Image;
 import app.familygem.detail.MediaActivity;
+import app.familygem.profile.ProfileActivity;
 import app.familygem.util.FileUtil;
 import app.familygem.util.MediaUtil;
 import app.familygem.visitor.FindStack;
@@ -90,9 +90,9 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
                 view.setTag(R.id.tag_container, container);
                 // Register context menu
                 final AppCompatActivity activity = (AppCompatActivity)view.getContext();
-                if (activity instanceof ProfileActivity) // ProfileMediaFragment
+                if (activity instanceof ProfileActivity) // profile.MediaFragment
                     ((ProfileActivity)activity).getPageFragment(0).registerForContextMenu(view);
-                else if (activity instanceof MainActivity) // MediaFragment
+                else if (activity instanceof MainActivity) // main.MediaFragment
                     activity.getSupportFragmentManager().findFragmentById(R.id.main_fragment).registerForContextMenu(view);
                 else // DetailActivity
                     activity.registerForContextMenu(view);
@@ -110,7 +110,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
         @Override
         public void onClick(View view) {
             AppCompatActivity activity = (AppCompatActivity)view.getContext();
-            // Choosing a media record from MediaFragment: returns the ID of the media record
+            // Choosing a media record from main.MediaFragment: returns the ID of the media record
             if (activity.getIntent().getBooleanExtra(Choice.MEDIA, false)) {
                 Intent intent = new Intent();
                 intent.putExtra(Extra.MEDIA_ID, media.getId());
@@ -120,12 +120,12 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
                 Intent intent = new Intent(view.getContext(), MediaActivity.class);
                 if (media.getId() != null) { // All the media records
                     Memory.setLeader(media);
-                } else if ((activity instanceof ProfileActivity && container instanceof Person) // First-level media in ProfileMediaFragment
+                } else if ((activity instanceof ProfileActivity && container instanceof Person) // First-level media in profile.MediaFragment
                         || activity instanceof DetailActivity) { // Media in DetailActivity
                     Memory.add(media);
-                } else { // Simple media from MediaFragment, or sub-level media from ProfileMediaFragment
-                    new FindStack(Global.gc, media);
-                    if (activity instanceof MainActivity) // In MediaFragment only
+                } else { // Simple media from main.MediaFragment, or sub-level media from profile.MediaFragment
+                    new FindStack(Global.gc, media, true);
+                    if (activity instanceof MainActivity) // In main.MediaFragment only
                         intent.putExtra(Extra.ALONE, true); // To make MediaActivity display the cabinet
                 }
                 view.getContext().startActivity(intent);

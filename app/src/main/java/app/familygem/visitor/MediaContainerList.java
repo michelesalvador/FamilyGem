@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import app.familygem.ProfileMediaFragment;
+import app.familygem.profile.MediaFragment;
 
 /**
  * Ordered map of the media each with its own container object.
- * The container is used practically only by 'Unlink media' context menu in {@link ProfileMediaFragment}.
+ * The container is used practically only by 'Unlink media' context menu in {@link MediaFragment}.
  */
 public class MediaContainerList extends Visitor {
 

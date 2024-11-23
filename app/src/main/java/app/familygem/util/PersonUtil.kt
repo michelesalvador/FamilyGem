@@ -9,13 +9,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import app.familygem.Global
 import app.familygem.Memory
-import app.familygem.ProfileActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.constant.Status
 import app.familygem.detail.FamilyActivity
+import app.familygem.profile.ProfileActivity
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
 

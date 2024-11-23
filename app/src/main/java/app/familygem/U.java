@@ -89,6 +89,7 @@ import app.familygem.main.MainActivity;
 import app.familygem.main.MediaAdapter;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
+import app.familygem.profile.ProfileActivity;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.FamilyUtil;
 import app.familygem.util.FamilyUtilKt;
@@ -559,7 +560,7 @@ public class U {
     /**
      * Copies text to clipboard.
      */
-    static void copyToClipboard(CharSequence label, CharSequence text) {
+    public static void copyToClipboard(CharSequence label, CharSequence text) {
         ClipboardManager clipboard = (ClipboardManager)Global.context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText(label, text);
         if (clipboard != null) clipboard.setPrimaryClip(clip);
@@ -572,11 +573,15 @@ public class U {
     public static List<Extension> findExtensions(ExtensionContainer container) {
         if (container.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY) != null) {
             List<Extension> extensionList = new ArrayList<>();
-            for (GedcomTag extension : (List<GedcomTag>)container.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY)) {
-                String text = traverseExtension(extension, 0);
-                if (text.endsWith("\n"))
-                    text = text.substring(0, text.length() - 1);
-                extensionList.add(new Extension(extension.getTag(), text, extension));
+            // We can't cast to List<GedcomTag> because, converting a media to shared media, the extensions become temporarily LinkedTreeMap
+            for (Object object : (List<Object>)container.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY)) {
+                if (object instanceof GedcomTag) {
+                    GedcomTag extension = (GedcomTag)object;
+                    String text = traverseExtension(extension, 0);
+                    if (text.endsWith("\n"))
+                        text = text.substring(0, text.length() - 1);
+                    extensionList.add(new Extension(extension.getTag(), text, extension));
+                }
             }
             return extensionList;
         }
@@ -602,7 +607,7 @@ public class U {
     }
 
     public static void deleteExtension(GedcomTag extension, Object container, View view) {
-        if (container instanceof ExtensionContainer) { // ProfileFactsFragment
+        if (container instanceof ExtensionContainer) { // profile.FactsFragment
             ExtensionContainer exc = (ExtensionContainer)container;
             @SuppressWarnings("unchecked")
             List<GedcomTag> lista = (List<GedcomTag>)exc.getExtension(ModelParser.MORE_TAGS_EXTENSION_KEY);
@@ -708,28 +713,23 @@ public class U {
      *
      * @return An array of the modified container records
      */
-    public static Object[] deleteNote(Note note, View view) {
+    public static Object[] deleteNote(Note note) {
         Set<Object> leaders;
         if (note.getId() != null) { // Shared note record
-            // First removes the references to the note with a visitor
             NoteReferences noteReferences = new NoteReferences(Global.gc, note.getId(), true);
             Global.gc.accept(noteReferences);
-            Global.gc.getNotes().remove(note); // Removes it if it is a shared note
+            Global.gc.getNotes().remove(note);
             leaders = noteReferences.leaders;
-            if (Global.gc.getNotes().isEmpty())
-                Global.gc.setNotes(null);
+            if (Global.gc.getNotes().isEmpty()) Global.gc.setNotes(null);
         } else { // Simple inline note
-            new FindStack(Global.gc, note);
-            NoteContainer container = (NoteContainer)Memory.getSecondToLastObject();
-            container.getNotes().remove(note); // Removes only if it is a simple note, not if a shared note
-            if (container.getNotes().isEmpty())
-                container.setNotes(null);
+            FindStack stack = new FindStack(Global.gc, note, false);
+            NoteContainer container = (NoteContainer)stack.getContainerObject();
+            container.getNotes().remove(note);
+            if (container.getNotes().isEmpty()) container.setNotes(null);
             leaders = new HashSet<>();
-            leaders.add(Memory.getLeaderObject());
-            Memory.stepBack();
+            leaders.add(stack.getLeaderObject());
         }
         Memory.setInstanceAndAllSubsequentToNull(note);
-        if (view != null) view.setVisibility(View.GONE);
         return leaders.toArray();
     }
 
@@ -785,7 +785,7 @@ public class U {
                 NoteUtil.INSTANCE.placeNotes(boxView, citation, false);
                 placeMedia(boxView, citation, false);
                 citationView.setTag(R.id.tag_object, citation);
-                if (layout.getContext() instanceof ProfileActivity) { // ProfileFactsFragment
+                if (layout.getContext() instanceof ProfileActivity) { // profile.FactsFragment
                     ((ProfileActivity)layout.getContext()).getPageFragment(1).registerForContextMenu(citationView);
                 } else // A detail activity
                     ((AppCompatActivity)layout.getContext()).registerForContextMenu(citationView);

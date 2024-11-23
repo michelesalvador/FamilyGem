@@ -7,12 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import app.familygem.Global
 import app.familygem.R
 import app.familygem.databinding.PremiumFragmentBinding
+import app.familygem.util.Util
 
 /**
  * Layout manager of the Premium advertisement and Premium banner.
@@ -90,11 +90,10 @@ class PremiumFragment : Fragment(R.layout.premium_fragment) {
                 binding.apply {
                     premiumDelete.isEnabled = true
                     premiumDelete.setOnClickListener { button ->
-                        AlertDialog.Builder(requireContext()).setMessage(R.string.sure_delete)
-                                .setPositiveButton(R.string.yes) { _, _ ->
-                                    button.isEnabled = false
-                                    model.consumePurchase()
-                                }.setNeutralButton(R.string.cancel, null).show()
+                        Util.confirmDelete(requireContext()) {
+                            button.isEnabled = false
+                            model.consumePurchase()
+                        }
                     }
                 }
             }

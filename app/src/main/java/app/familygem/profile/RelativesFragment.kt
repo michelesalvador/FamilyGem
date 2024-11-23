@@ -1,4 +1,4 @@
-package app.familygem
+package app.familygem.profile
 
 import android.content.Intent
 import android.graphics.Typeface
@@ -12,6 +12,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
+import app.familygem.Global
+import app.familygem.Memory
+import app.familygem.PersonEditorActivity
+import app.familygem.R
+import app.familygem.U
 import app.familygem.constant.Extra
 import app.familygem.constant.Relation
 import app.familygem.detail.FamilyActivity
@@ -28,7 +33,7 @@ import java.util.Collections
 /**
  * Relatives of the profile person, organized under family groups.
  */
-class ProfileRelativesFragment : ProfileBaseFragment() {
+class RelativesFragment : BaseFragment() {
 
     private enum class Branch { ANY, PATERNAL, MATERNAL }
     private enum class FamilyType { ORIGIN, HALF, ORIGIN_SMALL, OWN }

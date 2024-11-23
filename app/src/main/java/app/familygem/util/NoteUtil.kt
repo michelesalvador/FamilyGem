@@ -10,10 +10,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import app.familygem.Global
 import app.familygem.Memory
-import app.familygem.ProfileActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.detail.NoteActivity
+import app.familygem.profile.ProfileActivity
 import app.familygem.visitor.NoteReferences
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Note
@@ -73,7 +73,7 @@ object NoteUtil {
         if (detailed) {
             textView.maxLines = 10
             noteView.setTag(R.id.tag_object, note)
-            if (context is ProfileActivity) { // ProfileFactsFragment
+            if (context is ProfileActivity) { // profile.FactsFragment
                 context.getPageFragment(1).registerForContextMenu(noteView)
             } else if (layout.id != R.id.cabinet_box) // In all detail activities but not in cabinet
                 (context as AppCompatActivity).registerForContextMenu(noteView)

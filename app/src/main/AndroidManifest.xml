@@ -173,7 +173,7 @@
             android:name=".DiagramSettingsActivity"
             android:label="@string/diagram_settings" />
         <activity
-            android:name=".ProfileActivity"
+            android:name=".profile.ProfileActivity"
             android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".detail.FamilyActivity" />

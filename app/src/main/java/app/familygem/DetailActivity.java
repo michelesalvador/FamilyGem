@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -80,10 +81,10 @@ import app.familygem.detail.NoteActivity;
 import app.familygem.detail.SourceCitationActivity;
 import app.familygem.detail.SubmitterActivity;
 import app.familygem.main.MainActivity;
-import app.familygem.main.MediaFragment;
 import app.familygem.main.RepositoriesFragment;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
+import app.familygem.profile.ProfileActivity;
 import app.familygem.util.AddressUtilKt;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.EventUtilKt;
@@ -91,13 +92,17 @@ import app.familygem.util.FamilyUtil;
 import app.familygem.util.FamilyUtilKt;
 import app.familygem.util.FileUtil;
 import app.familygem.util.MediaUtil;
+import app.familygem.util.MediaUtilKt;
 import app.familygem.util.NoteUtil;
 import app.familygem.util.PersonUtil;
 import app.familygem.util.PersonUtilKt;
 import app.familygem.util.RepositoryUtil;
 import app.familygem.util.SourceUtil;
 import app.familygem.util.TreeUtil;
+import app.familygem.util.Util;
 import app.familygem.visitor.FindStack;
+import app.familygem.visitor.MediaReferences;
+import kotlin.Unit;
 
 public abstract class DetailActivity extends AppCompatActivity {
 
@@ -135,10 +140,18 @@ public abstract class DetailActivity extends AppCompatActivity {
 
         object = Memory.getLastObject();
         if (object == null) {
-            onBackPressed(); // Skip all previous details without object
+            goBack(); // Skip this detail without object
         } else if (TreeUtil.INSTANCE.isGlobalGedcomOk(this::setupInterface)) {
             setupInterface();
         }
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Memory.stepBack();
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
     }
 
     private void setupInterface() {
@@ -387,11 +400,11 @@ public abstract class DetailActivity extends AppCompatActivity {
                 ((MediaContainer)object).addMedia(media);
                 if (!F.setFileAndProposeCropping(this, null, data, media)) return;
             } else if (requestCode == 4174) { // File coming from SAF or other app becomes shared media
-                Media media = MediaFragment.newSharedMedia(object);
+                Media media = MediaUtil.INSTANCE.newSharedMedia((MediaContainer)object);
                 if (F.setFileAndProposeCropping(this, null, data, media))
                     TreeUtil.INSTANCE.save(true, media, Memory.getLeaderObject());
                 return;
-            } else if (requestCode == 43616) { // Media from MediaFragment
+            } else if (requestCode == 43616) { // Media from main.MediaFragment
                 MediaRef mediaRef = new MediaRef();
                 mediaRef.setRef(data.getStringExtra(Extra.MEDIA_ID));
                 ((MediaContainer)object).addMediaRef(mediaRef);
@@ -417,7 +430,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
     }
 
-    boolean isActivityRestarting; // To call refresh() only onBackPressed()
+    private boolean isActivityRestarting; // To call refresh() only onBackPressed()
 
     @Override
     public void onRestart() {
@@ -429,8 +442,9 @@ public abstract class DetailActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Updates contents when coming back with onBackPressed()
-        if (Global.edited && isActivityRestarting) {
-            refresh();
+        if (isActivityRestarting && Global.edited) {
+            if (Memory.getLastObject() == null) goBack(); // Maybe object was deleted in another activity
+            else refresh();
             isActivityRestarting = false;
         }
     }
@@ -470,7 +484,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 if (Memory.getLastStack().indexOf(step) < Memory.getLastStack().size() - 1) {
                     if (step.object instanceof Visitable) // GedcomTag extensions are not Visitable and it is impossible to find the stack of them
                         stepView.setOnClickListener(v -> {
-                            new FindStack(gc, step.object);
+                            new FindStack(gc, step.object, true);
                             startActivity(new Intent(this, Memory.classes.get(step.object.getClass())));
                         });
                 } else {
@@ -524,7 +538,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 casted = aClass.newInstance();
             casted = aClass.cast(object);
         } catch (Exception e) {
-            onBackPressed();
+            goBack();
         }
         return casted;
     }
@@ -653,8 +667,8 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     public void placeExtensions(ExtensionContainer container) {
-        for (Extension ext : U.findExtensions(container)) {
-            placePiece(ext.name, ext.text, ext.gedcomTag, 0);
+        for (Extension extension : U.findExtensions(container)) {
+            placePiece(extension.name, extension.text, extension.gedcomTag, 0);
         }
     }
 
@@ -932,13 +946,19 @@ public abstract class DetailActivity extends AppCompatActivity {
                 menu.add(0, 1, 0, R.string.make_default);
             if (object instanceof Media) {
                 if (box.findViewById(R.id.image_picture).getTag(R.id.tag_file_type) == Type.CROPPABLE)
-                    menu.add(0, 2, 0, R.string.crop);
-                menu.add(0, 3, 0, R.string.choose_file);
+                    menu.add(0, 5, 0, R.string.crop);
+                menu.add(0, 6, 0, R.string.choose_file);
+                Media media = (Media)object;
+                if (media.getId() != null) {
+                    MediaReferences mediaReferences = new MediaReferences(gc, media, false);
+                    if (mediaReferences.num > 0)
+                        menu.add(0, 7, 0, R.string.make_media);
+                } else menu.add(0, 8, 0, R.string.make_shared_media);
             }
             if (object instanceof Family)
-                menu.add(0, 4, 0, R.string.delete);
+                menu.add(0, 10, 0, R.string.delete);
             else if (!(object instanceof Submitter && U.submitterHasShared((Submitter)object))) // Submitter who shared cannot be deleted
-                menu.add(0, 5, 0, R.string.delete);
+                menu.add(0, 15, 0, R.string.delete);
         }
         return true;
     }
@@ -951,37 +971,51 @@ public abstract class DetailActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == 1) { // Main submitter // TODO code smell : magic number
             SubmittersFragment.mainSubmitter((Submitter)object);
-        } else if (id == 2) { // Image: crop
+        } else if (id == 5) { // Crop image
             cropImage(box);
-        } else if (id == 3) { // Image: choose
+        } else if (id == 6) { // Choose image
             F.displayImageCaptureDialog(this, null, 5173, null);
-        } else if (id == 4) { // Family
+        } else if (id == 7) { // Make simple media
+            Object[] modifiedObjects = MediaUtil.INSTANCE.makeSimpleMedia((Media)object);
+            TreeUtil.INSTANCE.save(true, modifiedObjects);
+            Memory.makeLastStep(object);
+            getIntent().putExtra(Extra.ALONE, true); // To display the cabinet
+            refresh();
+        } else if (id == 8) { // Make shared media
+            Object[] modifiedObjects = MediaUtil.INSTANCE.makeSharedMedia((Media)object);
+            TreeUtil.INSTANCE.save(true, modifiedObjects);
+            Memory.makeLeaderStep(object);
+            refresh();
+        } else if (id == 10) { // Delete family
             Family family = (Family)object;
             if (family.getHusbandRefs().size() + family.getWifeRefs().size() + family.getChildRefs().size() > 0) {
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_family)
                         .setPositiveButton(android.R.string.yes, (dialog, i) -> {
                             FamilyUtilKt.delete(family);
-                            onBackPressed();
+                            goBack();
                         }).setNeutralButton(android.R.string.cancel, null).show();
             } else {
-                FamilyUtilKt.delete(family);
-                onBackPressed();
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    FamilyUtilKt.delete(family);
+                    goBack();
+                    return Unit.INSTANCE;
+                });
             }
-        } else if (id == 5) { // All the others objects
-            // TODO: confirm deletion of all objects
-            delete();
-            TreeUtil.INSTANCE.save(true); // The update of the change dates takes place in the overrides of delete()
-            onBackPressed();
+        } else if (id == 15) { // Delete all other objects
+            Util.INSTANCE.confirmDelete(this, () -> {
+                delete();
+                TreeUtil.INSTANCE.save(true); // Update of change date takes place in the overrides of delete()
+                goBack();
+                return Unit.INSTANCE;
+            });
         } else if (id == android.R.id.home) {
-            onBackPressed();
+            goBack();
         }
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Memory.stepBack();
+    public void goBack() {
+        getOnBackPressedDispatcher().onBackPressed();
     }
 
     // Contextual menu
@@ -1073,9 +1107,11 @@ public abstract class DetailActivity extends AppCompatActivity {
                     menu.add(0, 37, 0, R.string.move_down);
                 menu.add(0, 38, 0, R.string.delete);
             } else if (pieceObject instanceof Media) {
-                if (((Media)pieceObject).getId() != null)
-                    menu.add(0, 40, 0, R.string.unlink);
-                menu.add(0, 41, 0, R.string.delete);
+                if (((Media)pieceObject).getId() != null) {
+                    menu.add(0, 40, 0, R.string.make_media);
+                    menu.add(0, 41, 0, R.string.unlink);
+                } else menu.add(0, 42, 0, R.string.make_shared_media);
+                menu.add(0, 43, 0, R.string.delete);
             } else if (pieceObject instanceof Address) {
                 menu.add(0, 50, 0, R.string.copy);
                 menu.add(0, 51, 0, R.string.delete);
@@ -1129,13 +1165,17 @@ public abstract class DetailActivity extends AppCompatActivity {
                         ((TextView)pieceView.findViewById(R.id.event_text)).getText());
                 return true;
             case 1: // Delete editable piece
-                try {
-                    object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, (Object)null);
-                } catch (Exception e) {
-                    Toast.makeText(box.getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                    break;
-                }
-                break;
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    try {
+                        object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, (Object)null);
+                        TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
+                        refresh();
+                    } catch (Exception exception) {
+                        Toast.makeText(box.getContext(), exception.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                    }
+                    return Unit.INSTANCE;
+                });
+                return true;
             case 10: // Diagram
                 U.whichParentsToShow(this, person, 1);
                 return true;
@@ -1166,9 +1206,9 @@ public abstract class DetailActivity extends AppCompatActivity {
                 swapChildren(1);
                 break;
             case 20: // Edit
-                Intent i = new Intent(this, PersonEditorActivity.class);
-                i.putExtra(Extra.PERSON_ID, person.getId());
-                startActivity(i);
+                Intent intent = new Intent(this, PersonEditorActivity.class);
+                intent.putExtra(Extra.PERSON_ID, person.getId());
+                startActivity(intent);
                 return true;
             case 21: // Lineage
                 PersonUtil.INSTANCE.chooseLineage(this, person, (Family)object);
@@ -1207,8 +1247,12 @@ public abstract class DetailActivity extends AppCompatActivity {
                 swapNotes(1);
                 break;
             case 31: // Delete note
-                Object[] leaders = U.deleteNote((Note)pieceObject, pieceView);
-                TreeUtil.INSTANCE.save(true, leaders);
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    Object[] leaders = U.deleteNote((Note)pieceObject);
+                    TreeUtil.INSTANCE.save(true, leaders);
+                    refresh();
+                    return Unit.INSTANCE;
+                });
                 return true;
             case 35: // Copy source citation
                 U.copyToClipboard(getText(R.string.source_citation),
@@ -1236,13 +1280,28 @@ public abstract class DetailActivity extends AppCompatActivity {
                     ((SourceCitationContainer)object).getSourceCitations().remove(pieceObject);
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject);
                 break;
-            case 40: // Unlink media
-                MediaFragment.disconnectMedia(((Media)pieceObject).getId(), (MediaContainer)object);
-                break;
-            case 41: // Delete media
-                Object[] mediaLeaders = MediaFragment.deleteMedia((Media)pieceObject, null);
-                TreeUtil.INSTANCE.save(true, mediaLeaders); // A shared media may need to update the dates of multiple leaders
+            case 40: // Make simple media
+                Object[] modified = MediaUtil.INSTANCE.makeSimpleMedia((Media)pieceObject);
+                TreeUtil.INSTANCE.save(true, modified);
+                Memory.setInstanceAndAllSubsequentToNull(pieceObject);
                 refresh();
+                return true;
+            case 41: // Unlink shared media
+                MediaUtilKt.unlinkMedia((MediaContainer)object, ((Media)pieceObject).getId());
+                break;
+            case 42: // Make shared media
+                Object[] modified1 = MediaUtil.INSTANCE.makeSharedMedia((Media)pieceObject);
+                TreeUtil.INSTANCE.save(true, modified1);
+                Memory.setInstanceAndAllSubsequentToNull(pieceObject);
+                refresh();
+                return true;
+            case 43: // Delete media
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    Object[] modified2 = MediaUtil.INSTANCE.deleteMedia((Media)pieceObject);
+                    TreeUtil.INSTANCE.save(true, modified2);
+                    refresh();
+                    return Unit.INSTANCE;
+                });
                 return true;
             case 51: // Delete address
                 deleteAddress(object);
@@ -1266,9 +1325,9 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.copyToClipboard(getText(R.string.source), ((TextView)pieceView.findViewById(R.id.source_text)).getText());
                 return true;
             case 71: // Choose source in SourcesFragment
-                Intent inte = new Intent(this, MainActivity.class);
-                inte.putExtra(Choice.SOURCE, true);
-                startActivityForResult(inte, 7047);
+                Intent intent1 = new Intent(this, MainActivity.class);
+                intent1.putExtra(Choice.SOURCE, true);
+                startActivityForResult(intent1, 7047);
                 return true;
             case 80: // Copy repository citation text
                 U.copyToClipboard(getText(R.string.repository_citation),
@@ -1283,9 +1342,9 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.copyToClipboard(getText(R.string.repository), ((TextView)pieceView.findViewById(R.id.source_text)).getText());
                 return true;
             case 91: // Choose repository in RepositoriesFragment
-                Intent intn = new Intent(this, MainActivity.class);
-                intn.putExtra(Choice.REPOSITORY, true);
-                startActivityForResult(intn, 5390);
+                Intent intent2 = new Intent(this, MainActivity.class);
+                intent2.putExtra(Choice.REPOSITORY, true);
+                startActivityForResult(intent2, 5390);
                 return true;
             case 100: // Crop image
                 cropImage(pieceView);

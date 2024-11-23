@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.familygem.constant.Extra;
+import app.familygem.util.Util;
+import kotlin.Unit;
 
 /**
  * Here user can see the list of media folders, add them, delete them.
@@ -119,11 +120,11 @@ public class MediaFoldersActivity extends BaseActivity {
             if (dir.equals(treeSpecificDir)) nameView.setText(R.string.app_storage);
             else nameView.setText(folderName(dir));
             folderView.findViewById(R.id.cartella_elimina).setOnClickListener(v -> {
-                new AlertDialog.Builder(this).setMessage(R.string.sure_delete)
-                        .setPositiveButton(R.string.yes, (di, id) -> {
-                            dirs.remove(dir);
-                            save();
-                        }).setNeutralButton(R.string.cancel, null).show();
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    dirs.remove(dir);
+                    save();
+                    return Unit.INSTANCE;
+                });
             });
             registerForContextMenu(folderView);
         }
@@ -140,24 +141,24 @@ public class MediaFoldersActivity extends BaseActivity {
             if (Global.settings.expert) urlView.setSingleLine(false);
             urlView.setText(Uri.decode(uriString)); // Shows it decoded, a little more readable
             uriView.findViewById(R.id.cartella_elimina).setOnClickListener(v -> {
-                new AlertDialog.Builder(this).setMessage(R.string.sure_delete)
-                        .setPositiveButton(R.string.yes, (di, id) -> {
-                            // Revokes permission for this URI, if the URI is not used in any other tree
-                            boolean uriExistsElsewhere = false;
-                            outer:
-                            for (Settings.Tree tree : Global.settings.trees) {
-                                for (String uri : tree.uris) {
-                                    if (uri != null && uri.equals(uriString) && tree.id != treeId) {
-                                        uriExistsElsewhere = true;
-                                        break outer;
-                                    }
-                                }
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    // Revokes permission for this URI, if the URI is not used in any other tree
+                    boolean uriExistsElsewhere = false;
+                    outer:
+                    for (Settings.Tree tree : Global.settings.trees) {
+                        for (String uri : tree.uris) {
+                            if (uri != null && uri.equals(uriString) && tree.id != treeId) {
+                                uriExistsElsewhere = true;
+                                break outer;
                             }
-                            if (!uriExistsElsewhere)
-                                revokeUriPermission(Uri.parse(uriString), Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            uris.remove(uriString);
-                            save();
-                        }).setNeutralButton(R.string.cancel, null).show();
+                        }
+                    }
+                    if (!uriExistsElsewhere)
+                        revokeUriPermission(Uri.parse(uriString), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    uris.remove(uriString);
+                    save();
+                    return Unit.INSTANCE;
+                });
             });
             registerForContextMenu(uriView);
         }

@@ -34,6 +34,7 @@ import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.NoteList;
+import kotlin.Unit;
 
 public class NotesFragment extends BaseFragment implements NotesAdapter.ItemClickListener {
 
@@ -105,7 +106,7 @@ public class NotesFragment extends BaseFragment implements NotesAdapter.ItemClic
             if (note.getId() != null) { // Shared note
                 Memory.setLeader(note);
             } else { // Simple note
-                new FindStack(gc, note);
+                new FindStack(gc, note, true);
                 intent.putExtra("fromNotes", true);
             }
             getContext().startActivity(intent);
@@ -115,10 +116,13 @@ public class NotesFragment extends BaseFragment implements NotesAdapter.ItemClic
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         if (item.getGroupId() == 4 && item.getItemId() == 0) { // Delete
-            Object[] leaders = U.deleteNote(adapter.selectedNote, null);
-            TreeUtil.INSTANCE.save(false, leaders);
-            showContent();
-            ((MainActivity)requireActivity()).refreshInterface();
+            Util.INSTANCE.confirmDelete(requireContext(), () -> {
+                Object[] leaders = U.deleteNote(adapter.selectedNote);
+                TreeUtil.INSTANCE.save(false, leaders);
+                showContent();
+                ((MainActivity)requireActivity()).refreshInterface();
+                return Unit.INSTANCE;
+            });
             return true;
         }
         return false;

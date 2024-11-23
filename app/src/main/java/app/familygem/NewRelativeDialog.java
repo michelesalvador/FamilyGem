@@ -27,6 +27,7 @@ import app.familygem.constant.Extra;
 import app.familygem.constant.Relation;
 import app.familygem.main.DiagramFragment;
 import app.familygem.main.MainActivity;
+import app.familygem.profile.ProfileActivity;
 import app.familygem.util.FamilyUtil;
 
 /**

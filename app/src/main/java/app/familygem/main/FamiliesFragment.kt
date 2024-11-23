@@ -230,7 +230,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
                             .setPositiveButton(android.R.string.ok) { _, _ -> deleteFamily() }
                             .setNeutralButton(android.R.string.cancel, null).show()
                     } else {
-                        deleteFamily()
+                        Util.confirmDelete(requireContext()) { deleteFamily() }
                     }
                     return true
                 }

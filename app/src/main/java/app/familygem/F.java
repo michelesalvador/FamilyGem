@@ -50,7 +50,9 @@ import java.util.regex.Pattern;
 
 import app.familygem.detail.MediaActivity;
 import app.familygem.main.MediaFragment;
+import app.familygem.profile.ProfileActivity;
 import app.familygem.util.FileUtil;
+import app.familygem.util.MediaUtil;
 import app.familygem.util.TreeUtil;
 
 /**
@@ -220,7 +222,7 @@ public class F {
         }
         final int perm = checkMultiplePermissions(context, requiredPermissions);
         if (perm == PackageManager.PERMISSION_DENIED) {
-            if (fragment != null) { // MediaFragment
+            if (fragment != null) { // main.MediaFragment
                 fragment.requestPermissions(requiredPermissions, code);
             } else
                 ActivityCompat.requestPermissions((AppCompatActivity)context, requiredPermissions, code);
@@ -285,7 +287,7 @@ public class F {
                             container.addMedia(med);
                             Memory.add(med);
                         } else { // Shared media
-                            med = MediaFragment.newSharedMedia(container);
+                            med = MediaUtil.INSTANCE.newSharedMedia(container);
                             Memory.setLeader(med);
                         }
                         med.setFile("");

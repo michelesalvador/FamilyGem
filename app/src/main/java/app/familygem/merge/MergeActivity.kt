@@ -3,12 +3,12 @@ package app.familygem.merge
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import app.familygem.BaseActivity
 import app.familygem.R
 import app.familygem.util.TreeUtil
+import app.familygem.util.Util
 
 class MergeActivity : BaseActivity() {
 
@@ -35,17 +35,15 @@ class MergeActivity : BaseActivity() {
             model.previousMatch()
         } // Cancel active merging
         else if (destination == R.id.resultFragment && model.state.value == State.ACTIVE) {
-            AlertDialog.Builder(this).setMessage(R.string.sure_delete)
-                    .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
-                    .setPositiveButton(R.string.yes) { _, _ ->
-                        model.coroutine.cancel()
-                        model.state.value = State.QUIET
-                        if (model.newNum > 0) {
-                            TreeUtil.deleteTree(model.newNum)
-                            model.newNum = 0
-                        }
-                        navController.navigateUp()
-                    }.show()
+            Util.confirmDelete(this) {
+                model.coroutine.cancel()
+                model.state.value = State.QUIET
+                if (model.newNum > 0) {
+                    TreeUtil.deleteTree(model.newNum)
+                    model.newNum = 0
+                }
+                navController.navigateUp()
+            }
             return false
         }
         return navController.navigateUp() || super.onSupportNavigateUp()

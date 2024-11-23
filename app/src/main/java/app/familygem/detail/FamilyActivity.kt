@@ -4,10 +4,10 @@ import android.content.Intent
 import app.familygem.DetailActivity
 import app.familygem.Global
 import app.familygem.Memory
-import app.familygem.ProfileActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Relation
+import app.familygem.profile.ProfileActivity
 import app.familygem.util.ChangeUtil.placeChangeDate
 import app.familygem.util.NoteUtil
 import app.familygem.util.PersonUtil
@@ -72,7 +72,6 @@ class FamilyActivity : DetailActivity() {
                 if (spouseFamilies.size == 2) { // Swaps between the 2 spouse families
                     Global.indi = person.id
                     val otherFamily = spouseFamilies[if (spouseFamilies.indexOf(family) == 0) 1 else 0]
-
                     Memory.replaceLeader(otherFamily)
                     recreate()
                 } else U.whichSpousesToShow(this, person, null)

@@ -390,7 +390,7 @@ public class PersonEditorActivity extends AppCompatActivity {
                 Family family = gc.getFamily(familyId);
                 FamilyUtil.INSTANCE.linkPerson(person, family, relation);
                 modifications[1] = family;
-            } else if (relation != null) // Comes from DiagramFragment o ProfileRelativesFragment
+            } else if (relation != null) // Comes from DiagramFragment or profile.RelativesFragment
                 modifications = addRelative(personId, newId, familyId, relation, getIntent().getStringExtra(Extra.DESTINATION));
         } else
             Global.indi = person.getId(); // To show the person then in DiagramFragment
