@@ -36,7 +36,6 @@
     <string name="delete">ಅಳಿಸು</string>
     <string name="errors_found">%d ದೋಷಗಳು ಕಂಡುಬಂದಿವೆ.</string>
     <string name="all_ok">ಎಲ್ಲವೂ ಸರಿ ಇದೆ.</string>
-    <string name="really_delete_tree">ನಿಜವಾಗಿಯೂ ಈ ಮರವನ್ನು ಅಳಿಸಲು ಬಯಸುವಿರಾ\?</string>
     <string name="no_results">ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ.</string>
     <string name="zip_exported_ok">ZIP ರಫ್ತು ಮಾಡಲಾಗಿದೆ.</string>
     <string name="gedcom_exported_ok">GEDCOM ರಫ್ತು ಮಾಡಲಾಗಿದೆ.</string>

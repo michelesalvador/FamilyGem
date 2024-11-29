@@ -15,7 +15,6 @@ import android.widget.Filterable
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
@@ -29,16 +28,17 @@ import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.Format
-import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.profile.ProfileActivity
 import app.familygem.util.FileUtil.selectMainImage
 import app.familygem.util.TreeUtil.save
+import app.familygem.util.Util
 import app.familygem.util.Util.caseString
 import app.familygem.util.countRelatives
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
 import app.familygem.util.getSpouseRefs
+import app.familygem.util.sex
 import app.familygem.util.writeContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -166,11 +166,10 @@ class PersonsFragment : BaseFragment() {
                 titleView.text = title
                 titleView.visibility = View.VISIBLE
             }
-            val border = when (Gender.getGender(person)) {
-                Gender.MALE -> R.drawable.casella_bordo_maschio
-                Gender.FEMALE -> R.drawable.casella_bordo_femmina
-                else -> R.drawable.casella_bordo_neutro
-            }
+            val sex = person.sex
+            val border = if (sex.isMale()) R.drawable.person_border_male
+            else if (sex.isFemale()) R.drawable.person_border_female
+            else R.drawable.person_border_undefined
             personView.findViewById<View>(R.id.person_border).setBackgroundResource(border)
 
             U.details(person, personView.findViewById(R.id.person_details))
@@ -519,16 +518,15 @@ class PersonsFragment : BaseFragment() {
             }
             4 -> U.editId(context, person) { adapter.notifyDataSetChanged() } // Edit ID
             5 -> { // Delete person
-                AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_person)
-                    .setPositiveButton(R.string.delete) { _, _ ->
-                        val families = person.delete()
-                        selectedPeople.removeAt(position)
-                        allPeople.removeAt(position)
-                        adapter.notifyItemRemoved(position)
-                        adapter.notifyItemRangeChanged(position, selectedPeople.size - position)
-                        (requireActivity() as MainActivity).refreshInterface()
-                        U.deleteEmptyFamilies(context, null, false, *families)
-                    }.setNeutralButton(R.string.cancel, null).show()
+                Util.confirmDelete(requireContext()) {
+                    val families = person.delete()
+                    selectedPeople.removeAt(position)
+                    allPeople.removeAt(position)
+                    adapter.notifyItemRemoved(position)
+                    adapter.notifyItemRangeChanged(position, selectedPeople.size - position)
+                    (requireActivity() as MainActivity).refreshInterface()
+                    U.deleteEmptyFamilies(context, null, false, *families)
+                }
             }
             else -> return false
         }

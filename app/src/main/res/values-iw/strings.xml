@@ -202,8 +202,6 @@
     <string name="descendants">צאצאים</string>
     <string name="siblings_nephews">אחאים ואחיינים</string>
     <string name="number_relatives">מספר קרובי המשפחה</string>
-    <string name="really_delete_person">למחוק אדם זה\?</string>
-    <string name="person_deleted">אדם נמחק.</string>
     <string name="events">עובדות</string>
     <string name="relatives">קרובי משפחה</string>
     <string name="make_root">הגדרה כשורש</string>
@@ -251,8 +249,6 @@
     <string name="divorce">גירושים</string>
     <string name="really_delete_family">המשפחה הזאת תימחק אך רק חברי המשפחה לא יימחקו.</string>
     <string name="shared_notes">הערות משותפות</string>
-    <string name="simple_note">הערה פשוטה</string>
-    <string name="simple_notes">הערות פשוטות</string>
     <string name="shared_note">הערה משותפת</string>
     <string name="written_in">נכתב תחת</string>
     <string name="male">זכר</string>
@@ -289,7 +285,6 @@
     <string name="spouse">בן/ת זוג</string>
     <string name="author">יוצר</string>
     <string name="between">בין</string>
-    <string name="really_delete_tree">למחוק את העץ הזה\?</string>
     <string name="load_tree_startup">לטעון את העץ האחרון שנפתח עם ההפעלה</string>
     <string name="aware_upload_server">נא לשים לב שפעולה זו תעלה את כל העץ לשרת מקוון.</string>
     <string name="tree_without_news">עץ ללא עדכונים</string>

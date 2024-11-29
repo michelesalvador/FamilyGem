@@ -98,8 +98,6 @@
     <string name="yes">Jes</string>
     <string name="name">Nomo</string>
     <string name="this_is_root">%s estas la ĉefa persono de arbo.</string>
-    <string name="person_deleted">Persono forigita.</string>
-    <string name="really_delete_person">Ĉu vi certas forigi ĉi tiun personon\?</string>
     <string name="year">Jaro</string>
     <string name="order_by">Ordigi laŭ</string>
     <string name="descendants">Idoj</string>
@@ -145,7 +143,6 @@
     <string name="correct">Ripari</string>
     <string name="errors_found">%d eraroj trovitaj.</string>
     <string name="all_ok">Ĉio estas bone.</string>
-    <string name="really_delete_tree">Ĉu vi certe volas forigi ĉi tiun arbon\?</string>
     <string name="no_results">Neniu rezulto.</string>
     <string name="zip_exported_ok">ZIP elportita.</string>
     <string name="gedcom_exported_ok">GEDCOM elportita.</string>
@@ -237,8 +234,6 @@
     <string name="shared_notes">Komunaj notoj</string>
     <string name="number_members">Nombro de anoj</string>
     <string name="shared_note">Komuna noto</string>
-    <string name="simple_notes">Simplaj notoj</string>
-    <string name="simple_note">Simpla noto</string>
     <string name="crop">Stuci</string>
     <string name="repository">Deponejo</string>
     <string name="inexistent_repository_citation">Mankanta referenco de deponejo</string>

@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/minicard"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:background="@drawable/casella_sfondo_base">
-	<TextView
-		android:id="@+id/minicard_text"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:background="@drawable/casella_bordo_neutro"
-		android:paddingBottom="3dp"
-		android:paddingLeft="5dp"
-		android:paddingRight="5dp"
-		android:paddingTop="3dp"/>
+    android:id="@+id/minicard"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/person_background">
+
+    <TextView
+        android:id="@+id/minicard_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/person_border_undefined"
+        android:paddingLeft="5dp"
+        android:paddingTop="3dp"
+        android:paddingRight="5dp"
+        android:paddingBottom="3dp" />
 </RelativeLayout>

@@ -12,7 +12,6 @@
     <string name="you_can_download">يمكنك تنزيل الشجرة المشاركة معك.</string>
     <string name="save">احفظ</string>
     <string name="no_results">لا نتائج.</string>
-    <string name="really_delete_tree">أمتأكد من رغبتك بحذف هذه الشجرة؟</string>
     <string name="auto_save">حفظ تلقائي</string>
     <string name="show_advanced_functions">أظهر الأدوات المتقدمة</string>
     <string name="item_exists_but_file">مُدخل الشجرة هو الفهرس، لكن لسبب ما فإن الملف المتعلق مفقود:</string>
@@ -193,8 +192,6 @@
     <string name="surname">الكنية</string>
     <string name="year">السنة</string>
     <string name="age">العمر</string>
-    <string name="really_delete_person">أحقاً تريد حذف هذا الشخص؟</string>
-    <string name="person_deleted">حُذِف الشخص.</string>
     <string name="events">حقائق</string>
     <string name="make_root">اضبط كجذر</string>
     <string name="this_is_root">%s هو الشخص الأساسي في الشجرة.</string>
@@ -315,8 +312,6 @@
     <string name="foster">مربّى</string>
     <string name="really_delete_family">ستحذف هذه العائلة دون حذف أفرادها.</string>
     <string name="shared_notes">ملاحظات مشاركة</string>
-    <string name="simple_note">ملاحظة بسيطة</string>
-    <string name="simple_notes">ملاحظات بسيطة</string>
     <string name="shared_note">ملاحظات مشتركة</string>
     <string name="written_in">مكتوب في</string>
     <string name="shared_by">مستخدم من</string>

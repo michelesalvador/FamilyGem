@@ -46,7 +46,6 @@ import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.FileType
-import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.databinding.DiagramFragmentBinding
 import app.familygem.detail.FamilyActivity
@@ -55,9 +54,11 @@ import app.familygem.util.ChangeUtil
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
+import app.familygem.util.Util.confirmDelete
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
 import app.familygem.util.getSpouseRefs
+import app.familygem.util.sex
 import graph.gedcom.Bond
 import graph.gedcom.CurveLine
 import graph.gedcom.Graph
@@ -438,14 +439,15 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             id = U.extractNum(person.id)
             val view = layoutInflater.inflate(R.layout.diagram_card, this, true)
             val border = view.findViewById<View>(R.id.card_border)
-            if (Gender.isMale(person)) border.setBackgroundResource(R.drawable.casella_bordo_maschio)
-            else if (Gender.isFemale(person)) border.setBackgroundResource(R.drawable.casella_bordo_femmina)
+            val sex = person.sex
+            if (sex.isMale()) border.setBackgroundResource(R.drawable.person_border_male)
+            else if (sex.isFemale()) border.setBackgroundResource(R.drawable.person_border_female)
             background = view.findViewById(R.id.card_background)
             if (personNode.isFulcrumNode) {
-                background.setBackgroundResource(R.drawable.casella_sfondo_evidente)
+                background.setBackgroundResource(R.drawable.person_background_selected)
                 fulcrumView = this
             } else if (personNode.acquired) {
-                background.setBackgroundResource(R.drawable.casella_sfondo_sposo)
+                background.setBackgroundResource(R.drawable.person_background_partner)
             }
             val imageView = view.findViewById<ImageView>(R.id.card_picture)
             val media = FileUtil.selectMainImage(person, imageView, show = false)
@@ -476,9 +478,9 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             // Changes background color for PNG or PDF export
             if (printing) {
                 if ((metric as PersonNode).acquired)
-                    background.setBackgroundResource(R.drawable.casella_sfondo_sposo_stampa)
+                    background.setBackgroundResource(R.drawable.person_background_partner_print)
                 if (this == fulcrumView)
-                    background.setBackgroundResource(R.drawable.casella_sfondo_base)
+                    background.setBackgroundResource(R.drawable.person_background)
             }
         }
     }
@@ -534,19 +536,19 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             val miniCard = layoutInflater.inflate(R.layout.diagram_minicard, this, true)
             val miniCardText = miniCard.findViewById<TextView>(R.id.minicard_text)
             miniCardText.text = if (personNode.amount > 100) "100+" else personNode.amount.toString()
-            val sex = Gender.getGender(personNode.person)
-            if (sex == Gender.MALE) miniCardText.setBackgroundResource(R.drawable.casella_bordo_maschio)
-            else if (sex == Gender.FEMALE) miniCardText.setBackgroundResource(R.drawable.casella_bordo_femmina)
+            val sex = personNode.person.sex
+            if (sex.isMale()) miniCardText.setBackgroundResource(R.drawable.person_border_male)
+            else if (sex.isFemale()) miniCardText.setBackgroundResource(R.drawable.person_border_female)
             if (personNode.acquired) {
                 layout = miniCard.findViewById(R.id.minicard)
-                layout!!.setBackgroundResource(R.drawable.casella_sfondo_sposo)
+                layout!!.setBackgroundResource(R.drawable.person_background_partner)
             }
             miniCard.setOnClickListener { if (!diagramJob!!.isActive) clickCard(personNode.person) }
         }
 
         override fun invalidate() {
             if (printing && layout != null) {
-                layout!!.setBackgroundResource(R.drawable.casella_sfondo_sposo_stampa)
+                layout!!.setBackgroundResource(R.drawable.person_background_partner_print)
             }
         }
     }
@@ -781,12 +783,11 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             TreeUtil.save(true, *modifiedArray)
             refreshAll()
         } else if (id == 7) { // Delete
-            AlertDialog.Builder(context()).setMessage(R.string.really_delete_person)
-                .setPositiveButton(R.string.delete) { _, _ ->
-                    val families = person.delete()
-                    refreshAll()
-                    U.deleteEmptyFamilies(context, { refreshAll() }, false, *families)
-                }.setNeutralButton(R.string.cancel, null).show()
+            confirmDelete(context()) {
+                val families = person.delete()
+                refreshAll()
+                U.deleteEmptyFamilies(context, { refreshAll() }, false, *families)
+            }
         } else return false
         return true
     }

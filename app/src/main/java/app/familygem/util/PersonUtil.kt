@@ -5,19 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.R
 import app.familygem.U
-import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.constant.Status
 import app.familygem.detail.FamilyActivity
 import app.familygem.profile.ProfileActivity
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Person
+
+var Person.sex: SexUtil
+    get() = SexUtil(eventsFacts.firstOrNull { it.tag == "SEX" })
+    set(value) = sex.setSex(this, value)
 
 /** Generates the 2 family labels (as child and as parent) for contextual menu. */
 fun Person.getFamilyLabels(context: Context, family: Family? = null): Array<String?> {
@@ -66,7 +68,7 @@ fun Person.countRelatives(): Int {
 }
 
 /**
- * Deletes a person from the tree, possibly finding the new root.
+ * Deletes a person from the tree, possibly finding the new root, and saves the changes.
  * @return An array of modified families
  */
 fun Person.delete(): Array<Family> {
@@ -99,7 +101,6 @@ fun Person.delete(): Array<Family> {
     if (Global.indi != null && Global.indi == id) Global.indi = newRootId
     val families = modifiedFamilies.toTypedArray<Family>()
     TreeUtil.save(true, *families)
-    Toast.makeText(Global.context, R.string.person_deleted, Toast.LENGTH_LONG).show()
     return families
 }
 
@@ -123,8 +124,9 @@ object PersonUtil {
         else detailView.text = dates
         if (!U.isDead(person)) personView.findViewById<View>(R.id.smallPerson_dead).visibility = View.GONE
         val borderView = personView.findViewById<View>(R.id.smallPerson_border)
-        if (Gender.isMale(person)) borderView.setBackgroundResource(R.drawable.casella_bordo_maschio)
-        else if (Gender.isFemale(person)) borderView.setBackgroundResource(R.drawable.casella_bordo_femmina)
+        val sex = person.sex
+        if (sex.isMale()) borderView.setBackgroundResource(R.drawable.person_border_male)
+        else if (sex.isFemale()) borderView.setBackgroundResource(R.drawable.person_border_female)
         return personView
     }
 
@@ -137,7 +139,8 @@ object PersonUtil {
         var relation = relation
         if (respectFamily && relation == Relation.PARTNER && family != null && family.childRefs.isNotEmpty()) relation = Relation.PARENT
         val status = Status.getStatus(family)
-        val role = if (Gender.isMale(person)) {
+        val sex = person.sex
+        val role = if (sex.isMale()) {
             when (relation) {
                 Relation.PARENT -> R.string.father
                 Relation.SIBLING -> R.string.brother
@@ -150,7 +153,7 @@ object PersonUtil {
                 }
                 Relation.CHILD -> R.string.son
             }
-        } else if (Gender.isFemale(person)) {
+        } else if (sex.isFemale()) {
             when (relation) {
                 Relation.PARENT -> R.string.mother
                 Relation.SIBLING -> R.string.sister

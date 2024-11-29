@@ -41,8 +41,6 @@
     <string name="make_root">Відмітити як головну особу</string>
     <string name="relatives">Рідні</string>
     <string name="events">Факти</string>
-    <string name="person_deleted">Особа видалена.</string>
-    <string name="really_delete_person">Дійсно хочете видалити цю особу\?</string>
     <string name="number_relatives">Кількість рідних</string>
     <string name="year">Рік</string>
     <string name="surname">Прізвище</string>
@@ -132,7 +130,6 @@
     <string name="correct">Виправити</string>
     <string name="errors_found">Знайдено помилок: %d.</string>
     <string name="all_ok">Все добре.</string>
-    <string name="really_delete_tree">Дійсно хочете видалити це дерево\?</string>
     <string name="no_results">Немає результатів.</string>
     <string name="export_gedcom">Експорт файлу GEDCOM</string>
     <string name="compare">Порівняти</string>
@@ -227,8 +224,6 @@
     <string name="shared_by">Використаний</string>
     <string name="written_in">Написано в</string>
     <string name="shared_note">Спільна примітка</string>
-    <string name="simple_notes">Прості примітки</string>
-    <string name="simple_note">Проста примітка</string>
     <string name="shared_notes">Спільні примітки</string>
     <string name="really_delete_family">Ця сім\'я буде видалена, але члени сім\'ї не будуть видалені.</string>
     <string name="divorce">Розлучення</string>

@@ -124,28 +124,27 @@
                 app:layout_constraintTop_toBottomOf="@+id/merge_persons" />
 
             <Button
-                android:id="@+id/merge_keep"
+                android:id="@+id/merge_merge"
                 style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/no"
-                app:layout_constraintEnd_toStartOf="@+id/merge_merge"
+                android:text="@string/yes"
+                app:layout_constraintEnd_toStartOf="@+id/merge_keep"
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/merge_question" />
 
             <Button
-                android:id="@+id/merge_merge"
+                android:id="@+id/merge_keep"
                 style="@style/AppTheme.NormalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                android:enabled="true"
-                android:text="@string/yes"
+                android:text="@string/no"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/merge_keep"
+                app:layout_constraintStart_toEndOf="@id/merge_merge"
                 app:layout_constraintTop_toBottomOf="@+id/merge_question" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

@@ -1,8 +1,6 @@
 
 package app.familygem;
 
-import android.widget.Toast;
-
 import com.google.gson.Gson;
 
 import org.apache.commons.io.FileUtils;
@@ -115,8 +113,8 @@ public class Settings {
             Gson gson = new Gson();
             String json = gson.toJson(this);
             FileUtils.writeStringToFile(new File(Global.context.getFilesDir(), "settings.json"), json, "UTF-8");
-        } catch (Exception e) {
-            Toast.makeText(Global.context, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception ignored) {
+            // Sometimes save() is called inside a coroutine, so we can't Toast on the main thread here
         }
     }
 

@@ -29,7 +29,6 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
 import app.familygem.constant.FileType
-import app.familygem.constant.Gender
 import app.familygem.main.MainActivity
 import app.familygem.merge.MergeActivity
 import app.familygem.share.SharingActivity
@@ -38,6 +37,7 @@ import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.getBasicData
+import app.familygem.util.sex
 import app.familygem.visitor.MediaList
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
@@ -444,11 +444,10 @@ class TreesActivity : AppCompatActivity() {
                     } else Util.toast(exporter.errorMessage)
                 }
             } else if (id == 10) { // Delete tree
-                AlertDialog.Builder(this@TreesActivity).setMessage(R.string.really_delete_tree)
-                    .setPositiveButton(R.string.delete) { _, _ ->
-                        TreeUtil.deleteTree(treeId)
-                        updateList()
-                    }.setNeutralButton(R.string.cancel, null).show()
+                Util.confirmDelete(this@TreesActivity) {
+                    TreeUtil.deleteTree(treeId)
+                    updateList()
+                }
             } else {
                 return false
             }
@@ -749,12 +748,11 @@ class TreesActivity : AppCompatActivity() {
                 } else {
                     val family = gedcom.getFamily(familyId)
                     if (family.husbandRefs.none { it.ref == person.id } && family.wifeRefs.none { it.ref == person.id }) {
-                        val female = Gender.isFemale(person)
+                        val female = person.sex.isFemale()
                         if (correct) {
                             val spouseRef = SpouseRef()
                             spouseRef.ref = person.id
-                            if (female) family.addWife(spouseRef)
-                            else family.addHusband(spouseRef)
+                            if (female) family.addWife(spouseRef) else family.addHusband(spouseRef)
                         } else addError(if (female) "Missing WIFE $personId in $familyId" else "Missing HUSB $personId in $familyId")
                     }
                     if (person.spouseFamilyRefs.filter { it.ref == familyId }.size > 1) {

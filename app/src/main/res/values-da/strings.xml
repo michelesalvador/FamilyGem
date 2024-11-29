@@ -114,8 +114,6 @@
     <string name="correctly_uploaded">Træet blev uploadet med succes.</string>
     <string name="sharing_tree">Deling af et slægtstræ</string>
     <string name="number_relatives">Antal slægtninge</string>
-    <string name="really_delete_person">Vil du virkelig slette denne person\?</string>
-    <string name="person_deleted">Person slettet.</string>
     <string name="events">Fakta</string>
     <string name="new_media">Nyt medium</string>
     <string name="new_shared_media">Nyt delte medium</string>
@@ -194,8 +192,6 @@
     <string name="undefined">Udefineret</string>
     <string name="adopted">Adopteret</string>
     <string name="shared_notes">Delte noter</string>
-    <string name="simple_note">Enkel note</string>
-    <string name="simple_notes">Enkle noter</string>
     <string name="shared_note">Delt note</string>
     <string name="written_in">Skrevet i</string>
     <string name="shared_by">Anvendt af</string>
@@ -275,7 +271,6 @@
     <string name="export_gedcom">Eksporter GEDCOM</string>
     <string name="gedcom_exported_ok">GEDCOM eksporteret.</string>
     <string name="zip_exported_ok">ZIP eksporteret.</string>
-    <string name="really_delete_tree">Vil du virkelig slette dette træ\?</string>
     <string name="errors_found">Der er %d fejl.</string>
     <string name="show_advanced_functions">Vis avancerede funktioner</string>
     <string name="about">Om appen</string>

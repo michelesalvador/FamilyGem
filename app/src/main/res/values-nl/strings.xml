@@ -74,8 +74,6 @@
     <string name="this_is_root">%s is de hoofdpersoon van de boom.</string>
     <string name="relatives">Familieleden</string>
     <string name="events">Feiten</string>
-    <string name="person_deleted">Persoon verwijderd.</string>
-    <string name="really_delete_person">Wilt u deze persoon echt verwijderen\?</string>
     <string name="number_relatives">Aantal familieleden</string>
     <string name="year">Jaar</string>
     <string name="surname">Achternaam</string>
@@ -175,7 +173,6 @@
     <string name="settings">Instellingen</string>
     <string name="errors_found">%d fouten gevonden.</string>
     <string name="all_ok">Alles is OK.</string>
-    <string name="really_delete_tree">Wilt u deze stamboom echt verwijderen\?</string>
     <string name="no_results">Geen resultaten.</string>
     <string name="export_gedcom">Exporteer GEDCOM</string>
     <string name="compare">Vergelijken</string>
@@ -260,8 +257,6 @@
     <string name="shared_by">Gebruikt door</string>
     <string name="written_in">Geschreven in</string>
     <string name="shared_note">Gedeelde notitie</string>
-    <string name="simple_notes">Eenvoudige opmerkingen</string>
-    <string name="simple_note">Eenvoudige notitie</string>
     <string name="shared_notes">Gedeelde notities</string>
     <string name="really_delete_family">Dit gezin wordt verwijderd, maar de gezinsleden worden niet verwijderd.</string>
     <string name="divorce">Scheiding</string>

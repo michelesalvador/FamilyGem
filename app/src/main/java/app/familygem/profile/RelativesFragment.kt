@@ -23,6 +23,7 @@ import app.familygem.detail.FamilyActivity
 import app.familygem.util.FamilyUtil
 import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil.save
+import app.familygem.util.Util
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
 import app.familygem.util.getSpouses
@@ -378,12 +379,11 @@ class RelativesFragment : BaseFragment() {
                 U.deleteEmptyFamilies(context, { this.refresh() }, false, family)
             }
             316 -> { // Delete
-                AlertDialog.Builder(requireContext()).setMessage(R.string.really_delete_person)
-                    .setPositiveButton(R.string.delete) { _, _ ->
-                        selected.delete()
-                        refresh()
-                        U.deleteEmptyFamilies(context, { this.refresh() }, false, family)
-                    }.setNeutralButton(R.string.cancel, null).show()
+                Util.confirmDelete(requireContext()) {
+                    selected.delete()
+                    refresh()
+                    U.deleteEmptyFamilies(context, { this.refresh() }, false, family)
+                }
             }
             else -> return false
         }

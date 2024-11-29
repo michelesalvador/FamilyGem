@@ -2,7 +2,7 @@
 <resources>
     <string name="tagline">Crea il tuo albero genealogico</string>
     <string name="delete">Elimina</string>
-    <string name="sure_delete">Sei sicuro?</string>
+    <string name="sure_delete">Sei sicuro\?</string>
     <string name="cancel">Annulla</string>
     <string name="done">Fatto</string>
     <string name="change_date">Data modifica</string>
@@ -38,7 +38,7 @@
     <string name="name_of_tree">Titolo dell\'albero</string>
     <string name="create">Crea</string>
     <string name="tree_created">Creato nuovo albero.</string>
-    <string name="complex_tree_advanced_tools">Questo albero sembra piuttosto complesso.\nPer gestirlo meglio vuoi mostrare le funzioni avanzate?</string>
+    <string name="complex_tree_advanced_tools">Questo albero sembra piuttosto complesso.\nPer gestirlo meglio vuoi mostrare le funzioni avanzate\?</string>
     <string name="tree_imported_ok">Albero importato correttamente.</string>
     <string name="backup_invalid">Questo backup non è valido.</string>
     <string name="invalid_gedcom">GEDCOM non valido.</string>
@@ -69,7 +69,6 @@
     <string name="gedcom_exported_ok">GEDCOM esportato.</string>
     <string name="zip_exported_ok">ZIP esportato.</string>
     <string name="no_results">Nessun risultato.</string>
-    <string name="really_delete_tree">Vuoi davvero eliminare questo albero?</string>
     <string name="all_ok">Tutto a posto.</string>
     <string name="error_found">Trovato un errore.</string>
     <string name="errors_found">Trovati %d errori.</string>
@@ -156,13 +155,16 @@
     <string name="confirm_news">Conferma gli aggiornamenti</string>
     <string name="accepted_news">Hai accettato %d aggiornamenti:\n\t%d aggiunte\n\t%d sostituzioni\n\t%d eliminazioni</string>
     <string name="confirm">Conferma</string>
-    <string name="all_imported_delete">Tutti gli aggiornamenti sono stati importati.\nVuoi eliminare l\'albero importato?</string>
+    <string name="all_imported_delete">Tutti gli aggiornamenti sono stati importati.\nVuoi eliminare l\'albero importato\?</string>
     <!-- MergeActivity -->
     <string name="merge_tree">Unisci albero</string>
     <string name="merge">Unisci</string>
     <string name="select_tree">Seleziona un albero da unire:</string>
-    <string name="next">Seguente</string>
-    <string name="are_same_person">Sono la stessa persona?</string>
+    <string name="search_duplicates">Cerca doppioni</string>
+    <string name="skip">Salta</string>
+    <string name="are_same_person">Sono la stessa persona\?</string>
+    <string name="yes_to_all">Sì a tutti i rimanenti</string>
+    <string name="no_to_all">No a tutti i rimanenti</string>
     <string name="choose_output">Scegli la destinazione:</string>
     <string name="merge_into">Unisci %2$s dentro a %1$s</string>
     <string name="generate_new">Genera un nuovo albero dai due</string>
@@ -201,12 +203,9 @@
     <string name="order_by">Ordina per</string>
     <string name="id">ID</string>
     <string name="surname">Cognome</string>
-    <string name="year">Anno</string>
     <string name="age">Età</string>
     <string name="birthday">Compleanno</string>
     <string name="number_relatives">Numero di familiari</string>
-    <string name="really_delete_person">Vuoi davvero eliminare questa persona?</string>
-    <string name="person_deleted">Persona eliminata.</string>
     <!-- ProfileActivity -->
     <string name="events">Fatti</string>
     <string name="relatives">Familiari</string>
@@ -276,7 +275,7 @@
     <string name="choose_file">Scegli file</string>
     <string name="crop">Ritaglia</string>
     <string name="copy">Copia testo</string>
-    <string name="make_main_submitter">Vuoi che questo sia l\'autore principale dell\'albero?</string>
+    <string name="make_main_submitter">Vuoi che questo sia l\'autore principale dell\'albero\?</string>
     <!-- NameActivity -->
     <string name="value">Valore</string>
     <string name="type">Tipo</string>
@@ -365,8 +364,6 @@
     <string name="really_delete_family">Questa famiglia sarà eliminata, ma le persone che la compongono non saranno eliminate.</string>
     <!-- NoteActivity -->
     <string name="shared_notes">Note condivise</string>
-    <string name="simple_note">Nota semplice</string>
-    <string name="simple_notes">Note semplici</string>
     <string name="shared_note">Nota condivisa</string>
     <string name="written_in">Scritta in</string>
     <string name="shared_by">Usata da</string>
@@ -424,13 +421,13 @@
     <string name="empty_name">Nome vuoto</string>
     <string name="months">mesi</string>
     <string name="days">giorni</string>
-    <string name="want_crop_image">Vuoi ritagliare questa immagine?</string>
+    <string name="want_crop_image">Vuoi ritagliare questa immagine\?</string>
     <string name="no">No</string>
     <string name="not_granted">%s non concesso.</string>
     <string name="empty_media">Media vuoto</string>
     <string name="empty_family">Famiglia vuota</string>
-    <string name="which_family">Quale famiglia?</string>
-    <string name="empty_family_delete">È rimasta qualche famiglia vuota.\nVuoi eliminarla?</string>
+    <string name="which_family">Quale famiglia\?</string>
+    <string name="empty_family_delete">È rimasta qualche famiglia vuota.\nVuoi eliminarla\?</string>
     <string name="edit_id">Modifica ID</string>
     <string name="invalid_id">ID non valido</string>
     <string name="existing_id">ID già esistente</string>
@@ -442,4 +439,7 @@
     <string name="premium_activated">Premium attivato.</string>
     <string name="premium_deactivated">Premium disattivato.</string>
     <string name="update_playstore">Prego aggiornare l\'app Play Store.</string>
+    <!-- Unused -->
+    <string name="year">Anno</string>
+    <string name="next">Seguente</string>
 </resources>

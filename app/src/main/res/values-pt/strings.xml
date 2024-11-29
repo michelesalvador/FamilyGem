@@ -28,7 +28,6 @@
     <string name="correct">Corrigir</string>
     <string name="errors_found">%d erros encontrados.</string>
     <string name="all_ok">Está tudo bem.</string>
-    <string name="really_delete_tree">Deseja realmente apagar esta árvore\?</string>
     <string name="no_results">Sem resultados.</string>
     <string name="export_gedcom">Exportar GEDCOM</string>
     <string name="compare">Comparar</string>
@@ -159,8 +158,6 @@
     <string name="shared_by">Usado por</string>
     <string name="written_in">Escrito em</string>
     <string name="shared_note">Nota compartilhada</string>
-    <string name="simple_notes">Notas simples</string>
-    <string name="simple_note">Nota simples</string>
     <string name="shared_notes">Notas compartilhadas</string>
     <string name="really_delete_family">Esta família será apagada, mas os membros da família não serão apagados.</string>
     <string name="divorce">Divórcio</string>
@@ -271,8 +268,6 @@
     <string name="make_root">Definir como raiz</string>
     <string name="relatives">Parentes</string>
     <string name="events">Fatos</string>
-    <string name="person_deleted">Pessoa apagada.</string>
-    <string name="really_delete_person">Deseja realmente apagar esta pessoa\?</string>
     <string name="number_relatives">Número de parentes</string>
     <string name="year">Ano</string>
     <string name="surname">Sobrenome</string>

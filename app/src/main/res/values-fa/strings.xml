@@ -63,7 +63,6 @@
     <string name="user_id">شناسه‌ی کاربری</string>
     <string name="divorce">طلاق</string>
     <string name="really_delete_family">این خانواده حذف خواهد شد، اما اعضای خانواده حذف نخواهند شد.</string>
-    <string name="simple_notes">یادداشت‌های ساده</string>
     <string name="shared_note">یادداشت به اشتراک گذاشته شده</string>
     <string name="inexistent_source_citation">ارجاع مبدا پیدا نشد</string>
     <string name="repository_citation">ارجاع مخزن</string>
@@ -79,7 +78,6 @@
     <string name="abbreviation">عنوان کوتاه</string>
     <string name="living_apart_together">جدا از هم زندگی کردن</string>
     <string name="shared_notes">یادداشت‌های به اشتراک گذاشته شده</string>
-    <string name="simple_note">یادداشت ساده</string>
     <string name="written_in">نوشته شده در</string>
     <string name="shared_by">استفاده شده توسط</string>
     <string name="male">مذکر</string>
@@ -139,7 +137,6 @@
     <string name="gedcom_exported_ok">GEDCOM استخراج شد.</string>
     <string name="zip_exported_ok">ZIP استخراج شد.</string>
     <string name="no_results">نتیجه‌ای وجود ندارد.</string>
-    <string name="really_delete_tree">آیا واقعا می‌خواهید این درخت را حذف کنید؟</string>
     <string name="errors_found">%d خطا پیدا شد.</string>
     <string name="correct">تصحیح</string>
     <string name="settings">تنظیمات</string>
@@ -218,8 +215,6 @@
     <string name="surname">نام خانوادگی</string>
     <string name="year">سال</string>
     <string name="number_relatives">تعداد اقوام</string>
-    <string name="really_delete_person">واقعا می خواهید این شخص را حذف کنید؟</string>
-    <string name="person_deleted">شخص حذف شد.</string>
     <string name="events">شناسنامه</string>
     <string name="relatives">اقوام</string>
     <string name="make_root">تنظیم به عنوان ریشه</string>

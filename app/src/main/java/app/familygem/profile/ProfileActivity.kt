@@ -30,7 +30,6 @@ import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
-import app.familygem.constant.Gender
 import app.familygem.constant.Image
 import app.familygem.constant.Relation
 import app.familygem.constant.Type
@@ -45,8 +44,10 @@ import app.familygem.util.FileUtil
 import app.familygem.util.MediaUtil
 import app.familygem.util.NoteUtil
 import app.familygem.util.TreeUtil.save
+import app.familygem.util.Util
 import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
+import app.familygem.util.sex
 import app.familygem.visitor.FindStack
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -249,7 +250,7 @@ class ProfileActivity : AppCompatActivity() {
                 1 -> { // Facts
                     menu.add(0, 20, 0, R.string.name)
                     // Sex
-                    if (Gender.getGender(person) == Gender.NONE) menu.add(0, 21, 0, R.string.sex)
+                    if (person?.sex?.isMissing() == true) menu.add(0, 21, 0, R.string.sex)
                     // Main events
                     val eventSubMenu = menu.addSubMenu(R.string.event)
                     val mainEventStrings = arrayOf(
@@ -500,11 +501,10 @@ class ProfileActivity : AppCompatActivity() {
                 startActivity(intent)
             }
             5 -> { // Delete
-                AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
-                    .setPositiveButton(R.string.delete) { _, _ ->
-                        val families = person!!.delete()
-                        if (!U.deleteEmptyFamilies(this, { this.goBack() }, true, *families)) goBack()
-                    }.setNeutralButton(R.string.cancel, null).show()
+                Util.confirmDelete(this) {
+                    val families = person!!.delete()
+                    if (!U.deleteEmptyFamilies(this, { this.goBack() }, true, *families)) goBack()
+                }
             }
             else -> goBack()
         }

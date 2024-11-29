@@ -78,7 +78,6 @@
     <string name="aka">Dar žinomas kaip</string>
     <string name="move_before">Perkelti prieš</string>
     <string name="death_date">Mirties data</string>
-    <string name="really_delete_person">Ar tikrai norite ištrinti šį asmenį?</string>
     <string name="select_tree">Pažymėkite medį, kurį norite sujungti:</string>
     <string name="www">Svetainė</string>
     <string name="year">Metai</string>
@@ -152,8 +151,6 @@
     <string name="correctly_uploaded">Medis sėkmingai nusiųstas.</string>
     <string name="about">Apie</string>
     <string name="sibling">Brolis-sesuo</string>
-    <string name="really_delete_tree">Ar tikrai norite ištrinti šį medį?</string>
-    <string name="person_deleted">Asmuo ištrintas.</string>
     <string name="load_tree_startup">Paleidžiant programą atverti paskutinį žiūrėtą medį</string>
     <string name="christening">Krikštijimas</string>
     <string name="country">Valstybė</string>
@@ -236,7 +233,6 @@
     <string name="replace">Pakeisti</string>
     <string name="author">Autorius</string>
     <string name="sex">Lytis</string>
-    <string name="simple_note">Paprasta pastaba</string>
     <string name="existing_family">Tokia šeima jau yra</string>
     <string name="after">Po</string>
     <string name="shares">Bendrinimai</string>
@@ -251,7 +247,6 @@
     <string name="july">Liepa</string>
     <string name="add">Pridėti</string>
     <string name="family_as_spouse">Šeima (kaip sutuoktinis)</string>
-    <string name="simple_notes">Papratos pastabos</string>
     <string name="delete_imported_tree">Ištrinti importuotą medį</string>
     <string name="copyright">Autorinės teisės</string>
     <string name="time">Laikas</string>

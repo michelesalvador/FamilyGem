@@ -9,9 +9,9 @@ import androidx.fragment.app.activityViewModels
 import app.familygem.GedcomDateConverter
 import app.familygem.R
 import app.familygem.U
-import app.familygem.constant.Gender
 import app.familygem.databinding.MergePersonFragmentBinding
 import app.familygem.util.FileUtil
+import app.familygem.util.sex
 import app.familygem.util.toString
 import app.familygem.util.writeTitle
 import org.folg.gedcom.model.Gedcom
@@ -34,8 +34,9 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
         binding.person = this
 
         // Border
-        if (Gender.isMale(person)) binding.mergeBorder.setBackgroundResource(R.drawable.casella_bordo_maschio)
-        else if (Gender.isFemale(person)) binding.mergeBorder.setBackgroundResource(R.drawable.casella_bordo_femmina)
+        val sex = person.sex
+        if (sex.isMale()) binding.mergeBorder.setBackgroundResource(R.drawable.person_border_male)
+        else if (sex.isFemale()) binding.mergeBorder.setBackgroundResource(R.drawable.person_border_female)
         // Image
         val gedcom: Gedcom = if (position) model.secondGedcom else model.firstGedcom
         val treeId: Int = if (position) model.secondNum.value!! else model.firstNum

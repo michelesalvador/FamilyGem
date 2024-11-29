@@ -61,7 +61,6 @@
     <string name="compare">Karşılaştır</string>
     <string name="settings">Ayarlar</string>
     <string name="auto_save">Otomatik kaydetme</string>
-    <string name="really_delete_tree">Bu ağacı gerçekten silmek istiyor musunuz\?</string>
     <string name="no_results">Sonuç yok.</string>
     <string name="all_ok">Her şey yolunda.</string>
     <string name="errors_found">%d hata bulundu.</string>
@@ -117,7 +116,6 @@
     <string name="shared_medias">paylaşılan medya</string>
     <string name="choose_output">Hedefi seçin:</string>
     <string name="move_before">Öne al</string>
-    <string name="really_delete_person">Gerçekten bu kişiyi silmek istiyor musun?</string>
     <string name="select_tree">Birleştirmek istediğiniz soyağacını seçiniz:</string>
     <string name="year">Yıla göre</string>
     <string name="half_sister">Üvey kız kardeş</string>
@@ -159,7 +157,6 @@
     <string name="ancestors">Atalar</string>
     <string name="correctly_uploaded">Soyağacı başarılı bir şekilde karşıya gönderildi.</string>
     <string name="sibling">Kardeş</string>
-    <string name="person_deleted">Kişi silindi.</string>
     <string name="christening">Vaftiz</string>
     <string name="diagram_settings">Soyağacı diyağramının ayarları</string>
     <string name="relatives">Akrabalar</string>
@@ -372,12 +369,10 @@
     <string name="not_granted">%s bağış yapmadı.</string>
     <string name="suffix">son ek</string>
     <string name="author">Yazar</string>
-    <string name="simple_note">Basit not</string>
     <string name="after">Sonra</string>
     <string name="italic">İtalik</string>
     <string name="which_family_add_sibling">Kardeş hangi aileye eklenmeli?</string>
     <string name="july">Temmuz</string>
-    <string name="simple_notes">Basit notlar</string>
     <string name="repository_citation">Depo alıntısı</string>
     <string name="edit_id">Kimlik bilgilerini düzenle</string>
     <string name="format">Biçimlendirme</string>

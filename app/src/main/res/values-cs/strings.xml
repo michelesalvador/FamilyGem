@@ -24,7 +24,6 @@
     <string name="make_main_submitter">Chcete, aby tento zadavatel byl hlavním zadavatelem stromu\?</string>
     <string name="half_sibling">Nevlastní sourozenec</string>
     <string name="make_root">Označit jako hlavní osobu</string>
-    <string name="really_delete_person">Opravdu odstranit tuto osobu\?</string>
     <string name="generations_display_diagram">Nastavení počtu generací zobrazených v diagramu:</string>
     <string name="updates_replace_add">Vybrat, zda aktualizace mají nahradit stávající položky nebo být přidány jako nové.</string>
     <string name="sent_by">Odeslal %s</string>
@@ -34,7 +33,6 @@
     <string name="load_tree_startup">Při spuštění načíst poslední otevřený strom</string>
     <string name="auto_save">Automatické ukládání</string>
     <string name="errors_found">%d nalezené chyby.</string>
-    <string name="really_delete_tree">Opravdu odstranit tento strom\?</string>
     <string name="download">Stáhnout</string>
     <string name="you_can_download">Teď můžete stáhnout sdílený strom.</string>
     <string name="modify_later">Později to můžete změnit.</string>
@@ -92,8 +90,6 @@
     <string name="shared_by">Sdílí</string>
     <string name="written_in">Napsáno v</string>
     <string name="shared_note">Sdílená poznámka</string>
-    <string name="simple_notes">Jednoduché poznámky</string>
-    <string name="simple_note">Jednoduchá poznámka</string>
     <string name="shared_notes">Sdílené poznámky</string>
     <string name="divorce">Rozvod</string>
     <string name="marriage">Sňatek</string>
@@ -232,7 +228,6 @@
     <string name="this_is_root">%s je hlavní osoba stromu.</string>
     <string name="relatives">Příbuzní</string>
     <string name="events">Fakta</string>
-    <string name="person_deleted">Osoba odstraněna.</string>
     <string name="number_relatives">Počet příbuzných</string>
     <string name="year">Rok</string>
     <string name="surname">Příjmení</string>

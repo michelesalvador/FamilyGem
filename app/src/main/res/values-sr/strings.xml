@@ -53,8 +53,6 @@
     <string name="shared_by">Delilac</string>
     <string name="written_in">Napisano u</string>
     <string name="shared_note">Deljena napomena</string>
-    <string name="simple_notes">Jednostavne napomene</string>
-    <string name="simple_note">Jednostavna napomena</string>
     <string name="shared_notes">Deljene napomene</string>
     <string name="really_delete_family">Ova će se porodica izbrisati, ali ne i članovi porodice.</string>
     <string name="divorce">Razvod</string>
@@ -166,8 +164,6 @@
     <string name="make_root">Postavi kao glavnu osobu</string>
     <string name="relatives">Rodbina</string>
     <string name="events">Činjenice</string>
-    <string name="person_deleted">Osoba izbrisana.</string>
-    <string name="really_delete_person">Stvarno želiš izbrisati ovu osobu\?</string>
     <string name="number_relatives">Broj srodnih osoba</string>
     <string name="year">Godina</string>
     <string name="surname">Prezime</string>
@@ -258,7 +254,6 @@
     <string name="correct">Ispravno</string>
     <string name="errors_found">Pronađenih grešaka: %d.</string>
     <string name="all_ok">Sve je u redu.</string>
-    <string name="really_delete_tree">Stvarno želiš izbrisati ovo stablo\?</string>
     <string name="no_results">Nema rezultata.</string>
     <string name="export_gedcom">Izvezi u GEDCOM formatu</string>
     <string name="compare">Uporedi</string>

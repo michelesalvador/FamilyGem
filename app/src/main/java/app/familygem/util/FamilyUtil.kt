@@ -10,7 +10,6 @@ import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.R
 import app.familygem.U
-import app.familygem.constant.Gender
 import app.familygem.constant.Relation
 import app.familygem.detail.FamilyActivity
 import org.folg.gedcom.model.ChildRef
@@ -157,7 +156,7 @@ object FamilyUtil {
                 else addWife(spouseRef)
             } else { // Adds according to sex
                 val person = Global.gc.getPerson(spouseRef.ref)
-                if (Gender.isFemale(person)) addWife(spouseRef)
+                if (person.sex.isFemale()) addWife(spouseRef)
                 else addHusband(spouseRef)
             }
         }
@@ -195,7 +194,7 @@ object FamilyUtil {
             }
 
             val spouses = getSpouseRefs().mapNotNull { it.getPerson(gedcom) }
-            val females = spouses.filter { Gender.isFemale(it) }
+            val females = spouses.filter { it.sex.isFemale() }
             val males = spouses.minus(females.toSet()) // Males and undefined sexes, actually
 
             if (females.isEmpty()) { // Males only
@@ -285,9 +284,9 @@ object FamilyUtil {
     fun areSpousesHomosexual(family: Family): Boolean {
         family.apply {
             if (husbandRefs.size > 0 && wifeRefs.size > 0) {
-                val husbandSex = Gender.getGender(getHusbands(Global.gc)[0])
-                val wifeSex = Gender.getGender(getWives(Global.gc)[0])
-                return husbandSex != Gender.FEMALE && wifeSex != Gender.FEMALE || husbandSex == Gender.FEMALE && wifeSex == Gender.FEMALE
+                val femaleHusband = getHusbands(Global.gc)[0].sex.isFemale()
+                val femaleWife = getWives(Global.gc)[0].sex.isFemale()
+                return femaleHusband && femaleWife || !femaleHusband && !femaleWife
             }
         }
         return false

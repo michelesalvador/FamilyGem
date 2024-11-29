@@ -1221,12 +1221,12 @@ public abstract class DetailActivity extends AppCompatActivity {
                 findAnotherRepresentativeOfTheFamily(person);
                 break;
             case 23: // Delete family member
-                new AlertDialog.Builder(this).setMessage(R.string.really_delete_person)
-                        .setPositiveButton(R.string.delete, (dialog, id) -> {
-                            PersonUtilKt.delete(person);
-                            findAnotherRepresentativeOfTheFamily(person);
-                            refresh();
-                        }).setNeutralButton(R.string.cancel, null).show();
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    PersonUtilKt.delete(person);
+                    findAnotherRepresentativeOfTheFamily(person);
+                    refresh();
+                    return Unit.INSTANCE;
+                });
                 return true;
             case 25: // Copy note text
                 U.copyToClipboard(getText(R.string.note), ((TextView)pieceView.findViewById(R.id.note_text)).getText());

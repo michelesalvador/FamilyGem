@@ -134,8 +134,6 @@
     <string name="age">年龄</string>
     <string name="year">年</string>
     <string name="number_relatives">亲属数量</string>
-    <string name="really_delete_person">真的要删除这个人吗？</string>
-    <string name="person_deleted">此人已删除。</string>
     <string name="events">基本信息</string>
     <string name="relatives">亲属</string>
     <string name="make_root">设置为根</string>
@@ -259,8 +257,6 @@
     <string name="foster">养育人</string>
     <string name="really_delete_family">这个家庭将被删除，但家庭成员将不会被删除。</string>
     <string name="shared_notes">分享的注释</string>
-    <string name="simple_note">简单注释</string>
-    <string name="simple_notes">简单注释</string>
     <string name="shared_note">共享注释</string>
     <string name="written_in">写在</string>
     <string name="shared_by">使用者</string>
@@ -332,7 +328,6 @@
     <string name="open">打开</string>
     <string name="rename">重命名</string>
     <string name="export_gedcom">导出 GEDCOM</string>
-    <string name="really_delete_tree">确定删除该家谱吗？</string>
     <string name="show_advanced_functions">显示高级工具</string>
     <string name="settings">设置</string>
     <string name="load_tree_startup">启动时加载上次打开的家谱</string>

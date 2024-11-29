@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="6dp"
-    android:background="@drawable/casella_sfondo_base">
+    android:background="@drawable/person_background">
 
     <View
         android:id="@+id/person_border"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/casella_bordo_neutro" />
+        android:background="@drawable/person_border_undefined" />
 
     <RelativeLayout
         android:layout_width="match_parent"

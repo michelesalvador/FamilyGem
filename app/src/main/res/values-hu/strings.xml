@@ -54,7 +54,6 @@
     <string name="gedcom_exported_ok">GEDCOM exportálva.</string>
     <string name="zip_exported_ok">ZIP exportálva.</string>
     <string name="no_results">Nincs találat.</string>
-    <string name="really_delete_tree">Valóban törölni szeretné ezt a fát\?</string>
     <string name="all_ok">Minden rendben.</string>
     <string name="correct">Helyes</string>
     <string name="settings">Beállítások</string>
@@ -126,8 +125,6 @@
     <string name="surname">Vezetéknév</string>
     <string name="year">Év</string>
     <string name="number_relatives">Hozzátartozók száma</string>
-    <string name="really_delete_person">Valóban törölni szeretné ezt a személyt\?</string>
-    <string name="person_deleted">Személy törölve.</string>
     <string name="events">Tények</string>
     <string name="relatives">Rokonok</string>
     <string name="make_root">Beállítás gyökérként</string>
@@ -221,7 +218,6 @@
     <string name="divorce">Válás</string>
     <string name="really_delete_family">Ez a család törlődik, de a családtagok nem.</string>
     <string name="shared_notes">Megosztott megjegyzések</string>
-    <string name="simple_note">Egyszerű megjegyzés</string>
     <string name="common_law_marriage">Szokásjog</string>
     <string name="separation">Különválás</string>
     <string name="shared_note">Megosztott megjegyzés</string>
@@ -322,7 +318,6 @@
     <string name="november">November</string>
     <string name="december">December</string>
     <string name="approximate">Hozzávetőleges</string>
-    <string name="simple_notes">Egyszerű megjegyzések</string>
     <string name="female">Nő</string>
     <string name="which_family_add_parent">Melyik családba kerüljön a szülő\?</string>
     <string name="april">Április</string>

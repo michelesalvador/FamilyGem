@@ -55,7 +55,6 @@
     <string name="compare">Porównaj</string>
     <string name="export_gedcom">Eksportuj GEDCOM</string>
     <string name="no_results">Brak wyników.</string>
-    <string name="really_delete_tree">Naprawdę chcesz usunąć to drzewo?</string>
     <string name="all_ok">Wszystko jest OK.</string>
     <string name="errors_found">%d znalezione błędy.</string>
     <string name="correct">Poprawne</string>
@@ -140,8 +139,6 @@
     <string name="surname">Nazwisko</string>
     <string name="year">Rok</string>
     <string name="number_relatives">Liczba krewnych</string>
-    <string name="really_delete_person">Naprawdę chcesz usunąć tę osobę?</string>
-    <string name="person_deleted">Osoba usunięta.</string>
     <string name="events">Fakty</string>
     <string name="relatives">Relacje</string>
     <string name="make_root">Ustaw jako katalog główny</string>
@@ -248,8 +245,6 @@
     <string name="marriage">Ślub</string>
     <string name="really_delete_family">Ta rodzina zostanie usunięta, ale członkowie rodziny nie zostaną usunięci.</string>
     <string name="shared_notes">Udostępnione notatki</string>
-    <string name="simple_note">Prosta notatka</string>
-    <string name="simple_notes">Proste notatki</string>
     <string name="shared_note">Udostępniona notatka</string>
     <string name="written_in">Napisane w</string>
     <string name="shared_by">Używany przez</string>

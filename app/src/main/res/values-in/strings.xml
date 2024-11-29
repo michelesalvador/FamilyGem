@@ -56,7 +56,6 @@
     <string name="export_gedcom">Ekspor GEDCOM</string>
     <string name="zip_exported_ok">ZIP sudah diekspor.</string>
     <string name="no_results">Tidak ada hasil.</string>
-    <string name="really_delete_tree">Benar-benar ingin menghapus pohon ini\?</string>
     <string name="all_ok">Semuanya OK.</string>
     <string name="errors_found">%d kesalahan ditemukan.</string>
     <string name="correct">Perbaiki</string>
@@ -132,7 +131,6 @@
     <string name="confirm_news">Konfirmasi pembaruan</string>
     <string name="surname">Nama keluarga</string>
     <string name="turns_years_old">%s berusia %d tahun hari ini.</string>
-    <string name="person_deleted">Orang telah dihapus.</string>
     <string name="family_as_spouse">Keluarga (sebagai pasangan)</string>
     <string name="card">Profil</string>
     <string name="family_as_child">Keluarga (sebagai anak)</string>
@@ -148,7 +146,6 @@
     <string name="make_root">Tetapkan sebagai root</string>
     <string name="this_is_root">%s adalah orang utama silsilah.</string>
     <string name="uncles_cousins">Paman dan sepupu</string>
-    <string name="really_delete_person">Benar-benar ingin menghapus orang ini\?</string>
     <string name="item_exists_but_file">Entri silsilah ada dalam indeks, tetapi karena alasan tertentu file terkait tidak ada:</string>
     <string name="accepted_news">Anda menerima %d pembaruan:
 \n%d tambahan
@@ -271,8 +268,6 @@
     <string name="common_law_marriage">Hukum umum</string>
     <string name="separation">Pemisahan</string>
     <string name="really_delete_family">Keluarga ini akan dihapus, tetapi anggota keluarga tidak akan dihapus.</string>
-    <string name="simple_note">Catatan sederhana</string>
-    <string name="simple_notes">Catatan sederhana</string>
     <string name="shared_note">Catatan yang dibagikan</string>
     <string name="written_in">Tertulis di</string>
     <string name="shared_by">Digunakan oleh</string>

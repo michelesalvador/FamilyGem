@@ -3,7 +3,7 @@
     <string name="app_name" translatable="false">Family Gem</string>
     <string name="tagline">Create your own family tree</string>
     <string name="delete">Delete</string>
-    <string name="sure_delete">Are you sure?</string>
+    <string name="sure_delete">Are you sure\?</string>
     <string name="cancel">Cancel</string>
     <string name="done">Done</string>
     <string name="change_date">Change date</string>
@@ -37,7 +37,7 @@
     <string name="name_of_tree">Title of tree</string>
     <string name="create">Create</string>
     <string name="tree_created">New tree created.</string>
-    <string name="complex_tree_advanced_tools">This tree looks quite complex.\nTo better manage it, do you want to show advanced tools?</string>
+    <string name="complex_tree_advanced_tools">This tree looks quite complex.\nTo better manage it, do you want to show advanced tools\?</string>
     <string name="tree_imported_ok">Tree successfully imported.</string>
     <string name="backup_invalid">This backup is invalid.</string>
     <string name="invalid_gedcom">Invalid GEDCOM.</string>
@@ -67,7 +67,6 @@
     <string name="gedcom_exported_ok">GEDCOM exported.</string>
     <string name="zip_exported_ok">ZIP exported.</string>
     <string name="no_results">No results.</string>
-    <string name="really_delete_tree">Really want to delete this tree?</string>
     <string name="all_ok">Everything is OK.</string>
     <string name="error_found">One error found.</string>
     <string name="errors_found">%d errors found.</string>
@@ -147,12 +146,15 @@
     <string name="confirm_news">Confirm updates</string>
     <string name="accepted_news">You accepted %d updates:\n\t%d additions\n\t%d replacements\n\t%d deletions</string>
     <string name="confirm">Confirm</string>
-    <string name="all_imported_delete">All updates have been imported.\nDo you want to delete the imported tree?</string>
+    <string name="all_imported_delete">All updates have been imported.\nDo you want to delete the imported tree\?</string>
     <string name="merge_tree">Merge tree</string>
     <string name="merge">Merge</string>
     <string name="select_tree">Select a tree to merge:</string>
-    <string name="next">Next</string>
-    <string name="are_same_person">Are they the same person?</string>
+    <string name="search_duplicates">Search for duplicates</string>
+    <string name="skip">Skip</string>
+    <string name="are_same_person">Are they the same person\?</string>
+    <string name="yes_to_all">Yes to all remaining</string>
+    <string name="no_to_all">No to all remaining</string>
     <string name="choose_output">Choose the destination:</string>
     <string name="merge_into">Merge %2$s into %1$s</string>
     <string name="generate_new">Generate a new tree from the two</string>
@@ -186,12 +188,9 @@
     <string name="order_by">Sort by</string>
     <string name="id">ID</string>
     <string name="surname">Surname</string>
-    <string name="year">Year</string>
     <string name="age">Age</string>
     <string name="birthday">Birthday</string>
     <string name="number_relatives">Number of relatives</string>
-    <string name="really_delete_person">Really want to delete this person?</string>
-    <string name="person_deleted">Person deleted.</string>
     <string name="events">Facts</string>
     <string name="relatives">Relatives</string>
     <string name="make_root">Set as root</string>
@@ -259,7 +258,7 @@
     <string name="choose_file">Choose file</string>
     <string name="crop">Crop</string>
     <string name="copy">Copy text</string>
-    <string name="make_main_submitter">Do you want this submitter be the main of the tree?</string>
+    <string name="make_main_submitter">Do you want this submitter be the main of the tree\?</string>
     <string name="value">Value</string>
     <string name="type">Type</string>
     <string name="prefix">Prefix</string>
@@ -339,8 +338,6 @@
     <string name="foster">Foster</string>
     <string name="really_delete_family">This family will be deleted, but the family members will not be deleted.</string>
     <string name="shared_notes">Shared notes</string>
-    <string name="simple_note">Simple note</string>
-    <string name="simple_notes">Simple notes</string>
     <string name="shared_note">Shared note</string>
     <string name="written_in">Written in</string>
     <string name="shared_by">Used by</string>
@@ -394,13 +391,13 @@
     <string name="empty_name">Empty name</string>
     <string name="months">months</string>
     <string name="days">days</string>
-    <string name="want_crop_image">Do you want to crop this image?</string>
+    <string name="want_crop_image">Do you want to crop this image\?</string>
     <string name="no">No</string>
     <string name="not_granted">%s not granted.</string>
     <string name="empty_media">Empty media</string>
     <string name="empty_family">Empty family</string>
-    <string name="which_family">Which family?</string>
-    <string name="empty_family_delete">There are some empty families left.\nDo you want to delete them?</string>
+    <string name="which_family">Which family\?</string>
+    <string name="empty_family_delete">There are some empty families left.\nDo you want to delete them\?</string>
     <string name="edit_id">Edit ID</string>
     <string name="invalid_id">Invalid ID</string>
     <string name="existing_id">Already existing ID</string>
@@ -412,4 +409,6 @@
     <string name="premium_activated">Premium activated.</string>
     <string name="premium_deactivated">Premium deactivated.</string>
     <string name="update_playstore">Please update Play Store app.</string>
+    <string name="year">Year</string>
+    <string name="next">Next</string>
 </resources>

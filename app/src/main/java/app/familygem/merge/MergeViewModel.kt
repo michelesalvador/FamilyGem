@@ -11,9 +11,12 @@ import app.familygem.Global
 import app.familygem.Settings.Tree
 import app.familygem.U
 import app.familygem.constant.Extra
-import app.familygem.constant.Gender
+import app.familygem.util.ChangeUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
+import app.familygem.util.getSpouseRefs
+import app.familygem.util.getSpouses
+import app.familygem.util.sex
 import app.familygem.visitor.ListOfSourceCitations
 import app.familygem.visitor.MediaContainersGuarded
 import app.familygem.visitor.MediaList
@@ -43,17 +46,16 @@ import java.io.FileInputStream
 import kotlin.collections.set
 import kotlin.math.abs
 
-/**
- * Merges second tree into first tree, or generates a third tree from the two.
- */
+
+/** Merges second tree into first tree, or generates a third tree from the two. */
 class MergeViewModel(state: SavedStateHandle) : ViewModel() {
 
-    val firstNum: Int // ID of the first tree
+    val firstNum = state.get<Int>(Extra.TREE_ID)!! // ID of the first tree
     val secondNum = MutableLiveData<Int>() // ID of the second tree
     var newNum = 0 // ID of the third tree created from first and second
-    val firstTree: Tree
+    val firstTree: Tree = Global.settings.getTree(firstNum)
     lateinit var secondTree: Tree
-    val trees = Global.settings.trees.filter { it.grade < 20 } as MutableList<Tree> // Derived and exhausted trees are excluded
+    val trees = Global.settings.trees.filterNot { it == firstTree || it.grade >= 20 } // Derived and exhausted trees are excluded
     lateinit var firstGedcom: Gedcom
     lateinit var secondGedcom: Gedcom
     private val records = Records()
@@ -73,18 +75,16 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     }
 
     init {
-        firstNum = state.get<Int>(Extra.TREE_ID)!!
-        firstTree = Global.settings.getTree(firstNum)
-        trees.remove(firstTree)
-
         // Populates the records array with the 7 types
-        records.add(Person::class.java, "I")
-        records.add(Family::class.java, "F")
-        records.add(Media::class.java, "M")
-        records.add(Note::class.java, "T")
-        records.add(Source::class.java, "S")
-        records.add(Repository::class.java, "R")
-        records.add(Submitter::class.java, "U")
+        records.apply {
+            add(Person::class.java, "I")
+            add(Family::class.java, "F")
+            add(Media::class.java, "M")
+            add(Note::class.java, "T")
+            add(Source::class.java, "S")
+            add(Repository::class.java, "R")
+            add(Submitter::class.java, "U")
+        }
     }
 
     fun setSecondTree(treeId: Int) {
@@ -92,9 +92,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         secondTree = Global.settings.getTree(treeId)
     }
 
-    /**
-     * Returns the person name or null.
-     */
+    /** Returns the person name or null. */
     private fun getNameValue(person: Person): String? {
         if (person.names.any()) {
             val name = person.names[0].displayValue.replace("/", "").trim()
@@ -107,10 +105,8 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         withContext(Dispatchers.Main) { state.value = stat }
     }
 
-    /**
-     * Searches for persons with similar name in the first and second GEDCOM
-     */
-    fun findMatches() {
+    /** Loads first and second GEDCOM, optionally searching for people with similar name. */
+    fun openTwoGedcom(searchMatches: Boolean) {
         coroutine = viewModelScope.launch(Dispatchers.Default) {
             setState(State.ACTIVE)
             var tempGedcom = TreeUtil.readJson(firstNum)
@@ -124,7 +120,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 return@launch
             }
             personMatches.clear()
-            firstGedcom.people.forEach { person1 ->
+            if (searchMatches) firstGedcom.people.forEach { person1 ->
                 yield()
                 val name1 = getNameValue(person1)
                 if (name1 != null) {
@@ -196,9 +192,16 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             actualMatch--
     }
 
-    /**
-     * @param position false = left, true = right
-     */
+    /** Assigns the given will to all remaining matches. */
+    fun resolveRemainingMatches(will: Will) {
+        val actual = actualMatch
+        while (nextMatch(will)) {
+            // All done
+        }
+        actualMatch = actual // To display last visible match on back pressed from ResultFragment
+    }
+
+    /** @param position false = left, true = right */
     fun getPerson(position: Boolean): Person {
         return if (position) personMatches[actualMatch].right else personMatches[actualMatch].left
     }
@@ -243,18 +246,18 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         destinationTree.uris.addAll(sourceTree.uris)
     }
 
-    /**
-     * Executes the merge of second GEDCOM into first GEDCOM.
-     */
+    /** Executes the merge of second GEDCOM into first GEDCOM. */
     private suspend fun doMerge() {
         // Loops in records of first GEDCOM seeking for maximum ID of each record type
-        firstGedcom.people.forEach { findMaxId(it) }
-        firstGedcom.families.forEach { findMaxId(it) }
-        firstGedcom.media.forEach { findMaxId(it) }
-        firstGedcom.notes.forEach { findMaxId(it) }
-        firstGedcom.sources.forEach { findMaxId(it) }
-        firstGedcom.repositories.forEach { findMaxId(it) }
-        firstGedcom.submitters.forEach { findMaxId(it) }
+        firstGedcom.run {
+            people.forEach { findMaxId(it) }
+            families.forEach { findMaxId(it) }
+            media.forEach { findMaxId(it) }
+            notes.forEach { findMaxId(it) }
+            sources.forEach { findMaxId(it) }
+            repositories.forEach { findMaxId(it) }
+            submitters.forEach { findMaxId(it) }
+        }
 
         // Populates familyMatches with personMatches grouped in parent and spouse families
         personMatches.forEach { personMatch ->
@@ -287,20 +290,18 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                         family.wifeRefs.count { ref -> match.spouseMatches.map { it.left.id }.contains(ref.ref) } +
                         family.childRefs.count { ref -> match.childMatches.map { it.left.id }.contains(ref.ref) }
                 // Counts non-matching spouses of first family
-                val nonMatchingPartners = (family.getHusbands(firstGedcom) + family.getWives(firstGedcom))
-                        .minus(match.spouseMatches.map { it.left }.toSet()).size
+                val nonMatchingPartners = family.getSpouses(firstGedcom).minus(match.spouseMatches.map { it.left }.toSet()).size
                 family.putExtension(SCORE, matchers - nonMatchingPartners)
             }
             // Selects the family with higher score or null
-            val matchingFamily: Family? = firstFamiliesPool.maxByOrNull { it.getExtension(SCORE) as Int }
+            val matchingFamily = firstFamiliesPool.maxByOrNull { it.getExtension(SCORE) as Int }
             if (matchingFamily == null) {
                 match.destiny = Will.KEEP
             } else {
                 val score = matchingFamily.getExtension(SCORE) as Int
                 // Total spouses of first and second family must be less than two
-                val totalSpouses = (matchingFamily.getHusbands(firstGedcom) + matchingFamily.getWives(firstGedcom)).minus(
-                        match.spouseMatches.map { it.left }.toSet()).size +
-                        (match.right.getHusbands(secondGedcom) + match.right.getWives(secondGedcom)).size
+                val totalSpouses = matchingFamily.getSpouses(firstGedcom).minus(match.spouseMatches.map { it.left }.toSet()).size +
+                        match.right.getSpouseRefs().size
                 if (score <= 0 || totalSpouses > 2) {
                     match.destiny = Will.KEEP
                 } else {
@@ -320,55 +321,42 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 val firstNameValue = getNameValue(first)
                 val secondNameValue = getNameValue(second)
                 if (firstNameValue != null && secondNameValue != null && firstNameValue.equals(secondNameValue, true)) {
-                    val firstName = first.names[0]
-                    val secondName = second.names[0]
-                    if (firstName.nickname == null) firstName.nickname = secondName.nickname
-                    if (firstName.type == null) firstName.type = secondName.type
-                    if (firstName.prefix == null) firstName.prefix = secondName.prefix
-                    if (firstName.given == null) firstName.given = secondName.given
-                    if (firstName.surnamePrefix == null) firstName.surnamePrefix = secondName.surnamePrefix
-                    if (firstName.surname == null) firstName.surname = secondName.surname
-                    if (firstName.suffix == null) firstName.suffix = secondName.suffix
-                    if (firstName.romn == null) firstName.romn = secondName.romn
-                    if (firstName.fone == null) firstName.fone = secondName.fone
-                    secondName.notes.forEach { firstName.addNote(it) }
-                    secondName.noteRefs.forEach { firstName.addNoteRef(it) }
-                    secondName.media.forEach { firstName.addMedia(it) }
-                    secondName.mediaRefs.forEach { firstName.addMediaRef(it) }
-                    secondName.sourceCitations.forEach { firstName.addSourceCitation(it) }
-                    secondName.extensions.forEach { firstName.putExtension(it.key, it.value) }
-                    second.names.filter { it != secondName }.forEach { first.addName(it) }
+                    first.names[0].apply { // First person name
+                        val secondName = second.names[0]
+                        if (nickname == null) nickname = secondName.nickname
+                        if (type == null) type = secondName.type
+                        if (prefix == null) prefix = secondName.prefix
+                        if (given == null) given = secondName.given
+                        if (surnamePrefix == null) surnamePrefix = secondName.surnamePrefix
+                        if (surname == null) surname = secondName.surname
+                        if (suffix == null) suffix = secondName.suffix
+                        if (romn == null) romn = secondName.romn
+                        if (fone == null) fone = secondName.fone
+                        secondName.notes.forEach { addNote(it) }
+                        secondName.noteRefs.forEach { addNoteRef(it) }
+                        secondName.media.forEach { addMedia(it) }
+                        secondName.mediaRefs.forEach { addMediaRef(it) }
+                        secondName.sourceCitations.forEach { addSourceCitation(it) }
+                        secondName.extensions.forEach { putExtension(it.key, it.value) }
+                        second.names.filterNot { it == secondName }.forEach { first.addName(it) }
+                    }
                 } else {
                     second.names.forEach { first.addName(it) }
                 }
                 // All data from second person to the first one
-                outer@ for (event in second.eventsFacts) {
-                    // Avoids duplication of sex tag in first person
-                    if (event.tag == "SEX") {
-                        if (Gender.isDefined(first)) {
-                            continue
-                        } else if (Gender.isDefined(second)) {
-                            val firstGender = Gender.getGender(first)
-                            if (firstGender == Gender.UNKNOWN || firstGender == Gender.EMPTY) {
-                                for (firstEvent in first.eventsFacts) {
-                                    if (firstEvent.tag == "SEX") {
-                                        firstEvent.value = event.value
-                                        continue@outer
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    first.addEventFact(event)
+                first.apply { // First person
+                    val secondSex = second.sex
+                    if (sex.isUndefined() && secondSex.isDefined()) sex = secondSex
+                    second.eventsFacts.filterNot { it.tag == "SEX" }.forEach { addEventFact(it) }
+                    second.media.forEach { addMedia(it) }
+                    second.mediaRefs.forEach { addMediaRef(it) }
+                    second.notes.forEach { addNote(it) }
+                    second.noteRefs.forEach { addNoteRef(it) }
+                    second.sourceCitations.forEach { addSourceCitation(it) }
+                    second.extensions.forEach { putExtension(it.key, it.value) }
+                    second.putExtension(MATCHING, id) // Adds the MATCHING extension to the second person to make them recognizable later
                 }
-                second.media.forEach { first.addMedia(it) }
-                second.mediaRefs.forEach { first.addMediaRef(it) }
-                second.notes.forEach { first.addNote(it) }
-                second.noteRefs.forEach { first.addNoteRef(it) }
-                second.sourceCitations.forEach { first.addSourceCitation(it) }
-                second.extensions.forEach { first.putExtension(it.key, it.value) }
-                // Adds the MATCHING extension to the second person to make them recognizable later
-                second.putExtension(MATCHING, first.id)
+                ChangeUtil.updateChangeDate(first)
             }
         }
 
@@ -377,29 +365,26 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             yield()
             val secondFamily = match.right
             if (match.destiny == Will.MERGE) {
-                val firstFamily = match.left!!
-                secondFamily.husbandRefs.filter { !isMatch(it) && !firstFamily.husbandRefs.contains(it) }.forEach {
-                    firstFamily.addHusband(it)
+                // Merges all content of second family into first family
+                match.left?.apply { // First family
+                    secondFamily.husbandRefs.filterNot { isMatch(it) || husbandRefs.contains(it) }.forEach { addHusband(it) }
+                    secondFamily.wifeRefs.filterNot { isMatch(it) || wifeRefs.contains(it) }.forEach { addWife(it) }
+                    secondFamily.childRefs.filterNot { isMatch(it) || childRefs.contains(it) }.forEach { addChild(it) }
+                    secondFamily.eventsFacts.forEach { addEventFact(it) }
+                    secondFamily.media.forEach { addMedia(it) }
+                    secondFamily.mediaRefs.forEach { addMediaRef(it) }
+                    secondFamily.notes.forEach { addNote(it) }
+                    secondFamily.noteRefs.forEach { addNoteRef(it) }
+                    secondFamily.sourceCitations.forEach { addSourceCitation(it) }
+                    secondFamily.putExtension(MATCHING, id) // Adds the extension to use it later
+                    ChangeUtil.updateChangeDate(this)
                 }
-                secondFamily.wifeRefs.filter { !isMatch(it) && !firstFamily.wifeRefs.contains(it) }.forEach {
-                    firstFamily.addWife(it)
-                }
-                secondFamily.childRefs.filter { !isMatch(it) && !firstFamily.childRefs.contains(it) }.forEach {
-                    firstFamily.addChild(it)
-                }
-                secondFamily.eventsFacts.forEach { firstFamily.addEventFact(it) }
-                secondFamily.media.forEach { firstFamily.addMedia(it) }
-                secondFamily.mediaRefs.forEach { firstFamily.addMediaRef(it) }
-                secondFamily.notes.forEach { firstFamily.addNote(it) }
-                secondFamily.noteRefs.forEach { firstFamily.addNoteRef(it) }
-                secondFamily.sourceCitations.forEach { firstFamily.addSourceCitation(it) }
-                // Adds the extension to use it later
-                secondFamily.putExtension(MATCHING, firstFamily.id)
             } else if (match.destiny == Will.KEEP) {
+                // Adds to first family members (designated to be merged) references to second family
                 match.childMatches.forEach {
                     val parentRef = ParentFamilyRef()
                     parentRef.ref = secondFamily.id
-                    parentRef.putExtension(UPDATE_REF, true) // To recognize it later
+                    parentRef.putExtension(UPDATE_REF, true) // To updated it later
                     it.left.addParentFamilyRef(parentRef)
                 }
                 match.spouseMatches.forEach {
@@ -412,152 +397,114 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         }
 
         // Loops in records of the second GEDCOM to update their ID and every related ID
-        for (person in secondGedcom.people) {
-            yield()
-            if (isEligible(person)) {
-                if (checkNotDone(person))
-                    person.id = newId
-                secondGedcom.families.forEach { family ->
-                    for (husbandRef in family.husbandRefs) {
-                        if (husbandRef.ref == oldId && checkNotDone(husbandRef))
-                            husbandRef.ref = newId
-                    }
-                    for (wifeRef in family.wifeRefs) {
-                        if (wifeRef.ref == oldId && checkNotDone(wifeRef))
-                            wifeRef.ref = newId
-                    }
-                    for (childRef in family.childRefs) {
-                        if (childRef.ref == oldId && checkNotDone(childRef))
-                            childRef.ref = newId
-                    }
+        secondGedcom.run {
+            people.forEach { person ->
+                yield()
+                findIds(person)
+                if (checkNotDone(person)) person.id = newId
+                families.forEach { family ->
+                    family.husbandRefs.filter { it.ref == oldId && checkNotDone(it) }.forEach { it.ref = newId }
+                    family.wifeRefs.filter { it.ref == oldId && checkNotDone(it) }.forEach { it.ref = newId }
+                    family.childRefs.filter { it.ref == oldId && checkNotDone(it) }.forEach { it.ref = newId }
                 }
             }
-        }
-        for (family in secondGedcom.families) {
-            yield()
-            if (isEligible(family)) {
+            families.forEach { family ->
+                yield()
+                findIds(family)
                 if (checkNotDone(family))
                     family.id = newId
-                secondGedcom.people.forEach { person ->
-                    person.parentFamilyRefs.forEach {
-                        if (it.ref == oldId && checkNotDone(it))
-                            it.ref = newId
-                    }
-                    person.spouseFamilyRefs.forEach {
-                        if (it.ref == oldId && checkNotDone(it))
-                            it.ref = newId
-                    }
+                people.forEach { person ->
+                    person.parentFamilyRefs.filter { it.ref == oldId && checkNotDone(it) }.forEach { it.ref = newId }
+                    person.spouseFamilyRefs.filter { it.ref == oldId && checkNotDone(it) }.forEach { it.ref = newId }
                 }
                 // Updates first GEDCOM too
                 firstGedcom.people.forEach { person ->
-                    person.parentFamilyRefs.forEach {
-                        if (it.ref == oldId && it.getExtension(UPDATE_REF) != null && checkNotDone(it))
-                            it.ref = newId
-                    }
-                    person.spouseFamilyRefs.forEach {
-                        if (it.ref == oldId && it.getExtension(UPDATE_REF) != null && checkNotDone(it))
-                            it.ref = newId
-                    }
+                    person.parentFamilyRefs.filter { it.ref == oldId && it.getExtension(UPDATE_REF) != null && checkNotDone(it) }
+                        .forEach { it.ref = newId }
+                    person.spouseFamilyRefs.filter { it.ref == oldId && it.getExtension(UPDATE_REF) != null && checkNotDone(it) }
+                        .forEach { it.ref = newId }
                 }
             }
-        }
-        for (media in secondGedcom.media) {
-            yield()
-            if (isEligible(media)) {
+            media.forEach { media ->
+                yield()
+                findIds(media)
                 media.id = newId
                 MediaContainersGuarded(secondGedcom, oldId, newId, false)
             }
-        }
-        for (note in secondGedcom.notes) {
-            yield()
-            if (isEligible(note)) {
+            notes.forEach { note ->
+                yield()
+                findIds(note)
                 note.id = newId
                 NoteContainersGuarded(secondGedcom, oldId, newId, false)
             }
-        }
-        for (source in secondGedcom.sources) {
-            yield()
-            if (isEligible(source)) {
+            sources.forEach { source ->
+                yield()
+                findIds(source)
                 source.id = newId
-                val citations = ListOfSourceCitations(secondGedcom, oldId)
-                for (triplet in citations.list) {
-                    if (checkNotDone(triplet.citation))
-                        triplet.citation.ref = newId
-                }
+                ListOfSourceCitations(secondGedcom, oldId).list.filter { checkNotDone(it.citation) }.forEach { it.citation.ref = newId }
             }
-        }
-        for (repo in secondGedcom.repositories) {
-            yield()
-            if (isEligible(repo)) {
+            repositories.forEach { repo ->
+                yield()
+                findIds(repo)
                 repo.id = newId
-                for (source in secondGedcom.sources) {
-                    val repoRef = source.repositoryRef
-                    if (repoRef != null && repoRef.ref == oldId && checkNotDone(repoRef))
-                        repoRef.ref = newId
-                }
+                sources.map { it.repositoryRef }.filter { it != null && it.ref == oldId && checkNotDone(it) }.forEach { it.ref = newId }
             }
-        }
-        for (submitter in secondGedcom.submitters) {
-            yield()
-            if (isEligible(submitter)) {
+            submitters.forEach { submitter ->
+                yield()
+                findIds(submitter)
                 submitter.id = newId
             }
-        }
 
-        // Deletes persons and families with MATCHING extension because they are duplicate
-        secondGedcom.people = secondGedcom.people.filter { it.getExtension(MATCHING) == null }
-        secondGedcom.families = secondGedcom.families.filter { it.getExtension(MATCHING) == null }
+            // Deletes persons and families with MATCHING extension because they are duplicate
+            people = people.filter { it.getExtension(MATCHING) == null }
+            families = families.filter { it.getExtension(MATCHING) == null }
 
-        // Removes guardian extensions from second GEDCOM
-        secondGedcom.people.forEach { person ->
+            // Removes guardian extensions from second GEDCOM
+            people.forEach { person ->
+                yield()
+                removeGuardian(person)
+                person.parentFamilyRefs.forEach { removeGuardian(it) }
+                person.spouseFamilyRefs.forEach { removeGuardian(it) }
+            }
+            families.forEach { family ->
+                yield()
+                removeGuardian(family)
+                family.husbandRefs.forEach { removeGuardian(it) }
+                family.wifeRefs.forEach { removeGuardian(it) }
+                family.childRefs.forEach { removeGuardian(it) }
+            }
+            sources.forEach { source ->
+                yield()
+                ListOfSourceCitations(secondGedcom, source.id).list.forEach { removeGuardian(it.citation) }
+                source.repositoryRef?.let { removeGuardian(it) }
+            }
+            // Removes extensions from first GEDCOM
+            firstGedcom.people.forEach { person ->
+                yield()
+                person.parentFamilyRefs.forEach { removeExtensions(it) }
+                person.spouseFamilyRefs.forEach { removeExtensions(it) }
+            }
+            MediaContainersGuarded(firstGedcom, null, null, true)
+            NoteContainersGuarded(firstGedcom, null, null, true)
             yield()
-            removeGuardian(person)
-            for (ref in person.parentFamilyRefs) removeGuardian(ref)
-            for (ref in person.spouseFamilyRefs) removeGuardian(ref)
-        }
-        secondGedcom.families.forEach { family ->
-            yield()
-            removeGuardian(family)
-            for (ref in family.husbandRefs) removeGuardian(ref)
-            for (ref in family.wifeRefs) removeGuardian(ref)
-            for (ref in family.childRefs) removeGuardian(ref)
-        }
-        secondGedcom.sources.forEach { source ->
-            yield()
-            val citations = ListOfSourceCitations(secondGedcom, source.id)
-            for (triplet in citations.list) removeGuardian(triplet.citation)
-            source.repositoryRef?.let { removeGuardian(it) }
-        }
-        // Removes extensions from first GEDCOM
-        firstGedcom.people.forEach { person ->
-            yield()
-            person.parentFamilyRefs.forEach { removeExtensions(it) }
-            person.spouseFamilyRefs.forEach { removeExtensions(it) }
-        }
-        MediaContainersGuarded(firstGedcom, null, null, true)
-        NoteContainersGuarded(firstGedcom, null, null, true)
-        yield()
 
-        // Merges the records from selected tree into base tree
-        secondGedcom.people.forEach { firstGedcom.addPerson(it) }
-        secondGedcom.families.forEach { firstGedcom.addFamily(it) }
-        secondGedcom.media.forEach { firstGedcom.addMedia(it) }
-        secondGedcom.notes.forEach { firstGedcom.addNote(it) }
-        secondGedcom.sources.forEach { firstGedcom.addSource(it) }
-        secondGedcom.repositories.forEach { firstGedcom.addRepository(it) }
-        secondGedcom.submitters.forEach { firstGedcom.addSubmitter(it) }
+            // Merges the records from selected tree into base tree
+            people.forEach { firstGedcom.addPerson(it) }
+            families.forEach { firstGedcom.addFamily(it) }
+            media.forEach { firstGedcom.addMedia(it) }
+            notes.forEach { firstGedcom.addNote(it) }
+            sources.forEach { firstGedcom.addSource(it) }
+            repositories.forEach { firstGedcom.addRepository(it) }
+            submitters.forEach { firstGedcom.addSubmitter(it) }
+        }
     }
 
-    /**
-     * Receives the spouse/child ref of a "right" (second) person and finds whether exists in matches as mergeable.
-     */
+    /** Receives the spouse/child ref of a "right" (second) person and finds whether exists in matches as mergeable. */
     private fun isMatch(ref: SpouseRef): Boolean {
         return personMatches.any { it.right.id == ref.ref && it.destiny == Will.MERGE }
     }
 
-    /**
-     * Populates [records] with the maximum ID number of a record.
-     */
+    /** Populates [records] with the maximum ID number of a record. */
     private fun findMaxId(record: ExtensionContainer) {
         val aClass: Class<*> = record.javaClass
         try {
@@ -568,30 +515,22 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         }
     }
 
-    /**
-     * Finds a new ID for a record to be merged and returns true.
-     */
-    private fun isEligible(record: ExtensionContainer): Boolean {
+    /** Finds the old and new ID for a record to be merged. */
+    private fun findIds(record: ExtensionContainer) {
         val aClass: Class<*> = record.javaClass
         try {
             oldId = aClass.getMethod("getId").invoke(record) as String
-        } catch (ignored: java.lang.Exception) {
+        } catch (ignored: Exception) {
         }
         newId = record.getExtension(MATCHING) as String?
         if (newId == null) {
-            var maxNum = records.getMax(aClass)
-            if (maxNum >= U.extractNum(oldId)) {
-                maxNum++
-                newId = records.getPrefix(aClass) + maxNum
-                records.setMax(aClass, maxNum)
-            }
+            val nextNum = records.getMax(aClass) + 1
+            newId = records.getPrefix(aClass) + nextNum
+            records.setMax(aClass, nextNum)
         }
-        return newId != null
     }
 
-    /**
-     * Checks if the GUARDIAN extension doesn't exist and puts it in the object.
-     */
+    /** Checks if the GUARDIAN extension doesn't exist and puts it in the object. */
     private fun checkNotDone(obj: ExtensionContainer): Boolean {
         if (obj.getExtension(GUARDIAN) == null) {
             obj.putExtension(GUARDIAN, true)
@@ -600,25 +539,19 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         return false
     }
 
-    /**
-     * Removes all extensions.
-     */
+    /** Removes all extensions. */
     private fun removeExtensions(obj: ExtensionContainer) {
         obj.getExtension(UPDATE_REF)?.let { obj.extensions.remove(UPDATE_REF) }
         removeGuardian(obj)
     }
 
-    /**
-     * Removes the guardian extension.
-     */
+    /** Removes the guardian extension. */
     private fun removeGuardian(obj: ExtensionContainer) {
         obj.getExtension(GUARDIAN)?.let { obj.extensions.remove(GUARDIAN) }
         if (obj.extensions.isEmpty()) obj.extensions = null
     }
 
-    /**
-     * Merges second GEDCOM into first GEDCOM.
-     */
+    /** Merges second GEDCOM into first GEDCOM. */
     fun performAnnexMerge(context: Context) {
         coroutine = viewModelScope.launch(Dispatchers.Default) {
             setState(State.ACTIVE)
@@ -630,14 +563,12 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 firstTree.generations = TreeUtil.countGenerations(firstGedcom, U.getRootId(firstGedcom, firstTree))
                 firstTree.media += secondTree.media
             }
-            if (isActive) TreeUtil.saveJson(firstGedcom, firstNum) // Saves also Global.settings through Notifier
+            if (isActive) TreeUtil.saveJson(firstGedcom, firstNum, false) // Saves also Global.settings through Notifier
             setState(if (isActive) State.COMPLETE else State.QUIET)
         }
     }
 
-    /*
-    * Generates a third GEDCOM from first and second.
-    */
+    /** Generates a third GEDCOM from first and second. */
     fun performGenerateMerge(context: Context, title: String) {
         coroutine = viewModelScope.launch(Dispatchers.Default) {
             setState(State.ACTIVE)
@@ -648,14 +579,12 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             copyMediaFiles(context, firstGedcom, firstNum, newNum)
             copyMediaFiles(context, secondGedcom, secondNum.value!!, newNum)
             doMerge()
-            if (isActive) TreeUtil.saveJson(firstGedcom, newNum)
+            if (isActive) TreeUtil.saveJson(firstGedcom, newNum, false)
             setState(if (isActive) State.COMPLETE else State.QUIET)
         }
     }
 
-    /**
-     * List of 7 record types.
-     */
+    /** List of 7 record types. */
     private class Records : ArrayList<Record>() {
         fun add(theClass: Class<*>, prefix: String) {
             add(Record(theClass, prefix))
@@ -686,8 +615,9 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     }
 
     private class Record(
-            val theClass: Class<*>, // Person, Family, Note...
-            val prefix: String) { // "I", "F", "T"...
+        val theClass: Class<*>, // Person, Family, Note...
+        val prefix: String // "I", "F", "T"...
+    ) {
         var max = 0 // Maximum ID number for this type of record
     }
 
@@ -710,9 +640,9 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         var childMatches = mutableListOf<PersonMatch>() // Child matches inside the right family
         override fun toString(): String {
             var str = "${left?.id}, ${right.id}, $destiny\n"
-            spouseMatches.forEach { str += "\tSpouse: $it\n" }
-            childMatches.forEach { str += "\tChild: $it\n" }
-            return str
+            spouseMatches.forEach { str += "\tSpouse match: $it\n" }
+            childMatches.forEach { str += "\tChild match: $it" }
+            return str.trimEnd('\n')
         }
     }
 
@@ -729,13 +659,13 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
     }
 
     class FamilyMatches : MutableList<FamilyMatch> by mutableListOf() {
-        // Creates or retrieve the match containing the provided second (right) family
+        /** Creates or retrieve the match containing the provided second (right) family. */
         fun getMatch(secondFamily: Family): FamilyMatch {
             return if (none { it.right == secondFamily }) {
                 val match = FamilyMatch(null, secondFamily)
                 add(match)
                 return match
-            } else filter { it.right == secondFamily }[0]
+            } else first { it.right == secondFamily }
         }
 
         override fun toString(): String {

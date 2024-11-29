@@ -171,15 +171,13 @@ object TreeUtil {
     private val backupViewModel = BackupViewModel(Global.application)
 
     /** Saves the GEDCOM tree as JSON. */
-    suspend fun saveJson(gedcom: Gedcom, treeId: Int) {
-        val h = gedcom.header
-        // Only if header is by Family Gem
-        if (h != null && h.generator != null && h.generator.value != null && h.generator.value == "FAMILY_GEM") {
-            // Updates date and time
-            h.dateTime = ChangeUtil.actualDateTime()
-            // If necessary updates the version of Family Gem
-            if (h.generator.version != null && h.generator.version != BuildConfig.VERSION_NAME || h.generator.version == null)
-                h.generator.version = BuildConfig.VERSION_NAME
+    suspend fun saveJson(gedcom: Gedcom, treeId: Int, makeBackup: Boolean = Global.settings.backup) {
+        gedcom.header?.apply {
+            if (generator?.value == "FAMILY_GEM") { // Only if header is by Family Gem
+                dateTime = ChangeUtil.actualDateTime()
+                // If necessary updates the version of Family Gem
+                if (generator.version != BuildConfig.VERSION_NAME) generator.version = BuildConfig.VERSION_NAME
+            }
         }
         try {
             FileUtils.writeStringToFile(File(Global.context.filesDir, "$treeId.json"), JsonParser().toJson(gedcom), "UTF-8")
@@ -195,7 +193,7 @@ object TreeUtil {
             Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
             activeNotifier = false
         }
-        if (Global.settings.backup) backupViewModel.backupDelayed(treeId)
+        if (makeBackup) backupViewModel.backupDelayed(treeId)
     }
 
     // Temporary hack to call a suspend function from Java

@@ -701,9 +701,9 @@ public class U {
         if (!isDead(person))
             personView.findViewById(R.id.person_mourning).setVisibility(View.GONE);
         if (Gender.isMale(person))
-            personView.findViewById(R.id.person_border).setBackgroundResource(R.drawable.casella_bordo_maschio);
+            personView.findViewById(R.id.person_border).setBackgroundResource(R.drawable.person_border_male);
         else if (Gender.isFemale(person))
-            personView.findViewById(R.id.person_border).setBackgroundResource(R.drawable.casella_bordo_femmina);
+            personView.findViewById(R.id.person_border).setBackgroundResource(R.drawable.person_border_female);
         personView.setTag(person.getId());
         return personView;
     }
