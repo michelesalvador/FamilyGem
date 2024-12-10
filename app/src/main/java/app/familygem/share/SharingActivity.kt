@@ -18,6 +18,7 @@ import app.familygem.BaseActivity
 import app.familygem.BuildConfig
 import app.familygem.Exporter
 import app.familygem.Global
+import app.familygem.ProgressView
 import app.familygem.R
 import app.familygem.Settings
 import app.familygem.Settings.Share
@@ -33,6 +34,7 @@ import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.TreeUtil.createHeader
 import app.familygem.util.Util
+import app.familygem.util.copyTo
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -43,12 +45,10 @@ import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Submitter
-import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.File
-import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
@@ -71,17 +71,19 @@ class SharingActivity : BaseActivity() {
     private lateinit var submitterId: String
     private var accessible = 0 // 0 = false, 1 = true
     private var dateId: String? = null
+    private lateinit var progressView: ProgressView
     private var successfulUpload = false // To avoid uploading twice
 
-    override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.sharing_activity)
         val treeId = intent.getIntExtra(Extra.TREE_ID, 1)
         tree = Global.settings.getTree(treeId)
         titleView = findViewById(R.id.share_title)
         titleView.setText(tree.title)
         if (tree.grade == 10) findViewById<TextView>(R.id.share_submitter_title).setText(R.string.changes_submitter)
-        exporter = Exporter(this)
+        progressView = findViewById(R.id.share_progress)
+        exporter = Exporter(this, progressView)
         lifecycleScope.launch(IO) {
             exporter.openTree(treeId)
             gedcom = Global.gc
@@ -129,10 +131,10 @@ class SharingActivity : BaseActivity() {
                     return@setOnClickListener
 
                 button.isEnabled = false
-                findViewById<View>(R.id.share_wheel).visibility = View.VISIBLE
+                progressView.visibility = View.VISIBLE
 
                 // Tree title
-                val editedTitle = titleView.text.toString()
+                val editedTitle = titleView.text.trim().toString()
                 if (tree.title != editedTitle) {
                     tree.title = editedTitle
                     Global.settings.save()
@@ -150,7 +152,7 @@ class SharingActivity : BaseActivity() {
                 if (header.submitterRef == null) {
                     header.submitterRef = submitter!!.id
                 }
-                val editedSubmitterName = submitterView.text.toString()
+                val editedSubmitterName = submitterView.text.trim().toString()
                 if (editedSubmitterName != submitterName) {
                     submitterName = editedSubmitterName
                     submitter!!.name = submitterName
@@ -218,7 +220,7 @@ class SharingActivity : BaseActivity() {
      * Verify that a EditText is filled in.
      */
     private fun checkCompiled(field: EditText, message: Int): Boolean {
-        if (field.text.isEmpty()) {
+        if (field.text.isBlank()) {
             field.requestFocus()
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(field, InputMethodManager.SHOW_IMPLICIT)
@@ -271,36 +273,40 @@ class SharingActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Uploads via FTP the ZIP file with the shared tree.
-     */
+    /** Uploads via FTP the ZIP file containing the shared tree. */
     private suspend fun ftpUpload() {
-        val credential = U.getCredential(Json.FTP)
-        if (credential != null) {
-            try {
-                val ftpClient = FTPClient()
-                ftpClient.connect(credential.getString(Json.HOST), credential.getInt(Json.PORT))
-                ftpClient.enterLocalPassiveMode()
-                ftpClient.login(credential.getString(Json.USER), credential.getString(Json.PASSWORD))
-                ftpClient.changeWorkingDirectory(credential.getString(Json.SHARED_PATH))
-                ftpClient.setFileType(FTP.BINARY_FILE_TYPE)
-                val bufferedInput: BufferedInputStream
-                val nomeZip = "$dateId.zip"
-                bufferedInput = BufferedInputStream(FileInputStream("$cacheDir/$nomeZip"))
-                successfulUpload = ftpClient.storeFile(nomeZip, bufferedInput)
-                bufferedInput.close()
-                ftpClient.logout()
-                ftpClient.disconnect()
-                if (successfulUpload) {
-                    Util.toast(R.string.correctly_uploaded)
-                    concludeShare()
-                } else throw Exception(getString(R.string.something_wrong))
-            } catch (exception: Exception) {
-                exception.printStackTrace()
-                Util.toast(exception.localizedMessage)
+        val client = FTPClient()
+        try {
+            val credential = U.getCredential(Json.FTP) ?: throw Exception("Missing credentials to upload.")
+            client.apply {
+                connect(credential.getString(Json.HOST), credential.getInt(Json.PORT))
+                enterLocalPassiveMode()
+                login(credential.getString(Json.USER), credential.getString(Json.PASSWORD))
+                changeWorkingDirectory(credential.getString(Json.SHARED_PATH))
+                setFileType(FTP.BINARY_FILE_TYPE)
             }
-        } else Util.toast(R.string.something_wrong)
-        restoreSuspended()
+            val zipName = "$dateId.zip"
+            val zipFile = File(cacheDir, zipName)
+            progressView.displayBar("Uploading tree", zipFile.length())
+            zipFile.inputStream().use { inputStream ->
+                client.appendFileStream(zipName).use { outputStream ->
+                    inputStream.copyTo(outputStream) { totalBytes ->
+                        progressView.progress = totalBytes
+                    }
+                }
+            }
+            progressView.hideBar()
+            successfulUpload = client.completePendingCommand()
+            if (!successfulUpload) throw Exception("Upload failed.")
+            Util.toast(R.string.correctly_uploaded)
+            concludeShare()
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            Util.toast(exception.localizedMessage)
+        } finally {
+            if (client.isConnected) client.disconnect()
+            restoreSuspended()
+        }
     }
 
     /**
@@ -322,7 +328,7 @@ class SharingActivity : BaseActivity() {
 
     private fun restore() {
         findViewById<View>(R.id.share_button).isEnabled = true
-        findViewById<View>(R.id.share_wheel).visibility = View.GONE
+        progressView.visibility = View.GONE
     }
 
     private suspend fun restoreSuspended() {

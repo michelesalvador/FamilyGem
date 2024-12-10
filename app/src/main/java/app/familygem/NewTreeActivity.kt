@@ -14,7 +14,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,7 +22,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
-import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -33,16 +31,15 @@ import org.apache.commons.io.FileUtils
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.parser.JsonParser
 import java.io.File
-import java.util.zip.ZipInputStream
 
 class NewTreeActivity : BaseActivity() {
 
-    private lateinit var progress: ProgressBar
+    private lateinit var progressView: ProgressView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.new_tree_activity)
-        progress = findViewById(R.id.new_progress)
+        progressView = findViewById(R.id.new_progress)
         val referrer = Global.settings.referrer // DateID coming from a sharing
         val dateIdExists = referrer != null && referrer.matches("\\d{14}".toRegex())
 
@@ -50,12 +47,9 @@ class NewTreeActivity : BaseActivity() {
         val downloadShared = findViewById<Button>(R.id.new_download_shared)
         if (dateIdExists) // Doesn't need any permissions because it unpacks only into the app's external storage
             downloadShared.setOnClickListener {
-                progress.visibility = View.VISIBLE
-                lifecycleScope.launch(IO) {
-                    TreeUtil.downloadSharedTree(this@NewTreeActivity, referrer,
-                        { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
-                        { progress.visibility = View.GONE })
-                }
+                progressView.visibility = View.VISIBLE
+                TreeUtil.launchDownloadSharedTree(lifecycleScope, this, referrer, progressView,
+                    { startActivity(Intent(this, TreesActivity::class.java)) }, { progressView.visibility = View.GONE })
             }
         else downloadShared.visibility = View.GONE
 
@@ -92,7 +86,7 @@ class NewTreeActivity : BaseActivity() {
         // Downloads the Simpsons example tree
         findViewById<Button>(R.id.new_download_example).setOnClickListener {
             it.isEnabled = false
-            progress.visibility = View.VISIBLE
+            progressView.visibility = View.VISIBLE
             lifecycleScope.launch(IO) { downloadExample(it as Button) }
         }
 
@@ -101,32 +95,17 @@ class NewTreeActivity : BaseActivity() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = result.data?.data
                 if (uri != null) {
-                    progress.visibility = View.VISIBLE
-                    lifecycleScope.launch(IO) {
-                        try {
-                            val isValidBackup = ZipInputStream(contentResolver.openInputStream(uri)).use { zipInputStream ->
-                                generateSequence { zipInputStream.nextEntry }.filterNot { it.isDirectory }.map { it.name }
-                                    .toList().containsAll(listOf("settings.json", "tree.json"))
-                            }
-                            if (isValidBackup) {
-                                TreeUtil.unZipTree(this@NewTreeActivity, null, uri,
-                                    {
-                                        startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java))
-                                        /* TODO: In the strange case that the same tree suggested by the referrer is imported with a ZIP backup,
-                                                 we should cancel the referrer:
-                                        val dateId = Exporter.extractFilename(uri) // Which however is not static
-                                        if( Global.settings.referrer.equals(dateId) ) {
-                                            Global.settings.referrer = null
-                                            Global.settings.save()
-                                        }*/
-                                    },
-                                    { progress.visibility = View.GONE })
-                            } else Util.toast(R.string.backup_invalid)
-                        } catch (e: Exception) {
-                            Util.toast(e.localizedMessage)
-                        }
-                        withContext(Main) { progress.visibility = View.GONE }
-                    }
+                    progressView.visibility = View.VISIBLE
+                    TreeUtil.launchUnzipTree(lifecycleScope, this, null, uri, progressView, {
+                        startActivity(Intent(this, TreesActivity::class.java))
+                        /* TODO: In the strange case that the same tree suggested by the referrer is imported with a ZIP backup,
+                                 we should cancel the referrer:
+                        val dateId = Exporter.extractFilename(uri) // Which however is not static
+                        if( Global.settings.referrer.equals(dateId) ) {
+                            Global.settings.referrer = null
+                            Global.settings.save()
+                        }*/
+                    }, { progressView.visibility = View.GONE })
                 } else Toast.makeText(this@NewTreeActivity, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
             }
         }
@@ -141,13 +120,13 @@ class NewTreeActivity : BaseActivity() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = result.data?.data
                 if (uri != null) {
-                    progress.visibility = View.VISIBLE
+                    progressView.visibility = View.VISIBLE
                     lifecycleScope.launch(IO) {
                         TreeUtil.importGedcom(this@NewTreeActivity, uri, {
                             // Successful import
                             onBackPressedDispatcher.onBackPressed()
                         }, { // Unsuccessful import
-                            progress.visibility = View.GONE
+                            progressView.visibility = View.GONE
                         })
                     }
                 }
@@ -183,9 +162,7 @@ class NewTreeActivity : BaseActivity() {
         Toast.makeText(this, R.string.tree_created, Toast.LENGTH_LONG).show()
     }
 
-    /**
-     * Downloads the Simpsons ZIP file from Google Drive into the app's external cache, so without permissions needed.
-     */
+    /** Downloads the Simpsons ZIP file from Google Drive into the app's external cache and unzips it. */
     private suspend fun downloadExample(downloadButton: Button) {
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         val url = "https://www.googleapis.com/drive/v3/files/1yMZgqhHx6_yP-_mjrUULDiNAaFTrAYQv?" +
@@ -208,7 +185,7 @@ class NewTreeActivity : BaseActivity() {
                     when (cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
                         DownloadManager.STATUS_FAILED -> {
                             withContext(Main) {
-                                progress.visibility = View.GONE
+                                progressView.visibility = View.GONE
                                 findViewById<Button>(R.id.new_download_example).isEnabled = true
                                 Toast.makeText(this@NewTreeActivity, R.string.something_wrong, Toast.LENGTH_LONG).show()
                             }
@@ -216,9 +193,9 @@ class NewTreeActivity : BaseActivity() {
                         }
                         DownloadManager.STATUS_SUCCESSFUL -> {
                             finishDownload = true
-                            TreeUtil.unZipTree(this, zipFile.path, null,
-                                { startActivity(Intent(this@NewTreeActivity, TreesActivity::class.java)) },
-                                { progress.visibility = View.GONE; downloadButton.isEnabled = true })
+                            TreeUtil.launchUnzipTree(lifecycleScope, this, zipFile, null, progressView,
+                                { startActivity(Intent(this, TreesActivity::class.java)) },
+                                { progressView.visibility = View.GONE; downloadButton.isEnabled = true })
                         }
                     }
                 }

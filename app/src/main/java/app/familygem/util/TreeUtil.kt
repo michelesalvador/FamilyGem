@@ -3,13 +3,14 @@ package app.familygem.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import app.familygem.BackupViewModel
 import app.familygem.BuildConfig
 import app.familygem.F
 import app.familygem.Global
 import app.familygem.Notifier
+import app.familygem.ProgressView
 import app.familygem.R
 import app.familygem.Settings
 import app.familygem.Settings.Tree
@@ -21,11 +22,13 @@ import app.familygem.util.Util.caseString
 import app.familygem.util.Util.string
 import app.familygem.visitor.MediaList
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.apache.commons.io.FileUtils
 import org.apache.commons.net.ftp.FTPClient
 import org.folg.gedcom.model.CharacterSet
@@ -38,11 +41,13 @@ import org.folg.gedcom.parser.JsonParser
 import org.folg.gedcom.parser.ModelParser
 import java.io.BufferedReader
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.FileNotFoundException
 import java.io.FileReader
+import java.io.InputStream
 import java.io.PrintWriter
 import java.util.Locale
+import java.util.zip.ZipException
+import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
 fun Tree.getBasicData(): String {
@@ -54,9 +59,10 @@ fun Tree.getBasicData(): String {
     return builder.toString()
 }
 
-/**
- * Functions about the general tree shared across many classes.
- */
+/** Represents the importing of a tree with some missing media. */
+class PartialSuccessException(message: String?) : Exception(message)
+
+/** Functions about the general tree shared across many classes. */
 object TreeUtil {
 
     /** Standard opening of a stored GEDCOM to edit it. */
@@ -167,8 +173,8 @@ object TreeUtil {
         }
     }
 
-    private var activeNotifier = false // To avoid ConcurrentModificationException on Notifier
-    private val backupViewModel = BackupViewModel(Global.application)
+    /** To avoid ConcurrentModificationException on Notifier. */
+    private var activeNotifier = false
 
     /** Saves the GEDCOM tree as JSON. */
     suspend fun saveJson(gedcom: Gedcom, treeId: Int, makeBackup: Boolean = Global.settings.backup) {
@@ -193,7 +199,7 @@ object TreeUtil {
             Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
             activeNotifier = false
         }
-        if (makeBackup) backupViewModel.backupDelayed(treeId)
+        if (makeBackup) Global.backupViewModel.backupDelayed(treeId)
     }
 
     // Temporary hack to call a suspend function from Java
@@ -361,88 +367,134 @@ object TreeUtil {
         }
     }
 
-    /** Connects to the server and downloads the ZIP file to import it. */
-    suspend fun downloadSharedTree(context: Context, dateId: String, onSuccess: () -> Unit, onFail: () -> Unit) {
-        val credential = U.getCredential(Json.FTP)
-        if (credential != null) {
-            try {
-                val client = FTPClient() // TODO: refactor to use Retrofit
-                client.connect(credential.getString(Json.HOST), credential.getInt(Json.PORT))
-                client.enterLocalPassiveMode()
-                client.login(credential.getString(Json.USER), credential.getString(Json.PASSWORD))
-                val zipPath = context.externalCacheDir?.path + "/$dateId.zip"
-                val fos = FileOutputStream(zipPath)
-                val path = credential.getString(Json.SHARED_PATH) + "/" + dateId + ".zip"
-                val input = client.retrieveFileStream(path)
-                if (input != null) {
-                    val data = ByteArray(1024)
-                    var count: Int
-                    while (input.read(data).also { count = it } != -1) {
-                        fos.write(data, 0, count)
-                    }
-                    fos.close()
-                    if (client.completePendingCommand()) {
-                        unZipTree(context, zipPath, null, {
-                            // If the tree was downloaded with the install referrer from TreesActivity or NewTreeActivity
-                            if (Global.settings.referrer != null && Global.settings.referrer == dateId) {
-                                Global.settings.referrer = null
-                                Global.settings.save()
-                            }
-                            onSuccess()
-                        }, onFail)
-                    } else // Failed decompression of downloaded ZIP (eg. corrupted file)
-                        downloadFailed(context.getString(R.string.backup_invalid), onFail)
-                } else // Did not find the file on the server
-                    downloadFailed(context.getString(R.string.something_wrong), onFail)
-                client.logout()
-                client.disconnect()
-            } catch (e: java.lang.Exception) {
-                downloadFailed(e.localizedMessage, onFail)
+    /** Launches [downloadSharedTree] in a coroutine, managing the results.
+     * @param onRefresh Action to display results
+     * @param onReset Action to restore interface (usually hiding progress view)
+     */
+    fun launchDownloadSharedTree(
+        scope: CoroutineScope, context: Context, dateId: String, progressView: ProgressView, onRefresh: () -> Unit, onReset: () -> Unit
+    ) {
+        scope.launch(IO) {
+            val onRefreshEnriched = {
+                // If the tree was downloaded with the install referrer from TreesActivity or NewTreeActivity
+                if (Global.settings.referrer != null && Global.settings.referrer == dateId) {
+                    Global.settings.referrer = null
+                    Global.settings.save()
+                }
+                onRefresh()
             }
-        } else // Credentials are null
-            downloadFailed(context.getString(R.string.something_wrong), onFail)
+            downloadSharedTree(context, dateId, progressView).onFailure { exception ->
+                when (exception) {
+                    is ZipException -> {
+                        withContext(Main) {
+                            val error = if (Global.settings.expert) "\n${exception.localizedMessage}." else ""
+                            AlertDialog.Builder(context)
+                                .setMessage(context.getString(R.string.backup_invalid) + error + "\nDownload it again or unzip anyway?")
+                                .setNeutralButton("Download again") { _, _ ->
+                                    progressView.visibility = View.VISIBLE
+                                    launchDownloadSharedTree(scope, context, dateId, progressView, onRefresh, onReset)
+                                }.setPositiveButton("Unzip") { _, _ ->
+                                    progressView.visibility = View.VISIBLE
+                                    val file = File(context.externalCacheDir, "$dateId.zip")
+                                    launchUnzipTree(scope, context, file, null, progressView, onRefreshEnriched, onReset)
+                                }.setOnCancelListener { onRefresh() }.show()
+                            onReset()
+                        }
+                    }
+                    else -> {
+                        Util.toast(exception.localizedMessage)
+                        onRefresh()
+                    }
+                }
+            }.onSuccess { launchUnzipTree(scope, context, it, null, progressView, onRefreshEnriched, onReset) }
+        }
     }
 
-    /** Negative conclusion of the above method. */
-    private suspend fun downloadFailed(message: String?, onFail: () -> Unit?) {
-        Util.toast(message)
-        withContext(Main) { onFail() }
+    /**
+     * Launches [unzipTree] in a coroutine.
+     * @param onRefresh Displays the results (maybe reloading views)
+     * @param onReset Restores interface (usually hiding progress view)
+     */
+    fun launchUnzipTree(
+        scope: CoroutineScope, context: Context, zipFile: File?, zipUri: Uri?,
+        progressView: ProgressView, onRefresh: () -> Unit, onReset: () -> Unit
+    ) = scope.launch(IO) {
+        unzipTree(context, zipFile, zipUri, progressView).onFailure { exception ->
+            withContext(Main) {
+                if (exception is PartialSuccessException) {
+                    AlertDialog.Builder(context).setMessage(exception.message)
+                        .setPositiveButton(android.R.string.ok) { _, _ -> onRefresh() }
+                        .setOnCancelListener { onRefresh() }.show()
+                    onReset()
+                } else {
+                    Util.toast(exception.localizedMessage)
+                    onRefresh()
+                }
+            }
+        }.onSuccess {
+            Util.toast(R.string.tree_imported_ok)
+            withContext(Main) { onRefresh() }
+        }
+    }
+
+    /**
+     * Connects to the server and downloads the ZIP file of the shared tree to import it.
+     * @return Result with the downloaded ZIP file
+     */
+    private fun downloadSharedTree(context: Context, dateId: String, progressView: ProgressView): Result<File> {
+        val client = FTPClient()
+        return try {
+            val credential = U.getCredential(Json.FTP) ?: throw Exception("Missing credentials.")
+            client.connect(credential.getString(Json.HOST), credential.getInt(Json.PORT))
+            client.login(credential.getString(Json.USER), credential.getString(Json.PASSWORD))
+            val inputPath = credential.getString(Json.SHARED_PATH) + "/$dateId.zip"
+            val fileSize = client.getSize(inputPath)?.toLongOrNull() ?: 0
+            if (fileSize > 0) progressView.displayBar("Downloading", fileSize)
+            client.enterLocalPassiveMode()
+            val inputStream = client.retrieveFileStream(inputPath)
+            if (inputStream == null) { // Usually file not found
+                val message = client.replyString.replace("550", "").replace("/www.familygem.app/condivisi/", "").trim()
+                throw FileNotFoundException(message)
+            }
+            val outputZipFile = File(context.externalCacheDir, "$dateId.zip")
+            inputStream.use {
+                outputZipFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream) { progressView.progress = it }
+                }
+            }
+            progressView.hideBar()
+            if (!client.completePendingCommand()) throw Exception("Can not complete file transfer.")
+            ZipFile(outputZipFile).close() // Checks ZIP file integrity and in case throws ZipException
+            Result.success(outputZipFile)
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        } finally {
+            if (client.isConnected) client.disconnect()
+        }
     }
 
     /**
      * Unzips a ZIP tree file in the device storage.
      * Used equally by: Simpsons example, backup files and shared trees.
+     * @return Result with the ID of the brand new tree (unused)
      */
-    suspend fun unZipTree(context: Context, zipPath: String?, zipUri: Uri?, onSuccess: () -> Unit, onFail: () -> Unit) {
-        val treeNumber = Global.settings.max() + 1
-        var mediaDir = context.getExternalFilesDir(treeNumber.toString())
-        val sourceDir = context.applicationInfo.sourceDir
-        if (!sourceDir.startsWith("/data/")) { // App installed not in internal memory (maybe moved to SD-card)
-            val externalFilesDirs = context.getExternalFilesDirs(treeNumber.toString())
-            if (externalFilesDirs.size > 1) {
-                mediaDir = externalFilesDirs[1]
-            }
-        }
+    private suspend fun unzipTree(context: Context, zipFile: File?, zipUri: Uri?, progress: ProgressView? = null): Result<Int> =
         try {
-            val inputStream = if (zipPath != null) FileInputStream(zipPath)
-            else context.contentResolver.openInputStream(zipUri!!)
-            var len: Int
-            val buffer = ByteArray(1024)
-            ZipInputStream(inputStream).use { zipInputStream ->
-                generateSequence { zipInputStream.nextEntry }.filterNot { it.isDirectory }.forEach { zipEntry ->
-                    val newFile = when (zipEntry.name) {
-                        "tree.json" -> File(context.filesDir, "$treeNumber.json")
-                        "settings.json" -> File(context.cacheDir, "settings.json")
-                        // It's a file from the 'media' folder
-                        else -> File(mediaDir, zipEntry.name.replace("media/", ""))
-                    }
-                    val outputStream = FileOutputStream(newFile)
-                    while (zipInputStream.read(buffer).also { len = it } > 0) {
-                        outputStream.write(buffer, 0, len)
-                    }
-                    outputStream.close()
+            val treeId = Global.settings.max() + 1
+            var mediaDir = context.getExternalFilesDir(treeId.toString())
+            val sourceDir = context.applicationInfo.sourceDir
+            if (!sourceDir.startsWith("/data/")) { // App installed not in internal memory (maybe moved to SD-card)
+                val externalFilesDirs = context.getExternalFilesDirs(treeId.toString())
+                if (externalFilesDirs.size > 1) {
+                    mediaDir = externalFilesDirs[1]
                 }
             }
+            val inputStream = zipFile?.inputStream() ?: context.contentResolver.openInputStream(zipUri!!)
+            val uri = zipUri ?: Uri.fromFile(zipFile)
+            val fileSize = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length }?.toLong() ?: 0
+            val result = unzipBackupFile(inputStream!!, context, treeId, mediaDir!!, progress!!, fileSize)
+            // PartialSuccessException is thrown after creating the tree entry
+            if (result.isFailure && result.exceptionOrNull() !is PartialSuccessException) throw result.exceptionOrNull()!!
             // Reads cached settings and saves them in Global.settings
             val settingsFile = File(context.cacheDir, "settings.json")
             var json = FileUtils.readFileToString(settingsFile, "UTF-8")
@@ -450,28 +502,69 @@ object TreeUtil {
             val gson = Gson()
             val zipped = gson.fromJson(json, Settings.ZippedTree::class.java)
             val tree = Tree(
-                treeNumber, zipped.title, mediaDir!!.path,
-                zipped.persons, zipped.generations, zipped.root, zipped.settings, zipped.shares, zipped.grade
+                treeId, zipped.title, mediaDir.path, zipped.persons, zipped.generations,
+                zipped.root, zipped.settings, zipped.shares, zipped.grade
             )
             Global.settings.addTree(tree)
             settingsFile.delete()
             // Tree coming from sharing intended for comparison
             if (zipped.grade == 9 && compareTrees(context, tree, false)) {
                 tree.grade = 20 // Marks it as derived
+                tree.backup = false // No need to backup a derived tree
             }
             Global.settings.save()
-            Util.toast(R.string.tree_imported_ok)
-            withContext(Main) { onSuccess() }
-            return
-        } catch (e: Exception) {
-            Util.toast(e.localizedMessage)
+            result.getOrThrow() // Maybe throws PartialSuccessException
+            Result.success(treeId) // Complete success
+        } catch (exception: Exception) {
+            Result.failure(exception)
         }
-        withContext(Main) { onFail() }
+
+    /** Decompress a ZIP file searching specifically for settings.json and tree.json files. */
+    private suspend fun unzipBackupFile(
+        inputStream: InputStream, context: Context, treeId: Int, mediaDir: File, progressView: ProgressView, fileSize: Long
+    ): Result<Boolean> {
+        var settingsOk = false;
+        var treeOk = false
+        var mediaCount = 0
+        return try {
+            ZipInputStream(inputStream).use { zipInputStream ->
+                progressView.displayBar("Unzipping", fileSize)
+                var copiedBytes = 0L
+                generateSequence { zipInputStream.nextEntry }.filterNot { it.isDirectory }.forEach { zipEntry ->
+                    yield()
+                    val newFile = when (zipEntry.name) {
+                        "settings.json" -> {
+                            settingsOk = true
+                            File(context.cacheDir, "settings.json")
+                        }
+                        "tree.json" -> {
+                            treeOk = true
+                            File(context.filesDir, "$treeId.json")
+                        }
+                        else -> { // It's a file from the 'media' folder
+                            mediaCount++
+                            File(mediaDir, zipEntry.name.replace("media/", ""))
+                        }
+                    }
+                    newFile.outputStream().use { copiedBytes += zipInputStream.copyTo(it) }
+                    progressView.progress = copiedBytes
+                }
+                progressView.hideBar()
+                if (!settingsOk || !treeOk) throw Exception(context.getString(R.string.backup_invalid)) // Failure for missing fundamental files
+            }
+            Result.success(true)
+        } catch (exception: Exception) {
+            if (settingsOk && treeOk) { // Invalid ZIP file but with settings.json and tree.json files
+                val errorMessage = if (Global.settings.expert) "Tree unzipped with error:\n${exception.localizedMessage}."
+                else context.getString(R.string.backup_invalid)
+                Result.failure(PartialSuccessException("$errorMessage\nOnly $mediaCount media files found."))
+            } else Result.failure(exception)
+        }
     }
 
     /**
      * Replaces Italian with English in the Json settings of ZIP backup.
-     * Added in Family Gem 0.8.
+     * @since Family Gem 0.8
      */
     private fun updateSettingsLanguage(originalJson: String): String {
         var json = originalJson

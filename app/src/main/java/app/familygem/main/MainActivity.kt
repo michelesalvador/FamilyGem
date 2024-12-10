@@ -243,13 +243,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Save button
         val saveButton = menuHeader.findViewById<Button>(R.id.menuHeader_save)
         saveButton.setOnClickListener { button ->
+            button.isEnabled = false
+            binding.mainLayout.closeDrawer(GravityCompat.START)
             GlobalScope.launch(Dispatchers.IO) {
                 TreeUtil.saveJson(Global.gc, Global.settings.openTree)
+                Global.shouldSave = false
+                withContext(Dispatchers.Main) {
+                    button.visibility = View.GONE
+                    Toast.makeText(this@MainActivity, R.string.saved, Toast.LENGTH_SHORT).show()
+                }
             }
-            Global.shouldSave = false
-            button.visibility = View.GONE
-            binding.mainLayout.closeDrawer(GravityCompat.START)
-            Toast.makeText(this, R.string.saved, Toast.LENGTH_SHORT).show()
         }
         saveButton.setOnLongClickListener { button ->
             val popup = PopupMenu(this, button)
@@ -274,6 +277,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             true
         }
-        saveButton.visibility = if (Global.shouldSave) View.VISIBLE else View.GONE
+        saveButton.visibility = if (Global.shouldSave) {
+            saveButton.isEnabled = true
+            View.VISIBLE
+        } else View.GONE
     }
 }

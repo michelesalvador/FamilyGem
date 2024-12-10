@@ -95,10 +95,12 @@ class CompareActivity : BaseActivity() {
             setTitle(R.string.tree_without_news)
             if (tree2.grade != 30) {
                 tree2.grade = 30
+                tree2.backup = false
                 Global.settings.save()
             }
         } else if (tree2.grade != 20) {
             tree2.grade = 20
+            tree2.backup = false
             Global.settings.save()
         }
         populateCard(Global.gc, idTree1, R.id.compare_old)
@@ -122,15 +124,17 @@ class CompareActivity : BaseActivity() {
                 intent.putExtra(Extra.POSITION, 1)
                 if (Comparison.get().numChoices > 0) {
                     AlertDialog.Builder(this) // Dialog requesting a revision
-                            .setTitle(if (Comparison.get().numChoices == 1) getString(R.string.one_update_choice)
-                            else getString(R.string.many_updates_choice, Comparison.get().numChoices))
-                            .setMessage(R.string.updates_replace_add)
-                            .setPositiveButton(android.R.string.ok) { _, _ ->
-                                Comparison.get().autoContinue = true
-                                Comparison.get().choicesMade = 1
-                                startActivity(intent)
-                            }.setNeutralButton(android.R.string.cancel) { _, _ -> button2.isEnabled = true }
-                            .setOnCancelListener { _ -> button2.isEnabled = true }.show()
+                        .setTitle(
+                            if (Comparison.get().numChoices == 1) getString(R.string.one_update_choice)
+                            else getString(R.string.many_updates_choice, Comparison.get().numChoices)
+                        )
+                        .setMessage(R.string.updates_replace_add)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            Comparison.get().autoContinue = true
+                            Comparison.get().choicesMade = 1
+                            startActivity(intent)
+                        }.setNeutralButton(android.R.string.cancel) { _, _ -> button2.isEnabled = true }
+                        .setOnCancelListener { _ -> button2.isEnabled = true }.show()
                 } else { // Continues automatically
                     Comparison.get().autoContinue = true
                     startActivity(intent)
@@ -157,39 +161,32 @@ class CompareActivity : BaseActivity() {
         Comparison.get().autoContinue = false // Resets it in case 'Accept all' was chosen
     }
 
-    /**
-     * Choose whether to add the two objects to the evaluation list.
-     */
+    /** Choose whether to add the two objects to the evaluation list. */
     private fun compare(obj: Any?, obj2: Any, type: Int) {
         val change = getChange(obj)
         val change2 = getChange(obj2)
-        var modification = 0
-        if (obj == null && isRecent(change2)) // obj2 has been added in the new tree -> ADD
-            modification = 1 else {
-            if (change == null && change2 != null) modification = 1 else if (change != null && change2 != null &&
-                    !(change.dateTime.value == change2.dateTime.value && change.dateTime.time == change2.dateTime.time)) {
-                if (isRecent(change) && isRecent(change2)) { // Both changed after sharing -> ADD / REPLACE
-                    modification = 2
-                } else if (isRecent(change2)) // Only obj2 has been changed -> REPLACE
-                    modification = 1
-            }
-        }
+        val modification = if (obj == null && isRecent(change2)) 1 // obj2 has been added in the new tree -> ADD
+        else if (change == null && change2 != null) 1 // obj was without date but obj2 has -> REPLACE
+        else if (areDifferent(change, change2) && isRecent(change) && isRecent(change2)) 2 // Both changed after sharing -> ADD + REPLACE
+        else if (areDifferent(change, change2) && isRecent(change2)) 1 // Only obj2 has been changed -> REPLACE
+        else 0
         if (modification > 0) {
             val front = Comparison.addFront(obj, obj2, type)
             if (modification == 2) front.canBothAddAndReplace = true
         }
     }
 
-    /**
-     * The same for the remaining objects deleted in the old tree.
-     */
+    /** Two change dates are both not null and have different values. */
+    private fun areDifferent(change: Change?, change2: Change?): Boolean =
+        change != null && change2 != null && !(change.dateTime.value == change2.dateTime.value && change.dateTime.time == change2.dateTime.time)
+
+    /** Choose whether to add the two objects to the evaluation list for the remaining objects deleted in the old tree. */
     private fun reconcile(obj: Any, obj2: Any?, type: Int) {
         if (obj2 == null && !isRecent(getChange(obj))) Comparison.addFront(obj, null, type)
     }
 
     /**
      * Finds if a top-level record has been modified after the date of sharing.
-     *
      * @param change Actual change date of the top-level record
      * @return true if the record is more recent than the date of sharing
      */
@@ -261,8 +258,14 @@ class CompareActivity : BaseActivity() {
         card.findViewById<View>(R.id.compare_date).visibility = View.GONE // TODO: Header date
     }
 
-    private var singulars = intArrayOf(R.string.shared_note, R.string.submitter, R.string.repository, R.string.shared_media, R.string.source, R.string.person, R.string.family)
-    private var plurals = intArrayOf(R.string.shared_notes, R.string.submitters, R.string.repositories, R.string.shared_medias, R.string.sources, R.string.persons, R.string.families)
+    private var singulars = intArrayOf(
+        R.string.shared_note, R.string.submitter, R.string.repository, R.string.shared_media,
+        R.string.source, R.string.person, R.string.family
+    )
+    private var plurals = intArrayOf(
+        R.string.shared_notes, R.string.submitters, R.string.repositories, R.string.shared_medias,
+        R.string.sources, R.string.persons, R.string.families
+    )
 
     private fun writeDifferences(type: Int): String {
         var type = type

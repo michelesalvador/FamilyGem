@@ -11,7 +11,20 @@ import app.familygem.Global
 import app.familygem.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.Locale
+
+fun InputStream.copyTo(out: OutputStream, onCopy: (totalBytes: Long) -> Unit) {
+    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+    var bytes: Int
+    var totalBytes: Long = 0
+    while (read(buffer).also { bytes = it } != -1) {
+        out.write(buffer, 0, bytes)
+        totalBytes += bytes
+        onCopy(totalBytes)
+    }
+}
 
 /** The most generic utilities. */
 object Util {
@@ -40,7 +53,7 @@ object Util {
     fun confirmDelete(context: Context, action: () -> Unit) {
         AlertDialog.Builder(context).setMessage(R.string.sure_delete)
             .setPositiveButton(R.string.yes) { _, _ -> action() }
-            .setNegativeButton(R.string.no, null).show()
+            .setNeutralButton(android.R.string.cancel, null).show()
     }
 
     /**

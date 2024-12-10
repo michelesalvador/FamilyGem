@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+    <ProgressBar
+        android:id="@+id/progress_circle"
+        android:layout_width="@dimen/wheel_size"
+        android:layout_height="@dimen/wheel_size" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/progress_box"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/generic_background"
+        android:elevation="15dp"
+        android:padding="20dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/progress_text"
+            style="@style/AppTheme.Suggestion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:gravity="center_horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/progress_guide"
+            tools:text="Unzipping 1234 files" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/progress_guide"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:progressTint="@color/accent"
+            app:layout_constraintTop_toBottomOf="@+id/progress_guide"
+            tools:progress="50" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

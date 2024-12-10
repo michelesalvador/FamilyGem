@@ -48,7 +48,8 @@
             android:layout_height="match_parent" />
     </LinearLayout>
 
-    <include
-        android:id="@+id/backup_wheel"
-        layout="@layout/progress" />
+    <app.familygem.ProgressView
+        android:id="@+id/backup_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

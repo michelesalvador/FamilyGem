@@ -61,12 +61,10 @@
                 android:text="@string/import_gedcom" />
         </LinearLayout>
 
-        <ProgressBar
+        <app.familygem.ProgressView
             android:id="@+id/new_progress"
-            android:layout_width="@dimen/wheel_size"
-            android:layout_height="@dimen/wheel_size"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:visibility="gone" />
     </RelativeLayout>
 </ScrollView>

@@ -61,11 +61,11 @@ import org.folg.gedcom.model.SpouseRef
 import org.folg.gedcom.model.Submitter
 import java.io.File
 
-/** First activity visible in the app, listing all available trees. */
+/** Second activity visible in the app, listing all available trees. */
 class TreesActivity : AppCompatActivity() {
     private lateinit var treeList: MutableList<Map<String, String>>
     private lateinit var adapter: SimpleAdapter
-    lateinit var progress: View
+    lateinit var progress: ProgressView
     private lateinit var welcome: SpeechBubble
     private lateinit var exporter: Exporter
     private var autoOpenedTree = false // To open automatically the tree at startup only once
@@ -75,9 +75,9 @@ class TreesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.trees_activity)
         val listView = findViewById<ListView>(R.id.trees_list)
-        progress = findViewById(R.id.progress_wheel)
+        progress = findViewById(R.id.trees_progress)
         welcome = SpeechBubble(this, R.string.tap_add_tree)
-        exporter = Exporter(this)
+        exporter = Exporter(this, progress)
 
         // At very first startup
         val referrer = Global.settings.referrer
@@ -170,7 +170,7 @@ class TreesActivity : AppCompatActivity() {
                         menu.add(0, 6, 0, R.string.merge_tree)
                     if (exists && !derived && !exhausted && Global.settings.expert && Global.settings.trees.size > 1
                         && tree.shares != null && tree.grade != 0 // Must be 9 or 10
-                    ) menu.add(0, 7, 0, R.string.compare)
+                    ) menu.add(0, 7, 0, R.string.compare) // TODO: remove menu item and compare automatically
                     if (exists && Global.settings.expert)
                         menu.add(0, 8, 0, R.string.make_backup)
                     if (exists && Global.settings.expert && !exhausted)
@@ -322,12 +322,10 @@ class TreesActivity : AppCompatActivity() {
             .setOnCancelListener { onCancel() }
             .setPositiveButton(R.string.download) { _, _ ->
                 progress.visibility = View.VISIBLE
-                lifecycleScope.launch(IO) {
-                    TreeUtil.downloadSharedTree(this@TreesActivity, dateId, {
-                        progress.visibility = View.GONE
-                        updateList()
-                    }, { progress.visibility = View.GONE })
-                }
+                TreeUtil.launchDownloadSharedTree(lifecycleScope, this, dateId, progress, {
+                    progress.visibility = View.GONE
+                    updateList()
+                }, { progress.visibility = View.GONE })
             }.show()
     }
 
@@ -416,14 +414,18 @@ class TreesActivity : AppCompatActivity() {
                 val tree = Global.settings.getTree(treeId)
                 if (TreeUtil.compareTrees(this@TreesActivity, tree, false)) {
                     tree.grade = 20
+                    tree.backup = false
+                    Global.settings.save()
                     updateList()
                 } else Toast.makeText(this@TreesActivity, R.string.no_results, Toast.LENGTH_LONG).show()
             } else if (id == 8) { // Export ZIP backup
+                progress.visibility = View.VISIBLE
                 lifecycleScope.launch(IO) {
                     exporter.openTree(treeId)
                     FileUtil.openSaf(treeId, FileType.ZIP_BACKUP, zipBackupLauncher)
                 }
             } else if (id == 9) { // Export GEDCOM
+                progress.visibility = View.VISIBLE
                 lifecycleScope.launch(IO) {
                     if (exporter.openTree(treeId)) {
                         val totMedia = exporter.countMediaFilesToAttach()
@@ -437,11 +439,15 @@ class TreesActivity : AppCompatActivity() {
                                         else FileUtil.openSaf(treeId, FileType.GEDCOM, gedcomLauncher)
                                         dialog.dismiss()
                                     }.show()
+                                progress.visibility = View.GONE
                             }
                         } else {
                             FileUtil.openSaf(treeId, FileType.GEDCOM, gedcomLauncher)
                         }
-                    } else Util.toast(exporter.errorMessage)
+                    } else {
+                        Util.toast(exporter.errorMessage)
+                        withContext(Main) { progress.visibility = View.GONE }
+                    }
                 }
             } else if (id == 10) { // Delete tree
                 Util.confirmDelete(this@TreesActivity) {

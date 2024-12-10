@@ -17,7 +17,11 @@
             android:scrollbarStyle="outsideOverlay" />
     </LinearLayout>
 
-    <include layout="@layout/progress" />
+    <app.familygem.ProgressView
+        android:id="@+id/trees_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
     <include layout="@layout/fab" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

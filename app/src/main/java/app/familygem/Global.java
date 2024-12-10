@@ -47,7 +47,7 @@ public class Global extends MultiDexApplication {
     public static Map<String, Integer> croppedPaths = new HashMap<>();
     public static Gedcom gc2; // A shared tree, for comparison of updates
     public static int treeId2; // ID of the shared tree
-
+    public static BackupViewModel backupViewModel;
     /**
      * This is called when the application starts, and also when it is restarted.
      */
@@ -130,6 +130,8 @@ public class Global extends MultiDexApplication {
             toBeSaved = true;
         }
         if (toBeSaved) settings.save();
+
+        backupViewModel = new BackupViewModel(this);
     }
 
     /**

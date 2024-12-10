@@ -2,8 +2,6 @@ package app.familygem
 
 import android.app.Application
 import android.net.Uri
-import android.text.format.DateUtils
-import android.text.format.Formatter
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
@@ -12,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import app.familygem.Settings.Tree
 import app.familygem.util.getBasicData
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -21,7 +20,6 @@ import kotlinx.coroutines.yield
 import org.joda.time.LocalDateTime
 import org.joda.time.format.DateTimeFormat
 import java.io.BufferedReader
-import java.util.Date
 import java.util.zip.ZipInputStream
 
 sealed class MainState {
@@ -41,22 +39,21 @@ sealed class SaveState {
 
 sealed class RecoverState {
     data object Loading : RecoverState()
-    data class Success(val files: List<BackupItem>) : RecoverState()
+    data class Success(val items: List<BackupItem>) : RecoverState()
     data class Error(val message: String?) : RecoverState() // Making backup is not allowed
     data class Notice(val message: String) : RecoverState() // Making backup is allowed
 }
 
 data class TreeItem(val tree: Tree, var detail: String, var backupDone: Boolean? = null)
 
-data class BackupItem(
-    val documentFile: DocumentFile, val treeId: Int, val treeTitle: String, val size: String, val date: String, val invalid: Boolean
-)
+data class BackupItem(val documentFile: DocumentFile, val treeId: Int, var label: String, var valid: Boolean?)
 
 class InvalidUriException(message: String) : Exception(message)
 
 class BackupViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
         const val NO_URI = "noUri"
+        private const val TAG = "BackupViewModel"
     }
 
     private val context = getApplication<Application>()
@@ -66,8 +63,12 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
     lateinit var treeItems: List<TreeItem>
     val canBackup = MutableLiveData<Boolean>()
     val recoverState = MutableStateFlow<RecoverState>(RecoverState.Loading)
+    private var backupItems = listOf<BackupItem>()
+    private var scheduleJob: Job? = null // Just to wait for next backup
+    private var backupJob: Job? = null // The actual backup process TODO maybe each tree/backup should have its own backupJob
+    private var backingFileName: String? = null // The DocumentFile we are currently backing up
 
-    /** Displays or hides loading wheel. */
+    /** Displays or hides progress view. */
     fun working(hard: Boolean) {
         loading.postValue(hard)
     }
@@ -91,7 +92,7 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
     fun listActualTrees() {
         saveState.value = if (Global.settings.trees.isEmpty()) SaveState.Error("No trees.")
         else {
-            treeItems = Global.settings.trees.map { TreeItem(it, it.getBasicData()) }
+            treeItems = Global.settings.trees.filter { it.grade < 20 }.map { TreeItem(it, it.getBasicData()) }
             SaveState.Success
         }
     }
@@ -105,7 +106,7 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
     /** Updates backup button state. */
     fun updateState() {
         canBackup.value = saveState.value is SaveState.Success && treeItems.any { it.tree.backup }
-                && recoverState.value !is RecoverState.Error // Could be RecoverState.Notice
+                && backupJob?.isActive != true && recoverState.value !is RecoverState.Error // Could be RecoverState.Notice
     }
 
     /** Checks for errors on backup folder and tries to return it. */
@@ -123,106 +124,138 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
     /** Displays the list of recoverable backup files. */
     fun loadBackupFiles() = viewModelScope.launch(Dispatchers.IO) {
         getBackupFolder()?.let { folder ->
+            // Displays the list of files
             recoverState.value = if (folder.listFiles().filterNot { it.isDirectory }.isEmpty()) {
                 RecoverState.Notice("Backup folder is empty.")
             } else {
-                val files = mutableListOf<BackupItem>()
+                val items = mutableListOf<BackupItem>()
                 folder.listFiles().filter { it.isFile }.forEach { file ->
-                    yield()
+                    // Tree ID from the first number of file name
                     val treeId = "^(\\d+)_".toRegex().find(file.name!!)?.groupValues?.get(1)?.toInt() ?: Int.MAX_VALUE
-                    var invalid = false
-                    val treeTitle = try {
-                        ZipInputStream(context.contentResolver.openInputStream(file.uri)).use { zipInputStream ->
-                            generateSequence { zipInputStream.nextEntry }.first { it.name == "settings.json" }.let { _ ->
-                                val json = zipInputStream.bufferedReader().use(BufferedReader::readText)
-                                val zipped = Gson().fromJson(json, Settings.ZippedTree::class.java)
-                                zipped.title
+                    items.add(BackupItem(file, treeId, "Loading..", null))
+                }
+                backupItems = items.sortedWith(compareBy({ it.treeId }, { it.documentFile.name }))
+                RecoverState.Success(backupItems)
+            }
+            // Opens each file to check whether is a valid backup that contains 'settings.json'
+            backupItems.forEach { item ->
+                yield()
+                var valid: Boolean? = null
+                val label = if (backupJob?.isActive == true && item.documentFile.name == backingFileName) {
+                    "Creating backup.."
+                } else try {
+                    ZipInputStream(context.contentResolver.openInputStream(item.documentFile.uri)).use { zipInputStream ->
+                        generateSequence { zipInputStream.nextEntry }.first { it.name == "settings.json" }.let { _ ->
+                            val json = zipInputStream.bufferedReader().use(BufferedReader::readText)
+                            val zippedTree = Gson().fromJson(json, Settings.ZippedTree::class.java)
+                            return@use if (zippedTree.title != null) {
+                                valid = true; zippedTree.title!!
+                            } else {
+                                valid = false; "Missing title"
                             }
                         }
-                    } catch (exception: NoSuchElementException) {
-                        invalid = true
-                        "Invalid backup"
-                    } catch (exception: Exception) {
-                        invalid = true
-                        exception.localizedMessage
                     }
-                    val size = Formatter.formatFileSize(context, file.length())
-                    val date = DateUtils.getRelativeTimeSpanString(file.lastModified(), Date().time, DateUtils.MINUTE_IN_MILLIS).toString()
-                    files.add(BackupItem(file, treeId, treeTitle, size, date, invalid))
+                } catch (exception: Exception) {
+                    valid = false
+                    when (exception) {
+                        is NoSuchElementException -> "Invalid backup"
+                        is JsonSyntaxException -> "Invalid JSON"
+                        else -> exception.localizedMessage ?: "Exception"
+                    }
                 }
-                RecoverState.Success(files.sortedWith(compareBy({ it.treeId }, { it.documentFile.name })))
+                backupItems = backupItems.map { if (it == item) item.copy(label = label, valid = valid) else it }
+                recoverState.value = RecoverState.Success(backupItems)
             }
+        }
+        working(false)
+    }
+
+    fun deleteBackupFile(item: BackupItem) {
+        // Cancels any backup job in progress
+        if (backupJob?.isActive == true && item.documentFile.name == backingFileName) {
+            backupJob?.cancel()
+        }
+        if (item.documentFile.delete()) {
+            backupItems = backupItems.filterNot { it == item }
+            recoverState.value = RecoverState.Success(backupItems)
         }
     }
 
-    fun deleteBackupFile(file: DocumentFile) {
-        file.delete()
-        recoverState.value = RecoverState.Loading
-    }
-
-    fun backupSelectedTrees() = viewModelScope.launch(Dispatchers.IO) {
-        treeItems.forEach { item ->
-            yield()
-            if (item.tree.backup) { // Makes backup
-                val result = backupTree(item.tree)
-                if (result.isSuccess) {
-                    item.detail = "Backup OK"
-                    item.backupDone = true
-                } else {
-                    item.detail = result.exceptionOrNull()?.localizedMessage ?: "Error"
-                    item.backupDone = false
-                }
-            } else { // Restores default values
-                item.detail = item.tree.getBasicData()
-                item.backupDone = null
-            }
-        }
-        saveState.postValue(SaveState.Success)
-        // Updates backup files list
-        if (treeItems.any { it.tree.backup && it.backupDone == true })
-            recoverState.value = RecoverState.Loading
-    }
-
-    private var backupJob: Job? = null
-
-    /** Performs backup of a tree after some delay. */
-    fun backupDelayed(treeId: Int) {
-        backupJob?.cancel()
+    /** Performs backup of selected trees. */
+    fun backupSelectedTrees() {
         backupJob = viewModelScope.launch(Dispatchers.IO) {
+            treeItems.forEach { item ->
+                yield()
+                if (item.tree.backup) { // Makes backup
+                    val result = backupTree(item.tree)
+                    if (result.isSuccess) {
+                        item.detail = "Backup OK"
+                        item.backupDone = true
+                    } else {
+                        item.detail = result.exceptionOrNull()?.localizedMessage ?: "Error"
+                        item.backupDone = false
+                    }
+                } else { // Restores default values
+                    item.detail = item.tree.getBasicData()
+                    item.backupDone = null
+                }
+            }
+            saveState.postValue(SaveState.Success)
+            // Updates backup item list
+            if (treeItems.any { it.tree.backup && it.backupDone == true })
+                recoverState.value = RecoverState.Loading
+        }
+    }
+
+    /** Performs backup of a tree after some delay. To be called on background. */
+    fun backupDelayed(treeId: Int) {
+        val tree = Global.settings.getTree(treeId)
+        if (!tree.backup) {
+            Log.v(TAG, "Tree $treeId does not require backup")
+            return
+        }
+        scheduleJob?.cancel()
+        scheduleJob = viewModelScope.launch(Dispatchers.Default) {
+            Log.i(TAG, "Backup of tree $treeId scheduled")
             delay(1000 * 60) // One minute
-            val tree = Global.settings.getTree(treeId)
-            val result = backupTree(tree)
-            // Deletes old backup files keeping only the last 3
-            if (result.isSuccess) {
-                val backupFolder = result.getOrNull()
-                val deletable = mutableListOf<DocumentFile>()
-                backupFolder?.listFiles()?.forEach {
-                    if ("^${treeId}_\\d{8}_\\d{6}\\.zip\$".toRegex().matches(it.name!!)) { // File with name like '12_20251231_123456.zip'
-                        deletable.add(it)
+            if (backupJob?.isActive == true) {
+                Log.w(TAG, "Another backup is already in progress")
+            } else {
+                backupJob = viewModelScope.launch(Dispatchers.IO) {
+                    backupTree(tree).onSuccess { backupFolder ->
+                        // Deletes old backup files keeping only the last 3
+                        val deletable = mutableListOf<DocumentFile>()
+                        backupFolder.listFiles().forEach {
+                            // File has name like '12_20251231_123456.zip'
+                            if ("^${treeId}_\\d{8}_\\d{6}\\.zip\$".toRegex().matches(it.name!!)) deletable.add(it)
+                        }
+                        deletable.sortedBy { it.lastModified() }.reversed().take(3).forEach { deletable.remove(it) }
+                        deletable.forEach { it.delete() }
+                        if (deletable.isNotEmpty()) Log.i(TAG, "Deleted ${deletable.size} old backup files")
                     }
                 }
-                deletable.sortedBy { it.lastModified() }.reversed().take(3).forEach { deletable.remove(it) }
-                deletable.forEach { it.delete() }
-                Log.i("BackupViewModel", "Backup tree $treeId success")
-            } else Log.w("BackupViewModel", "Backup tree $treeId fail: $result")
+            }
         }
     }
 
     /** Creates backup file for one tree. */
     private suspend fun backupTree(tree: Tree): Result<DocumentFile> {
+        Log.i(TAG, "Backup of tree ${tree.id} started")
         return try {
-            if (tree.backup) {
-                val folder = DocumentFile.fromTreeUri(context, Uri.parse(Global.settings.backupUri))
+            DocumentFile.fromTreeUri(context, Uri.parse(Global.settings.backupUri))?.let { folder ->
                 val exporter = Exporter(context)
                 if (exporter.openTreeStrict(tree.id)) {
                     val format = DateTimeFormat.forPattern("yyyyMMdd_HHmmss")
                     val date = LocalDateTime.now().toString(format)
-                    val file = folder?.createFile("application/zip", "${tree.id}_$date.zip")
+                    backingFileName = "${tree.id}_$date.zip"
+                    val file = folder.createFile("application/zip", backingFileName!!)
                     exporter.exportZipBackup(null, -1, file!!.uri)
+                    Log.i(TAG, "Backup of tree ${tree.id} completed")
                     Result.success(folder)
                 } else throw Exception(exporter.errorMessage)
-            } else throw Exception("Backup not requested")
+            } ?: throw Exception("Backup folder unreachable")
         } catch (exception: Exception) {
+            Log.w(TAG, "Backup of tree ${tree.id} failed: ${exception.message}")
             Result.failure(exception)
         }
     }

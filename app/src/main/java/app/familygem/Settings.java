@@ -195,7 +195,7 @@ public class Settings {
          * </ol>
          */
         public int grade;
-        boolean backup;
+        public boolean backup;
         public List<Birthday> birthdays;
 
         public Tree(int id, String title, String dir, int persons, int generations, String root,

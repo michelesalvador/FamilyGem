@@ -12,6 +12,7 @@ import app.familygem.util.ChangeUtil.actualDateTime
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import app.familygem.visitor.MediaList
+import kotlinx.coroutines.yield
 import org.apache.commons.io.FileUtils
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Media
@@ -21,10 +22,8 @@ import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-/**
- * Utility class to export a tree as GEDCOM or ZIP backup.
- */
-class Exporter(private val context: Context) {
+/** Utility class to export a tree as GEDCOM or ZIP backup. */
+class Exporter(private val context: Context, private val progressView: ProgressView? = null) {
 
     private var treeId = 0
     private var gedcom: Gedcom? = null
@@ -55,9 +54,7 @@ class Exporter(private val context: Context) {
         return true
     }
 
-    /**
-     * Writes the GEDCOM file in the URI.
-     */
+    /** Writes the GEDCOM file in the URI. */
     suspend fun exportGedcom(targetUri: Uri): Boolean {
         this.targetUri = targetUri
         updateHeader(extractFilename(targetUri))
@@ -78,9 +75,7 @@ class Exporter(private val context: Context) {
         return success(R.string.gedcom_exported_ok)
     }
 
-    /**
-     * Writes the GEDCOM with all the media in a ZIP file.
-     */
+    /** Writes the GEDCOM with all the media in a ZIP file. */
     suspend fun exportGedcomToZip(targetUri: Uri): Boolean {
         this.targetUri = targetUri
         // Creates the GEDCOM file
@@ -105,19 +100,17 @@ class Exporter(private val context: Context) {
         return success(R.string.zip_exported_ok)
     }
 
-    /**
-     * Creates a zipped file with the tree, settings and media.
-     */
-    fun exportZipBackup(root: String?, grade: Int, targetUri: Uri): Boolean {
+    /** Creates a zipped file with the tree, settings and media. */
+    suspend fun exportZipBackup(root: String?, grade: Int, targetUri: Uri): Boolean {
         var root = root
         var grade = grade
         this.targetUri = targetUri
         // Media
         val files = collectMedia()
-        // Tree's JSON
+        // Tree JSON
         val fileTree = File(context.filesDir, "$treeId.json")
         files[DocumentFile.fromFile(fileTree)] = Type.JSON_TREE
-        // Settings' JSON
+        // Settings JSON
         // title, root and grade can be modified by SharingActivity
         val tree = Global.settings.getTree(treeId)
         if (root == null) root = tree.root
@@ -130,9 +123,7 @@ class Exporter(private val context: Context) {
         return success(R.string.zip_exported_ok)
     }
 
-    /**
-     * @return The number of media files to attach into the ZIP file
-     */
+    /** @return The number of media files to attach into the ZIP file */
     fun countMediaFilesToAttach(): Int {
         val mediaList = MediaList(gedcom, 0)
         gedcom!!.accept(mediaList)
@@ -143,9 +134,7 @@ class Exporter(private val context: Context) {
         return numFiles
     }
 
-    /**
-     * @return A DocumentFile map of all the media that can be found
-     */
+    /** @return A DocumentFile map of all the media that can be found */
     private fun collectMedia(): MutableMap<DocumentFile?, Type> {
         val collection: MutableMap<DocumentFile?, Type> = HashMap()
         if (gedcom == null) { // gedcom is null if openTree() has failed
@@ -195,9 +184,7 @@ class Exporter(private val context: Context) {
         }
     }
 
-    /**
-     * Enhances GEDCOM for export.
-     */
+    /** Enhances GEDCOM for export. */
     private fun optimizeGedcom() {
         // Value of names from given and surname
         for (person in gedcom!!.people) {
@@ -214,9 +201,7 @@ class Exporter(private val context: Context) {
         }
     }
 
-    /**
-     * Extracts only the filename from a URI.
-     */
+    /** Extracts only the filename from a URI. */
     private fun extractFilename(uri: Uri): String {
         var filename: String? = null
         // file://
@@ -242,29 +227,38 @@ class Exporter(private val context: Context) {
     }
 
     /**
-     * Gets a list of DocumentFiles and put them in a ZIP file written to the targetUri.
+     * Receives a list of DocumentFiles and put them in a ZIP file written to the [targetUri].
      * @return Error message or true if all is well
      */
-    private fun createZipFile(files: Map<DocumentFile?, Type>): Boolean {
-        val buffer = ByteArray(128)
+    private suspend fun createZipFile(files: Map<DocumentFile?, Type>): Boolean {
         try {
-            val zos = ZipOutputStream(context.contentResolver.openOutputStream(targetUri!!))
-            for ((file, type) in files) {
-                val input = context.contentResolver.openInputStream(file!!.uri)
-                var filename = file.name // Files that are not renamed ('settings.json', 'family.ged')
-                if (type == Type.JSON_TREE) filename = "tree.json"
-                else if (type == Type.MEDIA) filename = "media/" + file.name
-                zos.putNextEntry(ZipEntry(filename))
-                var read: Int
-                while (input!!.read(buffer).also { read = it } != -1) {
-                    zos.write(buffer, 0, read)
+            val sortedFiles = files.toList().sortedBy { it.second } // Sorts files by type (any 'settings.json' goes first)
+            val zipOutputStream = ZipOutputStream(context.contentResolver.openOutputStream(targetUri!!))
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            progressView?.displayBar("Zipping files", files.size.toLong())
+            var count = 0L
+            for ((file, type) in sortedFiles) {
+                yield()
+                val inputStream = context.contentResolver.openInputStream(file!!.uri)
+                val filename = when (type) {
+                    Type.JSON_TREE -> "tree.json"
+                    Type.MEDIA -> "media/${file.name}"
+                    else -> file.name // Files that are not renamed ('settings.json', 'family.ged')
                 }
-                zos.closeEntry()
-                input.close()
+                zipOutputStream.putNextEntry(ZipEntry(filename))
+                var read: Int
+                while (inputStream!!.read(buffer).also { read = it } != -1) {
+                    zipOutputStream.write(buffer, 0, read)
+                }
+                zipOutputStream.closeEntry()
+                inputStream.close()
+                progressView?.progress = count++
             }
-            zos.close()
+            zipOutputStream.close()
         } catch (e: IOException) {
             return error(e.localizedMessage)
+        } finally {
+            progressView?.hideBar()
         }
         return true
     }

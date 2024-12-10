@@ -6,6 +6,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
+import android.text.format.DateUtils
+import android.text.format.Formatter
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
@@ -17,7 +19,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat.getColor
@@ -26,7 +27,6 @@ import androidx.core.view.children
 import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -38,15 +38,14 @@ import app.familygem.databinding.BackupSaveFragmentBinding
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.zip.ZipInputStream
+import java.util.Date
 
 /** Local backup manager for all trees. */
 class BackupActivity : BaseActivity() {
 
     private lateinit var binding: BackupActivityBinding
-    private val viewModel: BackupViewModel by viewModels()
+    private val viewModel = Global.backupViewModel
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,7 +104,7 @@ class BackupActivity : BaseActivity() {
                 viewModel.updateState()
             }
             viewModel.loading.observe(this@BackupActivity) {
-                backupWheel.root.visibility = if (it) View.VISIBLE else View.GONE
+                backupProgress.visibility = if (it) View.VISIBLE else View.GONE
             }
             backupPager.adapter = PagesAdapter(this@BackupActivity)
             TabLayoutMediator(backupTabs, backupPager) { tab, position ->
@@ -140,7 +139,7 @@ class BackupActivity : BaseActivity() {
 
     /** List of trees that can be selected for backup. */
     class SaveFragment : Fragment() {
-        private val viewModel: BackupViewModel by activityViewModels()
+        private val viewModel = Global.backupViewModel
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
             BackupSaveFragmentBinding.inflate(layoutInflater).run {
                 viewModel.listActualTrees()
@@ -151,6 +150,9 @@ class BackupActivity : BaseActivity() {
                             viewModel.treeItems.forEach { item ->
                                 val treeView = inflater.inflate(R.layout.backup_tree_item, backupSaveBox, false)
                                 backupSaveBox.addView(treeView)
+                                val idView = treeView.findViewById<TextView>(R.id.backupTree_id)
+                                if (Global.settings.expert) idView.text = item.tree.id.toString()
+                                else idView.visibility = View.GONE
                                 treeView.findViewById<TextView>(R.id.backupTree_title).text = item.tree.title
                                 val detailView = treeView.findViewById<TextView>(R.id.backupTree_detail)
                                 detailView.text = item.detail
@@ -199,7 +201,7 @@ class BackupActivity : BaseActivity() {
 
     /** List of recoverable backup files. */
     class RecoverFragment : Fragment() {
-        private val viewModel: BackupViewModel by activityViewModels()
+        private val viewModel = Global.backupViewModel
         private lateinit var binding: BackupRecoverFragmentBinding
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
             binding = BackupRecoverFragmentBinding.inflate(layoutInflater)
@@ -213,8 +215,7 @@ class BackupActivity : BaseActivity() {
                                 viewModel.loadBackupFiles()
                             }
                             is RecoverState.Success -> {
-                                displayBackupFiles(state.files)
-                                viewModel.working(false)
+                                displayBackupItems(state.items)
                             }
                             is RecoverState.Error -> {
                                 displayMessage(boxView, state.message ?: getString(R.string.something_wrong))
@@ -227,6 +228,11 @@ class BackupActivity : BaseActivity() {
                     }
                 }
             }
+            binding.backupRecoverSwipe.setOnRefreshListener {
+                viewModel.recoverState.value = RecoverState.Loading
+                binding.backupRecoverSwipe.isRefreshing = false
+            }
+            viewModel.recoverState.value = RecoverState.Loading
             return binding.root
         }
 
@@ -241,60 +247,57 @@ class BackupActivity : BaseActivity() {
             viewModel.working(false)
         }
 
-        private fun displayBackupFiles(files: List<BackupItem>) {
+        private fun displayBackupItems(items: List<BackupItem>) {
             val boxView = binding.backupRecoverBox
             boxView.removeAllViews()
-            files.forEach { file ->
+            items.forEach { item ->
+                val file = item.documentFile
                 val backupView = layoutInflater.inflate(R.layout.backup_file_item, boxView, false)
                 boxView.addView(backupView)
                 val nameView = backupView.findViewById<TextView>(R.id.backup_fileName)
-                nameView.text = file.documentFile.name
-                val titleView = backupView.findViewById<TextView>(R.id.backup_treeTitle)
-                titleView.text = file.treeTitle
-                backupView.findViewById<TextView>(R.id.backup_size).text = file.size
-                backupView.findViewById<TextView>(R.id.backup_date).text = file.date
+                nameView.text = file.name
+                val labelView = backupView.findViewById<TextView>(R.id.backup_label)
+                labelView.text = item.label
+                backupView.findViewById<TextView>(R.id.backup_date).text = DateUtils.getRelativeTimeSpanString(
+                    file.lastModified(), Date().time, DateUtils.SECOND_IN_MILLIS
+                ).toString()
+                backupView.findViewById<TextView>(R.id.backup_size).text = Formatter.formatFileSize(context, file.length())
                 // Detail view
-                val detailView = backupView.findViewById<RelativeLayout>(R.id.backup_detail)
+                val detailView = backupView.findViewById<LinearLayout>(R.id.backup_detail)
                 val deleteButton = detailView.findViewById<Button>(R.id.backup_delete)
                 deleteButton.setOnClickListener {
                     Util.confirmDelete(requireContext()) {
-                        viewModel.deleteBackupFile(file.documentFile)
-                        boxView.removeView(backupView)
+                        viewModel.deleteBackupFile(item)
                     }
                 }
                 val recoverButton = detailView.findViewById<Button>(R.id.backup_recover)
-                if (file.invalid) {
-                    nameView.setTextColor(getColor(requireContext(), R.color.gray_text))
-                    titleView.setTextColor(getColor(requireContext(), R.color.gray_text))
-                    recoverButton.visibility = View.GONE
-                    val params = deleteButton.layoutParams as RelativeLayout.LayoutParams
-                    params.addRule(RelativeLayout.ALIGN_PARENT_END)
-                } else {
-                    recoverButton.setOnClickListener {
-                        viewModel.working(true)
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            try {
-                                val isValidBackup =
-                                    ZipInputStream(requireContext().contentResolver.openInputStream(file.documentFile.uri)).use { zipInputStream ->
-                                        generateSequence { zipInputStream.nextEntry }.filterNot { it.isDirectory }.map { it.name }
-                                            .toList().containsAll(listOf("settings.json", "tree.json"))
-                                    }
-                                if (isValidBackup) {
-                                    TreeUtil.unZipTree(requireContext(), null, file.documentFile.uri,
-                                        { viewModel.listActualTrees() }, { viewModel.working(false) })
-                                } else Util.toast(R.string.backup_invalid)
-                            } catch (e: Exception) {
-                                Util.toast(e.localizedMessage)
-                            }
-                            viewModel.working(false)
+                when (item.valid) {
+                    null -> { // Initial state
+                        labelView.setTextColor(getColor(requireContext(), R.color.accent))
+                        recoverButton.visibility = View.GONE
+                    }
+                    true -> { // Valid backup
+                        recoverButton.setOnClickListener { button ->
+                            button.isEnabled = false
+                            viewModel.working(true)
+                            val progressView = activity?.findViewById<ProgressView>(R.id.backup_progress)
+                            TreeUtil.launchUnzipTree(lifecycleScope, requireContext(), null, file.uri, progressView!!, {
+                                button.isEnabled = true
+                                viewModel.listActualTrees()
+                            }, { viewModel.working(false) })
                         }
+                    }
+                    else -> { // Invalid backup
+                        labelView.setTextColor(getColor(requireContext(), R.color.gray_text))
+                        recoverButton.visibility = View.GONE
+                        backupView.findViewById<RelativeLayout>(R.id.backup_text).alpha = 0.7F
                     }
                 }
                 detailView.visibility = View.GONE
                 // Shows or hides detail
                 backupView.setOnClickListener {
                     boxView.children.filterNot { it == backupView }.forEach {
-                        it.findViewById<RelativeLayout>(R.id.backup_detail).visibility = View.GONE
+                        it.findViewById<LinearLayout>(R.id.backup_detail).visibility = View.GONE
                         it.background = null
                     }
                     detailView.visibility = if (detailView.visibility == View.VISIBLE) {

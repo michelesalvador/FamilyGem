@@ -3,6 +3,7 @@ package app.familygem
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -13,12 +14,11 @@ import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-/**
- * Entry point of the app.
- */
+/** Entry point of the app. */
 class LauncherActivity : AppCompatActivity() {
-    override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.launcher_activity)
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) { // Tiramisu doesn't need this
@@ -26,11 +26,10 @@ class LauncherActivity : AppCompatActivity() {
             Global.context = createConfigurationContext(resources.configuration)
         }
 
-        val intent = intent
         val uri = intent.data
         // By opening the app from the Recents screen, avoids re-importing a newly imported shared tree
         val fromHistory = intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-        val treesIntent = Intent(this, TreesActivity::class.java)
+        val startTrees = { startActivity(Intent(this, TreesActivity::class.java)) }
         if (uri != null && !fromHistory) {
             /* The URI could come from a click on various types of links:
                 https://www.familygem.app/share.php?tree=20190802224208
@@ -50,34 +49,26 @@ class LauncherActivity : AppCompatActivity() {
             else null
             if (dateId != null) {
                 if (BuildConfig.PASS_KEY.isNotEmpty()) {
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        TreeUtil.downloadSharedTree(this@LauncherActivity, dateId, {
-                            // Successful conclusion of download
-                            startActivity(treesIntent)
-                        }, { // Unsuccessful conclusion of download
-                            startActivity(treesIntent)
-                        })
-                    }
+                    val progressView = findViewById<ProgressView>(R.id.launcher_progress)
+                    TreeUtil.launchDownloadSharedTree(lifecycleScope, this, dateId, progressView, startTrees)
+                    { progressView.visibility = View.GONE }
                 } else {
-                    startActivity(treesIntent)
-                    Toast.makeText(this, R.string.something_wrong, Toast.LENGTH_LONG).show()
+                    startTrees()
+                    Toast.makeText(this, "Missing pass key.", Toast.LENGTH_LONG).show()
                 }
             } // The URI comes from a click on a .ged file
             else if (uri.scheme == "file" || uri.scheme == "content") {
                 lifecycleScope.launch(Dispatchers.Default) {
-                    TreeUtil.importGedcom(this@LauncherActivity, uri,
-                            { startActivity(treesIntent) }, { startActivity(treesIntent) })
+                    TreeUtil.importGedcom(this@LauncherActivity, uri, startTrees, startTrees)
                 }
             } else {
-                startActivity(treesIntent)
+                startTrees()
                 Toast.makeText(this, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
             }
         } else { // App normal launch
-            if (Global.settings.loadTree) {
-                treesIntent.putExtra(Extra.AUTO_LOAD_TREE, true) // To load the last opened tree
-                treesIntent.flags = Intent.FLAG_ACTIVITY_NO_ANIMATION // Perhaps ineffective but so be it
-            }
-            startActivity(treesIntent)
+            if (Global.settings.loadTree) { // To load the last opened tree
+                startActivity(Intent(this, TreesActivity::class.java).putExtra(Extra.AUTO_LOAD_TREE, true))
+            } else startTrees()
         }
 
         // Retrieves GeoNames username to store it in shared preferences

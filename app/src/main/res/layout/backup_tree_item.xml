@@ -11,29 +11,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
-        android:paddingStart="16dp"
+        android:clipToPadding="false"
+        android:paddingStart="15dp"
         android:paddingTop="8dp"
         android:paddingEnd="8dp"
         android:paddingBottom="8dp">
 
         <TextView
+            android:id="@+id/backupTree_id"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-15dp"
+            android:gravity="end"
+            android:paddingEnd="6dp"
+            android:textColor="@color/gray_text"
+            android:textSize="13sp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/backupTree_title"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="333" />
+
+        <TextView
             android:id="@+id/backupTree_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="19sp"
+            android:textSize="18sp"
             app:layout_constraintEnd_toStartOf="@id/backupTree_checkbox"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/backupTree_id"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tree title very long that may wrap into multiple lines" />
 
         <TextView
             android:id="@+id/backupTree_detail"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textColor="@color/gray_text"
             android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@id/backupTree_checkbox"
+            app:layout_constraintStart_toStartOf="@+id/backupTree_title"
             app:layout_constraintTop_toBottomOf="@id/backupTree_title"
-            tools:text="1 person - 2 generations - 3 media" />
+            tools:text="1 person - 2 generations - 3 media - and much more text to see what happens here" />
 
         <CheckBox
             android:id="@+id/backupTree_checkbox"

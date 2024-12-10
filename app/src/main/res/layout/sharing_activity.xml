@@ -91,10 +91,9 @@
         </LinearLayout>
     </ScrollView>
 
-    <ProgressBar
-        android:id="@+id/share_wheel"
-        android:layout_width="@dimen/wheel_size"
-        android:layout_height="@dimen/wheel_size"
-        android:layout_centerInParent="true"
+    <app.familygem.ProgressView
+        android:id="@+id/share_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="gone" />
 </RelativeLayout>
