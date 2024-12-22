@@ -26,6 +26,7 @@ class DiagramSettingsActivity : BaseActivity() {
     private lateinit var siblings: SeekBar
     private lateinit var cousins: SeekBar
     private lateinit var numbers: SwitchCompat
+    private lateinit var duplicateLines: SwitchCompat
     private lateinit var indicator: LinearLayout
     private lateinit var animator: AnimatorSet
     private var leftToRight = true
@@ -139,6 +140,12 @@ class DiagramSettingsActivity : BaseActivity() {
         numbers.setOnCheckedChangeListener { _, _ ->
             maySave = true
         }
+        // Displays duplicates lines
+        duplicateLines = binding.diagramSettingsDuplicateLines
+        duplicateLines.isChecked = Global.settings.diagram.duplicates
+        duplicateLines.setOnCheckedChangeListener { _, _ ->
+            maySave = true
+        }
         val alphaIn = ObjectAnimator.ofFloat(indicator, View.ALPHA, 1F)
         alphaIn.duration = 0
         val alphaOut = ObjectAnimator.ofFloat(indicator, View.ALPHA, 1F, 0F)
@@ -198,6 +205,7 @@ class DiagramSettingsActivity : BaseActivity() {
                 diagram.siblings = convert(siblings.progress)
                 diagram.cousins = convert(cousins.progress)
                 diagram.numbers = numbers.isChecked
+                diagram.duplicates = duplicateLines.isChecked
                 save()
             }
             Global.edited = true

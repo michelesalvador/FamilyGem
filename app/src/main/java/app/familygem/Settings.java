@@ -154,7 +154,8 @@ public class Settings {
         public int siblings;
         public int cousins;
         public boolean spouses;
-        public boolean numbers;
+        public boolean numbers; // Little numbers
+        public boolean duplicates; // Duplicates lines
 
         // Default values
         DiagramSettings init() {
@@ -165,6 +166,7 @@ public class Settings {
             cousins = 1;
             spouses = true;
             numbers = true;
+            duplicates = false;
             return this;
         }
     }

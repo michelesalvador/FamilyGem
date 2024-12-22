@@ -19,6 +19,7 @@
     <color name="consumed">#DDD</color>
     <color name="male">#44AAFF</color>
     <color name="female">#FF66DD</color>
+    <color name="undefined">#999</color>
     <color name="partner_screen">#CCCCCC</color>
     <color name="partner_print">#E6E6E6</color>
     <color name="diagram_lines_screen">#FFFFFF</color>

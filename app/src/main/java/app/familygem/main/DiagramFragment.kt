@@ -90,6 +90,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private var glow: FulcrumGlow? = null
     private lateinit var lines: Lines
     private lateinit var backLines: Lines
+    private lateinit var duplicateLines: DuplicateLines
     private var density = 0f
     private var lineStroke = 0 // Lines thickness, in pixels
     private var lineDash = 0 // Dashed lines interval
@@ -198,6 +199,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                     .maxSiblingsNephews(settings.siblings)
                     .maxUnclesCousins(settings.cousins)
                     .displayNumbers(settings.numbers)
+                    .displayDuplicateLines(settings.duplicates)
                     .showFamily(Global.familyNum)
                     .startFrom(fulcrum)
                 drawDiagram()
@@ -215,10 +217,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         // Place various type of graphic nodes in 'graphicNodes' list
         for (personNode in graph.personNodes) {
             ensureActive()
-            if (personNode.person.id == Global.indi && !personNode.isFulcrumNode)
-                graphicNodes.add(Asterisk(context(), personNode))
-            else if (personNode.mini)
-                graphicNodes.add(GraphicMiniCard(context(), personNode))
+            if (personNode.mini) graphicNodes.add(GraphicMiniCard(context(), personNode))
             else graphicNodes.add(GraphicPerson(context(), personNode))
         }
         // First layout of cards
@@ -295,6 +294,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 box.addView(lines, 0)
                 backLines = Lines(context(), graph.backLines, true)
                 box.addView(backLines, 0)
+                duplicateLines = DuplicateLines(context())
+                box.addView(duplicateLines, 0)
                 // Adds the glow
                 val fulcrumNode = fulcrumView!!.metric as PersonNode
                 val glowParams = RelativeLayout.LayoutParams(toPx(fulcrumNode.width) + glowSpace * 2, toPx(fulcrumNode.height) + glowSpace * 2)
@@ -326,6 +327,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         // Updates lines
         lines.invalidate()
         backLines.invalidate()
+        duplicateLines.invalidate()
         binding.diagramWheel.root.visibility = View.GONE
         // Pans to fulcrum
         val scale = moveLayout.minimumScale()
@@ -443,12 +445,12 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             if (sex.isMale()) border.setBackgroundResource(R.drawable.person_border_male)
             else if (sex.isFemale()) border.setBackgroundResource(R.drawable.person_border_female)
             background = view.findViewById(R.id.card_background)
-            if (personNode.isFulcrumNode) {
+            if (person.id == Global.indi) {
                 background.setBackgroundResource(R.drawable.person_background_selected)
-                fulcrumView = this
             } else if (personNode.acquired) {
                 background.setBackgroundResource(R.drawable.person_background_partner)
             }
+            if (personNode.isFulcrumNode) fulcrumView = this
             val imageView = view.findViewById<ImageView>(R.id.card_picture)
             val media = FileUtil.selectMainImage(person, imageView, show = false)
             if (media != null) loadingImages.add(Pair(media, imageView))
@@ -479,7 +481,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             if (printing) {
                 if ((metric as PersonNode).acquired)
                     background.setBackgroundResource(R.drawable.person_background_partner_print)
-                if (this == fulcrumView)
+                else // Removes fulcrum background
                     background.setBackgroundResource(R.drawable.person_background)
             }
         }
@@ -526,50 +528,37 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Little ancestry or progeny card.
-     */
+    /** Little ancestry or progeny card. */
     inner class GraphicMiniCard(context: Context, personNode: PersonNode) : GraphicMetric(context, personNode) {
-        var layout: RelativeLayout? = null
+        private val layout: RelativeLayout
 
         init {
             val miniCard = layoutInflater.inflate(R.layout.diagram_minicard, this, true)
+            layout = miniCard.findViewById(R.id.minicard)
             val miniCardText = miniCard.findViewById<TextView>(R.id.minicard_text)
             miniCardText.text = if (personNode.amount > 100) "100+" else personNode.amount.toString()
             val sex = personNode.person.sex
             if (sex.isMale()) miniCardText.setBackgroundResource(R.drawable.person_border_male)
             else if (sex.isFemale()) miniCardText.setBackgroundResource(R.drawable.person_border_female)
-            if (personNode.acquired) {
-                layout = miniCard.findViewById(R.id.minicard)
-                layout!!.setBackgroundResource(R.drawable.person_background_partner)
+            if (personNode.person.id == Global.indi) {
+                layout.setBackgroundResource(R.drawable.person_background_selected)
+            } else if (personNode.acquired) {
+                layout.setBackgroundResource(R.drawable.person_background_partner)
             }
             miniCard.setOnClickListener { if (!diagramJob!!.isActive) clickCard(personNode.person) }
         }
 
         override fun invalidate() {
-            if (printing && layout != null) {
-                layout!!.setBackgroundResource(R.drawable.person_background_partner_print)
+            if (printing) {
+                if ((metric as PersonNode).acquired)
+                    layout.setBackgroundResource(R.drawable.person_background_partner_print)
+                else
+                    layout.setBackgroundResource(R.drawable.person_background)
             }
         }
     }
 
-    /**
-     * Replacement for another person who is actually fulcrum.
-     */
-    inner class Asterisk(context: Context, personNode: PersonNode) : GraphicMetric(context, personNode) {
-        init {
-            layoutInflater.inflate(R.layout.diagram_asterisk, this, true)
-            registerForContextMenu(this)
-            setOnClickListener {
-                Memory.setLeader(personNode.person)
-                startActivity(Intent(getContext(), ProfileActivity::class.java))
-            }
-        }
-    }
-
-    /**
-     * Generates the view of lines connecting the cards.
-     */
+    /** The view of lines connecting the cards. */
     inner class Lines(context: Context, private val lineGroups: List<Set<Line>>, private val dashed: Boolean) : View(context) {
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val paths: MutableList<Path> = ArrayList() // Each path contains many lines
@@ -640,13 +629,51 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
+    /** The view of lines connecting duplicated persons. */
+    inner class DuplicateLines(context: Context) : View(context) {
+        private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        private val paths: MutableList<Path> = ArrayList(3) // Each path contains many lines
+        private val colors = arrayOf(R.color.male, R.color.female, R.color.undefined)
+
+        init {
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = toPxFloat(2F)
+            paint.strokeCap = Paint.Cap.SQUARE
+            for (i in 0..2) paths.add(Path())
+        }
+
+        override fun invalidate() {
+            for (line in graph.duplicateLines) {
+                val pathNum = when (line.gender) {
+                    Util.Gender.MALE -> 0
+                    Util.Gender.FEMALE -> 1
+                    else -> 2
+                }
+                val path = paths[pathNum]
+                path.moveTo(toPxFloat(line.x1), toPxFloat(line.y1))
+                path.quadTo(toPxFloat(line.x3), toPxFloat(line.y3), toPxFloat(line.x2), toPxFloat(line.y2))
+            }
+            // Update this view size
+            val params = layoutParams as RelativeLayout.LayoutParams
+            params.width = toPx(graph.width)
+            params.height = toPx(graph.height)
+            requestLayout()
+        }
+
+        override fun onDraw(canvas: Canvas) {
+            // Draw the paths
+            paths.forEachIndexed { i, it ->
+                paint.color = ResourcesCompat.getColor(resources, colors[i], null)
+                canvas.drawPath(it, paint)
+            }
+        }
+    }
+
     private fun clickCard(person: Person) {
         if (TreeUtil.isGlobalGedcomOk { selectParentFamily(person) }) selectParentFamily(person)
     }
 
-    /**
-     * Asks which family to display in the diagram if fulcrum has many parent families.
-     */
+    /** Asks which family to display in the diagram if fulcrum has many parent families. */
     private fun selectParentFamily(fulcrum: Person?) {
         val families = fulcrum!!.getParentFamilies(Global.gc)
         if (families.size > 1) {
@@ -657,9 +684,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Completes above function.
-     */
+    // Completes above function
     private fun completeSelect(fulcrum: Person, whichFamily: Int) {
         Global.indi = fulcrum.id
         Global.familyNum = whichFamily
@@ -691,7 +716,6 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     override fun onCreateContextMenu(menu: ContextMenu, view: View, info: ContextMenu.ContextMenuInfo?) {
         lateinit var personNode: PersonNode
         if (view is GraphicPerson) personNode = view.metric as PersonNode
-        else if (view is Asterisk) personNode = view.metric as PersonNode
         person = personNode.person
         if (personNode.origin != null) parentFam = personNode.origin.spouseFamily
         spouseFam = personNode.spouseFamily

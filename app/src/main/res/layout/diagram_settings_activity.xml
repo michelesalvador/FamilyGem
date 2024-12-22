@@ -106,6 +106,13 @@
             android:layout_marginTop="30dp"
             android:text="@string/numbers" />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/diagramSettings_duplicateLines"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/duplicates_lines" />
+
         <LinearLayout
             android:id="@+id/diagramSettings_indicator"
             android:layout_width="50dp"

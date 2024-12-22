@@ -199,6 +199,7 @@
     <string name="siblings_nephews">Fratelli e nipoti</string>
     <string name="uncles_cousins">Zii e cugini</string>
     <string name="numbers">Numeri</string>
+    <string name="duplicates_lines">Linee dei doppioni</string>
     <!-- PersonsFragment -->
     <string name="order_by">Ordina per</string>
     <string name="id">ID</string>
