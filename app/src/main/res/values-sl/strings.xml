@@ -120,8 +120,8 @@
     <string name="rename">Preimenovati</string>
     <string name="find_errors">Iskanje napak</string>
     <string name="share_tree">Deliti drevo</string>
-    <string name="export_gedcom">Izvoz datoteke GEDCOM</string>
-    <string name="gedcom_exported_ok">Datoteka GEDCOM je izvožena.</string>
+    <string name="export_gedcom">Izvoz GEDCOM</string>
+    <string name="gedcom_exported_ok">GEDCOM izvožen.</string>
     <string name="no_results">Brez rezultatov.</string>
     <string name="all_ok">Vse je v redu.</string>
     <string name="errors_found">Najdene napake: %d.</string>
@@ -174,8 +174,8 @@
     <string name="birthdays">Rojstni dnevi</string>
     <string name="turns_years_old">%s ima danes %d let.</string>
     <string name="card">Profil</string>
-    <string name="export_pdf">Izvoziti datoteko PDF</string>
-    <string name="pdf_exported_ok">Datoteka PDF izvožena.</string>
+    <string name="export_pdf">Izvoz PDF</string>
+    <string name="pdf_exported_ok">PDF izvožen.</string>
     <string name="unlink">Odvezati</string>
     <string name="partners">Partnerji</string>
     <string name="descendants">Potomci</string>
@@ -354,16 +354,13 @@
     <string name="simpsons_tree">Družinsko drevo Simpsonovih</string>
     <string name="persons">Osebe</string>
     <string name="compare">Primerjati</string>
-    <string name="zip_exported_ok">Datoteka ZIP je izvožena.</string>
+    <string name="zip_exported_ok">ZIP izvožen.</string>
     <string name="share_sensitive">Souporaba občutljivih podatkov</string>
     <string name="sharing_tree">Souporaba družinskega drevesa</string>
     <string name="allow_developer_access">Omogočiti razvijalcu aplikacije dostop do skupnega drevesa</string>
     <string name="all_imported_delete">Vse posodobitve so bile uvožene.
 \nAli želite odstraniti uvoženo drevo\?</string>
-    <string name="accepted_news">Sprejeli ste posodobitve %d:
-\n\t%d dopolnitve
-\n\t%d zamenjave
-\n\t%d odstranitve</string>
+    <string name="accepted_news">Sprejeli ste posodobitve %d:\n\t%d dopolnitve\n\t%d zamenjave\n\t%d odstranitve</string>
     <string name="merge_tree">Združiti drevo</string>
     <string name="merge">Združiti</string>
     <string name="select_tree">Izberiti drevo za združitev:</string>
@@ -392,4 +389,13 @@
     <string name="current_date">Aktualni datum</string>
     <string name="premium_deactivated">Premium deaktiviran.</string>
     <string name="choose_folder">Izbirati mapo</string>
+    <string name="export_png">Izvoz PNG</string>
+    <string name="png_exported_ok">PNG izvožen.</string>
+    <string name="numbers">Številke</string>
+    <string name="origin_family">Družina izvora</string>
+    <string name="adoptive_family">Posvojiteljska družina</string>
+    <string name="foster_family">Rejniška družina</string>
+    <string name="paternal_family">Očetova družina</string>
+    <string name="own_family">Lastna družina</string>
+    <string name="maternal_family">Mamina družina</string>
 </resources>

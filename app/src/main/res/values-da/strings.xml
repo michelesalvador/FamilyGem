@@ -337,10 +337,7 @@
     <string name="click_this_link">Klik på dette link for at se mit familietræ: %s</string>
     <string name="tree_news_imported">Ovenstående oprindelige træ kan modtage %d opdateringer fra det importerede træ:</string>
     <string name="updates_replace_add">Du skal beslutte, om opdateringer skal erstatte eksisterende elementer eller tilføjes som nye elementer.</string>
-    <string name="accepted_news">Du har accepteret %d opdateringer:
-\n\t%d tilføjelser
-\n\t%d udskiftninger
-\n\t%d sletninger</string>
+    <string name="accepted_news">Du har accepteret %d opdateringer:\n\t%d tilføjelser\n\t%d udskiftninger\n\t%d sletninger</string>
     <string name="long_press_menu">Tryk laenge for at få vist menuen.
 \nTryk for at åbne profilen.</string>
     <string name="maiden">Jomfru</string>
@@ -392,4 +389,6 @@
     <string name="current_date">Aktuel dato</string>
     <string name="premium_deactivated">Premium deaktiveret.</string>
     <string name="choose_folder">Vælg mappe</string>
+    <string name="png_exported_ok">PNG eksporteret.</string>
+    <string name="export_png">Eksporter PNG</string>
 </resources>

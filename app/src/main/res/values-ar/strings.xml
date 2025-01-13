@@ -157,10 +157,7 @@
     <string name="replace">استبدل</string>
     <string name="ignore">تجاوز</string>
     <string name="confirm_news">أكّد التحديثات</string>
-    <string name="accepted_news">قبلت %d تحديثات:
-\n\t%d أضافات
-\n\t%d استبدالات
-\n\t%d حذف</string>
+    <string name="accepted_news">قبلت %d تحديثات:\n\t%d أضافات\n\t%d استبدالات\n\t%d حذف</string>
     <string name="confirm">أكّد</string>
     <string name="all_imported_delete">استوردت كل التحديثات
 \nأتريدحذف الشجرة المستوردة؟</string>

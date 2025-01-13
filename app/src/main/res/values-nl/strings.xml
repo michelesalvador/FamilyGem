@@ -392,4 +392,23 @@
     <string name="current_date">Actuele datum</string>
     <string name="premium_deactivated">Premium gedeactiveerd.</string>
     <string name="choose_folder">Kies map</string>
+    <string name="export_png">PNG exporteren</string>
+    <string name="png_exported_ok">PNG geëxporteerd.</string>
+    <string name="origin_family">Herkomst familie</string>
+    <string name="paternal_family">Familie paternel</string>
+    <string name="maternal_family">Familie maternel</string>
+    <string name="local_backup">Lokale back-up</string>
+    <string name="backup_folder">Back-up map</string>
+    <string name="recover">Herstel</string>
+    <string name="numbers">Nummers</string>
+    <string name="notification_time">Tijd melding geboortedag</string>
+    <string name="adoptive_family">Adoptiefamilie</string>
+    <string name="own_family">Eigen familie</string>
+    <string name="person_birthday">De geboortdedag van iedere levende persoon.</string>
+    <string name="foster_family">Pleeggezin</string>
+    <string name="disable">Zet uit</string>
+    <string name="choose_disable_backup">Kies een back-up map of zet lokale back-up uit.\nDit kun je later ook activeren.</string>
+    <string name="backup_trees">Back-up geselecteerde boom</string>
+    <string name="make_shared_media">Maak gedeelde media</string>
+    <string name="make_media">Maak media</string>
 </resources>

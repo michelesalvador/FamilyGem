@@ -389,4 +389,24 @@
     <string name="choose_folder">Elegir carpeta</string>
     <string name="export_png">Exportar PNG</string>
     <string name="png_exported_ok">PNG exportado.</string>
+    <string name="adoptive_family">Familia adoptiva</string>
+    <string name="own_family">Propia familia</string>
+    <string name="numbers">Números</string>
+    <string name="maternal_family">Familia materna</string>
+    <string name="paternal_family">Familia paterna</string>
+    <string name="origin_family">Familia de origen</string>
+    <string name="foster_family">Familia de acogida</string>
+    <string name="notification_time">Hora de notificación del cumpleaños</string>
+    <string name="disable">Desactivar</string>
+    <string name="backup_folder">Carpeta de la copia de seguridad</string>
+    <string name="recover">Recuperar</string>
+    <string name="local_backup">Copia de seguridad local</string>
+    <string name="backup_trees">Copia de seguridad de los árboles seleccionados</string>
+    <string name="choose_disable_backup">Elija una carpeta de copia de seguridad o desactive la copia de seguridad local.\nPuedes activarla más tarde.</string>
+    <string name="make_media">Crear medios</string>
+    <string name="make_shared_media">Crear medios compartidos</string>
+    <string name="no_to_all">No a todo lo demás</string>
+    <string name="search_duplicates">Buscar duplicados</string>
+    <string name="skip">Omitir</string>
+    <string name="yes_to_all">Si a todo lo demás</string>
 </resources>

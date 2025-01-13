@@ -392,4 +392,13 @@
     <string name="current_date">Trenutni datum</string>
     <string name="premium_deactivated">Premium deaktiviran.</string>
     <string name="choose_folder">Odaberite fasciklu</string>
+    <string name="export_png">Izvoz PNG</string>
+    <string name="png_exported_ok">PNG izvezen.</string>
+    <string name="origin_family">Porodica porekla</string>
+    <string name="adoptive_family">Usvojiteljska porodica</string>
+    <string name="foster_family">Hraniteljska porodica</string>
+    <string name="paternal_family">Očeva porodica</string>
+    <string name="maternal_family">Majkina porodica</string>
+    <string name="own_family">Sopstvena porodica</string>
+    <string name="numbers">Brojevi</string>
 </resources>

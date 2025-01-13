@@ -118,8 +118,8 @@
     <string name="unlink">取消链接</string>
     <string name="long_press_menu">长按显示菜单。
 \n点击打开个人详情。</string>
-    <string name="export_pdf">导出PDF</string>
-    <string name="pdf_exported_ok">PDF已导出。</string>
+    <string name="export_pdf">导出 PDF</string>
+    <string name="pdf_exported_ok">PDF 已导出。</string>
     <string name="diagram_settings">显示设置</string>
     <string name="generations_display_diagram">设置在图中显示多少代:</string>
     <string name="ancestors">祖先</string>
@@ -340,10 +340,7 @@
     <string name="sharing_tree">分享一个家谱</string>
     <string name="tree_news_imported">旧的家谱可以接收来自导入家谱%d的更新:</string>
     <string name="updates_replace_add">你必须选择更新是否应取代现有项目或作为新项目添加。</string>
-    <string name="accepted_news">你接收了%d的更新：
-\n\t%d被增加
-\n\t%d被替换
-\n\t%d被删减</string>
+    <string name="accepted_news">你接收了%d的更新：\n\t%d被增加\n\t%d被替换\n\t%d被删减</string>
     <string name="all_imported_delete">所有的更新都已导入。
 \n你想删除导入的家谱吗？</string>
     <string name="turns_years_old">今天，%s%d岁了。</string>
@@ -392,4 +389,6 @@
     <string name="unlock_function">Family Gem高级版可解锁此功能。</string>
     <string name="premium_deactivated">高级版已停用。</string>
     <string name="merge">合并</string>
+    <string name="export_png">导出 PNG</string>
+    <string name="png_exported_ok">PNG 已导出。</string>
 </resources>

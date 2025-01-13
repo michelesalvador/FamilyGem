@@ -174,10 +174,7 @@
     <string name="card">Profil</string>
     <string name="new_person">Pridať prvú osobu.</string>
     <string name="confirm">Potvrdiť</string>
-    <string name="accepted_news">Prijali ste %d aktualizácie:
-\n%d doplnky
-\n%d nahradenia
-\n%d odstránenia</string>
+    <string name="accepted_news">Prijali ste %d aktualizácie:\n\t%d doplnky\n\t%d nahradenia\n\t%d odstránenia</string>
     <string name="confirm_news">Potvrdiť aktualizácie</string>
     <string name="ignore">Preskočiť</string>
     <string name="add">Pridať</string>
@@ -392,4 +389,28 @@
     <string name="birthday">Narodeniny</string>
     <string name="premium_deactivated">Premium deaktivovaný.</string>
     <string name="choose_folder">Vybrať priečinok</string>
+    <string name="export_png">Export PNG</string>
+    <string name="png_exported_ok">PNG exportovaný.</string>
+    <string name="numbers">Čísla</string>
+    <string name="adoptive_family">Adoptívna rodina</string>
+    <string name="foster_family">Pestúnska rodina</string>
+    <string name="own_family">Vlastná rodina</string>
+    <string name="origin_family">Rodina pôvodu</string>
+    <string name="paternal_family">Rodina otca</string>
+    <string name="maternal_family">Rodina matky</string>
+    <string name="notification_time">Čas upozornenia narodenín</string>
+    <string name="person_birthday">Narodeniny každej žijúcej osoby.</string>
+    <string name="disable">Vypnúť</string>
+    <string name="backup_folder">Zložka zálohy</string>
+    <string name="recover">Obnoviť</string>
+    <string name="backup_trees">Uložiť zálohu vybraných stromov</string>
+    <string name="choose_disable_backup">Vyberte zložku pre zálohu alebo vypnite lokálne zálohovanie.\nMôžete aktivovať neskôr.</string>
+    <string name="local_backup">Lokálna záloha</string>
+    <string name="make_media">Vytvoriť médium</string>
+    <string name="make_shared_media">Vytvoriť zdieľané médium</string>
+    <string name="search_duplicates">Hľadať duplicity</string>
+    <string name="skip">Vynechať</string>
+    <string name="yes_to_all">Áno pre všetky zostávajúce</string>
+    <string name="no_to_all">Nie pre všetky zostávajúce</string>
+    <string name="duplicates_lines">Línie duplicít</string>
 </resources>

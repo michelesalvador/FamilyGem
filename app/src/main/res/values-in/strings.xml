@@ -147,10 +147,7 @@
     <string name="this_is_root">%s adalah orang utama silsilah.</string>
     <string name="uncles_cousins">Paman dan sepupu</string>
     <string name="item_exists_but_file">Entri silsilah ada dalam indeks, tetapi karena alasan tertentu file terkait tidak ada:</string>
-    <string name="accepted_news">Anda menerima %d pembaruan:
-\n%d tambahan
-\n%d penggantian
-\n%d penghapusan</string>
+    <string name="accepted_news">Anda menerima %d pembaruan:\n\t%d tambahan\n\t%d penggantian\n\t%d penghapusan</string>
     <string name="confirm">Konfirmasi</string>
     <string name="all_imported_delete">Semua pembaruan telah diimpor.
 \nApakah Anda ingin menghapus silsilah yang diimpor\?</string>

@@ -69,10 +69,7 @@
     <string name="all_imported_delete">Усі оновлення імпортовані.
 \nВидалити імпортоване дерево\?</string>
     <string name="confirm">Підтвердити</string>
-    <string name="accepted_news">Ви прийняли %d оновлення:
-\n %d додатки
-\n %d заміни
-\n %d видалення</string>
+    <string name="accepted_news">Ви прийняли %d оновлення:\n\t%d додатки\n\t%d заміни\n\t%d видалення</string>
     <string name="confirm_news">Підтвердити оновлення</string>
     <string name="ignore">Пропустити</string>
     <string name="replace">Замінити</string>
@@ -192,7 +189,7 @@
     <string name="new_source">Нове джерело</string>
     <string name="married">Одружена/Одружений</string>
     <string name="maiden">Дівоче</string>
-    <string name="daughter">Дочка</string>
+    <string name="daughter">Донька</string>
     <string name="from">З</string>
     <string name="between_and">Між… і</string>
     <string name="exact">Точно</string>
@@ -392,4 +389,27 @@
     <string name="birthday">Уродини</string>
     <string name="premium_deactivated">Premium деактивований.</string>
     <string name="choose_folder">Оберіть папку</string>
+    <string name="export_png">Експортувати файл PNG</string>
+    <string name="png_exported_ok">PNG експортовано.</string>
+    <string name="numbers">Числа</string>
+    <string name="foster_family">Прийомна сім\'я</string>
+    <string name="paternal_family">Сім\'я батька</string>
+    <string name="maternal_family">Сім\'я матері</string>
+    <string name="adoptive_family">Усиновлена сім\'я</string>
+    <string name="own_family">Власна сім\'я</string>
+    <string name="origin_family">Сім\'я походження</string>
+    <string name="no_to_all">Не для всіх інших</string>
+    <string name="local_backup">Локальна резервна копія</string>
+    <string name="choose_disable_backup">Вибрати папку для резервної копії або вимкнути локальне резервне копіювання.\nВи можете активувати пізніше.</string>
+    <string name="disable">Вимкнути</string>
+    <string name="person_birthday">День народження кожної живої особи.</string>
+    <string name="notification_time">Час сповіщення про день народження</string>
+    <string name="backup_folder">Папка для резервної копії</string>
+    <string name="recover">Відновити</string>
+    <string name="backup_trees">Зберегти резервну копію вибраних дерев</string>
+    <string name="search_duplicates">Шукати дублікати</string>
+    <string name="skip">Пропустити</string>
+    <string name="yes_to_all">Так для всіх інших</string>
+    <string name="make_shared_media">Створити спільні медіа</string>
+    <string name="make_media">Створити медіа</string>
 </resources>
