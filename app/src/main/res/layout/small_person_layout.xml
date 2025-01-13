@@ -37,16 +37,17 @@
             android:layout_height="wrap_content"
             android:layout_toStartOf="@+id/smallPerson_image"
             android:textSize="15sp"
-            tools:text="Given Name Surname" />
+            tools:text="Prefix Given Name Second Name &quot;Nickname&quot; Surname Suffix" />
 
         <TextView
             android:id="@+id/smallPerson_detail"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/smallPerson_name"
+            android:layout_toStartOf="@+id/smallPerson_image"
             android:textColor="@color/gray_text"
             android:textSize="13sp"
-            tools:text="1 Jan 1900 - 31 Dec 2000" />
+            tools:text="Born on the day of first January 1900 – Dead on the day of 31 Dec 2000" />
 
         <ImageView
             android:id="@+id/smallPerson_dead"

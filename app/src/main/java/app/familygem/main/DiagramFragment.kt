@@ -53,6 +53,7 @@ import app.familygem.profile.ProfileActivity
 import app.familygem.util.ChangeUtil
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
+import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util.confirmDelete
 import app.familygem.util.delete
@@ -456,7 +457,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             if (media != null) loadingImages.add(Pair(media, imageView))
             view.findViewById<TextView>(R.id.card_name).text = U.properName(person, true)
             val titleView = view.findViewById<TextView>(R.id.card_title)
-            val title = U.titolo(person)
+            val title = PersonUtil.writeTitles(person)
             if (title.isEmpty()) titleView.visibility = GONE else titleView.text = title
             val dataView = view.findViewById<TextView>(R.id.card_data)
             val data = U.twoDates(person, true)

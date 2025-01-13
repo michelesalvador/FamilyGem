@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="6dp"
@@ -25,7 +26,8 @@
             android:layout_height="wrap_content"
             android:textAllCaps="true"
             android:textColor="@color/gray_text"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="Person role" />
 
         <TextView
             android:id="@+id/person_name"
@@ -33,15 +35,18 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/person_info"
             android:layout_toStartOf="@+id/person_image"
-            android:textSize="17sp" />
+            android:textSize="17sp"
+            tools:text="Prefix Given Name &quot;Nickname&quot; Surname Suffix" />
 
         <TextView
             android:id="@+id/person_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/person_name"
+            android:layout_toStartOf="@+id/person_image"
             android:textSize="15sp"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            tools:text="Sir Lord Duke King of England and Emperor of All Known Lands" />
 
         <TextView
             android:id="@+id/person_details"
@@ -50,7 +55,8 @@
             android:layout_below="@+id/person_title"
             android:layout_toStartOf="@+id/person_image"
             android:textColor="@color/gray_text"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="Born in the first day of the second month during the year 1234 AD\nLondon – New York" />
 
         <ImageView
             android:id="@+id/person_image"
@@ -58,7 +64,8 @@
             android:layout_height="80dp"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="8dp"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            tools:src="@drawable/image" />
 
         <ImageView
             android:id="@+id/person_mourning"

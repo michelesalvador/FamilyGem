@@ -1039,7 +1039,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                     menu.add(0, 12, 0, familyLabels[0]);
                 if (familyLabels[1] != null)
                     menu.add(0, 13, 0, familyLabels[1]);
-                menu.add(0, 16, 0, R.string.modify);
+                menu.add(0, 20, 0, R.string.modify);
             } else if (pieceObject instanceof Person) { // Regular person in family
                 person = (Person)pieceObject;
                 Family fam = (Family)object;

@@ -61,14 +61,16 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:maxWidth="220dp"
+            android:textSize="15sp"
             android:textStyle="italic"
             tools:text="Title" />
 
-        <TextView
+        <app.familygem.ElasticTextView
             android:id="@+id/card_data"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:maxWidth="220dp"
             android:textColor="@color/text_veiled"
             android:textSize="14sp"
             tools:text="Personal details" />

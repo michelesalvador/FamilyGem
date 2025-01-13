@@ -31,6 +31,7 @@ import app.familygem.constant.Format
 import app.familygem.constant.Relation
 import app.familygem.profile.ProfileActivity
 import app.familygem.util.FileUtil.selectMainImage
+import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil.save
 import app.familygem.util.Util
 import app.familygem.util.Util.caseString
@@ -128,7 +129,7 @@ class PersonsFragment : BaseFragment() {
 
     private inner class PeopleAdapter : RecyclerView.Adapter<PersonHolder>(), Filterable {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonHolder {
-            val personView = LayoutInflater.from(parent.context).inflate(R.layout.piece_person, parent, false)
+            val personView = LayoutInflater.from(parent.context).inflate(R.layout.person_layout, parent, false)
             registerForContextMenu(personView)
             return PersonHolder(personView)
         }
@@ -160,8 +161,8 @@ class PersonsFragment : BaseFragment() {
             nameView.visibility = if ((name.isBlank() && label != null)) View.GONE else View.VISIBLE
 
             val titleView = personView.findViewById<TextView>(R.id.person_title)
-            val title = U.titolo(person)
-            if (title.isBlank()) titleView.visibility = View.GONE
+            val title = PersonUtil.writeTitles(person)
+            if (title.isEmpty()) titleView.visibility = View.GONE
             else {
                 titleView.text = title
                 titleView.visibility = View.VISIBLE

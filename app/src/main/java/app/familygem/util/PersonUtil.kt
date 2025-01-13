@@ -130,6 +130,11 @@ object PersonUtil {
         return personView
     }
 
+    /** Returns a string with all titles of a person concatenated. */
+    fun writeTitles(person: Person): String {
+        return person.eventsFacts.filter { it.tag != null && it.tag == "TITL" && it.value != null }.joinToString("\n") { it.value }
+    }
+
     /**
      * Returns a definition of the person's role from their relation with a family.
      * @param family Can be null

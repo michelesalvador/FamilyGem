@@ -95,6 +95,7 @@ import app.familygem.util.FamilyUtil;
 import app.familygem.util.FamilyUtilKt;
 import app.familygem.util.FileUtil;
 import app.familygem.util.NoteUtil;
+import app.familygem.util.PersonUtil;
 import app.familygem.util.PersonUtilKt;
 import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
@@ -195,19 +196,6 @@ public class U {
             given = given.trim();
             return given.isEmpty() ? "[" + s(R.string.empty_name) + "]" : given;
         }
-    }
-
-    // riceve una Person e restituisce il titolo nobiliare
-    public static String titolo(Person p) {
-        // GEDCOM standard INDI.TITL
-        for (EventFact ef : p.getEventsFacts())
-            if (ef.getTag() != null && ef.getTag().equals("TITL") && ef.getValue() != null)
-                return ef.getValue();
-        // Così invece prende INDI.NAME._TYPE.TITL, vecchio metodo di org.folg.gedcom
-        for (Name n : p.getNames())
-            if (n.getType() != null && n.getType().equals("TITL") && n.getValue() != null)
-                return n.getValue();
-        return "";
     }
 
     /**
@@ -683,7 +671,7 @@ public class U {
      * Inflates in layout a person card with their main details.
      */
     public static View placePerson(LinearLayout layout, Person person, String role) {
-        View personView = LayoutInflater.from(layout.getContext()).inflate(R.layout.piece_person, layout, false);
+        View personView = LayoutInflater.from(layout.getContext()).inflate(R.layout.person_layout, layout, false);
         layout.addView(personView);
         TextView roleView = personView.findViewById(R.id.person_info);
         if (role == null) roleView.setVisibility(View.GONE);
@@ -693,7 +681,7 @@ public class U {
         if (name.isEmpty() && role != null) nameView.setVisibility(View.GONE);
         else nameView.setText(name);
         TextView titleView = personView.findViewById(R.id.person_title);
-        String title = titolo(person);
+        String title = PersonUtil.INSTANCE.writeTitles(person);
         if (title.isEmpty()) titleView.setVisibility(View.GONE);
         else titleView.setText(title);
         details(person, personView.findViewById(R.id.person_details));
