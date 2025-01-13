@@ -176,10 +176,7 @@
     <string name="replace">החלפה</string>
     <string name="ignore">דילוג</string>
     <string name="confirm_news">אישור עדכונים</string>
-    <string name="accepted_news">קיבלת %d עדכונים:
-\n\t%d תוספות
-\n\t%d החלפות
-\n\t%d מחיקות</string>
+    <string name="accepted_news">קיבלת %d עדכונים:\n\t%d תוספות\n\t%d החלפות\n\t%d מחיקות</string>
     <string name="confirm">אישור</string>
     <string name="all_imported_delete">כל העדכונים ייובאו.
 \nלמחוק את העץ שייובא\?</string>
@@ -392,4 +389,6 @@
     <string name="current_date">תאריך נוכחי</string>
     <string name="premium_deactivated">הפרימיום הושבת.</string>
     <string name="choose_folder">בחירת תיקייה</string>
+    <string name="png_exported_ok">תמונת PNG עברה ייצוא.</string>
+    <string name="export_png">ייצוא תמונת PNG</string>
 </resources>

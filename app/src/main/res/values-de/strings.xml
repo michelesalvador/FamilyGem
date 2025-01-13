@@ -210,10 +210,7 @@
     <string name="all_imported_delete">Alle Aktualisierungen wurden importiert.
 \nMöchtest Du den importierten Stammbaum löschen\?</string>
     <string name="confirm">Bestätigen</string>
-    <string name="accepted_news">Du hast %d Aktualisierungen bestätigt:
-\n%d hinzugefügt
-\n%d ersetzt
-\n%d gelöscht</string>
+    <string name="accepted_news">Du hast %d Aktualisierungen bestätigt:\n\t%d hinzugefügt\n\t%d ersetzt\n\t%d gelöscht</string>
     <string name="confirm_news">Aktualisierungen bestätigen</string>
     <string name="ignore">Überspringen</string>
     <string name="replace">Ersetzen</string>
@@ -349,7 +346,7 @@
     <string name="family_as">Familie (als %s)</string>
     <string name="turns_years_old">%s wird heute %d Jahre alt.</string>
     <string name="birthdays">Geburtstage</string>
-    <string name="allow_developer_access">Erlaube dem Entwickler dieser App den Zugriff auf den freigegebenen Stammbaum</string>
+    <string name="allow_developer_access">Erlaube dem Entwickler dieser App den Zugriff auf den geteilten Stammbaum</string>
     <string name="remind_later">Erinnere mich später</string>
     <string name="aware_upload_server">Bitte beachten Sie, dass Sie den gesamten Baum online auf einen Server hochladen werden.</string>
     <string name="share_sensitive">Weitergabe sensibler Daten</string>
@@ -392,4 +389,27 @@
     <string name="birthday">Geburtstag</string>
     <string name="premium_deactivated">Premium deaktiviert.</string>
     <string name="choose_folder">Wähle einen Ordner</string>
+    <string name="export_png">PNG exportieren</string>
+    <string name="png_exported_ok">PNG exportiert.</string>
+    <string name="foster_family">Pflegefamilie</string>
+    <string name="maternal_family">Mütterliche Familie</string>
+    <string name="own_family">Eigene Familie</string>
+    <string name="numbers">Nummern</string>
+    <string name="origin_family">Herkunftsfamilie</string>
+    <string name="adoptive_family">Adoptivfamilie</string>
+    <string name="paternal_family">Väterliche Familie</string>
+    <string name="local_backup">Lokale Datensicherung</string>
+    <string name="choose_disable_backup">Wählen Sie einen Sicherungsordner aus oder deaktivieren Sie die lokale Sicherung.\nSie können es später aktivieren.</string>
+    <string name="disable">Ausschalten</string>
+    <string name="backup_folder">Sicherungsordner</string>
+    <string name="recover">Wiederherstellen</string>
+    <string name="backup_trees">Ausgewählte Stammbäume sichern</string>
+    <string name="person_birthday">Geburtstag jeder lebenden Person.</string>
+    <string name="notification_time">Benachrichtigungszeit zum Geburtstag</string>
+    <string name="search_duplicates">Dubletten suchen</string>
+    <string name="skip">Auslassen</string>
+    <string name="yes_to_all">Ja für alle verbleibende</string>
+    <string name="no_to_all">Nein für alle verbleibende</string>
+    <string name="make_shared_media">Geteilte Datei erstellen</string>
+    <string name="make_media">Datei erstellen</string>
 </resources>

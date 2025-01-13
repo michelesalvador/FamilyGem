@@ -255,10 +255,7 @@
     <string name="card">Profil</string>
     <string name="new_person">Přidat první osobu.</string>
     <string name="confirm">Potvrdit</string>
-    <string name="accepted_news">Přijali jste %d aktualizace:
-\n%d dodatky
-\n%d nahrazení
-\n%d odstranění</string>
+    <string name="accepted_news">Přijali jste %d aktualizace:\n\t%d dodatky\n\t%d nahrazení\n\t%d odstranění</string>
     <string name="confirm_news">Potvrdit aktualizace</string>
     <string name="ignore">Přeskočit</string>
     <string name="replace">Nahradit</string>
@@ -392,4 +389,28 @@
     <string name="birthday">Narozeniny</string>
     <string name="premium_deactivated">Premium deaktivován.</string>
     <string name="choose_folder">Zvolit složku</string>
+    <string name="png_exported_ok">PNG exportován.</string>
+    <string name="export_png">Exportovat PNG</string>
+    <string name="adoptive_family">Adoptivní rodina</string>
+    <string name="foster_family">Pěstounská rodina</string>
+    <string name="maternal_family">Rodina matky</string>
+    <string name="numbers">Čísla</string>
+    <string name="own_family">Vlastní rodina</string>
+    <string name="paternal_family">Rodina otce</string>
+    <string name="origin_family">Rodina původu</string>
+    <string name="person_birthday">Narozeniny každé žijící osoby.</string>
+    <string name="notification_time">Čas upozornění narozenin</string>
+    <string name="local_backup">Lokální záloha</string>
+    <string name="backup_folder">Složka zálohy</string>
+    <string name="recover">Obnovit</string>
+    <string name="backup_trees">Uložit zálohu vybraných stromů</string>
+    <string name="choose_disable_backup">Vyberte složku pro zálohu nebo vypněte místní zálohování.\nMůžete aktivovat později.</string>
+    <string name="disable">Vypnout</string>
+    <string name="make_shared_media">Vytvořit sdílené médium</string>
+    <string name="make_media">Vytvořit médium</string>
+    <string name="search_duplicates">Hledat duplicity</string>
+    <string name="skip">Vynechat</string>
+    <string name="yes_to_all">Ano pro všechny zbývající</string>
+    <string name="no_to_all">Ne pro všechny zbývající</string>
+    <string name="duplicates_lines">Linie duplicit</string>
 </resources>

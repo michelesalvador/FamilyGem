@@ -210,10 +210,7 @@
     <string name="all_imported_delete">Все обновления были импортированы.
 \nХотите удалить импортированное дерево\?</string>
     <string name="confirm">Подтвердить</string>
-    <string name="accepted_news">Вы приняли %d обновлений: 
-\n%d добавлений
-\n%d замен
-\n%d удалений</string>
+    <string name="accepted_news">Вы приняли %d обновлений:\n\t%d добавлений\n\t%d замен\n\t%d удалений</string>
     <string name="confirm_news">Подтвердить обновления</string>
     <string name="ignore">Пропустить</string>
     <string name="replace">Заменить</string>
@@ -359,7 +356,7 @@
     <string name="system_language">Язык системы</string>
     <string name="lineage">Взаимоотношения</string>
     <string name="adopted">Усыновленный/усыновленная</string>
-    <string name="foster">Приемный/приемная</string>
+    <string name="foster">Приёмный/приёмная</string>
     <string name="edit_id">Редактировать идентификатор</string>
     <string name="invalid_id">Неверный идентификатор</string>
     <string name="existing_id">Уже существующий идентификатор</string>
@@ -392,4 +389,13 @@
     <string name="birthday">День рождения</string>
     <string name="premium_deactivated">Premium деактивирован.</string>
     <string name="choose_folder">Выбрать папку</string>
+    <string name="export_png">Экспорт PNG</string>
+    <string name="png_exported_ok">PNG экспортирован.</string>
+    <string name="numbers">Номера</string>
+    <string name="origin_family">Семья происхождения</string>
+    <string name="adoptive_family">Усыновительская семья</string>
+    <string name="foster_family">Приёмная семья</string>
+    <string name="paternal_family">Семья отца</string>
+    <string name="maternal_family">Семья матери</string>
+    <string name="own_family">Собственная семья</string>
 </resources>

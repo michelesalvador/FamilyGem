@@ -28,10 +28,7 @@
     <string name="tree_news_imported">درخت قدیمی بالا می تواند %d به روز رسانی را از درخت وارد شده دریافت کند:</string>
     <string name="updates_replace_add">شما باید انتخاب کنید که آیا به‌روزرسانی‌ها باید جایگزین موارد موجود شوند یا به عنوان موارد جدید اضافه شوند.</string>
     <string name="tree_with_news">درخت با به‌روز رسانی‌ها</string>
-    <string name="accepted_news">شما %d به روز رسانی را تایید کردید:
-\n\t%d اضافات
-\n\t%d تعویض‌ها
-\n\t%d حذفیات</string>
+    <string name="accepted_news">شما %d به روز رسانی را تایید کردید:\n\t%d اضافات\n\t%d تعویض‌ها\n\t%d حذفیات</string>
     <string name="long_press_menu">برای نمایش منو دکمه را نگه دارید.
 \nبرای باز کردن پروفایل ضربه بزنید.</string>
     <string name="family_as_spouse">خانواده (در نقش همسر)</string>
@@ -383,4 +380,6 @@
     <string name="christening">مراسم تعمید و نامگذاری بچه</string>
     <string name="help">راهنمایی</string>
     <string name="choose_folder">انتخاب پوشه</string>
+    <string name="png_exported_ok">PNG استخراج شد.</string>
+    <string name="export_png">استخراج PNG</string>
 </resources>

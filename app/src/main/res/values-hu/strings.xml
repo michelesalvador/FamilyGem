@@ -283,10 +283,7 @@
     <string name="usually_your_name">Általában az Ön keresztneve és vezetékneve.</string>
     <string name="sharing_completed">Megosztás kész.</string>
     <string name="tree_news_imported">A régi fa %d frissítést tud fogadni az importált fától:</string>
-    <string name="accepted_news">Elfogadott %d frissítést:
-\n%d kiegészítés
-\n%d csere
-\n%d törlés</string>
+    <string name="accepted_news">Elfogadott %d frissítést:\n\t%d kiegészítés\n\t%d csere\n\t%d törlés</string>
     <string name="pdf_exported_ok">PDF exportálva.</string>
     <string name="age">Kor</string>
     <string name="this_is_root">%s a fa fő személye.</string>
@@ -392,4 +389,14 @@
     <string name="current_date">Aktuális dátum</string>
     <string name="premium_deactivated">Premium deaktiválva.</string>
     <string name="choose_folder">Válassza ki a mappát</string>
+    <string name="png_exported_ok">PNG exportálva.</string>
+    <string name="export_png">PNG exportálása</string>
+    <string name="foster_family">Nevelőcsalád</string>
+    <string name="paternal_family">Apa családja</string>
+    <string name="own_family">Saját család</string>
+    <string name="maternal_family">Anya családja</string>
+    <string name="numbers">Számok</string>
+    <string name="origin_family">Származási család</string>
+    <string name="adoptive_family">Örökbefogadó család</string>
+    <string name="notification_time">Születésnapi értesítési idő</string>
 </resources>

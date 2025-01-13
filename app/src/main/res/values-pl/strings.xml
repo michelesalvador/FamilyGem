@@ -386,4 +386,27 @@
     <string name="birthday">Urodziny</string>
     <string name="premium_deactivated">Premium dezaktywowany.</string>
     <string name="choose_folder">Wybierz folder</string>
+    <string name="export_png">Eksportuj PNG</string>
+    <string name="png_exported_ok">Wyeksportowano PNG.</string>
+    <string name="numbers">Numery</string>
+    <string name="origin_family">Rodzina pochodzenia</string>
+    <string name="foster_family">Rodzina zastępcza</string>
+    <string name="maternal_family">Rodzina matki</string>
+    <string name="paternal_family">Rodzina ojca</string>
+    <string name="own_family">Własna rodzina</string>
+    <string name="adoptive_family">Rodzina adopcyjna</string>
+    <string name="local_backup">Lokalna kopia zapasowa</string>
+    <string name="choose_disable_backup">Wybierz folder kopii zapasowej lub wyłącz tworzenie kopii zapasowej lokalnie.\nMożna aktywować później.</string>
+    <string name="disable">Wyłącz</string>
+    <string name="backup_folder">Folder kopii zapasowej</string>
+    <string name="recover">Odzyskać</string>
+    <string name="backup_trees">Zapisz kopię zapasową wybranych drzew</string>
+    <string name="person_birthday">Urodziny każdej żyjącej osoby.</string>
+    <string name="notification_time">Czas powiadomienia o urodzinach</string>
+    <string name="search_duplicates">Szukać duplikaty</string>
+    <string name="make_shared_media">Utworzyć udostępnione medium</string>
+    <string name="make_media">Utworzyć medium</string>
+    <string name="skip">Pominąć</string>
+    <string name="yes_to_all">Tak dla wszystkich pozostałych</string>
+    <string name="no_to_all">Nie dla wszystkich pozostałych</string>
 </resources>

@@ -294,10 +294,7 @@
 \nVocê quer deletar a árvore importada\?</string>
     <string name="confirm">Confirmar</string>
     <string name="confirm_news">Confirmar as atualizações</string>
-    <string name="accepted_news">Você aceitou%d atualizações:
-\n%d adições
-\n%d substituições
-\n%d exclusões</string>
+    <string name="accepted_news">Você aceitou%d atualizações:\n\t%d adições\n\t%d substituições\n\t%d exclusões</string>
     <string name="ignore">Pular</string>
     <string name="replace">Substituir</string>
     <string name="add">Adicionar</string>
@@ -393,4 +390,6 @@
     <string name="current_date">Data actual</string>
     <string name="premium_deactivated">Premium desativado.</string>
     <string name="choose_folder">Escolher pasta</string>
+    <string name="export_png">Exportar PNG</string>
+    <string name="png_exported_ok">PNG exportado.</string>
 </resources>

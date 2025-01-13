@@ -73,7 +73,7 @@
     <string name="extension">Uzantı</string>
     <string name="family_gem_example">Family Gem örneği</string>
     <string name="open">Aç</string>
-    <string name="export_gedcom">GEDCOM olarak ver</string>
+    <string name="export_gedcom">GEDCOM dışa aktar</string>
     <string name="root">Kök</string>
     <string name="item_exists_but_file">Soyağacı girişi içindekiler kısmında görünüyor, ancak ilgili dosya bir şekilde kaybolmuş:</string>
     <string name="help">Yardım</string>
@@ -149,7 +149,7 @@
 \nİçe aktarılan bu soyağacını silmek ister misiniz?</string>
     <string name="tree_with_news">Güncel soyağacı</string>
     <string name="half_sibling">Üvey kardeş</string>
-    <string name="pdf_exported_ok">Soyağacı PDF olarak dışa aktarıldı.</string>
+    <string name="pdf_exported_ok">PDF dışa aktarıldı.</string>
     <string name="merge_tree">Ağaç birleştirme</string>
     <string name="generations_display_diagram">Diyağramda kaç nesil gösterileceğini ayarla:</string>
     <string name="link_person">Kayıtlı kişilerden birini ekle</string>
@@ -183,16 +183,13 @@
     <string name="person">Kişi</string>
     <string name="move_down">Aşağı taşı</string>
     <string name="new_source">Yeni bir kaynak</string>
-    <string name="accepted_news">%d güncelleme tamamlandı
-\n%d ekleme yapıldı
-\n%d yerdeğiştirme yapıldı
-\n%d silme işlemi yapıldı</string>
+    <string name="accepted_news">%d güncelleme kabul ettiniz:\n\t%d ekleme\n\t%d yerdeğiştirme\n\t%d silme işlemi</string>
     <string name="confirm">onay</string>
     <string name="please_name">Lütfen bir isim yazın.</string>
     <string name="order_by">Sırala</string>
     <string name="language">Dil</string>
     <string name="father">Baba</string>
-    <string name="export_pdf">PDF olarak dışa aktar</string>
+    <string name="export_pdf">PDF dışa aktar</string>
     <string name="uncles_cousins">Amcalar ve kuzenler</string>
     <string name="modify">Profili düzenle</string>
     <string name="new_person">İlk kişiyi ekle.</string>
@@ -390,4 +387,6 @@
     <string name="which_family_add_parent">Ebeveyn hangi aileye eklenmelidir?</string>
     <string name="january">Ocak</string>
     <string name="birthday">Doğum günü</string>
+    <string name="png_exported_ok">PNG dışa aktarıldı.</string>
+    <string name="export_png">PNG dışa aktar</string>
 </resources>

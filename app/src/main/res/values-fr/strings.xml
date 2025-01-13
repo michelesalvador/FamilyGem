@@ -393,4 +393,6 @@
     <string name="current_date">Date actuelle</string>
     <string name="premium_deactivated">Premium désactivé.</string>
     <string name="choose_folder">Choisir le dossier</string>
+    <string name="png_exported_ok">PNG exporté.</string>
+    <string name="export_png">Export PNG</string>
 </resources>
