@@ -14,13 +14,13 @@
     <locale android:name="es" />
     <locale android:name="fa" />
     <locale android:name="fr" />
+    <locale android:name="he" />
     <locale android:name="hr" />
     <locale android:name="hu" />
     <locale
-        android:name="in"
+        android:name="id"
         percent="87" />
     <locale android:name="it" />
-    <locale android:name="iw" />
     <locale
         android:name="kn"
         percent="16" />
