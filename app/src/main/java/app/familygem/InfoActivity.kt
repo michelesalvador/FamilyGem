@@ -181,6 +181,7 @@ class InfoActivity : BaseActivity() {
 
             // Button to update the GEDCOM header with the Family Gem parameters
             headerButton.setOnClickListener {
+                it.isEnabled = false
                 h.file = "$treeId.json"
                 var characterSet = h.characterSet
                 if (characterSet == null) {
@@ -198,7 +199,7 @@ class InfoActivity : BaseActivity() {
                 }
                 program.value = "FAMILY_GEM"
                 program.name = getString(R.string.app_name)
-                //program.version = BuildConfig.VERSION_NAME // saveJason() will do that
+                //program.version = BuildConfig.VERSION_NAME // saveJson() will do that
                 program.generatorCorporation = null
                 var gedcomVersion = h.gedcomVersion
                 if (gedcomVersion == null) {

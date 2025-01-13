@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
@@ -152,14 +153,24 @@ object TreeUtil {
         }
     }
 
+    private var saveJob: Job? = null
+    private var onlyOnce = true // To repeat saving function only once
+
     /**
      * Saves the currently opened tree.
      * @param refresh Will refresh also other activities
      * @param objects Record(s) to which update the change date
      */
-    fun save(refresh: Boolean, vararg objects: Any?) {
+    fun save(refresh: Boolean, vararg objects: Any?) = GlobalScope.launch {
         if (refresh) Global.edited = true
         ChangeUtil.updateChangeDate(*objects)
+        // Avoids multiple concurrent saving
+        if (saveJob?.isActive == true) {
+            if (onlyOnce) {
+                onlyOnce = false
+                saveJob?.join()
+            } else return@launch
+        }
         // On the first save adds an extension to submitters
         if (Global.settings.currentTree.grade == 9) {
             Global.gc.submitters.forEach { it.putExtension("passed", true) }
@@ -167,14 +178,12 @@ object TreeUtil {
             Global.settings.save()
         }
         if (Global.settings.autoSave) {
-            GlobalScope.launch(IO) { saveJson(Global.gc, Global.settings.openTree) }
+            saveJob = launch(IO) { saveJson(Global.gc, Global.settings.openTree) }
         } else {
             Global.shouldSave = true // The 'Save' button will be displayed
         }
+        onlyOnce = true
     }
-
-    /** To avoid ConcurrentModificationException on Notifier. */
-    private var activeNotifier = false
 
     /** Saves the GEDCOM tree as JSON. */
     suspend fun saveJson(gedcom: Gedcom, treeId: Int, makeBackup: Boolean = Global.settings.backup) {
@@ -194,11 +203,7 @@ object TreeUtil {
             else error.localizedMessage ?: string(R.string.something_wrong)
             Util.toast(message)
         }
-        if (!activeNotifier) {
-            activeNotifier = true
-            Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
-            activeNotifier = false
-        }
+        Notifier(Global.context, gedcom, treeId, Notifier.What.DEFAULT)
         if (makeBackup) Global.backupViewModel.backupDelayed(treeId)
     }
 
