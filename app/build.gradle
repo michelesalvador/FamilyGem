@@ -23,8 +23,8 @@ android {
         applicationId 'app.familygem'
         minSdk 19
         targetSdk 35
-        versionCode 26
-        versionName '1.0.1.13'
+        versionCode 27
+        versionName '1.1'
         vectorDrawables.useSupportLibrary = true
         resourceConfigurations += ['ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw',
                                    'kn', 'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh']
