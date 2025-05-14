@@ -2,9 +2,7 @@ package app.familygem.constant
 
 import app.familygem.util.FileUtil
 
-/**
- * Possible image types resulting by [FileUtil.showImage].
- */
+/** Possible image types resulting by [FileUtil.showImage]. */
 enum class Type {
     /** Initial value. */
     NONE,

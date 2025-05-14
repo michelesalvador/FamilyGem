@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import app.familygem.BuildConfig
-import app.familygem.F
 import app.familygem.Global
 import app.familygem.Notifier
 import app.familygem.ProgressView
@@ -31,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.apache.commons.io.FileUtils
+import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import org.folg.gedcom.model.CharacterSet
 import org.folg.gedcom.model.Gedcom
@@ -320,31 +320,19 @@ object TreeUtil {
             }
             gedcom.createIndexes() // Necessary to calculate the generations
             // Saves the JSON file
-            val newNumber = Global.settings.max() + 1
-            val printWriter = PrintWriter(context.filesDir.path + "/$newNumber.json")
+            val id = Global.settings.max() + 1
+            val printWriter = PrintWriter(context.filesDir.path + "/$id.json")
             val jsonParser = JsonParser()
             printWriter.print(jsonParser.toJson(gedcom))
             printWriter.close()
-            // Tree name and folder path
-            val path = F.getFilePathFromUri(uri)
-            var treeName: String
-            var folderPath: String? = null
-            if (path != null && path.lastIndexOf('/') > 0) { // It's a full path to the gedcom file
-                val fileGedcom = File(path)
-                folderPath = fileGedcom.parent
-                treeName = fileGedcom.name
-            } else if (path != null) { // It's just a file name, e.g. 'family.ged'
-                treeName = path
-            } else // Null path
-                treeName = context.getString(R.string.tree) + " $newNumber"
-            if (treeName.lastIndexOf('.') > 0) // Removes the extension
-                treeName = treeName.substring(0, treeName.lastIndexOf('.'))
+            // Tree name
+            var name: String = FileUtil.extractFilename(context, uri, context.getString(R.string.tree) + " $id")
+            if (name.lastIndexOf('.') > 0) // Removes the extension
+                name = name.substring(0, name.lastIndexOf('.'))
             // Saves the settings
             val rootId = U.findRootId(gedcom)
-            Global.settings.addTree(
-                Tree(newNumber, treeName, folderPath, gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, null, 0)
-            )
-            Notifier(context, gedcom, newNumber, Notifier.What.CREATE)
+            Global.settings.addTree(Tree(id, name, gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, null, 0))
+            Notifier(context, gedcom, id, Notifier.What.CREATE)
             withContext(Main) {
                 // If necessary propose to show advanced tools
                 if (gedcom.sources.isNotEmpty() && !Global.settings.expert) {
@@ -456,6 +444,7 @@ object TreeUtil {
             val fileSize = client.getSize(inputPath)?.toLongOrNull() ?: 0
             if (fileSize > 0) progressView.displayBar("Downloading", fileSize)
             client.enterLocalPassiveMode()
+            client.setFileType(FTP.BINARY_FILE_TYPE)
             val inputStream = client.retrieveFileStream(inputPath)
             if (inputStream == null) { // Usually file not found
                 val message = client.replyString.replace("550", "").replace("/www.familygem.app/condivisi/", "").trim()
@@ -506,10 +495,7 @@ object TreeUtil {
             json = updateSettingsLanguage(json)
             val gson = Gson()
             val zipped = gson.fromJson(json, Settings.ZippedTree::class.java)
-            val tree = Tree(
-                treeId, zipped.title, mediaDir.path, zipped.persons, zipped.generations,
-                zipped.root, zipped.settings, zipped.shares, zipped.grade
-            )
+            val tree = Tree(treeId, zipped.title, zipped.persons, zipped.generations, zipped.root, zipped.settings, zipped.shares, zipped.grade)
             Global.settings.addTree(tree)
             settingsFile.delete()
             // Tree coming from sharing intended for comparison

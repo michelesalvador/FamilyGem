@@ -30,17 +30,23 @@ public class Global extends MultiDexApplication {
      * Which parents' family to show in the diagram, usually 0.
      */
     public static int familyNum;
-    public static boolean edited; // There has been an editing in ProfileActivity or in DetailActivity and therefore the content of the previous pages must be updated
-    public static boolean shouldSave; // The Gedcom content has been changed and needs to be saved
     /**
-     * Path where a camera app puts the taken photo.
+     * There has been an editing in ProfileActivity, DetailActivity or CropImageActivity
+     * and therefore the content of the previous pages must be updated.
      */
-    public static String pathOfCameraDestination;
+    public static boolean edited;
     /**
-     * Path of the folder of an imported media, to be saved in settings.
+     * The Gedcom content has been changed and needs to be saved.
      */
-    public static String mediaFolderPath;
-    public static Media croppedMedia; // Temporary parking of the Media in the cropping process
+    public static boolean shouldSave;
+    /**
+     * File of the photo taken by a camera app.
+     */
+    public static File cameraDestination;
+    /**
+     * Temporary parking of the Media in the cropping process.
+     */
+    public static Media croppedMedia;
     /**
      * File path of cropped files to invalidate Glide cache.
      */
@@ -48,6 +54,7 @@ public class Global extends MultiDexApplication {
     public static Gedcom gc2; // A shared tree, for comparison of updates
     public static int treeId2; // ID of the shared tree
     public static BackupViewModel backupViewModel;
+
     /**
      * This is called when the application starts, and also when it is restarted.
      */
@@ -91,9 +98,7 @@ public class Global extends MultiDexApplication {
                 if (file.isFile() && name.endsWith(".json")) {
                     try {
                         int treeId = Integer.parseInt(name.substring(0, name.lastIndexOf(".json")));
-                        File mediaDir = new File(context.getExternalFilesDir(null), String.valueOf(treeId));
                         settings.trees.add(new Settings.Tree(treeId, String.valueOf(treeId),
-                                mediaDir.exists() ? mediaDir.getPath() : null,
                                 0, 0, null, null, null, 0));
                     } catch (Exception ignored) {
                     }

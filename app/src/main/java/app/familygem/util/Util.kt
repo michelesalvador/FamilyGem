@@ -26,6 +26,10 @@ fun InputStream.copyTo(out: OutputStream, onCopy: (totalBytes: Long) -> Unit) {
     }
 }
 
+fun Float.toPxFloat(): Float {
+    return this * Global.context.resources.displayMetrics.density + 0.5F
+}
+
 /** The most generic utilities. */
 object Util {
 

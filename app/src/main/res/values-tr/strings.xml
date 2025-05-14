@@ -202,7 +202,6 @@
     <string name="female_partner">Kız ortak</string>
     <string name="link_source">Kaynak linki</string>
     <string name="replace">Yer değiştir</string>
-    <string name="app_storage">Soy Ağacı kayıtlarının bulunduğu klasör</string>
     <string name="sex">Cinsiyet</string>
     <string name="share_with">Paylaşım yapacağınız kişi/yer</string>
     <string name="source">Kaynağı, başlangıcı</string>
@@ -363,7 +362,6 @@
     <string name="postal_code">Posta Kodu</string>
     <string name="unknown_relationship">Bilinmiyor</string>
     <string name="months">aylar</string>
-    <string name="not_granted">%s bağış yapmadı.</string>
     <string name="suffix">son ek</string>
     <string name="author">Yazar</string>
     <string name="after">Sonra</string>

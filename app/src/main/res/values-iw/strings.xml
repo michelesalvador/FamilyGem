@@ -151,7 +151,6 @@
     <string name="destination">יעד</string>
     <string name="time">שעה</string>
     <string name="media_searched_list">החיפוש אחר קובצי מדיה יעשה בתיקיות האלו:</string>
-    <string name="app_storage">אחסון היישומון</string>
     <string name="share_sensitive">שיתוף נתונים רגישים</string>
     <string name="remind_later">להזכיר לי אחר כך</string>
     <string name="please_title">נא לכתוב כותרת.</string>
@@ -349,7 +348,6 @@
     <string name="may">מאי</string>
     <string name="calculated">מחושב</string>
     <string name="before">לפני</string>
-    <string name="not_granted">%s לא אושר.</string>
     <string name="empty_media">מדיה ריקה</string>
     <string name="which_family">איזו משפחה\?</string>
     <string name="simpsons_tree">עץ משפחת סימפסון</string>

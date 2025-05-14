@@ -21,7 +21,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import app.familygem.F
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.NewRelativeDialog
@@ -29,6 +28,7 @@ import app.familygem.PersonEditorActivity
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Choice
+import app.familygem.constant.Destination
 import app.familygem.constant.Extra
 import app.familygem.constant.Image
 import app.familygem.constant.Relation
@@ -53,7 +53,6 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.theartofdev.edmodo.cropper.CropImage
 import org.folg.gedcom.model.EventFact
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.MediaRef
@@ -287,8 +286,8 @@ class ProfileActivity : AppCompatActivity() {
                 when (item.itemId) {
                     0 -> {} // When a submenu is clicked
                     // Media page
-                    10 -> F.displayImageCaptureDialog(this, null, 2173, person) // Link media
-                    11 -> F.displayImageCaptureDialog(this, null, 2174, person) // Link shared media
+                    10 -> FileUtil.displayFileChooser(this, localMediaLauncher, Destination.LOCAL_MEDIA) // New local media
+                    11 -> FileUtil.displayFileChooser(this, sharedMediaLauncher, Destination.SHARED_MEDIA) // New shared media
                     12 -> { // Link shared media
                         val intent = Intent(this, MainActivity::class.java)
                         intent.putExtra(Choice.MEDIA, true)
@@ -447,28 +446,28 @@ class ProfileActivity : AppCompatActivity() {
                     person?.addSourceCitation(citation)
                 }
                 save(true, person)
+                refresh()
             }
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK && data != null) {
-            if (requestCode == 2173) { // File provided by another app becomes local media
-                val media = Media()
-                media.fileTag = "FILE"
-                person?.addMedia(media)
-                if (F.setFileAndProposeCropping(this, null, data, media)) save(true, person)
-            } else if (requestCode == 2174) { // Shared media
-                val sharedMedia = MediaUtil.newSharedMedia(person)
-                if (F.setFileAndProposeCropping(this, null, data, sharedMedia)) save(true, sharedMedia, person)
-            } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // Gets the image cropped by Android Image Cropper
-                F.endImageCropping(data)
-                save(true) // The change date for shared media is already saved in the previous step
-                // TODO: pass Global.croppedMedia?
+    private val localMediaLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val media = Media()
+            media.fileTag = "FILE"
+            person?.addMedia(media)
+            if (FileUtil.setFileAndProposeCropping(this, it.data, media)) {
+                save(true, person)
             }
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // After back arrow in Image Cropper
-            F.saveFolderInSettings()
+        }
+    }
+
+    private val sharedMediaLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val sharedMedia = MediaUtil.newSharedMedia(person)
+            if (FileUtil.setFileAndProposeCropping(this, it.data, sharedMedia)) {
+                save(true, sharedMedia, person)
+            }
         }
     }
 
@@ -512,11 +511,6 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun goBack() = onBackPressedDispatcher.onBackPressed()
-
-    override fun onRequestPermissionsResult(code: Int, permissions: Array<String>, results: IntArray) {
-        super.onRequestPermissionsResult(code, permissions, results)
-        F.permissionsResult(this, null, code, permissions, results, person)
-    }
 
     fun getPageFragment(page: Int): Fragment {
         return pages[page] ?: adapter.createFragment(page)

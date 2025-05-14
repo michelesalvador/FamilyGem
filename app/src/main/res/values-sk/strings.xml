@@ -31,7 +31,6 @@
     <string name="sure_delete">Naozaj odstrániť\?</string>
     <string name="delete">Odstrániť</string>
     <string name="tagline">Vytvorte si svoj rodokmeň</string>
-    <string name="not_granted">%s neoverené.</string>
     <string name="date_phrase">Slovom</string>
     <string name="which_family_add_child">Do ktorej rodiny pridať dieťa\?</string>
     <string name="which_family_add_spouse">Do ktorej rodiny pridať manžela/manželku\?</string>
@@ -258,7 +257,6 @@
     <string name="media">Médiá</string>
     <string name="something_wrong">Vyskytla sa chyba.</string>
     <string name="ideally_recipient">Ideálne príjemca zdieľania.</string>
-    <string name="app_storage">Úložisko aplikácie</string>
     <string name="time">Čas</string>
     <string name="submitter">Zadávateľ</string>
     <string name="date">Dátum</string>

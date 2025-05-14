@@ -6,7 +6,6 @@
     <string name="which_family">Welke familie\?</string>
     <string name="empty_family">Lege familie</string>
     <string name="empty_media">Lege media</string>
-    <string name="not_granted">%s niet toegekend.</string>
     <string name="no">Nee</string>
     <string name="want_crop_image">Wilt u deze afbeelding bijsnijden\?</string>
     <string name="days">dagen</string>
@@ -318,7 +317,6 @@
     <string name="pdf_exported_ok">PDF geëxporteerd.</string>
     <string name="export_pdf">PDF exporteren</string>
     <string name="add_device_folder">Voeg een map toe vanaf dit apparaat.</string>
-    <string name="app_storage">Applicatie-opslag</string>
     <string name="media_searched_list">Mediabestanden worden doorzocht in deze mappen:</string>
     <string name="zip_exported_ok">ZIP geëxporteerd.</string>
     <string name="gedcom_exported_ok">GEDCOM geëxporteerd.</string>

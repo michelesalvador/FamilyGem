@@ -93,6 +93,12 @@
         <item name="android:textColorPrimary">#FFF</item> <!-- Text -->
     </style>
 
+    <style name="AppTheme.TransparentActionBar">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="colorPrimary">@android:color/transparent</item>
+    </style>
+
     <style name="AppTheme.WhiteTint" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:tint">@android:color/white</item>
     </style>

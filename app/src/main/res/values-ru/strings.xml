@@ -44,7 +44,6 @@
     <string name="which_family">Какая семья\?</string>
     <string name="empty_family">Пустая семья</string>
     <string name="empty_media">Пустые медиа</string>
-    <string name="not_granted">%s не предоставлено.</string>
     <string name="no">Нет</string>
     <string name="want_crop_image">Вы хотите обрезать изображение\?</string>
     <string name="days">дни</string>
@@ -316,7 +315,6 @@
     <string name="pdf_exported_ok">PDF экспортирован.</string>
     <string name="export_pdf">Экспорт PDF</string>
     <string name="add_device_folder">Добавьте папку из этого устройства.</string>
-    <string name="app_storage">Хранилище программы</string>
     <string name="media_searched_list">Поиск медиафайлов осуществляется в этих папках:</string>
     <string name="zip_exported_ok">Файл ZIP экспортирован.</string>
     <string name="gedcom_exported_ok">Файл GEDCOM экспортирован.</string>

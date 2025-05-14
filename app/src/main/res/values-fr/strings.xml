@@ -167,7 +167,6 @@
     <string name="blob">bulle</string>
     <string name="slideshow">Présentation</string>
     <string name="make_main_submitter">Voulez que cet auteur soit le principal de l\'arbre \?</string>
-    <string name="not_granted">%s pas garanti.</string>
     <string name="estimated">Estimée</string>
     <string name="calculated">Calculée</string>
     <string name="approximate">Approximative</string>
@@ -307,7 +306,6 @@
     <string name="changes_submitter">Auteur des changements</string>
     <string name="ideally_recipient">En principe, le réceptionnaire de cet échange.</string>
     <string name="add_device_folder">Ajouter un répertoire de cet appareil.</string>
-    <string name="app_storage">Stockage des applications</string>
     <string name="media_searched_list">Les fichier de médias sont recherchés dans ces répertoires :</string>
     <string name="destination">Destination</string>
     <string name="submission">Validation</string>

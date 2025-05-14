@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
-
-    <uses-sdk tools:overrideLibrary="androidx.security, jp.wasabeef.glide.transformations, me.zhanghai.android.fastscroll" />
 
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -176,6 +173,7 @@
             android:name=".profile.ProfileActivity"
             android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".PersonEditorActivity" />
         <activity android:name=".detail.FamilyActivity" />
         <activity android:name=".detail.NameActivity" />
         <activity android:name=".detail.RepositoryActivity" />
@@ -183,18 +181,20 @@
         <activity android:name=".detail.NoteActivity" />
         <activity android:name=".detail.SourceActivity" />
         <activity android:name=".detail.SourceCitationActivity" />
-        <activity android:name=".detail.MediaActivity" />
         <activity android:name=".detail.EventActivity" />
         <activity android:name=".detail.AddressActivity" />
         <activity android:name=".detail.SubmitterActivity" />
         <activity android:name=".detail.ExtensionActivity" />
         <activity android:name=".detail.ChangeActivity" />
         <activity
+            android:name=".detail.MediaActivity"
+            android:label="@string/empty_media" />
+        <activity
             android:name=".ImageActivity"
-            android:parentActivityName=".detail.MediaActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".PersonEditorActivity" />
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity" />
+            android:theme="@style/AppTheme.TransparentActionBar" />
+        <activity
+            android:name=".CropImageActivity"
+            android:label="@string/crop" />
         <activity android:name=".purchase.PurchaseActivity" />
 
         <service
@@ -215,9 +215,6 @@
         </receiver>
     </application>
     <queries>
-        <intent>
-            <action android:name="android.media.action.IMAGE_CAPTURE" />
-        </intent>
         <intent>
             <action android:name="android.intent.action.GET_CONTENT" />
             <data android:mimeType="*/*" />

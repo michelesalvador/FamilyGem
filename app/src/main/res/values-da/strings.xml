@@ -83,7 +83,6 @@
     <string name="software">Software</string>
     <string name="form">Form</string>
     <string name="destination">Destination</string>
-    <string name="app_storage">App lagring</string>
     <string name="add_device_folder">Tilføj en mappe fra denne enhed.</string>
     <string name="aware_upload_server">Vær opmærksom på, at du vil uploade hele træet til en server online.</string>
     <string name="remind_later">Mind mig senere</string>
@@ -360,7 +359,6 @@
     <string name="foster">Plejebarn</string>
     <string name="empty_family_delete">Der er et par tomme familier tilbage.
 \nØnsker du at slette dem\?</string>
-    <string name="not_granted">%s ikke indvilget.</string>
     <string name="merge_complete">Sammenlægningen afsluttet.</string>
     <string name="merge_tree">Sammenlægning af træe</string>
     <string name="merge">Sammenlægning</string>

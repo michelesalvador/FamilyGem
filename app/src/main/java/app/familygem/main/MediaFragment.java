@@ -11,21 +11,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.theartofdev.edmodo.cropper.CropImage;
-
 import org.folg.gedcom.model.Media;
 
-import app.familygem.F;
 import app.familygem.Global;
 import app.familygem.MediaFoldersActivity;
 import app.familygem.R;
 import app.familygem.constant.Choice;
+import app.familygem.constant.Destination;
 import app.familygem.constant.Extra;
+import app.familygem.util.FileUtil;
 import app.familygem.util.MediaUtil;
 import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
@@ -48,7 +48,7 @@ public class MediaFragment extends BaseFragment {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         view.findViewById(R.id.fab).setOnClickListener(
-                v -> F.displayImageCaptureDialog(getContext(), MediaFragment.this, 4546, null));
+                v -> FileUtil.INSTANCE.displayFileChooser(requireContext(), sharedMediaLauncher, Destination.SHARED_MEDIA));
         mediaVisitor = new MediaContainerList(Global.gc, !getActivity().getIntent().getBooleanExtra(Choice.MEDIA, false));
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
         recyclerView.setLayoutManager(layoutManager);
@@ -75,23 +75,16 @@ public class MediaFragment extends BaseFragment {
     /**
      * The file retrieved from SAF becomes a shared media.
      */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == 4546) { // File taken from the supplier app is saved in the Media and possibly cropped
-                Media media = MediaUtil.INSTANCE.newSharedMedia(null);
-                if (F.setFileAndProposeCropping(getContext(), this, data, media))
-                    TreeUtil.INSTANCE.save(true, media);
-            } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-                F.endImageCropping(data);
-                TreeUtil.INSTANCE.save(true, Global.croppedMedia);
-            }
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) { // If user clicks the back arrow in Image Cropper
-            F.saveFolderInSettings();
-        }
-    }
+    private final ActivityResultLauncher<Intent> sharedMediaLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Media sharedMedia = MediaUtil.INSTANCE.newSharedMedia(null);
+                    if (FileUtil.INSTANCE.setFileAndProposeCropping(requireContext(), result.getData(), sharedMedia)) {
+                        finalizeAction(new Media[]{sharedMedia});
+                    }
+                }
+            });
 
-    // Contextual menu
     private Media media;
 
     @Override
@@ -124,6 +117,9 @@ public class MediaFragment extends BaseFragment {
         return false;
     }
 
+    /**
+     * Saves the changes and updates the content.
+     */
     private boolean finalizeAction(Object[] modified) {
         TreeUtil.INSTANCE.save(true, modified);
         showContent();
@@ -142,10 +138,5 @@ public class MediaFragment extends BaseFragment {
         if (id == 0) {
             startActivity(new Intent(getContext(), MediaFoldersActivity.class).putExtra(Extra.TREE_ID, Global.settings.openTree));
         }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permission, @NonNull int[] grantResults) {
-        F.permissionsResult(getContext(), this, requestCode, permission, grantResults, null);
     }
 }

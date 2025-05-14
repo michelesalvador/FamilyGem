@@ -2,10 +2,10 @@ package app.familygem;
 
 import static app.familygem.Global.gc;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.ContextMenu;
@@ -18,13 +18,13 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,7 +34,6 @@ import androidx.core.util.Pair;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.theartofdev.edmodo.cropper.CropImage;
 
 import org.folg.gedcom.model.Address;
 import org.folg.gedcom.model.EventFact;
@@ -59,7 +58,6 @@ import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.model.Submitter;
 import org.folg.gedcom.model.Visitable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,9 +66,9 @@ import java.util.List;
 import java.util.Set;
 
 import app.familygem.constant.Choice;
+import app.familygem.constant.Destination;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Relation;
-import app.familygem.constant.Type;
 import app.familygem.detail.AddressActivity;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
@@ -140,7 +138,7 @@ public abstract class DetailActivity extends AppCompatActivity {
 
         object = Memory.getLastObject();
         if (object == null) {
-            goBack(); // Skip this detail without object
+            goBack(); // Skips this detail without object
         } else if (TreeUtil.INSTANCE.isGlobalGedcomOk(this::setupInterface)) {
             setupInterface();
         }
@@ -258,6 +256,34 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     /**
+     * File coming from SAF or other app becomes local media.
+     */
+    private final ActivityResultLauncher<Intent> localMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Media media = new Media();
+            media.setFileTag("FILE");
+            ((MediaContainer)object).addMedia(media);
+            if (FileUtil.INSTANCE.setFileAndProposeCropping(this, result.getData(), media)) {
+                TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
+                refresh(); // Sometimes necessary
+            }
+        }
+    });
+
+    /**
+     * File coming from SAF or other app becomes shared media.
+     */
+    private final ActivityResultLauncher<Intent> sharedMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Media media = MediaUtil.INSTANCE.newSharedMedia((MediaContainer)object);
+            if (FileUtil.INSTANCE.setFileAndProposeCropping(this, result.getData(), media)) {
+                TreeUtil.INSTANCE.save(true, media, Memory.getLeaderObject());
+                refresh(); // Sometimes necessary
+            }
+        }
+    });
+
+    /**
      * Actions to place a new piece (egg) optionally making it immediately editable.
      */
     PopupMenu.OnMenuItemClickListener fabMenuListener = item -> {
@@ -311,9 +337,9 @@ public abstract class DetailActivity extends AppCompatActivity {
             intent.putExtra(Choice.NOTE, true);
             startActivityForResult(intent, 7074);
         } else if (id == 106) { // Search for local media
-            F.displayImageCaptureDialog(this, null, 4173, (MediaContainer)object);
+            FileUtil.INSTANCE.displayFileChooser(this, localMediaLauncher, Destination.LOCAL_MEDIA);
         } else if (id == 107) { // Search for shared media
-            F.displayImageCaptureDialog(this, null, 4174, (MediaContainer)object);
+            FileUtil.INSTANCE.displayFileChooser(this, sharedMediaLauncher, Destination.SHARED_MEDIA);
         } else if (id == 108) { // Link shared media
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.MEDIA, true);
@@ -394,16 +420,6 @@ public abstract class DetailActivity extends AppCompatActivity {
                 NoteRef noteRef = new NoteRef();
                 noteRef.setRef(data.getStringExtra(Extra.NOTE_ID));
                 ((NoteContainer)object).addNoteRef(noteRef);
-            } else if (requestCode == 4173) { // File coming from SAF or other app becomes local media
-                Media media = new Media();
-                media.setFileTag("FILE");
-                ((MediaContainer)object).addMedia(media);
-                if (!F.setFileAndProposeCropping(this, null, data, media)) return;
-            } else if (requestCode == 4174) { // File coming from SAF or other app becomes shared media
-                Media media = MediaUtil.INSTANCE.newSharedMedia((MediaContainer)object);
-                if (F.setFileAndProposeCropping(this, null, data, media))
-                    TreeUtil.INSTANCE.save(true, media, Memory.getLeaderObject());
-                return;
             } else if (requestCode == 43616) { // Media from main.MediaFragment
                 MediaRef mediaRef = new MediaRef();
                 mediaRef.setRef(data.getStringExtra(Extra.MEDIA_ID));
@@ -412,10 +428,6 @@ public abstract class DetailActivity extends AppCompatActivity {
                 RepositoryRef archRef = new RepositoryRef();
                 archRef.setRef(data.getStringExtra("repoId"));
                 ((Source)object).setRepositoryRef(archRef);
-            } else if (requestCode == 5173) { // Saves in Media a file chosen with the apps from MediaActivity
-                if (!F.setFileAndProposeCropping(this, null, data, (Media)object)) return;
-            } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-                F.endImageCropping(data);
             }
             // From the context menu 'Choose...'
             if (requestCode == 5390) { // Sets the repository that has been chosen in the RepositoriesFragment list by RepositoryRefActivity
@@ -425,8 +437,6 @@ public abstract class DetailActivity extends AppCompatActivity {
             }
             // 'true' indicates to reload both this Detail thanks to the following onRestart(), and all previous activities
             TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            F.saveFolderInSettings();
         }
     }
 
@@ -945,15 +955,13 @@ public abstract class DetailActivity extends AppCompatActivity {
                     gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(object)))
                 menu.add(0, 1, 0, R.string.make_default);
             if (object instanceof Media) {
-                if (box.findViewById(R.id.image_picture).getTag(R.id.tag_file_type) == Type.CROPPABLE)
-                    menu.add(0, 5, 0, R.string.crop);
-                menu.add(0, 6, 0, R.string.choose_file);
+                menu.add(0, 5, 0, R.string.choose_file);
                 Media media = (Media)object;
                 if (media.getId() != null) {
                     MediaReferences mediaReferences = new MediaReferences(gc, media, false);
                     if (mediaReferences.num > 0)
-                        menu.add(0, 7, 0, R.string.make_media);
-                } else menu.add(0, 8, 0, R.string.make_shared_media);
+                        menu.add(0, 6, 0, R.string.make_media);
+                } else menu.add(0, 7, 0, R.string.make_shared_media);
             }
             if (object instanceof Family)
                 menu.add(0, 10, 0, R.string.delete);
@@ -964,6 +972,18 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     /**
+     * Saves in Media a file chosen with the apps from MediaActivity
+     */
+    public ActivityResultLauncher<Intent> chooseMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            if (FileUtil.INSTANCE.setFileAndProposeCropping(this, result.getData(), (Media)object)) {
+                TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
+                refresh();
+            }
+        }
+    });
+
+    /**
      * Is called when a menu item is chosen AND by clicking the back arrow
      */
     @Override
@@ -971,17 +991,15 @@ public abstract class DetailActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == 1) { // Main submitter // TODO code smell : magic number
             SubmittersFragment.mainSubmitter((Submitter)object);
-        } else if (id == 5) { // Crop image
-            cropImage(box);
-        } else if (id == 6) { // Choose image
-            F.displayImageCaptureDialog(this, null, 5173, null);
-        } else if (id == 7) { // Make simple media
+        } else if (id == 5) { // Choose image
+            FileUtil.INSTANCE.displayFileChooser(this, chooseMediaLauncher);
+        } else if (id == 6) { // Make simple media
             Object[] modifiedObjects = MediaUtil.INSTANCE.makeSimpleMedia((Media)object);
             TreeUtil.INSTANCE.save(true, modifiedObjects);
             Memory.makeLastStep(object);
             getIntent().putExtra(Extra.ALONE, true); // To display the cabinet
             refresh();
-        } else if (id == 8) { // Make shared media
+        } else if (id == 7) { // Make shared media
             Object[] modifiedObjects = MediaUtil.INSTANCE.makeSharedMedia((Media)object);
             TreeUtil.INSTANCE.save(true, modifiedObjects);
             Memory.makeLeaderStep(object);
@@ -1138,10 +1156,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 menu.add(0, 91, 0, R.string.choose_repository);
             } else if (pieceObject instanceof Integer) {
                 if (pieceObject.equals(43614)) { // The image in MediaActivity
-                    // It is a croppable image
-                    if (pieceView.findViewById(R.id.image_picture).getTag(R.id.tag_file_type) == Type.CROPPABLE)
-                        menu.add(0, 100, 0, R.string.crop);
-                    menu.add(0, 101, 0, R.string.choose_file);
+                    menu.add(0, 100, 0, R.string.choose_file);
                 } else if (pieceObject.equals(4043) || pieceObject.equals(6064)) // Name and surname for non-expert
                     menu.add(0, 0, 0, R.string.copy);
             } else if (pieceObject instanceof String) {
@@ -1346,11 +1361,8 @@ public abstract class DetailActivity extends AppCompatActivity {
                 intent2.putExtra(Choice.REPOSITORY, true);
                 startActivityForResult(intent2, 5390);
                 return true;
-            case 100: // Crop image
-                cropImage(pieceView);
-                return true;
-            case 101: // Choose image
-                F.displayImageCaptureDialog(this, null, 5173, null);
+            case 100: // Choose image
+                FileUtil.INSTANCE.displayFileChooser(this, chooseMediaLauncher);
                 return true;
             default:
                 return false;
@@ -1415,20 +1427,6 @@ public abstract class DetailActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Receives a View in which there is the image to be cropped and starts cropping.
-     */
-    private void cropImage(View view) {
-        ImageView imageView = view.findViewById(R.id.image_picture);
-        File mediaFile = null;
-        String path = (String)imageView.getTag(R.id.tag_path);
-        if (path != null)
-            mediaFile = new File(path);
-        Uri mediaUri = (Uri)imageView.getTag(R.id.tag_uri);
-        Global.croppedMedia = (Media)object;
-        F.cropImage(this, mediaFile, mediaUri, null);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -1437,14 +1435,5 @@ public abstract class DetailActivity extends AppCompatActivity {
         if (object instanceof EventFact && EventUtilKt.cleanUpFields((EventFact)object)) {
             TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
         }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        F.permissionsResult(this, null, requestCode, permissions, grantResults,
-                // MediaActivity has 'object' instance of Media, not of MediaContainer
-                object instanceof MediaContainer ? (MediaContainer)object : null);
-
     }
 }

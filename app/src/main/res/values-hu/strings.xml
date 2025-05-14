@@ -76,7 +76,6 @@
     <string name="form">Forma</string>
     <string name="time">Idő</string>
     <string name="media_folders">Média mappák</string>
-    <string name="app_storage">Alkalmazástárhely</string>
     <string name="add_device_folder">Mappa hozzáadása erről az eszközről.</string>
     <string name="share_sensitive">Érzékeny adatok megosztása</string>
     <string name="remind_later">Emlékeztessen később</string>
@@ -353,7 +352,6 @@
     <string name="from">Tól</string>
     <string name="to">Ig</string>
     <string name="empty_media">Üres média</string>
-    <string name="not_granted">%s nem igazolt.</string>
     <string name="lineage">Rokonság</string>
     <string name="adopted">Örökbefogadott</string>
     <string name="foster">Nevelt</string>

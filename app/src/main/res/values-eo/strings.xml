@@ -190,7 +190,6 @@
     <string name="sharing_completed">Komunigado finiĝis.</string>
     <string name="sharing_tree">Komunigado de familia arbo</string>
     <string name="usually_your_name">Kutime via nomo kaj familinomo.</string>
-    <string name="app_storage">Aplikaĵa konservejo</string>
     <string name="media_folders">Aŭdvidaĵaj dosierujoj</string>
     <string name="show_advanced_functions">Montri altnivelajn ilojn</string>
     <string name="auto_save">Aŭtomata konservado</string>
@@ -319,7 +318,6 @@
     <string name="generations_display_diagram">Tiom, kiom da generacioj montriĝos en la diagramo:</string>
     <string name="load_tree_startup">Ŝarĝi la laste malfermitan arbon dum lanĉo</string>
     <string name="media_searched_list">Aŭdvidaĵaj dosieroj estas serĉataj ene de ĉi tiuj dosierujoj:</string>
-    <string name="not_granted">%s ne permesita.</string>
     <string name="not_married">Ne edziĝinta</string>
     <string name="and">kaj</string>
     <string name="between">inter</string>

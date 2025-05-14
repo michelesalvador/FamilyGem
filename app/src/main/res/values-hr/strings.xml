@@ -216,7 +216,6 @@
     <string name="move_up">Premjesti gore</string>
     <string name="daughter">Kći</string>
     <string name="sibling">Brat/Sestra</string>
-    <string name="not_granted">%s nije odobreno.</string>
     <string name="romanized">Transliterirano u latinicu</string>
     <string name="generation">Generacija</string>
     <string name="line_1">1. redak</string>
@@ -315,7 +314,6 @@
     <string name="a_new_tree">Novo obiteljsko stablo</string>
     <string name="family_gem_example">Family Gem primjer</string>
     <string name="download_shared_tree">Preuzmi dijeljeno stablo</string>
-    <string name="app_storage">Spremište programa</string>
     <string name="sure_delete">Sigurno\?</string>
     <string name="pdf_exported_ok">PDF je izvezen.</string>
     <string name="zip_exported_ok">ZIP je izvezen.</string>

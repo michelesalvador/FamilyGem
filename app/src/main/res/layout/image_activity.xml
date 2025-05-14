@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/image_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000">
 
     <com.otaliastudios.zoom.ZoomLayout
-        android:id="@+id/image_zoomLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layoutDirection="ltr"
-        app:hasClickableChildren="false"
+        app:hasClickableChildren="true"
         app:maxZoom="10"
         app:maxZoomType="realZoom"
         app:minZoom="1">

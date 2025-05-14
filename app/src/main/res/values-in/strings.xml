@@ -85,7 +85,6 @@
     <string name="destination">Tujuan</string>
     <string name="time">Waktu</string>
     <string name="media_folders">Folder media</string>
-    <string name="app_storage">Penyimpanan aplikasi</string>
     <string name="share_sensitive">Berbagi data sensitif</string>
     <string name="aware_upload_server">Perhatikan bahwa Anda akan mengunggah seluruh silsilah ke server secara online.</string>
     <string name="remind_later">Ingatkan aku nanti</string>
@@ -352,7 +351,6 @@
 \nApakah Anda ingin menghapusnya\?</string>
     <string name="slideshow">Peragaan slide</string>
     <string name="birth_date">Tanggal lahir</string>
-    <string name="not_granted">%s tidak diberikan.</string>
     <string name="system_language">Bahasa sistem</string>
     <string name="select_tree">Pilih pohon untuk digabungkan:</string>
     <string name="error_found">Satu error ditemukan.</string>

@@ -11,9 +11,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter() // Necessary for android-image-cropper
         mavenCentral()
         mavenLocal()
-        maven { url 'https://jitpack.io' } // For FastScrollerAndRecyclerViewFixes
     }
 }

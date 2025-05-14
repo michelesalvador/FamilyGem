@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.familygem.F
 import app.familygem.GedcomDateConverter
 import app.familygem.Global
 import app.familygem.Settings.Tree
@@ -219,7 +218,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         }
         // Copies the files to media folder of destination tree, renaming them if necessary
         if (mediaPaths.isNotEmpty()) {
-            val extDestinationDir: File = context.getExternalFilesDir(destinationId.toString())!! // Creates the folder if not existing
+            val extDestinationDir = context.getExternalFilesDir(destinationId.toString())!! // Creates the folder if not existing
             if (extDestinationDir.list()?.size == 0) { // Empty folder, probably because just created
                 Global.settings.getTree(destinationId).dirs.add(extDestinationDir.path)
                 // No need to save Global.settings here because TreeUtils.saveJson() will do
@@ -229,7 +228,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                 val path = entry.value
                 val media = entry.key
                 val sourceFile = File(path)
-                val destinationFile = F.nextAvailableFileName(extDestinationDir, path.substring(path.lastIndexOf('/') + 1))
+                val destinationFile = FileUtil.nextAvailableFileName(extDestinationDir, path.substring(path.lastIndexOf('/') + 1))
                 try {
                     val sourceStream = FileInputStream(sourceFile)
                     FileUtils.copyInputStreamToFile(sourceStream, destinationFile)
@@ -575,7 +574,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             newNum = Global.settings.max() + 1
             val persons = firstGedcom.people.size + secondGedcom.people.size
             val generations = firstTree.generations.coerceAtLeast(secondTree.generations)
-            Global.settings.addTree(Tree(newNum, title, null, persons, generations, firstTree.root, firstTree.settings, null, 0))
+            Global.settings.addTree(Tree(newNum, title, persons, generations, firstTree.root, firstTree.settings, null, 0))
             copyMediaFiles(context, firstGedcom, firstNum, newNum)
             copyMediaFiles(context, secondGedcom, secondNum.value!!, newNum)
             doMerge()

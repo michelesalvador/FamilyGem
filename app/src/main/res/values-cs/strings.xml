@@ -8,7 +8,6 @@
 \nChcete je odstranit\?</string>
     <string name="delete">Odstranit</string>
     <string name="tagline">Vytvořte si vlastní rodokmen</string>
-    <string name="not_granted">%s neověřeno.</string>
     <string name="want_crop_image">Ořezat tento obrázek\?</string>
     <string name="saved">Uloženo.</string>
     <string name="birth_place">Místo narození</string>
@@ -280,7 +279,6 @@
     <string name="ideally_recipient">Ideálně příjemce sdílení.</string>
     <string name="please_name">Napište jméno.</string>
     <string name="add_device_folder">Přidat složku z tohoto zařízení.</string>
-    <string name="app_storage">Úložiště aplikace</string>
     <string name="media_searched_list">Mediální soubory jsou v těchto složkách:</string>
     <string name="media_folders">Složky médií</string>
     <string name="time">Čas</string>

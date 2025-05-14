@@ -81,6 +81,7 @@
     <string name="about">About</string>
     <string name="local_backup">Local backup</string>
     <string name="choose_disable_backup">Choose a backup folder or disable local backup.\nYou can activate it later.</string>
+    <string name="choose_folder">Choose folder</string>
     <string name="disable">Disable</string>
     <string name="backup_folder">Backup folder</string>
     <string name="recover">Recover</string>
@@ -111,8 +112,7 @@
     <string name="media_folders">Media folders</string>
     <string name="media_searched_list">Media files are searched inside these folders:</string>
     <string name="add_device_folder">Add a folder from this device.</string>
-    <string name="app_storage">App storage</string>
-    <string name="choose_folder">Choose folder</string>
+    <string name="not_granted_add_folder">Some permission not granted.\nDo you want to add a folder anyway\?</string>
     <string name="share_sensitive">Sharing sensitive data</string>
     <string name="aware_upload_server">Please be aware that you are going to upload the whole tree to a server online.</string>
     <string name="remind_later">Remind me later</string>
@@ -394,7 +394,6 @@
     <string name="days">days</string>
     <string name="want_crop_image">Do you want to crop this image\?</string>
     <string name="no">No</string>
-    <string name="not_granted">%s not granted.</string>
     <string name="empty_media">Empty media</string>
     <string name="empty_family">Empty family</string>
     <string name="which_family">Which family\?</string>

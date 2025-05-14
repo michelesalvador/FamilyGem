@@ -85,6 +85,7 @@
     <!-- BackupActivity -->
     <string name="local_backup">Backup locale</string>
     <string name="choose_disable_backup">Scegli una cartella di backup o disabilita il backup locale.\nPotrai attivarlo in seguito.</string>
+    <string name="choose_folder">Scegli cartella</string>
     <string name="disable">Disabilita</string>
     <string name="backup_folder">Cartella di backup</string>
     <string name="recover">Recupera</string>
@@ -116,8 +117,7 @@
     <string name="media_folders">Cartelle media</string>
     <string name="media_searched_list">I file media vengono cercati dentro a queste cartelle:</string>
     <string name="add_device_folder">Aggiungi una cartella da questo dispositivo.</string>
-    <string name="app_storage">Archiviazione app</string>
-    <string name="choose_folder">Scegli cartella</string>
+    <string name="not_granted_add_folder">Alcuni permessi non concessi.\nVuoi comunque aggiungere una cartella\?</string>
     <!-- SharingActivity -->
     <string name="share_sensitive">Condivisione di dati sensibili</string>
     <string name="aware_upload_server">Tieni presente che stai per caricare l\'intero albero su un server online.</string>
@@ -424,7 +424,6 @@
     <string name="days">giorni</string>
     <string name="want_crop_image">Vuoi ritagliare questa immagine\?</string>
     <string name="no">No</string>
-    <string name="not_granted">%s non concesso.</string>
     <string name="empty_media">Media vuoto</string>
     <string name="empty_family">Famiglia vuota</string>
     <string name="which_family">Quale famiglia\?</string>

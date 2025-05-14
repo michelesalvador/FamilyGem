@@ -110,7 +110,6 @@
     <string name="which_family">Qual família\?</string>
     <string name="empty_family">Família vazia</string>
     <string name="empty_media">Mídia vazia</string>
-    <string name="not_granted">%s não concedido.</string>
     <string name="no">Não</string>
     <string name="want_crop_image">Você quer cortar esta imagem\?</string>
     <string name="days">dias</string>
@@ -312,7 +311,6 @@
     <string name="tree_without_news">Árvore sem atualizações</string>
     <string name="tree_with_news">Árvore com atualizações</string>
     <string name="sharing_completed">Compartilhamento concluído.</string>
-    <string name="app_storage">Armazenamento do aplicativo</string>
     <string name="sure_delete">Você tem certeza\?</string>
     <string name="pdf_exported_ok">PDF exportado.</string>
     <string name="export_pdf">Exportar PDF</string>

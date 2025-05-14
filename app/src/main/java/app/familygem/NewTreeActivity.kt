@@ -155,7 +155,7 @@ class NewTreeActivity : BaseActivity() {
             Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
             return
         }
-        Global.settings.addTree(Settings.Tree(num, title, null, 0, 0, null, null, null, 0))
+        Global.settings.addTree(Settings.Tree(num, title, 0, 0, null, null, null, 0))
         Global.settings.openTree = num
         Global.settings.save()
         onBackPressedDispatcher.onBackPressed()

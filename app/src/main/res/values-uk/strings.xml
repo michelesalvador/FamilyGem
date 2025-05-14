@@ -12,7 +12,6 @@
     <string name="days">дні</string>
     <string name="want_crop_image">Ви хочете обрізати це зображення\?</string>
     <string name="no">Ні</string>
-    <string name="not_granted">%s неперевірене.</string>
     <string name="empty_media">Порожні медіа</string>
     <string name="empty_family">Порожня сім\'я</string>
     <string name="which_family">Яка сім\'я\?</string>
@@ -286,7 +285,6 @@
     <string name="pdf_exported_ok">PDF експортовано.</string>
     <string name="export_pdf">Експортувати файл PDF</string>
     <string name="add_device_folder">Додати папку з цього пристрою.</string>
-    <string name="app_storage">Сховище програми</string>
     <string name="media_searched_list">Пошук у медіафайлах виконується в цих папках:</string>
     <string name="update_header">Оновити заголовок</string>
     <string name="zip_exported_ok">Файл ZIP експортований.</string>

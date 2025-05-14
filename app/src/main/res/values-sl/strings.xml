@@ -144,7 +144,6 @@
     <string name="form">Oblika</string>
     <string name="destination">Lokacija</string>
     <string name="time">Čas</string>
-    <string name="app_storage">Skladišče aplikacije</string>
     <string name="add_device_folder">Dodati mapo iz te naprave.</string>
     <string name="aware_upload_server">Zavedajte se, da boste celotno drevo prenesli na spletni strežnik.</string>
     <string name="changes_submitter">Predlagatelj sprememb</string>
@@ -302,7 +301,6 @@
     <string name="version">Različica</string>
     <string name="address">Naslov</string>
     <string name="date">Datum</string>
-    <string name="not_granted">%s ni odobreno.</string>
     <string name="february">Februar</string>
     <string name="january">Januar</string>
     <string name="may">Maj</string>

@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 
 import app.familygem.BaseActivity;
-import app.familygem.F;
 import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.Settings;
@@ -284,7 +283,7 @@ public class ConfirmationActivity extends BaseActivity {
                 // Then use the already existing file
                 media.setFile(twinFile.getAbsolutePath());
             } else { // Otherwise copies the new file
-                File destinationFile = F.nextAvailableFileName(externalDir, fileName);
+                File destinationFile = FileUtil.INSTANCE.nextAvailableFileName(externalDir, fileName);
                 try {
                     FileUtils.copyFile(originFile, destinationFile);
                 } catch (IOException e) {

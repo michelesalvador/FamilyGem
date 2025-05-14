@@ -126,7 +126,6 @@
     <string name="form">نموذج</string>
     <string name="destination">الوجهة</string>
     <string name="media_folders">مجلدات الوسائط</string>
-    <string name="app_storage">مخزن التطبيق</string>
     <string name="share_sensitive">مشاركة ملفات حساسة</string>
     <string name="remind_later">ذكرني لاحقاً</string>
     <string name="please_title">رجاء اكتب عنواناً.</string>
@@ -351,7 +350,6 @@
     <string name="no_name">لا اسم</string>
     <string name="months">أشهر</string>
     <string name="want_crop_image">أتريد اقتطاع هذه الصورة؟</string>
-    <string name="not_granted">%s غير مضمون.</string>
     <string name="empty_media">وسيط فارغ</string>
     <string name="empty_family">عائلة فارغة</string>
     <string name="which_family">أي عائلة؟</string>

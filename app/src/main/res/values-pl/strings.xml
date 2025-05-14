@@ -292,7 +292,6 @@
     <string name="days">dni</string>
     <string name="want_crop_image">Chcesz przyciąć to zdjęcie?</string>
     <string name="no">Nie</string>
-    <string name="not_granted">%s nie jest dostępne.</string>
     <string name="empty_media">Puste multimedia</string>
     <string name="empty_family">Pusta rodzina</string>
     <string name="which_family">Która rodzina?</string>
@@ -309,7 +308,6 @@
     <string name="a_new_tree">Nowe drzewo genealogiczne</string>
     <string name="family_gem_example">Przykład Family Gem</string>
     <string name="download_shared_tree">Pobierz drzewo udostępnione</string>
-    <string name="app_storage">Magazyn aplikacji</string>
     <string name="sure_delete">Jesteś pewien\?</string>
     <string name="pdf_exported_ok">Wyeksportowano plik PDF.</string>
     <string name="export_pdf">Eksportuj do PDF</string>

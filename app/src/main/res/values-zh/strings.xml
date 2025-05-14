@@ -76,7 +76,6 @@
     <string name="destination">目的地</string>
     <string name="time">时间</string>
     <string name="media_folders">文件路径</string>
-    <string name="app_storage">应用程序路径</string>
     <string name="add_device_folder">从这个设备上添加一个文件夹。</string>
     <string name="share_sensitive">分享敏感数据</string>
     <string name="remind_later">稍后提醒我</string>
@@ -305,7 +304,6 @@
     <string name="days">日</string>
     <string name="want_crop_image">是否裁剪该图片？</string>
     <string name="no">否</string>
-    <string name="not_granted">%s 不予批准。</string>
     <string name="empty_media">空媒体</string>
     <string name="empty_family">空家庭</string>
     <string name="which_family">哪个家庭？</string>

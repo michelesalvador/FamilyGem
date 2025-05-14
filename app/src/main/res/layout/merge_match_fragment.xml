@@ -43,7 +43,7 @@
                 android:visibility="@{model.actualMatch > 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/elimina" />
+                app:srcCompat="@drawable/ex" />
 
             <ProgressBar
                 android:id="@+id/merge_progress"

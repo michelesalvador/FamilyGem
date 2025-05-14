@@ -2,10 +2,7 @@ package app.familygem
 
 import android.content.Context
 import android.content.Intent
-import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.Build
-import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.Settings.ZippedTree
 import app.familygem.util.ChangeUtil.actualDateTime
@@ -57,7 +54,7 @@ class Exporter(private val context: Context, private val progressView: ProgressV
     /** Writes the GEDCOM file in the URI. */
     suspend fun exportGedcom(targetUri: Uri): Boolean {
         this.targetUri = targetUri
-        updateHeader(extractFilename(targetUri))
+        updateHeader(FileUtil.extractFilename(context, targetUri, "tree.ged"))
         optimizeGedcom()
         val writer = GedcomWriter()
         val gedcomFile = File(context.cacheDir, "temp.ged")
@@ -201,31 +198,6 @@ class Exporter(private val context: Context, private val progressView: ProgressV
         }
     }
 
-    /** Extracts only the filename from a URI. */
-    private fun extractFilename(uri: Uri): String {
-        var filename: String? = null
-        // file://
-        if (uri.scheme != null && uri.scheme.equals("file", true)) {
-            filename = uri.lastPathSegment
-        }
-        // Cursor (usually it's used this)
-        if (filename == null) {
-            val cursor = context.contentResolver.query(uri, null, null, null, null)
-            if (cursor != null && cursor.moveToFirst()) {
-                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                filename = cursor.getString(index)
-                cursor.close()
-            }
-        }
-        // DocumentFile
-        if (filename == null) {
-            val document = DocumentFile.fromSingleUri(context, targetUri!!)
-            filename = document!!.name
-        }
-        return filename ?: "tree.ged"
-        // Not much else to do
-    }
-
     /**
      * Receives a list of DocumentFiles and put them in a ZIP file written to the [targetUri].
      * @return Error message or true if all is well
@@ -265,12 +237,7 @@ class Exporter(private val context: Context, private val progressView: ProgressV
 
     /** Makes the just created file visible from Windows file explorer. */
     private fun makeFileVisible(uri: Uri) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            val filePath = F.getFilePathFromUri(targetUri)
-            MediaScannerConnection.scanFile(context, arrayOf(filePath), null, null)
-        } else { // This is ineffective in KitKat where the file remains invisible
-            context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
-        }
+        context.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri))
     }
 
     private fun success(message: Int): Boolean {

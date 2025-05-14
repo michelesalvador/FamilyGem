@@ -161,7 +161,6 @@
     <string name="destination">مقصد</string>
     <string name="time">زمان</string>
     <string name="media_folders">پوشه‌ی رسانه‌ها</string>
-    <string name="app_storage">فضای حافظه برنامه</string>
     <string name="add_device_folder">یک پوشه از این دستگاه را اضافه کنید.</string>
     <string name="share_sensitive">اشتراک اطلاعات حساس</string>
     <string name="remind_later">بعدا به من یادآوری کن</string>
@@ -347,7 +346,6 @@
     <string name="to">تا</string>
     <string name="want_crop_image">آیا می خواهید این تصویر را برش دهید؟</string>
     <string name="no">نه</string>
-    <string name="not_granted">%s داده نشده است.</string>
     <string name="empty_media">رسانه خالی</string>
     <string name="empty_family">خانواده خالی</string>
     <string name="empty_family_delete">چند خانواده خالی مانده اند.

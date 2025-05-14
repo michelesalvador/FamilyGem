@@ -21,10 +21,10 @@ android {
     compileSdk 35
     defaultConfig {
         applicationId 'app.familygem'
-        minSdk 19
+        minSdk 21
         targetSdk 35
         versionCode 27
-        versionName '1.1'
+        versionName '1.1.0.2'
         vectorDrawables.useSupportLibrary = true
         resourceConfigurations += ['ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw',
                                    'kn', 'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh']
@@ -69,12 +69,12 @@ dependencies {
     implementation 'commons-net:commons-net:3.8.0'
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'androidx.lifecycle:lifecycle-process:2.8.7'
-    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha07'
     implementation 'org.familysearch.gedcom:gedcom:1.14.0'
-    implementation 'androidx.work:work-runtime:2.9.1' // 2.10.0 needs minSdk 21
-    implementation 'androidx.appcompat:appcompat:1.7.0-alpha03' // 1.7.0 needs minSdk 21
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // 2.2.0 needs minSdk 21
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7' // 2.8.0 needs minSdk 21
+    implementation 'androidx.work:work-runtime:2.10.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.8.9'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.android.installreferrer:installreferrer:2.2'
     implementation 'com.android.billingclient:billing-ktx:6.1.0'
@@ -82,7 +82,7 @@ dependencies {
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation files('libs/gedcomgraph-3.10.jar')
     implementation 'joda-time:joda-time:2.13.0'
-    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+    implementation 'com.vanniktech:android-image-cropper:4.6.0'
     implementation 'com.otaliastudios:zoomlayout:1.9.0'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     implementation 'jp.wasabeef:glide-transformations:4.3.0'

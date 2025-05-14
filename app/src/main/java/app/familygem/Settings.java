@@ -200,12 +200,11 @@ public class Settings {
         public boolean backup;
         public List<Birthday> birthdays;
 
-        public Tree(int id, String title, String dir, int persons, int generations, String root,
+        public Tree(int id, String title, int persons, int generations, String root,
                     TreeSettings settings, List<Share> shares, int grade) {
             this.id = id;
             this.title = title;
             dirs = new LinkedHashSet<>();
-            if (dir != null) dirs.add(dir);
             uris = new LinkedHashSet<>();
             this.persons = persons;
             this.generations = generations;

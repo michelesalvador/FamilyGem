@@ -175,7 +175,6 @@
     <string name="gedcom_media_zip">சிப் கோப்பில் %d மீடியாவுடன் GEDCOM</string>
     <string name="gedcom_only">GEDCOM கோப்பு மட்டுமே</string>
     <string name="add_device_folder">இந்த சாதனத்திலிருந்து ஒரு கோப்புறையைச் சேர்க்கவும்.</string>
-    <string name="app_storage">பயன்பாட்டு சேமிப்பு</string>
     <string name="modify">தொகு</string>
     <string name="pdf_exported_ok">PDF ஏற்றுமதி செய்யப்பட்டது.</string>
     <string name="diagram_settings">வரைபட அமைப்புகள்</string>
@@ -184,7 +183,6 @@
     <string name="surname_prefix">குடும்பப்பெயர் முன்னொட்டு</string>
     <string name="cited_by">மேற்கோள் காட்டப்பட்டது</string>
     <string name="no">இல்லை</string>
-    <string name="not_granted">%s வழங்கப்படவில்லை.</string>
     <string name="telephone">தொலைபேசி</string>
     <string name="fax">தொலைநகல்</string>
     <string name="date">திகதி</string>
