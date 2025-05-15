@@ -435,8 +435,8 @@ public abstract class DetailActivity extends AppCompatActivity {
             } else if (requestCode == 7047) { // Sets the source that has been chosen in SourcesFragment by SourceCitationActivity
                 ((SourceCitation)object).setRef(data.getStringExtra(Extra.SOURCE_ID));
             }
-            // 'true' indicates to reload both this Detail thanks to the following onRestart(), and all previous activities
-            TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
+            TreeUtil.INSTANCE.save(true, Memory.getLeaderObject()); // Since is in a coroutine, could set Global.edited true too late for onResume
+            Global.edited = true; // For the following onResume
         }
     }
 
@@ -1289,12 +1289,15 @@ public abstract class DetailActivity extends AppCompatActivity {
                 Collections.swap(sourceCitations2, index2, index2 + 1);
                 break;
             case 38: // Delete source citation
-                if (object instanceof Note)
-                    ((Note)object).getSourceCitations().remove(pieceObject);
-                else
-                    ((SourceCitationContainer)object).getSourceCitations().remove(pieceObject);
-                Memory.setInstanceAndAllSubsequentToNull(pieceObject);
-                break;
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    if (object instanceof Note) ((Note)object).getSourceCitations().remove(pieceObject);
+                    else ((SourceCitationContainer)object).getSourceCitations().remove(pieceObject);
+                    Memory.setInstanceAndAllSubsequentToNull(pieceObject);
+                    TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
+                    refresh();
+                    return Unit.INSTANCE;
+                });
+                return true;
             case 40: // Make simple media
                 Object[] modified = MediaUtil.INSTANCE.makeSimpleMedia((Media)pieceObject);
                 TreeUtil.INSTANCE.save(true, modified);
