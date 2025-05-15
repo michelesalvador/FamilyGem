@@ -757,7 +757,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 startActivity(Intent(context, FamilyActivity::class.java))
             } else U.whichParentsToShow(context, person, 2)
         } else if (id == 2) { // Family as spouse
-            U.whichSpousesToShow(context, person, null)
+            U.whichSpousesToShow(context, person)
         } else if (id == 3) { // Link new person
             if (Global.settings.expert) {
                 val dialog = NewRelativeDialog(person, parentFam, spouseFam, true, null)

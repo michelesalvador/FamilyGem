@@ -57,7 +57,7 @@ class FamilyActivity : DetailActivity() {
                 U.whichParentsToShow(this, person, 2)
             } // A child with one or more families in which he is a partner
             else if (relation == Relation.CHILD && spouseFamilies.isNotEmpty()) {
-                U.whichSpousesToShow(this, person, null)
+                U.whichSpousesToShow(this, person)
             } // An unmarried child who has multiple parental families
             else if (parentFamilies.size > 1) {
                 if (parentFamilies.size == 2) { // Swaps between the 2 parental families
@@ -74,7 +74,7 @@ class FamilyActivity : DetailActivity() {
                     val otherFamily = spouseFamilies[if (spouseFamilies.indexOf(family) == 0) 1 else 0]
                     Memory.replaceLeader(otherFamily)
                     recreate()
-                } else U.whichSpousesToShow(this, person, null)
+                } else U.whichSpousesToShow(this, person)
             } else { // Opens person profile
                 Memory.setLeader(person)
                 startActivity(Intent(this, ProfileActivity::class.java))

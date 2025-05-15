@@ -511,7 +511,7 @@ class PersonsFragment : BaseFragment() {
         when (item.itemId) {
             0 -> U.whichParentsToShow(context, person, 1) // Display diagram
             1 -> U.whichParentsToShow(context, person, 2) // Family as child
-            2 -> U.whichSpousesToShow(context, person, null) // Family as partner
+            2 -> U.whichSpousesToShow(context, person) // Family as partner
             3 -> { // Edit person
                 val intent = Intent(context, PersonEditorActivity::class.java)
                 intent.putExtra(Extra.PERSON_ID, person.id)

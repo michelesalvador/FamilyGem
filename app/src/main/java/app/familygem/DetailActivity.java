@@ -1202,7 +1202,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.whichParentsToShow(this, person, 2);
                 return true;
             case 13: // Family (as partner)
-                U.whichSpousesToShow(this, person, null);
+                U.whichSpousesToShow(this, person);
                 return true;
             case 14: // Swap husband and wife
             case 15:

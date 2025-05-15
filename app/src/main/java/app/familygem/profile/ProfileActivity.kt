@@ -488,7 +488,7 @@ class ProfileActivity : AppCompatActivity() {
         when (item.itemId) {
             0 -> U.whichParentsToShow(this, person, 1) // DiagramFragment
             1 -> U.whichParentsToShow(this, person, 2) // Family as child
-            2 -> U.whichSpousesToShow(this, person, null) // Family as partner
+            2 -> U.whichSpousesToShow(this, person) // Family as partner
             3 -> { // Set as root
                 Global.settings.currentTree.root = person?.id
                 Global.settings.save()

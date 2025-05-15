@@ -906,23 +906,23 @@ public class U {
     /**
      * For a person who has multiple marriages asks which one to show.
      */
-    public static void whichSpousesToShow(Context context, Person person, Family family) {
-        if (person.getSpouseFamilies(Global.gc).size() > 1 && family == null) {
+    public static void whichSpousesToShow(Context context, Person person) {
+        if (person.getSpouseFamilies(Global.gc).size() > 1) {
             new AlertDialog.Builder(context).setTitle(R.string.which_family)
                     .setItems(FamilyUtil.INSTANCE.listFamilies(person.getSpouseFamilies(Global.gc)), (dialog, which) -> {
-                        finishSpousesSelection(context, person, null, which);
+                        finishSpousesSelection(context, person, which);
                     }).show();
         } else {
-            finishSpousesSelection(context, person, family, 0);
+            finishSpousesSelection(context, person, 0);
         }
     }
 
-    private static void finishSpousesSelection(Context context, Person person, Family family, int whichFamily) {
+    private static void finishSpousesSelection(Context context, Person person, int whichFamily) {
         Global.indi = person.getId();
-        family = family == null ? person.getSpouseFamilies(Global.gc).get(whichFamily) : family;
+        Family family = person.getSpouseFamilies(Global.gc).get(whichFamily);
         if (context instanceof FamilyActivity) {
             Memory.replaceLeader(family);
-            ((Activity)context).recreate(); // Non accumula activity nello stack
+            ((Activity)context).recreate(); // Does not accumulate activities in the stack
         } else {
             Memory.setLeader(family);
             context.startActivity(new Intent(context, FamilyActivity.class));

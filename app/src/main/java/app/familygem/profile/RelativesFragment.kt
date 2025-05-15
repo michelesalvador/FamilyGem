@@ -364,7 +364,7 @@ class RelativesFragment : BaseFragment() {
             // Person
             310 -> U.whichParentsToShow(context, selected, 1) // Diagram
             311 -> U.whichParentsToShow(context, selected, 2) // Family as child
-            312 -> U.whichSpousesToShow(context, selected, family) // Family as partner
+            312 -> U.whichSpousesToShow(context, selected) // Family as partner
             313 -> { // Edit
                 val intent = Intent(context, PersonEditorActivity::class.java)
                 intent.putExtra(Extra.PERSON_ID, selectedId)
