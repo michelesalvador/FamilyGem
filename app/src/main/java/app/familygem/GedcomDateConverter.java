@@ -308,7 +308,8 @@ public class GedcomDateConverter {
      */
     public int getDateNumber() {
         if (firstDate.date != null && !firstDate.isFormat(Format.D_M)) {
-            return (firstDate.date.getYear() + 1900) * 10000 + (firstDate.date.getMonth() + 1) * 100 + firstDate.date.getDate();
+            int number = (firstDate.date.getYear() + 1900) * 10000 + (firstDate.date.getMonth() + 1) * 100 + firstDate.date.getDate();
+            return firstDate.negative ? -number : number;
         }
         return Integer.MAX_VALUE;
     }

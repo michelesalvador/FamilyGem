@@ -15,6 +15,7 @@ import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Person;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.Years;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +32,8 @@ public class Notifier {
     static final String PERSON_ID_KEY = "targetPersonId";
     static final String CHANNEL_ID = "birthdays";
     private final int FACTOR = 100000;
-    private final Date now = new Date();
+    private final LocalDateTime now = LocalDateTime.now();
+    private final LocalTime notifyTime = LocalTime.parse(Global.settings.notifyTime);
 
     public enum What {REBOOT, UPDATE, CREATE, DELETE, DEFAULT}
 
@@ -60,19 +62,17 @@ public class Notifier {
                 }
                 break;
             case UPDATE: // Updates time of each birthday and recreates alarms for all trees
-                LocalTime newTime = LocalTime.parse(Global.settings.notifyTime);
-                LocalDateTime now = LocalDateTime.now();
                 LocalTime nowTime = now.toLocalTime();
                 for (Settings.Tree tree1 : Global.settings.trees) {
                     if (tree1.settings.customDate) continue;
                     deleteAlarms(context, tree1);
                     for (Settings.Birthday birthday : tree1.birthdays) {
                         // Updates date time to reflect current setting
-                        LocalDateTime dateTime = new LocalDateTime(birthday.date);
-                        dateTime = dateTime.withHourOfDay(newTime.getHourOfDay()).withMinuteOfHour(newTime.getMinuteOfHour());
+                        LocalDateTime dateTime = new LocalDateTime(birthday.date)
+                                .withHourOfDay(notifyTime.getHourOfDay()).withMinuteOfHour(notifyTime.getMinuteOfHour());
                         // Same day than today but different year needs to be updated
                         if (dateTime.dayOfMonth().equals(now.dayOfMonth()) && dateTime.monthOfYear().equals(now.monthOfYear())
-                                && dateTime.getYear() > now.getYear() && newTime.isAfter(nowTime)) {
+                                && dateTime.getYear() > now.getYear() && notifyTime.isAfter(nowTime)) {
                             dateTime = dateTime.withYear(now.getYear());
                             birthday.age -= 1;
                         }
@@ -98,7 +98,7 @@ public class Notifier {
 
     /**
      * Selects people who have to celebrate their birthday and adds them to the settings.
-     * Eventually save settings.
+     * Eventually saves settings.
      */
     void findBirthdays(Gedcom gedcom, Settings.Tree tree) {
         if (tree.birthdays == null)
@@ -108,10 +108,14 @@ public class Notifier {
         for (Person person : gedcom.getPeople()) {
             Date birth = findBirth(person);
             if (birth != null) {
-                int years = findAge(birth, tree);
-                if (years >= 0) {
+                // Calculates the number of years that will be turned on the next birthday
+                LocalDateTime birthDay = new LocalDateTime(birth).withTime(notifyTime.getHourOfDay(), notifyTime.getMinuteOfHour(), 0, 0);
+                LocalDateTime nextBirthday = birthDay.withYear(now.getYear());
+                if (nextBirthday.isBefore(now)) nextBirthday = nextBirthday.plusYears(1);
+                int years = Years.yearsBetween(birthDay, nextBirthday).getYears();
+                if (years >= 0 && years <= tree.settings.lifeSpan) {
                     tree.birthdays.add(new Settings.Birthday(person.getId(), U.givenName(person),
-                            U.properName(person), nextBirthday(birth), years));
+                            U.properName(person), nextBirthday.toDate().getTime(), years));
                 }
             }
         }
@@ -136,31 +140,6 @@ public class Notifier {
     }
 
     /**
-     * Counts the number of years that will be turned on the next birthday.
-     */
-    private int findAge(Date birth, Settings.Tree tree) {
-        int years = now.getYear() - birth.getYear();
-        if (birth.getMonth() < now.getMonth()
-                || (birth.getMonth() == now.getMonth() && birth.getDate() < now.getDate())
-                || (birth.getMonth() == now.getMonth() && birth.getDate() == now.getDate() && now.getHours() >= 12))
-            years++;
-        return years <= tree.settings.lifeSpan ? years : -1;
-    }
-
-    /**
-     * From birth date finds next birthday notification time as long timestamp.
-     */
-    private long nextBirthday(Date birth) {
-        birth.setYear(now.getYear());
-        LocalTime time = LocalTime.parse(Global.settings.notifyTime);
-        birth.setHours(time.getHourOfDay());
-        birth.setMinutes(time.getMinuteOfHour());
-        if (now.after(birth))
-            birth.setYear(now.getYear() + 1);
-        return birth.getTime();
-    }
-
-    /**
      * Generates an alarm from each birthday of the provided tree.
      */
     void createAlarms(Context context, Settings.Tree tree) {
@@ -172,8 +151,9 @@ public class Notifier {
         });
         int eventId = tree.id * FACTOR;  // Different for every tree
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        long nowTime = now.toDate().getTime();
         for (Settings.Birthday birthday : tree.birthdays) {
-            if (birthday.date > now.getTime()) { // Avoid setting alarm for a past birthday
+            if (birthday.date > nowTime) { // Avoids setting alarm for a past birthday
                 Intent intent = new Intent(context, NotifyReceiver.class)
                         .putExtra(Extra.ID, eventId)
                         .putExtra(Extra.TITLE, birthday.name + " (" + tree.title + ")")

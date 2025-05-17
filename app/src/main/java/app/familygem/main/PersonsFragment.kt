@@ -52,9 +52,7 @@ import org.joda.time.Years
 import java.util.Locale
 import kotlin.concurrent.timer
 
-/**
- * List of all people of the tree, searchable and sortable.
- */
+/** List of all people of the tree, searchable and sortable. */
 class PersonsFragment : BaseFragment() {
     private val allPeople: MutableList<PersonWrapper> = ArrayList() // The immutable complete list of people
     private var selectedPeople: MutableList<PersonWrapper> = ArrayList() // Some persons selected by the search feature
@@ -274,7 +272,7 @@ class PersonsFragment : BaseFragment() {
     }
 
     private fun sortPeople() {
-        selectedPeople.sortWith { wrapper1: PersonWrapper, wrapper2: PersonWrapper ->
+        selectedPeople.sortWith { wrapper1, wrapper2 ->
             val id1 = wrapper1.person.id
             val id2 = wrapper2.person.id
             return@sortWith when (order) {
@@ -294,9 +292,13 @@ class PersonsFragment : BaseFragment() {
                     else if (wrapper2.name == null) -1
                     else wrapper2.name!!.compareTo(wrapper1.name!!)
                 }
-                Order.DATE_ASC -> wrapper1.date - wrapper2.date
+                Order.DATE_ASC -> {
+                    if (wrapper2.date == Int.MAX_VALUE) -1 // Those without date go to the bottom
+                    else if (wrapper1.date == Int.MAX_VALUE) 1
+                    else wrapper1.date - wrapper2.date
+                }
                 Order.DATE_DESC -> {
-                    if (wrapper1.date == Int.MAX_VALUE) 1 // Those without date go to the bottom
+                    if (wrapper1.date == Int.MAX_VALUE) 1
                     else if (wrapper2.date == Int.MAX_VALUE) -1
                     else wrapper2.date - wrapper1.date
                 }
