@@ -392,6 +392,9 @@
     <string name="empty_name">Empty name</string>
     <string name="months">months</string>
     <string name="days">days</string>
+    <string name="file_exists_reuse">This file already exists.\nDo you want to reuse it or make a copy\?</string>
+    <string name="use_existing">Reuse existing</string>
+    <string name="make_copy">Make a copy</string>
     <string name="want_crop_image">Do you want to crop this image\?</string>
     <string name="no">No</string>
     <string name="empty_media">Empty media</string>

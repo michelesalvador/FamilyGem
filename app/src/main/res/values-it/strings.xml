@@ -417,11 +417,14 @@
     <string name="current_date">Data attuale</string>
     <string name="device_date">Data del dispositivo</string>
     <string name="fixed_date">Data fissa</string>
-    <!-- U -->
+    <!-- Util -->
     <string name="no_name">Senza nome</string>
     <string name="empty_name">Nome vuoto</string>
     <string name="months">mesi</string>
     <string name="days">giorni</string>
+    <string name="file_exists_reuse">Questo file esiste già.\nVuoi riusarlo oppure farne una copia\?</string>
+    <string name="use_existing">Riusa esistente</string>
+    <string name="make_copy">Fai una copia</string>
     <string name="want_crop_image">Vuoi ritagliare questa immagine\?</string>
     <string name="no">No</string>
     <string name="empty_media">Media vuoto</string>

@@ -29,6 +29,7 @@ import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.BuildConfig
 import app.familygem.CropImageActivity
+import app.familygem.DetailActivity
 import app.familygem.Global
 import app.familygem.R
 import app.familygem.constant.Destination
@@ -37,6 +38,8 @@ import app.familygem.constant.FileType
 import app.familygem.constant.Image
 import app.familygem.constant.Type
 import app.familygem.detail.MediaActivity
+import app.familygem.main.MainActivity
+import app.familygem.profile.ProfileActivity
 import app.familygem.visitor.MediaList
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
@@ -161,12 +164,33 @@ object FileUtil {
         } else if (intent?.data != null) {
             val uri = intent.data!!
             val externalFilesDir = context.getExternalFilesDir(Global.settings.openTree.toString())!!
-            val newFile = nextAvailableFileName(externalFilesDir, extractFilename(context, uri, "media file"))
-            context.contentResolver.openInputStream(uri).use { inputStream ->
-                newFile.outputStream().use { inputStream?.copyTo(it) }
+            val filename = extractFilename(context, uri, "media file")
+            val twinFile = File(externalFilesDir, filename)
+            val originFile = DocumentFile.fromSingleUri(context, uri)
+            // If the file already exists proposes to reuse it and returns true
+            if (twinFile.isFile && twinFile.length() == originFile?.length()) {
+                media.file = filename // Sets the origin filename in the media
+                AlertDialog.Builder(context).setTitle(filename).setMessage(R.string.file_exists_reuse)
+                    .setNeutralButton(R.string.use_existing, null)
+                    .setPositiveButton(R.string.make_copy) { _, _ ->
+                        val newFile = twinFile.copyTo(nextAvailableFileName(externalFilesDir, filename))
+                        media.file = newFile.name
+                        TreeUtil.save(true)
+                        when (context) { // Immediately refreshes UI to display new file name
+                            is MainActivity -> context.frontFragment.showContent()
+                            is ProfileActivity -> context.refresh()
+                            is DetailActivity -> context.refresh()
+                        }
+                    }.show()
+                return true
+            } else {
+                val newFile = nextAvailableFileName(externalFilesDir, filename)
+                context.contentResolver.openInputStream(uri).use { inputStream ->
+                    newFile.outputStream().use { inputStream?.copyTo(it) }
+                }
+                media.file = newFile.name
+                newFile
             }
-            media.file = newFile.name // Sets the file name in the media
-            newFile
         } else null
         if (mediaFile != null) {
             // If is an image opens the cropping proposal dialog
