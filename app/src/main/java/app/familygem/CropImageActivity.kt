@@ -7,10 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import app.familygem.constant.Extra
 import app.familygem.databinding.CropImageActivityBinding
-import app.familygem.util.FileUtil
-import app.familygem.util.TreeUtil
 import app.familygem.util.toPxFloat
 import com.bumptech.glide.Glide
 import com.canhub.cropper.CropImageOptions
@@ -23,7 +20,6 @@ import kotlinx.coroutines.withContext
 class CropImageActivity : BaseActivity(), CropImageView.OnSetImageUriCompleteListener, CropImageView.OnCropImageCompleteListener {
 
     private lateinit var imageView: CropImageView
-    private val backIntent = Intent() // Intent to be passed back to previous ImageActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,16 +37,7 @@ class CropImageActivity : BaseActivity(), CropImageView.OnSetImageUriCompleteLis
                         borderCornerOffset = (-3F).toPxFloat()
                     )
                 )
-                // Destination image must be in external app storage
-                val filesDir = getExternalFilesDir(Global.settings.openTree.toString())!!
-                val outputUri = if (imageUri.toString().contains(filesDir.absolutePath)) imageUri
-                else {
-                    val fileName = FileUtil.extractFilename(this@CropImageActivity, imageUri, "image")
-                    val outputFile = FileUtil.nextAvailableFileName(filesDir, fileName)
-                    backIntent.putExtra(Extra.STRING, outputFile.absolutePath) // Updated path for previous ImageActivity
-                    Uri.fromFile(outputFile)
-                }
-                customOutputUri = outputUri
+                customOutputUri = imageUri
                 guidelines = CropImageView.Guidelines.OFF
                 setOnCropImageCompleteListener(this@CropImageActivity)
             }
@@ -66,12 +53,8 @@ class CropImageActivity : BaseActivity(), CropImageView.OnSetImageUriCompleteLis
 
     override fun onCropImageComplete(view: CropImageView, result: CropImageView.CropResult) {
         if (result.isSuccessful) {
-            setResult(RESULT_OK, backIntent) // For previous ImageActivity
-            // In case updates media file path
-            if (Global.croppedMedia.file != result.uriContent?.lastPathSegment) {
-                Global.croppedMedia.file = result.uriContent?.lastPathSegment
-                TreeUtil.save(true, Memory.getLeaderObject())
-            } else Global.edited = true
+            setResult(RESULT_OK, Intent()) // For previous FileActivity
+            Global.edited = true
             lifecycleScope.launch(Dispatchers.IO) {
                 Glide.get(this@CropImageActivity).clearDiskCache()
                 withContext(Dispatchers.Main) { onBackPressedDispatcher.onBackPressed() }

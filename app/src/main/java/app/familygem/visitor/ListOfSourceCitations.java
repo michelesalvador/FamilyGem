@@ -1,5 +1,6 @@
 package app.familygem.visitor;
 
+import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.SourceCitation;
@@ -25,7 +26,7 @@ public class ListOfSourceCitations extends TotalVisitor {
     }
 
     @Override
-    boolean visit(Object object, boolean isLeader) {
+    boolean visit(ExtensionContainer object, boolean isLeader) {
         if (isLeader)
             leader = object;
         if (object instanceof SourceCitationContainer) {

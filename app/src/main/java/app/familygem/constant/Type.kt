@@ -2,7 +2,7 @@ package app.familygem.constant
 
 import app.familygem.util.FileUtil
 
-/** Possible image types resulting by [FileUtil.showImage]. */
+/** Possible file types resulting by [FileUtil.showImage]. */
 enum class Type {
     /** Initial value. */
     NONE,
@@ -10,11 +10,17 @@ enum class Type {
     /** Croppable image. */
     CROPPABLE,
 
-    /** Not croppable preview (video or PDF). */
-    PREVIEW,
+    /** Not croppable video preview. */
+    VIDEO,
+
+    /** Not croppable PDF preview. */
+    PDF,
 
     /** Generic file icon. */
     DOCUMENT,
+
+    /** Image from web. */
+    WEB,
 
     /** Image failed loading. */
     PLACEHOLDER

@@ -310,6 +310,9 @@
     <string name="blob">Blob</string>
     <string name="used_by">Used by</string>
     <string name="into">Inside</string>
+    <string name="copy_app_storage">Copy to app storage</string>
+    <string name="existing_name">Already existing name</string>
+    <string name="invalid_name">Invalid name</string>
     <string name="line_1">Line 1</string>
     <string name="line_2">Line 2</string>
     <string name="line_3">Line 3</string>

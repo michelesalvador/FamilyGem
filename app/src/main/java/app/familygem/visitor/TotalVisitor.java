@@ -2,6 +2,7 @@ package app.familygem.visitor;
 
 import org.folg.gedcom.model.Change;
 import org.folg.gedcom.model.EventFact;
+import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Media;
@@ -21,7 +22,7 @@ import org.folg.gedcom.model.Visitor;
  */
 public abstract class TotalVisitor extends Visitor {
 
-    boolean visit(Object object, boolean isLeader) {
+    boolean visit(ExtensionContainer object, boolean isLeader) {
         return true;
     }
 

@@ -1,5 +1,7 @@
 package app.familygem.visitor;
 
+import org.folg.gedcom.model.ExtensionContainer;
+
 /**
  * Closely connected to {@link FindStack}, locates in the stack the objects to keep or delete.
  */
@@ -13,7 +15,7 @@ class CleanStack extends TotalVisitor {
     }
 
     @Override
-    boolean visit(Object object, boolean isLeader) { // The boolean is unused here
+    boolean visit(ExtensionContainer object, boolean isLeader) { // The boolean is unused here
         if (object.equals(target))
             toDelete = false;
         return true;

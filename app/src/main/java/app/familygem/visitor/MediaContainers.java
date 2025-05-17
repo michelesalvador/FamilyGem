@@ -1,5 +1,6 @@
 package app.familygem.visitor;
 
+import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.MediaContainer;
@@ -26,7 +27,7 @@ public class MediaContainers extends TotalVisitor {
     }
 
     @Override
-    boolean visit(Object object, boolean isLeader) {
+    boolean visit(ExtensionContainer object, boolean isLeader) {
         if (object instanceof MediaContainer) {
             for (MediaRef mediaRef : ((MediaContainer)object).getMediaRefs()) {
                 if (mediaRef.getRef().equals(media.getId())) {

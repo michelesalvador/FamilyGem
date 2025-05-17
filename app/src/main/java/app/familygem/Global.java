@@ -44,9 +44,9 @@ public class Global extends MultiDexApplication {
      */
     public static File cameraDestination;
     /**
-     * Temporary parking of the Media in the cropping process.
+     * Media opened by FileActivity or by CropImageActivity to be viewed and edited.
      */
-    public static Media croppedMedia;
+    public static Media editedMedia;
     /**
      * File path of cropped files to invalidate Glide cache.
      */

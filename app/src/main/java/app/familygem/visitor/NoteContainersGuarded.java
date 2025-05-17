@@ -1,5 +1,6 @@
 package app.familygem.visitor;
 
+import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.NoteRef;
@@ -23,7 +24,7 @@ public class NoteContainersGuarded extends TotalVisitor {
     }
 
     @Override
-    boolean visit(Object object, boolean isLeader) {
+    boolean visit(ExtensionContainer object, boolean isLeader) {
         if (object instanceof NoteContainer) {
             final String GUARDIAN = "modifiedNoteRef";
             for (NoteRef noteRef : ((NoteContainer)object).getNoteRefs()) {

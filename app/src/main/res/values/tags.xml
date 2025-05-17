@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="tag_fulcrum" type="id" />
-    <item name="tag_husband" type="id" />
-    <item name="tag_bond" type="id" />
     <item name="tag_object" type="id" />
     <item name="tag_container" type="id" />
-    <item name="tag_path" type="id" />
-    <item name="tag_uri" type="id" />
     <item name="tag_file_type" type="id" />
     <item name="tag_family" type="id" />
     <item name="tag_family_ref" type="id" />
     <item name="tag_ref" type="id" />
-    <item name="tag_id" type="id" />
     <item name="tag_position" type="id" />
 </resources>

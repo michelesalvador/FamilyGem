@@ -203,7 +203,7 @@ class ProfileActivity : AppCompatActivity() {
             imageView.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     val type = imageView.getTag(R.id.tag_file_type) as Type
-                    if (type == Type.CROPPABLE || type == Type.PREVIEW) {
+                    if (type == Type.CROPPABLE || type == Type.VIDEO || type == Type.PDF || type == Type.WEB) {
                         FileUtil.showImage(media, backImageView, Image.BLUR or Image.DARK)
                         backImageView.visibility = View.VISIBLE
                     } else backImageView.visibility = View.GONE

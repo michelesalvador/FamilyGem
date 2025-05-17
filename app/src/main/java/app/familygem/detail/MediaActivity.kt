@@ -1,19 +1,15 @@
 package app.familygem.detail
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.StrictMode
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
-import androidx.core.content.FileProvider
-import app.familygem.BuildConfig
 import app.familygem.DetailActivity
+import app.familygem.FileActivity
 import app.familygem.Global
-import app.familygem.ImageActivity
 import app.familygem.Memory
 import app.familygem.R
 import app.familygem.constant.Destination
@@ -27,8 +23,6 @@ import app.familygem.util.TreeUtil
 import app.familygem.visitor.MediaReferences
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.MediaContainer
-import java.io.File
-import java.net.URLConnection
 
 class MediaActivity : DetailActivity() {
     lateinit var media: Media
@@ -91,57 +85,19 @@ class MediaActivity : DetailActivity() {
         val imageView = imageLayout.findViewById<ImageView>(R.id.image_picture)
         FileUtil.showImage(media, imageView, 0, imageLayout.findViewById(R.id.image_progress))
         imageLayout.setOnClickListener {
-            val path = imageView.getTag(R.id.tag_path) as String?
-            var uri = imageView.getTag(R.id.tag_uri) as Uri?
-            val fileType = imageView.getTag(R.id.tag_file_type) as Type
-            when (fileType) {
+            when (val fileType = imageView.getTag(R.id.tag_file_type) as Type) {
                 Type.NONE, Type.PLACEHOLDER -> { // Placeholder instead of image, the media is loading or doesn't exist
                     FileUtil.displayFileChooser(this, chooseMediaLauncher)
                 }
-                Type.PREVIEW, Type.DOCUMENT -> { // Opens the media with some other app
-                    if (path != null) {
-                        val file = File(path)
-                        uri = if (isOwnedDirectory(path)) // File provider of its own folders
-                            FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file)
-                        else Uri.fromFile(file)
-                    }
-                    val mimeType = if (uri?.scheme == "content") contentResolver.getType(uri)
-                    else {
-                        // Hack to disable FileUriExposedException on file:// URIs
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            StrictMode::class.java.getMethod("disableDeathOnFileUriExposure").invoke(null)
-                        }
-                        URLConnection.guessContentTypeFromName(uri?.lastPathSegment)
-                    }
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setDataAndType(uri, mimeType)
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Necessary for folders owned by the app (provider)
-                    val resolvers = packageManager.queryIntentActivities(intent, 0)
-                    /* It's possible that the MIME type of some extension (e.g. '.pdf') is properly found,
-                       but maybe there is no any predefined app to open the file */
-                    if (mimeType == null || resolvers.isEmpty()) {
-                        intent.setDataAndType(uri, "*/*") // Ugly list of generic apps
-                    }
-                    startActivity(intent)
-                }
-                else -> { // Proper image that can be zoomed
-                    Global.croppedMedia = `object` as Media?
-                    val intent = Intent(this@MediaActivity, ImageActivity::class.java)
-                    intent.putExtra(Extra.PATH, path)
-                    if (uri != null) intent.putExtra(Extra.URI, uri.toString())
+                else -> { // Opens the file in FileActivity
+                    Global.editedMedia = `object` as Media
+                    val intent = Intent(this@MediaActivity, FileActivity::class.java).putExtra(Extra.TYPE, fileType)
                     startActivity(intent)
                 }
             }
         }
         imageLayout.setTag(R.id.tag_object, 43614 /* TODO: magic number */) // For the image context menu
         registerForContextMenu(imageLayout)
-    }
-
-    /** Checks if a path points to an external storage folder owned by the app. */
-    private fun isOwnedDirectory(path: String): Boolean {
-        if (path.startsWith(getExternalFilesDir(null)!!.absolutePath)) return true
-        for (mediaDir in externalMediaDirs) if (path.startsWith(mediaDir.absolutePath)) return true
-        return false
     }
 
     fun updateImage() {

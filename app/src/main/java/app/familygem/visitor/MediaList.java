@@ -31,8 +31,8 @@ public class MediaList extends Visitor {
      * <ol start="0">
      *     <li>All media
      *     <li>Only shared media
-     *     <li>Only local media (no gedcom needed)
-     *     <li>Shared and local but only previewable images and videos (for the main menu)
+     *     <li>Only local media (no Gedcom needed)
+     *     <li>Shared and local media, but only images and videos with preview (for the main menu)
      * </ol>
      */
     private final int mediaType;
@@ -42,17 +42,14 @@ public class MediaList extends Visitor {
         this.mediaType = mediaType;
     }
 
-    private boolean visita(Object object) {
-        if (object instanceof MediaContainer) {
-            MediaContainer container = (MediaContainer)object;
-            if (mediaType == 0)
-                list.addAll(container.getAllMedia(gedcom)); // Adds shared and local media
-            else if (mediaType == 2)
-                list.addAll(container.getMedia()); // Local media only
-            else if (mediaType == 3)
-                for (Media med : container.getAllMedia(gedcom))
-                    filter(med);
-        }
+    private boolean visitInternal(MediaContainer object) {
+        if (mediaType == 0)
+            list.addAll(object.getAllMedia(gedcom)); // Shared and local media
+        else if (mediaType == 2)
+            list.addAll(object.getMedia()); // Local media only
+        else if (mediaType == 3)
+            for (Media med : object.getAllMedia(gedcom))
+                filter(med);
         return true;
     }
 
@@ -106,32 +103,32 @@ public class MediaList extends Visitor {
     }
 
     @Override
-    public boolean visit(Person p) {
-        return visita(p);
+    public boolean visit(Person person) {
+        return visitInternal(person);
     }
 
     @Override
-    public boolean visit(Family f) {
-        return visita(f);
+    public boolean visit(Family family) {
+        return visitInternal(family);
     }
 
     @Override
-    public boolean visit(EventFact e) {
-        return visita(e);
+    public boolean visit(EventFact eventFact) {
+        return visitInternal(eventFact);
     }
 
     @Override
-    public boolean visit(Name n) {
-        return visita(n);
+    public boolean visit(Name name) {
+        return visitInternal(name);
     }
 
     @Override
-    public boolean visit(SourceCitation c) {
-        return visita(c);
+    public boolean visit(SourceCitation sourceCitation) {
+        return visitInternal(sourceCitation);
     }
 
     @Override
-    public boolean visit(Source s) {
-        return visita(s);
+    public boolean visit(Source source) {
+        return visitInternal(source);
     }
 }

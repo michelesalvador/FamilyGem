@@ -13,6 +13,7 @@
         <!-- PopupMenu, options menu item -->
         <item name="android:itemTextAppearance">@style/AppTheme.BasicText</item>
         <item name="textAppearancePopupMenuHeader">@style/AppTheme.LittleTitle</item>
+        <item name="bottomSheetDragHandleStyle">@style/AppTheme.DragHandle</item>
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
@@ -116,5 +117,10 @@
 
     <style name="AppTheme.NormalButton" parent="AppTheme.ColoredButton">
         <item name="backgroundTint">@drawable/button_background_color</item>
+    </style>
+
+    <style name="AppTheme.DragHandle" parent="Widget.Material3.BottomSheet.DragHandle">
+        <item name="tint">@color/text</item>
+        <item name="android:alpha">0.3</item>
     </style>
 </resources>

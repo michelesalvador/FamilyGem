@@ -196,7 +196,7 @@ object FileUtil {
             // If is an image opens the cropping proposal dialog
             val mimeType = URLConnection.guessContentTypeFromName(mediaFile.name)
             if (mimeType != null && mimeType.startsWith("image/")) {
-                Global.croppedMedia = media // Media parked waiting to be updated with new file path
+                Global.editedMedia = media
                 val alert: Dialog = AlertDialog.Builder(context).setView(R.layout.crop_image_dialog)
                     .setPositiveButton(R.string.yes) { _, _ -> cropImage(context, mediaFile, null) }
                     .setNeutralButton(R.string.no, null).show()
@@ -232,7 +232,7 @@ object FileUtil {
      */
     @JvmOverloads
     fun selectMainImage(
-        person: Person, imageView: ImageView, options: Int = 0, gedcom: Gedcom? = null, treeId: Int = 0, show: Boolean = true
+        person: Person, imageView: ImageView, options: Int = 0, gedcom: Gedcom? = null, treeId: Int? = null, show: Boolean = true
     ): Media? {
         val mediaList = MediaList(gedcom ?: Global.gc, 0)
         person.accept(mediaList)
@@ -254,9 +254,12 @@ object FileUtil {
         return media
     }
 
-    /** Shows a picture with Glide. */
+    /**
+     * Shows a picture with Glide.
+     * @param options Bitwise selection of [Image] constants
+     */
     @JvmOverloads
-    fun showImage(media: Media, imageView: ImageView, options: Int = 0, progressWheel: ProgressBar? = null, treeId: Int = 0) {
+    fun showImage(media: Media, imageView: ImageView, options: Int = 0, progressWheel: ProgressBar? = null, treeId: Int? = null) {
         fun applyOptions(builder: RequestBuilder<Drawable>) {
             if (options and Image.DARK != 0) {
                 imageView.setColorFilter(ContextCompat.getColor(imageView.context, R.color.primary_grayed), PorterDuff.Mode.MULTIPLY)
@@ -266,56 +269,32 @@ object FileUtil {
             }
         }
 
-        fun completeDisplay() {
-            if (progressWheel != null) progressWheel.visibility = View.GONE
+        fun completeDisplay(fileType: Type) {
+            imageView.setTag(R.id.tag_file_type, fileType)
+            progressWheel?.visibility = View.GONE
             imageView.tag = R.id.tag_object // Used by DiagramFragment to check the image finish loading
         }
 
         imageView.setTag(R.id.tag_file_type, Type.NONE)
-        if (progressWheel != null) progressWheel.visibility = View.VISIBLE
+        progressWheel?.visibility = View.VISIBLE
         if (options and Image.GALLERY != 0) { // Regular image inside MediaAdapter
             imageView.scaleType = ImageView.ScaleType.CENTER_CROP
             (imageView.layoutParams as RelativeLayout.LayoutParams).removeRule(RelativeLayout.ABOVE)
         }
-        val treeId = if (treeId == 0) Global.settings.openTree else treeId
-        val path: String? = getPathFromMedia(media, treeId)
-        val uri: Uri? = if (path == null) getUriFromMedia(media, treeId) else null
-        val glide = Glide.with(imageView.context)
-        if (path != null || uri != null) {
-            val pathOrUri = path ?: uri!!.path!! // 'path' or 'uri' one of the 2 is valid, the other is null
-            // PDF preview
-            if (pathOrUri.endsWith(".pdf", true)) {
-                val fileDescriptor = if (path != null) ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
-                else imageView.context.contentResolver.openFileDescriptor(uri!!, "r")
-                var renderer: PdfRenderer? = null
-                var page: PdfRenderer.Page? = null
-                try {
-                    renderer = PdfRenderer(fileDescriptor!!)
-                    page = renderer.openPage(0)
-                    val bitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
-                    // Paints bitmap on white background before rendering
-                    val canvas = Canvas(bitmap)
-                    canvas.drawColor(Color.WHITE)
-                    canvas.drawBitmap(bitmap, 0F, 0F, null)
-                    // Renders PDF page into bitmap
-                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                    val builder = glide.load(bitmap)
-                    applyOptions(builder)
-                    builder.placeholder(R.drawable.image).into(imageView)
-                    imageView.setTag(R.id.tag_file_type, Type.PREVIEW)
-                    imageView.setTag(R.id.tag_path, path)
-                    imageView.setTag(R.id.tag_uri, uri)
-                    return
-                } catch (_: Exception) {
-                } finally {
-                    page?.close()
-                    renderer?.close()
-                    fileDescriptor?.close()
-                    completeDisplay()
-                }
+        val file = getPathFromMedia(media, treeId ?: Global.settings.openTree)?.let { File(it) }
+        val uri = if (file == null) getUriFromMedia(media, treeId ?: Global.settings.openTree) else null
+        val glide = Glide.with(imageView)
+        if (file != null || uri != null) {
+            previewPdf(imageView.context, file, uri).onSuccess { bitmap ->
+                val builder = glide.load(bitmap)
+                applyOptions(builder)
+                builder.placeholder(R.drawable.image).into(imageView)
+                completeDisplay(Type.PDF)
+                return
             }
-            val builder = if (path != null) glide.load(path) else glide.load(uri)
+            val builder = if (file != null) glide.load(file) else glide.load(uri)
             applyOptions(builder)
+            val pathOrUri = file?.path ?: uri!!.path!! // 'file' or 'uri' one of the 2 is valid, the other is null
             if (Global.croppedPaths.contains(pathOrUri)) { // A cropped image needs to be reloaded not from cache
                 builder.signature(ObjectKey(Global.croppedPaths[pathOrUri]!!))
             }
@@ -324,12 +303,9 @@ object FileUtil {
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
                 ): Boolean {
                     // Maybe is a video
-                    val videoExts = arrayOf(".mp4", ".3gp", ".webm", ".mkv")
-                    val imageType = if (videoExts.any { pathOrUri.endsWith(it, true) }) Type.PREVIEW else Type.CROPPABLE
-                    imageView.setTag(R.id.tag_file_type, imageType)
-                    imageView.setTag(R.id.tag_path, path)
-                    imageView.setTag(R.id.tag_uri, uri)
-                    completeDisplay()
+                    val videoExtensions = arrayOf(".mp4", ".3gp", ".webm", ".mkv", ".mpg", ".mov")
+                    val fileType = if (videoExtensions.any { pathOrUri.endsWith(it, true) }) Type.VIDEO else Type.CROPPABLE
+                    completeDisplay(fileType)
                     return false
                 }
 
@@ -337,20 +313,17 @@ object FileUtil {
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                     // A local file with no preview
                     GlobalScope.launch(Dispatchers.Main) {
-                        glide.load(generateIcon(media, pathOrUri, imageView)).into(imageView)
+                        glide.load(generateIcon(imageView.context, media, pathOrUri)).into(imageView)
                     }
                     if (options and Image.GALLERY != 0) { // File icon inside MediaAdapter
                         imageView.scaleType = ImageView.ScaleType.FIT_CENTER
                         (imageView.layoutParams as RelativeLayout.LayoutParams).addRule(RelativeLayout.ABOVE, R.id.media_caption)
                     }
-                    imageView.setTag(R.id.tag_file_type, Type.DOCUMENT)
-                    imageView.setTag(R.id.tag_path, path)
-                    imageView.setTag(R.id.tag_uri, uri)
-                    completeDisplay()
+                    completeDisplay(Type.DOCUMENT)
                     return false
                 }
             }).into(imageView)
-        } else if (media.file != null) { // Path and Uri are both null
+        } else if (media.file != null && media.file.isNotBlank()) { // File and URI are both null
             // Maybe is an image online
             val filePath = media.file
             val builder = glide.load(filePath)
@@ -359,31 +332,59 @@ object FileUtil {
                 override fun onResourceReady(
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
                 ): Boolean {
-                    imageView.setTag(R.id.tag_file_type, Type.CROPPABLE)
-                    imageView.setTag(R.id.tag_path, filePath) // TODO: but CropImage doesn't handle a web URL
-                    completeDisplay()
+                    completeDisplay(Type.WEB)
                     return false
                 }
 
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                    imageView.setTag(R.id.tag_file_type, Type.PLACEHOLDER)
-                    completeDisplay()
+                    completeDisplay(Type.PLACEHOLDER)
                     return false
                 }
             }).into(imageView)
-        } else { // Media file field is null
+        } else { // Media file field is null or blank
             glide.load(R.drawable.image).into(imageView)
-            imageView.setTag(R.id.tag_file_type, Type.PLACEHOLDER)
-            completeDisplay()
+            completeDisplay(Type.PLACEHOLDER)
+        }
+    }
+
+    /**
+     * Previews the first page of a PDF file from file or URI.
+     * @return Result with the PDF bitmap or exception
+     */
+    fun previewPdf(context: Context, file: File?, uri: Uri?): Result<Bitmap> {
+        return try {
+            val pathOrUri = file?.path ?: uri!!.path!!
+            val bitmap = if (pathOrUri.endsWith(".pdf", true)) {
+                val fileDescriptor = if (file != null) ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+                else context.contentResolver.openFileDescriptor(uri!!, "r")
+                fileDescriptor?.use descriptor@{
+                    PdfRenderer(fileDescriptor).use { renderer ->
+                        renderer.openPage(0).use { page ->
+                            val pdfBitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
+                            // Paints bitmap on white background before rendering
+                            val canvas = Canvas(pdfBitmap)
+                            canvas.drawColor(Color.WHITE)
+                            canvas.drawBitmap(pdfBitmap, 0F, 0F, null)
+                            // Renders PDF page into bitmap
+                            page.render(pdfBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                            return@descriptor pdfBitmap
+                        }
+                    }
+                }
+                generateIcon(context, null, pathOrUri) // Fallback bitmap
+            } else throw Exception("Not a PDF")
+            Result.success(bitmap)
+        } catch (exception: Exception) {
+            Result.failure(exception)
         }
     }
 
     /** Creates a bitmap of a file icon with the format overwritten. */
-    private fun generateIcon(media: Media, pathOrUri: String, imageView: ImageView): Bitmap {
-        var format = media.format
+    fun generateIcon(context: Context, media: Media?, pathOrUri: String): Bitmap {
+        var format = media?.format
         if (format == null) // Removes any character that does not make find the file extension
             format = MimeTypeMap.getFileExtensionFromUrl(pathOrUri.replace("[^a-zA-Z0-9./]".toRegex(), "_"))
-        val inflater = imageView.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val inflated = inflater.inflate(R.layout.media_file, null)
         val frameLayout = inflated.findViewById<RelativeLayout>(R.id.icona)
         frameLayout.findViewById<TextView>(R.id.media_text).text = format
@@ -426,15 +427,27 @@ object FileUtil {
     fun getUriFromMedia(media: Media, treeId: Int): Uri? {
         val file = media.file
         if (file != null && file.isNotBlank()) {
-            // OBJE.FILE is never a Uri, always a file path (Windows or Android) or a single filename
-            val filename = File(file.replace("\\", "/")).name
+            // In Family Gem OBJE.FILE is never a Uri: it's always a file path (Windows or Android) or a single filename
+            val segments = file.replace('\\', '/').split('/')
             for (uri in Global.settings.getTree(treeId).uris.filterNot { it == null }) {
-                val documentDir = DocumentFile.fromTreeUri(Global.context, Uri.parse(uri))
-                val docFile = documentDir!!.findFile(filename)
-                if (docFile != null && docFile.isFile) return docFile.uri
+                var documentDir = DocumentFile.fromTreeUri(Global.context, Uri.parse(uri))
+                for (segment in segments) {
+                    val test = documentDir?.findFile(segment)
+                    if (test?.isDirectory == true) documentDir = test
+                    else if (test?.isFile == true) return test.uri
+                    else break
+                }
             }
         }
         return null
+    }
+
+    /** Checks if a file points to an external storage folder owned by the app. */
+    fun isOwnedDirectory(context: Context, file: File): Boolean {
+        val path = file.absolutePath
+        for (fileDir in context.getExternalFilesDirs(null).map { it.absolutePath }) if (path.startsWith(fileDir)) return true
+        for (mediaDir in context.externalMediaDirs.map { it.absolutePath }) if (path.startsWith(mediaDir)) return true
+        return false
     }
 
     /** Opens the Storage Access Framework to save a document (PNG, PDF, GEDCOM, ZIP). */

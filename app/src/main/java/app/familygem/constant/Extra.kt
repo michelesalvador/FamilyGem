@@ -16,7 +16,6 @@ object Extra {
     const val MEDIA_ID = "$PREFIX.mediaId"
     const val NOTE_ID = "$PREFIX.noteId"
     const val PAGE = "$PREFIX.page"
-    const val PATH = "$PREFIX.path"
     const val PERSON_ID = "$PREFIX.personId"
     const val POSITION = "$PREFIX.position"
     const val RELATION = "$PREFIX.relation"
@@ -27,5 +26,5 @@ object Extra {
     const val TITLE = "$PREFIX.title"
     const val TREE_ID = "$PREFIX.treeId"
     const val TREE_ID_2 = "$PREFIX.treeId2"
-    const val URI = "$PREFIX.uri"
+    const val TYPE = "$PREFIX.type"
 }

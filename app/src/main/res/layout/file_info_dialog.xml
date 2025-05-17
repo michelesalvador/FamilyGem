@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/back_element"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:theme="@style/AppTheme">
+
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:layout_width="match_parent"
+        android:layout_height="30dp" />
+
+    <TextView
+        android:id="@+id/fileInfo_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="/storage/emulated/0/Android/app.familygem/files/123/my image.jpg" />
+
+    <TextView
+        android:id="@+id/fileInfo_dimensions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:visibility="gone"
+        tools:text="1000×500 pixel" />
+
+    <TextView
+        android:id="@+id/fileInfo_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:paddingBottom="30dp"
+        tools:text="123 MB" />
+</LinearLayout>

@@ -25,8 +25,11 @@ public class MediaContainerList extends Visitor {
 
     public List<MedCont> mediaList = new ArrayList<>();
     private Gedcom gedcom;
-    private boolean requestAll; // Asks to list all media (even local), otherwise the shared media objects only
+    private final boolean requestAll;
 
+    /**
+     * @param requestAll Asks to list all media (even local), otherwise the shared media objects only
+     */
     public MediaContainerList(Gedcom gedcom, boolean requestAll) {
         this.gedcom = gedcom;
         this.requestAll = requestAll;

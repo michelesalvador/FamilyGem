@@ -1,10 +1,7 @@
 package app.familygem
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
@@ -16,13 +13,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.constant.Extra
+import app.familygem.util.FileUtil
 import app.familygem.util.Util
+import java.io.File
 
-/** Here user can set the list of media folders. */
+/** Activity where user can set the list of media folders. */
 class MediaFoldersActivity : BaseActivity() {
 
     private var treeId: Int = 0
@@ -39,50 +36,28 @@ class MediaFoldersActivity : BaseActivity() {
         updateList()
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         findViewById<View>(R.id.fab).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) checkPermissions() else chooseFolder()
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            chooseLauncher.launch(intent)
         }
         if (Global.settings.getTree(treeId).dirs.isEmpty() && Global.settings.getTree(treeId).uris.isEmpty())
             SpeechBubble(this, R.string.add_device_folder).show()
     }
 
-    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        var granted = true
-        permissions.entries.forEach {
-            granted = it.value and granted
-        }
-        if (granted) chooseFolder()
-        else AlertDialog.Builder(this).setMessage(getString(R.string.not_granted_add_folder))
-            .setPositiveButton(R.string.yes) { _, _ -> chooseFolder() }
-            .setNeutralButton(R.string.cancel, null).show()
-    }
-
-    private fun checkPermissions() {
-        val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO)
-        } else {
-            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        var result = PackageManager.PERMISSION_GRANTED
-        for (permission in requiredPermissions) {
-            result = result or ContextCompat.checkSelfPermission(this, permission)
-        }
-        if (result == PackageManager.PERMISSION_GRANTED) chooseFolder()
-        else if (result == PackageManager.PERMISSION_DENIED) permissionLauncher.launch(requiredPermissions)
-    }
-
-    /** Manages a folder chosen with SAF. */
+    /** Saves a folder chosen with SAF in directory or URI list. */
     private val chooseLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
             if (uri != null) {
                 val path = getFolderPathFromUri(uri)
-                if (path != null) {
+                if (path != null && FileUtil.isOwnedDirectory(this, File(path))) {
                     if (!dirs.contains(path)) {
                         dirs.add(path)
                         save()
                     } else Toast.makeText(this, "Already listed.", Toast.LENGTH_LONG).show()
                 } else {
-                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     val docDir = DocumentFile.fromTreeUri(this, uri)
                     if (docDir != null && docDir.canRead()) {
                         if (!uris.contains(uri.toString())) {
@@ -103,7 +78,7 @@ class MediaFoldersActivity : BaseActivity() {
         val treeDocId = DocumentsContract.getTreeDocumentId(uri)
         when (uri.authority) {
             "com.android.externalstorage.documents" -> {
-                val split = treeDocId.split(":".toRegex()).dropLastWhile { it.isEmpty() } //.toTypedArray()
+                val split = treeDocId.split(":".toRegex()).dropLastWhile { it.isEmpty() }
                 var path: String? = null
                 if (split[0].equals("primary", true)) { // Main storage
                     path = Environment.getExternalStorageDirectory().absolutePath
@@ -133,21 +108,14 @@ class MediaFoldersActivity : BaseActivity() {
         return null
     }
 
-    /** Launches SAF to choose a folder. */
-    private fun chooseFolder() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        chooseLauncher.launch(intent)
-    }
-
     private fun updateList() {
         val layout = findViewById<LinearLayout>(R.id.mediaFolders_list)
         layout.removeAllViews()
         dirs.forEach { dir ->
             val folderView = layoutInflater.inflate(R.layout.media_folder_item, layout, false)
             layout.addView(folderView)
-            folderView.findViewById<TextView>(R.id.mediaFolder_name).text = getFolderName(dir)
+            val name = if (dir.lastIndexOf('/') > 0) dir.substring(dir.lastIndexOf('/') + 1) else dir
+            folderView.findViewById<TextView>(R.id.mediaFolder_name).text = name
             val urlView = folderView.findViewById<TextView>(R.id.mediaFolder_url)
             urlView.text = dir
             if (Global.settings.expert) urlView.isSingleLine = false
@@ -164,7 +132,7 @@ class MediaFoldersActivity : BaseActivity() {
             DocumentFile.fromTreeUri(this, uri)?.let { documentDir ->
                 val uriView = layoutInflater.inflate(R.layout.media_folder_item, layout, false)
                 layout.addView(uriView)
-                uriView.findViewById<TextView>(R.id.mediaFolder_name).text = documentDir.name
+                uriView.findViewById<TextView>(R.id.mediaFolder_name).text = documentDir.name ?: "[${getString(R.string.no_name)}]"
                 val urlView = uriView.findViewById<TextView>(R.id.mediaFolder_url)
                 if (Global.settings.expert) urlView.isSingleLine = false
                 urlView.text = Uri.decode(uriString) // Shows it decoded, a little more readable
@@ -180,7 +148,7 @@ class MediaFoldersActivity : BaseActivity() {
                                 }
                             }
                         }
-                        if (!uriExistsElsewhere) revokeUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        if (!uriExistsElsewhere) revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                         uris.remove(uriString)
                         save()
                     }
@@ -188,11 +156,6 @@ class MediaFoldersActivity : BaseActivity() {
                 registerForContextMenu(uriView)
             }
         }
-    }
-
-    private fun getFolderName(url: String): String {
-        return if (url.lastIndexOf('/') > 0) url.substring(url.lastIndexOf('/') + 1)
-        else url
     }
 
     private fun save() {
@@ -212,7 +175,7 @@ class MediaFoldersActivity : BaseActivity() {
 
     private lateinit var selectedView: View
 
-    override fun onCreateContextMenu(menu: ContextMenu, view: View, info: ContextMenuInfo) {
+    override fun onCreateContextMenu(menu: ContextMenu, view: View, info: ContextMenuInfo?) {
         selectedView = view
         menu.add(0, 0, 0, R.string.copy)
     }

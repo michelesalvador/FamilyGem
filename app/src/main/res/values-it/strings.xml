@@ -333,6 +333,10 @@
     <string name="blob">Blob</string>
     <string name="used_by">Usato da</string>
     <string name="into">Dentro a</string>
+    <!-- FileActivity -->
+    <string name="copy_app_storage">Copia nella memoria dell\'app</string>
+    <string name="existing_name">Nome già esistente</string>
+    <string name="invalid_name">Nome non valido</string>
     <!-- AddressActivity -->
     <string name="line_1">Linea 1</string>
     <string name="line_2">Linea 2</string>
