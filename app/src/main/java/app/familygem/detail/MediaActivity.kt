@@ -35,7 +35,7 @@ class MediaActivity : DetailActivity() {
             else intent.getSerializableExtra(Extra.DESTINATION) as Destination?
         if (destination != null) {
             val media: Media
-            if (destination == Destination.LOCAL_MEDIA) { // Simple media
+            if (destination == Destination.SIMPLE_MEDIA) { // Simple media
                 media = Media()
                 media.fileTag = "FILE"
                 (Memory.getLastObject() as MediaContainer).addMedia(media)

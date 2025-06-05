@@ -70,7 +70,7 @@ object MediaUtil {
      * @return An array of modified leader objects plus the media itself
      */
     fun makeSharedMedia(media: Media): Array<Any> {
-        val mediaList = MediaList(null, 2)
+        val mediaList = MediaList(null, MediaList.Request.SIMPLE_MEDIA)
         Global.gc.accept(mediaList)
         val newId = U.newID(Global.gc, Media::class.java)
         val leaders = mutableSetOf<Any>()
@@ -103,7 +103,7 @@ object MediaUtil {
     }
 
     /**
-     * Deletes a shared or local media and removes the references in container records.
+     * Deletes a shared or simple media and removes the references in container records.
      * @return An array with the modified leader objects
      */
     fun deleteMedia(media: Media): Array<Any> {
@@ -112,7 +112,7 @@ object MediaUtil {
             Global.gc.media.remove(media)
             val references = MediaReferences(Global.gc, media, true) // Delete references in all containers
             references.leaders.toTypedArray()
-        } else { // Local Media
+        } else { // Simple Media
             val stack = FindStack(Global.gc, media, false) // The stack of the media provides container and leader object
             val container = stack.containerObject as MediaContainer
             container.media.remove(media)

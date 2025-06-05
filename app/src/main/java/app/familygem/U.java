@@ -86,7 +86,6 @@ import app.familygem.detail.FamilyActivity;
 import app.familygem.detail.SourceCitationActivity;
 import app.familygem.main.DiagramFragment;
 import app.familygem.main.MainActivity;
-import app.familygem.main.MediaAdapter;
 import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
 import app.familygem.profile.ProfileActivity;
@@ -729,13 +728,14 @@ public class U {
     public static void placeMedia(LinearLayout layout, MediaContainer container, boolean detailed) {
         List<Media> allMedia = container.getAllMedia(Global.gc);
         if (!allMedia.isEmpty()) {
-            RecyclerView recyclerView = new MediaAdapter.UnclickableRecyclerView(layout.getContext(), detailed);
+            RecyclerView recyclerView = detailed ? new RecyclerView(layout.getContext())
+                    : new MediaAdapter.UnclickableRecyclerView(layout.getContext());
             recyclerView.setHasFixedSize(true);
             RecyclerView.LayoutManager layoutManager = new GridLayoutManager(layout.getContext(), detailed ? 2 : 3);
             recyclerView.setLayoutManager(layoutManager);
-            List<MediaContainerList.MedCont> mediaList = new ArrayList<>();
+            List<MediaContainerList.MediaWrapper> mediaList = new ArrayList<>();
             for (Media media : allMedia)
-                mediaList.add(new MediaContainerList.MedCont(media, container));
+                mediaList.add(new MediaContainerList.MediaWrapper(media, container));
             MediaAdapter adapter = new MediaAdapter(mediaList, detailed);
             recyclerView.setAdapter(adapter);
             layout.addView(recyclerView);

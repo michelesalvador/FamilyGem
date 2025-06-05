@@ -23,10 +23,13 @@ import app.familygem.R
 import app.familygem.TreesActivity
 import app.familygem.U
 import app.familygem.constant.Choice
+import app.familygem.constant.Extra
 import app.familygem.constant.Image
 import app.familygem.databinding.MainActivityBinding
+import app.familygem.detail.MediaActivity
 import app.familygem.util.FileUtil.showImage
 import app.familygem.util.TreeUtil
+import app.familygem.visitor.FindStack
 import app.familygem.visitor.MediaList
 import app.familygem.visitor.NoteList
 import com.google.android.material.navigation.NavigationView
@@ -203,17 +206,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         imageView.visibility = ImageView.GONE
         mainTitle.text = ""
         if (Global.gc != null) {
-            val mediaList = MediaList(Global.gc, 3)
+            val mediaList = MediaList(Global.gc)
             Global.gc.accept(mediaList)
-            if (mediaList.list.isNotEmpty()) {
-                val media = mediaList.list.random()
+            mediaList.getRandomPreviewMedia()?.let { media ->
                 showImage(media, imageView, Image.DARK)
+                // TODO Visible and clickable only if not Type.PLACEHOLDER nor Type.DOCUMENT
                 imageView.visibility = ImageView.VISIBLE
+                imageView.setOnClickListener {
+                    FindStack(Global.gc, media, true)
+                    val intent = Intent(this, MediaActivity::class.java)
+                    if (media.id == null) intent.putExtra(Extra.ALONE, true) // Simple Media always display cabinet
+                    startActivity(intent)
+                }
             }
             mainTitle.text = Global.settings.currentTree.title
             if (Global.settings.expert) {
                 val treeNumView = menuHeader.findViewById<TextView>(R.id.menuHeader_number)
-                treeNumView.text = Global.settings.openTree.toString()
+                treeNumView.text = "${Global.settings.openTree}"
                 treeNumView.visibility = ImageView.VISIBLE
             }
             // Puts count of existing records in menu items
@@ -223,7 +232,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     1 -> count = Global.gc.people.size
                     2 -> count = Global.gc.families.size
                     3 -> {
-                        val mediaList1 = MediaList(Global.gc, 0)
+                        val mediaList1 = MediaList(Global.gc)
                         Global.gc.accept(mediaList1)
                         count = mediaList1.list.size
                     }

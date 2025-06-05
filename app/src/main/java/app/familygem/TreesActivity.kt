@@ -893,7 +893,7 @@ class TreesActivity : AppCompatActivity() {
         }
 
         // Adds a 'FILE' tag to media that don't have it
-        val mediaList = MediaList(gedcom, 0)
+        val mediaList = MediaList(gedcom)
         gedcom.accept(mediaList)
         mediaList.list.forEach {
             if (it.fileTag == null) {

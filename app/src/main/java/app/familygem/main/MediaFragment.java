@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.folg.gedcom.model.Media;
 
 import app.familygem.Global;
+import app.familygem.MediaAdapter;
 import app.familygem.MediaFoldersActivity;
 import app.familygem.R;
 import app.familygem.constant.Choice;

@@ -6,8 +6,6 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.ParcelFileDescriptor
-import android.provider.DocumentsContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.Formatter
@@ -32,8 +30,6 @@ import app.familygem.Logger.l
 import app.familygem.constant.Extra
 import app.familygem.constant.Type
 import app.familygem.util.FileUtil
-import app.familygem.util.FileUtil.getPathFromMedia
-import app.familygem.util.FileUtil.getUriFromMedia
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.visitor.MediaLeaders
@@ -50,14 +46,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.folg.gedcom.model.NoteContainer
-import java.io.File
 import java.net.URL
 
 /** Activity to display and manage any file. */
 class FileActivity : AppCompatActivity() {
 
-    private var file: File? = null
-    private var uri: Uri? = null
+    private lateinit var fileUri: FileUri
     private lateinit var wheel: ProgressBar
     private var type: Type = Type.NONE
     private var name = ""
@@ -76,15 +70,13 @@ class FileActivity : AppCompatActivity() {
     private fun displayImage() {
         wheel.visibility = View.VISIBLE
         val media = Global.editedMedia
-        file = getPathFromMedia(media, Global.settings.openTree)?.let { File(it) }
-        if (file == null) uri = getUriFromMedia(media, Global.settings.openTree)
-        val resource: Any = if (file != null || uri != null) {
-            val fileUri = file?.let { Uri.fromFile(it) } ?: uri!!
-            name = FileUtil.extractFilename(this, fileUri, "")
+        fileUri = FileUri(this, media)
+        val resource: Any = if (fileUri.exists()) {
+            name = fileUri.name!!
             when (type) {
-                Type.DOCUMENT -> FileUtil.generateIcon(this, media, fileUri.path!!)
-                Type.PDF -> FileUtil.previewPdf(this, file, uri).getOrElse { R.drawable.image }
-                else -> file ?: uri!!
+                Type.DOCUMENT -> FileUtil.generateIcon(this, fileUri)
+                Type.PDF -> FileUtil.previewPdf(this, fileUri).getOrElse { R.drawable.image }
+                else -> fileUri.file ?: fileUri.uri!!
             }
         } else if (type == Type.WEB) {
             name = URLUtil.guessFileName(media.file, null, null)
@@ -108,18 +100,17 @@ class FileActivity : AppCompatActivity() {
                 return false
             }
         })
-        if (file != null || uri != null) {
-            val pathOrUri = file?.path ?: uri!!.path!!
-            if (Global.croppedPaths.contains(pathOrUri)) {
-                builder.signature(ObjectKey(Global.croppedPaths[pathOrUri]!!)) // Clears Glide cache
+        if (fileUri.exists()) {
+            if (Global.croppedPaths.contains(fileUri.path)) {
+                builder.signature(ObjectKey(Global.croppedPaths[fileUri.path]!!)) // Clears Glide cache
             }
         }
         val zoomImage = findViewById<GlideZoomImageView>(R.id.file_zoomImage)
         builder.into(zoomImage)
         zoomImage.setOnClickListener { // Opens the file with some other app
-            val dataUri = if (file != null) FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", file!!)
+            val dataUri = if (fileUri.file != null) FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", fileUri.file!!)
             else if (type == Type.WEB) Uri.parse(Global.editedMedia.file)
-            else uri!!
+            else fileUri.uri!!
             val mimeType = contentResolver.getType(dataUri)
             val intent = Intent(Intent.ACTION_VIEW)
             intent.setDataAndType(dataUri, mimeType)
@@ -139,7 +130,7 @@ class FileActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.add(0, 0, 0, R.string.tree_info)
-        if (file == null || !FileUtil.isOwnedDirectory(this, file!!)) menu.add(0, 1, 0, R.string.copy_app_storage)
+        if (fileUri.file == null || !FileUtil.isOwnedDirectory(this, fileUri.file!!)) menu.add(0, 1, 0, R.string.copy_app_storage)
         if (name.isNotEmpty() && type != Type.WEB) menu.add(0, 2, 0, R.string.rename)
         if (type == Type.CROPPABLE) menu.add(0, 3, 0, R.string.crop)
         if (type != Type.WEB) menu.add(0, 4, 0, R.string.delete)
@@ -153,26 +144,27 @@ class FileActivity : AppCompatActivity() {
                 wheel.visibility = View.VISIBLE
                 lifecycleScope.launch(Dispatchers.IO) {
                     val newFile = FileUtil.nextAvailableFileName(getExternalFilesDir(Global.settings.openTree.toString())!!, name)
-                    if (file != null) {
-                        file = file!!.copyTo(newFile)
-                    } else if (uri != null) {
-                        contentResolver.openInputStream(uri!!).use { inputStream ->
+                    val copied = if (fileUri.file != null) {
+                        fileUri.file!!.copyTo(newFile)
+                        true
+                    } else if (fileUri.uri != null) {
+                        contentResolver.openInputStream(fileUri.uri!!).use input@{ inputStream ->
                             newFile.outputStream().use {
                                 inputStream?.copyTo(it)
-                                uri = null
-                                file = newFile
+                                return@input true
                             }
                         }
                     } else if (type == Type.WEB) {
-                        URL(Global.editedMedia.file).openStream().use { inputStream ->
+                        URL(Global.editedMedia.file).openStream().use stream@{ inputStream ->
                             newFile.outputStream().use {
                                 inputStream?.copyTo(it)
                                 type = Type.CROPPABLE
-                                file = newFile
+                                return@stream true
                             }
                         }
-                    }
-                    val message = if (file == newFile) {
+                    } else false
+                    val message = if (copied) {
+                        fileUri.file = newFile
                         val modified = updateFileOccurrences(newFile.name)
                         if (modified.isNotEmpty()) {
                             name = newFile.name
@@ -189,16 +181,9 @@ class FileActivity : AppCompatActivity() {
                 }
             }
             2 -> renameFile()
-            3 -> FileUtil.cropImage(this, file, uri, cropLauncher)
+            3 -> FileUtil.cropImage(this, fileUri.file, fileUri.uri, cropLauncher)
             4 -> Util.confirmDelete(this) { // Delete file
-                var deleted = false
-                if (file != null) {
-                    deleted = file?.delete() == true
-                } else if (uri != null) {
-                    val document = DocumentFile.fromSingleUri(this, uri!!)
-                    // On Android 9 (emulator) deletes the file but throws also FileNotFoundException
-                    deleted = document?.delete() == true
-                }
+                val deleted = fileUri.delete()
                 Toast.makeText(this, if (deleted) "File deleted." else "Unable to delete file.", Toast.LENGTH_LONG).show()
                 if (deleted) {
                     Global.edited = true
@@ -217,16 +202,13 @@ class FileActivity : AppCompatActivity() {
             dialog.setContentView(R.layout.file_info_dialog)
             val urlView = dialog.findViewById<TextView>(R.id.fileInfo_url)
             val sizeView = dialog.findViewById<TextView>(R.id.fileInfo_size)
-            if (file != null || uri != null) {
-                urlView?.text = file?.absolutePath ?: if (Global.settings.expert) Uri.decode(uri?.toString()) else uri?.lastPathSegment
+            if (fileUri.exists()) {
+                urlView?.text = if (Global.settings.expert) fileUri.path else fileUri.name
                 if (type == Type.CROPPABLE) {
                     // Finds image dimensions in pixels
                     val options = BitmapFactory.Options()
                     options.inJustDecodeBounds = true
-                    val descriptor = if (file != null) ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-                    else if (uri != null) contentResolver.openFileDescriptor(uri!!, "r")
-                    else null
-                    descriptor?.use {
+                    fileUri.fileDescriptor?.use { descriptor ->
                         BitmapFactory.decodeFileDescriptor(descriptor.fileDescriptor, null, options)
                         dialog.findViewById<TextView>(R.id.fileInfo_dimensions)?.apply {
                             text = "${options.outWidth} × ${options.outHeight} px"
@@ -234,7 +216,7 @@ class FileActivity : AppCompatActivity() {
                         }
                     }
                 }
-                val bytes = file?.length() ?: DocumentFile.fromSingleUri(this, uri!!)?.length() ?: 0
+                val bytes = fileUri.file?.length() ?: DocumentFile.fromSingleUri(this, fileUri.uri!!)?.length() ?: 0
                 sizeView?.text = Formatter.formatFileSize(this, bytes)
             } else if (type == Type.WEB) {
                 urlView?.text = Global.editedMedia.file
@@ -262,21 +244,13 @@ class FileActivity : AppCompatActivity() {
                 try {
                     val newName = inputField.text.toString().trim()
                     if (newName == oldName) return@setPositiveButton
-                    var renamed = false
-                    if (file != null) {
-                        renamed = file?.renameTo(File(file?.parentFile, newName)) == true
-                    } else if (uri != null) {
-                        // On Android 9 (emulator) renames the file but throws also FileNotFoundException
-                        DocumentsContract.renameDocument(contentResolver, uri!!, newName)?.let { renamed = true }
-                    }
-                    if (renamed) {
+                    if (fileUri.rename(newName)) {
                         val modified = updateFileOccurrences(newName)
                         TreeUtil.save(true, *modified)
                         displayImage()
                     } else throw Exception()
                 } catch (exception: Exception) {
                     Toast.makeText(this, exception.message ?: "Unable to rename file.", Toast.LENGTH_LONG).show()
-                    exception.printStackTrace()
                 }
             }.setNeutralButton(R.string.cancel, null).show()
         // Focus on input
@@ -288,10 +262,10 @@ class FileActivity : AppCompatActivity() {
             inputMethodManager.showSoftInput(inputField, InputMethodManager.SHOW_IMPLICIT)
         }, 300)
         // New name validation
-        val filenames = if (file != null) {
-            file!!.parentFile!!.list()!!.map { it.lowercase() }
-        } else if (uri != null) {
-            val folderUri = Global.settings.currentTree.uris.first { uri!!.toString().startsWith(it) }
+        val filenames = if (fileUri.file != null) {
+            fileUri.file!!.parentFile!!.list()!!.map { it.lowercase() }
+        } else if (fileUri.uri != null) {
+            val folderUri = Global.settings.currentTree.uris.first { fileUri.uri!!.toString().startsWith(it) }
             DocumentFile.fromTreeUri(context, Uri.parse(folderUri))!!.listFiles().map { it.name!!.lowercase() }
         } else {
             emptyList()
@@ -324,14 +298,15 @@ class FileActivity : AppCompatActivity() {
     }
 
     /**
-     * Replaces the file name in all Media which equal to [Global.editedMedia].
-     * @return Array of objects modified to update the file name.
+     * Replaces the file link in all Media which equal to [Global.editedMedia].
+     * @return Array of objects modified on updating the file link.
      */
     private fun updateFileOccurrences(newName: String): Array<NoteContainer> {
-        val mediaVisitor = MediaLeaders(Global.gc)
+        val mediaVisitor = MediaLeaders()
         Global.gc.accept(mediaVisitor)
-        val mediaList = mediaVisitor.list.filter { it.first.file == Global.editedMedia.file && it.first.file != newName }
-        mediaList.forEach { it.first.file = newName }
+        val finalPath = if (fileUri.relative) Global.editedMedia.file.replaceAfterLast('/', newName) else newName
+        val mediaList = mediaVisitor.list.filter { it.first.file == Global.editedMedia.file && it.first.file != finalPath }
+        mediaList.forEach { it.first.file = finalPath }
         return mediaList.map { it.second }.toTypedArray()
     }
 }

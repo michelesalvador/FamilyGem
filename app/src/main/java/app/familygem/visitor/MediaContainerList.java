@@ -1,6 +1,7 @@
 package app.familygem.visitor;
 
 import org.folg.gedcom.model.EventFact;
+import org.folg.gedcom.model.ExtensionContainer;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.Media;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import app.familygem.FileUri;
 import app.familygem.profile.MediaFragment;
 
 /**
@@ -23,7 +25,7 @@ import app.familygem.profile.MediaFragment;
  */
 public class MediaContainerList extends Visitor {
 
-    public List<MedCont> mediaList = new ArrayList<>();
+    public List<MediaWrapper> mediaList = new ArrayList<>();
     private Gedcom gedcom;
     private final boolean requestAll;
 
@@ -35,13 +37,12 @@ public class MediaContainerList extends Visitor {
         this.requestAll = requestAll;
     }
 
-    private boolean visitInternal(Object object) {
-        if (requestAll && object instanceof MediaContainer) {
-            MediaContainer container = (MediaContainer)object;
-            for (Media media : container.getAllMedia(gedcom)) { // Media objects and local media of each record
-                MedCont medCont = new MedCont(media, object);
-                if (!mediaList.contains(medCont))
-                    mediaList.add(medCont);
+    private boolean visitInternal(MediaContainer object) {
+        if (requestAll) {
+            for (Media media : object.getAllMedia(gedcom)) { // Shared and simple Media of object
+                MediaWrapper wrapper = new MediaWrapper(media, object);
+                if (!mediaList.contains(wrapper))
+                    mediaList.add(wrapper);
             }
         }
         return true;
@@ -50,7 +51,7 @@ public class MediaContainerList extends Visitor {
     @Override
     public boolean visit(Gedcom gedcom) {
         for (Media media : gedcom.getMedia())
-            mediaList.add(new MedCont(media, gedcom)); // Collects the media objects
+            mediaList.add(new MediaWrapper(media, gedcom)); // Collects the shared media
         if (this.gedcom == null) this.gedcom = gedcom; // Just in case
         return true;
     }
@@ -88,18 +89,19 @@ public class MediaContainerList extends Visitor {
     /**
      * Class representing a Media with its container object.
      */
-    static public class MedCont {
+    static public class MediaWrapper {
         public Media media;
-        public Object container;
+        public ExtensionContainer container;
+        public FileUri fileUri;
 
-        public MedCont(Media media, Object container) {
+        public MediaWrapper(Media media, ExtensionContainer container) {
             this.media = media;
             this.container = container;
         }
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof MedCont && media.equals(((MedCont)o).media);
+            return o instanceof MediaWrapper && media.equals(((MediaWrapper)o).media);
         }
 
         @Override

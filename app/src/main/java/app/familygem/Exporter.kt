@@ -122,13 +122,9 @@ class Exporter(private val context: Context, private val progressView: ProgressV
 
     /** @return The number of media files to attach into the ZIP file */
     fun countMediaFilesToAttach(): Int {
-        val mediaList = MediaList(gedcom, 0)
+        val mediaList = MediaList(gedcom!!)
         gedcom!!.accept(mediaList)
-        var numFiles = 0
-        for (media in mediaList.list) {
-            if (FileUtil.getPathFromMedia(media, treeId) != null || FileUtil.getUriFromMedia(media, treeId) != null) numFiles++
-        }
-        return numFiles
+        return mediaList.list.count { FileUri(context, it, treeId).exists() }
     }
 
     /** @return A DocumentFile map of all the media that can be found */
@@ -139,35 +135,26 @@ class Exporter(private val context: Context, private val progressView: ProgressV
             val mediaFolder = context.getExternalFilesDir(treeId.toString()) // Creates the folder if it doesn't exist
             mediaFolder!!.listFiles()?.forEach { collection[DocumentFile.fromFile(it)] = Type.MEDIA }
         } else { // Collects actually used files from the whole device
-            val mediaList = MediaList(gedcom, 0)
+            val mediaList = MediaList(gedcom!!)
             gedcom!!.accept(mediaList)
             /* It happens that different Media point to the same file.
                And it could also happen that different paths end up with the same filenames,
-               eg. 'pathA/img.jpg' 'pathB/img.jpg'
+               for example 'pathA/img.jpg' 'pathB/img.jpg'
                It's necessary to avoid that files with the same name end up in the ZIP.
                This loop creates a list of paths with unique filenames. */
-            val paths: MutableSet<String> = HashSet()
-            val onlyFileNames: MutableSet<String> = HashSet() // Control file names
-            for (media in mediaList.list) {
-                val path = media.file
-                if (path != null && path.isNotEmpty()) {
-                    var fileName = path.replace('\\', '/')
-                    if (fileName.lastIndexOf('/') > -1)
-                        fileName = fileName.substring(fileName.lastIndexOf('/') + 1)
-                    if (!onlyFileNames.contains(fileName)) paths.add(path)
-                    onlyFileNames.add(fileName)
+            val selectedMedia: MutableList<Media> = mutableListOf()
+            val filenames: MutableList<String> = mutableListOf() // Control filenames
+            mediaList.list.forEach { media ->
+                if (!media.file.isNullOrBlank()) {
+                    val filename = media.file.replace('\\', '/').split('/').last()
+                    if (!filenames.contains(filename)) selectedMedia.add(media)
+                    filenames.add(filename)
                 }
             }
-            for (path in paths) {
-                val media = Media()
-                media.file = path
-                // Paths
-                val mediaPath = FileUtil.getPathFromMedia(media, treeId)
-                if (mediaPath != null) collection[DocumentFile.fromFile(File(mediaPath))] = Type.MEDIA // TODO: canRead()?
-                else { // URIs
-                    val mediaUri = FileUtil.getUriFromMedia(media, treeId)
-                    if (mediaUri != null) collection[DocumentFile.fromSingleUri(context, mediaUri)] = Type.MEDIA
-                }
+            selectedMedia.forEach { media ->
+                val fileUri = FileUri(context, media, treeId)
+                fileUri.file?.let { collection[DocumentFile.fromFile(it)] = Type.MEDIA }
+                fileUri.uri?.let { collection[DocumentFile.fromSingleUri(context, it)] = Type.MEDIA }
             }
         }
         return collection

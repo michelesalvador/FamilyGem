@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.familygem.FileUri
 import app.familygem.GedcomDateConverter
 import app.familygem.Global
 import app.familygem.Settings.Tree
@@ -18,7 +19,7 @@ import app.familygem.util.getSpouses
 import app.familygem.util.sex
 import app.familygem.visitor.ListOfSourceCitations
 import app.familygem.visitor.MediaContainersGuarded
-import app.familygem.visitor.MediaList
+import app.familygem.visitor.MediaLeaders
 import app.familygem.visitor.NoteContainersGuarded
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,12 +27,12 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
-import org.apache.commons.io.FileUtils
 import org.folg.gedcom.model.ExtensionContainer
 import org.folg.gedcom.model.Family
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Note
+import org.folg.gedcom.model.NoteContainer
 import org.folg.gedcom.model.ParentFamilyRef
 import org.folg.gedcom.model.Person
 import org.folg.gedcom.model.PersonFamilyCommonContainer
@@ -41,8 +42,6 @@ import org.folg.gedcom.model.SpouseFamilyRef
 import org.folg.gedcom.model.SpouseRef
 import org.folg.gedcom.model.Submitter
 import java.io.File
-import java.io.FileInputStream
-import kotlin.collections.set
 import kotlin.math.abs
 
 
@@ -205,44 +204,48 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         return if (position) personMatches[actualMatch].right else personMatches[actualMatch].left
     }
 
+    /** Copies media files from a source external storage to a destination external storage. */
     private suspend fun copyMediaFiles(context: Context, sourceGedcom: Gedcom, sourceId: Int, destinationId: Int) {
         yield()
-        // Collects existing media and file paths of source tree, but only from externalFilesDir
-        val mediaList = MediaList(sourceGedcom, 0)
+        // Collects existing media and files of source tree, but only from externalFilesDir
+        val mediaList = MediaLeaders()
         sourceGedcom.accept(mediaList)
-        val mediaPaths: MutableMap<Media, String> = HashMap()
+        val mediaFiles: MutableList<Triple<File, Media, NoteContainer>> = mutableListOf()
         val extSourceDir = context.getExternalFilesDir(sourceId.toString())!!.path
-        for (media in mediaList.list) {
-            val path = FileUtil.getPathFromMedia(media, sourceId)
-            if (path != null && path.startsWith(extSourceDir)) mediaPaths[media] = path
+        mediaList.list.forEach { pair ->
+            val media = pair.first
+            FileUri(context, media, sourceId, true).file?.let { file ->
+                if (file.path.startsWith(extSourceDir)) {
+                    mediaFiles.add(Triple(file, media, pair.second))
+                }
+            }
         }
         // Copies the files to media folder of destination tree, renaming them if necessary
-        if (mediaPaths.isNotEmpty()) {
+        if (mediaFiles.isNotEmpty()) {
             val extDestinationDir = context.getExternalFilesDir(destinationId.toString())!! // Creates the folder if not existing
-            if (extDestinationDir.list()?.size == 0) { // Empty folder, probably because just created
-                Global.settings.getTree(destinationId).dirs.add(extDestinationDir.path)
-                // No need to save Global.settings here because TreeUtils.saveJson() will do
-            }
-            for (entry in mediaPaths.entries.iterator()) {
+            for (entry in mediaFiles.iterator()) {
                 yield()
-                val path = entry.value
-                val media = entry.key
-                val sourceFile = File(path)
-                val destinationFile = FileUtil.nextAvailableFileName(extDestinationDir, path.substring(path.lastIndexOf('/') + 1))
-                try {
-                    val sourceStream = FileInputStream(sourceFile)
-                    FileUtils.copyInputStreamToFile(sourceStream, destinationFile)
-                } catch (ignored: Exception) {
+                val sourceFile = entry.first
+                FileUtil.nextAvailableFileName(extDestinationDir, sourceFile.name, sourceFile).let { pair ->
+                    val destinationFile = pair.first
+                    if (pair.second) { // Source file has no duplicate, copies it
+                        sourceFile.inputStream().use { inputStream -> destinationFile.outputStream().use { inputStream.copyTo(it) } }
+                    }
+                    // Updates file link inside the Media and change date of the leader
+                    val media = entry.second
+                    if (media.file != destinationFile.name) {
+                        media.file = destinationFile.name
+                        ChangeUtil.updateChangeDate(entry.third)
+                    }
                 }
-                // Updates file link inside media
-                if (media.file.contains("/")) media.file = destinationFile.path
             }
         }
         // Copies media folder paths
         val sourceTree = Global.settings.getTree(sourceId)
         val destinationTree = Global.settings.getTree(destinationId)
-        destinationTree.dirs.addAll(sourceTree.dirs.filterNot { it.startsWith(extSourceDir) }) // External files dir excluded
-        destinationTree.uris.addAll(sourceTree.uris)
+        destinationTree.dirs.addAll(sourceTree.dirs.filterNot { it == null || it.startsWith(extSourceDir) }) // External files dir excluded
+        destinationTree.uris.addAll(sourceTree.uris.filterNot { it == null })
+        // No need to save Global.settings here because TreeUtils.saveJson() will do
     }
 
     /** Executes the merge of second GEDCOM into first GEDCOM. */

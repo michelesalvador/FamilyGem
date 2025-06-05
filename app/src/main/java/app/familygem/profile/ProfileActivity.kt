@@ -286,7 +286,7 @@ class ProfileActivity : AppCompatActivity() {
                 when (item.itemId) {
                     0 -> {} // When a submenu is clicked
                     // Media page
-                    10 -> FileUtil.displayFileChooser(this, localMediaLauncher, Destination.LOCAL_MEDIA) // New local media
+                    10 -> FileUtil.displayFileChooser(this, localMediaLauncher, Destination.SIMPLE_MEDIA) // New simple media
                     11 -> FileUtil.displayFileChooser(this, sharedMediaLauncher, Destination.SHARED_MEDIA) // New shared media
                     12 -> { // Link shared media
                         val intent = Intent(this, MainActivity::class.java)
@@ -424,6 +424,7 @@ class ProfileActivity : AppCompatActivity() {
                     getStringExtra(Extra.DESTINATION)
                 )
                 save(true, *modified)
+                refresh()
             }
         }
     }
@@ -458,6 +459,7 @@ class ProfileActivity : AppCompatActivity() {
             person?.addMedia(media)
             if (FileUtil.setFileAndProposeCropping(this, it.data, media)) {
                 save(true, person)
+                refresh()
             }
         }
     }
@@ -467,6 +469,7 @@ class ProfileActivity : AppCompatActivity() {
             val sharedMedia = MediaUtil.newSharedMedia(person)
             if (FileUtil.setFileAndProposeCropping(this, it.data, sharedMedia)) {
                 save(true, sharedMedia, person)
+                refresh()
             }
         }
     }

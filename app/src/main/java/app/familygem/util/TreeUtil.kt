@@ -214,7 +214,7 @@ object TreeUtil {
     fun refreshData(gedcom: Gedcom, treeItem: Tree) {
         treeItem.persons = gedcom.people.size
         treeItem.generations = countGenerations(gedcom, U.getRootId(gedcom, treeItem))
-        val mediaVisitor = MediaList(gedcom, 0)
+        val mediaVisitor = MediaList(gedcom)
         gedcom.accept(mediaVisitor)
         treeItem.media = mediaVisitor.list.size
         Global.settings.save()

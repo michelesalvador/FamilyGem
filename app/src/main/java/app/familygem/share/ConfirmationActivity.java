@@ -14,6 +14,7 @@ import org.folg.gedcom.model.ChildRef;
 import org.folg.gedcom.model.Family;
 import org.folg.gedcom.model.Media;
 import org.folg.gedcom.model.Note;
+import org.folg.gedcom.model.NoteContainer;
 import org.folg.gedcom.model.ParentFamilyRef;
 import org.folg.gedcom.model.Person;
 import org.folg.gedcom.model.Repository;
@@ -27,18 +28,21 @@ import java.io.File;
 import java.io.IOException;
 
 import app.familygem.BaseActivity;
+import app.familygem.FileUri;
 import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.Settings;
 import app.familygem.TreesActivity;
 import app.familygem.U;
+import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtil;
 import app.familygem.util.TreeUtilKt;
 import app.familygem.visitor.ListOfSourceCitations;
 import app.familygem.visitor.MediaContainers;
-import app.familygem.visitor.MediaList;
+import app.familygem.visitor.MediaLeaders;
 import app.familygem.visitor.NoteContainers;
+import kotlin.Pair;
 
 /**
  * Final activity of the process of importing updates in an existing tree.
@@ -185,7 +189,7 @@ public class ConfirmationActivity extends BaseActivity {
                                 Global.gc.getMedia().remove(front.object);
                             if (front.destiny > 0 && front.destiny < 3) {
                                 Global.gc.addMedia((Media)front.object2);
-                                copyFiles((Media)front.object2);
+                                copyFile((Media)front.object2, (NoteContainer)front.object2);
                             }
                             break;
                         case 5: // Source
@@ -260,36 +264,34 @@ public class ConfirmationActivity extends BaseActivity {
 
     /**
      * If a new object has media, considers copying the files to the image folder of the old tree.
-     * Anyhow updates the File link in the Media.
      */
     void copyAllFiles(Object object) {
-        MediaList searchMedia = new MediaList(Global.gc2, 2);
+        MediaLeaders searchMedia = new MediaLeaders();
         ((Visitable)object).accept(searchMedia);
-        for (Media media : searchMedia.list) {
-            copyFiles(media);
+        for (Pair<Media, NoteContainer> pair : searchMedia.getList()) {
+            copyFile(pair.component1(), pair.component2());
         }
     }
 
-    void copyFiles(Media media) {
-        String origin = FileUtil.INSTANCE.getPathFromMedia(media, Global.treeId2);
-        if (origin != null) {
-            File originFile = new File(origin);
+    /**
+     * Copies the Media file into the external storage of old tree, avoiding duplicates, and in case updates the Media link.
+     */
+    private void copyFile(Media media, NoteContainer leader) {
+        FileUri fileUri = new FileUri(this, media, Global.treeId2, true);
+        if (fileUri.exists()) {
+            File originFile = fileUri.getFile();
             File externalDir = getExternalFilesDir(String.valueOf(Global.settings.openTree));
-            String fileName = origin.substring(origin.lastIndexOf('/') + 1);
-            File twinFile = new File(externalDir, fileName);
-            if (twinFile.isFile() // If the corresponding file already exists
-                    && twinFile.lastModified() == originFile.lastModified() // and has the same date
-                    && twinFile.length() == originFile.length()) { // and the same size
-                // Then use the already existing file
-                media.setFile(twinFile.getAbsolutePath());
-            } else { // Otherwise copies the new file
-                File destinationFile = FileUtil.INSTANCE.nextAvailableFileName(externalDir, fileName);
+            Pair<File, Boolean> destination = FileUtil.INSTANCE.nextAvailableFileName(externalDir, fileUri.getName(), originFile);
+            File destinationFile = destination.component1();
+            if (destination.component2()) { // originFile does not already exist in externalDir
                 try {
                     FileUtils.copyFile(originFile, destinationFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ignored) {
                 }
-                media.setFile(destinationFile.getAbsolutePath());
+            }
+            if (!media.getFile().equals(destinationFile.getName())) {
+                media.setFile(destinationFile.getName());
+                ChangeUtil.INSTANCE.updateChangeDate(leader); // Updates change date of leader object
             }
         }
     }

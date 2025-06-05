@@ -63,7 +63,12 @@ class MediaFoldersActivity : BaseActivity() {
                         if (!uris.contains(uri.toString())) {
                             uris.add(uri.toString())
                             save()
-                        } else Toast.makeText(this, "Already listed.", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(this, "Already listed.", Toast.LENGTH_LONG).show()
+                            // Maybe the URI is already listed, but was invalid
+                            updateList()
+                            Global.edited = true
+                        }
                     } else Toast.makeText(this, "Could not read this position.", Toast.LENGTH_LONG).show()
                 }
             } else Toast.makeText(this, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
@@ -132,7 +137,7 @@ class MediaFoldersActivity : BaseActivity() {
             DocumentFile.fromTreeUri(this, uri)?.let { documentDir ->
                 val uriView = layoutInflater.inflate(R.layout.media_folder_item, layout, false)
                 layout.addView(uriView)
-                uriView.findViewById<TextView>(R.id.mediaFolder_name).text = documentDir.name ?: "[${getString(R.string.no_name)}]"
+                uriView.findViewById<TextView>(R.id.mediaFolder_name).text = documentDir.name ?: "[Invalid]"
                 val urlView = uriView.findViewById<TextView>(R.id.mediaFolder_url)
                 if (Global.settings.expert) urlView.isSingleLine = false
                 urlView.text = Uri.decode(uriString) // Shows it decoded, a little more readable

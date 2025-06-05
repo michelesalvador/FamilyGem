@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/icona"
-    android:layout_width="100dp"
-    android:layout_height="100dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="200dp"
+    android:layout_height="200dp"
     android:background="@drawable/file_icon">
 
     <TextView
         android:id="@+id/media_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="22dp"
-        android:maxWidth="60dp"
-        android:paddingBottom="10dp"
-        android:textColor="#666"
-        android:textStyle="bold" />
+        android:layout_marginStart="42dp"
+        android:layout_marginTop="10dp"
+        android:lineHeight="27dp"
+        android:maxWidth="111dp"
+        android:maxHeight="170dp"
+        android:textColor="#9000"
+        android:textSize="27sp"
+        android:textStyle="bold"
+        tools:text="One VER LONG jpg Extensjo for the people who Cares" />
 </RelativeLayout>

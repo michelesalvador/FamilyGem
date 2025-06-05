@@ -48,7 +48,7 @@ public class ProcessActivity extends BaseActivity {
         super.onCreate(bundle);
         setContentView(R.layout.process_activity);
 
-        if (Comparison.getList().size() > 0) {
+        if (!Comparison.getList().isEmpty()) {
             int max;
             int position;
             if (Comparison.get().autoContinue) {
@@ -154,7 +154,7 @@ public class ProcessActivity extends BaseActivity {
             text = media.getFile();
             date = getDateTime(media.getChange());
             imageView.setVisibility(View.VISIBLE);
-            FileUtil.INSTANCE.showImage(media, imageView, 0, null, treeId);
+            FileUtil.INSTANCE.showImage(media, imageView, 0, null, null, treeId);
         } else if (obj instanceof Source) {
             Source source = (Source)obj;
             writeHeading(R.string.source, source.getId());

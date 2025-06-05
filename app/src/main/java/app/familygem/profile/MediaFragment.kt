@@ -7,9 +7,9 @@ import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.familygem.Global
+import app.familygem.MediaAdapter
 import app.familygem.Memory
 import app.familygem.R
-import app.familygem.main.MediaAdapter
 import app.familygem.util.MediaUtil
 import app.familygem.util.TreeUtil.save
 import app.familygem.util.Util

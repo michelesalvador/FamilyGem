@@ -256,7 +256,7 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     /**
-     * File coming from SAF or other app becomes local media.
+     * File coming from SAF or other app becomes simple media.
      */
     private final ActivityResultLauncher<Intent> localMediaLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
         if (result.getResultCode() == Activity.RESULT_OK) {
@@ -336,8 +336,8 @@ public abstract class DetailActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.NOTE, true);
             startActivityForResult(intent, 7074);
-        } else if (id == 106) { // Search for local media
-            FileUtil.INSTANCE.displayFileChooser(this, localMediaLauncher, Destination.LOCAL_MEDIA);
+        } else if (id == 106) { // Search for simple media
+            FileUtil.INSTANCE.displayFileChooser(this, localMediaLauncher, Destination.SIMPLE_MEDIA);
         } else if (id == 107) { // Search for shared media
             FileUtil.INSTANCE.displayFileChooser(this, sharedMediaLauncher, Destination.SHARED_MEDIA);
         } else if (id == 108) { // Link shared media

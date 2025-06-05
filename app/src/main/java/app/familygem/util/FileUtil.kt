@@ -12,26 +12,27 @@ import android.graphics.drawable.Drawable
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Build
-import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.lifecycleScope
 import app.familygem.BuildConfig
 import app.familygem.CropImageActivity
 import app.familygem.DetailActivity
+import app.familygem.FileUri
 import app.familygem.Global
 import app.familygem.R
+import app.familygem.U
 import app.familygem.constant.Destination
 import app.familygem.constant.Extra
 import app.familygem.constant.FileType
@@ -67,27 +68,23 @@ object FileUtil {
     val gedcomMimeTypes = arrayOf("text/vnd.familysearch.gedcom", "application/octet-stream", "vnd.android.document/file", "text/plain")
 
     /** Extracts only the filename from a URI. */
-    fun extractFilename(context: Context, uri: Uri, fallback: String): String {
-        var filename: String? = null
-        // file://
-        if (uri.scheme != null && uri.scheme.equals("file", true)) {
-            filename = uri.lastPathSegment
-        }
-        // Cursor (usually it's used this)
-        if (filename == null) {
-            val cursor = context.contentResolver.query(uri, null, null, null, null)
-            if (cursor != null && cursor.moveToFirst()) {
-                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                filename = cursor.getString(index)
-                cursor.close()
+    fun extractFilename(context: Context, uri: Uri?, fallback: String = ""): String {
+        return uri?.let {
+            // file://
+            if (uri.scheme?.equals("file", true) == true) {
+                return@let uri.lastPathSegment
             }
-        }
-        // DocumentFile
-        if (filename == null) {
+            // Cursor (usually it's used this)
+            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    return@let cursor.getString(index)
+                }
+            }
+            // DocumentFile
             val document = DocumentFile.fromSingleUri(context, uri)
-            filename = document?.name
-        }
-        return filename ?: fallback
+            document?.name
+        } ?: fallback
     }
 
     /**
@@ -132,9 +129,15 @@ object FileUtil {
 
     /** If a file with that name already exists in that folder, increments it appending (1) (2) (3)... */
     fun nextAvailableFileName(folder: File, fileName: String): File {
+        return nextAvailableFileName(folder, fileName, null).first
+    }
+
+    /** @return Second false if [original] already exists in [folder], otherwise true */
+    fun nextAvailableFileName(folder: File, fileName: String, original: File? = null): Pair<File, Boolean> {
         var newFileName = fileName
         var file = File(folder, newFileName)
         while (file.exists()) {
+            if (original != null && file.length() == original.length()) return file to false // File with same name and size already exists
             var pattern = Pattern.compile("(.*)\\((\\d+)\\)\\s*(\\.\\w+$|$)")
             var match = pattern.matcher(newFileName)
             if (match.matches()) { // Filename terminates with digits between parenthesis e.g. "image (34).jpg"
@@ -149,7 +152,7 @@ object FileUtil {
             }
             file = File(folder, newFileName)
         }
-        return file
+        return file to true
     }
 
     /**
@@ -232,34 +235,32 @@ object FileUtil {
      */
     @JvmOverloads
     fun selectMainImage(
-        person: Person, imageView: ImageView, options: Int = 0, gedcom: Gedcom? = null, treeId: Int? = null, show: Boolean = true
+        person: Person, imageView: ImageView, options: Int = 0,
+        gedcom: Gedcom = Global.gc, treeId: Int = Global.settings.openTree, show: Boolean = true
     ): Media? {
-        val mediaList = MediaList(gedcom ?: Global.gc, 0)
+        val mediaList = MediaList(gedcom)
         person.accept(mediaList)
-        var media: Media? = null
-        // Looks for a media with Primary value "Y"
-        for (media1 in mediaList.list) {
-            if (media1.primary != null && media1.primary == "Y") {
-                if (show) showImage(media1, imageView, options, null, treeId)
-                media = media1
-                break
-            }
+        // Looks for the "primary" media, or the first one
+        val media = mediaList.list.firstOrNull { it.primary != null && it.primary == "Y" } ?: mediaList.list.firstOrNull()
+        if (media != null) {
+            if (show) showImage(media, imageView, options, null, null, treeId)
+            imageView.visibility = View.VISIBLE
+        } else {
+            imageView.visibility = View.GONE
         }
-        // Alternatively, uses the first one
-        if (media == null && mediaList.list.isNotEmpty()) {
-            media = mediaList.list.first()
-            if (show) showImage(media, imageView, options, null, treeId)
-        }
-        imageView.visibility = if (media != null) View.VISIBLE else View.GONE
         return media
     }
 
     /**
      * Shows a picture with Glide.
      * @param options Bitwise selection of [Image] constants
+     * @param oldFileUri The same [FileUri] returned by this function, to speed up the process
      */
     @JvmOverloads
-    fun showImage(media: Media, imageView: ImageView, options: Int = 0, progressWheel: ProgressBar? = null, treeId: Int? = null) {
+    fun showImage(
+        media: Media, imageView: ImageView, options: Int = 0, progressWheel: ProgressBar? = null,
+        oldFileUri: FileUri? = null, treeId: Int = Global.settings.openTree
+    ): FileUri { // TODO Make it return Result<FileUri>
         fun applyOptions(builder: RequestBuilder<Drawable>) {
             if (options and Image.DARK != 0) {
                 imageView.setColorFilter(ContextCompat.getColor(imageView.context, R.color.primary_grayed), PorterDuff.Mode.MULTIPLY)
@@ -277,56 +278,47 @@ object FileUtil {
 
         imageView.setTag(R.id.tag_file_type, Type.NONE)
         progressWheel?.visibility = View.VISIBLE
-        if (options and Image.GALLERY != 0) { // Regular image inside MediaAdapter
-            imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-            (imageView.layoutParams as RelativeLayout.LayoutParams).removeRule(RelativeLayout.ABOVE)
-        }
-        val file = getPathFromMedia(media, treeId ?: Global.settings.openTree)?.let { File(it) }
-        val uri = if (file == null) getUriFromMedia(media, treeId ?: Global.settings.openTree) else null
+        val fileUri = oldFileUri ?: FileUri(imageView.context, media, treeId)
         val glide = Glide.with(imageView)
-        if (file != null || uri != null) {
-            previewPdf(imageView.context, file, uri).onSuccess { bitmap ->
+        if (fileUri.exists()) {
+            previewPdf(imageView.context, fileUri).onSuccess { bitmap ->
                 val builder = glide.load(bitmap)
                 applyOptions(builder)
                 builder.placeholder(R.drawable.image).into(imageView)
                 completeDisplay(Type.PDF)
-                return
+                return fileUri
             }
-            val builder = if (file != null) glide.load(file) else glide.load(uri)
+            val builder = glide.load(fileUri.file ?: fileUri.uri)
             applyOptions(builder)
-            val pathOrUri = file?.path ?: uri!!.path!! // 'file' or 'uri' one of the 2 is valid, the other is null
-            if (Global.croppedPaths.contains(pathOrUri)) { // A cropped image needs to be reloaded not from cache
-                builder.signature(ObjectKey(Global.croppedPaths[pathOrUri]!!))
+            if (Global.croppedPaths.contains(fileUri.path)) { // A cropped image needs to be reloaded not from cache
+                builder.signature(ObjectKey(Global.croppedPaths[fileUri.path]!!))
             }
             builder.placeholder(R.drawable.image).listener(object : RequestListener<Drawable> {
                 override fun onResourceReady(
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
                 ): Boolean {
                     // Maybe is a video
-                    val videoExtensions = arrayOf(".mp4", ".3gp", ".webm", ".mkv", ".mpg", ".mov")
-                    val fileType = if (videoExtensions.any { pathOrUri.endsWith(it, true) }) Type.VIDEO else Type.CROPPABLE
+                    val videoExtensions = arrayOf("mp4", "3gp", "webm", "mkv", "mpg", "mov")
+                    val fileType = if (videoExtensions.contains(fileUri.extension)) Type.VIDEO else Type.CROPPABLE
                     completeDisplay(fileType)
                     return false
                 }
 
-                // Path or Uri are correct, but image can't be displayed (e.g. unsupported format)
+                // File or URI one is correct, but image can't be displayed (e.g. unsupported format)
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                     // A local file with no preview
-                    GlobalScope.launch(Dispatchers.Main) {
-                        glide.load(generateIcon(imageView.context, media, pathOrUri)).into(imageView)
-                    }
-                    if (options and Image.GALLERY != 0) { // File icon inside MediaAdapter
-                        imageView.scaleType = ImageView.ScaleType.FIT_CENTER
-                        (imageView.layoutParams as RelativeLayout.LayoutParams).addRule(RelativeLayout.ABOVE, R.id.media_caption)
+                    val coroutineScope =
+                        if (imageView.context is AppCompatActivity) (imageView.context as AppCompatActivity).lifecycleScope else GlobalScope
+                    coroutineScope.launch(Dispatchers.Main) {
+                        glide.load(generateIcon(imageView.context, fileUri)).placeholder(R.drawable.image).into(imageView)
                     }
                     completeDisplay(Type.DOCUMENT)
                     return false
                 }
             }).into(imageView)
-        } else if (media.file != null && media.file.isNotBlank()) { // File and URI are both null
+        } else if (!media.file.isNullOrBlank()) { // File and URI are both null
             // Maybe is an image online
-            val filePath = media.file
-            val builder = glide.load(filePath)
+            val builder = glide.load(media.file)
             applyOptions(builder)
             builder.placeholder(R.drawable.image).listener(object : RequestListener<Drawable> {
                 override fun onResourceReady(
@@ -345,101 +337,49 @@ object FileUtil {
             glide.load(R.drawable.image).into(imageView)
             completeDisplay(Type.PLACEHOLDER)
         }
+        return fileUri
     }
 
     /**
      * Previews the first page of a PDF file from file or URI.
      * @return Result with the PDF bitmap or exception
      */
-    fun previewPdf(context: Context, file: File?, uri: Uri?): Result<Bitmap> {
+    fun previewPdf(context: Context, fileUri: FileUri): Result<Bitmap> {
         return try {
-            val pathOrUri = file?.path ?: uri!!.path!!
-            val bitmap = if (pathOrUri.endsWith(".pdf", true)) {
-                val fileDescriptor = if (file != null) ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-                else context.contentResolver.openFileDescriptor(uri!!, "r")
-                fileDescriptor?.use descriptor@{
-                    PdfRenderer(fileDescriptor).use { renderer ->
+            if (fileUri.extension == "pdf") {
+                fileUri.fileDescriptor?.use descriptor@{ descriptor ->
+                    PdfRenderer(descriptor).use { renderer ->
                         renderer.openPage(0).use { page ->
-                            val pdfBitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
+                            val bitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
                             // Paints bitmap on white background before rendering
-                            val canvas = Canvas(pdfBitmap)
+                            val canvas = Canvas(bitmap)
                             canvas.drawColor(Color.WHITE)
-                            canvas.drawBitmap(pdfBitmap, 0F, 0F, null)
+                            canvas.drawBitmap(bitmap, 0F, 0F, null)
                             // Renders PDF page into bitmap
-                            page.render(pdfBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                            return@descriptor pdfBitmap
+                            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                            return Result.success(bitmap)
                         }
                     }
                 }
-                generateIcon(context, null, pathOrUri) // Fallback bitmap
             } else throw Exception("Not a PDF")
-            Result.success(bitmap)
+            Result.success(generateIcon(context, fileUri)) // Fallback bitmap
         } catch (exception: Exception) {
             Result.failure(exception)
         }
     }
 
-    /** Creates a bitmap of a file icon with the format overwritten. */
-    fun generateIcon(context: Context, media: Media?, pathOrUri: String): Bitmap {
-        var format = media?.format
-        if (format == null) // Removes any character that does not make find the file extension
-            format = MimeTypeMap.getFileExtensionFromUrl(pathOrUri.replace("[^a-zA-Z0-9./]".toRegex(), "_"))
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val inflated = inflater.inflate(R.layout.media_file, null)
-        val frameLayout = inflated.findViewById<RelativeLayout>(R.id.icona)
-        frameLayout.findViewById<TextView>(R.id.media_text).text = format
-        frameLayout.isDrawingCacheEnabled = true
-        frameLayout.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-        frameLayout.layout(0, 0, frameLayout.measuredWidth, frameLayout.measuredHeight)
-        return frameLayout.drawingCache
-    }
-
-    /** Receives a Media and looks for the file on the device with different path combinations. */
-    fun getPathFromMedia(media: Media, treeId: Int): String? {
-        val file = media.file
-        if (file != null && file.isNotBlank()) {
-            // Original file path
-            val path = file.replace("\\", "/")
-            var test = File(path)
-            if (test.isFile && test.canRead()) return path
-            // File name in app tree storage
-            val name = File(path).name
-            test = File(Global.context.getExternalFilesDir(treeId.toString()), name)
-            if (test.isFile && test.canRead()) return test.absolutePath
-            // Media folders
-            for (dir in Global.settings.getTree(treeId).dirs.filterNot { it == null }) {
-                // Media folder + file path
-                var dirPath = "$dir/$path"
-                test = File(dirPath)
-                if (test.isFile && test.canRead()) return dirPath
-                // Media folder + file name
-                dirPath = "$dir/$name"
-                test = File(dirPath)
-                if (test.isFile && test.canRead()) return dirPath
-            }
-        }
-        return null
-    }
-
-    /** Receives a Media, looks for the file in the device with any tree-URIs and returns the URI. */
-    fun getUriFromMedia(media: Media, treeId: Int): Uri? {
-        val file = media.file
-        if (file != null && file.isNotBlank()) {
-            // In Family Gem OBJE.FILE is never a Uri: it's always a file path (Windows or Android) or a single filename
-            val segments = file.replace('\\', '/').split('/')
-            for (uri in Global.settings.getTree(treeId).uris.filterNot { it == null }) {
-                var documentDir = DocumentFile.fromTreeUri(Global.context, Uri.parse(uri))
-                for (segment in segments) {
-                    val test = documentDir?.findFile(segment)
-                    if (test?.isDirectory == true) documentDir = test
-                    else if (test?.isFile == true) return test.uri
-                    else break
-                }
-            }
-        }
-        return null
+    /** Creates a bitmap of a generic file icon with the format overwritten. */
+    fun generateIcon(context: Context, fileUri: FileUri): Bitmap {
+        val view = LayoutInflater.from(context).inflate(R.layout.media_file, null)
+        val format = if (!fileUri.media.format.isNullOrBlank()) fileUri.media.format else fileUri.extension
+        view.findViewById<TextView>(R.id.media_text).text = format
+        view.measure(0, 0) // For View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        val size = U.dpToPx(200F)
+        view.layout(0, 0, size, size)
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        view.draw(canvas)
+        return bitmap
     }
 
     /** Checks if a file points to an external storage folder owned by the app. */
