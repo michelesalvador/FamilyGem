@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="empty_family_delete">Preostalo je nekoliko praznih porodica.
-\nŽeliš li ih izbrisati\?</string>
+    <string name="empty_family_delete">Preostalo je nekoliko praznih porodica.\nŽeliš li ih izbrisati?</string>
     <string name="which_family">Kojoj porodici\?</string>
     <string name="empty_family">Prazna porodica</string>
     <string name="empty_media">Prazan medij</string>

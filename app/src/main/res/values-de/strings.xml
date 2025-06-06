@@ -19,7 +19,7 @@
     <string name="new_person">Eine neue Person erstellen.</string>
     <string name="header">Datei-Header</string>
     <string name="repositories">Archive</string>
-    <string name="rename">Stammbaum umbenennen</string>
+    <string name="rename">Umbenennen</string>
     <string name="modify_later">Du kannst den Titel auch später bearbeiten.</string>
     <string name="empty_tree">Neuen Stammbaum anlegen</string>
     <string name="blob">Blob</string>
@@ -266,7 +266,7 @@
     <string name="compare">Vergleichen</string>
     <string name="share_tree">Stammbaum teilen</string>
     <string name="find_errors">Auf Fehler prüfen</string>
-    <string name="tree_info">Stammbaum Info</string>
+    <string name="tree_info">Info</string>
     <string name="open">Öffnen</string>
     <string name="save">Sichern</string>
     <string name="make_backup">Als ZIP-Sicherung exportieren</string>
@@ -410,4 +410,5 @@
     <string name="no_to_all">Nein für alle verbleibende</string>
     <string name="make_shared_media">Geteilte Datei erstellen</string>
     <string name="make_media">Datei erstellen</string>
+    <string name="duplicates_lines">Linien verdoppeln</string>
 </resources>

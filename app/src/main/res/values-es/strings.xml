@@ -115,8 +115,8 @@
     <string name="sister">Hermana</string>
     <string name="brother">Hermano</string>
     <string name="half_sibling">Hermanastro/a</string>
-    <string name="half_sister">Hermanastra</string>
-    <string name="half_brother">Hermanastro</string>
+    <string name="half_sister">Media hermana</string>
+    <string name="half_brother">Medio hermano</string>
     <string name="daughter">Hija</string>
     <string name="son">Hijo</string>
     <string name="new_repository">Nuevo repositorio</string>
@@ -407,4 +407,5 @@
     <string name="search_duplicates">Buscar duplicados</string>
     <string name="skip">Omitir</string>
     <string name="yes_to_all">Si a todo lo demás</string>
+    <string name="duplicates_lines">Líneas de duplicados</string>
 </resources>

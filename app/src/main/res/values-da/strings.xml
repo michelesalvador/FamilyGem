@@ -389,4 +389,26 @@
     <string name="choose_folder">Vælg mappe</string>
     <string name="png_exported_ok">PNG eksporteret.</string>
     <string name="export_png">Eksporter PNG</string>
+    <string name="numbers">Numre</string>
+    <string name="disable">Deaktiver</string>
+    <string name="backup_folder">Backup-mappe</string>
+    <string name="recover">Gendan</string>
+    <string name="backup_trees">Backup af valgte træer</string>
+    <string name="notification_time">Fødselsdagsmeddelelse tid</string>
+    <string name="person_birthday">Hver levende persons fødselsdag.</string>
+    <string name="foster_family">Plejefamilie</string>
+    <string name="paternal_family">Fars familie</string>
+    <string name="adoptive_family">Adoptivfamilie</string>
+    <string name="duplicates_lines">Linjer af duplikater</string>
+    <string name="origin_family">Oprindelsesfamilie</string>
+    <string name="maternal_family">Mors familie</string>
+    <string name="own_family">Egen familie</string>
+    <string name="make_shared_media">Lav delte medier</string>
+    <string name="make_media">Lav medier</string>
+    <string name="local_backup">Lokal sikkerhedskopi</string>
+    <string name="choose_disable_backup">Vælg en backup-mappe, eller deaktiver lokal backup.\nDu kan aktivere den senere.</string>
+    <string name="search_duplicates">Søg efter dubletter</string>
+    <string name="skip">Spring over</string>
+    <string name="yes_to_all">Ja til alle resterende</string>
+    <string name="no_to_all">Nej til alle resterende</string>
 </resources>

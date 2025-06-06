@@ -396,4 +396,23 @@
     <string name="paternal_family">Семья отца</string>
     <string name="maternal_family">Семья матери</string>
     <string name="own_family">Собственная семья</string>
+    <string name="local_backup">Локальное резервное копирование</string>
+    <string name="choose_disable_backup">Выберите папку резервного копирования или отключите локальное резервное копирование.\nВы можете активировать его позже.</string>
+    <string name="disable">Отключить</string>
+    <string name="recover">Восстановить</string>
+    <string name="backup_trees">Резервное копирование выбранных деревьев</string>
+    <string name="duplicates_lines">Дублирующиеся строки</string>
+    <string name="make_shared_media">Добавить общие медиа</string>
+    <string name="make_media">Добавить медиа</string>
+    <string name="notification_time">Время уведомления о дне рождения</string>
+    <string name="backup_folder">Папка резервного копирования</string>
+    <string name="search_duplicates">Поиск дубликатов</string>
+    <string name="skip">Пропустить</string>
+    <string name="yes_to_all">Применимо ко всем оставшимся</string>
+    <string name="no_to_all">Нет всему оставшемуся</string>
+    <string name="person_birthday">День рождения каждого живущего человека.</string>
+    <string name="not_granted_add_folder">Некоторые разрешения не предоставлены.\nВы все равно хотите добавить папку?</string>
+    <string name="use_existing">Повторно использовать существующий</string>
+    <string name="make_copy">Сделать копию</string>
+    <string name="file_exists_reuse">Этот файл уже существует.\nВы хотите использовать его повторно или сделать копию?</string>
 </resources>
