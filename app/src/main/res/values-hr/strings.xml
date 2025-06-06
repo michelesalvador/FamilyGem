@@ -351,7 +351,7 @@
     <string name="female_partner">Partnerica</string>
     <string name="male_partner">Partner</string>
     <string name="partner">Partner</string>
-    <string name="age">Vijek</string>
+    <string name="age">Starost</string>
     <string name="uncles_cousins">Stričevi i rođaci</string>
     <string name="partners">Partneri</string>
     <string name="system_language">Jezik sustava</string>
@@ -413,4 +413,5 @@
     <string name="skip">Preskoči</string>
     <string name="yes_to_all">Da za sve prostale</string>
     <string name="no_to_all">Ne za sve prostale</string>
+    <string name="duplicates_lines">Linije duplikata</string>
 </resources>

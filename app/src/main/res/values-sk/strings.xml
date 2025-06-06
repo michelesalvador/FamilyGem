@@ -231,9 +231,9 @@
     <string name="new_repository">Nový archív</string>
     <string name="son">Syn</string>
     <string name="daughter">Dcéra</string>
-    <string name="half_sister">Nevlastná sestra</string>
-    <string name="half_sibling">Nevlastný súrodenec</string>
-    <string name="half_brother">Nevlastný brat</string>
+    <string name="half_sister">Polosestra</string>
+    <string name="half_sibling">Polorodný súrodenec</string>
+    <string name="half_brother">Polobrat</string>
     <string name="brother">Brat</string>
     <string name="sister">Sestra</string>
     <string name="husband">Manžel</string>
@@ -411,4 +411,8 @@
     <string name="yes_to_all">Áno pre všetky zostávajúce</string>
     <string name="no_to_all">Nie pre všetky zostávajúce</string>
     <string name="duplicates_lines">Línie duplicít</string>
+    <string name="not_granted_add_folder">Niektoré povolenia neboli udelené.\nChcete aj tak pridať priečinok?</string>
+    <string name="file_exists_reuse">Tento súbor už existuje.\nChcete ho znovu použiť alebo vytvoriť jeho kópiu?</string>
+    <string name="make_copy">Vytvoriť kópiu</string>
+    <string name="use_existing">Znovu použiť existujúci</string>
 </resources>

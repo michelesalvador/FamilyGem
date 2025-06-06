@@ -21,7 +21,7 @@
     <string name="source_citation">Citace pramene</string>
     <string name="www">Webová stránka</string>
     <string name="make_main_submitter">Chcete, aby tento zadavatel byl hlavním zadavatelem stromu\?</string>
-    <string name="half_sibling">Nevlastní sourozenec</string>
+    <string name="half_sibling">Polorodý sourozenec</string>
     <string name="make_root">Označit jako hlavní osobu</string>
     <string name="generations_display_diagram">Nastavení počtu generací zobrazených v diagramu:</string>
     <string name="updates_replace_add">Vybrat, zda aktualizace mají nahradit stávající položky nebo být přidány jako nové.</string>
@@ -190,8 +190,8 @@
     <string name="new_repository">Nový archiv</string>
     <string name="son">Syn</string>
     <string name="daughter">Dcera</string>
-    <string name="half_sister">Nevlastní sestra</string>
-    <string name="half_brother">Nevlastní bratr</string>
+    <string name="half_sister">Polorodá sestra</string>
+    <string name="half_brother">Polorodý bratr</string>
     <string name="brother">Bratr</string>
     <string name="sister">Sestra</string>
     <string name="husband">Manžel</string>
@@ -411,4 +411,8 @@
     <string name="yes_to_all">Ano pro všechny zbývající</string>
     <string name="no_to_all">Ne pro všechny zbývající</string>
     <string name="duplicates_lines">Linie duplicit</string>
+    <string name="not_granted_add_folder">Některá povolení nebyla udělena.\nChcete přesto přidat složku?</string>
+    <string name="use_existing">Znovu použít stávající</string>
+    <string name="make_copy">Vytvořit kopii</string>
+    <string name="file_exists_reuse">Tento soubor již existuje.\nChcete jej znovu použít, nebo vytvořit jeho kopii?</string>
 </resources>

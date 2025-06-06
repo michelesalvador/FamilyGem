@@ -389,4 +389,26 @@
     <string name="merge">合并</string>
     <string name="export_png">导出 PNG</string>
     <string name="png_exported_ok">PNG 已导出。</string>
+    <string name="numbers">数字</string>
+    <string name="foster_family">寄养家庭</string>
+    <string name="adoptive_family">收养家庭</string>
+    <string name="own_family">自己的家庭</string>
+    <string name="local_backup">本地备份</string>
+    <string name="choose_disable_backup">选择一个备份文件夹，或者禁用本地备份。\n你可以稍后再启用它。</string>
+    <string name="backup_trees">备份所选的家谱</string>
+    <string name="notification_time">生日通知时间</string>
+    <string name="duplicates_lines">重复连线</string>
+    <string name="origin_family">原家庭</string>
+    <string name="paternal_family">父系家族</string>
+    <string name="maternal_family">母系家族</string>
+    <string name="make_shared_media">制作共享媒体</string>
+    <string name="make_media">制作媒体</string>
+    <string name="skip">跳过</string>
+    <string name="disable">禁用</string>
+    <string name="backup_folder">备份文件夹</string>
+    <string name="search_duplicates">搜索重复项</string>
+    <string name="recover">修复</string>
+    <string name="yes_to_all">全部应用是</string>
+    <string name="no_to_all">全部应用否</string>
+    <string name="person_birthday">每一个在世之人的生日。</string>
 </resources>

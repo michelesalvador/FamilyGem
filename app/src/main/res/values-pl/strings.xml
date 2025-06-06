@@ -407,4 +407,7 @@
     <string name="skip">Pominąć</string>
     <string name="yes_to_all">Tak dla wszystkich pozostałych</string>
     <string name="no_to_all">Nie dla wszystkich pozostałych</string>
+    <string name="duplicates_lines">Linie duplikatów</string>
+    <string name="not_granted_add_folder">Nie nadano niektórych uprawnień.\nCzy chcesz dodać folder mimo to?</string>
+    <string name="make_copy">Zrób kopię</string>
 </resources>

@@ -297,7 +297,7 @@
     <string name="download_shared_tree">Завантажити спільне дерево</string>
     <string name="sure_delete">Ви впевнені\?</string>
     <string name="approximate">Приблизно</string>
-    <string name="dead">Смерть</string>
+    <string name="dead">Смерті</string>
     <string name="female">Жінка</string>
     <string name="into">В сім\'ї</string>
     <string name="repository">Архів</string>
@@ -410,4 +410,12 @@
     <string name="yes_to_all">Так для всіх інших</string>
     <string name="make_shared_media">Створити спільні медіа</string>
     <string name="make_media">Створити медіа</string>
+    <string name="duplicates_lines">Дублює рядки</string>
+    <string name="not_granted_add_folder">Деякі дозволи не надано.\nВи все одно хочете додати папку?</string>
+    <string name="file_exists_reuse">Цей файл вже існує.\nВи хочете використати його повторно чи зробити копію?</string>
+    <string name="use_existing">Повторно використовуйте існуюче</string>
+    <string name="make_copy">Зробити копію</string>
+    <string name="existing_name">Вже існуюча назва</string>
+    <string name="copy_app_storage">Копіювати в сховище програми</string>
+    <string name="invalid_name">Недійсне ім\'я</string>
 </resources>

@@ -396,4 +396,5 @@
     <string name="paternal_family">Očetova družina</string>
     <string name="own_family">Lastna družina</string>
     <string name="maternal_family">Mamina družina</string>
+    <string name="duplicates_lines">Vrstice podvojenih</string>
 </resources>

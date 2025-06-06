@@ -393,4 +393,10 @@
     <string name="choose_folder">Choisir le dossier</string>
     <string name="png_exported_ok">PNG exporté.</string>
     <string name="export_png">Export PNG</string>
+    <string name="disable">Désactiver</string>
+    <string name="numbers">Numéros</string>
+    <string name="maternal_family">Famille maternelle</string>
+    <string name="origin_family">Famille d\'origine</string>
+    <string name="adoptive_family">Famille adoptive</string>
+    <string name="paternal_family">Famille paternelle</string>
 </resources>

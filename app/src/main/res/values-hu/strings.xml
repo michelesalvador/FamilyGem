@@ -397,4 +397,14 @@
     <string name="origin_family">Származási család</string>
     <string name="adoptive_family">Örökbefogadó család</string>
     <string name="notification_time">Születésnapi értesítési idő</string>
+    <string name="local_backup">Lokális biztonsági mentés</string>
+    <string name="choose_disable_backup">Válasszon egy biztonsági mentési mappát, vagy tiltsa le a helyi biztonsági mentést.\nKésőbb aktiválhatja.</string>
+    <string name="backup_folder">Biztonsági mentési mappa</string>
+    <string name="recover">Visszaállít</string>
+    <string name="duplicates_lines">Duplikátum vonalak</string>
+    <string name="search_duplicates">Keresés duplikátumok után</string>
+    <string name="person_birthday">Minden élő személy születésnapja.</string>
+    <string name="skip">Kihagyás</string>
+    <string name="yes_to_all">Igen az összesre</string>
+    <string name="no_to_all">Nem az összesre</string>
 </resources>
