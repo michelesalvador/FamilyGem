@@ -258,7 +258,7 @@
     <string name="share_tree">Deli</string>
     <string name="find_errors">Nađi greške</string>
     <string name="rename">Preimenuj</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="open">Otvori</string>
     <string name="save">Sačuvaj</string>
     <string name="make_backup">Napravi sigurnosnu kopiju u ZIP formatu</string>

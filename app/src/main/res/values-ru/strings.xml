@@ -265,7 +265,7 @@
     <string name="share_tree">Поделиться</string>
     <string name="find_errors">Поиск ошибок</string>
     <string name="rename">Переименовать</string>
-    <string name="tree_info">Информация</string>
+    <string name="info">Информация</string>
     <string name="open">Открыть</string>
     <string name="save">Сохранить</string>
     <string name="make_backup">Сохранить резервную ZIP-копию</string>
@@ -411,7 +411,6 @@
     <string name="yes_to_all">Применимо ко всем оставшимся</string>
     <string name="no_to_all">Нет всему оставшемуся</string>
     <string name="person_birthday">День рождения каждого живущего человека.</string>
-    <string name="not_granted_add_folder">Некоторые разрешения не предоставлены.\nВы все равно хотите добавить папку?</string>
     <string name="use_existing">Повторно использовать существующий</string>
     <string name="make_copy">Сделать копию</string>
     <string name="file_exists_reuse">Этот файл уже существует.\nВы хотите использовать его повторно или сделать копию?</string>

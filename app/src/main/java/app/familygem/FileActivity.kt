@@ -129,7 +129,7 @@ class FileActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add(0, 0, 0, R.string.tree_info)
+        menu.add(0, 0, 0, R.string.info)
         if (fileUri.file == null || !FileUtil.isOwnedDirectory(this, fileUri.file!!)) menu.add(0, 1, 0, R.string.copy_app_storage)
         if (name.isNotEmpty() && type != Type.WEB) menu.add(0, 2, 0, R.string.rename)
         if (type == Type.CROPPABLE) menu.add(0, 3, 0, R.string.crop)

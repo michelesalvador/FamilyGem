@@ -178,7 +178,7 @@
     <string name="share_tree">Delen</string>
     <string name="find_errors">Vind fouten</string>
     <string name="rename">Hernoemen</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="open">Openen</string>
     <string name="save">Opslaan</string>
     <string name="make_backup">Sla ZIP-back-up op</string>

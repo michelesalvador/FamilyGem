@@ -46,7 +46,7 @@
     <string name="open">Megnyitás</string>
     <string name="make_backup">Mentse a ZIP biztonsági másolatot</string>
     <string name="not_memory_tree">Nincs elég memória ehhez a fához.</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="rename">Átnevezés</string>
     <string name="find_errors">Hibák keresése</string>
     <string name="share_tree">Megosztás</string>

@@ -266,7 +266,7 @@
     <string name="compare">Vergleichen</string>
     <string name="share_tree">Stammbaum teilen</string>
     <string name="find_errors">Auf Fehler prüfen</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="open">Öffnen</string>
     <string name="save">Sichern</string>
     <string name="make_backup">Als ZIP-Sicherung exportieren</string>

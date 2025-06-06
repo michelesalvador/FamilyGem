@@ -124,7 +124,7 @@
     <string name="save">ذخیره</string>
     <string name="open">باز کردن</string>
     <string name="not_memory_tree">حافظه کافی برای این درخت وجود ندارد.</string>
-    <string name="tree_info">اطلاعات</string>
+    <string name="info">اطلاعات</string>
     <string name="find_errors">خطاها را پیدا کنید</string>
     <string name="share_tree">اشتراک گذاری</string>
     <string name="export_gedcom">استخراج GEDCOM</string>

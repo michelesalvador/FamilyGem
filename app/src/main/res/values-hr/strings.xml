@@ -202,7 +202,7 @@
     <string name="complex_tree_advanced_tools">Ovo stablo izgleda prilično složeno.
 \nŽeliš li vidjeti napredne alate koji olakšavaju upravljanje stablom\?</string>
     <string name="cant_understand_uri">Nerazumljena primljena URI adresa.</string>
-    <string name="tree_info">Informacije</string>
+    <string name="info">Informacije</string>
     <string name="new_person">Stvori novu osobu.</string>
     <string name="name_of_tree">Naslov stabla</string>
     <string name="change_date">Datum promjene</string>

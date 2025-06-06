@@ -34,7 +34,7 @@
     <string name="share_tree">Compartilhar</string>
     <string name="find_errors">Encontre erros</string>
     <string name="rename">Renomear</string>
-    <string name="tree_info">Informação</string>
+    <string name="info">Informação</string>
     <string name="open">Abrir</string>
     <string name="save">Salvar</string>
     <string name="make_backup">Salvar backup ZIP</string>

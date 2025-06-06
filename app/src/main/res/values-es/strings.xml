@@ -34,7 +34,7 @@
     <string name="settings">Configuración</string>
     <string name="about">Acerca</string>
     <string name="save">Guardar</string>
-    <string name="tree_info">Información</string>
+    <string name="info">Información</string>
     <string name="rename">Cambiar nombre</string>
     <string name="find_errors">Buscar errores</string>
     <string name="share_tree">Compartir</string>

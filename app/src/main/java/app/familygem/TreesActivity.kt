@@ -157,7 +157,7 @@ class TreesActivity : AppCompatActivity() {
                     if (Global.settings.expert && derived || Global.settings.expert && exhausted)
                         menu.add(0, 0, 0, R.string.open)
                     if (!exhausted || Global.settings.expert)
-                        menu.add(0, 1, 0, R.string.tree_info)
+                        menu.add(0, 1, 0, R.string.info)
                     if (!derived && !exhausted || Global.settings.expert)
                         menu.add(0, 2, 0, R.string.rename)
                     if (exists && (!derived || Global.settings.expert) && !exhausted)

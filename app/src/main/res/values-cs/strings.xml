@@ -167,7 +167,7 @@
     <string name="share_tree">Sdílet strom</string>
     <string name="find_errors">Najít chyby</string>
     <string name="rename">Přejmenovat</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="open">Otevřít</string>
     <string name="save">Uložit</string>
     <string name="make_backup">Uložit zálohu ZIP</string>
@@ -411,7 +411,6 @@
     <string name="yes_to_all">Ano pro všechny zbývající</string>
     <string name="no_to_all">Ne pro všechny zbývající</string>
     <string name="duplicates_lines">Linie duplicit</string>
-    <string name="not_granted_add_folder">Některá povolení nebyla udělena.\nChcete přesto přidat složku?</string>
     <string name="use_existing">Znovu použít stávající</string>
     <string name="make_copy">Vytvořit kopii</string>
     <string name="file_exists_reuse">Tento soubor již existuje.\nChcete jej znovu použít, nebo vytvořit jeho kopii?</string>

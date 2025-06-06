@@ -276,7 +276,7 @@
     <string name="make_backup">சிப் காப்புப்பிரதியை சேமிக்கவும்</string>
     <string name="save">சேமி</string>
     <string name="open">திற</string>
-    <string name="tree_info">தகவல்</string>
+    <string name="info">தகவல்</string>
     <string name="rename">மறுபெயரிடுங்கள்</string>
     <string name="find_errors">பிழைகள் கண்டறியவும்</string>
     <string name="share_tree">பங்கு</string>

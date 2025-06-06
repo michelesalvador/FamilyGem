@@ -117,7 +117,7 @@
     <string name="make_backup">שמירת גיבוי ZIP</string>
     <string name="save">שמירה</string>
     <string name="open">פתיחה</string>
-    <string name="tree_info">מידע</string>
+    <string name="info">מידע</string>
     <string name="rename">שינוי שם</string>
     <string name="find_errors">איתור שגיאות</string>
     <string name="share_tree">שיתוף</string>

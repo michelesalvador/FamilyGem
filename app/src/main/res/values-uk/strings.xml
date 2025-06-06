@@ -132,7 +132,7 @@
     <string name="share_tree">Поділитися</string>
     <string name="find_errors">Пошук помилок</string>
     <string name="rename">Перейменувати</string>
-    <string name="tree_info">Інформація</string>
+    <string name="info">Інформація</string>
     <string name="open">Відкрити</string>
     <string name="save">Зберегти</string>
     <string name="make_backup">Збережіть резервну копію ZIP</string>
@@ -411,7 +411,6 @@
     <string name="make_shared_media">Створити спільні медіа</string>
     <string name="make_media">Створити медіа</string>
     <string name="duplicates_lines">Дублює рядки</string>
-    <string name="not_granted_add_folder">Деякі дозволи не надано.\nВи все одно хочете додати папку?</string>
     <string name="file_exists_reuse">Цей файл вже існує.\nВи хочете використати його повторно чи зробити копію?</string>
     <string name="use_existing">Повторно використовуйте існуюче</string>
     <string name="make_copy">Зробити копію</string>

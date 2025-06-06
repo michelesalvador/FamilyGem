@@ -44,7 +44,7 @@
     <string name="share_tree">ಹಂಚಿಕೊಳ್ಳಿ</string>
     <string name="find_errors">ದೋಷಗಳನ್ನು ಹುಡುಕಿ</string>
     <string name="rename">ಮರುನಾಮಕರಣ</string>
-    <string name="tree_info">ಮಾಹಿತಿ</string>
+    <string name="info">ಮಾಹಿತಿ</string>
     <string name="open">ತೆರೆಯಿರಿ</string>
     <string name="save">ಉಳಿಸಿ</string>
     <string name="make_backup">ZIP ಬ್ಯಾಕಪ್ ಉಳಿಸಿ</string>

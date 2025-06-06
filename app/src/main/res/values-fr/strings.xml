@@ -111,7 +111,7 @@
     <string name="share_tree">Partager</string>
     <string name="find_errors">Trouver des erreurs</string>
     <string name="rename">Renommer</string>
-    <string name="tree_info">Infos</string>
+    <string name="info">Infos</string>
     <string name="open">Ouvrir</string>
     <string name="save">Sauvegarder</string>
     <string name="make_backup">Faire une sauvegarder ZIP</string>

@@ -56,7 +56,7 @@
     <string name="save">Save</string>
     <string name="open">Open</string>
     <string name="not_memory_tree">Not enough memory for this tree.</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="rename">Rename</string>
     <string name="find_errors">Find errors</string>
     <string name="share_tree">Share</string>
@@ -112,7 +112,6 @@
     <string name="media_folders">Media folders</string>
     <string name="media_searched_list">Media files are searched inside these folders:</string>
     <string name="add_device_folder">Add a folder from this device.</string>
-    <string name="not_granted_add_folder">Some permission not granted.\nDo you want to add a folder anyway\?</string>
     <string name="share_sensitive">Sharing sensitive data</string>
     <string name="aware_upload_server">Please be aware that you are going to upload the whole tree to a server online.</string>
     <string name="remind_later">Remind me later</string>

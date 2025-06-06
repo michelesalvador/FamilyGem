@@ -116,7 +116,7 @@
     <string name="make_backup">Shraniti varnostno kopijo ZIP</string>
     <string name="save">Shraniti</string>
     <string name="open">Odpri</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="rename">Preimenovati</string>
     <string name="find_errors">Iskanje napak</string>
     <string name="share_tree">Deliti drevo</string>

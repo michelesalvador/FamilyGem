@@ -48,7 +48,7 @@
     <string name="make_backup">Zapisz kopię zapasową do pliku ZIP</string>
     <string name="save">Zapisz</string>
     <string name="open">Otwórz</string>
-    <string name="tree_info">Informacje</string>
+    <string name="info">Informacje</string>
     <string name="rename">Zmień nazwę</string>
     <string name="find_errors">Znajdź błędy</string>
     <string name="share_tree">Udostępnij</string>
@@ -408,6 +408,5 @@
     <string name="yes_to_all">Tak dla wszystkich pozostałych</string>
     <string name="no_to_all">Nie dla wszystkich pozostałych</string>
     <string name="duplicates_lines">Linie duplikatów</string>
-    <string name="not_granted_add_folder">Nie nadano niektórych uprawnień.\nCzy chcesz dodać folder mimo to?</string>
     <string name="make_copy">Zrób kopię</string>
 </resources>

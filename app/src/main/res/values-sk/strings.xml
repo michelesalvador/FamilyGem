@@ -21,7 +21,7 @@
     <string name="media_searched_list">Mediálne súbory sú v týchto priečinkoch:</string>
     <string name="destination">Umiestnenie</string>
     <string name="find_errors">Nájsť chyby</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="tap_add_tree">Klepnutím pridať rodokmeň.</string>
     <string name="invalid_gedcom">Neplatný súbor GEDCOM.</string>
     <string name="tree_imported_ok">Strom úspešne importovaný.</string>
@@ -411,7 +411,6 @@
     <string name="yes_to_all">Áno pre všetky zostávajúce</string>
     <string name="no_to_all">Nie pre všetky zostávajúce</string>
     <string name="duplicates_lines">Línie duplicít</string>
-    <string name="not_granted_add_folder">Niektoré povolenia neboli udelené.\nChcete aj tak pridať priečinok?</string>
     <string name="file_exists_reuse">Tento súbor už existuje.\nChcete ho znovu použiť alebo vytvoriť jeho kópiu?</string>
     <string name="make_copy">Vytvoriť kópiu</string>
     <string name="use_existing">Znovu použiť existujúci</string>

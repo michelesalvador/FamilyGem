@@ -46,7 +46,7 @@
     <string name="make_backup">保存ZIP备份</string>
     <string name="save">保存</string>
     <string name="not_memory_tree">内存不足。</string>
-    <string name="tree_info">信息</string>
+    <string name="info">信息</string>
     <string name="compare">比较</string>
     <string name="gedcom_exported_ok">GEDCOM 已导出。</string>
     <string name="zip_exported_ok">ZIP 已导出。</string>

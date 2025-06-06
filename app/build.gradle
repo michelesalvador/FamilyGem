@@ -24,10 +24,9 @@ android {
         minSdk 21
         targetSdk 35
         versionCode 27
-        versionName '1.1.0.4'
-        vectorDrawables.useSupportLibrary = true
-        resourceConfigurations += ['ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw',
-                                   'kn', 'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh']
+        versionName '1.1.0.5'
+        resourceConfigurations += ['ar', 'bg', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn',
+                                   'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'sv', 'ta', 'ti', 'tr', 'uk', 'vi', 'zh']
         def passKey = ''
         if (credential) {
             passKey = credential['passKey']

@@ -113,7 +113,7 @@
     <string name="no_useful_data">Kan inte få användbara data.</string>
     <string name="save">Spara</string>
     <string name="open">Öppna</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="rename">Byt namn</string>
     <string name="compare">Jämför</string>
     <string name="gedcom_only">Endast GEDCOM-fil</string>
@@ -328,7 +328,6 @@
     <string name="living_apart_together">Särbo</string>
     <string name="exact">Exakt</string>
     <string name="calculated">Beräknad</string>
-    <string name="not_granted">%s inte beviljad.</string>
     <string name="want_crop_image">Vill du beskära den här bilden?</string>
     <string name="empty_media">Tom media</string>
     <string name="premium_activated">Premium aktiverad.</string>
@@ -398,7 +397,6 @@
     <string name="make_main_submitter">Vill du att detta ska vara huvudförfattare till trädet?</string>
     <string name="correct">Rätta</string>
     <string name="auto_save">Automatiskt sparande</string>
-    <string name="app_storage">Applikationslagring</string>
     <string name="max_life_span">Maximal livslängd</string>
     <string name="make_shared_media">Skapa delat media</string>
 </resources>

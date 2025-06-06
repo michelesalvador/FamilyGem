@@ -193,7 +193,7 @@
     <string name="media_folders">Aŭdvidaĵaj dosierujoj</string>
     <string name="show_advanced_functions">Montri altnivelajn ilojn</string>
     <string name="auto_save">Aŭtomata konservado</string>
-    <string name="tree_info">Informoj</string>
+    <string name="info">Informoj</string>
     <string name="make_backup">Konservi ZIP savkopion</string>
     <string name="no_useful_data">Ne povas akiri uzatan datumon.</string>
     <string name="generations">Generacioj</string>

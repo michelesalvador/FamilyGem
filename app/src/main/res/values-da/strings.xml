@@ -58,7 +58,7 @@
     <string name="submitter">Bidragsyder</string>
     <string name="changes_submitter">Bidragsyder af ændringer</string>
     <string name="settings">Indstillinger</string>
-    <string name="tree_info">Info</string>
+    <string name="info">Info</string>
     <string name="rename">Omdøb</string>
     <string name="find_errors">Find fejl</string>
     <string name="share_tree">Del</string>

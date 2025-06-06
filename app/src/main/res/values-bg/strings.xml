@@ -60,7 +60,7 @@
     <string name="generation">Поколение</string>
     <string name="save">Запази</string>
     <string name="not_memory_tree">Няма достатъчно памет за това дърво.</string>
-    <string name="tree_info">Инфо</string>
+    <string name="info">Инфо</string>
     <string name="find_errors">Намери грешки</string>
     <string name="share_tree">Сподели</string>
     <string name="compare">Сравни</string>

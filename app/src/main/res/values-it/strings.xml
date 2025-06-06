@@ -58,7 +58,7 @@
     <string name="save">Salva</string>
     <string name="open">Apri</string>
     <string name="not_memory_tree">Memoria insufficiente per questo albero.</string>
-    <string name="tree_info">Informazioni</string>
+    <string name="info">Informazioni</string>
     <string name="rename">Rinomina</string>
     <string name="find_errors">Trova errori</string>
     <string name="share_tree">Condividi</string>
@@ -117,7 +117,6 @@
     <string name="media_folders">Cartelle media</string>
     <string name="media_searched_list">I file media vengono cercati dentro a queste cartelle:</string>
     <string name="add_device_folder">Aggiungi una cartella da questo dispositivo.</string>
-    <string name="not_granted_add_folder">Alcuni permessi non concessi.\nVuoi comunque aggiungere una cartella\?</string>
     <!-- SharingActivity -->
     <string name="share_sensitive">Condivisione di dati sensibili</string>
     <string name="aware_upload_server">Tieni presente che stai per caricare l\'intero albero su un server online.</string>

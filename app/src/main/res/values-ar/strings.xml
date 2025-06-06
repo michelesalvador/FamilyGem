@@ -95,7 +95,7 @@
     <string name="make_backup">احفظ ZIP احتياطي</string>
     <string name="open">افتح</string>
     <string name="not_memory_tree">لا يتوفر ذاكرة كافية لهذه الشجرة.</string>
-    <string name="tree_info">معلومات</string>
+    <string name="info">معلومات</string>
     <string name="rename">غير الاسم</string>
     <string name="find_errors">تحرى الأخطاء</string>
     <string name="share_tree">شارك</string>

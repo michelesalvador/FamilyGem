@@ -39,7 +39,7 @@
     <string name="tree">Cây gia phả</string>
     <string name="simpsons_tree">Cây gia đình Simpsons</string>
     <string name="persons">Người</string>
-    <string name="tree_info">Thông tin</string>
+    <string name="info">Thông tin</string>
     <string name="rename">Đổi tên</string>
     <string name="auto_save">Tự động lưu</string>
     <string name="show_advanced_functions">Hiện các công cụ nâng cao</string>

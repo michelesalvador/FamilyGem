@@ -48,7 +48,7 @@
     <string name="no_useful_data">İşe yarar veriler alınamıyor.</string>
     <string name="make_backup">ZIP yedeğini kaydet</string>
     <string name="save">Kaydet</string>
-    <string name="tree_info">Bilgi</string>
+    <string name="info">Bilgi</string>
     <string name="rename">Yeniden adlandır</string>
     <string name="find_errors">Hataları bul</string>
     <string name="zip_exported_ok">ZIP dışa aktarıldı.</string>

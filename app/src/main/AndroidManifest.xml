@@ -132,7 +132,7 @@
             android:parentActivityName=".SettingsActivity" />
         <activity
             android:name=".InfoActivity"
-            android:label="@string/tree_info"
+            android:label="@string/info"
             android:parentActivityName=".TreesActivity" />
         <activity
             android:name=".MediaFoldersActivity"
