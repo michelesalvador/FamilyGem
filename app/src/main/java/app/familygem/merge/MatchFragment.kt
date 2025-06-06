@@ -1,7 +1,6 @@
 package app.familygem.merge
 
 import android.content.res.ColorStateList
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -42,12 +41,10 @@ class MatchFragment : BaseFragment(R.layout.merge_match_fragment) {
         binding.mergeMerge.setOnClickListener { nextMatch(Will.MERGE) }
         binding.mergeKeep.setOnClickListener { nextMatch(Will.KEEP) }
         // Accent color for selected option
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val destiny = model.personMatches[model.actualMatch].destiny
-            val tint = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.accent))
-            if (destiny == Will.MERGE) binding.mergeMerge.backgroundTintList = tint
-            else if (destiny == Will.KEEP) binding.mergeKeep.backgroundTintList = tint
-        }
+        val destiny = model.personMatches[model.actualMatch].destiny
+        val tint = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.accent))
+        if (destiny == Will.MERGE) binding.mergeMerge.backgroundTintList = tint
+        else if (destiny == Will.KEEP) binding.mergeKeep.backgroundTintList = tint
         // Options menu
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

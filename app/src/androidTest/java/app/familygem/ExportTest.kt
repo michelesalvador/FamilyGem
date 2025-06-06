@@ -65,7 +65,7 @@ class ExportTest {
         assertNotNull(gedcomFile)
         FileOutputStream(gedcomFile).use { inputStream.copyTo(it) }
         assertTrue(gedcomFile.isFile)
-        // This import fails on Android 4, 5 and 6 throwing a strange OutOfMemory error
+        // This import fails on Android 5 and 6 throwing a strange OutOfMemory error
         TreeUtil.importGedcom(appContext, Uri.fromFile(gedcomFile), {}, {})
         Espresso.pressBack()
         assertEquals(Global.settings.trees.size, 1)

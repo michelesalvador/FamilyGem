@@ -3,7 +3,6 @@ package app.familygem.purchase
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -125,8 +124,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
             return
         }
         val products = listOf(
-                QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId(PRODUCT_ID).setProductType(BillingClient.ProductType.INAPP).build()
+            QueryProductDetailsParams.Product.newBuilder().setProductId(PRODUCT_ID).setProductType(BillingClient.ProductType.INAPP).build()
         )
         val params = QueryProductDetailsParams.newBuilder().setProductList(products).build()
         val productDetailsResult = billingClient.queryProductDetails(params)
@@ -135,7 +133,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
             // Displays product details on layout
             productDetails.postValue(productDetailsResult.productDetailsList!![0])
         } else if (productDetailsResult.productDetailsList.isNullOrEmpty()
-                || response == BillingClient.BillingResponseCode.ERROR || response == BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE
+            || response == BillingClient.BillingResponseCode.ERROR || response == BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE
         ) {
             // Can't retrieve products, maybe for network error
             status.postValue(Status.ERROR)
@@ -188,7 +186,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
     private fun launchFlow(activity: Activity) {
         if (productDetails.value == null) return
         val productDetailsParamsList = listOf(
-                BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(productDetails.value!!).build()
+            BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(productDetails.value!!).build()
         )
         val billingFlowParams = BillingFlowParams.newBuilder().setProductDetailsParamsList(productDetailsParamsList).build()
         billingClient.launchBillingFlow(activity, billingFlowParams)
@@ -199,9 +197,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
      */
     private fun verifyPurchase(purchase: Purchase) {
         try {
-            var protocol = "https"
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) protocol = "http"
-            val url = URL("$protocol://www.familygem.app/purchase.php")
+            val url = URL("https://www.familygem.app/purchase.php")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
             val stream = connection.outputStream
@@ -223,9 +219,8 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
             } // Purchase just inserted on backend database
             else if (line == purchase.purchaseTime.toString() && !purchase.isAcknowledged) {
                 // Acknowledges purchase
-                val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
-                        .setPurchaseToken(purchase.purchaseToken).build()
-                billingClient.acknowledgePurchase(acknowledgePurchaseParams) { billingResult: BillingResult ->
+                val params = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.purchaseToken).build()
+                billingClient.acknowledgePurchase(params) { billingResult: BillingResult ->
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                         becomePremium()
                         purchaseToken.postValue(purchase.purchaseToken)
@@ -282,9 +277,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
      */
     private fun registerConsumedPurchase(purchaseToken: String) {
         try {
-            var protocol = "https"
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) protocol = "http"
-            val url = URL("$protocol://www.familygem.app/consume.php")
+            val url = URL("https://www.familygem.app/consume.php")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
             val stream = connection.outputStream

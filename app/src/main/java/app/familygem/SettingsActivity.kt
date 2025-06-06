@@ -83,11 +83,8 @@ class SettingsActivity : BaseActivity() {
         }
 
         // Local backup
-        // Not available on KitKat, because it's hard there to emulate ACTION_OPEN_DOCUMENT_TREE
-        binding.settingsBackup.run {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                setOnClickListener { startActivity(Intent(this@SettingsActivity, BackupActivity::class.java)) }
-            else visibility = View.GONE
+        binding.settingsBackup.setOnClickListener {
+            startActivity(Intent(this, BackupActivity::class.java))
         }
 
         // Language picker
@@ -119,21 +116,13 @@ class SettingsActivity : BaseActivity() {
                             Global.context = ContextCompat.getContextForLanguage(applicationContext)
                         }, 50) // Waits just a bit to get the correct locale
                     }
-                    // Removes switches to force KitKat to update their language
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                        val layout = binding.settingsLayout
-                        layout.removeView(saveSwitch)
-                        layout.removeView(loadSwitch)
-                        layout.removeView(expertSwitch)
-                        recreate()
-                    }
                     dialog.dismiss()
                 }.show()
         }
 
         // About
         binding.settingsAbout.setOnClickListener {
-            startActivity(Intent(this@SettingsActivity, AboutActivity::class.java))
+            startActivity(Intent(this, AboutActivity::class.java))
         }
     }
 

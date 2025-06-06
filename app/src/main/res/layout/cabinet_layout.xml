@@ -10,13 +10,13 @@
         android:id="@+id/cabinet_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/title_background"
         android:paddingStart="10dp"
         android:paddingTop="2dp"
         android:paddingEnd="28dp"
         android:textColor="#fff"
         android:textSize="15sp"
         android:textStyle="bold"
-        tools:background="@drawable/sghembo"
         tools:text="Cabinet title" />
 
     <LinearLayout

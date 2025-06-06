@@ -5,7 +5,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
@@ -1229,9 +1228,7 @@ public class U {
      */
     public static JSONObject getCredential(String request) {
         try {
-            String protocol = "https";
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) protocol = "http";
-            URL url = new URL(protocol + "://www.familygem.app/credential.php");
+            URL url = new URL("https://www.familygem.app/credential.php");
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod("POST");
             OutputStream stream = connection.getOutputStream();

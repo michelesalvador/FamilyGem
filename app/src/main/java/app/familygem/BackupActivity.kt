@@ -19,7 +19,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.ContextCompat.getDrawable
@@ -47,7 +46,6 @@ class BackupActivity : BaseActivity() {
     private lateinit var binding: BackupActivityBinding
     private val viewModel = Global.backupViewModel
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         BackupActivityBinding.inflate(layoutInflater).run {
@@ -151,7 +149,7 @@ class BackupActivity : BaseActivity() {
                                 val treeView = inflater.inflate(R.layout.backup_tree_item, backupSaveBox, false)
                                 backupSaveBox.addView(treeView)
                                 val idView = treeView.findViewById<TextView>(R.id.backupTree_id)
-                                if (Global.settings.expert) idView.text = item.tree.id.toString()
+                                if (Global.settings.expert) idView.text = "${item.tree.id}"
                                 else idView.visibility = View.GONE
                                 treeView.findViewById<TextView>(R.id.backupTree_title).text = item.tree.title
                                 val detailView = treeView.findViewById<TextView>(R.id.backupTree_detail)

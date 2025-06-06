@@ -5,7 +5,6 @@ import android.app.DownloadManager
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -55,7 +54,7 @@ class NewTreeActivity : BaseActivity() {
 
         // Creates an empty tree
         val emptyTree = findViewById<Button>(R.id.new_empty_tree)
-        if (dateIdExists && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (dateIdExists) {
             emptyTree.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.primary_light))
         }
         emptyTree.setOnClickListener {

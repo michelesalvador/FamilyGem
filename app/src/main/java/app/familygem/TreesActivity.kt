@@ -264,9 +264,7 @@ class TreesActivity : AppCompatActivity() {
         updateList()
 
         // Banner to choose backup folder or to disable backup
-        if (Global.settings.backupUri == BackupViewModel.NO_URI && Global.settings.backup
-            && Global.settings.trees.isNotEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-        ) {
+        if (Global.settings.backupUri == BackupViewModel.NO_URI && Global.settings.backup && Global.settings.trees.isNotEmpty()) {
             val bannerView = layoutInflater.inflate(R.layout.banner_layout, listView, false)
             bannerView.findViewById<Button>(R.id.banner_choose).setOnClickListener {
                 startActivity(Intent(this, BackupActivity::class.java))

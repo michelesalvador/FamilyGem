@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -35,13 +34,8 @@ public class NotifyReceiver extends BroadcastReceiver {
                     .setContentText(intent.getStringExtra(Extra.TEXT))
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true)
-                    .setCategory(NotificationCompat.CATEGORY_EVENT);
-            // KitKat does not support XML icons
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                builder.setSmallIcon(R.drawable.small_tree);
-            } else {
-                builder.setSmallIcon(R.drawable.albero_cherokee);
-            }
+                    .setCategory(NotificationCompat.CATEGORY_EVENT)
+                    .setSmallIcon(R.drawable.cherokee_tree);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.notify(intent.getIntExtra(Extra.ID, 1), builder.build());

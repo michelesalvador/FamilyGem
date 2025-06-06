@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -29,8 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:max="9"
-            android:mirrorForRtl="true" /><!-- Necessary for KitKat RTL layout -->
+            android:max="9" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -44,8 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:max="9"
-            android:mirrorForRtl="true" />
+            android:max="9" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/diagramSettings_partners"
@@ -66,8 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:max="9"
-            android:mirrorForRtl="true" />
+            android:max="9" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -81,8 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:max="9"
-            android:mirrorForRtl="true" />
+            android:max="9" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -96,8 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:max="9"
-            android:mirrorForRtl="true" />
+            android:max="9" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/diagramSettings_numbers"
@@ -130,7 +126,8 @@
                 android:paddingEnd="5dp"
                 android:paddingBottom="2dp"
                 android:textColor="#FFFFFFFF"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                tools:text="100" />
 
             <ImageView
                 android:layout_width="wrap_content"

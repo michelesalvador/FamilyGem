@@ -2,7 +2,6 @@ package app.familygem.share
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -236,9 +235,7 @@ class SharingActivity : BaseActivity() {
      */
     private suspend fun sendShareData() {
         try {
-            var protocol = "https"
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) protocol = "http"
-            val url = URL("$protocol://www.familygem.app/insert_share.php")
+            val url = URL("https://www.familygem.app/insert_share.php")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
             val stream: OutputStream = BufferedOutputStream(connection.outputStream)

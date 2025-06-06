@@ -24,7 +24,7 @@ android {
         minSdk 21
         targetSdk 35
         versionCode 27
-        versionName '1.1.0.3'
+        versionName '1.1.0.4'
         vectorDrawables.useSupportLibrary = true
         resourceConfigurations += ['ar', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw',
                                    'kn', 'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'ti', 'tr', 'uk', 'zh']
@@ -43,6 +43,8 @@ android {
                 signingConfig signingConfigs.config
         }
         release {
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (credential)
                 signingConfig signingConfigs.config
@@ -68,11 +70,11 @@ dependencies {
     // commons-net versions >= 3.9.0 throws NoClassDefFoundError on API <= 25
     implementation 'commons-net:commons-net:3.8.0'
     implementation 'com.google.code.gson:gson:2.11.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.9.0'
-    implementation 'androidx.security:security-crypto:1.1.0-alpha07'
+    implementation 'androidx.lifecycle:lifecycle-process:2.9.1'
+    implementation 'androidx.security:security-crypto:1.1.0-beta01'
     implementation 'org.familysearch.gedcom:gedcom:1.14.0'
     implementation 'androidx.work:work-runtime:2.10.1'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.9.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
@@ -90,10 +92,12 @@ dependencies {
     implementation files('libs/geonames-1.1.15.jar')
     // Don't update Jdom to version 2.x for compatibility with GeoNames 1.1.15
     implementation 'org.jdom:jdom:1.1.3'
+    // To avoid ClassNotFoundException org.apache.xerces.parsers.SAXParser when building with minifyEnabled
+    implementation 'xerces:xercesImpl:2.12.2'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test:rules:1.6.1'
     androidTestImplementation 'androidx.test.ext:junit-ktx:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
 }

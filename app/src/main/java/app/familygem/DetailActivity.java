@@ -28,7 +28,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.util.Pair;
 
@@ -692,7 +691,6 @@ public abstract class DetailActivity extends AppCompatActivity {
         View cabinetView = getLayoutInflater().inflate(R.layout.cabinet_layout, box, false);
         TextView titleView = cabinetView.findViewById(R.id.cabinet_title);
         titleView.setText(title);
-        titleView.setBackground(AppCompatResources.getDrawable(this, R.drawable.sghembo)); // For KitKat
         box.addView(cabinetView);
         LinearLayout cabinetBox = cabinetView.findViewById(R.id.cabinet_box);
         if (object instanceof Object[]) {

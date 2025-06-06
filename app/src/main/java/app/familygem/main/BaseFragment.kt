@@ -1,6 +1,5 @@
 package app.familygem.main
 
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -46,12 +45,10 @@ abstract class BaseFragment(layout: Int) : Fragment(layout) {
     }
 
     fun setupFastScroller(recyclerView: RecyclerView) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val thumbDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.thumb)
-            val lineDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.empty)
-            FastScrollerBuilder(recyclerView).setPadding(0, 0, 0, resources.getDimensionPixelSize(R.dimen.bottom_padding))
-                .setThumbDrawable(thumbDrawable!!).setTrackDrawable(lineDrawable!!).build()
-        }
+        val thumbDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.thumb)
+        val lineDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.empty)
+        FastScrollerBuilder(recyclerView).setPadding(0, 0, 0, resources.getDimensionPixelSize(R.dimen.bottom_padding))
+            .setThumbDrawable(thumbDrawable!!).setTrackDrawable(lineDrawable!!).build()
     }
 
     // Called almost every time a fragment is displayed, except onBackPressed from another BaseFragment
