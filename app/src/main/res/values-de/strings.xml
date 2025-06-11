@@ -411,4 +411,10 @@
     <string name="make_shared_media">Geteilte Datei erstellen</string>
     <string name="make_media">Datei erstellen</string>
     <string name="duplicates_lines">Linien verdoppeln</string>
+    <string name="copy_app_storage">Zum Speicher der Anwendung kopieren</string>
+    <string name="existing_name">Bereits vorhandener Name</string>
+    <string name="invalid_name">Ungültiger Name</string>
+    <string name="file_exists_reuse">Diese Datei existiert bereits.\nMöchten Sie sie wiederverwenden oder eine Kopie erstellen?</string>
+    <string name="use_existing">Vorhandene Datei wiederverwenden</string>
+    <string name="make_copy">Kopie erstellen</string>
 </resources>

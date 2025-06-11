@@ -395,6 +395,26 @@
     <string name="foster_family">Rejniška družina</string>
     <string name="paternal_family">Očetova družina</string>
     <string name="own_family">Lastna družina</string>
-    <string name="maternal_family">Mamina družina</string>
+    <string name="maternal_family">Matičina družina</string>
     <string name="duplicates_lines">Vrstice podvojenih</string>
+    <string name="local_backup">Lokalna varnostna kopija</string>
+    <string name="choose_disable_backup">Izbirajte mapo za varnostno kopijo ali izklopite lokalno varnostno kopiranje.\nLahko ga aktivirate kasneje.</string>
+    <string name="make_shared_media">Ustvariti skupno medijsko datoteko</string>
+    <string name="make_media">Ustvariti medij</string>
+    <string name="notification_time">Čas opomnika za rojstni dan</string>
+    <string name="person_birthday">Rođendani vsake živeće osebe.</string>
+    <string name="search_duplicates">Poiskati podvojitve</string>
+    <string name="skip">Izpustiti</string>
+    <string name="yes_to_all">Da za vse ostale</string>
+    <string name="no_to_all">Ne za vse ostale</string>
+    <string name="copy_app_storage">Kopirati v shranjevalnik aplikacije</string>
+    <string name="existing_name">Že obstoječi naziv</string>
+    <string name="invalid_name">Neveljaven naziv</string>
+    <string name="use_existing">Ponovno uporabiti obstoječo</string>
+    <string name="make_copy">Ustvariti kopijo</string>
+    <string name="recover">Obnoviti</string>
+    <string name="backup_trees">Shraniti varnostno kopijo izbranih dreves</string>
+    <string name="disable">Izklopiti</string>
+    <string name="backup_folder">Mapa z varnostnimi kopijami</string>
+    <string name="file_exists_reuse">Ta datoteka že obstaja.\nŽelite jo ponovno uporabiti ali ustvariti njeno kopijo?</string>
 </resources>
