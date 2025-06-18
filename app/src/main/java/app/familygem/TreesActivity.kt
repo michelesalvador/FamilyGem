@@ -9,10 +9,7 @@ import android.view.DragEvent
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ListView
@@ -376,26 +373,7 @@ class TreesActivity : AppCompatActivity() {
                 intent.putExtra(Extra.TREE_ID, treeId)
                 startActivity(intent)
             } else if (id == 2) { // Rename tree
-                val renameView = layoutInflater.inflate(R.layout.tree_title_dialog, null, false)
-                val titleEdit = renameView.findViewById<EditText>(R.id.treeTitle_edit)
-                titleEdit.setText(treeList[position]["title"])
-                val dialog = AlertDialog.Builder(this@TreesActivity)
-                    .setView(renameView).setTitle(R.string.title)
-                    .setPositiveButton(R.string.rename) { _, _ ->
-                        Global.settings.renameTree(treeId, titleEdit.text.toString().trim())
-                        updateList()
-                    }.setNeutralButton(R.string.cancel, null).create()
-                titleEdit.setOnEditorActionListener { _, action, _ ->
-                    if (action == EditorInfo.IME_ACTION_DONE) dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
-                    false
-                }
-                dialog.show()
-                renameView.postDelayed({
-                    titleEdit.requestFocus()
-                    titleEdit.setSelection(titleEdit.text.length)
-                    val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                    inputMethodManager.showSoftInput(titleEdit, InputMethodManager.SHOW_IMPLICIT)
-                }, 300)
+                TreeUtil.renameTree(this@TreesActivity, treeId) { updateList() }
             } else if (id == 3) { // Media folders
                 startActivity(Intent(this@TreesActivity, MediaFoldersActivity::class.java).putExtra(Extra.TREE_ID, treeId))
             } else if (id == 4) { // Find errors

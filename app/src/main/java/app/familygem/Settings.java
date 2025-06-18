@@ -85,7 +85,7 @@ public class Settings {
         trees.add(tree);
     }
 
-    void renameTree(int id, String newTitle) {
+    public void renameTree(int id, String newTitle) {
         for (Tree tree : trees) {
             if (tree.id == id) {
                 tree.title = newTitle;

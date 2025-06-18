@@ -3,9 +3,14 @@ package app.familygem.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
 import app.familygem.BuildConfig
 import app.familygem.Global
 import app.familygem.Notifier
@@ -592,5 +597,29 @@ object TreeUtil {
                             }
                     }
         return false
+    }
+
+    /** Displays a dialog to rename the tree. */
+    fun renameTree(context: Context, treeId: Int, onSuccess: () -> Unit) {
+        val renameView = LayoutInflater.from(context).inflate(R.layout.tree_title_dialog, null, false)
+        val titleEdit = renameView.findViewById<EditText>(R.id.treeTitle_edit)
+        titleEdit.setText(Global.settings.getTree(treeId).title)
+        val dialog = AlertDialog.Builder(context)
+            .setView(renameView).setTitle(R.string.title)
+            .setPositiveButton(R.string.rename) { _, _ ->
+                Global.settings.renameTree(treeId, titleEdit.text.toString().trim())
+                onSuccess()
+            }.setNeutralButton(R.string.cancel, null).create()
+        titleEdit.setOnEditorActionListener { _, action, _ ->
+            if (action == EditorInfo.IME_ACTION_DONE) dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
+            false
+        }
+        dialog.show()
+        renameView.postDelayed({
+            titleEdit.requestFocus()
+            titleEdit.setSelection(titleEdit.text.length)
+            val inputMethodManager = context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.showSoftInput(titleEdit, InputMethodManager.SHOW_IMPLICIT)
+        }, 300)
     }
 }

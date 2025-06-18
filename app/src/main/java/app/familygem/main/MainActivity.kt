@@ -220,6 +220,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
             mainTitle.text = Global.settings.currentTree.title
+            mainTitle.setOnClickListener {
+                TreeUtil.renameTree(this, Global.settings.openTree) { refreshInterface() }
+            }
             if (Global.settings.expert) {
                 val treeNumView = menuHeader.findViewById<TextView>(R.id.menuHeader_number)
                 treeNumView.text = "${Global.settings.openTree}"
