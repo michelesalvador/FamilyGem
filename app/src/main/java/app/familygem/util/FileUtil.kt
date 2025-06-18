@@ -16,6 +16,7 @@ import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -31,6 +32,7 @@ import app.familygem.CropImageActivity
 import app.familygem.DetailActivity
 import app.familygem.FileUri
 import app.familygem.Global
+import app.familygem.Logger.l
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Destination
@@ -54,10 +56,13 @@ import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Person
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 import java.net.URLConnection
 import java.util.regex.Pattern
 
@@ -68,23 +73,25 @@ object FileUtil {
     val gedcomMimeTypes = arrayOf("text/vnd.familysearch.gedcom", "application/octet-stream", "vnd.android.document/file", "text/plain")
 
     /** Extracts only the filename from a URI. */
-    fun extractFilename(context: Context, uri: Uri?, fallback: String = ""): String {
-        return uri?.let {
-            // file://
-            if (uri.scheme?.equals("file", true) == true) {
-                return@let uri.lastPathSegment
+    fun extractFilename(context: Context, uri: Uri?, fallback: String): String {
+        return uri?.let { extractFilename(context, uri) } ?: fallback
+    }
+
+    fun extractFilename(context: Context, uri: Uri): String? {
+        // file://
+        if (uri.scheme?.equals("file", true) == true) {
+            return uri.lastPathSegment
+        }
+        // Cursor (usually it's used this)
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                return cursor.getString(index)
             }
-            // Cursor (usually it's used this)
-            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    return@let cursor.getString(index)
-                }
-            }
-            // DocumentFile
-            val document = DocumentFile.fromSingleUri(context, uri)
-            document?.name
-        } ?: fallback
+        }
+        // DocumentFile
+        val document = DocumentFile.fromSingleUri(context, uri)
+        return document?.name
     }
 
     /**
@@ -280,6 +287,7 @@ object FileUtil {
         progressWheel?.visibility = View.VISIBLE
         val fileUri = oldFileUri ?: FileUri(imageView.context, media, treeId)
         val glide = Glide.with(imageView)
+        val coroutineScope = if (imageView.context is AppCompatActivity) (imageView.context as AppCompatActivity).lifecycleScope else GlobalScope
         if (fileUri.exists()) {
             previewPdf(imageView.context, fileUri).onSuccess { bitmap ->
                 val builder = glide.load(bitmap)
@@ -307,8 +315,6 @@ object FileUtil {
                 // File or URI one is correct, but image can't be displayed (e.g. unsupported format)
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                     // A local file with no preview
-                    val coroutineScope =
-                        if (imageView.context is AppCompatActivity) (imageView.context as AppCompatActivity).lifecycleScope else GlobalScope
                     coroutineScope.launch(Dispatchers.Main) {
                         glide.load(generateIcon(imageView.context, fileUri)).placeholder(R.drawable.image).into(imageView)
                     }
@@ -324,12 +330,24 @@ object FileUtil {
                 override fun onResourceReady(
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
                 ): Boolean {
-                    completeDisplay(Type.WEB)
+                    completeDisplay(Type.WEB_IMAGE)
                     return false
                 }
 
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                    completeDisplay(Type.PLACEHOLDER)
+                    coroutineScope.launch(Dispatchers.IO) {
+                        try {
+                            val connection = URL(media.file).openConnection() as HttpURLConnection
+                            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                                withContext(Dispatchers.Main) {
+                                    glide.load(generateIcon(imageView.context, fileUri)).placeholder(R.drawable.image).into(imageView)
+                                    completeDisplay(Type.WEB_ANYTHING)
+                                }
+                            } else throw Exception()
+                        } catch (exception: Exception) {
+                            withContext(Dispatchers.Main) { completeDisplay(Type.PLACEHOLDER) }
+                        }
+                    }
                     return false
                 }
             }).into(imageView)
@@ -371,7 +389,8 @@ object FileUtil {
     /** Creates a bitmap of a generic file icon with the format overwritten. */
     fun generateIcon(context: Context, fileUri: FileUri): Bitmap {
         val view = LayoutInflater.from(context).inflate(R.layout.media_file, null)
-        val format = if (!fileUri.media.format.isNullOrBlank()) fileUri.media.format else fileUri.extension
+        val format = if (!fileUri.media.format.isNullOrBlank()) fileUri.media.format else fileUri.extension?.uppercase()
+            ?: MimeTypeMap.getFileExtensionFromUrl(fileUri.media.file).uppercase()
         view.findViewById<TextView>(R.id.media_text).text = format
         view.measure(0, 0) // For View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         val size = U.dpToPx(200F)

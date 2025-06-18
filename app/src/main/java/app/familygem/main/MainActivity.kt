@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     )
     private val fragments = listOf<Class<*>>(
         DiagramFragment::class.java, PersonsFragment::class.java, FamiliesFragment::class.java,
-        MediaFragment::class.java, NotesFragment::class.java, SourcesFragment::class.java, RepositoriesFragment::class.java,
+        GalleryFragment::class.java, NotesFragment::class.java, SourcesFragment::class.java, RepositoriesFragment::class.java,
         SubmittersFragment::class.java, TreeSettingsFragment::class.java
     )
 
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         furnishMenu()
         if (savedInstanceState == null) { // Loads only the first time, not rotating the screen
             val fragment: BaseFragment = if (intent.getBooleanExtra(Choice.PERSON, false)) PersonsFragment()
-            else if (intent.getBooleanExtra(Choice.MEDIA, false)) MediaFragment()
+            else if (intent.getBooleanExtra(Choice.MEDIA, false)) GalleryFragment()
             else if (intent.getBooleanExtra(Choice.NOTE, false)) NotesFragment()
             else if (intent.getBooleanExtra(Choice.SOURCE, false)) SourcesFragment()
             else if (intent.getBooleanExtra(Choice.REPOSITORY, false)) RepositoriesFragment()

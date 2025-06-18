@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
-import android.webkit.MimeTypeMap
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.util.FileUtil
 import org.folg.gedcom.model.Media
@@ -21,7 +20,8 @@ class FileUri(val context: Context, val media: Media, val treeId: Int = Global.s
     var uri: Uri? = null
     var path: String? = null
     var name: String? = null
-    var extension: String? = null
+    var extension: String? = null // Always lowercase
+    var treeDirFilename = false // File is found in external app storage using the last part of media link
     var relative = false // File was found in a subfolder
     val fileDescriptor: ParcelFileDescriptor?
         get() = if (file != null) ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -33,8 +33,11 @@ class FileUri(val context: Context, val media: Media, val treeId: Int = Global.s
             file = getFileFromMedia()
             if (!fileOnly && file == null) uri = getUriFromMedia()
             path = file?.absolutePath ?: uri?.path
-            name = file?.name ?: FileUtil.extractFilename(context, uri)
-            extension = MimeTypeMap.getFileExtensionFromUrl(name)
+            name = file?.name ?: uri?.let { FileUtil.extractFilename(context, it) }
+            extension = name?.let {
+                val index = it.lastIndexOf('.')
+                if (index >= 0) it.substring(index + 1).lowercase() else null
+            }
         }
     }
 
@@ -46,7 +49,10 @@ class FileUri(val context: Context, val media: Media, val treeId: Int = Global.s
         // File name in app tree storage
         val name = test.name
         test = File(context.getExternalFilesDir(treeId.toString()), name)
-        if (test.isFile && test.canRead()) return test
+        if (test.isFile && test.canRead()) {
+            if (name != mediaPath) treeDirFilename = true // Filename is different from the media link
+            return test
+        }
         // Media folders
         for (dir in Global.settings.getTree(treeId).dirs.filterNot { it == null }) {
             // Media folder + file path

@@ -42,10 +42,13 @@ import com.bumptech.glide.signature.ObjectKey
 import com.github.panpf.zoomimage.GlideZoomImageView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.folg.gedcom.model.NoteContainer
+import java.io.File
+import java.net.HttpURLConnection
 import java.net.URL
 
 /** Activity to display and manage any file. */
@@ -53,6 +56,7 @@ class FileActivity : AppCompatActivity() {
 
     private lateinit var fileUri: FileUri
     private lateinit var wheel: ProgressBar
+    private lateinit var treeDir: File
     private var type: Type = Type.NONE
     private var name = ""
 
@@ -61,6 +65,7 @@ class FileActivity : AppCompatActivity() {
         setContentView(R.layout.file_activity)
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // Displays back arrow on toolbar
         wheel = findViewById(R.id.progress_wheel)
+        treeDir = getExternalFilesDir(Global.settings.openTree.toString())!!
         type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) intent.getSerializableExtra(Extra.TYPE, Type::class.java)!!
         else intent.getSerializableExtra(Extra.TYPE) as Type
         displayImage()
@@ -78,7 +83,11 @@ class FileActivity : AppCompatActivity() {
                 Type.PDF -> FileUtil.previewPdf(this, fileUri).getOrElse { R.drawable.image }
                 else -> fileUri.file ?: fileUri.uri!!
             }
-        } else if (type == Type.WEB) {
+        } else if (type == Type.WEB_ANYTHING) {
+            name = URLUtil.guessFileName(media.file, null, null)
+            if (name.endsWith(".bin")) name = name.substring(0, name.lastIndexOf(".bin")) // File extension added by URLUtil
+            FileUtil.generateIcon(this, fileUri)
+        } else if (type == Type.WEB_IMAGE) {
             name = URLUtil.guessFileName(media.file, null, null)
             media.file
         } else {
@@ -86,20 +95,21 @@ class FileActivity : AppCompatActivity() {
             R.drawable.image
         }
         title = name
-        val builder = Glide.with(this).load(resource).error(R.drawable.image).listener(object : RequestListener<Drawable> {
-            override fun onResourceReady(
-                resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
-            ): Boolean {
-                wheel.visibility = View.GONE
-                return false
-            }
+        val builder = Glide.with(this).load(resource).placeholder(R.drawable.image).error(R.drawable.image)
+            .listener(object : RequestListener<Drawable> {
+                override fun onResourceReady(
+                    resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
+                ): Boolean {
+                    wheel.visibility = View.GONE
+                    return false
+                }
 
-            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                wheel.visibility = View.GONE
-                Toast.makeText(this@FileActivity, e?.localizedMessage, Toast.LENGTH_LONG).show()
-                return false
-            }
-        })
+                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
+                    wheel.visibility = View.GONE
+                    Toast.makeText(this@FileActivity, e?.localizedMessage, Toast.LENGTH_LONG).show()
+                    return false
+                }
+            })
         if (fileUri.exists()) {
             if (Global.croppedPaths.contains(fileUri.path)) {
                 builder.signature(ObjectKey(Global.croppedPaths[fileUri.path]!!)) // Clears Glide cache
@@ -109,7 +119,7 @@ class FileActivity : AppCompatActivity() {
         builder.into(zoomImage)
         zoomImage.setOnClickListener { // Opens the file with some other app
             val dataUri = if (fileUri.file != null) FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", fileUri.file!!)
-            else if (type == Type.WEB) Uri.parse(Global.editedMedia.file)
+            else if (type == Type.WEB_IMAGE || type == Type.WEB_ANYTHING) Uri.parse(Global.editedMedia.file)
             else fileUri.uri!!
             val mimeType = contentResolver.getType(dataUri)
             val intent = Intent(Intent.ACTION_VIEW)
@@ -130,56 +140,17 @@ class FileActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.add(0, 0, 0, R.string.info)
-        if (fileUri.file == null || !FileUtil.isOwnedDirectory(this, fileUri.file!!)) menu.add(0, 1, 0, R.string.copy_app_storage)
-        if (name.isNotEmpty() && type != Type.WEB) menu.add(0, 2, 0, R.string.rename)
+        if (fileUri.file == null || !fileUri.file!!.startsWith(treeDir)) menu.add(0, 1, 0, R.string.copy_app_storage)
+        if (name.isNotEmpty() && type != Type.WEB_IMAGE && type != Type.WEB_ANYTHING) menu.add(0, 2, 0, R.string.rename)
         if (type == Type.CROPPABLE) menu.add(0, 3, 0, R.string.crop)
-        if (type != Type.WEB) menu.add(0, 4, 0, R.string.delete)
+        if (type != Type.WEB_IMAGE && type != Type.WEB_ANYTHING) menu.add(0, 4, 0, R.string.delete)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             0 -> displayFileInfo()
-            1 -> { // Copies file to app external storage
-                wheel.visibility = View.VISIBLE
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val newFile = FileUtil.nextAvailableFileName(getExternalFilesDir(Global.settings.openTree.toString())!!, name)
-                    val copied = if (fileUri.file != null) {
-                        fileUri.file!!.copyTo(newFile)
-                        true
-                    } else if (fileUri.uri != null) {
-                        contentResolver.openInputStream(fileUri.uri!!).use input@{ inputStream ->
-                            newFile.outputStream().use {
-                                inputStream?.copyTo(it)
-                                return@input true
-                            }
-                        }
-                    } else if (type == Type.WEB) {
-                        URL(Global.editedMedia.file).openStream().use stream@{ inputStream ->
-                            newFile.outputStream().use {
-                                inputStream?.copyTo(it)
-                                type = Type.CROPPABLE
-                                return@stream true
-                            }
-                        }
-                    } else false
-                    val message = if (copied) {
-                        fileUri.file = newFile
-                        val modified = updateFileOccurrences(newFile.name)
-                        if (modified.isNotEmpty()) {
-                            name = newFile.name
-                            TreeUtil.save(true, *modified)
-                        }
-                        "File copied."
-                    } else "Unable to copy file."
-                    withContext(Dispatchers.Main) {
-                        title = name
-                        invalidateOptionsMenu() // To remove copy option
-                        Toast.makeText(this@FileActivity, message, Toast.LENGTH_LONG).show()
-                        wheel.visibility = View.GONE
-                    }
-                }
-            }
+            1 -> copyToTreeStorage()
             2 -> renameFile()
             3 -> FileUtil.cropImage(this, fileUri.file, fileUri.uri, cropLauncher)
             4 -> Util.confirmDelete(this) { // Delete file
@@ -218,18 +189,76 @@ class FileActivity : AppCompatActivity() {
                 }
                 val bytes = fileUri.file?.length() ?: DocumentFile.fromSingleUri(this, fileUri.uri!!)?.length() ?: 0
                 sizeView?.text = Formatter.formatFileSize(this, bytes)
-            } else if (type == Type.WEB) {
+            } else if (type == Type.WEB_IMAGE || type == Type.WEB_ANYTHING) {
                 urlView?.text = Global.editedMedia.file
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val bytes = URL(Global.editedMedia.file).openConnection().contentLength.toLong()
-                    withContext(Dispatchers.Main) {
-                        sizeView?.text = Formatter.formatFileSize(this@FileActivity, bytes)
+                lifecycleScope.launch(IO) {
+                    val connection = URL(Global.editedMedia.file).openConnection() as HttpURLConnection
+                    if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                        val bytes = connection.contentLength.toLong()
+                        withContext(Main) {
+                            sizeView?.text = if (bytes >= 0) Formatter.formatFileSize(this@FileActivity, bytes) else "Size unknown"
+                        }
+                    } else withContext(Main) {
+                        sizeView?.text = "${connection.responseCode} ${connection.responseMessage}"
                     }
                 }
+            }
+            urlView?.setOnLongClickListener {
+                U.copyToClipboard(getText(android.R.string.copyUrl), urlView.text)
+                Toast.makeText(this, "URL copied.", Toast.LENGTH_SHORT).show()
+                true
             }
             dialog.show()
         } catch (exception: Exception) {
             Toast.makeText(this, exception.message ?: "Unable to display file info.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /** Copies the file to app external storage. */
+    private fun copyToTreeStorage() {
+        wheel.visibility = View.VISIBLE
+        lifecycleScope.launch(IO) {
+            val newFile = FileUtil.nextAvailableFileName(treeDir, name)
+            if (fileUri.file != null) {
+                fileUri.file!!.copyTo(newFile)
+                completeCopy(newFile)
+            } else if (fileUri.uri != null) {
+                contentResolver.openInputStream(fileUri.uri!!).use { inputStream ->
+                    newFile.outputStream().use {
+                        inputStream?.copyTo(it)
+                        completeCopy(newFile)
+                    }
+                }
+            } else if (type == Type.WEB_IMAGE || type == Type.WEB_ANYTHING) {
+                val connection = URL(Global.editedMedia.file).openConnection() as HttpURLConnection
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    connection.inputStream.use { inputStream ->
+                        newFile.outputStream().use {
+                            inputStream?.copyTo(it)
+                            type = if (type == Type.WEB_IMAGE) Type.CROPPABLE else Type.DOCUMENT
+                            completeCopy(newFile)
+                        }
+                    }
+                } else completeCopy()
+            } else completeCopy()
+        }
+    }
+
+    private suspend fun completeCopy(newFile: File? = null) {
+        val message = if (newFile != null) {
+            val modified = updateFileOccurrences(newFile.name)
+            if (modified.isNotEmpty()) {
+                TreeUtil.save(true, *modified)
+            }
+            withContext(Main) {
+                displayImage()
+                invalidateOptionsMenu() // To remove copy option
+            }
+            "File copied."
+        } else "Unable to copy file."
+        withContext(Main) {
+            Toast.makeText(this@FileActivity, message, Toast.LENGTH_LONG).show()
+            wheel.visibility = View.GONE
         }
     }
 

@@ -17,6 +17,7 @@ import app.familygem.util.unlinkMedia
 import app.familygem.visitor.MediaContainerList
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.MediaContainer
+import java.util.Collections
 
 /** Displays all the media of a person. */
 class MediaFragment : BaseFragment() {
@@ -31,7 +32,7 @@ class MediaFragment : BaseFragment() {
             recyclerView.setHasFixedSize(true)
             val layoutManager: RecyclerView.LayoutManager = GridLayoutManager(context, 2)
             recyclerView.layoutManager = layoutManager
-            val adapter = MediaAdapter(mediaVisitor.mediaList, true)
+            val adapter = MediaAdapter(mediaVisitor.list, true)
             recyclerView.adapter = adapter
             layout.addView(recyclerView)
         }
@@ -43,53 +44,72 @@ class MediaFragment : BaseFragment() {
     override fun onCreateContextMenu(menu: ContextMenu, view: View, info: ContextMenuInfo?) {
         media = view.getTag(R.id.tag_object) as Media
         container = view.getTag(R.id.tag_container) as MediaContainer
-        if (mediaVisitor.mediaList.size > 1 && media.primary == null)
-            menu.add(0, 0, 0, R.string.primary_media)
+        if (mediaVisitor.list.size > 1 && media.primary == null) menu.add(0, 0, 0, R.string.primary_media)
         if (media.id != null) {
-            menu.add(0, 1, 0, R.string.make_media)
-            menu.add(0, 2, 0, R.string.unlink)
-        } else menu.add(0, 3, 0, R.string.make_shared_media)
-        menu.add(0, 4, 0, R.string.delete)
+            val index = person.mediaRefs.map { it.ref }.indexOf(media.id)
+            if (index > 0) menu.add(0, 1, 0, R.string.move_up)
+            if (index >= 0 && index < person.mediaRefs.size - 1) menu.add(0, 2, 0, R.string.move_down)
+            menu.add(0, 3, 0, R.string.make_media)
+            menu.add(0, 4, 0, R.string.unlink)
+        } else {
+            val index = person.media.indexOf(media)
+            if (index > 0) menu.add(0, 5, 0, R.string.move_up)
+            if (index >= 0 && index < person.media.size - 1) menu.add(0, 6, 0, R.string.move_down)
+            menu.add(0, 7, 0, R.string.make_shared_media)
+        }
+        menu.add(0, 8, 0, R.string.delete)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+        when (item.itemId) {
             0 -> { // Primary media
-                mediaVisitor.mediaList.forEach { it.media.primary = null } // Resets them all then marks one
+                mediaVisitor.list.forEach { it.media.primary = null } // Resets them all then marks one
                 media.primary = "Y"
-                if (media.id != null) // To update the change date in the Media record rather than in the Person
+                if (media.id != null) { // To update the change date in the Media record rather than in the Person
                     save(true, media)
-                else save(true, person)
-                refresh()
-                true
+                    refresh()
+                    return true
+                }
             }
-            1 -> { // Make media
+            1 -> swapSharedMedia(-1)
+            2 -> swapSharedMedia(1)
+            3 -> { // Make media
                 save(true, *MediaUtil.makeSimpleMedia(media))
                 Memory.setInstanceAndAllSubsequentToNull(media)
                 refresh()
-                true
+                return true
             }
-            2 -> { // Unlink
-                container.unlinkMedia(media.id)
-                save(true, person)
-                refresh()
-                true
-            }
-            3 -> { // Make shared media
+            4 -> container.unlinkMedia(media.id)
+            5 -> swapMedia(-1)
+            6 -> swapMedia(1)
+            7 -> { // Make shared media
                 save(true, *MediaUtil.makeSharedMedia(media))
                 Memory.setInstanceAndAllSubsequentToNull(media)
                 refresh()
-                true
+                return true
             }
-            4 -> { // Delete
+            8 -> { // Delete
                 Util.confirmDelete(requireContext()) {
                     val leaders = MediaUtil.deleteMedia(media)
                     save(true, *leaders)
                     refresh()
                 }
-                true
+                return true
             }
-            else -> false
+            else -> return false
         }
+        save(true, person)
+        refresh()
+        return true
+    }
+
+    private fun swapSharedMedia(direction: Int) {
+        val index = person.mediaRefs.map { it.ref }.indexOf(media.id)
+        Collections.swap(person.mediaRefs, index, index + direction)
+    }
+
+    private fun swapMedia(direction: Int) {
+        val index = person.media.indexOf(media)
+        Collections.swap(person.media, index, index + direction)
     }
 }

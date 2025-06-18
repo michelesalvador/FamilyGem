@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.ImageView
 import app.familygem.DetailActivity
 import app.familygem.FileActivity
+import app.familygem.FileUri
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.R
@@ -25,7 +26,9 @@ import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.MediaContainer
 
 class MediaActivity : DetailActivity() {
+
     lateinit var media: Media
+    lateinit var fileUri: FileUri
     private lateinit var imageLayout: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,7 +86,7 @@ class MediaActivity : DetailActivity() {
         imageLayout = LayoutInflater.from(this).inflate(R.layout.image_layout, box, false)
         box.addView(imageLayout, position)
         val imageView = imageLayout.findViewById<ImageView>(R.id.image_picture)
-        FileUtil.showImage(media, imageView, 0, imageLayout.findViewById(R.id.image_progress))
+        fileUri = FileUtil.showImage(media, imageView, 0, imageLayout.findViewById(R.id.image_progress))
         imageLayout.setOnClickListener {
             when (val fileType = imageView.getTag(R.id.tag_file_type) as Type) {
                 Type.NONE, Type.PLACEHOLDER -> { // Placeholder instead of image, the media is loading or doesn't exist

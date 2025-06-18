@@ -325,6 +325,7 @@
     <string name="shared_media">Media condiviso</string>
     <string name="make_shared_media">Rendi media condiviso</string>
     <string name="make_media">Rendi media</string>
+    <string name="shrink_path">Riduci percorso file</string>
     <string name="format">Formato</string>
     <string name="primary">Principale</string>
     <string name="scrapbook">Album</string>

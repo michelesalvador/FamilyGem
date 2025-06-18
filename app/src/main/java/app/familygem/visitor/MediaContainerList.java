@@ -25,7 +25,7 @@ import app.familygem.profile.MediaFragment;
  */
 public class MediaContainerList extends Visitor {
 
-    public List<MediaWrapper> mediaList = new ArrayList<>();
+    public List<MediaWrapper> list = new ArrayList<>();
     private Gedcom gedcom;
     private final boolean requestAll;
 
@@ -41,8 +41,8 @@ public class MediaContainerList extends Visitor {
         if (requestAll) {
             for (Media media : object.getAllMedia(gedcom)) { // Shared and simple Media of object
                 MediaWrapper wrapper = new MediaWrapper(media, object);
-                if (!mediaList.contains(wrapper))
-                    mediaList.add(wrapper);
+                if (!list.contains(wrapper))
+                    list.add(wrapper);
             }
         }
         return true;
@@ -51,7 +51,7 @@ public class MediaContainerList extends Visitor {
     @Override
     public boolean visit(Gedcom gedcom) {
         for (Media media : gedcom.getMedia())
-            mediaList.add(new MediaWrapper(media, gedcom)); // Collects the shared media
+            list.add(new MediaWrapper(media, gedcom)); // Collects the shared media
         if (this.gedcom == null) this.gedcom = gedcom; // Just in case
         return true;
     }

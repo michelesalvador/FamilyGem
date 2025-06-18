@@ -31,9 +31,7 @@ import kotlinx.coroutines.launch
 import org.folg.gedcom.model.Family
 import kotlin.concurrent.timer
 
-/**
- * List of all families of the tree.
- */
+/** List of all families of the tree. */
 class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
 
     private lateinit var binding: RecyclerviewBinding
@@ -72,7 +70,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
     }
 
     override fun showContent() {
-        binding.recyclerWheel.root.visibility = View.VISIBLE
+        binding.recyclerProgress.visibility = View.VISIBLE
         val prepareJob = lifecycleScope.launch(Dispatchers.Default) {
             allFamilies.clear()
             Global.gc.families.forEach { allFamilies.add(FamilyWrapper(it)) }
@@ -85,7 +83,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
                 sortFamilies()
                 adapter.notifyDataSetChanged()
                 if (prepareJob.isCompleted) {
-                    binding.recyclerWheel.root.visibility = View.GONE
+                    binding.recyclerProgress.visibility = View.GONE
                     cancel()
                 }
             }

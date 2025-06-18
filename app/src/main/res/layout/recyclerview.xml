@@ -17,7 +17,9 @@
         android:id="@+id/recycler_fab"
         layout="@layout/fab" />
 
-    <include
-        android:id="@+id/recycler_wheel"
-        layout="@layout/progress" />
+    <app.familygem.ProgressView
+        android:id="@+id/recycler_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

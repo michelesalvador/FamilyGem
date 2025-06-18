@@ -19,9 +19,12 @@ enum class Type {
     /** Generic file icon. */
     DOCUMENT,
 
-    /** Image from web. */
-    WEB,
+    /** Image with preview from the web. */
+    WEB_IMAGE,
 
-    /** Image failed loading. */
+    /** Anything else from the web. */
+    WEB_ANYTHING,
+
+    /** File failed loading. */
     PLACEHOLDER
 }

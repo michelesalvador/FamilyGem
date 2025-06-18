@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +22,7 @@ import app.familygem.GedcomDateConverter
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.PersonEditorActivity
+import app.familygem.ProgressView
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Choice
@@ -57,7 +57,7 @@ class PersonsFragment : BaseFragment() {
     private val allPeople: MutableList<PersonWrapper> = ArrayList() // The immutable complete list of people
     private var selectedPeople: MutableList<PersonWrapper> = ArrayList() // Some persons selected by the search feature
     private val adapter = PeopleAdapter()
-    private lateinit var progressWheel: ProgressBar
+    private lateinit var progress: ProgressView
     private var prepareJob: Job? = null
     private var searchView: SearchView? = null
     private var order = Order.NONE
@@ -89,13 +89,13 @@ class PersonsFragment : BaseFragment() {
         recyclerView.setPadding(padding, padding, padding, recyclerView.paddingBottom)
         recyclerView.adapter = adapter
         view.findViewById<View>(R.id.fab).setOnClickListener { startActivity(Intent(context, PersonEditorActivity::class.java)) }
-        progressWheel = view.findViewById(R.id.recycler_wheel)
+        progress = view.findViewById(R.id.recycler_progress)
         setupFastScroller(recyclerView)
         return view
     }
 
     override fun showContent() {
-        progressWheel.visibility = View.VISIBLE
+        progress.visibility = View.VISIBLE
         if (prepareJob == null || prepareJob!!.isCompleted) { // To avoid ConcurrentModificationException
             prepareJob = lifecycleScope.launch(Dispatchers.Default) {
                 // Recreates the list for some person modified, added or removed
@@ -114,7 +114,7 @@ class PersonsFragment : BaseFragment() {
             lifecycleScope.launch(Dispatchers.Main) {
                 adapter.filter.filter(searchView?.query ?: "")
                 if (prepareJob!!.isCompleted) {
-                    progressWheel.visibility = View.GONE
+                    progress.visibility = View.GONE
                     cancel()
                 }
             }

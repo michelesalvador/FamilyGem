@@ -5,7 +5,10 @@
     android:layout_height="match_parent"
     android:background="@color/back_element"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="48dp"
     android:theme="@style/AppTheme">
 
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
@@ -31,6 +34,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:paddingBottom="30dp"
         tools:text="123 MB" />
 </LinearLayout>

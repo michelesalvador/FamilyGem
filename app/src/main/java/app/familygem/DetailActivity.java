@@ -419,7 +419,7 @@ public abstract class DetailActivity extends AppCompatActivity {
                 NoteRef noteRef = new NoteRef();
                 noteRef.setRef(data.getStringExtra(Extra.NOTE_ID));
                 ((NoteContainer)object).addNoteRef(noteRef);
-            } else if (requestCode == 43616) { // Media from main.MediaFragment
+            } else if (requestCode == 43616) { // Media from GalleryFragment
                 MediaRef mediaRef = new MediaRef();
                 mediaRef.setRef(data.getStringExtra(Extra.MEDIA_ID));
                 ((MediaContainer)object).addMediaRef(mediaRef);
@@ -1160,7 +1160,9 @@ public abstract class DetailActivity extends AppCompatActivity {
             } else if (pieceObject instanceof String) {
                 if (((TextView)view.findViewById(R.id.event_text)).getText().length() > 0)
                     menu.add(0, 0, 0, R.string.copy);
-                menu.add(0, 1, 0, R.string.delete);
+                if (pieceObject.equals("File") && ((MediaActivity)this).fileUri.getTreeDirFilename())
+                    menu.add(0, 1, 0, R.string.shrink_path);
+                menu.add(0, 2, 0, R.string.delete);
             }
         }
     }
@@ -1177,7 +1179,11 @@ public abstract class DetailActivity extends AppCompatActivity {
                 U.copyToClipboard(((TextView)pieceView.findViewById(R.id.event_title)).getText(),
                         ((TextView)pieceView.findViewById(R.id.event_text)).getText());
                 return true;
-            case 1: // Delete editable piece
+            case 1: // Shrink Media file path
+                String filename = ((MediaActivity)this).fileUri.getName();
+                ((MediaActivity)this).media.setFile(filename);
+                break;
+            case 2: // Delete editable piece
                 Util.INSTANCE.confirmDelete(this, () -> {
                     try {
                         object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, (Object)null);
