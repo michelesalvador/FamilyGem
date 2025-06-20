@@ -409,4 +409,9 @@
     <string name="no_to_all">Nie dla wszystkich pozostałych</string>
     <string name="duplicates_lines">Linie duplikatów</string>
     <string name="make_copy">Zrób kopię</string>
+    <string name="copy_app_storage">Kopiować do pamięci aplikacji</string>
+    <string name="use_existing">Ponownie wykorzystać istniejący</string>
+    <string name="file_exists_reuse">Ten plik już istnieje.\nCzy chcesz go ponownie wykorzystać czy zrobić jego kopię?</string>
+    <string name="existing_name">Istniejąca już nazwa</string>
+    <string name="invalid_name">Nieważna nazwa</string>
 </resources>

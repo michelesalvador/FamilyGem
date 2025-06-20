@@ -414,4 +414,7 @@
     <string name="use_existing">Znovu použít stávající</string>
     <string name="make_copy">Vytvořit kopii</string>
     <string name="file_exists_reuse">Tento soubor již existuje.\nChcete jej znovu použít, nebo vytvořit jeho kopii?</string>
+    <string name="copy_app_storage">Kopírovat do úložiště aplikace</string>
+    <string name="existing_name">Již existující název</string>
+    <string name="invalid_name">Neplatný název</string>
 </resources>
