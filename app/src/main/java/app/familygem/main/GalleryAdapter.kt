@@ -20,7 +20,7 @@ import app.familygem.detail.MediaActivity
 import app.familygem.util.FileUtil
 import app.familygem.util.MediaUtil
 import app.familygem.visitor.FindStack
-import app.familygem.visitor.GalleryList.MediaWrapper
+import app.familygem.visitor.MediaLeaders.MediaWrapper
 import org.folg.gedcom.model.Media
 import java.util.Locale
 

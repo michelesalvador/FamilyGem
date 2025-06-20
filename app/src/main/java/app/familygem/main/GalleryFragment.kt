@@ -32,7 +32,7 @@ import app.familygem.util.FileUtil
 import app.familygem.util.MediaUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
-import app.familygem.visitor.GalleryList
+import app.familygem.visitor.MediaLeaders
 import app.familygem.visitor.MediaReferences
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers.Default
@@ -49,7 +49,7 @@ import java.util.Collections
 /** Fragment with a list of all Media of the tree. */
 class GalleryFragment : BaseFragment() {
 
-    private lateinit var mediaVisitor: GalleryList
+    private lateinit var mediaVisitor: MediaLeaders
     lateinit var adapter: GalleryAdapter
     private var sharedMediaOnly = false
     private lateinit var progress: ProgressView
@@ -65,7 +65,7 @@ class GalleryFragment : BaseFragment() {
             FileUtil.displayFileChooser(requireContext(), sharedMediaLauncher, Destination.SHARED_MEDIA)
         }
         sharedMediaOnly = requireActivity().intent.getBooleanExtra(Choice.MEDIA, false)
-        mediaVisitor = GalleryList(sharedMediaOnly)
+        mediaVisitor = MediaLeaders(sharedMediaOnly, true)
         recyclerView.layoutManager = GridLayoutManager(context, 2)
         adapter = GalleryAdapter(mediaVisitor.list)
         recyclerView.adapter = adapter
@@ -270,7 +270,7 @@ class GalleryFragment : BaseFragment() {
         }
     }
 
-    private fun completeCopy(wrapperList: List<GalleryList.MediaWrapper>? = null, newFile: File? = null) {
+    private fun completeCopy(wrapperList: List<MediaLeaders.MediaWrapper>? = null, newFile: File? = null) {
         if (wrapperList != null && newFile != null) {
             val name = newFile.name
             wrapperList.filter { it.media.file != name }.forEach {

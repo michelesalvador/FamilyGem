@@ -268,8 +268,8 @@ public class ConfirmationActivity extends BaseActivity {
     void copyAllFiles(Object object) {
         MediaLeaders searchMedia = new MediaLeaders();
         ((Visitable)object).accept(searchMedia);
-        for (Pair<Media, NoteContainer> pair : searchMedia.getList()) {
-            copyFile(pair.component1(), pair.component2());
+        for (MediaLeaders.MediaWrapper wrapper : searchMedia.getList()) {
+            copyFile(wrapper.getMedia(), wrapper.getLeader());
         }
     }
 

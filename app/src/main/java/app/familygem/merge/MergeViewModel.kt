@@ -212,11 +212,11 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
         sourceGedcom.accept(mediaList)
         val mediaFiles: MutableList<Triple<File, Media, NoteContainer>> = mutableListOf()
         val extSourceDir = context.getExternalFilesDir(sourceId.toString())!!.path
-        mediaList.list.forEach { pair ->
-            val media = pair.first
+        mediaList.list.forEach { wrapper ->
+            val media = wrapper.media
             FileUri(context, media, sourceId, true).file?.let { file ->
                 if (file.path.startsWith(extSourceDir)) {
-                    mediaFiles.add(Triple(file, media, pair.second))
+                    mediaFiles.add(Triple(file, media, wrapper.leader))
                 }
             }
         }

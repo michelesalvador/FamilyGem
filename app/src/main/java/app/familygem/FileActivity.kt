@@ -3,7 +3,6 @@ package app.familygem
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -23,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import app.familygem.Global.context
@@ -59,6 +59,7 @@ class FileActivity : AppCompatActivity() {
     private lateinit var treeDir: File
     private var type: Type = Type.NONE
     private var name = ""
+    private lateinit var mediaList: List<MediaLeaders.MediaWrapper> // All media before copying or renaming one of them
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,7 +120,7 @@ class FileActivity : AppCompatActivity() {
         builder.into(zoomImage)
         zoomImage.setOnClickListener { // Opens the file with some other app
             val dataUri = if (fileUri.file != null) FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", fileUri.file!!)
-            else if (type == Type.WEB_IMAGE || type == Type.WEB_ANYTHING) Uri.parse(Global.editedMedia.file)
+            else if (type == Type.WEB_IMAGE || type == Type.WEB_ANYTHING) Global.editedMedia.file.toUri()
             else fileUri.uri!!
             val mimeType = contentResolver.getType(dataUri)
             val intent = Intent(Intent.ACTION_VIEW)
@@ -218,6 +219,7 @@ class FileActivity : AppCompatActivity() {
     private fun copyToTreeStorage() {
         wheel.visibility = View.VISIBLE
         lifecycleScope.launch(IO) {
+            setMediaList()
             val newFile = FileUtil.nextAvailableFileName(treeDir, name)
             if (fileUri.file != null) {
                 fileUri.file!!.copyTo(newFile)
@@ -246,7 +248,7 @@ class FileActivity : AppCompatActivity() {
 
     private suspend fun completeCopy(newFile: File? = null) {
         val message = if (newFile != null) {
-            val modified = updateFileOccurrences(newFile.name)
+            val modified = updateFileOccurrences(newFile.name, false)
             if (modified.isNotEmpty()) {
                 TreeUtil.save(true, *modified)
             }
@@ -271,13 +273,17 @@ class FileActivity : AppCompatActivity() {
         val dialog = AlertDialog.Builder(this).setTitle(R.string.rename).setView(view)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 try {
-                    val newName = inputField.text.toString().trim()
-                    if (newName == oldName) return@setPositiveButton
-                    if (fileUri.rename(newName)) {
-                        val modified = updateFileOccurrences(newName)
-                        TreeUtil.save(true, *modified)
-                        displayImage()
-                    } else throw Exception()
+                    wheel.visibility = View.VISIBLE
+                    lifecycleScope.launch(IO) {
+                        setMediaList()
+                        val newName = inputField.text.toString().trim()
+                        if (newName == oldName) return@launch
+                        if (fileUri.rename(newName)) {
+                            val modified = updateFileOccurrences(newName)
+                            TreeUtil.save(true, *modified)
+                            withContext(Main) { displayImage() }
+                        } else throw Exception()
+                    }
                 } catch (exception: Exception) {
                     Toast.makeText(this, exception.message ?: "Unable to rename file.", Toast.LENGTH_LONG).show()
                 }
@@ -295,7 +301,7 @@ class FileActivity : AppCompatActivity() {
             fileUri.file!!.parentFile!!.list()!!.map { it.lowercase() }
         } else if (fileUri.uri != null) {
             val folderUri = Global.settings.currentTree.uris.first { fileUri.uri!!.toString().startsWith(it) }
-            DocumentFile.fromTreeUri(context, Uri.parse(folderUri))!!.listFiles().map { it.name!!.lowercase() }
+            DocumentFile.fromTreeUri(context, folderUri.toUri())!!.listFiles().map { it.name!!.lowercase() }
         } else {
             emptyList()
         }
@@ -326,16 +332,25 @@ class FileActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Replaces the file link in all Media which equal to [Global.editedMedia].
-     * @return Array of objects modified on updating the file link.
-     */
-    private fun updateFileOccurrences(newName: String): Array<NoteContainer> {
+    /** Sets the list of all media of the tree complete of FileUri, to be used later by [updateFileOccurrences] */
+    private fun setMediaList() {
         val mediaVisitor = MediaLeaders()
         Global.gc.accept(mediaVisitor)
-        val finalPath = if (fileUri.relative) Global.editedMedia.file.replaceAfterLast('/', newName) else newName
-        val mediaList = mediaVisitor.list.filter { it.first.file == Global.editedMedia.file && it.first.file != finalPath }
-        mediaList.forEach { it.first.file = finalPath }
-        return mediaList.map { it.second }.toTypedArray()
+        mediaVisitor.list.forEach { it.fileUri = FileUri(this, it.media) }
+        mediaList = mediaVisitor.list
+    }
+
+    /**
+     * Replaces the file link in all Media equal to [fileUri].
+     * @param honorRelative Relative paths are kept
+     * @return Array of objects modified on updating the file link
+     */
+    private fun updateFileOccurrences(newName: String, honorRelative: Boolean = true): Array<NoteContainer> {
+        val finalPath = if (fileUri.relative && honorRelative) fileUri.media.file.replaceAfterLast('/', newName) else newName
+        val filteredList = mediaList.filter { // Same fileUri path or same media link
+            (fileUri.path != null && it.fileUri?.path == fileUri.path || it.media.file == fileUri.media.file) && it.media.file != finalPath
+        }
+        filteredList.forEach { it.media.file = finalPath }
+        return filteredList.map { it.leader }.toTypedArray()
     }
 }

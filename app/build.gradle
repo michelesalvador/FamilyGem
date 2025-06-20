@@ -24,7 +24,7 @@ android {
         minSdk 21
         targetSdk 35
         versionCode 27
-        versionName '1.1.0.5'
+        versionName '1.1.0.6'
         resourceConfigurations += ['ar', 'bg', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn',
                                    'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'sv', 'ta', 'ti', 'tr', 'uk', 'vi', 'zh']
         def passKey = ''
@@ -72,7 +72,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-process:2.9.1'
     implementation 'androidx.security:security-crypto:1.1.0-beta01'
     implementation 'org.familysearch.gedcom:gedcom:1.14.0'
-    implementation 'androidx.work:work-runtime:2.10.1'
+    implementation 'androidx.work:work-runtime:2.10.2'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.9.0'

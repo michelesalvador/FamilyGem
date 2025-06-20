@@ -124,7 +124,7 @@ object MediaUtil {
     /** Fills in two text views of a media. */
     fun furnishMedia(media: Media, textView: TextView, numberView: TextView) {
         // File title and name
-        var text = media.title ?: ""
+        var label = media.title ?: ""
         if (Global.settings.expert && media.file != null) {
             var file = media.file
             file = file.replace('\\', '/')
@@ -133,10 +133,15 @@ object MediaUtil {
                     file = file.substring(0, file.length - 1)
                 file = file.substring(file.lastIndexOf('/') + 1)
             }
-            text += "\n$file"
+            label += "\n$file"
         }
-        if (text.isEmpty()) textView.visibility = View.GONE
-        else textView.text = text.trim('\n', ' ')
+        textView.apply {
+            if (label.isEmpty()) visibility = View.GONE
+            else {
+                text = label.trim('\n', ' ')
+                visibility = View.VISIBLE
+            }
+        }
         // Usage number
         if (media.id != null) {
             val mediaReferences = MediaReferences(Global.gc, media, false)
