@@ -358,4 +358,7 @@
     <string name="gedcom_only">Hanya file GEDCOM</string>
     <string name="merge_tree">Gabungkan pohon</string>
     <string name="merge">Gabungkan</string>
+    <string name="local_backup">Cadangan lokal</string>
+    <string name="help">Bantuan</string>
+    <string name="notification_time">Waktu pemberitahuan ulang tahun</string>
 </resources>

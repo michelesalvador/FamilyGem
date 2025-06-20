@@ -387,4 +387,12 @@
     <string name="birthday">Doğum günü</string>
     <string name="png_exported_ok">PNG dışa aktarıldı.</string>
     <string name="export_png">PNG dışa aktar</string>
+    <string name="local_backup">Yerel yedek</string>
+    <string name="backup_folder">Yedekleme klasörü</string>
+    <string name="recover">Geri yükle</string>
+    <string name="backup_trees">Seçilen soyağaçlarını yedekle</string>
+    <string name="notification_time">Doğum günü bildirim saati</string>
+    <string name="choose_folder">Klasör seç</string>
+    <string name="choose_disable_backup">Bir yedek klasörü seçin veya yerel yedeklemeyi kaptaın.\nDaha sonra tekrar aktif edebilirsiniz.</string>
+    <string name="disable">Devre dışı</string>
 </resources>
