@@ -26,7 +26,6 @@ import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import app.familygem.Global.context
-import app.familygem.Logger.l
 import app.familygem.constant.Extra
 import app.familygem.constant.Type
 import app.familygem.util.FileUtil
@@ -126,8 +125,6 @@ class FileActivity : AppCompatActivity() {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.setDataAndType(dataUri, mimeType)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Necessary for folders owned by the app (provider)
-            l(dataUri.toString())
-            l(mimeType, intent.resolveActivity(packageManager))
             startActivity(Intent.createChooser(intent, null))
         }
     }

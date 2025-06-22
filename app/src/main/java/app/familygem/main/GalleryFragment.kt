@@ -1,6 +1,7 @@
 package app.familygem.main
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.ContextMenu
@@ -38,8 +39,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.folg.gedcom.model.Media
 import java.io.File
 import java.net.HttpURLConnection
@@ -55,6 +58,9 @@ class GalleryFragment : BaseFragment() {
     private lateinit var progress: ProgressView
     private lateinit var treeDir: File // Tree media folder in app external storage
     private var searchView: SearchView? = null
+    private var checkJob: Job? = null
+    private var copyJob: Job? = null
+    private var shrinkJob: Job? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -89,8 +95,14 @@ class GalleryFragment : BaseFragment() {
 
     override fun onPause() {
         super.onPause()
-        // Leaving the activity resets the extra if no shared media has been chosen
+        // Resets the extra if no shared media has been chosen
         requireActivity().intent.removeExtra(Choice.MEDIA)
+        // Cancels any active job
+        if (checkJob?.isActive == true) checkJob?.cancel()
+        if (copyJob?.isActive == true) copyJob?.cancel()
+        if (shrinkJob?.isActive == true) shrinkJob?.cancel()
+        progress.hideBar()
+        progress.visibility = View.GONE
     }
 
     /** The file retrieved from SAF becomes a shared media. */
@@ -156,10 +168,10 @@ class GalleryFragment : BaseFragment() {
             menu.add(0, 0, 0, R.string.media_folders)
             menu.add(0, 1, 0, R.string.copy_app_storage)
             menu.add(0, 2, 0, R.string.shrink_path)
-            lifecycleScope.launch(IO) {
+            checkJob = lifecycleScope.launch(IO) {
                 // Sometimes long running tasks
-                if (!isThereAnyExternalFile()) withContext(Main) { menu.removeItem(1) }
-                if (!isThereAnyShrinkablePath()) withContext(Main) { menu.removeItem(2) }
+                if (!isThereAnyExternalFile(requireContext())) withContext(Main) { menu.removeItem(1) }
+                if (!isThereAnyShrinkablePath(requireContext())) withContext(Main) { menu.removeItem(2) }
             }
         }
         // Search for Media
@@ -185,33 +197,30 @@ class GalleryFragment : BaseFragment() {
             0 -> startActivity(Intent(context, MediaFoldersActivity::class.java).putExtra(Extra.TREE_ID, Global.settings.openTree))
             1 -> {
                 progress.visibility = View.VISIBLE
-                lifecycleScope.launch(IO) { copyFilesToTreeStorage() }
+                copyJob = lifecycleScope.launch(IO) { copyFilesToTreeStorage() }
             }
             2 -> {
                 progress.visibility = View.VISIBLE
-                lifecycleScope.launch(Default) { shrinkMediaPaths() }
+                shrinkJob = lifecycleScope.launch(Default) { shrinkMediaPaths() }
             }
         }
     }
 
     /** @return True in case there is at least one media linked to a file not in the app storage. */
-    private fun isThereAnyExternalFile(): Boolean {
-        mediaVisitor.list.forEach { if (it.fileUri == null) it.fileUri = FileUri(requireContext(), it.media) }
+    private fun isThereAnyExternalFile(context: Context): Boolean {
         return mediaVisitor.list.filterNot { it.media.file.isNullOrBlank() }.any {
+            if (it.fileUri == null) it.fileUri = FileUri(context, it.media)
             it.fileUri?.file?.startsWith(treeDir) == false || it.fileUri?.uri != null
                     || it.media.file.startsWith("https://") || it.media.file.startsWith("http://")
         }
     }
 
     /** @return True in case there is at least one media link shrinkable to filename only. */
-    private fun isThereAnyShrinkablePath(): Boolean {
-        for (wrapper in mediaVisitor.list) {
-            if (!wrapper.media.file.isNullOrBlank()) {
-                if (wrapper.fileUri == null) wrapper.fileUri = FileUri(requireContext(), wrapper.media)
-                if (wrapper.fileUri!!.treeDirFilename) return true
-            }
+    private fun isThereAnyShrinkablePath(context: Context): Boolean {
+        return mediaVisitor.list.filterNot { it.media.file.isNullOrBlank() }.any {
+            if (it.fileUri == null) it.fileUri = FileUri(context, it.media)
+            it.fileUri?.treeDirFilename == true
         }
-        return false
     }
 
     private var copiedFiles = 0 // Number of files actually copied
@@ -220,11 +229,19 @@ class GalleryFragment : BaseFragment() {
     /** Each valid file outside the tree app storage is copied inside. */
     private suspend fun copyFilesToTreeStorage() {
         // Creates a list of media grouped by the file they are linked to
-        mediaVisitor.list.forEach { if (it.fileUri == null) it.fileUri = FileUri(requireContext(), it.media) }
-        val groupedMedia = mediaVisitor.list.filterNot { it.media.file.isNullOrBlank() || it.fileUri?.file?.startsWith(treeDir) == true }
-            .groupBy { it.fileUri!!.path ?: it.media.file }
-        withContext(Main) { progress.displayBar("Copying files", groupedMedia.size.toLong()) }
+        progress.displayBar("Preparing files", mediaVisitor.list.size.toLong())
         var count: Long = 0
+        mediaVisitor.list.forEach {
+            yield()
+            if (it.fileUri == null) it.fileUri = FileUri(requireContext(), it.media)
+            progress.progress = ++count
+        }
+        progress.hideBar()
+        val groupedMedia = mediaVisitor.list.filterNot { it.media.file.isNullOrBlank() || it.fileUri?.file?.startsWith(treeDir) == true }
+            .groupBy { it.fileUri?.path ?: it.media.file }
+        // Copies each file
+        progress.displayBar("Copying files", groupedMedia.size.toLong())
+        count = 0
         copiedFiles = 0
         val excluded = arrayOf("text/html", "text/javascript", "application/json", "text/css", "text/xml")
         groupedMedia.forEach { entry ->
@@ -257,7 +274,7 @@ class GalleryFragment : BaseFragment() {
                     }
                 } else completeCopy()
             }
-            withContext(Main) { progress.progress = ++count }
+            progress.progress = ++count
         }
         if (toBeSaved) TreeUtil.save(true)
         withContext(Main) {
@@ -284,13 +301,22 @@ class GalleryFragment : BaseFragment() {
 
     /** Reduces media links to filename only where possible. */
     private suspend fun shrinkMediaPaths() {
-        mediaVisitor.list.forEach { if (it.fileUri == null) it.fileUri = FileUri(requireContext(), it.media) }
-        val shrinkableMedia = mediaVisitor.list.filter { it.fileUri!!.treeDirFilename }
+        progress.displayBar("Preparing files", mediaVisitor.list.size.toLong())
+        var count: Long = 0
+        mediaVisitor.list.forEach {
+            yield()
+            if (it.fileUri == null) it.fileUri = FileUri(requireContext(), it.media)
+            progress.progress = ++count
+        }
+        progress.hideBar()
+        val shrinkableMedia = mediaVisitor.list.filter { it.fileUri?.treeDirFilename == true }
         var modified = 0
-        shrinkableMedia.forEach {
-            it.media.file = it.fileUri!!.name
-            ChangeUtil.updateChangeDate(it.leader)
-            modified++
+        shrinkableMedia.forEach { wrapper ->
+            wrapper.fileUri?.name?.let {
+                wrapper.media.file = it
+                ChangeUtil.updateChangeDate(wrapper.leader)
+                modified++
+            }
         }
         if (modified > 0) TreeUtil.save(true)
         withContext(Main) {

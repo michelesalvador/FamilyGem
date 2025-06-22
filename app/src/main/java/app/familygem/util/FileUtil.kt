@@ -32,7 +32,6 @@ import app.familygem.CropImageActivity
 import app.familygem.DetailActivity
 import app.familygem.FileUri
 import app.familygem.Global
-import app.familygem.Logger.l
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Destination
