@@ -23,8 +23,8 @@ android {
         applicationId 'app.familygem'
         minSdk 21
         targetSdk 35
-        versionCode 27
-        versionName '1.1.0.6'
+        versionCode 28
+        versionName '1.2'
         resourceConfigurations += ['ar', 'bg', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn',
                                    'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'sv', 'ta', 'ti', 'tr', 'uk', 'vi', 'zh']
         def passKey = ''
