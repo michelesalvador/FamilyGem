@@ -1,6 +1,8 @@
 
 package app.familygem;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
 
 import org.apache.commons.io.FileUtils;
@@ -265,10 +267,11 @@ public class Settings {
             this.age = age;
         }
 
+        @NonNull
         @Override
         public String toString() {
             DateFormat sdf = new SimpleDateFormat("d MMM y", Locale.US);
-            return "[" + name + ": " + age + " (" + sdf.format(date) + ")]";
+            return "[" + id + " " + name + ": " + age + " (" + sdf.format(date) + ")]";
         }
     }
 
@@ -304,7 +307,7 @@ public class Settings {
             String json = gson.toJson(this);
             try {
                 FileUtils.writeStringToFile(settingsFile, json, "UTF-8");
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
             return settingsFile;
         }

@@ -27,7 +27,7 @@ public class NotifyReceiver extends BroadcastReceiver {
                     .putExtra(Notifier.TREE_ID_KEY, intent.getIntExtra(Extra.TREE_ID, 0))
                     .putExtra(Notifier.PERSON_ID_KEY, intent.getStringExtra(Extra.PERSON_ID));
             PendingIntent pendingIntent = PendingIntent.getActivity(context, intent.getIntExtra(Extra.ID, 1),
-                    notifyIntent, PendingIntent.FLAG_IMMUTABLE);
+                    notifyIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Notifier.CHANNEL_ID)
                     .setContentTitle(intent.getStringExtra(Extra.TITLE))
