@@ -14,7 +14,6 @@
         <item name="android:itemTextAppearance">@style/AppTheme.BasicText</item>
         <item name="textAppearancePopupMenuHeader">@style/AppTheme.LittleTitle</item>
         <item name="bottomSheetDragHandleStyle">@style/AppTheme.DragHandle</item>
-        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="AppTheme.BasicText">

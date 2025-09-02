@@ -12,7 +12,7 @@ With Family Gem you can:
 - Share a tree with your relatives, letting them improve it and receiving back the updates. Then you can choose whether accept them or not.
 - Export the diagram as PDF or PNG.
 
-Minimum supported version is Android 5 Lollipop (API 21), maximum is Android 15 Vanilla Ice Scream (API 35).\
+Minimum supported version is Android 5 Lollipop (API 21), maximum is Android 16 Baklava (API 36).\
 The intent is that data structure respects as much as possible the GEDCOM standard [5.5.1](https://www.familysearch.org/developers/docs/gedcom/) and possibly also [5.5.5](https://www.gedcom.org/gedcom.html).\
 Family Gem is strongly based on the library [Gedcom 5 Java](https://github.com/FamilySearch/gedcom5-java) by FamilySearch.
 

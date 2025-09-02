@@ -15,6 +15,7 @@ import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.ConsumeParams
+import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.Purchase.PurchaseState
@@ -32,9 +33,7 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-/**
- * Business manager of [PremiumFragment].
- */
+/** Business manager of [PremiumFragment]. */
 class PremiumViewModel(application: Application) : AndroidViewModel(application), PurchasesUpdatedListener {
 
     companion object {
@@ -63,7 +62,8 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
      * Creates the billing client and establishes connection with Google Play billing system.
      */
     fun connectGoogleBilling(context: Context) {
-        billingClient = BillingClient.newBuilder(context).setListener(this).enablePendingPurchases().build()
+        val params = PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()
+        billingClient = BillingClient.newBuilder(context).setListener(this).enablePendingPurchases(params).build()
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 when (billingResult.responseCode) {
@@ -237,7 +237,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
             }
         } catch (exception: Exception) {
             // E.g. no internet connection
-            setMessage(exception.localizedMessage)
+            setMessage(exception.localizedMessage ?: R.string.something_wrong)
         }
     }
 
@@ -296,7 +296,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
             } else setMessage(line)
         } catch (exception: Exception) {
             // E.g. no internet connection
-            setMessage(exception.localizedMessage)
+            setMessage(exception.localizedMessage ?: R.string.something_wrong)
         }
     }
 
