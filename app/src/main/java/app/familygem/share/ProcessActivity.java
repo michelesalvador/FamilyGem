@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.cardview.widget.CardView;
@@ -31,6 +32,7 @@ import app.familygem.Global;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.constant.Extra;
+import app.familygem.databinding.ProcessActivityBinding;
 import app.familygem.util.AddressUtilKt;
 import app.familygem.util.FamilyUtil;
 import app.familygem.util.FileUtil;
@@ -43,10 +45,14 @@ public class ProcessActivity extends BaseActivity {
     Class<?> clazz; // The class that rules the activity
     int destiny;
 
+    public ProcessActivity() {
+        super(R.string.import_news);
+    }
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.process_activity);
+        setContent(ProcessActivityBinding.inflate(getLayoutInflater()).getRoot());
 
         if (!Comparison.getList().isEmpty()) {
             int max;
@@ -117,8 +123,17 @@ public class ProcessActivity extends BaseActivity {
                 Comparison.getFront(this).destiny = 0;
                 goAhead();
             });
-        } else
-            onBackPressed(); // Returns to CompareActivity
+        } else finish(); // Returns to CompareActivity
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (Comparison.get().autoContinue)
+                    Comparison.get().choicesMade--;
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
     }
 
     void populateCard(Gedcom gedcom, int treeId, int cardId, Object obj) {
@@ -243,14 +258,7 @@ public class ProcessActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if (Comparison.get().autoContinue)
-            Comparison.get().choicesMade--;
     }
 }

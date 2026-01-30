@@ -34,6 +34,7 @@ import app.familygem.R;
 import app.familygem.Settings;
 import app.familygem.TreesActivity;
 import app.familygem.U;
+import app.familygem.databinding.ConfirmationActivityBinding;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.FileUtil;
 import app.familygem.util.TreeUtil;
@@ -49,10 +50,14 @@ import kotlin.Pair;
  */
 public class ConfirmationActivity extends BaseActivity {
 
+    public ConfirmationActivity() {
+        super(R.string.confirm_news);
+    }
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.confirmation_activity);
+        setContent(ConfirmationActivityBinding.inflate(getLayoutInflater()).getRoot());
         if (!Comparison.getList().isEmpty()) {
 
             // Old tree
@@ -297,8 +302,8 @@ public class ConfirmationActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem i) {
-        onBackPressed();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

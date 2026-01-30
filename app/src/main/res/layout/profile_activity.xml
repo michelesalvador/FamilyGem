@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.ActionBar">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/profile_toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:expandedTitleGravity="center_horizontal|bottom"
             app:expandedTitleMarginBottom="55dp"
@@ -33,25 +31,27 @@
                 android:layout_width="250dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="15dp"
-                android:contentDescription="@string/file" />
+                android:contentDescription="@string/file"
+                tools:src="@drawable/image" />
 
             <TextView
                 android:id="@+id/profile_id"
                 style="@style/AppTheme.Slug"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="18dp"
-                android:layout_marginTop="140dp"
                 android:textStyle="bold"
-                app:layout_collapseMode="parallax" />
+                app:layout_collapseMode="parallax"
+                tools:text="INDI I123" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/profile_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_marginBottom="50dp"
-                app:layout_collapseMode="pin" />
+                android:background="@android:color/transparent"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/arrow_back"
+                tools:title="Name Surname" />
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/profile_tabs"
@@ -72,5 +72,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <include layout="@layout/fab" />
+    <include
+        android:id="@+id/profile_fab"
+        layout="@layout/fab" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

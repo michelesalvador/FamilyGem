@@ -2,21 +2,26 @@ package app.familygem.profile
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
-import androidx.appcompat.widget.Toolbar
+import androidx.core.graphics.Insets
 import androidx.core.util.Pair
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -33,6 +38,7 @@ import app.familygem.constant.Extra
 import app.familygem.constant.Image
 import app.familygem.constant.Relation
 import app.familygem.constant.Type
+import app.familygem.databinding.ProfileActivityBinding
 import app.familygem.detail.EventActivity
 import app.familygem.detail.MediaActivity
 import app.familygem.detail.NameActivity
@@ -41,6 +47,7 @@ import app.familygem.main.MainActivity
 import app.familygem.main.SourcesFragment
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
+import app.familygem.util.InsetsUtil
 import app.familygem.util.MediaUtil
 import app.familygem.util.NoteUtil
 import app.familygem.util.TreeUtil.save
@@ -49,9 +56,7 @@ import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
 import app.familygem.util.sex
 import app.familygem.visitor.FindStack
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.folg.gedcom.model.EventFact
 import org.folg.gedcom.model.Media
@@ -67,83 +72,96 @@ class ProfileActivity : AppCompatActivity() {
 
     private var person: Person? = null
     private lateinit var adapter: PagesAdapter
-    private lateinit var tabLayout: TabLayout
-    private lateinit var toolbarLayout: CollapsingToolbarLayout
+    private lateinit var binding: ProfileActivityBinding
     private lateinit var fabView: FloatingActionButton
     private val pages = arrayOfNulls<Fragment>(3)
+    var insets = Insets.NONE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.profile_activity)
+        enableEdgeToEdge(SystemBarStyle.dark(Color.TRANSPARENT))
+        ProfileActivityBinding.inflate(layoutInflater).run {
+            binding = this
+            setContentView(root)
+
+            // Toolbar
+            setSupportActionBar(profileToolbar)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true) // Brings up the back arrow and the options menu
+
+            // Assigns to the pager an adapter that manages the three pages
+            adapter = PagesAdapter(this@ProfileActivity)
+            profilePager.adapter = adapter
+            // Furnishes tab layout
+            TabLayoutMediator(profileTabs, profilePager) { tab, position ->
+                tab.text = getString(
+                    when (position) {
+                        0 -> R.string.media
+                        1 -> R.string.events
+                        else -> R.string.relatives
+                    }
+                )
+            }.attach()
+            profilePager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                // Animates the FAB
+                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+                    // positionOffset is 0.0 > 1.0 during swiping, and becomes 0.0 at the end
+                    fabView.apply { if (positionOffset > 0) hide() else show() }
+                }
+            })
+            // Only at first creation selects one specific tab
+            if (savedInstanceState == null) profileTabs.getTabAt(intent.getIntExtra(Extra.PAGE, 1))?.select()
+
+            // The person displayed
+            person = Memory.getLeaderObject() as Person?
+            if (person == null) {
+                goBack()
+                return
+            }
+            // Person ID in the header
+            if (Global.settings.expert) {
+                profileId.text = "INDI ${person?.id}"
+                profileId.setOnClickListener {
+                    U.editId(this@ProfileActivity, person) { this@ProfileActivity.refresh() }
+                }
+            } else profileId.visibility = View.GONE
+            // Person name in the header
+            profileToolbarLayout.apply {
+                title = U.properName(person)
+                setExpandedTitleTextAppearance(R.style.AppTheme_ExpandedAppBar)
+                setCollapsedTitleTextAppearance(R.style.AppTheme_CollapsedAppBar)
+                setOnClickListener { // Not only the name view but all the expanded toolbar
+                    if (person!!.names.isNotEmpty()) {
+                        Memory.add(person!!.names[0])
+                        startActivity(Intent(this@ProfileActivity, NameActivity::class.java))
+                    }
+                }
+            }
+            // Insets
+            InsetsUtil(root) {
+                profileToolbarLayout.updateLayoutParams { height = it.top + U.dpToPx(250F) }
+                profileToolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top; leftMargin = it.left; rightMargin = it.right
+                }
+                profileImage.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = it.top + U.dpToPx(10F) }
+                profileId.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top + U.dpToPx(135F); leftMargin = it.left + U.dpToPx(18F)
+                }
+                profileFab.root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = it.left; rightMargin = it.right; bottomMargin = it.bottom
+                }
+                insets = it
+            }
+        }
+        // Setups FAB
+        fabView = findViewById(R.id.fab)
+        setupFab()
+
         onBackPressedDispatcher.addCallback(this) {
             Memory.stepBack()
             isEnabled = false // Disables this callback to avoid infinite loop
             onBackPressedDispatcher.onBackPressed()
         }
 
-        // Toolbar
-        val toolbar = findViewById<Toolbar>(R.id.profile_toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) // Brings up the back arrow and the options menu
-
-        // Assigns to the pager an adapter that manages the three pages
-        val viewPager = findViewById<ViewPager2>(R.id.profile_pager)
-        adapter = PagesAdapter(this)
-        viewPager.adapter = adapter
-        // Furnishes tab layout
-        tabLayout = findViewById(R.id.profile_tabs)
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = getString(
-                when (position) {
-                    0 -> R.string.media
-                    1 -> R.string.events
-                    else -> R.string.relatives
-                }
-            )
-        }.attach()
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            // Animates the FAB
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                // positionOffset is 0.0 > 1.0 during swiping, and becomes 0.0 at the end
-                fabView.apply { if (positionOffset > 0) hide() else show() }
-            }
-        })
-        // Only at first creation selects one specific tab
-        if (savedInstanceState == null) tabLayout.getTabAt(intent.getIntExtra(Extra.PAGE, 1))!!.select()
-
-        // Setups FAB
-        fabView = findViewById(R.id.fab)
-        setupFab()
-
-        // The person displayed
-        person = Memory.getLeaderObject() as Person?
-        if (person == null) {
-            goBack()
-            return
-        }
-        // Person ID in the header
-        val idView = findViewById<TextView>(R.id.profile_id)
-        if (Global.settings.expert) {
-            idView.text = "INDI ${person?.id}"
-            idView.setOnClickListener {
-                U.editId(
-                    this, person
-                ) { this.refresh() }
-            }
-        } else idView.visibility = View.GONE
-        // Person name in the header
-        findViewById<CollapsingToolbarLayout>(R.id.profile_toolbar_layout).apply {
-            toolbarLayout = this
-            title = U.properName(person)
-            setExpandedTitleTextAppearance(R.style.AppTheme_ExpandedAppBar)
-            setCollapsedTitleTextAppearance(R.style.AppTheme_CollapsedAppBar)
-            setOnClickListener { // Not only the name view but all the expanded toolbar
-                if (person!!.names.isNotEmpty()) {
-                    Memory.add(person!!.names[0])
-                    startActivity(Intent(this@ProfileActivity, NameActivity::class.java))
-                }
-            }
-        }
         setImages()
         Global.indi = person?.id
     }
@@ -169,7 +187,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private var isActivityRestarting: Boolean = false // To refresh activity only onBackPressed()
+    private var isActivityRestarting = false // To refresh activity only onBackPressed()
 
     public override fun onRestart() {
         super.onRestart()
@@ -240,7 +258,7 @@ class ProfileActivity : AppCompatActivity() {
             if (Global.gc == null) return@setOnClickListener
             val popup = PopupMenu(this, view!!)
             val menu = popup.menu
-            when (tabLayout.selectedTabPosition) {
+            when (binding.profileTabs.selectedTabPosition) {
                 0 -> { // Media
                     menu.add(0, 10, 0, R.string.new_media)
                     menu.add(0, 11, 0, R.string.new_shared_media)
@@ -305,7 +323,7 @@ class ProfileActivity : AppCompatActivity() {
                     21 -> { // Create sex
                         val sexNames =
                             arrayOf(getString(R.string.male), getString(R.string.female), getString(R.string.unknown))
-                        AlertDialog.Builder(tabLayout.context)
+                        AlertDialog.Builder(this)
                             .setSingleChoiceItems(sexNames, -1) { dialog: DialogInterface, i: Int ->
                                 val gender = EventFact()
                                 gender.tag = "SEX"
@@ -401,7 +419,7 @@ class ProfileActivity : AppCompatActivity() {
 
     /** Refreshes header and pages without recreating the activity. */
     fun refresh() {
-        toolbarLayout.title = U.properName(person) // Name in the header
+        binding.profileToolbarLayout.title = U.properName(person) // Name in the header
         setImages() // Header images
         // ID in the header
         if (Global.settings.expert) {

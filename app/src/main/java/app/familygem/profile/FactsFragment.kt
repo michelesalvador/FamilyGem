@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.R
@@ -160,7 +161,7 @@ class FactsFragment : BaseFragment() {
                 menu.add(0, 203, 0, R.string.delete)
             }
             is EventFact -> {
-                if (view.findViewById<View>(R.id.profileFact_text).visibility == View.VISIBLE)
+                if (view.findViewById<View>(R.id.profileFact_text).isVisible)
                     menu.add(0, 210, 0, R.string.copy)
                 if (person.eventsFacts.indexOf(pieceObject) > 0)
                     menu.add(0, 211, 0, R.string.move_up)

@@ -4,10 +4,10 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/backupSave_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="30dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/backupSave_box"

@@ -6,6 +6,9 @@
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
         <item name="android:windowBackground">@color/background</item>
+        <item name="drawerArrowStyle">@style/AppTheme.DrawerArrow</item>
+        <item name="actionOverflowButtonStyle">@style/AppTheme.OverflowButton</item>
+        <item name="searchViewStyle">@style/AppTheme.SearchView</item>
         <!-- TextView -->
         <item name="android:textAppearanceSmall">@style/AppTheme.BasicText</item>
         <!-- RadioButton, SwitchCompat, CheckBox -->
@@ -14,6 +17,33 @@
         <item name="android:itemTextAppearance">@style/AppTheme.BasicText</item>
         <item name="textAppearancePopupMenuHeader">@style/AppTheme.LittleTitle</item>
         <item name="bottomSheetDragHandleStyle">@style/AppTheme.DragHandle</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="toolbarStyle">@style/AppTheme.Toolbar</item>
+    </style>
+
+    <style name="AppTheme.TransparentActionBar">
+        <item name="colorPrimary">@color/black_veiled</item>
+    </style>
+
+    <style name="AppTheme.DrawerArrow" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.OverflowButton" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">@drawable/bar_background</item>
+        <item name="titleTextColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.SearchView">
+        <item name="closeIcon">@drawable/ex_white</item>
     </style>
 
     <style name="AppTheme.BasicText">
@@ -44,7 +74,7 @@
     </style>
 
     <style name="AppTheme.ReferencesNumber" parent="AppTheme.CitationsNumber">
-        <item name="android:textColor">#FFF</item>
+        <item name="android:textColor">@android:color/white</item>
         <item name="android:background">@drawable/references_background</item>
     </style>
 
@@ -61,10 +91,12 @@
 
     <style name="AppTheme.ExpandedAppBar">
         <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="AppTheme.CollapsedAppBar">
         <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="AppTheme.Slug">
@@ -81,26 +113,6 @@
     <style name="AppTheme.Navigator" parent="ThemeOverlay.AppCompat">
         <item name="colorPrimary">@color/primary</item> <!-- Selected text and icon -->
         <item name="colorControlHighlight">@color/accent</item> <!-- Selected background -->
-    </style>
-
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.ActionBar">
-        <item name="colorControlNormal">#FFF</item> <!-- Buttons -->
-        <item name="android:textColorPrimary">#FFF</item> <!-- Text -->
-    </style>
-
-    <style name="AppTheme.TransparentActionBar">
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="windowActionBarOverlay">true</item>
-        <item name="colorPrimary">@android:color/transparent</item>
-    </style>
-
-    <style name="AppTheme.WhiteTint" parent="@style/Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:tint">@android:color/white</item>
     </style>
 
     <style name="AppTheme.Wheel">

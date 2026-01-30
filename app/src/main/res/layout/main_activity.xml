@@ -5,7 +5,6 @@
     android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -14,13 +13,13 @@
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.ActionBar">
+            android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/main_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize" />
+                android:layout_height="?attr/actionBarSize"
+                app:collapseIcon="@drawable/arrow_back" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <FrameLayout
@@ -36,7 +35,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@color/back_element"
-        android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.Navigator"
         app:headerLayout="@layout/main_menu_header"
         app:menu="@menu/main_menu" />

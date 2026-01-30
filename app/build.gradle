@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'kotlin-android'
 }
 def credentialFile = rootProject.file('credential.properties')
 def credential
@@ -24,7 +23,7 @@ android {
         minSdk = 21
         targetSdk = 36
         versionCode = 28
-        versionName = '1.2.0.3'
+        versionName = '1.2.0.4'
         resourceConfigurations += ['ar', 'bg', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn',
                                    'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'sv', 'ta', 'ti', 'tr', 'uk', 'vi', 'zh']
         def passKey = ''
@@ -58,9 +57,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
 }
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -76,7 +72,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.documentfile:documentfile:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.9.6'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.9.7'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
     implementation 'com.android.installreferrer:installreferrer:2.2'
     implementation 'com.android.billingclient:billing-ktx:8.0.0' // Version >= 8.1 requires API >= 23

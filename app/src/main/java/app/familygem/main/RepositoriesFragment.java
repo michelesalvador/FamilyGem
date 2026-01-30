@@ -53,6 +53,7 @@ public class RepositoriesFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.scrollview, container, false);
         layout = view.findViewById(R.id.scrollview_layout);
         view.findViewById(R.id.fab).setOnClickListener(v -> newRepository(getContext(), null));
+        setInterfacer(view.findViewById(R.id.scrollview_fab), view.findViewById(R.id.scrollview_scroll), false);
         return view;
     }
 

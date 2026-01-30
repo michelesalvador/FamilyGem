@@ -13,6 +13,7 @@ import androidx.core.text.TextUtilsCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
+import app.familygem.databinding.InfoActivityBinding
 import app.familygem.util.NoteUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.writeName
@@ -28,15 +29,15 @@ import org.folg.gedcom.model.Generator
 import java.io.File
 import java.util.Locale
 
-class InfoActivity : BaseActivity() {
+class InfoActivity : BaseActivity(R.string.info) {
 
     private var gedcom: Gedcom? = null
     private lateinit var table: TableLayout
     private val leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == ViewCompat.LAYOUT_DIRECTION_LTR
 
-    override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
-        setContentView(R.layout.info_activity)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent(InfoActivityBinding.inflate(layoutInflater).root)
         val treeId = intent.getIntExtra(Extra.TREE_ID, 1)
         val tree = Global.settings.getTree(treeId)
         val file = File(filesDir, "$treeId.json")

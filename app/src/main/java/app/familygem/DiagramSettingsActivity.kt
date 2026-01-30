@@ -16,7 +16,7 @@ import java.util.Locale
 /**
  * Here user can set some dimensions of the diagram.
  */
-class DiagramSettingsActivity : BaseActivity() {
+class DiagramSettingsActivity : BaseActivity(R.string.diagram_settings) {
 
     private lateinit var binding: DiagramSettingsActivityBinding
     private lateinit var ancestors: SeekBar
@@ -35,8 +35,7 @@ class DiagramSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DiagramSettingsActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        setContent(binding.root)
         indicator = binding.diagramSettingsIndicator
         leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == View.LAYOUT_DIRECTION_LTR
         // Number of ancestors

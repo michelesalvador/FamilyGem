@@ -85,12 +85,10 @@ class PersonsFragment : BaseFragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         val view = inflater.inflate(R.layout.recyclerview, container, false)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        val padding = U.dpToPx(8F)
-        recyclerView.setPadding(padding, padding, padding, recyclerView.paddingBottom)
         recyclerView.adapter = adapter
         view.findViewById<View>(R.id.fab).setOnClickListener { startActivity(Intent(context, PersonEditorActivity::class.java)) }
         progress = view.findViewById(R.id.recycler_progress)
-        setupFastScroller(recyclerView)
+        setInterfacer(view.findViewById(R.id.recycler_fab), recyclerView)
         return view
     }
 
@@ -452,14 +450,15 @@ class PersonsFragment : BaseFragment() {
             // Search in PersonsFragment
             inflater.inflate(R.menu.search, menu) // This only makes appear the lens with the search field
             searchView = menu.findItem(R.id.search_item).actionView as SearchView
-            searchView!!.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            stylizeSearchView(searchView)
+            searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextChange(query: String): Boolean {
                     adapter.filter.filter(query)
                     return true
                 }
 
                 override fun onQueryTextSubmit(q: String): Boolean {
-                    searchView!!.clearFocus()
+                    searchView?.clearFocus()
                     return false
                 }
             })

@@ -13,14 +13,16 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import app.familygem.constant.Extra
+import app.familygem.databinding.MediaFoldersActivityBinding
 import app.familygem.util.FileUtil
 import app.familygem.util.Util
 import java.io.File
 
 /** Activity where user can set the list of media folders. */
-class MediaFoldersActivity : BaseActivity() {
+class MediaFoldersActivity : BaseActivity(R.string.media_folders) {
 
     private var treeId: Int = 0
     private lateinit var dirs: MutableList<String>
@@ -28,21 +30,20 @@ class MediaFoldersActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.media_folders_activity)
+        setContent(MediaFoldersActivityBinding.inflate(layoutInflater).root)
         treeId = intent.getIntExtra(Extra.TREE_ID, 0)
         // Sometimes a null dir or uri is stored in settings
         dirs = ArrayList(Global.settings.getTree(treeId).dirs).filterNot { it == null }.toMutableList()
         uris = ArrayList(Global.settings.getTree(treeId).uris).filterNot { it == null }.toMutableList()
         updateList()
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        findViewById<View>(R.id.fab).setOnClickListener {
+        getVisibleFab().setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
             intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             chooseLauncher.launch(intent)
         }
         if (Global.settings.getTree(treeId).dirs.isEmpty() && Global.settings.getTree(treeId).uris.isEmpty())
-            SpeechBubble(this, R.string.add_device_folder).show()
+            FabPopup(this, fabBox!!, R.string.add_device_folder).show()
     }
 
     /** Saves a folder chosen with SAF in directory or URI list. */
@@ -133,7 +134,7 @@ class MediaFoldersActivity : BaseActivity() {
             registerForContextMenu(folderView)
         }
         uris.forEach { uriString ->
-            val uri = Uri.parse(uriString)
+            val uri = uriString.toUri()
             DocumentFile.fromTreeUri(this, uri)?.let { documentDir ->
                 val uriView = layoutInflater.inflate(R.layout.media_folder_item, layout, false)
                 layout.addView(uriView)

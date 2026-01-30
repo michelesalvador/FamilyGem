@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import app.familygem.Global
 import app.familygem.Memory
@@ -18,6 +19,10 @@ abstract class BaseFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val pageView = inflater.inflate(R.layout.profile_page_fragment, container, false)
+        pageView.post {
+            val insets = (activity as ProfileActivity).insets
+            pageView.updatePadding(bottom = insets.bottom + resources.getDimensionPixelSize(R.dimen.bottom_padding))
+        }
         layout = pageView.findViewById(R.id.profile_page)
         createContent()
         return pageView

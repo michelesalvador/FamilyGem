@@ -64,7 +64,7 @@ public class SourcesFragment extends BaseFragment {
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         adapter = new SourcesAdapter();
         recyclerView.setAdapter(adapter);
-        setupFastScroller(recyclerView);
+        setInterfacer(view.findViewById(R.id.recycler_fab), recyclerView, true);
         view.findViewById(R.id.fab).setOnClickListener(v -> newSource(getContext(), null));
         return view;
     }
@@ -324,6 +324,7 @@ public class SourcesFragment extends BaseFragment {
             // Search in SourcesFragment
             inflater.inflate(R.menu.search, menu);
             searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
+            stylizeSearchView(searchView);
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextChange(String query) {

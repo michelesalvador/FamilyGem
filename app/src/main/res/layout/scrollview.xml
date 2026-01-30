@@ -5,10 +5,10 @@
     android:background="@color/background">
 
     <ScrollView
+        android:id="@+id/scrollview_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"
         android:scrollbarStyle="outsideOverlay">
 
         <LinearLayout

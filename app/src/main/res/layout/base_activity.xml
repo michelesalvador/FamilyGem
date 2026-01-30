@@ -1,36 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ScrollView
+        android:id="@+id/base_scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"
         android:scrollbarStyle="outsideOverlay">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <com.google.android.flexbox.FlexboxLayout
-                android:id="@+id/dettaglio_bava"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/base_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:flexWrap="wrap" />
+                app:navigationIcon="@drawable/arrow_back"
+                tools:title="Activity title" />
 
-            <LinearLayout
-                android:id="@+id/detail_box"
+            <FrameLayout
+                android:id="@+id/base_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </ScrollView>
 
-    <include layout="@layout/fab" />
+    <app.familygem.ProgressView
+        android:id="@+id/base_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <include
+        android:id="@+id/base_fab"
+        layout="@layout/fab" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

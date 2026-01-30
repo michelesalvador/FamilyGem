@@ -1,21 +1,26 @@
 package app.familygem.main
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuProvider
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import app.familygem.Global
@@ -28,6 +33,7 @@ import app.familygem.constant.Image
 import app.familygem.databinding.MainActivityBinding
 import app.familygem.detail.MediaActivity
 import app.familygem.util.FileUtil.showImage
+import app.familygem.util.InsetsUtil
 import app.familygem.util.TreeUtil
 import app.familygem.visitor.FindStack
 import app.familygem.visitor.MediaList
@@ -60,9 +66,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge(SystemBarStyle.dark(Color.TRANSPARENT))
         binding = MainActivityBinding.inflate(layoutInflater)
         manager = supportFragmentManager
         setContentView(binding.root)
+        InsetsUtil(binding.root) {
+            binding.mainToolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = it.left; topMargin = it.top; rightMargin = it.right
+            }
+            frontFragment.interfacer?.invoke(it)
+        }
         setSupportActionBar(binding.mainToolbar)
         val toggle = ActionBarDrawerToggle(this, binding.mainLayout, binding.mainToolbar, R.string.drawer_open, R.string.drawer_close)
         binding.mainLayout.addDrawerListener(toggle)

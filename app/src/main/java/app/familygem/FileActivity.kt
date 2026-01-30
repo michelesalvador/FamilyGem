@@ -18,10 +18,13 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
@@ -62,8 +65,11 @@ class FileActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val barStyle = SystemBarStyle.dark(ResourcesCompat.getColor(resources, R.color.black_veiled, null))
+        enableEdgeToEdge(barStyle, barStyle)
         setContentView(R.layout.file_activity)
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // Displays back arrow on toolbar
+        supportActionBar?.elevation = 0F // Removes toolbar shadow
         wheel = findViewById(R.id.progress_wheel)
         treeDir = getExternalFilesDir(Global.settings.openTree.toString())!!
         type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) intent.getSerializableExtra(Extra.TYPE, Type::class.java)!!

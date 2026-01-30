@@ -12,7 +12,7 @@ import app.familygem.Settings.Tree
 import app.familygem.U
 import app.familygem.util.getBasicData
 
-open class BaseFragment(layout: Int) : Fragment(layout) {
+abstract class BaseFragment(layout: Int) : Fragment(layout) {
 
     val model: MergeViewModel by activityViewModels()
 

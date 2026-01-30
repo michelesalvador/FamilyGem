@@ -65,7 +65,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
             Memory.setLeader(newFamily)
             startActivity(Intent(context, FamilyActivity::class.java))
         }
-        setupFastScroller(binding.recyclerView)
+        setInterfacer(binding.recyclerFab.root, binding.recyclerView)
         return binding.root
     }
 
@@ -97,7 +97,8 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
             // Search view
             inflater.inflate(R.menu.search, menu)
             searchView = menu.findItem(R.id.search_item).actionView as SearchView
-            searchView!!.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            stylizeSearchView(searchView)
+            searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextChange(query: String): Boolean {
                     filterFamilies(query)
                     adapter.notifyDataSetChanged()
@@ -105,7 +106,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
                 }
 
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    searchView!!.clearFocus()
+                    searchView?.clearFocus()
                     return false
                 }
             })
@@ -237,10 +238,8 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
         return false
     }
 
-    /**
-     * Container of family and fields relevant for displaying, sorting and filtering.
-     */
-    inner class FamilyWrapper(val family: Family) {
+    /** Container of family and fields relevant for displaying, sorting and filtering. */
+    class FamilyWrapper(val family: Family) {
         val parents: String
         val children: String
         val id: String

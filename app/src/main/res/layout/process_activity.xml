@@ -1,92 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <LinearLayout
+    <ProgressBar
+        android:id="@+id/process_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/process_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <ProgressBar
-            android:id="@+id/process_progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp">
 
         <TextView
-            android:id="@+id/process_state"
+            android:id="@+id/process_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/process_id"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Record type" />
+
+        <TextView
+            android:id="@+id/process_id"
+            style="@style/AppTheme.Slug"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right" />
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="I000123" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+    <include
+        android:id="@+id/process_old"
+        layout="@layout/compare_card" />
+
+    <LinearLayout
+        android:id="@+id/process_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/process_okButton"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="3"
+            android:text="@string/replace"
+            android:textColor="#FFF"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/process_ignoreButton"
+            style="@style/AppTheme.NormalButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:id="@+id/process_type"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toStartOf="@+id/process_id"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Record type" />
-
-            <TextView
-                android:id="@+id/process_id"
-                style="@style/AppTheme.Slug"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:text="I000123" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <include
-            android:id="@+id/process_old"
-            layout="@layout/compare_card" />
-
-        <LinearLayout
-            android:id="@+id/process_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/process_okButton"
-                android:layout_width="wrap_content"
-                android:layout_height="70dp"
-                android:layout_marginRight="10dp"
-                android:layout_weight="3"
-                android:text="@string/replace"
-                android:textColor="#FFF"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/process_ignoreButton"
-                style="@style/AppTheme.NormalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/ignore" />
-        </LinearLayout>
-
-        <include
-            android:id="@+id/process_new"
-            layout="@layout/compare_card" />
+            android:layout_weight="1"
+            android:text="@string/ignore" />
     </LinearLayout>
-</ScrollView>
+
+    <include
+        android:id="@+id/process_new"
+        layout="@layout/compare_card" />
+</LinearLayout>

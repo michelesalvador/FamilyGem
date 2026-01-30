@@ -75,7 +75,7 @@ class GalleryFragment : BaseFragment() {
         recyclerView.layoutManager = GridLayoutManager(context, 2)
         adapter = GalleryAdapter(mediaVisitor.list)
         recyclerView.adapter = adapter
-        setupFastScroller(recyclerView)
+        setInterfacer(view.findViewById(R.id.recycler_fab), recyclerView)
         progress = view.findViewById(R.id.recycler_progress)
         treeDir = requireContext().getExternalFilesDir(Global.settings.openTree.toString())!!
         return view
@@ -169,7 +169,7 @@ class GalleryFragment : BaseFragment() {
             menu.add(0, 1, 0, R.string.copy_app_storage)
             menu.add(0, 2, 0, R.string.shrink_path)
             checkJob = lifecycleScope.launch(IO) {
-                // Sometimes long running tasks
+                // Sometimes long-running tasks
                 if (!isThereAnyExternalFile(requireContext())) withContext(Main) { menu.removeItem(1) }
                 if (!isThereAnyShrinkablePath(requireContext())) withContext(Main) { menu.removeItem(2) }
             }
@@ -178,6 +178,7 @@ class GalleryFragment : BaseFragment() {
         if (mediaVisitor.list.size > 1) {
             inflater.inflate(R.menu.search, menu)
             searchView = menu.findItem(R.id.search_item).actionView as SearchView
+            stylizeSearchView(searchView)
             searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextChange(query: String): Boolean {
                     adapter.filter.filter(query)

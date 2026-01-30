@@ -2,7 +2,6 @@ package app.familygem
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.DragEvent
@@ -17,12 +16,17 @@ import android.widget.RelativeLayout
 import android.widget.SimpleAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.net.toUri
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
 import app.familygem.constant.FileType
@@ -31,6 +35,7 @@ import app.familygem.merge.MergeActivity
 import app.familygem.share.SharingActivity
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
+import app.familygem.util.InsetsUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.getBasicData
@@ -63,17 +68,18 @@ class TreesActivity : AppCompatActivity() {
     private lateinit var treeList: MutableList<Map<String, String>>
     private lateinit var adapter: SimpleAdapter
     lateinit var progress: ProgressView
-    private lateinit var welcome: SpeechBubble
+    private lateinit var welcome: FabPopup
     private lateinit var exporter: Exporter
     private var autoOpenedTree = false // To open automatically the tree at startup only once
     private var draggedTreeId = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.trees_activity)
         val listView = findViewById<ListView>(R.id.trees_list)
         progress = findViewById(R.id.trees_progress)
-        welcome = SpeechBubble(this, R.string.tap_add_tree)
+        welcome = FabPopup(this, findViewById(R.id.fab_box), R.string.tap_add_tree)
         exporter = Exporter(this, progress)
 
         // At very first startup
@@ -87,6 +93,13 @@ class TreesActivity : AppCompatActivity() {
 
         if (savedInstanceState != null) {
             autoOpenedTree = savedInstanceState.getBoolean("autoOpenedTree")
+        }
+
+        InsetsUtil(listView.rootView) {
+            listView.updatePadding(it.left, it.top, it.right, it.bottom + getResources().getDimension(R.dimen.bottom_padding).toInt())
+            findViewById<View>(R.id.fab_box).updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = it.left; rightMargin = it.right; bottomMargin = it.bottom
+            }
         }
 
         if (Global.settings.trees == null) return
@@ -274,17 +287,19 @@ class TreesActivity : AppCompatActivity() {
             listView.addHeaderView(bannerView)
         }
 
-        // Custom actionbar
-        val bar = supportActionBar
-        val treesBar = layoutInflater.inflate(R.layout.trees_bar, listView, false)
-        treesBar.findViewById<ImageButton>(R.id.trees_help).setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/michelesalvador/FamilyGem/wiki")))
+        // Custom toolbar
+        val bar = Toolbar(this)
+        bar.title = getString(R.string.trees)
+        bar.inflateMenu(R.menu.trees_menu)
+        bar.menu.findItem(R.id.treesMenu_help).setOnMenuItemClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/michelesalvador/FamilyGem/wiki".toUri()))
+            return@setOnMenuItemClickListener false
         }
-        treesBar.findViewById<ImageButton>(R.id.trees_settings).setOnClickListener {
+        bar.menu.findItem(R.id.treesMenu_settings).setOnMenuItemClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+            return@setOnMenuItemClickListener false
         }
-        bar!!.customView = treesBar
-        bar.setDisplayShowCustomEnabled(true)
+        listView.addHeaderView(bar)
 
         // FAB
         findViewById<View>(R.id.fab).setOnClickListener {
@@ -306,9 +321,7 @@ class TreesActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Displays an AlertDialog that asks to download the shared tree.
-     */
+    /** Displays an AlertDialog that asks to download the shared tree. */
     private fun showSharedTreeDialog(dateId: String, onCancel: () -> Unit) {
         AlertDialog.Builder(this)
             .setTitle(R.string.a_new_tree)

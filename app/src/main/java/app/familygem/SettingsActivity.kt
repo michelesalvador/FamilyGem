@@ -19,7 +19,7 @@ import org.joda.time.format.DateTimeFormat
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
-class SettingsActivity : BaseActivity() {
+class SettingsActivity : BaseActivity(R.string.settings) {
 
     private lateinit var binding: SettingsActivityBinding
     private lateinit var languages: MutableList<Language>
@@ -40,7 +40,7 @@ class SettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = SettingsActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent(binding.root)
 
         // Auto save
         val saveSwitch = binding.settingsAutoSave
@@ -112,7 +112,7 @@ class SettingsActivity : BaseActivity() {
                     AppCompatDelegate.setApplicationLocales(appLocale)
                     // Updates app global context for this session only
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                        binding.settingsLayout.postDelayed({
+                        view.postDelayed({
                             Global.context = ContextCompat.getContextForLanguage(applicationContext)
                         }, 50) // Waits just a bit to get the correct locale
                     }

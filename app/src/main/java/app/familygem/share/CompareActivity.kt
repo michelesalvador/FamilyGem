@@ -15,6 +15,7 @@ import app.familygem.Global
 import app.familygem.R
 import app.familygem.U
 import app.familygem.constant.Extra
+import app.familygem.databinding.CompareActivityBinding
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.getBasicData
@@ -41,16 +42,16 @@ import java.util.TimeZone
  * Activity that introduces the process for importing updates in an existing tree.
  * The updates are taken from a tree received on sharing.
  */
-class CompareActivity : BaseActivity() {
+class CompareActivity : BaseActivity(R.string.tree_with_news) {
 
     private var idTree1 = 0
     private var idTree2 = 0
     private lateinit var sharingDate: Date
     private lateinit var changeDateFormat: SimpleDateFormat
 
-    override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
-        setContentView(R.layout.compare_activity)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent(CompareActivityBinding.inflate(layoutInflater).root)
         idTree1 = intent.getIntExtra(Extra.TREE_ID, 1) // Old tree present in the app
         idTree2 = intent.getIntExtra(Extra.TREE_ID_2, 1) // New tree received in sharing
         Global.treeId2 = idTree2 // It will be used by ProcessActivity and ConfirmationActivity
@@ -86,7 +87,11 @@ class CompareActivity : BaseActivity() {
 
             withContext(Main) { setupInterface() }
         }
-        onBackPressedDispatcher.addCallback(this) { onSupportNavigateUp() }
+        onBackPressedDispatcher.addCallback(this) {
+            Comparison.reset() // Resets the Comparison singleton
+            isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     private fun setupInterface() {
@@ -148,11 +153,6 @@ class CompareActivity : BaseActivity() {
             }
             button2.visibility = View.GONE
         }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        Comparison.reset() // Resets the Comparison singleton
-        return super.onSupportNavigateUp()
     }
 
     override fun onRestart() {

@@ -31,7 +31,7 @@
 
     <ImageButton
         android:id="@+id/diagram_options"
-        style="@style/AppTheme.WhiteTint"
+        style="@style/AppTheme.OverflowButton"
         android:layout_width="?attr/actionBarSize"
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="end"

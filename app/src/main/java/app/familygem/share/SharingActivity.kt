@@ -17,7 +17,6 @@ import app.familygem.BaseActivity
 import app.familygem.BuildConfig
 import app.familygem.Exporter
 import app.familygem.Global
-import app.familygem.ProgressView
 import app.familygem.R
 import app.familygem.Settings
 import app.familygem.Settings.Share
@@ -25,6 +24,7 @@ import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.Json
+import app.familygem.databinding.SharingActivityBinding
 import app.familygem.main.MainActivity
 import app.familygem.main.SubmittersFragment
 import app.familygem.util.ChangeUtil.actualDateTime
@@ -56,10 +56,8 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-/**
- * Allows to share a tree by uploading it to the online server.
- */
-class SharingActivity : BaseActivity() {
+/** Allows to share a tree by uploading it to the online server. */
+class SharingActivity : BaseActivity(R.string.share_tree) {
 
     private var gedcom: Gedcom? = null
     private lateinit var tree: Settings.Tree
@@ -70,18 +68,16 @@ class SharingActivity : BaseActivity() {
     private lateinit var submitterId: String
     private var accessible = 0 // 0 = false, 1 = true
     private var dateId: String? = null
-    private lateinit var progressView: ProgressView
     private var successfulUpload = false // To avoid uploading twice
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.sharing_activity)
+        setContent(SharingActivityBinding.inflate(layoutInflater).root)
         val treeId = intent.getIntExtra(Extra.TREE_ID, 1)
         tree = Global.settings.getTree(treeId)
         titleView = findViewById(R.id.share_title)
         titleView.setText(tree.title)
         if (tree.grade == 10) findViewById<TextView>(R.id.share_submitter_title).setText(R.string.changes_submitter)
-        progressView = findViewById(R.id.share_progress)
         exporter = Exporter(this, progressView)
         lifecycleScope.launch(IO) {
             exporter.openTree(treeId)

@@ -18,7 +18,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import app.familygem.databinding.NewTreeActivityBinding
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
 import kotlinx.coroutines.Dispatchers.IO
@@ -31,14 +33,11 @@ import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.parser.JsonParser
 import java.io.File
 
-class NewTreeActivity : BaseActivity() {
-
-    private lateinit var progressView: ProgressView
+class NewTreeActivity : BaseActivity(R.string.new_tree) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.new_tree_activity)
-        progressView = findViewById(R.id.new_progress)
+        setContent(NewTreeActivityBinding.inflate(layoutInflater).root)
         val referrer = Global.settings.referrer // DateID coming from a sharing
         val dateIdExists = referrer != null && referrer.matches("\\d{14}".toRegex())
 
@@ -47,7 +46,8 @@ class NewTreeActivity : BaseActivity() {
         if (dateIdExists) // Doesn't need any permissions because it unpacks only into the app's external storage
             downloadShared.setOnClickListener {
                 progressView.visibility = View.VISIBLE
-                TreeUtil.launchDownloadSharedTree(lifecycleScope, this, referrer, progressView,
+                TreeUtil.launchDownloadSharedTree(
+                    lifecycleScope, this, referrer, progressView,
                     { startActivity(Intent(this, TreesActivity::class.java)) }, { progressView.visibility = View.GONE })
             }
         else downloadShared.visibility = View.GONE
@@ -168,7 +168,7 @@ class NewTreeActivity : BaseActivity() {
                 "alt=media&key=AIzaSyDN3OS52Wxs58px8fPcPKOUdC0WBZFOCSY"
         val zipFile = File(externalCacheDir, "the Simpsons.zip")
         if (zipFile.exists()) zipFile.delete()
-        val request = DownloadManager.Request(Uri.parse(url))
+        val request = DownloadManager.Request(url.toUri())
             .setTitle(getString(R.string.simpsons_tree))
             .setDescription(getString(R.string.family_gem_example))
             .setMimeType("application/zip")
@@ -192,7 +192,8 @@ class NewTreeActivity : BaseActivity() {
                         }
                         DownloadManager.STATUS_SUCCESSFUL -> {
                             finishDownload = true
-                            TreeUtil.launchUnzipTree(lifecycleScope, this, zipFile, null, progressView,
+                            TreeUtil.launchUnzipTree(
+                                lifecycleScope, this, zipFile, null, progressView,
                                 { startActivity(Intent(this, TreesActivity::class.java)) },
                                 { progressView.visibility = View.GONE; downloadButton.isEnabled = true })
                         }

@@ -10,7 +10,6 @@ import android.text.format.DateUtils
 import android.text.format.Formatter
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -18,12 +17,18 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.ContextCompat.getDrawable
+import androidx.core.graphics.Insets
+import androidx.core.net.toUri
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.core.view.setPadding
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -34,6 +39,7 @@ import app.familygem.BackupViewModel.Companion.NO_URI
 import app.familygem.databinding.BackupActivityBinding
 import app.familygem.databinding.BackupRecoverFragmentBinding
 import app.familygem.databinding.BackupSaveFragmentBinding
+import app.familygem.util.InsetsUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import com.google.android.material.tabs.TabLayoutMediator
@@ -41,17 +47,38 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 /** Local backup manager for all trees. */
-class BackupActivity : BaseActivity() {
+class BackupActivity : AppCompatActivity() {
 
     private lateinit var binding: BackupActivityBinding
     private val viewModel = Global.backupViewModel
+    private var insets = Insets.NONE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         BackupActivityBinding.inflate(layoutInflater).run {
             binding = this
             setContentView(root)
-            backupContainer.visibility = if (Global.settings.backup) View.VISIBLE else View.GONE
+            InsetsUtil(root) {
+                backupLayout.updatePadding(left = it.left, top = it.top, right = it.right)
+                this@BackupActivity.insets = it
+            }
+            // Toolbar
+            backupToolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
+            backupToolbar.inflateMenu(R.menu.switcher)
+            val item = backupToolbar.menu.findItem(R.id.switch_item)
+            item.setActionView(R.layout.switch_layout)
+            val switch = item.actionView!!.findViewById<SwitchCompat>(R.id.switch_widget)
+            switch.isChecked = Global.settings.backup
+            switch.setOnCheckedChangeListener { _, isChecked ->
+                Global.settings.backup = isChecked
+                Global.settings.save()
+                backupContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+            }
+            if (!Global.settings.backup) {
+                backupContainer.visibility = View.GONE
+                viewModel.working(false)
+            }
             // Backup folder
             viewModel.displayFolder()
             val backupFolderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -68,7 +95,7 @@ class BackupActivity : BaseActivity() {
                 intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val initialUri = if (Global.settings.backupUri != NO_URI) Uri.parse(Global.settings.backupUri) else Uri.EMPTY
+                    val initialUri = if (Global.settings.backupUri != NO_URI) Global.settings.backupUri.toUri() else Uri.EMPTY
                     intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, initialUri)
                 }
                 backupFolderLauncher.launch(intent)
@@ -110,21 +137,6 @@ class BackupActivity : BaseActivity() {
             }.attach()
             viewModel.getBackupFolder() // To update backup button state
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Backup general switch
-        menuInflater.inflate(R.menu.switcher, menu)
-        val item = menu.findItem(R.id.switch_item)
-        item.setActionView(R.layout.switch_layout)
-        val switch = item.actionView!!.findViewById<SwitchCompat>(R.id.switch_widget)
-        switch.isChecked = Global.settings.backup
-        switch.setOnCheckedChangeListener { _, isChecked ->
-            Global.settings.backup = isChecked
-            Global.settings.save()
-            binding.backupContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
-        return true
     }
 
     class PagesAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
@@ -192,6 +204,7 @@ class BackupActivity : BaseActivity() {
                 backupSaveButton.setOnClickListener {
                     viewModel.saveState.value = SaveState.Saving
                 }
+                backupSaveLayout.updatePadding(bottom = (activity as BackupActivity).insets.bottom + U.dpToPx(30F))
                 return root
             }
         }
@@ -231,6 +244,7 @@ class BackupActivity : BaseActivity() {
                 binding.backupRecoverSwipe.isRefreshing = false
             }
             viewModel.recoverState.value = RecoverState.Loading
+            binding.backupRecoverBox.updatePadding(bottom = (activity as BackupActivity).insets.bottom)
             return binding.root
         }
 
@@ -298,7 +312,7 @@ class BackupActivity : BaseActivity() {
                         it.findViewById<LinearLayout>(R.id.backup_detail).visibility = View.GONE
                         it.background = null
                     }
-                    detailView.visibility = if (detailView.visibility == View.VISIBLE) {
+                    detailView.visibility = if (detailView.isVisible) {
                         backupView.background = null
                         View.GONE
                     } else {

@@ -6,6 +6,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.databinding.CropImageActivityBinding
 import app.familygem.util.toPxFloat
@@ -17,13 +21,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Activity to crop image. */
-class CropImageActivity : BaseActivity(), CropImageView.OnSetImageUriCompleteListener, CropImageView.OnCropImageCompleteListener {
+class CropImageActivity : AppCompatActivity(), CropImageView.OnSetImageUriCompleteListener, CropImageView.OnCropImageCompleteListener {
 
     private lateinit var imageView: CropImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        val barStyle = SystemBarStyle.dark(ResourcesCompat.getColor(resources, R.color.black_veiled, null))
+        enableEdgeToEdge(barStyle, barStyle)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.elevation = 0F
         CropImageActivityBinding.inflate(layoutInflater).run {
             setContentView(root)
             val imageUri = intent.data!!

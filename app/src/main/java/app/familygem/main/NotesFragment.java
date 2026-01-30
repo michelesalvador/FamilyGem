@@ -66,7 +66,7 @@ public class NotesFragment extends BaseFragment implements NotesAdapter.ItemClic
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         registerForContextMenu(recyclerView);
-        setupFastScroller(recyclerView);
+        setInterfacer(view.findViewById(R.id.recycler_fab), recyclerView, true);
         view.findViewById(R.id.fab).setOnClickListener(v -> NoteUtil.INSTANCE.createSharedNote(getContext(), null));
         return view;
     }
@@ -134,6 +134,7 @@ public class NotesFragment extends BaseFragment implements NotesAdapter.ItemClic
         if (allNotes.size() > 1) {  // Search inside notes
             inflater.inflate(R.menu.search, menu);
             searchView = (SearchView)menu.findItem(R.id.search_item).getActionView();
+            stylizeSearchView(searchView);
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextChange(String query) {

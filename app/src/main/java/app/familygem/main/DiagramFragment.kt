@@ -33,6 +33,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.TextUtilsCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import app.familygem.DiagramSettingsActivity
@@ -137,6 +138,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         moveLayout = binding.diagramFrame
         moveLayout.graph = graph
         box = binding.diagramBox
+        interfacer = { insets ->
+            binding.diagramHamburger.updateLayoutParams<ViewGroup.MarginLayoutParams> { leftMargin = insets.left; topMargin = insets.top }
+            binding.diagramOptions.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.top; rightMargin = insets.right }
+        }
         return binding.root
     }
 
@@ -185,7 +190,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             button.findViewById<View>(R.id.diagram_new).setOnClickListener {
                 startActivity(Intent(context(), PersonEditorActivity::class.java))
             }
-            SuggestionBalloon(context(), button, R.string.new_person)
+            SuggestionPopup(context(), button, R.string.new_person)
             if (!Global.settings.expert) binding.diagramOptions.visibility = View.GONE
         } else {
             binding.diagramWheel.root.visibility = View.VISIBLE
@@ -256,7 +261,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 val singleNode = graphicNodes[0]
                 singleNode.id = R.id.tag_fulcrum
                 box.removeAllViews()
-                val popupLayout: ConstraintLayout = SuggestionBalloon(context(), singleNode, R.string.long_press_menu)
+                val popupLayout = SuggestionPopup(context(), singleNode, R.string.long_press_menu)
                 // Adds the glow to the fulcrum card
                 if (fulcrumView != null) {
                     box.post {
@@ -352,12 +357,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         if (diagramJob != null && diagramJob!!.isActive) diagramJob!!.cancel()
     }
 
-    /**
-     * Puts a view under the suggestion balloon.
-     */
-    inner class SuggestionBalloon(context: Context, private val childView: View, suggestion: Int) : ConstraintLayout(context) {
+    /** Puts a view under the suggestion popup. */
+    inner class SuggestionPopup(context: Context, private val childView: View, suggestion: Int) : ConstraintLayout(context) {
         init {
-            val popupView = layoutInflater.inflate(R.layout.popup, this, true)
+            val popupView = layoutInflater.inflate(R.layout.popup_layout, this, true)
             box.addView(popupView)
             val nodeParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             nodeParams.topToBottom = R.id.popup_fumetto

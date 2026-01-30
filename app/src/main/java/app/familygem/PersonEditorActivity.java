@@ -8,12 +8,9 @@ import android.text.InputFilter;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 import org.folg.gedcom.model.ChildRef;
@@ -38,7 +35,7 @@ import app.familygem.util.EventUtilKt;
 import app.familygem.util.FamilyUtil;
 import app.familygem.util.TreeUtil;
 
-public class PersonEditorActivity extends AppCompatActivity {
+public class PersonEditorActivity extends BaseActivity {
 
     private String personId; // ID of the person we want to edit. If null we have to create a new person.
     private String familyId;
@@ -66,7 +63,7 @@ public class PersonEditorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.edita_individuo);
+        setContent(getLayoutInflater().inflate(R.layout.person_editor_activity, null));
         Intent intent = getIntent();
         personId = intent.getStringExtra(Extra.PERSON_ID);
         familyId = intent.getStringExtra(Extra.FAMILY_ID);
@@ -74,19 +71,21 @@ public class PersonEditorActivity extends AppCompatActivity {
         fromFamilyActivity = intent.getBooleanExtra(Extra.FROM_FAMILY, false);
         nameSuffix = "";
 
-        givenNameView = findViewById(R.id.nome);
-        surnameView = findViewById(R.id.cognome);
-        radioGroup = findViewById(R.id.radioGroup);
-        sexMale = findViewById(R.id.sesso1);
-        sexFemale = findViewById(R.id.sesso2);
-        sexUnknown = findViewById(R.id.sesso3);
-        birthDate = findViewById(R.id.data_nascita);
-        birthDateEditor = findViewById(R.id.editore_data_nascita);
-        birthPlace = findViewById(R.id.luogo_nascita);
-        isDeadSwitch = findViewById(R.id.defunto);
-        deathDate = findViewById(R.id.data_morte);
-        deathDateEditor = findViewById(R.id.editore_data_morte);
-        deathPlace = findViewById(R.id.luogo_morte);
+        bar.setTitle(R.string.person); // TODO: title could be more sophisticated
+
+        givenNameView = findViewById(R.id.editor_name);
+        surnameView = findViewById(R.id.editor_surname);
+        radioGroup = findViewById(R.id.editor_sexGroup);
+        sexMale = findViewById(R.id.editor_sex1);
+        sexFemale = findViewById(R.id.editor_sex2);
+        sexUnknown = findViewById(R.id.editor_sex3);
+        birthDate = findViewById(R.id.editor_birthDate);
+        birthDateEditor = findViewById(R.id.editor_birthDateEditor);
+        birthPlace = findViewById(R.id.editor_birthPlace);
+        isDeadSwitch = findViewById(R.id.editor_dead);
+        deathDate = findViewById(R.id.editor_deathDate);
+        deathDateEditor = findViewById(R.id.editor_deathDateEditor);
+        deathPlace = findViewById(R.id.editor_deathPlace);
 
         // Forbidden "/" character in name
         InputFilter[] filters = new InputFilter[]{(source, start, end, dest, dstart, dend) -> {
@@ -122,16 +121,11 @@ public class PersonEditorActivity extends AppCompatActivity {
             return false;
         });
 
-        // Toolbar
-        ActionBar toolbar = getSupportActionBar();
-        View actionBar = getLayoutInflater().inflate(R.layout.barra_edita, new LinearLayout(getApplicationContext()), false);
-        actionBar.findViewById(R.id.edita_annulla).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-        actionBar.findViewById(R.id.edita_salva).setOnClickListener(button -> {
+        findViewById(R.id.editor_cancel).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        findViewById(R.id.editor_save).setOnClickListener(button -> {
             button.setEnabled(false); // To avoid multiple clicks
             save();
         });
-        toolbar.setCustomView(actionBar);
-        toolbar.setDisplayShowCustomEnabled(true);
 
         if (TreeUtil.INSTANCE.isGlobalGedcomOk(this::populateFields)) populateFields();
     }
@@ -240,7 +234,7 @@ public class PersonEditorActivity extends AppCompatActivity {
     }
 
     private void disableDeath() {
-        findViewById(R.id.morte).setVisibility(View.GONE);
+        findViewById(R.id.editor_death).setVisibility(View.GONE);
         birthPlace.setImeOptions(EditorInfo.IME_ACTION_DONE);
         birthPlace.setNextFocusForwardId(0);
         // Intercepts the 'Done' on the keyboard
@@ -253,9 +247,9 @@ public class PersonEditorActivity extends AppCompatActivity {
 
     private void enableDeath() {
         birthPlace.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-        birthPlace.setNextFocusForwardId(R.id.data_morte);
+        birthPlace.setNextFocusForwardId(R.id.editor_deathDate);
         birthPlace.setOnEditorActionListener(null);
-        findViewById(R.id.morte).setVisibility(View.VISIBLE);
+        findViewById(R.id.editor_death).setVisibility(View.VISIBLE);
     }
 
     private void save() {

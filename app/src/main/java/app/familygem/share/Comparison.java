@@ -16,7 +16,7 @@ public class Comparison {
     private final List<Front> list = new ArrayList<>();
     boolean autoContinue; // Determines whether to automatically accept all updates
     int numChoices; // Total choices in case of autoContinue
-    int choicesMade; // Position in case of autoContinue //Posizione in caso di autoProsegui
+    int choicesMade; // Position in case of autoContinue
 
     static Comparison get() {
         return comparison;

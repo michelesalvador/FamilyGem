@@ -16,7 +16,7 @@
         android:localeConfig="@xml/locales_config"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/AppTheme.NoActionBar"
         android:usesCleartextTraffic="true">
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -111,59 +111,20 @@
         <activity
             android:name=".TreesActivity"
             android:launchMode="singleTask" />
-        <activity
-            android:name=".NewTreeActivity"
-            android:label="@string/new_tree"
-            android:parentActivityName=".TreesActivity" />
-        <activity
-            android:name=".main.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/settings"
-            android:parentActivityName=".TreesActivity" />
-        <activity
-            android:name=".BackupActivity"
-            android:label="@string/local_backup"
-            android:parentActivityName=".SettingsActivity" />
-        <activity
-            android:name=".AboutActivity"
-            android:label="@string/about"
-            android:parentActivityName=".SettingsActivity" />
-        <activity
-            android:name=".InfoActivity"
-            android:label="@string/info"
-            android:parentActivityName=".TreesActivity" />
-        <activity
-            android:name=".MediaFoldersActivity"
-            android:label="@string/media_folders" />
-        <activity
-            android:name=".share.SharingActivity"
-            android:label="@string/share_tree"
-            android:parentActivityName=".TreesActivity" />
-        <activity
-            android:name=".merge.MergeActivity"
-            android:label="@string/merge_tree"
-            android:parentActivityName=".TreesActivity" />
-        <activity
-            android:name=".share.CompareActivity"
-            android:label="@string/tree_with_news"
-            android:parentActivityName=".TreesActivity" />
-        <activity
-            android:name=".share.ProcessActivity"
-            android:label="@string/import_news"
-            android:parentActivityName=".share.CompareActivity" />
-        <activity
-            android:name=".share.ConfirmationActivity"
-            android:label="@string/confirm_news"
-            android:parentActivityName=".share.CompareActivity" />
-        <activity
-            android:name=".DiagramSettingsActivity"
-            android:label="@string/diagram_settings" />
-        <activity
-            android:name=".profile.ProfileActivity"
-            android:configChanges="orientation|screenSize|screenLayout"
-            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".NewTreeActivity" />
+        <activity android:name=".main.MainActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".BackupActivity" />
+        <activity android:name=".AboutActivity" />
+        <activity android:name=".InfoActivity" />
+        <activity android:name=".MediaFoldersActivity" />
+        <activity android:name=".share.SharingActivity" />
+        <activity android:name=".share.CompareActivity" />
+        <activity android:name=".share.ProcessActivity" />
+        <activity android:name=".share.ConfirmationActivity" />
+        <activity android:name=".merge.MergeActivity" />
+        <activity android:name=".DiagramSettingsActivity" />
+        <activity android:name=".profile.ProfileActivity" />
         <activity android:name=".PersonEditorActivity" />
         <activity android:name=".detail.FamilyActivity" />
         <activity android:name=".detail.NameActivity" />
@@ -185,7 +146,8 @@
             android:theme="@style/AppTheme.TransparentActionBar" />
         <activity
             android:name=".CropImageActivity"
-            android:label="@string/crop" />
+            android:label="@string/crop"
+            android:theme="@style/AppTheme.TransparentActionBar" />
         <activity android:name=".purchase.PurchaseActivity" />
 
         <service

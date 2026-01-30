@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/treesMenu_help"
+        android:icon="@drawable/questionmark"
+        android:title="@string/help"
+        app:showAsAction="ifRoom|collapseActionView" />
+    <item
+        android:id="@+id/treesMenu_settings"
+        android:icon="@drawable/gear"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom|collapseActionView" />
+</menu>

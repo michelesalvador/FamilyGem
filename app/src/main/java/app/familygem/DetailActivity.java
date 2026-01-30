@@ -27,7 +27,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.util.Pair;
 
@@ -101,7 +100,7 @@ import app.familygem.visitor.FindStack;
 import app.familygem.visitor.MediaReferences;
 import kotlin.Unit;
 
-public abstract class DetailActivity extends AppCompatActivity {
+public abstract class DetailActivity extends BaseActivity {
 
     protected LinearLayout box;
     protected Object object; // Name, Media, SourceCitation etc.
@@ -112,14 +111,17 @@ public abstract class DetailActivity extends AppCompatActivity {
     private DateEditorLayout dateEditor;
     private FloatingActionButton fabView;
     private ActionBar actionBar;
+    private View editBar;
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.activity_detail);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setContent(getLayoutInflater().inflate(R.layout.detail_activity, null));
         box = findViewById(R.id.detail_box);
-        fabView = findViewById(R.id.fab);
+        fabView = getVisibleFab();
+
+        // Action bar
+        setSupportActionBar(bar);
         actionBar = getSupportActionBar();
 
         // List of other Family events
@@ -161,7 +163,7 @@ public abstract class DetailActivity extends AppCompatActivity {
             popup.show();
         });
         // If the FAB menu is empty hides the FAB
-        if (!createFabMenu().getMenu().hasVisibleItems()) fabView.hide();
+        if (!createFabMenu().getMenu().hasVisibleItems()) getFabBox().setVisibility(View.GONE);
         // TODO: when the FAB was hidden, if a piece is deleted the FAB should reappear
     }
 
@@ -484,7 +486,7 @@ public abstract class DetailActivity extends AppCompatActivity {
     }
 
     public void placeSlug(String tag, String id) {
-        FlexboxLayout slugLayout = findViewById(R.id.dettaglio_bava);
+        FlexboxLayout slugLayout = findViewById(R.id.detail_slug);
         if (Global.settings.expert) {
             slugLayout.removeAllViews();
             for (final Memory.Step step : Memory.getLastStack()) {
@@ -799,7 +801,7 @@ public abstract class DetailActivity extends AppCompatActivity {
         concludeActivePieces();
         TextView textView = pieceView.findViewById(R.id.event_text);
         textView.setVisibility(View.GONE);
-        fabView.hide();
+        getFabBox().setVisibility(View.GONE);
         Object pieceObject = pieceView.getTag(R.id.tag_object);
         boolean showInput = false;
         editText = pieceView.findViewById(R.id.event_edit);
@@ -872,16 +874,18 @@ public abstract class DetailActivity extends AppCompatActivity {
 
         // Custom ActionBar
         actionBar.setDisplayHomeAsUpEnabled(false); // Hides the back arrow
+        actionBar.setDisplayShowTitleEnabled(false); // Hides the title
         whichMenu = 0;
         invalidateOptionsMenu();
-        View editBar = getLayoutInflater().inflate(R.layout.barra_edita, new LinearLayout(box.getContext()), false);
-        editBar.findViewById(R.id.edita_annulla).setOnClickListener(v -> {
+        editBar = getLayoutInflater().inflate(R.layout.edit_bar, null);
+        LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        editBar.setLayoutParams(params1);
+        editBar.findViewById(R.id.editBar_cancel).setOnClickListener(v -> {
             editText.setText(textView.getText());
             restore(pieceView);
         });
-        editBar.findViewById(R.id.edita_salva).setOnClickListener(v -> save(pieceView));
-        actionBar.setCustomView(editBar);
-        actionBar.setDisplayShowCustomEnabled(true);
+        editBar.findViewById(R.id.editBar_save).setOnClickListener(v -> save(pieceView));
+        bar.addView(editBar);
     }
 
     void save(View pieceView) {
@@ -938,12 +942,13 @@ public abstract class DetailActivity extends AppCompatActivity {
         editText.setVisibility(View.GONE);
         pieceView.findViewById(R.id.event_date).setVisibility(View.GONE);
         pieceView.findViewById(R.id.event_text).setVisibility(View.VISIBLE);
-        actionBar.setDisplayShowCustomEnabled(false); // Hides custom toolbar
+        bar.removeView(editBar); // Removes custom toolbar
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(true);
         whichMenu = 1;
         invalidateOptionsMenu();
         if (!(object instanceof Note && !Global.settings.expert)) // NoteActivity on non-expert mode has no FAB
-            fabView.show();
+            getFabBox().setVisibility(View.VISIBLE);
     }
 
     @Override

@@ -50,6 +50,7 @@ public class SubmittersFragment extends BaseFragment {
             createSubmitter(getContext());
             TreeUtil.INSTANCE.save(true);
         });
+        setInterfacer(binding.scrollviewFab.getRoot(), binding.scrollviewScroll, false);
         return binding.getRoot();
     }
 

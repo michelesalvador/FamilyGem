@@ -9,6 +9,7 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.updatePadding
 import androidx.core.widget.addTextChangedListener
 import app.familygem.DatePickerFragment
 import app.familygem.Global
@@ -31,6 +32,7 @@ class TreeSettingsFragment : BaseFragment(R.layout.tree_settings_fragment) {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = TreeSettingsFragmentBinding.inflate(inflater, container, false)
+        interfacer = { insets -> binding.root.updatePadding(insets.left, 0, insets.right, insets.bottom) }
         return binding.root
     }
 
