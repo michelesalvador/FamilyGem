@@ -23,6 +23,7 @@ class MatchFragment : BaseFragment(R.layout.merge_match_fragment) {
         super.onViewCreated(view, savedInstanceState)
         binding = MergeMatchFragmentBinding.bind(view)
         binding.model = model
+        progress.visibility = View.GONE
         // Sets the two tree titles
         binding.mergeLeftTitle.text = model.firstTree.title
         binding.mergeRightTitle.text = model.secondTree.title

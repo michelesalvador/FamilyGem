@@ -1,40 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingTop="40dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="50dp">
 
-    <LinearLayout
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="Two merging trees"
+        android:gravity="bottom"
+        app:srcCompat="@drawable/merging_trees" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:gravity="center_horizontal"
+        android:text="@string/unlock_function" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/purchase_premium"
+        android:name="app.familygem.purchase.PremiumFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingTop="40dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="50dp">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:contentDescription="Two merging trees"
-            android:gravity="bottom"
-            app:srcCompat="@drawable/merging_trees" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
-            android:gravity="center_horizontal"
-            android:text="@string/unlock_function" />
-
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/purchase_premium"
-            android:name="app.familygem.purchase.PremiumFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:layout="@layout/premium_fragment" />
-    </LinearLayout>
-</ScrollView>
+        tools:layout="@layout/premium_fragment" />
+</LinearLayout>

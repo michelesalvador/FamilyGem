@@ -13,139 +13,134 @@
             type="app.familygem.merge.MergeViewModel" />
     </data>
 
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:paddingStart="15dp"
+        android:paddingTop="30dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="50dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <TextView
+            android:id="@+id/merge_counter"
+            style="@style/AppTheme.Suggestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{model.actualMatch + 1 + `/` + model.personMatches.size}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1/23" />
+
+        <ImageButton
+            android:id="@+id/merge_abort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#0000"
+            android:visibility="@{model.actualMatch > 0 ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ex" />
+
+        <ProgressBar
+            android:id="@+id/merge_progress"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:paddingTop="30dp"
-            android:paddingEnd="15dp"
-            android:paddingBottom="50dp">
+            android:max="@{model.personMatches.size}"
+            android:progress="@{model.actualMatch + 1}"
+            app:layout_constraintTop_toBottomOf="@+id/merge_counter" />
+
+        <LinearLayout
+            android:id="@+id/merge_treeTitles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/merge_progress"
+            app:layout_constraintWidth_max="600dp">
 
             <TextView
-                android:id="@+id/merge_counter"
+                android:id="@+id/merge_leftTitle"
                 style="@style/AppTheme.Suggestion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{model.actualMatch + 1 + `/` + model.personMatches.size}"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="1/23" />
-
-            <ImageButton
-                android:id="@+id/merge_abort"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="#0000"
-                android:visibility="@{model.actualMatch > 0 ? View.VISIBLE : View.GONE}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ex" />
-
-            <ProgressBar
-                android:id="@+id/merge_progress"
-                style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="@{model.personMatches.size}"
-                android:progress="@{model.actualMatch + 1}"
-                app:layout_constraintTop_toBottomOf="@+id/merge_counter" />
-
-            <LinearLayout
-                android:id="@+id/merge_treeTitles"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/merge_progress"
-                app:layout_constraintWidth_max="600dp">
-
-                <TextView
-                    android:id="@+id/merge_leftTitle"
-                    style="@style/AppTheme.Suggestion"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="1"
-                    android:gravity="bottom|center_horizontal"
-                    tools:text="First tree title" />
-
-                <TextView
-                    android:id="@+id/merge_rightTitle"
-                    style="@style/AppTheme.Suggestion"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    android:gravity="bottom|center_horizontal"
-                    tools:text="Second tree title" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/merge_persons"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/merge_treeTitles"
-                app:layout_constraintWidth_max="600dp">
-
-                <androidx.fragment.app.FragmentContainerView
-                    android:id="@+id/leftPerson"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="1"
-                    tools:layout="@layout/merge_person_fragment" />
-
-                <androidx.fragment.app.FragmentContainerView
-                    android:id="@+id/rightPerson"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    tools:layout="@layout/merge_person_fragment" />
-            </LinearLayout>
+                android:layout_height="match_parent"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:gravity="bottom|center_horizontal"
+                tools:text="First tree title" />
 
             <TextView
-                android:id="@+id/merge_question"
+                android:id="@+id/merge_rightTitle"
+                style="@style/AppTheme.Suggestion"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:gravity="bottom|center_horizontal"
+                tools:text="Second tree title" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/merge_persons"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/merge_treeTitles"
+            app:layout_constraintWidth_max="600dp">
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/leftPerson"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center_horizontal"
-                android:text="@string/are_same_person"
-                app:layout_constraintTop_toBottomOf="@+id/merge_persons" />
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                tools:layout="@layout/merge_person_fragment" />
 
-            <Button
-                android:id="@+id/merge_merge"
-                style="@style/AppTheme.NormalButton"
-                android:layout_width="wrap_content"
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/rightPerson"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/yes"
-                app:layout_constraintEnd_toStartOf="@+id/merge_keep"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/merge_question" />
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                tools:layout="@layout/merge_person_fragment" />
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/merge_keep"
-                style="@style/AppTheme.NormalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
-                android:text="@string/no"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/merge_merge"
-                app:layout_constraintTop_toBottomOf="@+id/merge_question" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+        <TextView
+            android:id="@+id/merge_question"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center_horizontal"
+            android:text="@string/are_same_person"
+            app:layout_constraintTop_toBottomOf="@+id/merge_persons" />
+
+        <Button
+            android:id="@+id/merge_merge"
+            style="@style/AppTheme.NormalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/yes"
+            app:layout_constraintEnd_toStartOf="@+id/merge_keep"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/merge_question" />
+
+        <Button
+            android:id="@+id/merge_keep"
+            style="@style/AppTheme.NormalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:text="@string/no"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/merge_merge"
+            app:layout_constraintTop_toBottomOf="@+id/merge_question" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

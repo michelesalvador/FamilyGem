@@ -1,5 +1,6 @@
 package app.familygem.merge
 
+import android.content.Context
 import android.view.View
 import android.widget.ImageButton
 import android.widget.RelativeLayout
@@ -7,6 +8,8 @@ import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import app.familygem.BaseActivity
+import app.familygem.ProgressView
 import app.familygem.R
 import app.familygem.Settings.Tree
 import app.familygem.U
@@ -15,6 +18,12 @@ import app.familygem.util.getBasicData
 abstract class BaseFragment(layout: Int) : Fragment(layout) {
 
     val model: MergeViewModel by activityViewModels()
+    lateinit var progress: ProgressView
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        progress = (activity as BaseActivity).progressView
+    }
 
     fun setupTreeView(treeView: View, tree: Tree) {
         treeView.background = ResourcesCompat.getDrawable(resources, R.drawable.generic_background, null)

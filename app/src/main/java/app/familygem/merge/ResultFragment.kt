@@ -3,7 +3,6 @@ package app.familygem.merge
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ProgressBar
 import android.widget.Toast
 import app.familygem.BuildConfig
 import app.familygem.Global
@@ -39,7 +38,7 @@ class ResultFragment : BaseFragment(R.layout.merge_result_fragment) {
                     bind.mergeRadioGenerate.isEnabled = false
                     bind.mergeRetitle.isEnabled = false
                     bind.mergeButton.isEnabled = false
-                    activity?.findViewById<ProgressBar>(R.id.progress_wheel)?.visibility = View.VISIBLE
+                    progress.visibility = View.VISIBLE
                 }
                 State.COMPLETE -> {
                     requireActivity().finish()
@@ -50,7 +49,7 @@ class ResultFragment : BaseFragment(R.layout.merge_result_fragment) {
                     bind.mergeRadioGenerate.isEnabled = true
                     bind.mergeRetitle.isEnabled = true
                     bind.mergeButton.isEnabled = bind.mergeRadioAnnex.isChecked || bind.mergeRadioGenerate.isChecked
-                    activity?.findViewById<ProgressBar>(R.id.progress_wheel)?.visibility = View.GONE
+                    progress.visibility = View.GONE
                 }
             }
             // Merge button

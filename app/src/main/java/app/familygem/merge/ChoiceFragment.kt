@@ -54,7 +54,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
                         }
                         mergeSearchDuplicates.isEnabled = false
                         mergeSkip.isEnabled = false
-                        mergeWheel.root.visibility = View.VISIBLE
+                        progress.visibility = View.VISIBLE
                     }
                     State.RESET -> {
                         for (i in 0 until mergeList.childCount) {
@@ -64,7 +64,7 @@ class ChoiceFragment : BaseFragment(R.layout.merge_choice_fragment) {
                         }
                         mergeSearchDuplicates.isEnabled = true
                         mergeSkip.isEnabled = true
-                        mergeWheel.root.visibility = View.GONE
+                        progress.visibility = View.GONE
                         model.state.value = State.QUIET
                     }
                     State.COMPLETE -> {
