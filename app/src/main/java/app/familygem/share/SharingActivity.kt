@@ -173,20 +173,12 @@ class SharingActivity : BaseActivity(R.string.share_tree) {
         }
     }
 
-    /**
-     * Places a small person card that represents the root of the shared tree.
-     */
+    /** Places a small person card that represents the root of the shared tree. */
     private fun displayShareRoot() {
-        val rootId: String
-        if (tree.shareRoot != null && gedcom!!.getPerson(tree.shareRoot) != null) {
-            rootId = tree.shareRoot
-        } else if (tree.root != null && gedcom!!.getPerson(tree.root) != null) {
-            rootId = tree.root
-            tree.shareRoot = rootId // To immediately share the tree without changing the root
-        } else {
-            rootId = U.findRootId(gedcom)
-            tree.shareRoot = rootId
-        }
+        val rootId = if (gedcom!!.getPerson(tree.shareRoot) != null) tree.shareRoot
+        else if (gedcom!!.getPerson(tree.root) != null) tree.root
+        else TreeUtil.findRootId(gedcom!!) // Root is missing or tree has no people
+        tree.shareRoot = rootId // In case it was different
         val person = gedcom!!.getPerson(rootId)
         if (person != null && tree.grade < 10) { // Shown only at first sharing, not coming back
             val rootLayout = findViewById<LinearLayout>(R.id.share_root)

@@ -216,12 +216,12 @@ object TreeUtil {
     fun saveJsonAsync(gedcom: Gedcom, treeId: Int) = GlobalScope.launch(IO) { saveJson(gedcom, treeId) }
 
     /** Refreshes the data displayed below the tree title in TreesActivity list. */
-    fun refreshData(gedcom: Gedcom, treeItem: Tree) {
-        treeItem.persons = gedcom.people.size
-        treeItem.generations = countGenerations(gedcom, U.getRootId(gedcom, treeItem))
+    fun refreshData(gedcom: Gedcom, tree: Tree) {
+        tree.persons = gedcom.people.size
+        tree.generations = countGenerations(gedcom, tree)
         val mediaVisitor = MediaList(gedcom)
         gedcom.accept(mediaVisitor)
-        treeItem.media = mediaVisitor.list.size
+        tree.media = mediaVisitor.list.size
         Global.settings.save()
     }
 
@@ -259,18 +259,55 @@ object TreeUtil {
         return header
     }
 
+    /** @return The main person of a tree or null */
+    fun getRoot(gedcom: Gedcom, tree: Tree?): Person? {
+        gedcom.getPerson(tree?.root)?.let { return it }
+        return gedcom.getPerson(findRootId(gedcom))
+    }
+
+    /** @return The ID of the main existing person of a GEDCOM or null */
+    fun findRootId(gedcom: Gedcom): String? {
+        if (gedcom.header != null) {
+            // Family Historian root
+            U.getTagValue(gedcom.header.extensions, "_ROOT")?.let {
+                if (gedcom.getPerson(it) != null) return it
+            }
+            // Ahnenblatt home
+            U.getTagValue(gedcom.header.extensions, "_HOME")?.let {
+                if (gedcom.getPerson(it) != null) return it
+            }
+        }
+        if (!gedcom.people.isEmpty()) {
+            // Lower numeric ID
+            var minId: String? = null
+            var minNum = Int.MAX_VALUE
+            for (person in gedcom.people) {
+                val num = U.extractNum(person.id)
+                if (num < minNum) {
+                    minNum = num
+                    minId = person.id
+                }
+            }
+            if (minNum < Int.MAX_VALUE) return minId
+            // ID of the first person
+            return gedcom.people[0].id
+        }
+        return null
+    }
+
     private var generationMin = 0
     private var generationMax = 0
     private const val GENERATION = "gen"
 
     /** @return Total number of generations of the tree starting from a root person */
-    fun countGenerations(gedcom: Gedcom, rootId: String?): Int {
+    fun countGenerations(gedcom: Gedcom, tree: Tree?): Int {
         if (gedcom.people.isEmpty()) return 0
         generationMin = 0
         generationMax = 0
-        val root = gedcom.getPerson(rootId)
-        ascendGenerations(root, gedcom, 0)
-        descendGenerations(root, gedcom, 0)
+        getRoot(gedcom, tree)?.let { root ->
+            ascendGenerations(root, gedcom, 0)
+            descendGenerations(root, gedcom, 0)
+        }
         // Removes from persons the GENERATION extension to allow later counting
         gedcom.people.forEach {
             it.extensions.remove(GENERATION)
@@ -335,8 +372,7 @@ object TreeUtil {
             if (name.lastIndexOf('.') > 0) // Removes the extension
                 name = name.substring(0, name.lastIndexOf('.'))
             // Saves the settings
-            val rootId = U.findRootId(gedcom)
-            Global.settings.addTree(Tree(id, name, gedcom.people.size, countGenerations(gedcom, rootId), rootId, null, null, 0))
+            Global.settings.addTree(Tree(id, name, gedcom.people.size, countGenerations(gedcom, null), findRootId(gedcom), null, null, 0))
             Notifier(context, gedcom, id, Notifier.What.CREATE)
             withContext(Main) {
                 // If necessary propose to show advanced tools

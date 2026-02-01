@@ -511,7 +511,9 @@ class ProfileActivity : AppCompatActivity() {
             1 -> U.whichParentsToShow(this, person, 2) // Family as child
             2 -> U.whichSpousesToShow(this, person) // Family as partner
             3 -> { // Set as root
-                Global.settings.currentTree.root = person?.id
+                val tree = Global.settings.currentTree
+                if (tree.shareRoot == tree.root) tree.shareRoot = person?.id
+                tree.root = person?.id
                 Global.settings.save()
                 Toast.makeText(this, getString(R.string.this_is_root, U.properName(person)), Toast.LENGTH_LONG).show()
             }

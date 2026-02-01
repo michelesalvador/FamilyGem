@@ -562,7 +562,7 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
             if (Global.settings.openTree == firstNum) Global.gc = firstGedcom // We don't want to modify Global.settings.openTree here
             else {
                 firstTree.persons = firstGedcom.people.size
-                firstTree.generations = TreeUtil.countGenerations(firstGedcom, U.getRootId(firstGedcom, firstTree))
+                firstTree.generations = TreeUtil.countGenerations(firstGedcom, firstTree)
                 firstTree.media += secondTree.media
             }
             if (isActive) TreeUtil.saveJson(firstGedcom, firstNum, false) // Saves also Global.settings through Notifier

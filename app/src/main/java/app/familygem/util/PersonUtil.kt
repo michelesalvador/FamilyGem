@@ -93,7 +93,7 @@ fun Person.delete(): Array<Family> {
     Memory.setInstanceAndAllSubsequentToNull(this)
     Global.gc.people.remove(this)
     Global.gc.createIndexes() // Necessary
-    val newRootId = U.findRootId(Global.gc) // TODO: could be "find next of kin"
+    val newRootId = TreeUtil.findRootId(Global.gc) // TODO: could be "find next of kin"
     if (Global.settings.currentTree.root != null && Global.settings.currentTree.root == id) {
         Global.settings.currentTree.root = newRootId
         Global.settings.save()

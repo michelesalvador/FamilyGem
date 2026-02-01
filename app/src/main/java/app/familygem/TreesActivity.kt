@@ -576,7 +576,7 @@ class TreesActivity : AppCompatActivity() {
         if (tree.root != null && root == null) {
             if (gedcom.people.isNotEmpty()) {
                 if (correct) {
-                    tree.root = U.findRootId(gedcom)
+                    tree.root = TreeUtil.findRootId(gedcom)
                     Global.settings.save()
                 } else addError("Missing root person")
             } else { // Tree without persons
@@ -589,7 +589,7 @@ class TreesActivity : AppCompatActivity() {
         // Or a root is not indicated in settings even though there are people in the tree
         if (root == null && gedcom.people.isNotEmpty()) {
             if (correct) {
-                tree.root = U.findRootId(gedcom)
+                tree.root = TreeUtil.findRootId(gedcom)
                 Global.settings.save()
             } else addError("Root not defined")
         }

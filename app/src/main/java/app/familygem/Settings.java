@@ -183,8 +183,14 @@ public class Settings {
         public int media;
         public String root;
         public TreeSettings settings;
-        public List<Share> shares; // Dati identificativi delle condivisioni attraverso il tempo e lo spazio
-        public String shareRoot; // Id della Person radice dell'albero in Condivisione
+        /**
+         * List of shares made for this tree.
+         */
+        public List<Share> shares;
+        /**
+         * ID of the person root of shared tree.
+         */
+        public String shareRoot;
         /**
          * Sharing grade:
          * <ol>

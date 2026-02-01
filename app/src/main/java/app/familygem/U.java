@@ -113,48 +113,6 @@ public class U {
     }
 
     /**
-     * @return The ID of the main person of the tree
-     */
-    public static String getRootId(Gedcom gedcom, Settings.Tree tree) {
-        if (tree.root != null) {
-            Person root = gedcom.getPerson(tree.root);
-            if (root != null)
-                return root.getId();
-        }
-        return findRootId(gedcom);
-    }
-
-    /**
-     * @return The ID of initial person of a GEDCOM or null
-     */
-    public static String findRootId(Gedcom gedcom) {
-        if (gedcom.getHeader() != null) {
-            // Family Historian root
-            if (getTagValue(gedcom.getHeader().getExtensions(), "_ROOT") != null)
-                return getTagValue(gedcom.getHeader().getExtensions(), "_ROOT");
-            // Ahnenblatt home
-            if (getTagValue(gedcom.getHeader().getExtensions(), "_HOME") != null)
-                return getTagValue(gedcom.getHeader().getExtensions(), "_HOME");
-        }
-        if (!gedcom.getPeople().isEmpty()) {
-            // Lower numeric ID
-            String minId = null;
-            int minNum = Integer.MAX_VALUE;
-            for (Person person : gedcom.getPeople()) {
-                int num = extractNum(person.getId());
-                if (num < minNum) {
-                    minNum = num;
-                    minId = person.getId();
-                }
-            }
-            if (minNum < Integer.MAX_VALUE) return minId;
-            // ID of the first person
-            return gedcom.getPeople().get(0).getId();
-        }
-        return null;
-    }
-
-    /**
      * Returns the first available full name of a person.
      */
     public static String properName(Person person) {
@@ -617,7 +575,7 @@ public class U {
      * @return The value of a given tag in an extension (GedcomTag)
      */
     @SuppressWarnings("unchecked")
-    static String getTagValue(Map<String, Object> extensions, String tag) {
+    public static String getTagValue(Map<String, Object> extensions, String tag) {
         for (Map.Entry<String, Object> extension : extensions.entrySet()) {
             List<GedcomTag> fields = (ArrayList<GedcomTag>)extension.getValue();
             for (GedcomTag field : fields) {

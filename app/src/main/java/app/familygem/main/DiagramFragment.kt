@@ -170,7 +170,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     /** Identifies the fulcrum person to start from, shows the button 'Add the first person' or starts the diagram. */
     private fun startDiagram() {
         // Finds fulcrum
-        val ids = arrayOf(Global.indi, Global.settings.currentTree.root, U.findRootId(Global.gc))
+        val ids = arrayOf(Global.indi, Global.settings.currentTree.root, TreeUtil.findRootId(Global.gc))
         var fulcrum: Person? = null
         for (id in ids) {
             fulcrum = Global.gc.getPerson(id)
