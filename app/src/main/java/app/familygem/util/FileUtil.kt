@@ -68,7 +68,10 @@ import java.util.regex.Pattern
 /** Functions to manage files and display images. */
 object FileUtil {
 
-    /** List of mime type to open and create GEDCOM files. */
+    /** MIME types to open and create ZIP files. */
+    val zipMimeTypes = arrayOf("application/zip", "application/x-zip-compressed")
+
+    /** MIME types to open and create GEDCOM files. */
     val gedcomMimeTypes = arrayOf("text/vnd.familysearch.gedcom", "application/octet-stream", "vnd.android.document/file", "text/plain")
 
     /** Extracts only the filename from a URI. */

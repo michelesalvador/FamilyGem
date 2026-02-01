@@ -109,8 +109,10 @@ class NewTreeActivity : BaseActivity(R.string.new_tree) {
             }
         }
         findViewById<Button>(R.id.new_recover_backup).setOnClickListener {
+            val mimeTypes = FileUtil.zipMimeTypes
             val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "application/zip"
+                .setType(mimeTypes[0])
+                .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             backupResultLauncher.launch(intent)
         }
 

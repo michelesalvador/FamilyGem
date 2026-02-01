@@ -6,7 +6,7 @@ import app.familygem.util.FileUtil
 enum class FileType(val mimeType: String) {
     PNG("image/png"),
     PDF("application/pdf"),
-    ZIP_BACKUP("application/zip"),
+    ZIP_BACKUP(FileUtil.zipMimeTypes[0]),
     GEDCOM(FileUtil.gedcomMimeTypes[0]),
-    ZIPPED_GEDCOM("application/zip")
+    ZIPPED_GEDCOM(FileUtil.zipMimeTypes[0])
 }
