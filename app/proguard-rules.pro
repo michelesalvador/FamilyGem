@@ -1,3 +1,6 @@
+# To avoid androidx.startup.StartupException: java.lang.NoSuchMethodException: <init> []
+-keep class androidx.work.impl.WorkDatabase* { <init>(); }
+
 -keepclassmembernames class app.familygem.Settings, app.familygem.Settings$Tree, app.familygem.Settings$DiagramSettings,
  app.familygem.Settings$TreeSettings, app.familygem.Settings$ZippedTree, app.familygem.Settings$Share { *; }
 -keepclassmembers class org.folg.gedcom.model.* { *; }
