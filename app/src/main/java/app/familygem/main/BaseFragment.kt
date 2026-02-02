@@ -60,8 +60,13 @@ abstract class BaseFragment(layout: Int) : Fragment(layout) {
         searchView?.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)?.setTextColor(Color.WHITE)
     }
 
-    /** Creates an [interfacer] which sets insets for FAB and RecyclerView, and in case creates FastScroller. */
+    /** Creates the FastScroller and an [interfacer] which sets insets for FAB, RecyclerView and FastScroller. */
     fun setInterfacer(fab: View, recyclerView: ViewGroup, scrollerAlso: Boolean = true) {
+        if (scrollerAlso) {
+            val thumbDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.thumb)
+            val lineDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.empty)
+            fastScroller = FastScrollerBuilder(recyclerView).setThumbDrawable(thumbDrawable!!).setTrackDrawable(lineDrawable!!).build()
+        }
         interfacer = { insets ->
             fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.left; rightMargin = insets.right; bottomMargin = insets.bottom
@@ -69,14 +74,7 @@ abstract class BaseFragment(layout: Int) : Fragment(layout) {
             val morePadding = if (this is PersonsFragment) U.dpToPx(8F) else 0
             val bottomPadding = insets.bottom + resources.getDimensionPixelSize(R.dimen.bottom_padding)
             recyclerView.updatePadding(insets.left + morePadding, morePadding, insets.right + morePadding, bottomPadding)
-            if (scrollerAlso) {
-                if (fastScroller == null) {
-                    val thumbDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.thumb)
-                    val lineDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.empty)
-                    fastScroller = FastScrollerBuilder(recyclerView).setThumbDrawable(thumbDrawable!!).setTrackDrawable(lineDrawable!!).build()
-                }
-                fastScroller?.setPadding(insets.left, 0, insets.right, bottomPadding)
-            }
+            fastScroller?.setPadding(insets.left, 0, insets.right, bottomPadding)
         }
     }
 
