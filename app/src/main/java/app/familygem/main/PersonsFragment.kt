@@ -32,7 +32,7 @@ import app.familygem.constant.Relation
 import app.familygem.profile.ProfileActivity
 import app.familygem.util.FileUtil.selectMainImage
 import app.familygem.util.PersonUtil
-import app.familygem.util.TreeUtil.save
+import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.Util.caseString
 import app.familygem.util.countRelatives
@@ -485,8 +485,8 @@ class PersonsFragment : BaseFragment() {
             // Updates sorting of people in global GEDCOM too
             if (selectedPeople.size == Global.gc.people.size) { // Only if there is no filtering
                 Global.gc.people = selectedPeople.map { it.person }
-                save(false) // Too much?
-                if (Global.shouldSave) (requireActivity() as MainActivity).furnishMenu() // Displays the Save button
+                TreeUtil.save(false) // Immediately saves persons sorting
+                if (!Global.settings.autoSave) (requireActivity() as MainActivity).furnishMenu() // Displays the Save button
             }
         }
     }

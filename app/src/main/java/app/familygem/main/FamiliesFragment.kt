@@ -155,7 +155,7 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
             if (filteredFamilies.size == Global.gc.families.size) {
                 Global.gc.families = filteredFamilies.map { it.family }
                 TreeUtil.save(false) // Immediately saves families sorting
-                if (Global.shouldSave) (requireActivity() as MainActivity).furnishMenu() // Displays the Save button
+                if (!Global.settings.autoSave) (requireActivity() as MainActivity).furnishMenu() // Displays the Save button
             }
         }
     }
