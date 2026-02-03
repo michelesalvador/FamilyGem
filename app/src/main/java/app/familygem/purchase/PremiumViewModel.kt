@@ -137,7 +137,6 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
         ) {
             // Can't retrieve products, maybe for network error
             status.postValue(Status.ERROR)
-            setMessage(R.string.something_wrong)
         }
     }
 
