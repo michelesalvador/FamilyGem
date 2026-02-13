@@ -275,6 +275,8 @@
     <string name="married">Married</string>
     <string name="place">Place</string>
     <string name="cause">Cause</string>
+    <string name="husband_age">Husband age</string>
+    <string name="wife_age">Wife age</string>
     <string name="www">Website</string>
     <string name="email">E-mail</string>
     <string name="rin">Automated record ID</string>
@@ -387,6 +389,9 @@
     <string name="interpreted">Interpreted</string>
     <string name="date_phrase">Phrase</string>
     <string name="invalid_date">Invalid GEDCOM date.</string>
+    <string name="less_than">Less than</string>
+    <string name="more_than">More than</string>
+    <string name="invalid_age">Invalid GEDCOM age.</string>
     <string name="tree_settings">Tree settings</string>
     <string name="max_life_span">Maximum life span</string>
     <string name="years">Years</string>

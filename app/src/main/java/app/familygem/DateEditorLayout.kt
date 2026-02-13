@@ -130,22 +130,18 @@ class DateEditorLayout(context: Context, set: AttributeSet?) : LinearLayout(cont
             findViewById(R.id.dateEditor_secondCentury), findViewById(R.id.dateEditor_secondYear)
         )
 
-        // At first focus DateEditorLayout shows itself hiding the keyboard
+        // At first focus DateEditorLayout shows itself generally not displaying the keyboard
         keyboard = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         editText.onFocusChangeListener = OnFocusChangeListener { _, getFocus ->
             if (getFocus) {
                 if (dateConverter.kind == Kind.PHRASE) {
                     editText.setText(dateConverter.phrase) // To remove parentheses around the phrase
-                } else {
-                    keyboardVisible = keyboard.hideSoftInputFromWindow(editText.windowToken, 0) // Hides keyboard
-                    // Disables text input from keyboard
-                    editText.inputType = InputType.TYPE_NULL // Necessary in recent versions of Android where the keyboard reappears
+                    keyboardVisible = keyboard.showSoftInput(editText, 0)
                 }
                 setupDateEditor()
                 visibility = VISIBLE
             } else visibility = GONE
         }
-
         // On the second tap brings up the keyboard
         editText.setOnTouchListener { _, event ->
             if (event?.action == MotionEvent.ACTION_DOWN) {

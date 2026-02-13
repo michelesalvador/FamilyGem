@@ -1,5 +1,6 @@
 package app.familygem.util
 
+import app.familygem.AgeConverter
 import app.familygem.DateConverter
 import app.familygem.Global
 import app.familygem.R
@@ -36,6 +37,9 @@ fun EventFact.writeContent(): String {
     if (place != null) builder.append(place).append("\n")
     if (address != null) builder.append(address.toString(true)).append("\n")
     if (cause != null) builder.append(cause).append("\n")
+    if (age != null) builder.append(AgeConverter(age).writeAge(Global.context)).append("\n")
+    if (husband?.age != null) builder.append(AgeConverter(husband.age).writeAge(Global.context)).append("\n")
+    if (wife?.age != null) builder.append(AgeConverter(wife.age).writeAge(Global.context)).append("\n")
     if (www != null) builder.append(www).append("\n")
     if (email != null) builder.append(email).append("\n")
     if (phone != null) builder.append(phone).append("\n")
@@ -59,7 +63,9 @@ fun EventFact.cleanUpFields(): Boolean {
         place = null; changed = true
     }
     if (tag != null && (tag == "BIRT" || tag == "CHR" || tag == "DEAT" || tag == "MARR" || tag == "DIV")) {
-        if (type == null && date == null && place == null && address == null && cause == null) {
+        if (type == null && date == null && place == null && address == null && cause == null
+            && age == null && husband?.age == null && wife?.age == null
+        ) {
             if (value != "Y") changed = true
             value = "Y"
         } else {

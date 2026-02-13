@@ -160,12 +160,12 @@ class DateConverter {
         val day = "\\d{1,2}"
         val month = "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)"
         val year = "\\d{3,4}(/\\d{2})?"
-        val datePart = "($day +$month +$year|$month +$year|$year( B\\.C\\.)?)"
+        val datePart = "($day $month $year|$month $year|$year( B\\.C\\.)?)"
         return gedcomDate.matches(datePart.toRegex())
-                || gedcomDate.matches(("(ABT|CAL|EST|BEF|AFT|FROM|TO) +$datePart").toRegex())
-                || gedcomDate.matches(("BET +$datePart +AND +$datePart").toRegex())
-                || gedcomDate.matches(("FROM +$datePart +TO +$datePart").toRegex())
-                || gedcomDate.matches(("INT +$datePart +\\(.*\\)").toRegex())
+                || gedcomDate.matches(("(ABT|CAL|EST|BEF|AFT|FROM|TO) $datePart").toRegex())
+                || gedcomDate.matches(("BET $datePart AND $datePart").toRegex())
+                || gedcomDate.matches(("FROM $datePart TO $datePart").toRegex())
+                || gedcomDate.matches(("INT $datePart \\(.*\\)").toRegex())
     }
 
     /** Writes a short text-version of the date in the default locale.

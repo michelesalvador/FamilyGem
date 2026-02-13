@@ -46,30 +46,22 @@
 
         <NumberPicker
             android:id="@+id/dateEditor_firstDay"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel" />
 
         <NumberPicker
             android:id="@+id/dateEditor_firstMonth"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
 
         <NumberPicker
             android:id="@+id/dateEditor_firstCentury"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
 
         <NumberPicker
             android:id="@+id/dateEditor_firstYear"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -104,29 +96,21 @@
 
         <NumberPicker
             android:id="@+id/dateEditor_secondDay"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel" />
 
         <NumberPicker
             android:id="@+id/dateEditor_secondMonth"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
 
         <NumberPicker
             android:id="@+id/dateEditor_secondCentury"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
 
         <NumberPicker
             android:id="@+id/dateEditor_secondYear"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:layout_marginLeft="8dp"
-            android:theme="@style/AppTheme.Wheel" />
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
     </LinearLayout>
 </LinearLayout>

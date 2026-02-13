@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RadioGroup
+        android:id="@+id/ageEditor_modifiers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/ageEditor_exact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exact" />
+
+        <RadioButton
+            android:id="@+id/ageEditor_less"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/less_than" />
+
+        <RadioButton
+            android:id="@+id/ageEditor_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/more_than" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:id="@+id/ageEditor_first"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layoutDirection="ltr"
+        android:orientation="horizontal">
+
+        <NumberPicker
+            android:id="@+id/ageEditor_years"
+            style="@style/AppTheme.Wheel" />
+
+        <NumberPicker
+            android:id="@+id/ageEditor_months"
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
+
+        <NumberPicker
+            android:id="@+id/ageEditor_days"
+            style="@style/AppTheme.Wheel"
+            android:layout_marginLeft="8dp" />
+    </LinearLayout>
+</LinearLayout>

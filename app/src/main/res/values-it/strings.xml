@@ -294,6 +294,8 @@
     <!-- EventActivity -->
     <string name="place">Luogo</string>
     <string name="cause">Causa</string>
+    <string name="husband_age">Età del marito</string>
+    <string name="wife_age">Età della moglie</string>
     <string name="www">Sito web</string>
     <string name="email">E-mail</string>
     <string name="rin">ID automatizzato del record</string>
@@ -416,6 +418,10 @@
     <string name="interpreted">Interpretata</string>
     <string name="date_phrase">Frase</string>
     <string name="invalid_date">Data GEDCOM non valida.</string>
+    <!-- AgeEditorLayout -->
+    <string name="less_than">Meno di</string>
+    <string name="more_than">Più di</string>
+    <string name="invalid_age">Età GEDCOM non valida.</string>
     <!-- TreeSettingsActivity -->
     <string name="tree_settings">Impostazioni albero</string>
     <string name="max_life_span">Durata massima di vita</string>

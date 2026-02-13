@@ -48,6 +48,13 @@
         android:layout_below="@id/event_edit"
         android:visibility="gone" />
 
+    <app.familygem.AgeEditorLayout
+        android:id="@+id/event_age"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/event_edit"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/event_other"
         android:layout_width="match_parent"

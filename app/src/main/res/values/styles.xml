@@ -112,9 +112,15 @@
     </style>
 
     <style name="AppTheme.Wheel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">120dp</item>
         <item name="android:background">@drawable/cylinder_background</item>
         <item name="android:descendantFocusability">blocksDescendants</item>
-        <!-- Hides the dividing lines from API 23 -->
+        <item name="android:theme">@style/AppTheme.Wheel.TransparentLines</item>
+    </style>
+
+    <style name="AppTheme.Wheel.TransparentLines">
+        <!-- Hides the divider lines from API 23 -->
         <item name="colorControlNormal">@android:color/transparent</item>
     </style>
 

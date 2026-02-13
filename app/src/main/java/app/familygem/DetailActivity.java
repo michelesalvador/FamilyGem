@@ -51,6 +51,7 @@ import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
 import org.folg.gedcom.model.SourceCitation;
 import org.folg.gedcom.model.SourceCitationContainer;
+import org.folg.gedcom.model.Spouse;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.model.Submitter;
@@ -292,7 +293,8 @@ public abstract class DetailActivity extends BaseActivity {
         int id = item.getItemId();
         boolean toBeSaved = false;
         if (id < 100) {
-            Object thing = eggs.get(id).yolk;
+            Egg egg = eggs.get(id);
+            Object thing = egg.yolk;
             if (thing instanceof Address) { // thing is a new Address()
                 if (object instanceof EventFact)
                     ((EventFact)object).setAddress((Address)thing);
@@ -300,6 +302,9 @@ public abstract class DetailActivity extends BaseActivity {
                     ((Submitter)object).setAddress((Address)thing);
                 else if (object instanceof Repository)
                     ((Repository)object).setAddress((Address)thing);
+            } else if (thing instanceof Spouse) {
+                if (egg.isHusband) ((EventFact)object).setHusband((Spouse)thing);
+                else ((EventFact)object).setWife((Spouse)thing);
             }
             // Tags needed to then export to Gedcom
             if (object instanceof Name && thing.equals("Type")) {
@@ -315,9 +320,12 @@ public abstract class DetailActivity extends BaseActivity {
                 if (thing.equals("Email"))
                     ((Submitter)object).setEmailTag("EMAIL");
             }
-            View piece = placePiece(eggs.get(id).title, "", thing, eggs.get(id).inputType);
-            if (thing instanceof String)
+            View piece = placePiece(egg.title, "", thing, egg.inputType);
+            if (thing instanceof String) edit(piece);
+            else if (thing instanceof Spouse) {
+                piece.setTag(R.id.tag_husband, egg.isHusband);
                 edit(piece);
+            }
             // TODO: open new Address for editing
         } else if (id == 101) { // TODO: code smell: use of magic numbers
             RepositoriesFragment.newRepository(this, (Source)object);
@@ -562,9 +570,10 @@ public abstract class DetailActivity extends BaseActivity {
      */
     class Egg {
         String title;
-        Object yolk; // Can be a method string ("Value", "Date", "Type"...) or an Address
+        Object yolk; // Can be a method string ("Value", "Date", "Type"...), an Address or a Spouse
         boolean common; // Indicates whether to make it appear in the FAB menu to insert the piece
         int inputType;
+        boolean isHusband; // Used only to distinguish between husband or wife Spouse
 
         Egg(String title, Object yolk, boolean common, int inputType) {
             this.title = title;
@@ -612,6 +621,14 @@ public abstract class DetailActivity extends BaseActivity {
         placePiece(title, address == null ? null : AddressUtilKt.toString(address, false), addressNotNull, 0);
     }
 
+    public void place(String title, Spouse spouse, boolean isHusband) {
+        Spouse spouseNotNull = spouse == null ? new Spouse() : spouse;
+        Egg egg = new Egg(title, spouseNotNull, true, 0);
+        egg.isHusband = isHusband;
+        View view = placePiece(title, spouse == null ? null : spouse.getAge(), spouseNotNull, 0);
+        if (view != null) view.setTag(R.id.tag_husband, isHusband);
+    }
+
     /**
      * @param event Events of {@link FamilyActivity}
      */
@@ -637,6 +654,11 @@ public abstract class DetailActivity extends BaseActivity {
         View.OnClickListener click = null;
         if (object instanceof Integer) { // Given name or surname in non-expert mode
             click = this::edit;
+        } else if (object.equals("Age") || object instanceof Spouse) { // Age or family event husband or wife
+            click = this::edit;
+            AgeEditorLayout ageEditor = pieceView.findViewById(R.id.event_age);
+            editText.setText(text);
+            ageEditor.initialize(editText, pieceView.findViewById(R.id.event_alert));
         } else if (object instanceof String) { // Method
             click = this::edit;
             // If it is a date
@@ -651,6 +673,7 @@ public abstract class DetailActivity extends BaseActivity {
                 startActivity(new Intent(this, AddressActivity.class));
             };
         } else if (object instanceof EventFact) { // Family EventFact
+
             click = v -> {
                 Memory.add(object);
                 startActivity(new Intent(this, EventActivity.class));
@@ -831,8 +854,8 @@ public abstract class DetailActivity extends BaseActivity {
                 parent.addView(editText, parent.indexOfChild(editText), params);
             } else
                 editText.setVisibility(View.VISIBLE);
-        } // Date
-        else if (pieceObject.equals("Date")) {
+        } // Date or Age
+        else if (pieceObject.equals("Date") || pieceObject.equals("Age") || pieceObject instanceof Spouse) {
             editText.setVisibility(View.VISIBLE);
         } // All other normal editing cases
         else {
@@ -905,6 +928,8 @@ public abstract class DetailActivity extends BaseActivity {
                 else value += " /" + surname + "/";
             }
             ((Name)object).setValue(value.trim());
+        } else if (pieceObject instanceof Spouse) {
+            ((Spouse)pieceObject).setAge(text);
         } else try { // All other normal methods
             object.getClass().getMethod("set" + pieceObject, String.class).invoke(object, text); // TODO: reflection
         } catch (Exception e) {
@@ -1139,6 +1164,9 @@ public abstract class DetailActivity extends BaseActivity {
                     menu.add(0, 44, 0, R.string.make_shared_media);
                 }
                 menu.add(0, 45, 0, R.string.delete);
+            } else if (pieceObject instanceof Spouse) {
+                menu.add(0, 46, 0, R.string.copy);
+                menu.add(0, 47, 0, R.string.delete);
             } else if (pieceObject instanceof Address) {
                 menu.add(0, 50, 0, R.string.copy);
                 menu.add(0, 51, 0, R.string.delete);
@@ -1184,6 +1212,7 @@ public abstract class DetailActivity extends BaseActivity {
             // TODo all deletes require deletion confirmation
             // Copy
             case 0: // Editable piece
+            case 46: // Spouse
             case 50: // Address
             case 55: // Event
             case 60: // Extension
@@ -1340,6 +1369,15 @@ public abstract class DetailActivity extends BaseActivity {
                 Util.INSTANCE.confirmDelete(this, () -> {
                     Object[] modified2 = MediaUtil.INSTANCE.deleteMedia((Media)pieceObject);
                     TreeUtil.INSTANCE.save(true, modified2);
+                    refresh();
+                    return Unit.INSTANCE;
+                });
+                return true;
+            case 47: // Delete Spouse age
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    if ((boolean)pieceView.getTag(R.id.tag_husband)) ((EventFact)object).setHusband(null);
+                    else ((EventFact)object).setWife(null);
+                    TreeUtil.INSTANCE.save(true, Memory.getLeaderObject());
                     refresh();
                     return Unit.INSTANCE;
                 });

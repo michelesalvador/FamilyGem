@@ -44,6 +44,12 @@ public class EventActivity extends DetailActivity {
         place(getString(R.string.place), "Place");
         place(getString(R.string.address), event.getAddress());
         place(getString(R.string.cause), "Cause", event.getTag() != null && event.getTag().equals("DEAT"), 0);
+        if (Memory.getLeaderObject() instanceof Family) {
+            place(getString(R.string.husband_age), event.getHusband(), true);
+            place(getString(R.string.wife_age), event.getWife(), false);
+        } else { // Person
+            place(getString(R.string.age), "Age");
+        }
         place(getString(R.string.www), "Www", false, InputType.TYPE_CLASS_TEXT);
         place(getString(R.string.email), "Email", false, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         place(getString(R.string.telephone), "Phone", false, InputType.TYPE_CLASS_PHONE);
