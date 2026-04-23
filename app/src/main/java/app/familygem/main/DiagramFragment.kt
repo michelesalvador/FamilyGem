@@ -37,7 +37,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import app.familygem.DiagramSettingsActivity
-import app.familygem.GedcomDateConverter
+import app.familygem.DateConverter
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.NewRelativeDialog
@@ -513,7 +513,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 val year = TextView(context)
                 year.setBackgroundResource(R.drawable.diagram_year_oval)
                 year.gravity = Gravity.CENTER
-                year.text = GedcomDateConverter(bond.marriageDate).writeDate(true)
+                year.text = DateConverter(bond.marriageDate).writeDate(true)
                 year.textSize = 13f
                 val yearParams = LayoutParams(LayoutParams.MATCH_PARENT, toPx(Util.MARRIAGE_HEIGHT.toFloat()))
                 yearParams.topMargin = toPx(bond.centerRelY() - Util.MARRIAGE_HEIGHT / 2)

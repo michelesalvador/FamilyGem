@@ -229,8 +229,8 @@ public class PersonEditorActivity extends BaseActivity {
                 }
             }
         }
-        birthDateEditor.initialize(birthDate);
-        deathDateEditor.initialize(deathDate);
+        birthDateEditor.initialize(birthDate, findViewById(R.id.editor_birthAlert));
+        deathDateEditor.initialize(deathDate, findViewById(R.id.editor_deathAlert));
     }
 
     private void disableDeath() {

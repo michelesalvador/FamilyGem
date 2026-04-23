@@ -1,6 +1,6 @@
 package app.familygem.util
 
-import app.familygem.GedcomDateConverter
+import app.familygem.DateConverter
 import app.familygem.Global
 import app.familygem.R
 import org.folg.gedcom.model.EventFact
@@ -32,7 +32,7 @@ fun EventFact.writeContent(): String {
         else builder.append(value).append("\n")
     }
     //if (type != null) builder.append(type).append("\n") // Included in event title
-    if (date != null) builder.append(GedcomDateConverter(date).writeDateLong()).append("\n")
+    if (date != null) builder.append(DateConverter(date).writeDateLong()).append("\n")
     if (place != null) builder.append(place).append("\n")
     if (address != null) builder.append(address.toString(true)).append("\n")
     if (cause != null) builder.append(cause).append("\n")

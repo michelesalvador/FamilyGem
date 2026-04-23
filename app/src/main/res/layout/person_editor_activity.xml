@@ -91,6 +91,17 @@
             android:nextFocusForward="@+id/editor_birthPlace" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <ImageView
+        android:id="@+id/editor_birthAlert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/invalid_date"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/editor_birthDateLabel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/editor_birthDateLabel"
+        app:srcCompat="@drawable/alert" />
+
     <app.familygem.DateEditorLayout
         android:id="@+id/editor_birthDateEditor"
         android:layout_width="match_parent"
@@ -125,12 +136,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editor_birthPlaceLabel" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/editor_death"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editor_dead">
@@ -139,10 +149,10 @@
             android:id="@+id/editor_deathDateLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:hint="@string/death_date"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editor_deathDate"
@@ -152,6 +162,17 @@
                 android:inputType="textCapCharacters"
                 android:nextFocusForward="@id/editor_deathPlace" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/editor_deathAlert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/invalid_date"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/editor_deathDateLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/editor_deathDateLabel"
+            app:srcCompat="@drawable/alert" />
 
         <app.familygem.DateEditorLayout
             android:id="@+id/editor_deathDateEditor"
@@ -175,7 +196,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"

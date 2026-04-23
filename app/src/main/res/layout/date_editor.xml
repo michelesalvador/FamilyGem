@@ -30,7 +30,7 @@
             android:text="B.C." />
 
         <CheckBox
-            android:id="@+id/dateEditor_firstDouble"
+            android:id="@+id/dateEditor_firstDual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/double_date" />
@@ -87,7 +87,7 @@
             android:text="B.C." />
 
         <CheckBox
-            android:id="@+id/dateEditor_secondDouble"
+            android:id="@+id/dateEditor_secondDual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/double_date" />

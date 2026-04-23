@@ -414,6 +414,7 @@
     <string name="from">Da</string>
     <string name="to">A</string>
     <string name="date_phrase">Frase</string>
+    <string name="invalid_date">Data GEDCOM non valida.</string>
     <!-- TreeSettingsActivity -->
     <string name="tree_settings">Impostazioni albero</string>
     <string name="max_life_span">Durata massima di vita</string>

@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.familygem.FileUri
-import app.familygem.GedcomDateConverter
+import app.familygem.DateConverter
 import app.familygem.Global
 import app.familygem.Settings.Tree
 import app.familygem.U
@@ -129,8 +129,8 @@ class MergeViewModel(state: SavedStateHandle) : ViewModel() {
                             val births1 = person1.eventsFacts.filter { it.tag == "BIRT" && it.date != null }
                             val births2 = person2.eventsFacts.filter { it.tag == "BIRT" && it.date != null }
                             if (births1.isNotEmpty() && births2.isNotEmpty()) {
-                                val year1 = GedcomDateConverter(births1[0].date).year
-                                val year2 = GedcomDateConverter(births2[0].date).year
+                                val year1 = DateConverter(births1[0].date).getYear()
+                                val year2 = DateConverter(births2[0].date).getYear()
                                 if (year1 != Int.MAX_VALUE && year2 != Int.MAX_VALUE) {
                                     if (abs(year1 - year2) > 5) return@inner
                                 }

@@ -116,7 +116,7 @@
     </style>
 
     <style name="AppTheme.Wheel">
-        <item name="android:background">@drawable/ruota_sfondo</item>
+        <item name="android:background">@drawable/cylinder_background</item>
         <item name="android:descendantFocusability">blocksDescendants</item>
         <!-- Hides the dividing lines from API 23 -->
         <item name="colorControlNormal">@android:color/transparent</item>

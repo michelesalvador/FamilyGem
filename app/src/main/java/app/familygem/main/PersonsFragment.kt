@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import app.familygem.GedcomDateConverter
+import app.familygem.DateConverter
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.PersonEditorActivity
@@ -179,7 +179,7 @@ class PersonsFragment : BaseFragment() {
             return object : Filter() {
                 override fun performFiltering(charSequence: CharSequence): FilterResults {
                     // Splits query by spaces and search all the words
-                    val query = charSequence.trim().toString().lowercase(Locale.getDefault()).split("\\s+".toRegex()).dropWhile { it.isEmpty() }
+                    val query = charSequence.trim().toString().lowercase().split("\\s+".toRegex()).dropWhile { it.isEmpty() }
                     // Instead of using selectedPeople, we create a new list to avoid IndexOutOfBoundsException when RecyclerView is scrolled
                     val filteredPeople: MutableList<PersonWrapper> = ArrayList()
                     if (query.isEmpty()) {
@@ -361,18 +361,16 @@ class PersonsFragment : BaseFragment() {
         return null
     }
 
-    var dateConverter: GedcomDateConverter = GedcomDateConverter("") // Here outside to initialize only once
+    val dateConverter = DateConverter("") // Here outside to initialize only once
 
-    /**
-     * Class to wrap a person of the list and all their relevant fields
-     */
+    /** Class to wrap a person of the list and all their relevant fields. */
     private inner class PersonWrapper(val person: Person) {
         var text: String? = null // Single string with all names and events for search
         var name: String? = null // Surname and given name of the person
-        var date: Int = Int.MAX_VALUE // Date in the format YYYYMMDD
-        var age: Int = Int.MAX_VALUE // Age in days
-        var birthday: Int = Int.MIN_VALUE // Negative days to the next birthday
-        var relatives: Int = 0 // Number of near relatives
+        var date = Int.MAX_VALUE // Date in the format YYYYMMDD
+        var age = Int.MAX_VALUE // Age in days
+        var birthday = Int.MIN_VALUE // Negative days to the next birthday
+        var relatives = 0 // Number of near relatives
 
         fun completeFields() {
             // Writes one string concatenating all names and personal events
@@ -384,7 +382,7 @@ class PersonsFragment : BaseFragment() {
                 if (!("SEX" == event.tag || "Y" == event.value)) // Sex and 'Yes' excluded
                     builder.append(event.writeContent()).append(' ')
             }
-            text = builder.toString().lowercase(Locale.getDefault())
+            text = builder.toString().lowercase()
 
             // Surname and given name concatenated
             name = getSurnameGivenName(person)
@@ -393,45 +391,45 @@ class PersonsFragment : BaseFragment() {
             for (event in person.eventsFacts) {
                 if (event.date != null) {
                     dateConverter.analyze(event.date)
-                    date = dateConverter.dateNumber
+                    date = dateConverter.getDateNumber()
                     break
                 }
             }
 
             // Calculates age and days to next birthday
-            var start: GedcomDateConverter? = null
-            var end: GedcomDateConverter? = null
+            var start: DateConverter? = null
+            var end: DateConverter? = null
             for (event in person.eventsFacts) {
                 if (event.tag != null && event.tag == "BIRT" && event.date != null) {
-                    start = GedcomDateConverter(event.date)
+                    start = DateConverter(event.date)
                     break
                 }
             }
             for (event in person.eventsFacts) {
                 if (event.tag != null && event.tag == "DEAT" && event.date != null) {
-                    end = GedcomDateConverter(event.date)
+                    end = DateConverter(event.date)
                     break
                 }
             }
-            if (start != null && start.isSingleKind && !start.firstDate.isFormat(Format.OTHER)) {
+            val startDate = start?.firstDate?.date
+            if (startDate != null && start.isSingleKind) {
                 val treeSettings = Global.settings.currentTree.settings
-                val startDate = LocalDate(start.firstDate.date)
                 val now = if (treeSettings.customDate) LocalDate(treeSettings.fixedDate) else LocalDate.now()
                 val living = !U.isDead(person) && Years.yearsBetween(startDate, now).years <= treeSettings.lifeSpan
                 // Calculates the person age in days
-                if (!start.firstDate.isFormat(Format.D_M)) {
+                if (start.firstDate.hasYear) {
                     if (living && end == null && (startDate.isBefore(now) || startDate.isEqual(now))) {
-                        end = GedcomDateConverter(now.toDate())
+                        end = DateConverter(now)
                     }
-                    if (end != null && end.isSingleKind && !end.firstDate.isFormat(Format.D_M)) {
-                        val endDate = LocalDate(end.firstDate.date)
+                    val endDate = end?.firstDate?.date
+                    if (endDate != null && end.isSingleKind && end.firstDate.hasYear) {
                         if (startDate.isBefore(endDate) || startDate.isEqual(endDate)) {
                             age = Days.daysBetween(startDate, endDate).days
                         }
                     }
                 }
                 // Counts the days remaining to the person next birthday
-                if (living && !(start.firstDate.isFormat(Format.Y) || start.firstDate.isFormat(Format.M_Y))) {
+                if (living && (start.firstDate.format == Format.D_M_Y || start.firstDate.format == Format.D_M)) {
                     val ageYears = Period(startDate, now).years
                     var nextBirthday = startDate.plusYears(ageYears)
                     if (nextBirthday.isBefore(now)) nextBirthday = startDate.plusYears(ageYears + 1)

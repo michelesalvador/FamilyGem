@@ -77,7 +77,6 @@ import java.util.Set;
 
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
-import app.familygem.constant.Format;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Json;
 import app.familygem.constant.Relation;
@@ -255,13 +254,13 @@ public class U {
     public static String twoDates(Person person, boolean vertical) {
         StringBuilder builder = new StringBuilder();
         String endDateStr = "";
-        GedcomDateConverter start = null, end = null;
+        DateConverter start = null, end = null;
         boolean ageBelow = false;
         List<EventFact> facts = person.getEventsFacts();
         // Birth date
         for (EventFact fact : facts) {
             if (fact.getTag() != null && fact.getTag().equals("BIRT") && fact.getDate() != null) {
-                start = new GedcomDateConverter(fact.getDate());
+                start = new DateConverter(fact.getDate());
                 builder.append("★ ").append(start.writeDate(false));
                 break;
             }
@@ -270,7 +269,7 @@ public class U {
         if (builder.length() == 0) {
             for (EventFact fact : facts) {
                 if (fact.getTag() != null && (fact.getTag().equals("CHR") || fact.getTag().equals("BAPM")) && fact.getDate() != null) {
-                    builder.append("≈ ").append(new GedcomDateConverter(fact.getDate()).writeDate(false));
+                    builder.append("≈ ").append(new DateConverter(fact.getDate()).writeDate(false));
                     break;
                 }
             }
@@ -278,7 +277,7 @@ public class U {
         // Death date
         for (EventFact fact : facts) {
             if (fact.getTag() != null && fact.getTag().equals("DEAT") && fact.getDate() != null) {
-                end = new GedcomDateConverter(fact.getDate());
+                end = new DateConverter(fact.getDate());
                 endDateStr = end.writeDate(false);
                 if (builder.length() != 0) {
                     if (vertical && (builder.length() > 7 || endDateStr.length() > 7)) {
@@ -296,14 +295,14 @@ public class U {
         if (builder.length() == 0) {
             for (EventFact fact : facts) {
                 if (fact.getDate() != null) {
-                    return new GedcomDateConverter(fact.getDate()).writeDate(false);
+                    return new DateConverter(fact.getDate()).writeDate(false);
                 }
             }
         }
         // Add the age between parentheses
-        if (start != null && start.isSingleKind() && !start.firstDate.isFormat(Format.D_M) && !start.firstDate.isFormat(Format.OTHER)) {
+        if (start != null && start.isSingleKind() && start.getFirstDate().getHasYear()) {
             Settings.TreeSettings treeSettings = Global.settings.getCurrentTree().settings;
-            LocalDate startDate = new LocalDate(start.firstDate.date); // Converted to joda time
+            LocalDate startDate = start.getFirstDate().getDate();
             // If the person is still alive the end is a fixed date or now
             LocalDate now;
             if (treeSettings.customDate) now = new LocalDate(treeSettings.fixedDate);
@@ -311,11 +310,11 @@ public class U {
             if (end == null && (startDate.isBefore(now) || startDate.isEqual(now))
                     && Years.yearsBetween(startDate, now).getYears() <= treeSettings.lifeSpan
                     && !isDead(person)) {
-                end = new GedcomDateConverter(now.toDate());
+                end = new DateConverter(now);
                 endDateStr = end.writeDate(false);
             }
-            if (end != null && end.isSingleKind() && !end.firstDate.isFormat(Format.D_M) && !endDateStr.isEmpty()) { // Plausible dates
-                LocalDate endDate = new LocalDate(end.firstDate.date);
+            if (end != null && end.isSingleKind() && end.getFirstDate().getHasYear() && !endDateStr.isEmpty()) { // Plausible dates
+                LocalDate endDate = end.getFirstDate().getDate();
                 if (startDate.isBefore(endDate) || startDate.isEqual(endDate)) {
                     String units = "";
                     int age = Years.yearsBetween(startDate, endDate).getYears();
@@ -718,8 +717,7 @@ public class U {
                 String txt = "";
                 if (citation.getValue() != null) txt += citation.getValue() + "\n";
                 if (citation.getPage() != null) txt += citation.getPage() + "\n";
-                if (citation.getDate() != null)
-                    txt += new GedcomDateConverter(citation.getDate()).writeDateLong() + "\n";
+                if (citation.getDate() != null) txt += new DateConverter(citation.getDate()).writeDateLong() + "\n";
                 // Valid for both sourceCitation and sourceNote
                 if (citation.getText() != null) txt += citation.getText() + "\n";
                 TextView textView = citationView.findViewById(R.id.sourceCitation_text);

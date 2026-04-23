@@ -6,7 +6,6 @@ import android.os.Build;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
-import androidx.multidex.MultiDexApplication;
 
 import com.google.gson.Gson;
 
@@ -18,7 +17,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Global extends MultiDexApplication {
+public class Global extends Application {
 
     private Thread.UncaughtExceptionHandler defaultExceptionHandler;
     public static Gedcom gc;

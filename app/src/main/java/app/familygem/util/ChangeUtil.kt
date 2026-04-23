@@ -4,7 +4,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.TextView
-import app.familygem.GedcomDateConverter
+import app.familygem.DateConverter
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.R
@@ -57,7 +57,7 @@ object ChangeUtil {
             val textView = changeView.findViewById<TextView>(R.id.changeDate_text)
             if (change.dateTime != null) {
                 var txt = ""
-                if (change.dateTime.value != null) txt = GedcomDateConverter(change.dateTime.value).writeDateLong()
+                if (change.dateTime.value != null) txt = DateConverter(change.dateTime.value).writeDateLong()
                 if (change.dateTime.time != null) txt += " - " + change.dateTime.time
                 textView.text = txt
             }

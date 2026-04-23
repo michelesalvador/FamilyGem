@@ -641,7 +641,7 @@ public abstract class DetailActivity extends BaseActivity {
             if (object.equals("Date")) {
                 dateEditor = pieceView.findViewById(R.id.event_date);
                 editText.setText(text); // To pass the date to DateEditorLayout
-                dateEditor.initialize(editText);
+                dateEditor.initialize(editText, pieceView.findViewById(R.id.event_alert));
             }
         } else if (object instanceof Address) { // Address
             click = v -> {
