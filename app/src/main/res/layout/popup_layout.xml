@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/popup_fumetto"
+    android:id="@+id/popup_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
@@ -10,7 +10,7 @@
     app:layout_constraintStart_toStartOf="parent">
 
     <TextView
-        android:id="@+id/popup_testo"
+        android:id="@+id/popup_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/popup_balloon"

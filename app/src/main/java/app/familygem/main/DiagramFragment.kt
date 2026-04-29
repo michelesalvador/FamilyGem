@@ -36,8 +36,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
-import app.familygem.DiagramSettingsActivity
 import app.familygem.DateConverter
+import app.familygem.DiagramSettingsActivity
 import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.NewRelativeDialog
@@ -120,7 +120,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             val settings = PopupMenu(context(), it)
             val menu = settings.menu
             menu.add(0, 0, 0, R.string.diagram_settings)
-            if (Global.gc.people.size > 0) {
+            if (Global.gc.people.isNotEmpty()) {
                 menu.add(0, 1, 0, R.string.export_png)
                 menu.add(0, 2, 0, R.string.export_pdf)
             }
@@ -213,10 +213,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Creates cards, waits for all images loaded, detects card sizes and adds other elements to layout.
-     * Called each time the fragment starts and clicking on a card.
-     */
+    /** Creates cards, waits for all images loaded, detects card sizes and adds other elements to layout.
+     * Called each time the fragment starts and clicking on a card. */
     private suspend fun drawDiagram() = coroutineScope {
         graphicNodes.clear()
         loadingImages.clear()
@@ -313,9 +311,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Place cards on their final position and updates glow and lines.
-     */
+    /** Places cards on their final position and updates glow and lines. */
     private fun displaceDiagram() {
         // Position of the nodes from dips to pixels
         graphicNodes.forEach {
@@ -344,9 +340,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         )
     }
 
-    /**
-     * Updates both diagram and main menu.
-     */
+    /** Updates both diagram and main menu. */
     private fun refreshAll() {
         startDiagram()
         (requireActivity() as MainActivity).furnishMenu()
@@ -360,17 +354,17 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     /** Puts a view under the suggestion popup. */
     inner class SuggestionPopup(context: Context, private val childView: View, suggestion: Int) : ConstraintLayout(context) {
         init {
-            val popupView = layoutInflater.inflate(R.layout.popup_layout, this, true)
-            box.addView(popupView)
+            LayoutInflater.from(context).inflate(R.layout.popup_layout, this, true)
+            box.addView(this)
             val nodeParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            nodeParams.topToBottom = R.id.popup_fumetto
+            nodeParams.topToBottom = R.id.popup_layout
             nodeParams.startToStart = LayoutParams.PARENT_ID
             nodeParams.endToEnd = LayoutParams.PARENT_ID
             addView(childView, nodeParams)
-            popup = popupView.findViewById(R.id.popup_fumetto)
-            popup!!.findViewById<TextView>(R.id.popup_testo).setText(suggestion)
-            popup!!.visibility = INVISIBLE
-            popup!!.setOnTouchListener { view, event ->
+            popup = findViewById(R.id.popup_layout)
+            popup?.findViewById<TextView>(R.id.popup_text)?.setText(suggestion)
+            popup?.visibility = INVISIBLE
+            popup?.setOnTouchListener { view, event ->
                 view.performClick() // Useless but required
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     view.visibility = INVISIBLE
@@ -383,7 +377,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 moveLayout.childHeight = box.height
                 moveLayout.displayAll()
             }, 100)
-            popup!!.postDelayed({ popup!!.visibility = VISIBLE }, 1000)
+            popup?.postDelayed({ popup?.visibility = VISIBLE }, 1000)
         }
 
         override fun invalidate() {
@@ -395,9 +389,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * The glow around fulcrum card.
-     */
+    /** The glow around fulcrum card. */
     inner class FulcrumGlow(context: Context?) : View(context) {
         private var paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private var bmf = BlurMaskFilter(toPx(25f).toFloat(), BlurMaskFilter.Blur.NORMAL)
@@ -425,48 +417,44 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Node with one person or one bond.
-     */
-    abstract inner class GraphicMetric(context: Context, val metric: Metric) : RelativeLayout(context) {
+    /** Node with one person or one bond. */
+    abstract class GraphicMetric(context: Context, val metric: Metric) : RelativeLayout(context) {
         init {
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
         }
     }
 
-    /**
-     * Card of a person.
-     */
+    /** Card of a person. */
     inner class GraphicPerson(context: Context, personNode: PersonNode) : GraphicMetric(context, personNode) {
         var background: ImageView
 
         init {
             val person = personNode.person
             id = U.extractNum(person.id)
-            val view = layoutInflater.inflate(R.layout.diagram_card, this, true)
-            val border = view.findViewById<View>(R.id.card_border)
+            LayoutInflater.from(context).inflate(R.layout.diagram_card, this, true)
+            val border = findViewById<View>(R.id.card_border)
             val sex = person.sex
             if (sex.isMale()) border.setBackgroundResource(R.drawable.person_border_male)
             else if (sex.isFemale()) border.setBackgroundResource(R.drawable.person_border_female)
-            background = view.findViewById(R.id.card_background)
+            background = findViewById(R.id.card_background)
             if (person.id == Global.indi) {
                 background.setBackgroundResource(R.drawable.person_background_selected)
             } else if (personNode.acquired) {
                 background.setBackgroundResource(R.drawable.person_background_partner)
             }
             if (personNode.isFulcrumNode) fulcrumView = this
-            val imageView = view.findViewById<ImageView>(R.id.card_picture)
+            val imageView = findViewById<ImageView>(R.id.card_picture)
             val media = FileUtil.selectMainImage(person, imageView, show = false)
             if (media != null) loadingImages.add(Pair(media, imageView))
-            view.findViewById<TextView>(R.id.card_name).text = U.properName(person, true)
-            val titleView = view.findViewById<TextView>(R.id.card_title)
+            findViewById<TextView>(R.id.card_name).text = U.properName(person, true)
+            val titleView = findViewById<TextView>(R.id.card_title)
             val title = PersonUtil.writeTitles(person)
             if (title.isEmpty()) titleView.visibility = GONE else titleView.text = title
-            val dataView = view.findViewById<TextView>(R.id.card_data)
+            val dataView = findViewById<TextView>(R.id.card_data)
             val data = U.twoDates(person, true)
             if (data.isEmpty()) dataView.visibility = GONE else dataView.text = data
-            if (!U.isDead(person)) view.findViewById<View>(R.id.card_mourn).visibility = GONE
-            layoutDirection = View.LAYOUT_DIRECTION_LOCALE
+            if (!U.isDead(person)) findViewById<View>(R.id.card_mourn).visibility = GONE
+            layoutDirection = LAYOUT_DIRECTION_LOCALE
             registerForContextMenu(this)
             setOnClickListener {
                 if (!diagramJob!!.isActive) { // Avoids multiple clicks
@@ -491,9 +479,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Marriage with optional year and vertical line.
-     */
+    /** Marriage with optional year and vertical line. */
     inner class GraphicBond(context: Context, bond: Bond) : GraphicMetric(context, bond) {
         private var hearth: View? = null
 
@@ -537,9 +523,9 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         private val layout: RelativeLayout
 
         init {
-            val miniCard = layoutInflater.inflate(R.layout.diagram_minicard, this, true)
-            layout = miniCard.findViewById(R.id.minicard)
-            val miniCardText = miniCard.findViewById<TextView>(R.id.minicard_text)
+            LayoutInflater.from(context).inflate(R.layout.diagram_minicard, this, true)
+            layout = findViewById(R.id.minicard)
+            val miniCardText = findViewById<TextView>(R.id.minicard_text)
             miniCardText.text = if (personNode.amount > 100) "100+" else personNode.amount.toString()
             val sex = personNode.person.sex
             if (sex.isMale()) miniCardText.setBackgroundResource(R.drawable.person_border_male)
@@ -549,7 +535,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             } else if (personNode.acquired) {
                 layout.setBackgroundResource(R.drawable.person_background_partner)
             }
-            miniCard.setOnClickListener { if (!diagramJob!!.isActive) clickCard(personNode.person) }
+            setOnClickListener { if (!diagramJob!!.isActive) clickCard(personNode.person) }
         }
 
         override fun invalidate() {
@@ -820,9 +806,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         return true
     }
 
-    /**
-     * Adds the relative who has been chosen in PersonsFragment.
-     */
+    /** Adds the relative who has been chosen in PersonsFragment. */
     val choosePersonLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val data = result.data
@@ -839,9 +823,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Prepares present diagram for export as PNG.
-     */
+    /** Prepares present diagram for export as PNG. */
     private fun generatePng() {
         binding.diagramWheel.root.visibility = View.VISIBLE
         // Stylizes diagram for print
@@ -856,10 +838,8 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Recursively generates a bitmap of acceptable size.
-     * Exports the bitmap to a temporary PNG file and asks where to save it.
-     */
+    /** Recursively generates a bitmap of acceptable size.
+     * Exports the bitmap to a temporary PNG file and asks where to save it. */
     private suspend fun createBitmap(scale: Float) {
         try {
             // Creates Bitmap with the scaled dimensions
@@ -890,9 +870,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         FileUtil.openSaf(Global.settings.openTree, FileType.PNG, savePngLauncher)
     }
 
-    /**
-     * Exports the present diagram to a temporary PDF file and asks where to save it.
-     */
+    /** Exports the present diagram to a temporary PDF file and asks where to save it. */
     private fun generatePdf() {
         binding.diagramWheel.root.visibility = View.VISIBLE
         // Stylizes diagram for print
@@ -923,9 +901,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         }
     }
 
-    /**
-     * Bad conclusion of previous two functions.
-     */
+    /** Bad conclusion of previous two functions. */
     private suspend fun generateFail(message: String?) {
         withContext(Dispatchers.Main) {
             message?.let { Toast.makeText(context(), it, Toast.LENGTH_LONG).show() }
