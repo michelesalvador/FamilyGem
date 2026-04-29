@@ -178,7 +178,7 @@ public class Notifier {
         if (tree.birthdays == null) return;
         int eventId = tree.id * FACTOR;
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        for (Settings.Birthday b : tree.birthdays) {
+        for (Settings.Birthday b : new ArrayList<>(tree.birthdays)) { // Copies them to avoid ConcurrentModificationException
             Intent intent = new Intent(context, NotifyReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, eventId++, intent,
                     // Flags also need to be identical to alarm creator
