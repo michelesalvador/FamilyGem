@@ -38,15 +38,19 @@ class DateTest {
         add("32", Kind.EXACT, Format.Y)
         add("032", Kind.EXACT, Format.Y, valid = true)
         add(" APR  ", Kind.EXACT, Format.M)
-        add("7 AUG", Kind.EXACT, Format.D_M)
-        add("MAr 78 ", Kind.EXACT, Format.M_Y)
-        add("10 agosto 2024", Kind.PHRASE, valid = true)
-        add("10 august 2024", Kind.EXACT, Format.D_M_Y)
+        add("7     AUG", Kind.EXACT, Format.D_M)
+        add("MAy 78 ", Kind.EXACT, Format.M_Y)
+        add("10 agosto 2024", Kind.EXACT, Format.D_M_Y)
+        add("10 August 2024", Kind.EXACT, Format.D_M_Y)
+        add("10 Août 2024", Kind.PHRASE, valid = true)
         add("29 FEB 1999", Kind.PHRASE, valid = true)
+
         add("12/1713", Kind.EXACT, Format.M_Y)
         add("15/05/1970", Kind.EXACT, Format.D_M_Y)
+        add("CAL <<<12>>>OtTobre .. 1713", Kind.CALCULATED, Format.D_M_Y)
+        add("ABT. 2003", Kind.APPROXIMATE, Format.Y)
 
-        add(" abt  29 feb 2000 ", Kind.APPROXIMATE, Format.D_M_Y)
+        add(" abt  29  feb    2000 ", Kind.APPROXIMATE, Format.D_M_Y)
         add("ABT", Kind.APPROXIMATE)
         add("ABT9", Kind.APPROXIMATE, Format.D)
         add("ABTJan 1234", Kind.APPROXIMATE, Format.M_Y)
@@ -105,7 +109,7 @@ class DateTest {
             "21 APR 753 B.C.", "1/2 BC", "apr 10/11 BC", "6 aug 100/101 BC", "from 1000/01B.C. TO 020/21 BCE", "ABT 28 NOV 050/51 B.C."
         )
 
-        Locale.setDefault(Locale.ENGLISH)
+        Locale.setDefault(Locale.ITALIAN)
         for (date in dateList) {
             print("'" + date.gedcomDate + "'")
             val converter = DateConverter(date.gedcomDate)

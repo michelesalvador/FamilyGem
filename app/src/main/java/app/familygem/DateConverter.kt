@@ -36,27 +36,22 @@ class DateConverter {
     class SingleDate {
         var date: LocalDate? = null
         var format: Format? = null
-        var negative: Boolean = false
+        var negative = false
             set(value) {
                 field = value
                 date = date?.withEra(if (value) 0 else 1)
             }
-        var dual: Boolean = false
-        private val suffixes = arrayOf("B.C.", "BC", "BCE")
+        var dual = false
 
         /** Receives an exact GEDCOM date and fills all the attributes of the SingleDate. */
         fun scan(gedcomDate: String) {
             var gedcomDate = gedcomDate.trim()
             // Recognizes if the date is B.C. and removes the suffix
-            for (suffix in suffixes) {
-                if (gedcomDate.endsWith(suffix)) {
-                    negative = true
-                    gedcomDate = gedcomDate.substring(0, gedcomDate.indexOf(suffix)).trim()
-                    break
-                }
-                negative = false
-            }
-            gedcomDate = gedcomDate.replace("[\\\\_\\-|.,;:?'\"#^&*°+=~()\\[\\]{}]".toRegex(), " ") // All characters except '/'
+            negative = if (gedcomDate.endsWith("BC")) {
+                gedcomDate = gedcomDate.substring(0, gedcomDate.length - 2).trim()
+                true
+            } else false
+            gedcomDate = gedcomDate.replace("\\s+".toRegex(), " ") // All spaces
             // Distinguishes a date with a double year 1712/1713 from a date as 17/12/1713
             dual = false // Resets it
             if (gedcomDate.indexOf('/') > 0) {
@@ -68,14 +63,17 @@ class DateConverter {
                     if (gedcomDate.length > 1) dual = true
                 }
             }
+            val locales = listOf(Locale.getDefault(), Locale.ENGLISH).distinct()
             for (format in Format.entries) {
                 this.format = format
-                try {
-                    val formatter = DateTimeFormat.forPattern(format.pattern).withLocale(Locale.ENGLISH)
-                    date = formatter.parseLocalDate(gedcomDate)
-                    break
-                } catch (_: Exception) {
+                date = locales.firstNotNullOfOrNull { locale ->
+                    try {
+                        DateTimeFormat.forPattern(format.pattern).withLocale(locale).parseLocalDate(gedcomDate)
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
+                if (date != null) break
             }
             if (format == Format.D_m_Y) format = Format.D_M_Y
             if (format == Format.m_Y) format = Format.M_Y
@@ -105,13 +103,14 @@ class DateConverter {
         firstDate.format = Format.OTHER
         secondDate?.format = Format.OTHER
 
-        val gedcomDate = gedcomDate.trim()
+        val gedcomDate = gedcomDate.replace("B.C.", "BC", true).replace("BCE", "BC", true).trim()
         if (gedcomDate.isEmpty()) {
             kind = Kind.EXACT
             return
         }
         // Recognizes types other than EXACT and converts the string to SingleDate
-        val upperDate = gedcomDate.uppercase()
+        // Replaces all characters except numbers, letters, '/' and parenthesis
+        val upperDate = gedcomDate.replace("[^0-9\\p{L}/()]+".toRegex(), " ").uppercase()
         for (i in 1..<Kind.entries.size) {
             val k = Kind.entries[i]
             if (upperDate.startsWith(k.prefix)) {
@@ -164,6 +163,7 @@ class DateConverter {
     /** Writes a short text-version of the date in the default locale.
      * @param yearOnly Writes the year only or the whole date with day and month */
     fun writeDate(yearOnly: Boolean): String {
+        if (kind == Kind.PHRASE) return phrase!!
         var text = ""
         if (firstDate.date != null) {
             text = writeSingleDate(firstDate, yearOnly, true)
@@ -198,6 +198,7 @@ class DateConverter {
 
     /** Plain text of the date in local language. */
     fun writeDateLong(): String {
+        if (kind == Kind.PHRASE) return phrase!!
         var txt = ""
         val prefix = when (kind) {
             Kind.APPROXIMATE -> R.string.approximate
@@ -221,8 +222,6 @@ class DateConverter {
                 txt += " " + Global.context.getString(if (kind == Kind.BETWEEN_AND) R.string.and else R.string.to).lowercase() + " "
                 if (secondDate?.date != null) txt += writeSingleDateLong(secondDate!!)
             }
-        } else if (phrase != null) {
-            txt = phrase!!
         }
         return txt.replace("-", "").trim()
     }
