@@ -1,6 +1,5 @@
 package app.familygem
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -67,6 +66,7 @@ import java.io.File
 class TreesActivity : AppCompatActivity() {
     private lateinit var treeList: MutableList<Map<String, String>>
     private lateinit var adapter: SimpleAdapter
+    private lateinit var bar: Toolbar
     lateinit var progress: ProgressView
     private lateinit var welcome: FabPopup
     private lateinit var exporter: Exporter
@@ -223,19 +223,16 @@ class TreesActivity : AppCompatActivity() {
                         DragEvent.ACTION_DROP -> {
                             val draggedTree = event.localState as Settings.Tree
                             val startPosition = Global.settings.trees.indexOf(draggedTree)
-                            var dropPosition = listView.getPositionForView(view)
-                            draggedTreeId = 0
-                            when (startPosition) {
-                                dropPosition -> treeLayout.visibility = View.VISIBLE // Dropped on itself
-                                dropPosition - 1 -> adapter.notifyDataSetChanged() // Dropped on the following one
-                                else -> {
-                                    Global.settings.trees.remove(draggedTree)
-                                    if (startPosition < dropPosition) dropPosition--
-                                    Global.settings.trees.add(dropPosition, draggedTree)
-                                    updateList()
-                                    Global.settings.save()
-                                }
+                            var dropPosition = listView.getPositionForView(view) - listView.headerViewsCount
+                            // Dropped not on itself or on the following one
+                            if (!(startPosition == dropPosition || startPosition == dropPosition - 1)) {
+                                Global.settings.trees.remove(draggedTree)
+                                if (startPosition < dropPosition) dropPosition--
+                                Global.settings.trees.add(dropPosition, draggedTree)
+                                updateList()
+                                Global.settings.save()
                             }
+                            refreshList()
                         }
                     }
                     true
@@ -243,26 +240,20 @@ class TreesActivity : AppCompatActivity() {
                 return treeView
             }
         }
-        listView.setOnDragListener { _, event ->
+        window.decorView.setOnDragListener { _, event ->
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-                    // Drops the tree at the end of the list
+                    // The tree is dropped above or below the list
                     val draggedTree = event.localState as Settings.Tree
                     Global.settings.trees.remove(draggedTree)
-                    Global.settings.trees.add(draggedTree)
-                    draggedTreeId = 0
+                    val dropPosition = if (event.y < bar.bottom) 0 else treeList.size - 1
+                    Global.settings.trees.add(dropPosition, draggedTree)
                     updateList()
                     Global.settings.save()
-                }
-                DragEvent.ACTION_DRAG_EXITED -> {
-                    // Fixes the drop outside the list on old devices
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                        draggedTreeId = 0
-                        adapter.notifyDataSetChanged()
-                    }
+                    refreshList()
                 }
                 DragEvent.ACTION_DRAG_ENDED -> {
-                    // Refreshes the list dropping a tree outside the list (e.g. on the toolbar)
+                    // Refreshes the list dropping a tree everywhere on the screen (also on status bar)
                     // Called only from API 24+
                     draggedTreeId = 0
                     adapter.notifyDataSetChanged()
@@ -288,7 +279,7 @@ class TreesActivity : AppCompatActivity() {
         }
 
         // Custom toolbar
-        val bar = Toolbar(this)
+        bar = Toolbar(this)
         bar.title = getString(R.string.trees)
         bar.inflateMenu(R.menu.trees_menu)
         bar.menu.findItem(R.id.treesMenu_help).setOnMenuItemClickListener {
@@ -321,6 +312,14 @@ class TreesActivity : AppCompatActivity() {
         }
     }
 
+    /** Refreshes the list until API 23. */
+    private fun refreshList() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            draggedTreeId = 0
+            adapter.notifyDataSetChanged()
+        }
+    }
+
     /** Displays an AlertDialog that asks to download the shared tree. */
     private fun showSharedTreeDialog(dateId: String, onCancel: () -> Unit) {
         AlertDialog.Builder(this)
@@ -349,7 +348,7 @@ class TreesActivity : AppCompatActivity() {
 
     /** Finalizes the process of exporting a tree. */
     private fun finalizeExport(result: ActivityResult, fileType: FileType) {
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val uri = result.data?.data
             if (uri != null) {
                 progress.visibility = View.VISIBLE
