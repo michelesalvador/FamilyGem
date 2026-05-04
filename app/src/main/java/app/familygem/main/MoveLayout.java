@@ -23,7 +23,7 @@ public class MoveLayout extends FrameLayout {
     final ScaleGestureDetector scaleDetector;
     private final OverScroller scroller;
     private VelocityTracker velocityTracker;
-    int width, height;
+    int width, height; // Layout size minus padding
     int childWidth, childHeight;
     private int lastX, lastY;
     private float downX, downY;
@@ -64,9 +64,11 @@ public class MoveLayout extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        width = MeasureSpec.getSize(widthMeasureSpec);
-        height = MeasureSpec.getSize(heightMeasureSpec);
-        setMeasuredDimension(width, height);
+        int measuredWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int measuredHeight = MeasureSpec.getSize(heightMeasureSpec);
+        setMeasuredDimension(measuredWidth, measuredHeight);
+        width = measuredWidth - getPaddingLeft() - getPaddingRight();
+        height = measuredHeight - getPaddingTop() - getPaddingBottom();
 
         child = getChildAt(0);
         child.setScaleX(scale);
@@ -156,9 +158,12 @@ public class MoveLayout extends FrameLayout {
         }
     }
 
-    // Calculate overscroll and mend
-    // @param centering Add to 'mendX' and to 'mendY' the space to center a small child inside moveLayout
-    void calcOverScroll(boolean centering) {
+    /**
+     * Calculates overscroll and mend.
+     *
+     * @param centering Adds to 'mendX' and to 'mendY' the space to center a small child inside moveLayout
+     */
+    private void calcOverScroll(boolean centering) {
         overX = (int)(width / 4 * scale);
         overY = (int)(height / 4 * scale);
 
@@ -179,7 +184,9 @@ public class MoveLayout extends FrameLayout {
         return scale;
     }
 
-    // Scroll to x and y
+    /**
+     * Scrolls to x and y.
+     */
     void panTo(int x, int y) {
         calcOverScroll(false);
         // Remove eccessive space around

@@ -139,6 +139,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         moveLayout.graph = graph
         box = binding.diagramBox
         interfacer = { insets ->
+            binding.diagramFrame.setPadding(insets.left, insets.top, insets.right, insets.bottom)
             binding.diagramHamburger.updateLayoutParams<ViewGroup.MarginLayoutParams> { leftMargin = insets.left; topMargin = insets.top }
             binding.diagramOptions.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.top; rightMargin = insets.right }
         }
