@@ -411,6 +411,7 @@ public abstract class DetailActivity extends BaseActivity {
                 Person personToBeAdded = gc.getPerson(data.getStringExtra(Extra.RELATIVE_ID));
                 FamilyUtil.INSTANCE.linkPerson(personToBeAdded, (Family)object, (Relation)data.getSerializableExtra(Extra.RELATION));
                 TreeUtil.INSTANCE.save(true, personToBeAdded, Memory.getLeaderObject());
+                Global.edited = true;
                 return;
             } else if (requestCode == 5065) { // Source chosen in SourcesFragment
                 SourceCitation sourceCitation = new SourceCitation();
