@@ -1,0 +1,10 @@
+Family Gem je besplatna aplikacija za Android koja omogućuje izradu potpunih rodoslovnih stabla.
+
+S Family Gem aplikacijom možeš:
+
+* stvoriti obiteljsko stablo unoseći imena, datume, mjesta, događaje, fotografije i izvore.
+* uvesti postojeće obiteljsko stablo putem GEDCOM datoteke i mijenjati ga po želji.
+* izvesti izrađeno obiteljsko stablo (opet putem GEDCOM-a) u bilo koji drugi program za genealogiju.
+* dijeliti stablo s rodbinom, omogućujući im da ga nadopune i da ti pošalju aktualizirane podatke.
+
+Za pomoć postoji <a href='https://github.com/michelesalvador/FamilyGem/wiki'>wiki stranica</a>.
