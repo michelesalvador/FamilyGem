@@ -6,9 +6,9 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import app.familygem.BuildConfig
 import app.familygem.Global
 import app.familygem.R
+import app.familygem.util.Util
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -26,12 +26,10 @@ import com.android.billingclient.api.consumePurchase
 import com.android.billingclient.api.queryProductDetails
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 
 /** Business manager of [PremiumFragment]. */
 class PremiumViewModel(application: Application) : AndroidViewModel(application), PurchasesUpdatedListener {
@@ -58,9 +56,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
         connectGoogleBilling(getApplication<Application>().applicationContext)
     }
 
-    /**
-     * Creates the billing client and establishes connection with Google Play billing system.
-     */
+    /** Creates the billing client and establishes connection with Google Play billing system. */
     fun connectGoogleBilling(context: Context) {
         val params = PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()
         billingClient = BillingClient.newBuilder(context).setListener(this).enablePendingPurchases(params).build()
@@ -90,9 +86,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
         })
     }
 
-    /**
-     * Checks if the product was already purchased to immediately activate Premium or make it available to buy.
-     */
+    /** Checks if the product was already purchased to immediately activate Premium or make it available to buy. */
     private fun queryHistory() {
         // Returns purchases details for currently owned items bought within the app
         val params = QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build()
@@ -113,9 +107,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Gets product details from Google Play to display it on layout.
-     */
+    /** Gets product details from Google Play to display it on layout. */
     suspend fun queryProducts() {
         // Old versions of Google Play app give the error FEATURE_NOT_SUPPORTED: billing client does not support ProductDetails
         val billingResult = billingClient.isFeatureSupported(BillingClient.FeatureType.PRODUCT_DETAILS)
@@ -154,9 +146,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Listener called after the purchase is made.
-     */
+    /** Listener called after the purchase is made. */
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: List<Purchase>?) {
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && !purchases.isNullOrEmpty()) {
             // Product just purchased
@@ -172,7 +162,7 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
             // User clicks outside the Google Play dialog box
             status.postValue(Status.REACTIVATE)
         } else {
-            // User not signed into Google Account
+            // User not signed to Google Account
             // Or NETWORK_ERROR (no internet connection)
             status.postValue(Status.REACTIVATE)
             setMessage(R.string.something_wrong)
@@ -191,48 +181,42 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
         billingClient.launchBillingFlow(activity, billingFlowParams)
     }
 
-    /**
-     * Checks on the backend server if the purchase has been already done or not, if not acknowledges it.
-     */
+    /** Checks on API if the purchase has been already done or not, if not acknowledges it. */
     private fun verifyPurchase(purchase: Purchase) {
         try {
-            val url = URL("https://www.familygem.app/purchase.php")
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "POST"
-            val stream = connection.outputStream
-            val query = "passKey=" + URLEncoder.encode(BuildConfig.PASS_KEY, "UTF-8") +
-                    "&orderId=" + purchase.orderId +
-                    "&purchaseTime=" + purchase.purchaseTime +
-                    "&purchaseToken=" + purchase.purchaseToken
-            stream.write(query.toByteArray(StandardCharsets.UTF_8))
-            stream.flush()
-            stream.close()
-            // Answer
-            val reader = BufferedReader(InputStreamReader(connection.inputStream))
-            val line = reader.readLine()
-            reader.close()
-            connection.disconnect()
-            // Purchase was already consumed, maybe on another device
-            if (line == "consumed") {
-                completeConsumption()
-            } // Purchase just inserted on backend database
-            else if (line == purchase.purchaseTime.toString() && !purchase.isAcknowledged) {
-                // Acknowledges purchase
-                val params = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.purchaseToken).build()
-                billingClient.acknowledgePurchase(params) { billingResult: BillingResult ->
-                    if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                        becomePremium()
-                        purchaseToken.postValue(purchase.purchaseToken)
-                    } else {
-                        setMessage(R.string.something_wrong)
+            val jsonRequest = JSONObject().apply {
+                put("orderId", purchase.orderId)
+                put("purchaseTime", purchase.purchaseTime)
+                put("purchaseToken", purchase.purchaseToken)
+            }
+            val body = jsonRequest.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
+            val request = Request.Builder().url(Global.apiUrl + "purchases")
+                .header("Authorization", "Bearer ${Util.getToken()}").post(body).build()
+            Global.okHttpClient.newCall(request).execute().use { response ->
+                val responseBody = response.body.string()
+                val jsonResponse = if (responseBody.isNotEmpty()) JSONObject(responseBody) else JSONObject()
+                // Purchase just inserted on backend database
+                if (response.isSuccessful && !purchase.isAcknowledged) {
+                    // Acknowledges purchase
+                    val params = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.purchaseToken).build()
+                    billingClient.acknowledgePurchase(params) { billingResult: BillingResult ->
+                        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                            becomePremium()
+                            purchaseToken.postValue(purchase.purchaseToken)
+                        } else {
+                            throw Exception(billingResult.debugMessage)
+                        }
                     }
+                } // Purchase was already consumed, maybe on another device
+                else if (response.code == 409 && jsonResponse.optBoolean("consumed")) {
+                    completeConsumption()
+                } // Premium already purchased in the past
+                else if (response.code == 409 && purchase.isAcknowledged) {
+                    becomePremium()
+                    purchaseToken.postValue(purchase.purchaseToken)
+                } else {
+                    throw Exception(jsonResponse.optString("detail", response.message))
                 }
-            } // Premium already purchased in the past
-            else if (line == purchase.purchaseToken && purchase.isAcknowledged) {
-                becomePremium()
-                purchaseToken.postValue(purchase.purchaseToken)
-            } else {
-                setMessage(R.string.something_wrong)
             }
         } catch (exception: Exception) {
             // E.g. no internet connection
@@ -253,49 +237,36 @@ class PremiumViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    /**
-     * Consume the purchase with the token retrieved by [PremiumViewModel.verifyPurchase].
-     */
-    fun consumePurchase() {
-        if (purchaseToken.value != null) {
-            viewModelScope.launch(IO) {
-                val consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchaseToken.value!!).build()
+    /** Consumes the purchase with the token retrieved by [PremiumViewModel.verifyPurchase]. */
+    fun consumePurchase(purchaseToken: String) {
+        viewModelScope.launch(IO) {
+            try {
+                val consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build()
                 val consumeResult = billingClient.consumePurchase(consumeParams)
                 if (consumeResult.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    if (BuildConfig.PASS_KEY.isNotEmpty()) registerConsumedPurchase(consumeResult.purchaseToken!!)
+                    registerConsumedPurchase(consumeResult.purchaseToken!!)
                 } else if (consumeResult.billingResult.responseCode == BillingClient.BillingResponseCode.ITEM_NOT_OWNED) {
                     setMessage(consumeResult.billingResult.debugMessage)
                     completeConsumption()
                 }
+            } catch (exception: Exception) {
+                // E.g. no internet connection
+                setMessage(exception.localizedMessage ?: R.string.something_wrong)
             }
-        } else setMessage(R.string.something_wrong)
+        }
     }
 
-    /**
-     * Registers on the backend server the consumption of the purchase with this token.
-     */
+    /** Registers on API the consumption of the purchase with this token. */
     private fun registerConsumedPurchase(purchaseToken: String) {
-        try {
-            val url = URL("https://www.familygem.app/consume.php")
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "POST"
-            val stream = connection.outputStream
-            val query = "passKey=" + URLEncoder.encode(BuildConfig.PASS_KEY, "UTF-8") +
-                    "&purchaseToken=" + purchaseToken
-            stream.write(query.toByteArray(StandardCharsets.UTF_8))
-            stream.flush()
-            stream.close()
-            // Answer
-            val reader = BufferedReader(InputStreamReader(connection.inputStream))
-            val line = reader.readLine()
-            reader.close()
-            connection.disconnect()
-            if (line == purchaseToken) {
+        val request = Request.Builder().url(Global.apiUrl + "purchases")
+            .header("Authorization", "Bearer $purchaseToken").put("".toRequestBody()).build()
+        Global.okHttpClient.newCall(request).execute().use { response ->
+            if (response.isSuccessful) {
                 completeConsumption()
-            } else setMessage(line)
-        } catch (exception: Exception) {
-            // E.g. no internet connection
-            setMessage(exception.localizedMessage ?: R.string.something_wrong)
+            } else {
+                val jsonResponse = JSONObject(response.body.string())
+                throw Exception(jsonResponse.optString("detail", response.message))
+            }
         }
     }
 

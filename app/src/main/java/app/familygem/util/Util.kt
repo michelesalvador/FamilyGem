@@ -7,10 +7,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import app.familygem.BuildConfig
 import app.familygem.Global
 import app.familygem.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Request
+import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.Locale
@@ -58,6 +61,25 @@ object Util {
         AlertDialog.Builder(context).setMessage(R.string.sure_delete)
             .setPositiveButton(R.string.yes) { _, _ -> action() }
             .setNeutralButton(android.R.string.cancel, null).show()
+    }
+
+    /** @return A token useful to access the API */
+    @Throws(Exception::class)
+    fun getToken(): String {
+        val passkey = BuildConfig.PASSKEY
+        if (passkey.isEmpty()) throw Exception("Passkey is empty.")
+        val request = Request.Builder()
+            .url(Global.apiUrl + "token")
+            .header("Authorization", "Bearer $passkey")
+            .build()
+        Global.okHttpClient.newCall(request).execute().use { response ->
+            val json = JSONObject(response.body.string())
+            if (response.isSuccessful) {
+                return json.getString("token")
+            } else {
+                throw Exception(json.optString("detail", response.message))
+            }
+        }
     }
 
     /**

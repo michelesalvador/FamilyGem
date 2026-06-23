@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.InputType;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -102,7 +103,8 @@ public class PlaceFinderTextView extends AppCompatAutoCompleteTextView {
                             }
                             filterResults.values = places;
                             filterResults.count = places.size();
-                        } catch (Exception ignored) {
+                        } catch (Exception exception) {
+                            Log.e("PlaceFinderTextView", exception.getMessage());
                         }
                     }
                     return filterResults;

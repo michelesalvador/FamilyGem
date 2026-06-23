@@ -14,16 +14,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import app.familygem.BaseActivity
-import app.familygem.BuildConfig
 import app.familygem.Exporter
 import app.familygem.Global
 import app.familygem.R
 import app.familygem.Settings
 import app.familygem.Settings.Share
-import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
-import app.familygem.constant.Json
 import app.familygem.databinding.SharingActivityBinding
 import app.familygem.main.MainActivity
 import app.familygem.main.SubmittersFragment
@@ -33,28 +30,26 @@ import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.TreeUtil.createHeader
 import app.familygem.util.Util
-import app.familygem.util.copyTo
-import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.apache.commons.net.ftp.FTP
-import org.apache.commons.net.ftp.FTPClient
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okio.buffer
+import okio.source
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.Submitter
-import java.io.BufferedOutputStream
-import java.io.BufferedReader
-import java.io.BufferedWriter
+import org.json.JSONObject
 import java.io.File
-import java.io.InputStreamReader
-import java.io.OutputStream
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
+import kotlin.math.ceil
+import kotlin.math.min
 
 /** Allows to share a tree by uploading it to the online server. */
 class SharingActivity : BaseActivity(R.string.share_tree) {
@@ -66,7 +61,8 @@ class SharingActivity : BaseActivity(R.string.share_tree) {
     private var rootView: View? = null // The person root of the tree
     private lateinit var submitterName: String
     private lateinit var submitterId: String
-    private var accessible = 0 // 0 = false, 1 = true
+    private var accessible = false
+    private lateinit var apiToken: String
     private var dateId: String? = null
     private var successfulUpload = false // To avoid uploading twice
 
@@ -160,14 +156,21 @@ class SharingActivity : BaseActivity(R.string.share_tree) {
 
                 // Tree accessibility for app developer
                 val accessibleTree = findViewById<CheckBox>(R.id.share_allow)
-                accessible = if (accessibleTree.isChecked) 1 else 0
+                accessible = accessibleTree.isChecked
 
                 // Sends
-                if (BuildConfig.PASS_KEY.isNotEmpty()) {
-                    lifecycleScope.launch(Default) { sendShareData() }
-                } else {
-                    restore()
-                    Toast.makeText(this, R.string.something_wrong, Toast.LENGTH_LONG).show()
+                lifecycleScope.launch(IO) {
+                    sendShareData()
+                        .onSuccess {
+                            successfulUpload = true
+                            Util.toast(R.string.correctly_uploaded)
+                            restore()
+                            concludeShare()
+                        }.onFailure {
+                            it.printStackTrace()
+                            Util.toast(it.message)
+                            restore()
+                        }
                 }
             }
         }
@@ -193,9 +196,7 @@ class SharingActivity : BaseActivity(R.string.share_tree) {
         }
     }
 
-    /**
-     * Finds the first non-passed submitter.
-     */
+    /** Finds the first non-passed submitter. */
     private fun getFreshSubmitter(): Submitter? {
         for (submitter in gedcom!!.submitters) {
             if (submitter.getExtension("passed") == null) return submitter
@@ -203,9 +204,7 @@ class SharingActivity : BaseActivity(R.string.share_tree) {
         return null
     }
 
-    /**
-     * Verify that a EditText is filled in.
-     */
+    /** Verifies that a EditText is filled in. */
     private fun checkCompiled(field: EditText, message: Int): Boolean {
         if (field.text.isBlank()) {
             field.requestFocus()
@@ -221,82 +220,115 @@ class SharingActivity : BaseActivity(R.string.share_tree) {
      * Inserts the share summary in the database of www.familygem.app.
      * If all goes well creates the ZIP file with the tree and images.
      */
-    private suspend fun sendShareData() {
-        try {
-            val url = URL("https://www.familygem.app/insert_share.php")
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "POST"
-            val stream: OutputStream = BufferedOutputStream(connection.outputStream)
-            val writer = BufferedWriter(OutputStreamWriter(stream, StandardCharsets.UTF_8))
-            val query = "passKey=" + URLEncoder.encode(BuildConfig.PASS_KEY, "UTF-8") +
-                    "&treeTitle=" + URLEncoder.encode(tree.title, "UTF-8") +
-                    "&submitterName=" + URLEncoder.encode(submitterName, "UTF-8") +
-                    "&accessible=" + accessible
-            writer.write(query)
-            writer.flush()
-            writer.close()
-            stream.close()
-
-            // Answer
-            val reader = BufferedReader(InputStreamReader(connection.inputStream))
-            val line = reader.readLine()
-            reader.close()
-            connection.disconnect()
-            if (line.startsWith("20")) {
-                dateId = line.replace("[-: ]".toRegex(), "")
-                val share = Share(dateId, submitterId)
-                tree.addShare(share)
-                Global.settings.save()
-                val treeFile = File(cacheDir, "$dateId.zip")
-                if (exporter.exportZipBackup(tree.shareRoot, 9, Uri.fromFile(treeFile))) {
-                    ftpUpload()
-                } else throw Exception(exporter.errorMessage)
-            } else throw Exception(line)
+    private suspend fun sendShareData(): Result<Boolean> {
+        return try {
+            apiToken = Util.getToken()
+            val jsonObject = JSONObject().apply {
+                put("title", tree.title)
+                put("submitterName", submitterName)
+                put("accessible", accessible)
+            }
+            val requestBody = jsonObject.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            val request = Request.Builder()
+                .url(Global.apiUrl + "trees")
+                .header("Authorization", "Bearer $apiToken")
+                .post(requestBody).build()
+            Global.okHttpClient.newCall(request).execute().use { response ->
+                val json = JSONObject(response.body.string())
+                if (response.isSuccessful) {
+                    dateId = json.getString("dateId")
+                    val share = Share(dateId, submitterId)
+                    tree.addShare(share)
+                    Global.settings.save()
+                    val treeFile = File(cacheDir, "$dateId.zip")
+                    if (exporter.exportZipBackup(tree.shareRoot, 9, Uri.fromFile(treeFile))) {
+                        uploadChunkedTree(treeFile)
+                        Result.success(true)
+                    } else {
+                        throw Exception(exporter.errorMessage)
+                    }
+                } else {
+                    throw Exception(json.optString("detail", response.message))
+                }
+            }
         } catch (exception: Exception) {
-            Util.toast(exception.localizedMessage)
-            restoreSuspended()
+            Result.failure(exception)
         }
     }
 
-    /** Uploads via FTP the ZIP file containing the shared tree. */
-    private suspend fun ftpUpload() {
-        val client = FTPClient()
-        try {
-            val credential = U.getCredential(Json.FTP) ?: throw Exception("Missing credentials to upload.")
-            client.apply {
-                connect(credential.getString(Json.HOST), credential.getInt(Json.PORT))
-                enterLocalPassiveMode()
-                login(credential.getString(Json.USER), credential.getString(Json.PASSWORD))
-                changeWorkingDirectory(credential.getString(Json.SHARED_PATH))
-                setFileType(FTP.BINARY_FILE_TYPE)
-            }
-            val zipName = "$dateId.zip"
-            val zipFile = File(cacheDir, zipName)
-            progressView.displayBar("Uploading tree", zipFile.length())
-            zipFile.inputStream().use { inputStream ->
-                client.appendFileStream(zipName).use { outputStream ->
-                    inputStream.copyTo(outputStream) { totalBytes ->
-                        progressView.progress = totalBytes
+    /** Uploads the tree ZIP file chunked in parts. */
+    private suspend fun uploadChunkedTree(zipFile: File) {
+        val totalSize = zipFile.length()
+        progressView.displayBar("Uploading tree", totalSize)
+        val chunkSize = (2 * 1024 * 1024).toLong() // 2 MB
+        val totalChunks = ceil(totalSize.toDouble() / chunkSize).toLong()
+        var totalBytesWritten = 0L
+        var totalBytesUploaded = 0L
+        val maxRetries = 3
+        val uploadClient = Global.okHttpClient.newBuilder()
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true).build()
+        val deferred = (0 until totalChunks).map { i ->
+            lifecycleScope.async(IO) {
+                val offset = i * chunkSize
+                val currentChunkSize = min(chunkSize, totalSize - offset)
+                var retryCount = 0
+                var success = false
+                while (!success) {
+                    try {
+                        val requestBody = object : RequestBody() {
+                            override fun contentType() = "application/octet-stream".toMediaTypeOrNull()
+                            override fun contentLength() = currentChunkSize
+                            override fun writeTo(sink: okio.BufferedSink) {
+                                zipFile.source().buffer().use { source ->
+                                    source.skip(offset)
+                                    val buffer = ByteArray(8192) // 8 kB segments
+                                    var bytesInChunkWritten = 0L
+                                    while (bytesInChunkWritten < currentChunkSize) {
+                                        val toRead = min(buffer.size.toLong(), currentChunkSize - bytesInChunkWritten).toInt()
+                                        val read = source.read(buffer, 0, toRead)
+                                        if (read == -1) break
+                                        sink.write(buffer, 0, read)
+                                        sink.flush()
+                                        bytesInChunkWritten += read
+                                        totalBytesWritten += read
+                                        progressView.progress = totalBytesWritten
+                                    }
+                                }
+                            }
+                        }
+                        val request = Request.Builder().url(Global.apiUrl + "files?dateId=$dateId&offset=$offset")
+                            .header("Authorization", "Bearer $apiToken")
+                            .post(requestBody).build()
+                        uploadClient.newCall(request).execute().use { response ->
+                            if (response.isSuccessful) {
+                                totalBytesUploaded += currentChunkSize
+                                success = true
+                                if (totalBytesUploaded >= totalSize) {
+                                    progressView.hideBar()
+                                }
+                            } else {
+                                val jsonResponse = JSONObject(response.body.string())
+                                throw Exception(jsonResponse.optString("detail", response.message))
+                            }
+                        }
+                    } catch (exception: Exception) {
+                        retryCount++
+                        if (retryCount >= maxRetries) {
+                            progressView.hideBar()
+                            throw exception
+                        }
+                        Thread.sleep(1000L * retryCount) // Exponential backoff
                     }
                 }
             }
-            progressView.hideBar()
-            successfulUpload = client.completePendingCommand()
-            if (!successfulUpload) throw Exception("Upload failed.")
-            Util.toast(R.string.correctly_uploaded)
-            concludeShare()
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-            Util.toast(exception.localizedMessage)
-        } finally {
-            if (client.isConnected) client.disconnect()
-            restoreSuspended()
         }
+        deferred.awaitAll()
     }
 
-    /**
-     * Displays available apps to share the link.
-     */
+    /** Displays available apps to share the link. */
     private fun concludeShare() {
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
@@ -311,13 +343,11 @@ class SharingActivity : BaseActivity(R.string.share_tree) {
         startActivityForResult(Intent.createChooser(intent, getText(R.string.share_with)), 35417)
     }
 
-    private fun restore() {
-        findViewById<View>(R.id.share_button).isEnabled = true
-        progressView.visibility = View.GONE
-    }
-
-    private suspend fun restoreSuspended() {
-        withContext(Main) { restore() }
+    private suspend fun restore() {
+        withContext(Main) {
+            findViewById<View>(R.id.share_button).isEnabled = true
+            progressView.visibility = View.GONE
+        }
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

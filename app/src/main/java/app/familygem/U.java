@@ -58,16 +58,7 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
 import org.joda.time.Years;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -78,7 +69,6 @@ import java.util.Set;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
-import app.familygem.constant.Json;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
 import app.familygem.detail.SourceCitationActivity;
@@ -1176,36 +1166,6 @@ public class U {
             });
         } catch (Exception e) {
         }
-    }
-
-    /**
-     * Connects to the online server to get credentials.
-     * Must be called from a working thread.
-     */
-    public static JSONObject getCredential(String request) {
-        try {
-            URL url = new URL("https://www.familygem.app/credential.php");
-            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-            connection.setRequestMethod("POST");
-            OutputStream stream = connection.getOutputStream();
-            String query = "passKey=" + URLEncoder.encode(BuildConfig.PASS_KEY, "UTF-8")
-                    + "&request=" + request;
-            stream.write(query.getBytes(StandardCharsets.UTF_8));
-            stream.flush();
-            stream.close();
-            // Answer
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line = reader.readLine();
-            connection.disconnect();
-            reader.close();
-            if (line.contains(Json.USER)) {
-                return new JSONObject(new JSONTokener(line));
-            } else
-                toast(line);
-        } catch (Exception ignored) {
-            // Usually no connection to internet
-        }
-        return null;
     }
 
     /**

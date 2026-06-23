@@ -3,17 +3,19 @@ package app.familygem
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
-import app.familygem.constant.Json
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.Request
+import org.json.JSONObject
 
 /** Entry point of the app. */
 class LauncherActivity : AppCompatActivity() {
@@ -50,14 +52,9 @@ class LauncherActivity : AppCompatActivity() {
                 uri.lastPathSegment!!.replace(".zip", "")
             else null
             if (dateId != null) {
-                if (BuildConfig.PASS_KEY.isNotEmpty()) {
-                    val progressView = findViewById<ProgressView>(R.id.launcher_progress)
-                    TreeUtil.launchDownloadSharedTree(lifecycleScope, this, dateId, progressView, startTrees)
-                    { progressView.visibility = View.GONE }
-                } else {
-                    startTrees()
-                    Toast.makeText(this, "Missing pass key.", Toast.LENGTH_LONG).show()
-                }
+                val progressView = findViewById<ProgressView>(R.id.launcher_progress)
+                TreeUtil.launchDownloadSharedTree(lifecycleScope, this, dateId, progressView, startTrees)
+                { progressView.visibility = View.GONE }
             } // The URI comes from a click on a .ged file
             else if (uri.scheme == "file" || uri.scheme == "content") {
                 lifecycleScope.launch(Dispatchers.Default) {
@@ -74,13 +71,20 @@ class LauncherActivity : AppCompatActivity() {
         }
 
         // Retrieves GeoNames username to store it in shared preferences
-        if (BuildConfig.PASS_KEY.isNotEmpty()) {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val credential = U.getCredential(Json.GEO_NAMES)
-                if (credential != null) {
-                    val editor = Util.getSharedPreferences(this@LauncherActivity)?.edit()
-                    editor?.putString(PlaceFinderTextView.GEONAMES_USER, credential.getString(Json.USER))?.apply()
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val apiToken = Util.getToken()
+                val request = Request.Builder().url(Global.apiUrl + "credentials").header("Authorization", "Bearer $apiToken").build()
+                Global.okHttpClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val json = JSONObject(response.body.string())
+                        val username = json.getString("geoNamesUsername")
+                        val editor = Util.getSharedPreferences(this@LauncherActivity)?.edit()
+                        editor?.putString(PlaceFinderTextView.GEONAMES_USER, username)?.apply()
+                    }
                 }
+            } catch (exception: Exception) {
+                Log.e("LauncherActivity", exception.message ?: "Unknown error")
             }
         }
 

@@ -25,7 +25,14 @@ class ProgressView(context: Context, attrs: AttributeSet) : RelativeLayout(conte
 
     var progress: Long
         set(value) {
-            if (maximum > 0) bar.progress = (value * 100 / maximum).toInt()
+            if (maximum > 0) {
+                lifecycleScope?.launch {
+                    val newProgress = (value * 100 / maximum).toInt()
+                    if (newProgress != bar.progress && newProgress <= 100) {
+                        bar.progress = newProgress
+                    }
+                }
+            }
         }
         get() = bar.progress * maximum / 100
 
@@ -52,6 +59,7 @@ class ProgressView(context: Context, attrs: AttributeSet) : RelativeLayout(conte
         }
     }
 
+    /** Hides the progress bar and shows the rotating circle. */
     fun hideBar() {
         lifecycleScope?.launch {
             box.visibility = GONE

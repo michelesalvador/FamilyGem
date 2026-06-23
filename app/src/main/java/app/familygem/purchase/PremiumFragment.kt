@@ -1,12 +1,12 @@
 package app.familygem.purchase
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import app.familygem.Global
@@ -27,7 +27,7 @@ class PremiumFragment : Fragment(R.layout.premium_fragment) {
         if (Global.settings.premium) model.show.value = PremiumViewModel.Show.ACTIVATED
         else model.show.value = PremiumViewModel.Show.ADVERTISEMENT
         binding.premiumMore.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.familygem.app/premium")))
+            startActivity(Intent(Intent.ACTION_VIEW, "https://www.familygem.app/premium".toUri()))
         }
         return binding.root
     }
@@ -92,7 +92,7 @@ class PremiumFragment : Fragment(R.layout.premium_fragment) {
                     premiumDelete.setOnClickListener { button ->
                         Util.confirmDelete(requireContext()) {
                             button.isEnabled = false
-                            model.consumePurchase()
+                            model.consumePurchase(it)
                         }
                     }
                 }

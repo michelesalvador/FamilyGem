@@ -54,7 +54,7 @@ class ResultFragment : BaseFragment(R.layout.merge_result_fragment) {
             }
             // Merge button
             bind.mergeButton.setOnClickListener {
-                if (Global.settings.premium || BuildConfig.PASS_KEY.isEmpty()) {
+                if (Global.settings.premium || BuildConfig.PASSKEY.isEmpty()) {
                     if (bind.mergeRadioAnnex.isChecked)
                         model.performAnnexMerge(requireContext())
                     else if (bind.mergeRadioGenerate.isChecked)

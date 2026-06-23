@@ -20,7 +20,6 @@ import app.familygem.Settings
 import app.familygem.Settings.Tree
 import app.familygem.U
 import app.familygem.constant.Extra
-import app.familygem.constant.Json
 import app.familygem.share.CompareActivity
 import app.familygem.util.Util.caseString
 import app.familygem.util.Util.string
@@ -34,9 +33,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
+import okhttp3.Request
 import org.apache.commons.io.FileUtils
-import org.apache.commons.net.ftp.FTP
-import org.apache.commons.net.ftp.FTPClient
 import org.folg.gedcom.model.CharacterSet
 import org.folg.gedcom.model.Gedcom
 import org.folg.gedcom.model.GedcomVersion
@@ -45,6 +43,7 @@ import org.folg.gedcom.model.Header
 import org.folg.gedcom.model.Person
 import org.folg.gedcom.parser.JsonParser
 import org.folg.gedcom.parser.ModelParser
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileNotFoundException
@@ -472,39 +471,42 @@ object TreeUtil {
     }
 
     /**
-     * Connects to the server and downloads the ZIP file of the shared tree to import it.
+     * Connects to API and downloads the ZIP file of the shared tree to import it.
      * @return Result with the downloaded ZIP file
      */
     private fun downloadSharedTree(context: Context, dateId: String, progressView: ProgressView): Result<File> {
-        val client = FTPClient()
         return try {
-            val credential = U.getCredential(Json.FTP) ?: throw Exception("Missing credentials.")
-            client.connect(credential.getString(Json.HOST), credential.getInt(Json.PORT))
-            client.login(credential.getString(Json.USER), credential.getString(Json.PASSWORD))
-            val inputPath = credential.getString(Json.SHARED_PATH) + "/$dateId.zip"
-            val fileSize = client.getSize(inputPath)?.toLongOrNull() ?: 0
-            if (fileSize > 0) progressView.displayBar("Downloading", fileSize)
-            client.enterLocalPassiveMode()
-            client.setFileType(FTP.BINARY_FILE_TYPE)
-            val inputStream = client.retrieveFileStream(inputPath)
-            if (inputStream == null) { // Usually file not found
-                val message = client.replyString.replace("550", "").replace("/www.familygem.app/condivisi/", "").trim()
-                throw FileNotFoundException(message)
-            }
-            val outputZipFile = File(context.externalCacheDir, "$dateId.zip")
-            inputStream.use {
-                outputZipFile.outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream) { progressView.progress = it }
+            val url = Global.apiUrl + "files?dateId=$dateId"
+            // HEAD request to get the file size
+            val headRequest = Request.Builder().url(url).head().build()
+            Global.okHttpClient.newCall(headRequest).execute().use { response ->
+                if (response.isSuccessful) {
+                    val contentLength = response.header("content-length")?.toLong() ?: 0L
+                    if (contentLength > 0) {
+                        progressView.displayBar("Downloading", contentLength)
+                    }
                 }
             }
-            progressView.hideBar()
-            if (!client.completePendingCommand()) throw Exception("Can not complete file transfer.")
-            ZipFile(outputZipFile).close() // Checks ZIP file integrity and in case throws ZipException
-            Result.success(outputZipFile)
+            // GET request to download the file
+            val request = Request.Builder().url(url).build()
+            Global.okHttpClient.newCall(request).execute().use { response ->
+                val body = response.body
+                if (!response.isSuccessful) {
+                    val jsonResponse = JSONObject(body.string())
+                    throw Exception(jsonResponse.optString("detail", response.message))
+                }
+                val outputZipFile = File(context.externalCacheDir, "$dateId.zip")
+                body.byteStream().use { inputStream ->
+                    outputZipFile.outputStream().use { outputStream ->
+                        inputStream.copyTo(outputStream) { progressView.progress = it }
+                    }
+                }
+                progressView.hideBar()
+                ZipFile(outputZipFile).close() // Checks ZIP file integrity and in case throws ZipException
+                Result.success(outputZipFile)
+            }
         } catch (exception: Exception) {
             Result.failure(exception)
-        } finally {
-            if (client.isConnected) client.disconnect()
         }
     }
 
@@ -526,7 +528,7 @@ object TreeUtil {
             }
             val inputStream = zipFile?.inputStream() ?: context.contentResolver.openInputStream(zipUri!!)
             val uri = zipUri ?: Uri.fromFile(zipFile)
-            val fileSize = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length }?.toLong() ?: 0
+            val fileSize = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: 0L
             val result = unzipBackupFile(inputStream!!, context, treeId, mediaDir!!, progress!!, fileSize)
             // PartialSuccessException is thrown after creating the tree entry
             if (result.isFailure && result.exceptionOrNull() !is PartialSuccessException) throw result.exceptionOrNull()!!

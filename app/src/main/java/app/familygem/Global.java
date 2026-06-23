@@ -17,9 +17,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.OkHttpClient;
+
 public class Global extends Application {
 
     private Thread.UncaughtExceptionHandler defaultExceptionHandler;
+    public static final String apiUrl = "https://www.familygem.app/api/v1/";
+    public static final OkHttpClient okHttpClient = new OkHttpClient();
     public static Gedcom gc;
     public static Context context;
     public static Application application;
