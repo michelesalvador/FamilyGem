@@ -68,10 +68,14 @@ class DateTest {
         add("from     TO 1234", Kind.FROM_TO, Format.OTHER, Format.Y)
         add("   FROM 1001 to 1001  ", Kind.FROM_TO, Format.Y, Format.Y)
 
+        add("INT 15 DEC 2000 (More or less)", Kind.INTERPRETED, Format.D_M_Y, valid = true)
+        add("INT (parenthesis-only)", Kind.INTERPRETED, Format.OTHER)
+        add("INT 9999 B.C. (Long ago, for sure B.C.)", Kind.INTERPRETED, Format.Y, firstNegative = true, valid = true)
+
         add("Söme ràndom téxt", Kind.PHRASE, valid = true)
         add("BE 7 Jan 1913", Kind.PHRASE, valid = true)
-        add("(JAn 1458)", Kind.PHRASE, valid = true)
-        add("(one parenthesis only", Kind.PHRASE, valid = true)
+        add("(JAn 1458 B.C.)", Kind.PHRASE, valid = true)
+        add("(one parenthesis only!", Kind.PHRASE, valid = true)
         add("  (  True phrase ) ", Kind.PHRASE, valid = true)
 
         add("jan 1699/00 ", Kind.EXACT, Format.M_Y, firstDual = true)
@@ -116,7 +120,7 @@ class DateTest {
             val valid = converter.isValid(date.gedcomDate)
             println(if (valid) "" else " ⚠")
             println("\t" + converter.firstDate + " - " + converter.secondDate + " - " + converter.kind)
-            if (converter.phrase != null) println("\t(" + converter.phrase + ")")
+            if (converter.kind == Kind.PHRASE) println("\t(" + converter.phrase + ")")
             else println("\t'" + converter.writeDate(false) + "' '" + converter.writeDate(true) + "'")
             println("\t" + converter.getDateNumber() + " " + converter.getYear())
             assertNotNull(converter)

@@ -43,7 +43,7 @@ class DateEditorLayout(context: Context, set: AttributeSet?) : LinearLayout(cont
     private val dateKinds = intArrayOf(
         R.string.exact, R.string.approximate, R.string.calculated, R.string.estimated,
         R.string.after, R.string.before, R.string.between_and,
-        R.string.from, R.string.to, R.string.from_to, R.string.date_phrase
+        R.string.from, R.string.to, R.string.from_to, R.string.interpreted, R.string.date_phrase
     )
 
     private var trueTextInput = false // The user is actually typing on the virtual keyboard or the text is changed otherwise
@@ -149,7 +149,8 @@ class DateEditorLayout(context: Context, set: AttributeSet?) : LinearLayout(cont
         // On the second tap brings up the keyboard
         editText.setOnTouchListener { _, event ->
             if (event?.action == MotionEvent.ACTION_DOWN) {
-                editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS // Re-enables the input
+                editText.inputType = if (dateConverter.kind == Kind.PHRASE || dateConverter.kind == Kind.INTERPRETED)
+                    InputType.TYPE_TEXT_FLAG_CAP_SENTENCES else InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS // Re-enables the input
             } else if (event.action == MotionEvent.ACTION_UP) {
                 keyboardVisible = keyboard.showSoftInput(editText, 0) // Makes the keyboard reappear
             }
@@ -317,6 +318,7 @@ class DateEditorLayout(context: Context, set: AttributeSet?) : LinearLayout(cont
             Kind.EXACT -> writeDate(firstDate)
             Kind.BETWEEN_AND -> "BET " + writeDate(firstDate) + " AND " + writeDate(secondDate!!)
             Kind.FROM_TO -> "FROM " + writeDate(firstDate) + " TO " + writeDate(secondDate!!)
+            Kind.INTERPRETED -> "INT " + writeDate(firstDate) + " (" + (dateConverter.phrase ?: "") + ")"
             Kind.PHRASE -> { // The phrase is replaced by an exact date
                 dateConverter.kind = Kind.EXACT
                 findViewById<TextView>(R.id.dateEditor_kinds)?.setText(dateKinds[0])

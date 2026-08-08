@@ -413,6 +413,7 @@
     <string name="from_to">Da… a</string>
     <string name="from">Da</string>
     <string name="to">A</string>
+    <string name="interpreted">Interpretata</string>
     <string name="date_phrase">Frase</string>
     <string name="invalid_date">Data GEDCOM non valida.</string>
     <!-- TreeSettingsActivity -->

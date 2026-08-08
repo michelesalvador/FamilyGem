@@ -5,7 +5,6 @@ import android.widget.EditText
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
@@ -14,7 +13,7 @@ import org.junit.runner.RunWith
 
 /** Tests some dates. */
 @RunWith(AndroidJUnit4ClassRunner::class)
-class DateTest {
+class DateEditorTest {
 
     @get:Rule
     val activityScenarioRule = activityScenarioRule<LauncherActivity>()
@@ -31,7 +30,7 @@ class DateTest {
     class DateWrapper(val gedcomDate: String)
 
     @Test
-    fun testSomeDates() = runTest {
+    fun testSomeDates() {
         val dateList = ArrayList<DateWrapper>()
         fun add(date: String) {
             dateList.add(DateWrapper(date))
@@ -40,9 +39,12 @@ class DateTest {
         add("31 DEc 1998")
         add("CAL 23 AUG")
         add("From 1234/35 to 21 DEc 1699/00")
+        add("0")
         add("BC")
         add("CAL 007/08 B.C.")
         add("BET Jun 2000/99 b.C. And 7/8 b.C.")
+        add("INT 10000 B.C. (long-ago, for sure B.C.)")
+        add("INT 20 Feb 222 B.C. ()")
 
         for (date in dateList) {
             println("'" + date.gedcomDate + "'")

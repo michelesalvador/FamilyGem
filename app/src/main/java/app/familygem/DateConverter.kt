@@ -15,7 +15,7 @@ class DateConverter {
 
     /** Kinds of date that represent a single event in time. */
     val isSingleKind: Boolean
-        get() = kind == Kind.EXACT || kind == Kind.APPROXIMATE || kind == Kind.CALCULATED || kind == Kind.ESTIMATED
+        get() = kind == Kind.EXACT || kind == Kind.APPROXIMATE || kind == Kind.CALCULATED || kind == Kind.ESTIMATED || kind == Kind.INTERPRETED
 
     /** With a string date in GEDCOM style. */
     constructor(gedcomDate: String) {
@@ -103,14 +103,20 @@ class DateConverter {
         firstDate.format = Format.OTHER
         secondDate?.format = Format.OTHER
 
-        val gedcomDate = gedcomDate.replace("B.C.", "BC", true).replace("BCE", "BC", true).trim()
+        val gedcomDate = gedcomDate.trim()
         if (gedcomDate.isEmpty()) {
             kind = Kind.EXACT
             return
         }
+        // Phrase date after opening parenthesis
+        if (gedcomDate.startsWith("(")) {
+            kind = Kind.PHRASE
+            phrase = gedcomDate.replace("[()]".toRegex(), "")
+            return
+        }
         // Recognizes types other than EXACT and converts the string to SingleDate
         // Replaces all characters except numbers, letters, '/' and parenthesis
-        val upperDate = gedcomDate.replace("[^0-9\\p{L}/()]+".toRegex(), " ").uppercase()
+        val upperDate = gedcomDate.replace("B.C.", "BC", true).replace("BCE", "BC", true).replace("[^0-9\\p{L}/()]+".toRegex(), " ").uppercase()
         for (i in 1..<Kind.entries.size) {
             val k = Kind.entries[i]
             if (upperDate.startsWith(k.prefix)) {
@@ -126,8 +132,9 @@ class DateConverter {
                         firstDate.scan(upperDate.substring(4, upperDate.indexOf("TO")))
                     if (upperDate.length > upperDate.indexOf("TO") + 2)
                         secondDate?.scan(upperDate.substring(upperDate.indexOf("TO") + 2))
-                } else if (k == Kind.PHRASE) { // Phrase date between parenthesis
-                    phrase = gedcomDate.replace("[()]".toRegex(), "")
+                } else if (k == Kind.INTERPRETED && gedcomDate.contains("(")) {
+                    firstDate.scan(upperDate.substring(3, upperDate.indexOf("(")))
+                    phrase = gedcomDate.substring(gedcomDate.indexOf("(") + 1).replace("[()]".toRegex(), "")
                 } else if (upperDate.length > k.prefix.length) { // Other prefixes followed by something
                     firstDate.scan(upperDate.substring(k.prefix.length))
                 }
@@ -158,6 +165,7 @@ class DateConverter {
                 || gedcomDate.matches(("(ABT|CAL|EST|BEF|AFT|FROM|TO) +$datePart").toRegex())
                 || gedcomDate.matches(("BET +$datePart +AND +$datePart").toRegex())
                 || gedcomDate.matches(("FROM +$datePart +TO +$datePart").toRegex())
+                || gedcomDate.matches(("INT +$datePart +\\(.*\\)").toRegex())
     }
 
     /** Writes a short text-version of the date in the default locale.
@@ -215,7 +223,7 @@ class DateConverter {
         if (firstDate.date != null) {
             txt += writeSingleDateLong(firstDate)
             // Uppercase initial month
-            if (kind == Kind.EXACT && (firstDate.format == Format.M || firstDate.format == Format.M_Y)) {
+            if ((kind == Kind.EXACT || kind == Kind.INTERPRETED) && (firstDate.format == Format.M || firstDate.format == Format.M_Y)) {
                 txt = txt.replaceFirstChar { it.titlecase() }
             }
             if (kind == Kind.BETWEEN_AND || kind == Kind.FROM_TO) {
@@ -223,12 +231,13 @@ class DateConverter {
                 if (secondDate?.date != null) txt += writeSingleDateLong(secondDate!!)
             }
         }
-        return txt.replace("-", "").trim()
+        if (kind == Kind.INTERPRETED && !phrase.isNullOrBlank()) txt += " ($phrase)"
+        return txt.trim()
     }
 
     private fun writeSingleDateLong(singleDate: SingleDate): String {
         val pattern = singleDate.format!!.pattern.replace("MMM", "MMMM")
-        var txt = singleDate.date!!.toString(pattern)
+        var txt = singleDate.date!!.withEra(1).toString(pattern)
         if (singleDate.dual) txt += "/" + singleDate.date!!.plusYears(1).toString("yy")
         if (singleDate.negative) txt += " B.C."
         return txt

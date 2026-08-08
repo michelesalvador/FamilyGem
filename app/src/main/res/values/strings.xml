@@ -384,6 +384,7 @@
     <string name="from_to">From… to</string>
     <string name="from">From</string>
     <string name="to">To</string>
+    <string name="interpreted">Interpreted</string>
     <string name="date_phrase">Phrase</string>
     <string name="invalid_date">Invalid GEDCOM date.</string>
     <string name="tree_settings">Tree settings</string>
