@@ -63,6 +63,7 @@ import app.familygem.util.getSpouseRefs
 import app.familygem.util.sex
 import graph.gedcom.Bond
 import graph.gedcom.CurveLine
+import graph.gedcom.FamilyNode
 import graph.gedcom.Graph
 import graph.gedcom.Line
 import graph.gedcom.Metric
@@ -142,6 +143,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             binding.diagramFrame.setPadding(insets.left, insets.top, insets.right, insets.bottom)
             binding.diagramHamburger.updateLayoutParams<ViewGroup.MarginLayoutParams> { leftMargin = insets.left; topMargin = insets.top }
             binding.diagramOptions.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.top; rightMargin = insets.right }
+        }
+        FamilyNode.marriageYearProvider = {
+            val converter = DateConverter(it)
+            if (converter.isSingleKind && converter.firstDate.hasYear) converter.writeDate(true) else null
         }
         return binding.root
     }
@@ -488,7 +493,16 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             val bondLayout = RelativeLayout(context)
             addView(bondLayout, LayoutParams(toPx(bond.width), toPx(bond.height)))
             val familyNode = bond.familyNode
-            if (bond.marriageDate == null) {
+            if (bond.marriageYear != null) {
+                val oval = TextView(context)
+                oval.setBackgroundResource(R.drawable.diagram_year_oval)
+                oval.gravity = Gravity.CENTER
+                oval.textSize = 13f
+                oval.text = bond.marriageYear
+                val yearParams = LayoutParams(LayoutParams.MATCH_PARENT, toPx(Util.MARRIAGE_HEIGHT.toFloat()))
+                yearParams.topMargin = toPx(bond.centerRelY() - Util.MARRIAGE_HEIGHT / 2)
+                bondLayout.addView(oval, yearParams)
+            } else {
                 hearth = View(context)
                 hearth!!.setBackgroundResource(R.drawable.diagram_hearth)
                 val diameter = toPx((if (familyNode.mini) Util.MINI_HEARTH_DIAMETER else Util.HEARTH_DIAMETER).toFloat())
@@ -496,21 +510,13 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 hearthParams.topMargin = toPx(familyNode.centerRelY()) - diameter / 2
                 hearthParams.addRule(CENTER_HORIZONTAL)
                 bondLayout.addView(hearth, hearthParams)
-            } else {
-                val year = TextView(context)
-                year.setBackgroundResource(R.drawable.diagram_year_oval)
-                year.gravity = Gravity.CENTER
-                year.text = DateConverter(bond.marriageDate).writeDate(true)
-                year.textSize = 13f
-                val yearParams = LayoutParams(LayoutParams.MATCH_PARENT, toPx(Util.MARRIAGE_HEIGHT.toFloat()))
-                yearParams.topMargin = toPx(bond.centerRelY() - Util.MARRIAGE_HEIGHT / 2)
-                bondLayout.addView(year, yearParams)
             }
             setOnClickListener {
                 Memory.setLeader(familyNode.spouseFamily)
                 startActivity(Intent(context, FamilyActivity::class.java))
             }
         }
+
 
         override fun invalidate() {
             if (printing && hearth != null) {
