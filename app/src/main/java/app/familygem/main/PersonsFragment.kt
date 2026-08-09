@@ -497,27 +497,32 @@ class PersonsFragment : BaseFragment() {
         person = view.getTag(R.id.tag_object) as Person
         position = view.getTag(R.id.tag_position) as Int
         menu.add(1, 0, 0, R.string.diagram)
+        if (activity?.intent?.getBooleanExtra(Choice.PERSON, false) == true) menu.add(1, 1, 0, R.string.card)
         val familyLabels = person.getFamilyLabels(requireContext(), null)
-        if (familyLabels[0] != null) menu.add(1, 1, 0, familyLabels[0])
-        if (familyLabels[1] != null) menu.add(1, 2, 0, familyLabels[1])
-        menu.add(1, 3, 0, R.string.modify)
-        if (Global.settings.expert) menu.add(1, 4, 0, R.string.edit_id)
-        menu.add(1, 5, 0, R.string.delete)
+        if (familyLabels[0] != null) menu.add(1, 2, 0, familyLabels[0])
+        if (familyLabels[1] != null) menu.add(1, 3, 0, familyLabels[1])
+        menu.add(1, 4, 0, R.string.modify)
+        if (Global.settings.expert) menu.add(1, 5, 0, R.string.edit_id)
+        menu.add(1, 6, 0, R.string.delete)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         if (item.groupId != 1) return false
         when (item.itemId) {
             0 -> U.whichParentsToShow(context, person, 1) // Display diagram
-            1 -> U.whichParentsToShow(context, person, 2) // Family as child
-            2 -> U.whichSpousesToShow(context, person) // Family as partner
-            3 -> { // Edit person
+            1 -> { // Opens person profile
+                Memory.setLeader(person)
+                startActivity(Intent(context, ProfileActivity::class.java))
+            }
+            2 -> U.whichParentsToShow(context, person, 2) // Family as child
+            3 -> U.whichSpousesToShow(context, person) // Family as partner
+            4 -> { // Edit person
                 val intent = Intent(context, PersonEditorActivity::class.java)
                 intent.putExtra(Extra.PERSON_ID, person.id)
                 startActivity(intent)
             }
-            4 -> U.editId(context, person) { adapter.notifyDataSetChanged() } // Edit ID
-            5 -> { // Delete person
+            5 -> U.editId(context, person) { adapter.notifyDataSetChanged() } // Edit ID
+            6 -> { // Delete person
                 Util.confirmDelete(requireContext()) {
                     val families = person.delete()
                     selectedPeople.removeAt(position)
