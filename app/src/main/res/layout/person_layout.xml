@@ -35,6 +35,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/person_info"
             android:layout_toStartOf="@+id/person_image"
+            android:ellipsize="end"
+            android:maxLines="3"
             android:textSize="17sp"
             tools:text="Prefix Given Name &quot;Nickname&quot; Surname Suffix" />
 
@@ -44,6 +46,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/person_name"
             android:layout_toStartOf="@+id/person_image"
+            android:ellipsize="end"
+            android:maxLines="3"
             android:textSize="15sp"
             android:textStyle="italic"
             tools:text="Sir Lord Duke King of England and Emperor of All Known Lands" />
@@ -54,6 +58,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/person_title"
             android:layout_toStartOf="@+id/person_image"
+            android:ellipsize="end"
+            android:maxLines="3"
             android:textColor="@color/gray_text"
             android:textSize="14sp"
             tools:text="Born in the first day of the second month during the year 1234 AD\nLondon – New York" />
@@ -65,7 +71,7 @@
             android:layout_alignParentEnd="true"
             android:layout_marginStart="8dp"
             android:scaleType="centerCrop"
-            tools:src="@drawable/image" />
+            tools:src="@drawable/person_image" />
 
         <ImageView
             android:id="@+id/person_mourning"

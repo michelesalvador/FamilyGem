@@ -24,8 +24,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.JsonPrimitive;
@@ -38,7 +36,6 @@ import org.folg.gedcom.model.Gedcom;
 import org.folg.gedcom.model.GedcomTag;
 import org.folg.gedcom.model.Header;
 import org.folg.gedcom.model.Media;
-import org.folg.gedcom.model.MediaContainer;
 import org.folg.gedcom.model.Name;
 import org.folg.gedcom.model.Note;
 import org.folg.gedcom.model.NoteContainer;
@@ -48,8 +45,6 @@ import org.folg.gedcom.model.PersonFamilyCommonContainer;
 import org.folg.gedcom.model.Repository;
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
-import org.folg.gedcom.model.SourceCitation;
-import org.folg.gedcom.model.SourceCitationContainer;
 import org.folg.gedcom.model.SpouseFamilyRef;
 import org.folg.gedcom.model.SpouseRef;
 import org.folg.gedcom.model.Submitter;
@@ -71,23 +66,19 @@ import app.familygem.constant.Extra;
 import app.familygem.constant.Gender;
 import app.familygem.constant.Relation;
 import app.familygem.detail.FamilyActivity;
-import app.familygem.detail.SourceCitationActivity;
 import app.familygem.main.DiagramFragment;
 import app.familygem.main.MainActivity;
-import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
 import app.familygem.profile.ProfileActivity;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.FamilyUtil;
 import app.familygem.util.FamilyUtilKt;
 import app.familygem.util.FileUtil;
-import app.familygem.util.NoteUtil;
 import app.familygem.util.PersonUtil;
 import app.familygem.util.PersonUtilKt;
 import app.familygem.util.TreeUtil;
 import app.familygem.visitor.FindStack;
 import app.familygem.visitor.ListOfSourceCitations;
-import app.familygem.visitor.MediaContainerList;
 import app.familygem.visitor.MediaContainers;
 import app.familygem.visitor.NoteContainers;
 import app.familygem.visitor.NoteReferences;
@@ -630,7 +621,7 @@ public class U {
         if (title.isEmpty()) titleView.setVisibility(View.GONE);
         else titleView.setText(title);
         details(person, personView.findViewById(R.id.person_details));
-        FileUtil.INSTANCE.selectMainImage(person, personView.findViewById(R.id.person_image));
+        FileUtil.INSTANCE.showMainMedia(person, personView.findViewById(R.id.person_image));
         if (!isDead(person))
             personView.findViewById(R.id.person_mourning).setVisibility(View.GONE);
         if (Gender.isMale(person))
@@ -664,76 +655,6 @@ public class U {
         }
         Memory.setInstanceAndAllSubsequentToNull(note);
         return leaders.toArray();
-    }
-
-    /**
-     * Lists all media of a container object and adds them to the layout.
-     *
-     * @param detailed More or less details displayed
-     */
-    public static void placeMedia(LinearLayout layout, MediaContainer container, boolean detailed) {
-        List<Media> allMedia = container.getAllMedia(Global.gc);
-        if (!allMedia.isEmpty()) {
-            RecyclerView recyclerView = detailed ? new RecyclerView(layout.getContext())
-                    : new MediaAdapter.UnclickableRecyclerView(layout.getContext());
-            recyclerView.setHasFixedSize(true);
-            RecyclerView.LayoutManager layoutManager = new GridLayoutManager(layout.getContext(), detailed ? 2 : 3);
-            recyclerView.setLayoutManager(layoutManager);
-            List<MediaContainerList.MediaWrapper> mediaList = new ArrayList<>();
-            for (Media media : allMedia)
-                mediaList.add(new MediaContainerList.MediaWrapper(media, container));
-            MediaAdapter adapter = new MediaAdapter(mediaList, detailed);
-            recyclerView.setAdapter(adapter);
-            layout.addView(recyclerView);
-        }
-    }
-
-    /**
-     * Places into layout the source citations of a given container.
-     */
-    public static void placeSourceCitations(LinearLayout layout, Object container) {
-        if (Global.settings.expert) {
-            List<SourceCitation> sourceCitations;
-            if (container instanceof Note) // Note doesn't extend SourceCitationContainer
-                sourceCitations = ((Note)container).getSourceCitations();
-            else sourceCitations = ((SourceCitationContainer)container).getSourceCitations();
-            for (SourceCitation citation : sourceCitations) {
-                View citationView = LayoutInflater.from(layout.getContext()).inflate(R.layout.source_citation_layout, layout, false);
-                layout.addView(citationView);
-                if (citation.getSource(Global.gc) != null) // source CITATION
-                    ((TextView)citationView.findViewById(R.id.source_text)).setText(SourcesFragment.titoloFonte(citation.getSource(Global.gc)));
-                else // source NOTE, or citation of source that has been deleted
-                    citationView.findViewById(R.id.sourceCitation).setVisibility(View.GONE);
-                String txt = "";
-                if (citation.getValue() != null) txt += citation.getValue() + "\n";
-                if (citation.getPage() != null) txt += citation.getPage() + "\n";
-                if (citation.getDate() != null) txt += new DateConverter(citation.getDate()).writeDateLong() + "\n";
-                // Valid for both sourceCitation and sourceNote
-                if (citation.getText() != null) txt += citation.getText() + "\n";
-                TextView textView = citationView.findViewById(R.id.sourceCitation_text);
-                if (txt.isEmpty()) textView.setVisibility(View.GONE);
-                else textView.setText(txt.substring(0, txt.length() - 1));
-                // All the rest
-                LinearLayout boxView = citationView.findViewById(R.id.sourceCitation_box);
-                NoteUtil.INSTANCE.placeNotes(boxView, citation, false);
-                placeMedia(boxView, citation, false);
-                citationView.setTag(R.id.tag_object, citation);
-                if (layout.getContext() instanceof ProfileActivity) { // profile.FactsFragment
-                    ((ProfileActivity)layout.getContext()).getPageFragment(1).registerForContextMenu(citationView);
-                } else // A detail activity
-                    ((AppCompatActivity)layout.getContext()).registerForContextMenu(citationView);
-                citationView.setOnClickListener(v -> {
-                    Intent intent = new Intent(layout.getContext(), SourceCitationActivity.class);
-                    Memory.add(citation);
-                    layout.getContext().startActivity(intent);
-                });
-            }
-        }
-    }
-
-    public static int castJsonInt(Object unknown) {
-        if (unknown instanceof Integer) return (int)unknown;
-        else return ((JsonPrimitive)unknown).getAsInt();
     }
 
     public static String castJsonString(Object unknown) {

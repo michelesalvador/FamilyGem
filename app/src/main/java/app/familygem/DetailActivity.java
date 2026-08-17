@@ -66,6 +66,7 @@ import java.util.Set;
 import app.familygem.constant.Choice;
 import app.familygem.constant.Destination;
 import app.familygem.constant.Extra;
+import app.familygem.constant.Level;
 import app.familygem.constant.Relation;
 import app.familygem.detail.AddressActivity;
 import app.familygem.detail.EventActivity;
@@ -78,7 +79,6 @@ import app.familygem.detail.SourceCitationActivity;
 import app.familygem.detail.SubmitterActivity;
 import app.familygem.main.MainActivity;
 import app.familygem.main.RepositoriesFragment;
-import app.familygem.main.SourcesFragment;
 import app.familygem.main.SubmittersFragment;
 import app.familygem.profile.ProfileActivity;
 import app.familygem.util.AddressUtilKt;
@@ -93,6 +93,7 @@ import app.familygem.util.NoteUtil;
 import app.familygem.util.PersonUtil;
 import app.familygem.util.PersonUtilKt;
 import app.familygem.util.RepositoryUtil;
+import app.familygem.util.SourceCitationUtil;
 import app.familygem.util.SourceUtil;
 import app.familygem.util.TreeUtil;
 import app.familygem.util.Util;
@@ -227,18 +228,11 @@ public abstract class DetailActivity extends BaseActivity {
                 i++;
             }
         }
-        if (object instanceof Source && findViewById(R.id.sourceCitation) == null) {
+        if (object instanceof Source && findViewById(R.id.repositoryCitation_citation) == null) {
             SubMenu subRepository = menu.addSubMenu(0, 100, 0, R.string.repository);
             subRepository.add(0, 101, 0, R.string.new_repository);
             if (!gc.getRepositories().isEmpty())
                 subRepository.add(0, 102, 0, R.string.link_repository);
-        }
-        if (object instanceof NoteContainer) {
-            SubMenu subNote = menu.addSubMenu(0, 100, 0, R.string.note);
-            subNote.add(0, 103, 0, R.string.new_note);
-            subNote.add(0, 104, 0, R.string.new_shared_note);
-            if (!gc.getNotes().isEmpty())
-                subNote.add(0, 105, 0, R.string.link_shared_note);
         }
         if (object instanceof MediaContainer) {
             SubMenu subMedia = menu.addSubMenu(0, 100, 0, R.string.media);
@@ -246,6 +240,13 @@ public abstract class DetailActivity extends BaseActivity {
             subMedia.add(0, 107, 0, R.string.new_shared_media);
             if (!gc.getMedia().isEmpty())
                 subMedia.add(0, 108, 0, R.string.link_shared_media);
+        }
+        if (object instanceof NoteContainer) {
+            SubMenu subNote = menu.addSubMenu(0, 100, 0, R.string.note);
+            subNote.add(0, 103, 0, R.string.new_note);
+            subNote.add(0, 104, 0, R.string.new_shared_note);
+            if (!gc.getNotes().isEmpty())
+                subNote.add(0, 105, 0, R.string.link_shared_note);
         }
         if ((object instanceof SourceCitationContainer || object instanceof Note) && Global.settings.expert) {
             SubMenu subSource = menu.addSubMenu(0, 100, 0, R.string.source);
@@ -354,7 +355,7 @@ public abstract class DetailActivity extends BaseActivity {
             startActivity(new Intent(this, SourceCitationActivity.class));
             toBeSaved = true;
         } else if (id == 110) { // New source
-            SourcesFragment.newSource(this, object);
+            SourceUtil.INSTANCE.createSource(this, (ExtensionContainer)object);
         } else if (id == 111) { // Link existing source
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.SOURCE, true);
@@ -649,23 +650,15 @@ public abstract class DetailActivity extends BaseActivity {
                 Memory.add(object);
                 startActivity(new Intent(this, AddressActivity.class));
             };
-        } else if (object instanceof EventFact) { // Event
+        } else if (object instanceof EventFact) { // Family EventFact
             click = v -> {
                 Memory.add(object);
                 startActivity(new Intent(this, EventActivity.class));
             };
-            // Family EventFacts can have notes, media and source count
-            LinearLayout noteLayout = pieceView.findViewById(R.id.event_other);
-            NoteUtil.INSTANCE.placeNotes(noteLayout, (NoteContainer)object, false);
-            U.placeMedia(noteLayout, (MediaContainer)object, false);
-            if (Global.settings.expert) {
-                List<SourceCitation> sourceCitations = ((SourceCitationContainer)object).getSourceCitations();
-                TextView sourceView = pieceView.findViewById(R.id.event_sources);
-                if (!sourceCitations.isEmpty()) {
-                    sourceView.setText(String.valueOf(sourceCitations.size()));
-                    sourceView.setVisibility(View.VISIBLE);
-                }
-            }
+            LinearLayout otherLayout = pieceView.findViewById(R.id.event_other);
+            MediaUtil.INSTANCE.placeMedia(otherLayout, (MediaContainer)object, false);
+            NoteUtil.INSTANCE.placeNotes(otherLayout, (NoteContainer)object, Level.MEDIUM);
+            SourceCitationUtil.INSTANCE.placeSourceCitations(otherLayout, (ExtensionContainer)object, Level.MEDIUM);
         } else if (object instanceof GedcomTag) { // Extension
             click = v -> {
                 Memory.add(object);
@@ -722,9 +715,9 @@ public abstract class DetailActivity extends BaseActivity {
         else if (record instanceof Media)
             placeMedia(layout, (Media)record);
         else if (record instanceof Note)
-            NoteUtil.INSTANCE.placeNote(layout, (Note)record, null, true);
+            NoteUtil.INSTANCE.placeNote(layout, (Note)record, null, Level.MEDIUM);
         else if (record instanceof Source)
-            SourceUtil.INSTANCE.placeSource(layout, (Source)record, false);
+            SourceUtil.INSTANCE.placeSource(layout, (Source)record, Level.MEDIUM);
         else if (record instanceof Repository)
             RepositoryUtil.INSTANCE.placeRepository(layout, (Repository)record);
         else if (record instanceof Submitter)
@@ -967,6 +960,8 @@ public abstract class DetailActivity extends BaseActivity {
                         menu.add(0, 6, 0, R.string.make_media);
                 } else menu.add(0, 7, 0, R.string.make_shared_media);
             }
+            if (object instanceof SourceCitation)
+                menu.add(0, 8, 0, R.string.choose_source);
             if (object instanceof Family)
                 menu.add(0, 10, 0, R.string.delete);
             else if (!(object instanceof Submitter && U.submitterHasShared((Submitter)object))) // Submitter who shared cannot be deleted
@@ -1008,6 +1003,9 @@ public abstract class DetailActivity extends BaseActivity {
             TreeUtil.INSTANCE.save(true, modifiedObjects);
             Memory.makeLeaderStep(object);
             refresh();
+        } else if (id == 8) { // Choose source
+            Intent intent = new Intent(this, MainActivity.class).putExtra(Choice.SOURCE, true);
+            startActivityForResult(intent, 7047);
         } else if (id == 10) { // Delete family
             Family family = (Family)object;
             if (family.getHusbandRefs().size() + family.getWifeRefs().size() + family.getChildRefs().size() > 0) {
@@ -1132,8 +1130,15 @@ public abstract class DetailActivity extends BaseActivity {
                 if (((Media)pieceObject).getId() != null) {
                     menu.add(0, 40, 0, R.string.make_media);
                     menu.add(0, 41, 0, R.string.unlink);
-                } else menu.add(0, 42, 0, R.string.make_shared_media);
-                menu.add(0, 43, 0, R.string.delete);
+                } else {
+                    List<Media> mediaList = ((MediaContainer)object).getMedia();
+                    if (mediaList.indexOf(pieceObject) > 0)
+                        menu.add(0, 42, 0, R.string.move_up);
+                    if (mediaList.indexOf(pieceObject) < mediaList.size() - 1)
+                        menu.add(0, 43, 0, R.string.move_down);
+                    menu.add(0, 44, 0, R.string.make_shared_media);
+                }
+                menu.add(0, 45, 0, R.string.delete);
             } else if (pieceObject instanceof Address) {
                 menu.add(0, 50, 0, R.string.copy);
                 menu.add(0, 51, 0, R.string.delete);
@@ -1317,13 +1322,21 @@ public abstract class DetailActivity extends BaseActivity {
             case 41: // Unlink shared media
                 MediaUtilKt.unlinkMedia((MediaContainer)object, ((Media)pieceObject).getId());
                 break;
-            case 42: // Make shared media
+            case 42: // Move up media
+                int index3 = ((MediaContainer)object).getMedia().indexOf(pieceObject);
+                Collections.swap(((MediaContainer)object).getMedia(), index3, index3 - 1);
+                break;
+            case 43: // Move down media
+                int index4 = ((MediaContainer)object).getMedia().indexOf(pieceObject);
+                Collections.swap(((MediaContainer)object).getMedia(), index4, index4 + 1);
+                break;
+            case 44: // Make shared media
                 Object[] modified1 = MediaUtil.INSTANCE.makeSharedMedia((Media)pieceObject);
                 TreeUtil.INSTANCE.save(true, modified1);
                 Memory.setInstanceAndAllSubsequentToNull(pieceObject);
                 refresh();
                 return true;
-            case 43: // Delete media
+            case 45: // Delete media
                 Util.INSTANCE.confirmDelete(this, () -> {
                     Object[] modified2 = MediaUtil.INSTANCE.deleteMedia((Media)pieceObject);
                     TreeUtil.INSTANCE.save(true, modified2);
@@ -1335,12 +1348,12 @@ public abstract class DetailActivity extends BaseActivity {
                 deleteAddress(object);
                 break;
             case 56: // Move up family event
-                int index3 = ((Family)object).getEventsFacts().indexOf(pieceObject);
-                Collections.swap(((Family)object).getEventsFacts(), index3, index3 - 1);
+                int index5 = ((Family)object).getEventsFacts().indexOf(pieceObject);
+                Collections.swap(((Family)object).getEventsFacts(), index5, index5 - 1);
                 break;
             case 57: // Move down family event
-                int index4 = ((Family)object).getEventsFacts().indexOf(pieceObject);
-                Collections.swap(((Family)object).getEventsFacts(), index4, index4 + 1);
+                int index6 = ((Family)object).getEventsFacts().indexOf(pieceObject);
+                Collections.swap(((Family)object).getEventsFacts(), index6, index6 + 1);
                 break;
             case 58: // Delete family event
                 ((Family)object).getEventsFacts().remove(pieceObject);
@@ -1359,8 +1372,8 @@ public abstract class DetailActivity extends BaseActivity {
                 return true;
             case 80: // Copy repository citation text
                 U.copyToClipboard(getText(R.string.repository_citation),
-                        ((TextView)pieceView.findViewById(R.id.source_text)).getText() + "\n"
-                                + ((TextView)pieceView.findViewById(R.id.sourceCitation_text)).getText());
+                        ((TextView)pieceView.findViewById(R.id.repositoryCitation_repo)).getText() + "\n"
+                                + ((TextView)pieceView.findViewById(R.id.repositoryCitation_text)).getText());
                 return true;
             case 81: // Delete repository citation
                 ((Source)object).setRepositoryRef(null);

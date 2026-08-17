@@ -9,21 +9,36 @@
     android:orientation="vertical"
     android:padding="6dp">
 
-    <include
-        android:id="@+id/sourceCitation"
-        layout="@layout/source_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/sourceCitation_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:text="Source text" />
-
     <LinearLayout
-        android:id="@+id/sourceCitation_box"
+        android:id="@+id/sourceCitation_source"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" />
+
+    <RelativeLayout
+        android:id="@+id/sourceCitation_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/sourceCitation_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@+id/sourceCitation_image"
+            android:ellipsize="end"
+            android:maxLines="10"
+            tools:text="Source description\nSecond line.\nAnother long line that reaches the image on the right." />
+
+        <ImageView
+            android:id="@+id/sourceCitation_image"
+            android:layout_width="45dp"
+            android:layout_height="60dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="6dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            tools:src="@drawable/source_image" />
+    </RelativeLayout>
 </LinearLayout>

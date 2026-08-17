@@ -14,24 +14,27 @@ import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.R
 import app.familygem.U
+import app.familygem.constant.Level
 import app.familygem.detail.EventActivity
 import app.familygem.detail.ExtensionActivity
 import app.familygem.detail.NameActivity
 import app.familygem.util.ChangeUtil.placeChangeDate
 import app.familygem.util.FamilyUtil.updateSpouseRoles
+import app.familygem.util.MediaUtil
 import app.familygem.util.NoteUtil
+import app.familygem.util.SourceCitationUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.writeContent
 import app.familygem.util.writeTitle
 import org.folg.gedcom.model.EventFact
+import org.folg.gedcom.model.ExtensionContainer
 import org.folg.gedcom.model.GedcomTag
 import org.folg.gedcom.model.MediaContainer
 import org.folg.gedcom.model.Name
 import org.folg.gedcom.model.Note
 import org.folg.gedcom.model.NoteContainer
 import org.folg.gedcom.model.SourceCitation
-import org.folg.gedcom.model.SourceCitationContainer
 import java.util.Collections
 
 class FactsFragment : BaseFragment() {
@@ -42,7 +45,7 @@ class FactsFragment : BaseFragment() {
             person.eventsFacts.forEach { placeEvent(layout, it.writeTitle(), it.writeContent(), it) }
             U.findExtensions(person).forEach { placeEvent(layout, it.name, it.text, it.gedcomTag) }
             NoteUtil.placeNotes(layout, person)
-            U.placeSourceCitations(layout, person)
+            SourceCitationUtil.placeSourceCitations(layout, person)
             placeChangeDate(layout, person.change)
         }
     }
@@ -69,20 +72,9 @@ class FactsFragment : BaseFragment() {
         val textView = eventView.findViewById<TextView>(R.id.profileFact_text)
         if (text.isEmpty()) textView.visibility = View.GONE
         else textView.text = text
-        if (Global.settings.expert && obj is SourceCitationContainer) {
-            val sourceCitations = obj.sourceCitations
-            val sourceView = eventView.findViewById<TextView>(R.id.profileFact_sources)
-            if (sourceCitations.isNotEmpty()) {
-                sourceView.text = sourceCitations.size.toString()
-                sourceView.visibility = View.VISIBLE
-            }
-        }
         val otherLayout = eventView.findViewById<LinearLayout>(R.id.profileFact_other)
-        if (obj is NoteContainer) NoteUtil.placeNotes(otherLayout, obj, false)
-        eventView.setTag(R.id.tag_object, obj)
-        registerForContextMenu(eventView)
         if (obj is Name) {
-            U.placeMedia(otherLayout, obj as MediaContainer, false)
+            MediaUtil.placeMedia(otherLayout, obj as MediaContainer, false)
             eventView.setOnClickListener {
                 // If it is a complex name, suggests expert mode
                 if (!Global.settings.expert && isNameComplex(obj)) {
@@ -129,7 +121,7 @@ class FactsFragment : BaseFragment() {
                         }.show()
                 }
             } else { // All other events
-                U.placeMedia(otherLayout, obj as MediaContainer, false)
+                MediaUtil.placeMedia(otherLayout, obj as MediaContainer, false)
                 eventView.setOnClickListener {
                     Memory.add(obj)
                     startActivity(Intent(context, EventActivity::class.java))
@@ -141,6 +133,10 @@ class FactsFragment : BaseFragment() {
                 startActivity(Intent(context, ExtensionActivity::class.java))
             }
         }
+        if (obj is NoteContainer) NoteUtil.placeNotes(otherLayout, obj, Level.MEDIUM)
+        SourceCitationUtil.placeSourceCitations(otherLayout, obj as ExtensionContainer, Level.MEDIUM)
+        eventView.setTag(R.id.tag_object, obj)
+        registerForContextMenu(eventView)
     }
 
     // Context menu

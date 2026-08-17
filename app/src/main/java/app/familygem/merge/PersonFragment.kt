@@ -40,7 +40,7 @@ class PersonFragment : Fragment(R.layout.merge_person_fragment) {
         // Image
         val gedcom: Gedcom = if (position) model.secondGedcom else model.firstGedcom
         val treeId: Int = if (position) model.secondNum.value!! else model.firstNum
-        FileUtil.selectMainImage(person, binding.mergeImage, 0, gedcom, treeId)
+        FileUtil.showMainMedia(person, binding.mergeImage, gedcom, treeId)
         // Death ribbon
         binding.mergeMourn.visibility = if (U.isDead(person)) View.VISIBLE else View.GONE
         // Personal events

@@ -30,7 +30,7 @@ import app.familygem.constant.Extra
 import app.familygem.constant.Format
 import app.familygem.constant.Relation
 import app.familygem.profile.ProfileActivity
-import app.familygem.util.FileUtil.selectMainImage
+import app.familygem.util.FileUtil
 import app.familygem.util.PersonUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
@@ -170,7 +170,7 @@ class PersonsFragment : BaseFragment() {
             personView.findViewById<View>(R.id.person_border).setBackgroundResource(border)
 
             U.details(person, personView.findViewById(R.id.person_details))
-            selectMainImage(person, personView.findViewById(R.id.person_image))
+            FileUtil.showMainMedia(person, personView.findViewById(R.id.person_image))
             personView.findViewById<View>(R.id.person_mourning).visibility =
                 if (U.isDead(person)) View.VISIBLE else View.GONE
         }

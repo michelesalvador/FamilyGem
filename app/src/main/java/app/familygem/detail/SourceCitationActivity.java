@@ -11,8 +11,9 @@ import org.folg.gedcom.model.SourceCitationContainer;
 import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
-import app.familygem.U;
+import app.familygem.constant.Level;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.MediaUtil;
 import app.familygem.util.NoteUtil;
 import app.familygem.util.SourceUtil;
 
@@ -26,7 +27,7 @@ public class SourceCitationActivity extends DetailActivity {
         citation = (SourceCitation)cast(SourceCitation.class);
         if (citation.getSource(gc) != null) { // Citation of an existing source
             setTitle(R.string.source_citation);
-            SourceUtil.INSTANCE.placeSource(box, citation.getSource(gc), true);
+            SourceUtil.INSTANCE.placeSource(box, citation.getSource(gc), Level.DETAILED);
         } else if (citation.getRef() != null) { // Citation of a non-existent source (maybe deleted)
             setTitle(R.string.inexistent_source_citation); // TODO: maybe this can be removed
         } else { // Note-source
@@ -42,8 +43,8 @@ public class SourceCitationActivity extends DetailActivity {
         //    U.place(box, "Data Tag Contents", c.getDataTagContents().toString()); // COMBINED DATA TEXT
         //place("Ref", "Ref", false, false); // The ID of the source, useless here
         placeExtensions(citation);
+        MediaUtil.INSTANCE.placeMedia(box, citation);
         NoteUtil.INSTANCE.placeNotes(box, citation);
-        U.placeMedia(box, citation, true);
     }
 
     @Override

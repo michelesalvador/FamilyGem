@@ -44,12 +44,12 @@ import app.familygem.detail.MediaActivity
 import app.familygem.detail.NameActivity
 import app.familygem.detail.NoteActivity
 import app.familygem.main.MainActivity
-import app.familygem.main.SourcesFragment
 import app.familygem.util.FamilyUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.InsetsUtil
 import app.familygem.util.MediaUtil
 import app.familygem.util.NoteUtil
+import app.familygem.util.SourceUtil
 import app.familygem.util.TreeUtil.save
 import app.familygem.util.Util
 import app.familygem.util.delete
@@ -209,7 +209,7 @@ class ProfileActivity : AppCompatActivity() {
     /** Displays two images in the profile header: a regular one and the same blurred on background. */
     private fun setImages() {
         val imageView = findViewById<ImageView>(R.id.profile_image)
-        val media = FileUtil.selectMainImage(person!!, imageView)
+        val media = FileUtil.showMainMedia(person!!, imageView)
         // Same image blurred on background
         val backImageView = findViewById<ImageView>(R.id.profile_background)
         if (media != null) {
@@ -351,7 +351,7 @@ class ProfileActivity : AppCompatActivity() {
                         intent.putExtra(Choice.NOTE, true)
                         chooseLauncher.launch(intent)
                     }
-                    25 -> SourcesFragment.newSource(this, person)
+                    25 -> SourceUtil.createSource(this, person)
                     26 -> { // Link existing source
                         val intent = Intent(this, MainActivity::class.java)
                         intent.putExtra(Choice.SOURCE, true)

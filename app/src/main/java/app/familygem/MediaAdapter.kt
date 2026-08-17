@@ -10,14 +10,18 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import app.familygem.constant.Image
 import app.familygem.detail.MediaActivity
 import app.familygem.profile.ProfileActivity
 import app.familygem.util.FileUtil
 import app.familygem.util.MediaUtil
 import app.familygem.visitor.FindStack
 import app.familygem.visitor.MediaContainerList.MediaWrapper
+import com.google.android.flexbox.FlexboxLayoutManager
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Person
+import org.folg.gedcom.model.Source
+import org.folg.gedcom.model.SourceCitation
 
 /** Adapter for a media gallery made with RecyclerView. */
 class MediaAdapter(private val mediaList: List<MediaWrapper>, private val detail: Boolean) :
@@ -29,6 +33,14 @@ class MediaAdapter(private val mediaList: List<MediaWrapper>, private val detail
     }
 
     override fun onBindViewHolder(holder: MediaViewHolder, position: Int) {
+        holder.itemView.layoutParams.apply {
+            if (this is FlexboxLayoutManager.LayoutParams) {
+                marginStart = 0
+                marginEnd = if (detail || (position + 1) % 3 == 0) 0 else U.dpToPx(10F)
+                flexBasisPercent = if (detail) 0.485F else 0.29F
+                if (!detail) height = U.dpToPx(120F)
+            }
+        }
         holder.setupMedia(position)
     }
 
@@ -58,14 +70,11 @@ class MediaAdapter(private val mediaList: List<MediaWrapper>, private val detail
                     else -> activity.registerForContextMenu(view) // DetailActivity
                 }
             } else {
-                val params = RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, U.dpToPx(110F))
-                val margin = U.dpToPx(5F)
-                params.setMargins(margin, margin, margin, margin)
-                view.layoutParams = params
                 textView.visibility = View.GONE
                 numberView.visibility = View.GONE
             }
-            FileUtil.showImage(media, imageView, 0, view.findViewById(R.id.media_progress))
+            val options = if (container is Source || container is SourceCitation) Image.SOURCE else 0
+            FileUtil.showImage(media, imageView, options, view.findViewById(R.id.media_progress))
         }
 
         override fun onClick(view: View) {
@@ -83,9 +92,7 @@ class MediaAdapter(private val mediaList: List<MediaWrapper>, private val detail
         }
     }
 
-    /** RecyclerView to make media icons insensitive to clicks.
-     * TODO: however prevents scrolling in Detail
-     */
+    /** RecyclerView to make media icons insensitive to clicks. */
     class UnclickableRecyclerView(context: Context) : RecyclerView(context) {
         override fun onTouchEvent(event: MotionEvent): Boolean {
             return false // The grid does not intercept the click

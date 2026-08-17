@@ -30,6 +30,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import app.familygem.Global.context
 import app.familygem.constant.Extra
+import app.familygem.constant.Image
 import app.familygem.constant.Type
 import app.familygem.util.FileUtil
 import app.familygem.util.TreeUtil
@@ -59,7 +60,8 @@ class FileActivity : AppCompatActivity() {
     private lateinit var fileUri: FileUri
     private lateinit var wheel: ProgressBar
     private lateinit var treeDir: File
-    private var type: Type = Type.NONE
+    private var type = Type.NONE
+    private var placeholder = 0
     private var name = ""
     private lateinit var mediaList: List<MediaLeaders.MediaWrapper> // All media before copying or renaming one of them
 
@@ -74,6 +76,7 @@ class FileActivity : AppCompatActivity() {
         treeDir = getExternalFilesDir(Global.settings.openTree.toString())!!
         type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) intent.getSerializableExtra(Extra.TYPE, Type::class.java)!!
         else intent.getSerializableExtra(Extra.TYPE) as Type
+        placeholder = if (intent.getIntExtra(Extra.OPTIONS, 0) and Image.SOURCE != 0) R.drawable.source_image else R.drawable.person_image
         displayImage()
     }
 
@@ -86,7 +89,7 @@ class FileActivity : AppCompatActivity() {
             name = fileUri.name!!
             when (type) {
                 Type.DOCUMENT -> FileUtil.generateIcon(this, fileUri)
-                Type.PDF -> FileUtil.previewPdf(this, fileUri).getOrElse { R.drawable.image }
+                Type.PDF -> FileUtil.previewPdf(this, fileUri).getOrElse { placeholder }
                 else -> fileUri.file ?: fileUri.uri!!
             }
         } else if (type == Type.WEB_ANYTHING) {
@@ -98,10 +101,10 @@ class FileActivity : AppCompatActivity() {
             media.file
         } else {
             name = ""
-            R.drawable.image
+            placeholder
         }
         title = name
-        val builder = Glide.with(this).load(resource).placeholder(R.drawable.image).error(R.drawable.image)
+        val builder = Glide.with(this).load(resource).placeholder(placeholder).error(placeholder)
             .listener(object : RequestListener<Drawable> {
                 override fun onResourceReady(
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean

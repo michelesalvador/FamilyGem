@@ -185,7 +185,7 @@ public class ProcessActivity extends BaseActivity {
             title = U.properName(person);
             text = U.details(person, null);
             date = getDateTime(person.getChange());
-            FileUtil.INSTANCE.selectMainImage(person, imageView, 0, gedcom, treeId);
+            FileUtil.INSTANCE.showMainMedia(person, imageView, gedcom, treeId);
         } else if (obj instanceof Family) {
             Family family = (Family)obj;
             writeHeading(R.string.family, family.getId());

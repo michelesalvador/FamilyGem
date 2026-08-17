@@ -6,9 +6,8 @@ import android.content.Intent;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import androidx.cardview.widget.CardView;
 
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
@@ -16,10 +15,11 @@ import org.folg.gedcom.model.Source;
 import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
-import app.familygem.U;
-import app.familygem.main.SourcesFragment;
+import app.familygem.constant.Level;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.MediaUtil;
 import app.familygem.util.NoteUtil;
+import app.familygem.util.SourceUtil;
 import app.familygem.visitor.ListOfSourceCitations;
 
 public class SourceActivity extends DetailActivity {
@@ -31,8 +31,6 @@ public class SourceActivity extends DetailActivity {
         setTitle(R.string.source);
         source = (Source)cast(Source.class);
         placeSlug("SOUR", source.getId());
-        ListOfSourceCitations citations = new ListOfSourceCitations(gc, source.getId());
-        source.putExtension("citaz", citations.list.size()); // For SourcesFragment
         int multiLine = InputType.TYPE_TEXT_FLAG_MULTI_LINE;
         place(getString(R.string.abbreviation), "Abbreviation");
         place(getString(R.string.title), "Title", true, multiLine);
@@ -51,39 +49,39 @@ public class SourceActivity extends DetailActivity {
         placeExtensions(source);
 
         // Places the citation to the repository
-        if (source.getRepositoryRef() != null) {
-            View refView = LayoutInflater.from(this).inflate(R.layout.source_citation_layout, box, false);
+        final RepositoryRef repositoryRef = source.getRepositoryRef();
+        if (repositoryRef != null) {
+            View refView = LayoutInflater.from(this).inflate(R.layout.repository_citation_layout, box, false);
             box.addView(refView);
-            refView.setBackgroundColor(getResources().getColor(R.color.repository_citation));
-            final RepositoryRef repositoryRef = source.getRepositoryRef();
+            TextView repoView = refView.findViewById(R.id.repositoryCitation_repo);
             if (repositoryRef.getRepository(gc) != null) {
-                ((TextView)refView.findViewById(R.id.source_text)).setText(repositoryRef.getRepository(gc).getName());
-                ((CardView)refView.findViewById(R.id.sourceCitation)).setCardBackgroundColor(getResources().getColor(R.color.repository));
-            } else refView.findViewById(R.id.sourceCitation).setVisibility(View.GONE);
+                repoView.setText(repositoryRef.getRepository(gc).getName());
+            } else repoView.setVisibility(View.GONE);
             String txt = "";
             if (repositoryRef.getValue() != null) txt += repositoryRef.getValue() + "\n";
             if (repositoryRef.getCallNumber() != null) txt += repositoryRef.getCallNumber() + "\n";
             if (repositoryRef.getMediaType() != null) txt += repositoryRef.getMediaType() + "\n";
-            TextView textView = refView.findViewById(R.id.sourceCitation_text);
+            TextView textView = refView.findViewById(R.id.repositoryCitation_text);
             if (txt.isEmpty()) textView.setVisibility(View.GONE);
             else textView.setText(txt.substring(0, txt.length() - 1));
-            NoteUtil.INSTANCE.placeNotes(refView.findViewById(R.id.sourceCitation_box), repositoryRef, false);
-            refView.setOnClickListener(v -> {
+            LinearLayout repoCitationView = refView.findViewById(R.id.repositoryCitation_citation);
+            NoteUtil.INSTANCE.placeNotes(repoCitationView, repositoryRef, Level.MEDIUM);
+            repoCitationView.setOnClickListener(v -> {
                 Memory.add(repositoryRef);
                 startActivity(new Intent(SourceActivity.this, RepositoryRefActivity.class));
             });
-            registerForContextMenu(refView);
-            refView.setTag(R.id.tag_object, repositoryRef); // For the context menu
+            registerForContextMenu(repoCitationView);
+            repoCitationView.setTag(R.id.tag_object, repositoryRef); // For the context menu
         }
+        MediaUtil.INSTANCE.placeMedia(box, source);
         NoteUtil.INSTANCE.placeNotes(box, source);
-        U.placeMedia(box, source, true);
         ChangeUtil.INSTANCE.placeChangeDate(box, source.getChange());
-        if (!citations.list.isEmpty())
-            placeCabinet(citations.getProgenitors(), R.string.cited_by);
+        ListOfSourceCitations citations = new ListOfSourceCitations(gc, source.getId());
+        if (!citations.list.isEmpty()) placeCabinet(citations.getProgenitors(), R.string.cited_by);
     }
 
     @Override
     public void delete() {
-        ChangeUtil.INSTANCE.updateChangeDate(SourcesFragment.deleteSource(source));
+        ChangeUtil.INSTANCE.updateChangeDate(SourceUtil.INSTANCE.deleteSource(source));
     }
 }

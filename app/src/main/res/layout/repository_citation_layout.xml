@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/AppTheme.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/repository" />
+
+    <LinearLayout
+        android:id="@+id/repositoryCitation_citation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@color/repository_citation"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/repositoryCitation_repo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/repository"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:textSize="15sp"
+            tools:text="Name of the repository\nSecond line.\nAnother long line that reaches the border on the right and wraps." />
+
+        <TextView
+            android:id="@+id/repositoryCitation_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="10"
+            tools:text="Repository description\nSecond line.\nAnother long line that reaches the border on the right.\nMax 10 lines." />
+    </LinearLayout>
+</LinearLayout>

@@ -17,7 +17,7 @@ import java.util.Set;
 public class ListOfSourceCitations extends TotalVisitor {
 
     public List<Triplet> list = new ArrayList<>();
-    private String id; // ID of the source
+    private final String id; // ID of the source
     private Object leader;
 
     public ListOfSourceCitations(Gedcom gedcom, String id) {

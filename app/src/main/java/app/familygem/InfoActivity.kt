@@ -13,6 +13,7 @@ import androidx.core.text.TextUtilsCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import app.familygem.constant.Extra
+import app.familygem.constant.Level
 import app.familygem.databinding.InfoActivityBinding
 import app.familygem.util.NoteUtil
 import app.familygem.util.TreeUtil
@@ -215,7 +216,7 @@ class InfoActivity : BaseActivity(R.string.info) {
                     withContext(Main) { recreate() }
                 }
             }
-            NoteUtil.placeNotes(layout, h, false, gedcom!!) // TODO: improve note managing: detailed = true etc.
+            NoteUtil.placeNotes(layout, h, Level.MEDIUM, gedcom!!) // TODO: improve note managing: level = HIGH etc.
         }
         headerButton.visibility = View.VISIBLE
         // GEDCOM extensions: zero level non-standard tags

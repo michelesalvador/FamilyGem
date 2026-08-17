@@ -9,6 +9,7 @@ import app.familygem.Global
 import app.familygem.Memory
 import app.familygem.R
 import app.familygem.U
+import app.familygem.constant.Level
 import app.familygem.detail.ChangeActivity
 import org.folg.gedcom.model.Change
 import org.folg.gedcom.model.DateTime
@@ -63,7 +64,7 @@ object ChangeUtil {
             }
             val otherBox = changeView.findViewById<LinearLayout>(R.id.changeDate_box)
             U.findExtensions(change).forEach { U.place(otherBox, it.name, it.text) }
-            NoteUtil.placeNotes(otherBox, change, false)
+            NoteUtil.placeNotes(otherBox, change, Level.MEDIUM)
             changeView.setOnClickListener {
                 Memory.add(change)
                 layout.context.startActivity(Intent(layout.context, ChangeActivity::class.java))

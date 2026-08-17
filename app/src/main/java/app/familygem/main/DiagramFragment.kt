@@ -61,6 +61,7 @@ import app.familygem.util.delete
 import app.familygem.util.getFamilyLabels
 import app.familygem.util.getSpouseRefs
 import app.familygem.util.sex
+import app.familygem.visitor.MediaContainerList
 import graph.gedcom.Bond
 import graph.gedcom.CurveLine
 import graph.gedcom.FamilyNode
@@ -77,7 +78,6 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.folg.gedcom.model.Family
-import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Person
 import java.io.File
 import java.io.FileOutputStream
@@ -103,7 +103,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
     private val leftToRight = TextUtilsCompat.getLayoutDirectionFromLocale(Locale.getDefault()) == View.LAYOUT_DIRECTION_LTR
     private var diagramJob: Job? = null
     private val graphicNodes: MutableList<GraphicMetric> = ArrayList()
-    private val loadingImages: MutableList<Pair<Media, ImageView>> = ArrayList()
+    private val loadingImages: MutableList<Pair<MediaContainerList.MediaWrapper, ImageView>> = ArrayList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -239,7 +239,7 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         withContext(Dispatchers.Main) {
             // Loads images
             loadingImages.forEach {
-                FileUtil.showImage(it.first, it.second)
+                FileUtil.showImage(it.first.media, it.second, it.first.options)
             }
             // To stop waiting for images to be loaded
             binding.diagramWheel.root.setOnClickListener {
@@ -449,9 +449,9 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 background.setBackgroundResource(R.drawable.person_background_partner)
             }
             if (personNode.isFulcrumNode) fulcrumView = this
+            val wrapper = FileUtil.selectMainMedia(person)
             val imageView = findViewById<ImageView>(R.id.card_picture)
-            val media = FileUtil.selectMainImage(person, imageView, show = false)
-            if (media != null) loadingImages.add(Pair(media, imageView))
+            if (wrapper != null) loadingImages.add(Pair(wrapper, imageView)) else imageView.visibility = GONE
             findViewById<TextView>(R.id.card_name).text = U.properName(person, true)
             val titleView = findViewById<TextView>(R.id.card_title)
             val title = PersonUtil.writeTitles(person)

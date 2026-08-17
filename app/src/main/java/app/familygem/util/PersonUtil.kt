@@ -116,7 +116,7 @@ object PersonUtil {
     fun placeSmallPerson(layout: LinearLayout, person: Person): View {
         val personView = LayoutInflater.from(layout.context).inflate(R.layout.small_person_layout, layout, false)
         layout.addView(personView)
-        FileUtil.selectMainImage(person, personView.findViewById(R.id.smallPerson_image))
+        FileUtil.showMainMedia(person, personView.findViewById(R.id.smallPerson_image))
         personView.findViewById<TextView>(R.id.smallPerson_name).text = U.properName(person)
         val dates = U.twoDates(person, false)
         val detailView = personView.findViewById<TextView>(R.id.smallPerson_detail)

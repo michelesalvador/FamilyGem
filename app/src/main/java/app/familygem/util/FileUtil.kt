@@ -42,7 +42,7 @@ import app.familygem.constant.Type
 import app.familygem.detail.MediaActivity
 import app.familygem.main.MainActivity
 import app.familygem.profile.ProfileActivity
-import app.familygem.visitor.MediaList
+import app.familygem.visitor.MediaContainerList
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.DataSource
@@ -236,28 +236,27 @@ object FileUtil {
         else context.startActivity(intent)
     }
 
+    /** Receives a Person and returns the primary media from which to get the image, or the first media, or null. */
+    fun selectMainMedia(person: Person, gedcom: Gedcom = Global.gc): MediaContainerList.MediaWrapper? {
+        val mediaList = MediaContainerList(gedcom, true)
+        person.accept(mediaList)
+        return mediaList.list.firstOrNull { it.media.primary == "Y" } ?: mediaList.list.firstOrNull()
+    }
+
     /**
-     * Receives a Person and returns the primary media from which to get the image, or the first media, or null.
+     * Displays the main media of a person.
      * @param imageView Where the image will appear
-     * @param options Bitwise selection of [Image] constants
-     * @param show Calls showImage() or not
      */
     @JvmOverloads
-    fun selectMainImage(
-        person: Person, imageView: ImageView, options: Int = 0,
-        gedcom: Gedcom = Global.gc, treeId: Int = Global.settings.openTree, show: Boolean = true
-    ): Media? {
-        val mediaList = MediaList(gedcom)
-        person.accept(mediaList)
-        // Looks for the "primary" media, or the first one
-        val media = mediaList.list.firstOrNull { it.primary != null && it.primary == "Y" } ?: mediaList.list.firstOrNull()
-        if (media != null) {
-            if (show) showImage(media, imageView, options, null, null, treeId)
+    fun showMainMedia(person: Person, imageView: ImageView, gedcom: Gedcom = Global.gc, treeId: Int = Global.settings.openTree): Media? {
+        val wrapper = selectMainMedia(person, gedcom)
+        if (wrapper != null) {
+            showImage(wrapper.media, imageView, wrapper.options, null, null, treeId)
             imageView.visibility = View.VISIBLE
         } else {
             imageView.visibility = View.GONE
         }
-        return media
+        return wrapper?.media
     }
 
     /**
@@ -289,12 +288,13 @@ object FileUtil {
         progressWheel?.visibility = View.VISIBLE
         val fileUri = oldFileUri ?: FileUri(imageView.context, media, treeId)
         val glide = Glide.with(imageView)
+        val placeholder = if (options and Image.SOURCE != 0) R.drawable.source_image else R.drawable.person_image
         val coroutineScope = if (imageView.context is AppCompatActivity) (imageView.context as AppCompatActivity).lifecycleScope else GlobalScope
         if (fileUri.exists()) {
             previewPdf(imageView.context, fileUri).onSuccess { bitmap ->
                 val builder = glide.load(bitmap)
                 applyOptions(builder)
-                builder.placeholder(R.drawable.image).into(imageView)
+                builder.placeholder(placeholder).into(imageView)
                 completeDisplay(Type.PDF)
                 return fileUri
             }
@@ -303,7 +303,7 @@ object FileUtil {
             if (Global.croppedPaths.contains(fileUri.path)) { // A cropped image needs to be reloaded not from cache
                 builder.signature(ObjectKey(Global.croppedPaths[fileUri.path]!!))
             }
-            builder.placeholder(R.drawable.image).listener(object : RequestListener<Drawable> {
+            builder.placeholder(placeholder).listener(object : RequestListener<Drawable> {
                 override fun onResourceReady(
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
                 ): Boolean {
@@ -318,7 +318,7 @@ object FileUtil {
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                     // A local file with no preview
                     coroutineScope.launch(Dispatchers.Main) {
-                        glide.load(generateIcon(imageView.context, fileUri)).placeholder(R.drawable.image).into(imageView)
+                        glide.load(generateIcon(imageView.context, fileUri)).placeholder(placeholder).into(imageView)
                     }
                     completeDisplay(Type.DOCUMENT)
                     return false
@@ -328,7 +328,7 @@ object FileUtil {
             // Maybe is an image online
             val builder = glide.load(media.file)
             applyOptions(builder)
-            builder.placeholder(R.drawable.image).listener(object : RequestListener<Drawable> {
+            builder.placeholder(placeholder).listener(object : RequestListener<Drawable> {
                 override fun onResourceReady(
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
                 ): Boolean {
@@ -342,7 +342,7 @@ object FileUtil {
                             val connection = URL(media.file).openConnection() as HttpURLConnection
                             if (connection.responseCode == HttpURLConnection.HTTP_OK) {
                                 withContext(Dispatchers.Main) {
-                                    glide.load(generateIcon(imageView.context, fileUri)).placeholder(R.drawable.image).into(imageView)
+                                    glide.load(generateIcon(imageView.context, fileUri)).placeholder(placeholder).into(imageView)
                                     completeDisplay(Type.WEB_ANYTHING)
                                 }
                             } else throw Exception()
@@ -354,7 +354,7 @@ object FileUtil {
                 }
             }).into(imageView)
         } else { // Media file field is null or blank
-            glide.load(R.drawable.image).into(imageView)
+            glide.load(placeholder).into(imageView)
             completeDisplay(Type.PLACEHOLDER)
         }
         return fileUri

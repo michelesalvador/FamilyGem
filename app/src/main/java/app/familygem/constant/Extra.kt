@@ -15,6 +15,7 @@ object Extra {
     const val ID = "$PREFIX.id"
     const val MEDIA_ID = "$PREFIX.mediaId"
     const val NOTE_ID = "$PREFIX.noteId"
+    const val OPTIONS = "$PREFIX.options"
     const val PAGE = "$PREFIX.page"
     const val PERSON_ID = "$PREFIX.personId"
     const val POSITION = "$PREFIX.position"

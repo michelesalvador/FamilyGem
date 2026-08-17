@@ -15,15 +15,19 @@ import app.familygem.Memory
 import app.familygem.R
 import app.familygem.constant.Destination
 import app.familygem.constant.Extra
+import app.familygem.constant.Image
 import app.familygem.constant.Type
 import app.familygem.util.ChangeUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.MediaUtil
 import app.familygem.util.NoteUtil
 import app.familygem.util.TreeUtil
+import app.familygem.visitor.MediaContainers
 import app.familygem.visitor.MediaReferences
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.MediaContainer
+import org.folg.gedcom.model.Source
+import org.folg.gedcom.model.SourceCitation
 
 class MediaActivity : DetailActivity() {
 
@@ -86,7 +90,14 @@ class MediaActivity : DetailActivity() {
         imageLayout = LayoutInflater.from(this).inflate(R.layout.image_layout, box, false)
         box.addView(imageLayout, position)
         val imageView = imageLayout.findViewById<ImageView>(R.id.image_picture)
-        fileUri = FileUtil.showImage(media, imageView, 0, imageLayout.findViewById(R.id.image_progress))
+        val insideSource = if (media.id != null) {
+            val container = MediaContainers(Global.gc, media).firstContainer()
+            container is Source || container is SourceCitation
+        } else {
+            Memory.getLeaderObject() is Source || Memory.getSecondToLastObject() is SourceCitation
+        }
+        val options = if (insideSource) Image.SOURCE else 0
+        fileUri = FileUtil.showImage(media, imageView, options, imageLayout.findViewById(R.id.image_progress))
         imageLayout.setOnClickListener {
             when (val fileType = imageView.getTag(R.id.tag_file_type) as Type) {
                 Type.NONE, Type.PLACEHOLDER -> { // Placeholder instead of image, the media is loading or doesn't exist
@@ -94,7 +105,8 @@ class MediaActivity : DetailActivity() {
                 }
                 else -> { // Opens the file in FileActivity
                     Global.editedMedia = `object` as Media
-                    val intent = Intent(this@MediaActivity, FileActivity::class.java).putExtra(Extra.TYPE, fileType)
+                    val intent = Intent(this@MediaActivity, FileActivity::class.java)
+                        .putExtra(Extra.TYPE, fileType).putExtra(Extra.OPTIONS, options)
                     startActivity(intent)
                 }
             }

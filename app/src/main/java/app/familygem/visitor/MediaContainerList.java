@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 import app.familygem.FileUri;
+import app.familygem.constant.Image;
 import app.familygem.profile.MediaFragment;
 
 /**
@@ -97,6 +98,10 @@ public class MediaContainerList extends Visitor {
         public MediaWrapper(Media media, ExtensionContainer container) {
             this.media = media;
             this.container = container;
+        }
+
+        public int getOptions() {
+            return (container instanceof Source || container instanceof SourceCitation) ? Image.SOURCE : 0;
         }
 
         @Override

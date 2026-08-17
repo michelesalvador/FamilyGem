@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:visibility="gone"
-                app:srcCompat="@drawable/image" />
+                app:srcCompat="@drawable/person_image" />
 
             <TextView
                 android:id="@+id/compare_title"

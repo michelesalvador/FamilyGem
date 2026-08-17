@@ -32,7 +32,7 @@
                 android:layout_height="150dp"
                 android:layout_gravity="center_horizontal"
                 android:contentDescription="@string/file"
-                tools:src="@drawable/image" />
+                tools:src="@drawable/person_image" />
 
             <TextView
                 android:id="@+id/profile_id"

@@ -12,55 +12,49 @@ import app.familygem.main.SourcesFragment;
 
 /**
  * Counter of citations of a source.
- * It would be used to replace {@link SourcesFragment#quanteCitazioni}.
- * It's more accurate in counting, but is four times slower.
+ * It's equivalent to {@link SourcesFragment#countSourceCitations()} but is probably slower.
  */
 public class CountSourceCitations extends Visitor {
 
     public int count = 0;
-    String id;
+    private final String id;
 
-    CountSourceCitations(String id) {
+    public CountSourceCitations(String id) {
         this.id = id;
     }
 
     @Override
-    public boolean visit(Person p) {
-        for (SourceCitation c : p.getSourceCitations())
-            if (c.getRef() != null) // Required because the note-sources have no reference to the source
-                if (c.getRef().equals(id)) count++;
+    public boolean visit(Person person) {
+        for (SourceCitation c : person.getSourceCitations())
+            if (c.getRef() != null && c.getRef().equals(id)) count++;
         return true;
     }
 
     @Override
-    public boolean visit(Family f) {
-        for (SourceCitation c : f.getSourceCitations())
-            if (c.getRef() != null)
-                if (c.getRef().equals(id)) count++;
+    public boolean visit(Family family) {
+        for (SourceCitation c : family.getSourceCitations())
+            if (c.getRef() != null && c.getRef().equals(id)) count++;
         return true;
     }
 
     @Override
-    public boolean visit(Name n) {
-        for (SourceCitation c : n.getSourceCitations())
-            if (c.getRef() != null)
-                if (c.getRef().equals(id)) count++;
+    public boolean visit(Name name) {
+        for (SourceCitation c : name.getSourceCitations())
+            if (c.getRef() != null && c.getRef().equals(id)) count++;
         return true;
     }
 
     @Override
-    public boolean visit(EventFact e) {
-        for (SourceCitation c : e.getSourceCitations())
-            if (c.getRef() != null)
-                if (c.getRef().equals(id)) count++;
+    public boolean visit(EventFact fact) {
+        for (SourceCitation c : fact.getSourceCitations())
+            if (c.getRef() != null && c.getRef().equals(id)) count++;
         return true;
     }
 
     @Override
-    public boolean visit(Note n) {
-        for (SourceCitation c : n.getSourceCitations())
-            if (c.getRef() != null)
-                if (c.getRef().equals(id)) count++;
+    public boolean visit(Note note) {
+        for (SourceCitation c : note.getSourceCitations())
+            if (c.getRef() != null && c.getRef().equals(id)) count++;
         return true;
     }
 }

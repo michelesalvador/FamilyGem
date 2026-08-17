@@ -2,7 +2,9 @@ package app.familygem.detail;
 
 import static app.familygem.Global.gc;
 
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import org.folg.gedcom.model.RepositoryRef;
 import org.folg.gedcom.model.Source;
@@ -24,6 +26,9 @@ public class RepositoryRefActivity extends DetailActivity {
         repoRef = (RepositoryRef)cast(RepositoryRef.class);
         if (repoRef.getRepository(gc) != null) { // An actual repository is referenced
             setTitle(R.string.repository_citation);
+            TextView titleView = (TextView)LayoutInflater.from(this).inflate(R.layout.notes_title, box, false);
+            titleView.setText(R.string.repository);
+            box.addView(titleView);
             View repositoryCard = RepositoryUtil.INSTANCE.placeRepository(box, repoRef.getRepository(gc));
             repositoryCard.setTag(R.id.tag_object, repoRef.getRepository(gc)); // For the context menu TODO: still needed?
             registerForContextMenu(repositoryCard);

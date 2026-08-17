@@ -1,14 +1,25 @@
 package app.familygem.util
 
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import app.familygem.Global
+import app.familygem.MediaAdapter
+import app.familygem.MediaAdapter.UnclickableRecyclerView
 import app.familygem.Memory
+import app.familygem.R
 import app.familygem.U
 import app.familygem.visitor.FindStack
+import app.familygem.visitor.MediaContainerList
 import app.familygem.visitor.MediaContainers
 import app.familygem.visitor.MediaList
 import app.familygem.visitor.MediaReferences
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import com.google.gson.Gson
 import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.MediaContainer
@@ -39,11 +50,39 @@ object MediaUtil {
     }
 
     /**
+     * Lists all media of a container object and adds them to the layout.
+     * @param detailed More or less details displayed
+     */
+    @JvmOverloads
+    fun placeMedia(layout: LinearLayout, container: MediaContainer, detailed: Boolean = true) {
+        val allMedia = container.getAllMedia(Global.gc)
+        if (allMedia.isNotEmpty()) {
+            if (detailed) {
+                val titleView = LayoutInflater.from(layout.context).inflate(R.layout.notes_title, layout, false) as TextView
+                titleView.setText(R.string.media)
+                layout.addView(titleView)
+            }
+            val recyclerView = if (detailed) RecyclerView(layout.context) else UnclickableRecyclerView(layout.context)
+            recyclerView.isNestedScrollingEnabled = false
+            val layoutManager = FlexboxLayoutManager(layout.context).apply {
+                flexDirection = FlexDirection.ROW
+                flexWrap = FlexWrap.WRAP
+                justifyContent = if (detailed) JustifyContent.SPACE_BETWEEN else JustifyContent.FLEX_START
+            }
+            recyclerView.layoutManager = layoutManager
+            val mediaList = allMedia.map { MediaContainerList.MediaWrapper(it, container) }
+            val adapter = MediaAdapter(mediaList, detailed)
+            recyclerView.adapter = adapter
+            layout.addView(recyclerView)
+        }
+    }
+
+    /**
      * Converts the given shared media to simple media in all its containers.
      * @return An array of the modified leader objects
      */
     fun makeSimpleMedia(media: Media): Array<Any> {
-        val mediaContainers = MediaContainers(Global.gc, media, null)
+        val mediaContainers = MediaContainers(Global.gc, media)
         val mediaReferences = MediaReferences(Global.gc, media, false)
         val mediaId = media.id // We are going to null it
         Global.gc.media.remove(media)

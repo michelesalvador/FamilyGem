@@ -11,10 +11,11 @@ import java.util.Arrays;
 import app.familygem.DetailActivity;
 import app.familygem.Memory;
 import app.familygem.R;
-import app.familygem.U;
 import app.familygem.util.ChangeUtil;
 import app.familygem.util.EventUtilKt;
+import app.familygem.util.MediaUtil;
 import app.familygem.util.NoteUtil;
+import app.familygem.util.SourceCitationUtil;
 
 public class EventActivity extends DetailActivity {
 
@@ -51,9 +52,9 @@ public class EventActivity extends DetailActivity {
         place(getString(R.string.user_id), "Uid", false, 0);
         // Other methods are "WwwTag", "EmailTag", "UidTag"
         placeExtensions(event);
+        MediaUtil.INSTANCE.placeMedia(box, event);
         NoteUtil.INSTANCE.placeNotes(box, event);
-        U.placeMedia(box, event, true);
-        U.placeSourceCitations(box, event);
+        SourceCitationUtil.INSTANCE.placeSourceCitations(box, event);
     }
 
     @Override

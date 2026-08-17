@@ -49,16 +49,16 @@ class GalleryAdapter(private val mediaList: List<MediaWrapper>) : RecyclerView.A
         private val numberView: TextView = view.findViewById(R.id.media_number)
 
         fun setupMedia(position: Int) {
-            media = selectedMedia[position].media
+            val wrapper = selectedMedia[position]
+            media = wrapper.media
             MediaUtil.furnishMedia(media, textView, numberView)
             view.setOnClickListener(this)
             view.setTag(R.id.tag_object, media)
-            // Register context menu
             val activity = view.context as AppCompatActivity
             activity.supportFragmentManager.findFragmentById(R.id.main_fragment)!!.registerForContextMenu(view)
-            if (selectedMedia[position].fileUri == null)
-                selectedMedia[position].fileUri = FileUtil.showImage(media, imageView, 0, view.findViewById(R.id.media_progress), null)
-            else FileUtil.showImage(media, imageView, 0, view.findViewById(R.id.media_progress), selectedMedia[position].fileUri)
+            if (wrapper.fileUri == null)
+                wrapper.fileUri = FileUtil.showImage(media, imageView, wrapper.getOptions(), view.findViewById(R.id.media_progress))
+            else FileUtil.showImage(media, imageView, wrapper.getOptions(), view.findViewById(R.id.media_progress), wrapper.fileUri)
         }
 
         override fun onClick(view: View) {

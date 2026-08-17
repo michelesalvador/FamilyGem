@@ -11,6 +11,7 @@ import app.familygem.Memory;
 import app.familygem.R;
 import app.familygem.U;
 import app.familygem.util.ChangeUtil;
+import app.familygem.util.SourceCitationUtil;
 import app.familygem.visitor.NoteReferences;
 
 public class NoteActivity extends DetailActivity {
@@ -30,7 +31,7 @@ public class NoteActivity extends DetailActivity {
         place(getString(R.string.text), "Value", true, InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         place(getString(R.string.rin), "Rin", false, 0);
         placeExtensions(note);
-        U.placeSourceCitations(box, note);
+        SourceCitationUtil.INSTANCE.placeSourceCitations(box, note);
         ChangeUtil.INSTANCE.placeChangeDate(box, note.getChange());
         if (note.getId() != null) {
             NoteReferences noteRefs = new NoteReferences(Global.gc, note.getId(), false);
