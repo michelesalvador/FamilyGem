@@ -46,7 +46,6 @@ import org.folg.gedcom.parser.ModelParser
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileReader
 import java.io.InputStream
 import java.io.PrintWriter
@@ -54,6 +53,7 @@ import java.util.Locale
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
+import kotlin.time.Duration
 
 fun Tree.getBasicData(): String {
     val builder = StringBuilder()
@@ -400,7 +400,8 @@ object TreeUtil {
         }
     }
 
-    /** Launches [downloadSharedTree] in a coroutine, managing the results.
+    /**
+     * Launches [TreeUtil.downloadSharedTree] in a coroutine, managing the results.
      * @param onRefresh Action to display results
      * @param onReset Action to restore interface (usually hiding progress view)
      */
@@ -444,7 +445,7 @@ object TreeUtil {
     }
 
     /**
-     * Launches [unzipTree] in a coroutine.
+     * Launches [TreeUtil.unzipTree] in a coroutine.
      * @param onRefresh Displays the results (maybe reloading views)
      * @param onReset Restores interface (usually hiding progress view)
      */
@@ -488,8 +489,9 @@ object TreeUtil {
                 }
             }
             // GET request to download the file
+            val downloadClient = Global.okHttpClient.newBuilder().readTimeout(Duration.ZERO).build()
             val request = Request.Builder().url(url).build()
-            Global.okHttpClient.newCall(request).execute().use { response ->
+            downloadClient.newCall(request).execute().use { response ->
                 val body = response.body
                 if (!response.isSuccessful) {
                     val jsonResponse = JSONObject(body.string())
