@@ -112,7 +112,7 @@ class ProfileActivity : AppCompatActivity() {
             if (savedInstanceState == null) profileTabs.getTabAt(intent.getIntExtra(Extra.PAGE, 1))?.select()
 
             // The person displayed
-            person = Memory.getLeaderObject() as Person?
+            person = Memory.getLeaderObject() as? Person
             if (person == null) {
                 goBack()
                 return
@@ -199,7 +199,7 @@ class ProfileActivity : AppCompatActivity() {
         super.onResume()
         // Updates contents when coming back with onBackPressed()
         if (isActivityRestarting) {
-            person = Memory.getLeaderObject() as Person?
+            person = Memory.getLeaderObject() as? Person
             if (person == null) goBack() // Coming back to the profile of a person who has been deleted
             else if (Global.edited) refresh()
             isActivityRestarting = false

@@ -455,9 +455,9 @@ public abstract class DetailActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         // Updates contents when coming back with onBackPressed()
-        if (isActivityRestarting && Global.edited) {
+        if (isActivityRestarting) {
             if (Memory.getLastObject() == null) goBack(); // Maybe object was deleted in another activity
-            else refresh();
+            else if (Global.edited) refresh();
             isActivityRestarting = false;
         }
     }
@@ -917,9 +917,9 @@ public abstract class DetailActivity extends BaseActivity {
 		/*if( Memory.getStepStack().size() == 1 ) {
 			refresh(); // TODO: The record change date should be updated, but perhaps without reloading everything
 		}*/
-        // Refreshes the image in MediaActivity if the File path has been edited
+        // Refreshes MediaActivity if the File path has been edited
         if (this instanceof MediaActivity && pieceObject.equals("File"))
-            ((MediaActivity)this).updateImage();
+            refresh();
             // If a submitter has been edited, asks to reference him in the Gedcom header
         else if (object instanceof Submitter)
             U.autorePrincipale(this, ((Submitter)object).getId());

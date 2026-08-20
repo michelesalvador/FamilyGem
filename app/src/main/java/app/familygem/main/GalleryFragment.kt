@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import app.familygem.FileUri
 import app.familygem.Global
 import app.familygem.MediaFoldersActivity
+import app.familygem.Memory
 import app.familygem.ProgressView
 import app.familygem.R
 import app.familygem.constant.Choice
@@ -68,6 +69,7 @@ class GalleryFragment : BaseFragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.setHasFixedSize(true)
         view.findViewById<FloatingActionButton>(R.id.fab).setOnClickListener {
+            Memory.clear() // In some case Memory is not empty, but we need it is
             FileUtil.displayFileChooser(requireContext(), sharedMediaLauncher, Destination.SHARED_MEDIA)
         }
         sharedMediaOnly = requireActivity().intent.getBooleanExtra(Choice.MEDIA, false)

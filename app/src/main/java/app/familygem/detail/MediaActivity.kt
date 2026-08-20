@@ -39,16 +39,17 @@ class MediaActivity : DetailActivity() {
         // Creates new empty media
         val destination =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) intent.getSerializableExtra(Extra.DESTINATION, Destination::class.java)
-            else intent.getSerializableExtra(Extra.DESTINATION) as Destination?
+            else intent.getSerializableExtra(Extra.DESTINATION) as? Destination
         if (destination != null) {
             val media: Media
+            val container = Memory.getLastObject() as? MediaContainer
             if (destination == Destination.SIMPLE_MEDIA) { // Simple media
                 media = Media()
                 media.fileTag = "FILE"
-                (Memory.getLastObject() as MediaContainer).addMedia(media)
+                container?.addMedia(media)
                 Memory.add(media)
             } else { // Shared media
-                media = MediaUtil.newSharedMedia(Memory.getLeaderObject() as MediaContainer?)
+                media = MediaUtil.newSharedMedia(container)
                 Memory.setLeader(media)
             }
             media.file = ""
@@ -113,12 +114,6 @@ class MediaActivity : DetailActivity() {
         }
         imageLayout.setTag(R.id.tag_object, 43614 /* TODO: magic number */) // For the image context menu
         registerForContextMenu(imageLayout)
-    }
-
-    fun updateImage() {
-        val position = box.indexOfChild(imageLayout)
-        box.removeView(imageLayout)
-        displayMedia(media, position)
     }
 
     override fun delete() {

@@ -223,6 +223,13 @@ public class Memory {
         new FindStack(Global.gc, object, true);
     }
 
+    /**
+     * Removes all stacks.
+     */
+    public static void clear() {
+        memory.list.clear();
+    }
+
     public static class StepStack extends Stack<Step> {
         @NonNull
         @Override
