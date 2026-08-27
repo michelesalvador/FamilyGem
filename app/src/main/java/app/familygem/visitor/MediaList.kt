@@ -66,7 +66,7 @@ class MediaList(private val gedcom: Gedcom?, private val request: Request = Requ
     fun getRandomPreviewMedia(): Media? {
         list.shuffle()
         val extensions = arrayOf(
-            "jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif", "mp4", "mpg", "mov", "3gp", "webm", "mkv", "pdf"
+            "jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif", "dng", "mp4", "mpg", "mov", "3gp", "webm", "mkv", "pdf"
         )
         return list.take(10).firstOrNull {
             val fileUri = FileUri(Global.context, it)
