@@ -25,7 +25,6 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.util.Pair;
@@ -112,19 +111,16 @@ public abstract class DetailActivity extends BaseActivity {
     protected Person oneFamilyMember; // A family member used to hide in the FAB 'Link person'
     private DateEditorLayout dateEditor;
     private FloatingActionButton fabView;
-    private ActionBar actionBar;
-    private View editBar;
+    private EditText editText;
+    private boolean editMode; // We are editing an editText
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContent(getLayoutInflater().inflate(R.layout.detail_activity, null));
+        setSupportActionBar(bar);
         box = findViewById(R.id.detail_box);
         fabView = getVisibleFab();
-
-        // Action bar
-        setSupportActionBar(bar);
-        actionBar = getSupportActionBar();
 
         // List of other Family events
         String[] otherEventTags = {"ANUL", "CENS", "DIVF", "ENGA", "MARB", "MARC", "MARL", "MARS", "RESI", "EVEN", "NCHI"};
@@ -327,7 +323,7 @@ public abstract class DetailActivity extends BaseActivity {
                 edit(piece);
             }
             // TODO: open new Address for editing
-        } else if (id == 101) { // TODO: code smell: use of magic numbers
+        } else if (id == 101) {
             RepositoriesFragment.newRepository(this, (Source)object);
         } else if (id == 102) {
             Intent intent = new Intent(this, MainActivity.class);
@@ -811,9 +807,6 @@ public abstract class DetailActivity extends BaseActivity {
         return tit;
     }
 
-    EditText editText;
-    int whichMenu = 1; // Used to hide the options menu when entering editor mode TODO: replace with a boolean as 'editMode'
-
     void edit(View pieceView) {
         concludeActivePieces();
         TextView textView = pieceView.findViewById(R.id.event_text);
@@ -872,7 +865,6 @@ public abstract class DetailActivity extends BaseActivity {
                 input.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
             }, 100);
         }
-
         // Intercepts the 'Done' and 'Next' on the keyboard
         editText.setOnEditorActionListener((view, actionId, keyEvent) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -888,21 +880,14 @@ public abstract class DetailActivity extends BaseActivity {
             }
             return false;
         });
-
-        // Custom ActionBar
-        actionBar.setDisplayHomeAsUpEnabled(false); // Hides the back arrow
-        actionBar.setDisplayShowTitleEnabled(false); // Hides the title
-        whichMenu = 0;
-        invalidateOptionsMenu();
-        editBar = getLayoutInflater().inflate(R.layout.edit_bar, null);
-        LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        editBar.setLayoutParams(params1);
-        editBar.findViewById(R.id.editBar_cancel).setOnClickListener(v -> {
+        // Buttons
+        pieceView.findViewById(R.id.event_buttons).setVisibility(View.VISIBLE);
+        pieceView.findViewById(R.id.event_cancel).setOnClickListener(v -> {
             editText.setText(textView.getText());
             restore(pieceView);
         });
-        editBar.findViewById(R.id.editBar_save).setOnClickListener(v -> save(pieceView));
-        bar.addView(editBar);
+        pieceView.findViewById(R.id.event_save).setOnClickListener(v -> save(pieceView));
+        editMode = true;
     }
 
     void save(View pieceView) {
@@ -959,39 +944,33 @@ public abstract class DetailActivity extends BaseActivity {
         InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         input.hideSoftInputFromWindow(editText.getWindowToken(), 0);
         editText.setVisibility(View.GONE);
-        pieceView.findViewById(R.id.event_date).setVisibility(View.GONE);
+        pieceView.findViewById(R.id.event_buttons).setVisibility(View.GONE);
         pieceView.findViewById(R.id.event_text).setVisibility(View.VISIBLE);
-        bar.removeView(editBar); // Removes custom toolbar
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(true);
-        whichMenu = 1;
-        invalidateOptionsMenu();
         if (!(object instanceof Note && !Global.settings.expert)) // NoteActivity on non-expert mode has no FAB
             getFabBox().setVisibility(View.VISIBLE);
+        editMode = false;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (whichMenu == 1) { // Standard bar menu
-            if (object instanceof Submitter && (gc.getHeader() == null || // Non-main submitter
-                    gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(object)))
-                menu.add(0, 1, 0, R.string.make_default);
-            if (object instanceof Media) {
-                menu.add(0, 5, 0, R.string.choose_file);
-                Media media = (Media)object;
-                if (media.getId() != null) {
-                    MediaReferences mediaReferences = new MediaReferences(gc, media, false);
-                    if (mediaReferences.num > 0)
-                        menu.add(0, 6, 0, R.string.make_media);
-                } else menu.add(0, 7, 0, R.string.make_shared_media);
-            }
-            if (object instanceof SourceCitation)
-                menu.add(0, 8, 0, R.string.choose_source);
-            if (object instanceof Family)
-                menu.add(0, 10, 0, R.string.delete);
-            else if (!(object instanceof Submitter && U.submitterHasShared((Submitter)object))) // Submitter who shared cannot be deleted
-                menu.add(0, 15, 0, R.string.delete);
+        if (object instanceof Submitter && (gc.getHeader() == null || // Non-main submitter
+                gc.getHeader().getSubmitter(gc) == null || !gc.getHeader().getSubmitter(gc).equals(object)))
+            menu.add(0, 1, 0, R.string.make_default);
+        if (object instanceof Media) {
+            menu.add(0, 5, 0, R.string.choose_file);
+            Media media = (Media)object;
+            if (media.getId() != null) {
+                MediaReferences mediaReferences = new MediaReferences(gc, media, false);
+                if (mediaReferences.num > 0)
+                    menu.add(0, 6, 0, R.string.make_media);
+            } else menu.add(0, 7, 0, R.string.make_shared_media);
         }
+        if (object instanceof SourceCitation)
+            menu.add(0, 8, 0, R.string.choose_source);
+        if (object instanceof Family)
+            menu.add(0, 10, 0, R.string.delete);
+        else if (!(object instanceof Submitter && U.submitterHasShared((Submitter)object))) // Submitter who shared cannot be deleted
+            menu.add(0, 15, 0, R.string.delete);
         return true;
     }
 
@@ -1072,8 +1051,8 @@ public abstract class DetailActivity extends BaseActivity {
     int sharedNoteIndex; // Index of the shared note in the container
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) { // info is null
-        if (whichMenu != 0) { // If we are in edit mode shows the editor menu with 'Cancel' and 'Done' buttons
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo info) {
+        if (!editMode) { // If we are in edit mode context menu is not created
             pieceView = view;
             pieceObject = view.getTag(R.id.tag_object);
             if (view.getId() == R.id.smallPerson) { // Small person inside cabinet

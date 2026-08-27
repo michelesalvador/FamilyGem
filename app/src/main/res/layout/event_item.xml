@@ -46,14 +46,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/event_edit"
+        android:layout_marginBottom="8dp"
         android:visibility="gone" />
 
     <app.familygem.AgeEditorLayout
         android:id="@+id/event_age"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/event_edit"
+        android:layout_below="@id/event_date"
+        android:layout_marginBottom="8dp"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/event_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/event_age"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/event_cancel"
+            style="@style/AppTheme.NormalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel" />
+
+        <Button
+            android:id="@+id/event_save"
+            style="@style/AppTheme.ColoredButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/event_other"
