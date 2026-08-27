@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
@@ -144,6 +145,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         }
                         refreshToolbar()
                         selectMenuItem()
+                        ViewCompat.requestApplyInsets(binding.root) // In case FAB is out of place in PersonsFragment
                         frontFragment.onResume() // In case there was editing
                     }
                 }
@@ -172,16 +174,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    /**
-     * Receives a class like 'DiagramFragment.class' and says whether it is the fragment currently visible.
-     */
+    /** Receives a class like 'DiagramFragment.class' and says whether it is the fragment currently visible. */
     private fun isCurrentFragment(aClass: Class<*>): Boolean {
         return aClass.isInstance(manager.findFragmentById(R.id.main_fragment))
     }
 
-    /**
-     * Displays a fragment in the main view.
-     */
+    /** Displays a fragment in the main view. */
     fun showFragment(fragment: BaseFragment) {
         manager.beginTransaction().add(R.id.main_fragment, fragment, fragment.javaClass.simpleName).addToBackStack(null).commit()
         _frontFragment = fragment
@@ -189,9 +187,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         selectMenuItem()
     }
 
-    /**
-     * Highlights one item of the main menu.
-     */
+    /** Highlights one item of the main menu. */
     private fun selectMenuItem() {
         val fragmentPosition = fragments.indexOf(frontFragment.javaClass)
         binding.mainMenu.setCheckedItem(menuIds[fragmentPosition])
@@ -201,17 +197,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         invalidateMenu()
     }
 
-    /**
-     * Updates both toolbar and main menu.
-     */
+    /** Updates both toolbar and main menu. */
     fun refreshInterface() {
         if (!frontFragment.isSearching()) refreshToolbar()
         furnishMenu()
     }
 
-    /**
-     * Updates title, random image, 'Save' button in menu header, and menu items count.
-     */
+    /** Updates title, random image, 'Save' button in menu header, and menu items count. */
     fun furnishMenu() {
         val menuHeader = binding.mainMenu.getHeaderView(0)
         val imageView = menuHeader.findViewById<ImageView>(R.id.menuHeader_image)
