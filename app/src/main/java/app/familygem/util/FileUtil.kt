@@ -246,29 +246,33 @@ object FileUtil {
     /**
      * Displays the main media of a person.
      * @param imageView Where the image will appear
+     * @param onMediaType Callback to use the resulting [Media] and file [Type]
      */
     @JvmOverloads
-    fun showMainMedia(person: Person, imageView: ImageView, gedcom: Gedcom = Global.gc, treeId: Int = Global.settings.openTree): Media? {
+    fun showMainMedia(
+        person: Person, imageView: ImageView, gedcom: Gedcom = Global.gc,
+        treeId: Int = Global.settings.openTree, onMediaType: ((Media, Type) -> Unit)? = null
+    ) {
         val wrapper = selectMainMedia(person, gedcom)
         if (wrapper != null) {
-            showImage(wrapper.media, imageView, wrapper.options, null, null, treeId)
+            showImage(wrapper.media, imageView, wrapper.options, null, null, treeId, onMediaType)
             imageView.visibility = View.VISIBLE
         } else {
             imageView.visibility = View.GONE
         }
-        return wrapper?.media
     }
 
     /**
      * Shows a picture with Glide.
      * @param options Bitwise selection of [Image] constants
      * @param oldFileUri The same [FileUri] returned by this function, to speed up the process
+     * @param onMediaType Callback to use the resulting file [Type]
      */
     @JvmOverloads
     fun showImage(
         media: Media, imageView: ImageView, options: Int = 0, progressWheel: ProgressBar? = null,
-        oldFileUri: FileUri? = null, treeId: Int = Global.settings.openTree
-    ): FileUri { // TODO Make it return Result<FileUri>
+        oldFileUri: FileUri? = null, treeId: Int = Global.settings.openTree, onMediaType: ((Media, Type) -> Unit)? = null
+    ): FileUri {
         fun applyOptions(builder: RequestBuilder<Drawable>) {
             if (options and Image.DARK != 0) {
                 imageView.setColorFilter(ContextCompat.getColor(imageView.context, R.color.primary_grayed), PorterDuff.Mode.MULTIPLY)
@@ -279,12 +283,12 @@ object FileUtil {
         }
 
         fun completeDisplay(fileType: Type) {
-            imageView.setTag(R.id.tag_file_type, fileType)
+            onMediaType?.invoke(media, fileType)
             progressWheel?.visibility = View.GONE
             imageView.tag = R.id.tag_object // Used by DiagramFragment to check the image finish loading
         }
 
-        imageView.setTag(R.id.tag_file_type, Type.NONE)
+        onMediaType?.invoke(media, Type.NONE)
         progressWheel?.visibility = View.VISIBLE
         val fileUri = oldFileUri ?: FileUri(imageView.context, media, treeId)
         val glide = Glide.with(imageView)
@@ -346,7 +350,7 @@ object FileUtil {
                                     completeDisplay(Type.WEB_ANYTHING)
                                 }
                             } else throw Exception()
-                        } catch (exception: Exception) {
+                        } catch (_: Exception) {
                             withContext(Dispatchers.Main) { completeDisplay(Type.PLACEHOLDER) }
                         }
                     }

@@ -68,6 +68,7 @@ import app.familygem.constant.Destination;
 import app.familygem.constant.Extra;
 import app.familygem.constant.Level;
 import app.familygem.constant.Relation;
+import app.familygem.constant.Type;
 import app.familygem.detail.AddressActivity;
 import app.familygem.detail.EventActivity;
 import app.familygem.detail.ExtensionActivity;
@@ -959,18 +960,21 @@ public abstract class DetailActivity extends BaseActivity {
         if (object instanceof Media) {
             menu.add(0, 5, 0, R.string.choose_file);
             Media media = (Media)object;
+            Type fileType = ((MediaActivity)this).getFileType();
+            if (media.getFile() != null && !media.getFile().isBlank() && fileType == Type.PLACEHOLDER)
+                menu.add(0, 6, 0, R.string.media_folders);
             if (media.getId() != null) {
                 MediaReferences mediaReferences = new MediaReferences(gc, media, false);
                 if (mediaReferences.num > 0)
-                    menu.add(0, 6, 0, R.string.make_media);
-            } else menu.add(0, 7, 0, R.string.make_shared_media);
+                    menu.add(0, 7, 0, R.string.make_media);
+            } else menu.add(0, 8, 0, R.string.make_shared_media);
         }
         if (object instanceof SourceCitation)
-            menu.add(0, 8, 0, R.string.choose_source);
+            menu.add(0, 10, 0, R.string.choose_source);
         if (object instanceof Family)
-            menu.add(0, 10, 0, R.string.delete);
-        else if (!(object instanceof Submitter && U.submitterHasShared((Submitter)object))) // Submitter who shared cannot be deleted
             menu.add(0, 15, 0, R.string.delete);
+        else if (!(object instanceof Submitter && U.submitterHasShared((Submitter)object))) // Submitter who shared cannot be deleted
+            menu.add(0, 20, 0, R.string.delete);
         return true;
     }
 
@@ -996,21 +1000,23 @@ public abstract class DetailActivity extends BaseActivity {
             SubmittersFragment.mainSubmitter((Submitter)object);
         } else if (id == 5) { // Choose image
             FileUtil.INSTANCE.displayFileChooser(this, chooseMediaLauncher);
-        } else if (id == 6) { // Make simple media
+        } else if (id == 6) { // Media folders
+            startActivity(new Intent(this, MediaFoldersActivity.class).putExtra(Extra.TREE_ID, Global.settings.openTree));
+        } else if (id == 7) { // Make simple media
             Object[] modifiedObjects = MediaUtil.INSTANCE.makeSimpleMedia((Media)object);
             TreeUtil.INSTANCE.save(true, modifiedObjects);
             Memory.makeLastStep(object);
             getIntent().putExtra(Extra.ALONE, true); // To display the cabinet
             refresh();
-        } else if (id == 7) { // Make shared media
+        } else if (id == 8) { // Make shared media
             Object[] modifiedObjects = MediaUtil.INSTANCE.makeSharedMedia((Media)object);
             TreeUtil.INSTANCE.save(true, modifiedObjects);
             Memory.makeLeaderStep(object);
             refresh();
-        } else if (id == 8) { // Choose source
+        } else if (id == 10) { // Choose source
             Intent intent = new Intent(this, MainActivity.class).putExtra(Choice.SOURCE, true);
             startActivityForResult(intent, 7047);
-        } else if (id == 10) { // Delete family
+        } else if (id == 15) { // Delete family
             Family family = (Family)object;
             if (family.getHusbandRefs().size() + family.getWifeRefs().size() + family.getChildRefs().size() > 0) {
                 new AlertDialog.Builder(this).setMessage(R.string.really_delete_family)
@@ -1025,7 +1031,7 @@ public abstract class DetailActivity extends BaseActivity {
                     return Unit.INSTANCE;
                 });
             }
-        } else if (id == 15) { // Delete all other objects
+        } else if (id == 20) { // Delete all other objects
             Util.INSTANCE.confirmDelete(this, () -> {
                 delete();
                 TreeUtil.INSTANCE.save(true); // Update of change date takes place in the overrides of delete()

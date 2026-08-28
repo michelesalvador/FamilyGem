@@ -8,7 +8,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -209,28 +208,17 @@ class ProfileActivity : AppCompatActivity() {
     /** Displays two images in the profile header: a regular one and the same blurred on background. */
     private fun setImages() {
         val imageView = findViewById<ImageView>(R.id.profile_image)
-        val media = FileUtil.showMainMedia(person!!, imageView)
-        // Same image blurred on background
-        val backImageView = findViewById<ImageView>(R.id.profile_background)
-        if (media != null) {
+        FileUtil.showMainMedia(person!!, imageView) { media, type ->
             imageView.setOnClickListener {
                 FindStack(Global.gc, media, true)
                 startActivity(Intent(this, MediaActivity::class.java))
             }
-            // imageView waits for the image to be loaded
-            imageView.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    val type = imageView.getTag(R.id.tag_file_type) as Type
-                    if (type == Type.CROPPABLE || type == Type.VIDEO || type == Type.PDF || type == Type.WEB_IMAGE) {
-                        FileUtil.showImage(media, backImageView, Image.BLUR or Image.DARK)
-                        backImageView.visibility = View.VISIBLE
-                    } else backImageView.visibility = View.GONE
-                    if (type != Type.NONE) {
-                        imageView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    }
-                }
-            })
-        } else backImageView.visibility = View.GONE
+            val backImageView = findViewById<ImageView>(R.id.profile_background)
+            backImageView.visibility = if (type == Type.CROPPABLE || type == Type.VIDEO || type == Type.PDF || type == Type.WEB_IMAGE) {
+                FileUtil.showImage(media, backImageView, Image.BLUR or Image.DARK)
+                View.VISIBLE
+            } else View.INVISIBLE
+        }
     }
 
     /** Setups the click listener of floating action button. */

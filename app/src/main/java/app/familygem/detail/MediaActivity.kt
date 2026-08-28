@@ -33,6 +33,7 @@ class MediaActivity : DetailActivity() {
 
     lateinit var media: Media
     lateinit var fileUri: FileUri
+    var fileType: Type = Type.NONE
     private lateinit var imageLayout: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,9 +99,12 @@ class MediaActivity : DetailActivity() {
             Memory.getLeaderObject() is Source || Memory.getSecondToLastObject() is SourceCitation
         }
         val options = if (insideSource) Image.SOURCE else 0
-        fileUri = FileUtil.showImage(media, imageView, options, imageLayout.findViewById(R.id.image_progress))
+        fileUri = FileUtil.showImage(media, imageView, options, imageLayout.findViewById(R.id.image_progress)) { _, type ->
+            fileType = type
+            invalidateOptionsMenu() // To hide or display Media folders link
+        }
         imageLayout.setOnClickListener {
-            when (val fileType = imageView.getTag(R.id.tag_file_type) as Type) {
+            when (fileType) {
                 Type.NONE, Type.PLACEHOLDER -> { // Placeholder instead of image, the media is loading or doesn't exist
                     FileUtil.displayFileChooser(this, chooseMediaLauncher)
                 }

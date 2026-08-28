@@ -31,9 +31,10 @@ import app.familygem.U
 import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.Image
+import app.familygem.constant.Type
 import app.familygem.databinding.MainActivityBinding
 import app.familygem.detail.MediaActivity
-import app.familygem.util.FileUtil.showImage
+import app.familygem.util.FileUtil
 import app.familygem.util.InsetsUtil
 import app.familygem.util.TreeUtil
 import app.familygem.visitor.FindStack
@@ -82,7 +83,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.mainLayout.addDrawerListener(toggle)
         toggle.syncState()
         binding.mainMenu.setNavigationItemSelectedListener(this)
-        furnishMenu()
         if (savedInstanceState == null) { // Loads only the first time, not rotating the screen
             val fragment: BaseFragment = if (intent.getBooleanExtra(Choice.PERSON, false)) PersonsFragment()
             else if (intent.getBooleanExtra(Choice.MEDIA, false)) GalleryFragment()
@@ -206,22 +206,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /** Updates title, random image, 'Save' button in menu header, and menu items count. */
     fun furnishMenu() {
         val menuHeader = binding.mainMenu.getHeaderView(0)
-        val imageView = menuHeader.findViewById<ImageView>(R.id.menuHeader_image)
         val mainTitle = menuHeader.findViewById<TextView>(R.id.menuHeader_title)
-        imageView.visibility = ImageView.GONE
         mainTitle.text = ""
         if (Global.gc != null) {
             val mediaList = MediaList(Global.gc)
             Global.gc.accept(mediaList)
             mediaList.getRandomPreviewMedia()?.let { media ->
-                showImage(media, imageView, Image.DARK)
-                // TODO Visible and clickable only if not Type.PLACEHOLDER nor Type.DOCUMENT
-                imageView.visibility = ImageView.VISIBLE
-                imageView.setOnClickListener {
-                    FindStack(Global.gc, media, true)
-                    val intent = Intent(this, MediaActivity::class.java)
-                    if (media.id == null) intent.putExtra(Extra.ALONE, true) // Simple Media always display cabinet
-                    startActivity(intent)
+                val imageView = menuHeader.findViewById<ImageView>(R.id.menuHeader_image)
+                FileUtil.showImage(media, imageView, Image.DARK) { _, type ->
+                    imageView.visibility = if (type == Type.NONE || type == Type.PLACEHOLDER || type == Type.DOCUMENT) ImageView.INVISIBLE
+                    else {
+                        imageView.setOnClickListener {
+                            FindStack(Global.gc, media, true)
+                            val intent = Intent(this, MediaActivity::class.java)
+                            if (media.id == null) intent.putExtra(Extra.ALONE, true) // Simple Media always display cabinet
+                            startActivity(intent)
+                        }
+                        ImageView.VISIBLE
+                    }
                 }
             }
             mainTitle.text = Global.settings.currentTree.title

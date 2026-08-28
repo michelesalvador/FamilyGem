@@ -170,8 +170,6 @@ class TreesActivity : AppCompatActivity() {
                         menu.add(0, 1, 0, R.string.info)
                     if (!derived && !exhausted || Global.settings.expert)
                         menu.add(0, 2, 0, R.string.rename)
-                    if (exists && (!derived || Global.settings.expert) && !exhausted)
-                        menu.add(0, 3, 0, R.string.media_folders)
                     if (!exhausted)
                         menu.add(0, 4, 0, R.string.find_errors)
                     if (exists && !derived && !exhausted) // You cannot re-share a tree received back, even if you are an expert
@@ -386,8 +384,6 @@ class TreesActivity : AppCompatActivity() {
                 startActivity(intent)
             } else if (id == 2) { // Rename tree
                 TreeUtil.renameTree(this@TreesActivity, treeId) { updateList() }
-            } else if (id == 3) { // Media folders
-                startActivity(Intent(this@TreesActivity, MediaFoldersActivity::class.java).putExtra(Extra.TREE_ID, treeId))
             } else if (id == 4) { // Find errors
                 progress.visibility = View.VISIBLE
                 lifecycleScope.launch(Default) {
