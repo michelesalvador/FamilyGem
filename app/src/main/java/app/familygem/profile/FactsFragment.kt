@@ -28,7 +28,6 @@ import app.familygem.util.Util
 import app.familygem.util.writeContent
 import app.familygem.util.writeTitle
 import org.folg.gedcom.model.EventFact
-import org.folg.gedcom.model.ExtensionContainer
 import org.folg.gedcom.model.GedcomTag
 import org.folg.gedcom.model.MediaContainer
 import org.folg.gedcom.model.Name
@@ -134,7 +133,7 @@ class FactsFragment : BaseFragment() {
             }
         }
         if (obj is NoteContainer) NoteUtil.placeNotes(otherLayout, obj, Level.MEDIUM)
-        SourceCitationUtil.placeSourceCitations(otherLayout, obj as ExtensionContainer, Level.MEDIUM)
+        SourceCitationUtil.placeSourceCitations(otherLayout, obj, Level.MEDIUM)
         eventView.setTag(R.id.tag_object, obj)
         registerForContextMenu(eventView)
     }

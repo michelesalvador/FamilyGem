@@ -351,14 +351,6 @@ public abstract class DetailActivity extends BaseActivity {
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra(Choice.MEDIA, true);
             startActivityForResult(intent, 43616);
-        } else if (id == 109) { // New note-source (source citation without reference to a source)
-            SourceCitation citation = new SourceCitation();
-            citation.setValue("");
-            if (object instanceof Note) ((Note)object).addSourceCitation(citation);
-            else ((SourceCitationContainer)object).addSourceCitation(citation);
-            Memory.add(citation);
-            startActivity(new Intent(this, SourceCitationActivity.class));
-            toBeSaved = true;
         } else if (id == 110) { // New source
             SourceUtil.INSTANCE.createSource(this, (ExtensionContainer)object);
         } else if (id == 111) { // Link existing source
@@ -441,7 +433,9 @@ public abstract class DetailActivity extends BaseActivity {
             if (requestCode == 5390) { // Sets the repository that has been chosen in the RepositoriesFragment list by RepositoryRefActivity
                 ((RepositoryRef)object).setRef(data.getStringExtra("repoId"));
             } else if (requestCode == 7047) { // Sets the source that has been chosen in SourcesFragment by SourceCitationActivity
-                ((SourceCitation)object).setRef(data.getStringExtra(Extra.SOURCE_ID));
+                SourceCitation citation = (SourceCitation)object;
+                citation.setRef(data.getStringExtra(Extra.SOURCE_ID));
+                citation.setValue(null); // Value can't coexist with Ref
             }
             TreeUtil.INSTANCE.save(true, Memory.getLeaderObject()); // Since is in a coroutine, could set Global.edited true too late for onResume
             Global.edited = true; // For the following onResume
@@ -969,8 +963,10 @@ public abstract class DetailActivity extends BaseActivity {
                     menu.add(0, 7, 0, R.string.make_media);
             } else menu.add(0, 8, 0, R.string.make_shared_media);
         }
-        if (object instanceof SourceCitation)
-            menu.add(0, 10, 0, R.string.choose_source);
+        if (object instanceof SourceCitation) {
+            if (!gc.getSources().isEmpty())
+                menu.add(0, 10, 0, R.string.choose_source);
+        }
         if (object instanceof Family)
             menu.add(0, 15, 0, R.string.delete);
         else if (!(object instanceof Submitter && U.submitterHasShared((Submitter)object))) // Submitter who shared cannot be deleted
@@ -1014,8 +1010,17 @@ public abstract class DetailActivity extends BaseActivity {
             Memory.makeLeaderStep(object);
             refresh();
         } else if (id == 10) { // Choose source
-            Intent intent = new Intent(this, MainActivity.class).putExtra(Choice.SOURCE, true);
-            startActivityForResult(intent, 7047);
+            Runnable chooseSource = () -> {
+                Intent intent = new Intent(this, MainActivity.class).putExtra(Choice.SOURCE, true);
+                startActivityForResult(intent, 7047);
+            };
+            String value = ((SourceCitation)object).getValue();
+            if (value != null && !value.isBlank()) {
+                Util.INSTANCE.confirmDelete(this, () -> {
+                    chooseSource.run();
+                    return Unit.INSTANCE;
+                });
+            } else chooseSource.run();
         } else if (id == 15) { // Delete family
             Family family = (Family)object;
             if (family.getHusbandRefs().size() + family.getWifeRefs().size() + family.getChildRefs().size() > 0) {
@@ -1170,6 +1175,7 @@ public abstract class DetailActivity extends BaseActivity {
             } else if (pieceObject instanceof Source) {
                 menu.add(0, 70, 0, R.string.copy);
                 menu.add(0, 71, 0, R.string.choose_source);
+                menu.add(0, 72, 0, R.string.unlink);
             } else if (pieceObject instanceof RepositoryRef) {
                 menu.add(0, 80, 0, R.string.copy);
                 menu.add(0, 81, 0, R.string.delete);
@@ -1393,6 +1399,9 @@ public abstract class DetailActivity extends BaseActivity {
                 intent1.putExtra(Choice.SOURCE, true);
                 startActivityForResult(intent1, 7047);
                 return true;
+            case 72: // Unlink source
+                ((SourceCitation)object).setRef(null);
+                break;
             case 80: // Copy repository citation text
                 U.copyToClipboard(getText(R.string.repository_citation),
                         ((TextView)pieceView.findViewById(R.id.repositoryCitation_repo)).getText() + "\n"

@@ -40,6 +40,7 @@ import app.familygem.util.TreeUtil
 import app.familygem.visitor.FindStack
 import app.familygem.visitor.MediaList
 import app.familygem.visitor.NoteList
+import app.familygem.visitor.NoteSourcesList
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -251,7 +252,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         Global.gc.accept(noteList)
                         count = noteList.noteList.size + Global.gc.notes.size
                     }
-                    5 -> count = Global.gc.sources.size
+                    5 -> {
+                        val noteSources = NoteSourcesList()
+                        Global.gc.accept(noteSources)
+                        count = Global.gc.sources.size + noteSources.list.size
+                    }
                     6 -> count = Global.gc.repositories.size
                     7 -> count = Global.gc.submitters.size
                 }

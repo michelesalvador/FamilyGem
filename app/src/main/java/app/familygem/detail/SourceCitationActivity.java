@@ -38,13 +38,16 @@ public class SourceCitationActivity extends DetailActivity {
         place(getString(R.string.date), "Date");
         place(getString(R.string.text), "Text", true, InputType.TYPE_TEXT_FLAG_MULTI_LINE); // Applies to both note-source and source citation
         place(getString(R.string.certainty), "Quality"); // A number from 0 to 3
-        //c.getTextOrValue(); // Practically useless
-        //if (c.getDataTagContents() != null)
-        //    U.place(box, "Data Tag Contents", c.getDataTagContents().toString()); // COMBINED DATA TEXT
+        //citation.getTextOrValue(); // Practically useless
+        //if (citation.getDataTagContents() != null)
+        //    U.place(box, "Data Tag Contents", citation.getDataTagContents().toString()); // COMBINED DATA TEXT
         //place("Ref", "Ref", false, false); // The ID of the source, useless here
         placeExtensions(citation);
         MediaUtil.INSTANCE.placeMedia(box, citation);
         NoteUtil.INSTANCE.placeNotes(box, citation);
+        if (getIntent().getBooleanExtra("fromSources", false)) {
+            placeCabinet(Memory.getLeaderObject(), R.string.cited_by);
+        }
     }
 
     @Override

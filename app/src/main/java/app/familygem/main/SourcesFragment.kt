@@ -29,17 +29,24 @@ import app.familygem.constant.Choice
 import app.familygem.constant.Extra
 import app.familygem.constant.Image
 import app.familygem.detail.SourceActivity
+import app.familygem.detail.SourceCitationActivity
 import app.familygem.util.FileUtil.showImage
 import app.familygem.util.SourceUtil
 import app.familygem.util.TreeUtil
 import app.familygem.util.Util
 import app.familygem.util.getMainText
+import app.familygem.visitor.FindStack
+import app.familygem.visitor.NoteSourcesList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.folg.gedcom.model.ExtensionContainer
+import org.folg.gedcom.model.Media
 import org.folg.gedcom.model.Note
 import org.folg.gedcom.model.NoteContainer
 import org.folg.gedcom.model.Source
+import org.folg.gedcom.model.SourceCitation
 import org.folg.gedcom.model.SourceCitationContainer
 import java.util.Locale
 
@@ -49,6 +56,7 @@ class SourcesFragment : BaseFragment() {
     private var selectedWrappers = mutableListOf<SourceWrapper>()
     private lateinit var adapter: SourcesAdapter
     private lateinit var progress: ProgressView
+    private var prepareJob: Job? = null
     private var searchView: SearchView? = null
     private val citationCount = mutableMapOf<String, Int>() // Source ID, citation count
     private var order = Order.NONE
@@ -82,23 +90,27 @@ class SourcesFragment : BaseFragment() {
 
     override fun showContent() {
         progress.visibility = View.VISIBLE
-        lifecycleScope.launch(Dispatchers.Default) {
-            allWrappers.clear()
-            selectedWrappers.clear()
+        prepareJob = lifecycleScope.launch(Dispatchers.Default) {
             countSourceCitations()
             allWrappers = Global.gc.sources.map {
-                SourceWrapper(it, U.extractNum(it.id), it.getMainText(), citationCount[it.id] ?: 0, getSearchText(it))
+                SourceWrapper(it, null, U.extractNum(it.id), it.getMainText(), citationCount[it.id] ?: 0, getSearchText(it))
             }.toMutableList()
-            selectedWrappers = allWrappers
+            if (!requireActivity().intent.getBooleanExtra(Choice.SOURCE, false)) {
+                val noteSources = NoteSourcesList()
+                Global.gc.accept(noteSources)
+                allWrappers.addAll(noteSources.list.map {
+                    SourceWrapper(noteSource = it, displayText = it.getMainText(), searchText = getSearchText(it))
+                })
+            }
             // Family Gem 1.3 removed the "citaz" extension from sources
             // TODO remove this loop on a future release
             for (source in Global.gc.sources) {
                 source.extensions.remove("citaz")
                 if (source.extensions.isEmpty()) source.extensions = null
             }
-            launch(Dispatchers.Main) {
-                adapter.notifyDataSetChanged()
+            withContext(Dispatchers.Main) {
                 adapter.filter.filter(searchView?.query ?: "")
+                if (!isSearching()) activity?.invalidateOptionsMenu()
                 progress.visibility = View.GONE
             }
         }
@@ -118,14 +130,23 @@ class SourcesFragment : BaseFragment() {
         override fun onBindViewHolder(holder: SourceHolder, position: Int) {
             val wrapper = selectedWrappers[position]
             holder.apply {
-                itemView.setTag(R.id.source_id, wrapper.source.id)
-                idView.text = wrapper.source.id
-                idView.visibility = if (order == Order.ID_ASC || order == Order.ID_DESC) View.VISIBLE else View.GONE
-                titleView.text = wrapper.mainTitle
-                numView.text = wrapper.citations.toString()
+                val media = if (wrapper.source != null) {
+                    itemView.setTag(R.id.tag_object, wrapper.source.id)
+                    idView.text = wrapper.source.id
+                    idView.visibility = if (order == Order.ID_ASC || order == Order.ID_DESC) View.VISIBLE else View.GONE
+                    textView.text = wrapper.displayText
+                    numView.text = wrapper.citations.toString()
+                    numView.visibility = View.VISIBLE
+                    wrapper.source.getAllMedia(Global.gc)
+                } else if (wrapper.noteSource != null) {
+                    itemView.setTag(R.id.tag_object, wrapper.noteSource)
+                    idView.visibility = View.GONE
+                    textView.text = wrapper.displayText
+                    numView.visibility = View.GONE
+                    wrapper.noteSource.getAllMedia(Global.gc)
+                } else emptyList<Media>()
                 // Media logic
-                val media = wrapper.source.getAllMedia(Global.gc)
-                val params = titleView.layoutParams as RelativeLayout.LayoutParams
+                val params = textView.layoutParams as RelativeLayout.LayoutParams
                 if (media.isEmpty()) {
                     imageView.visibility = View.GONE
                     params.addRule(RelativeLayout.START_OF, R.id.source_num)
@@ -166,7 +187,7 @@ class SourcesFragment : BaseFragment() {
 
     inner class SourceHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         val idView: TextView = view.findViewById(R.id.source_id)
-        val titleView: TextView = view.findViewById(R.id.source_title)
+        val textView: TextView = view.findViewById(R.id.source_title)
         val imageView: ImageView = view.findViewById(R.id.source_image)
         val numView: TextView = view.findViewById(R.id.source_num)
 
@@ -175,17 +196,21 @@ class SourcesFragment : BaseFragment() {
         }
 
         override fun onClick(v: View?) {
-            val id = itemView.getTag(R.id.source_id) as? String
+            val id = itemView.getTag(R.id.tag_object) as? String
+            val citation = itemView.getTag(R.id.tag_object) as? SourceCitation
             // Returns a source ID to ProfileActivity or to DetailActivity
             if (requireActivity().intent.getBooleanExtra(Choice.SOURCE, false)) {
                 val intent = Intent()
                 intent.putExtra(Extra.SOURCE_ID, id)
                 requireActivity().setResult(Activity.RESULT_OK, intent)
                 requireActivity().finish()
-            } else { // Regular source opening
+            } else if (id != null) { // Regular source opening
                 val source = Global.gc.getSource(id)
                 Memory.setLeader(source)
                 startActivity(Intent(context, SourceActivity::class.java))
+            } else if (citation != null) { // Note-source opening
+                FindStack(Global.gc, citation, true)
+                startActivity(Intent(context, SourceCitationActivity::class.java).putExtra("fromSources", true))
             }
         }
     }
@@ -199,7 +224,7 @@ class SourcesFragment : BaseFragment() {
     private fun getSearchText(source: Source): String {
         return source.run {
             val builder = StringBuilder()
-            builder.append(id).append(' ')
+            if (Global.settings.expert) builder.append(id).append(' ')
             if (abbreviation != null) builder.append(abbreviation).append(' ')
             if (title != null) builder.append(title).append(' ')
             if (author != null) builder.append(author).append(' ')
@@ -214,16 +239,38 @@ class SourcesFragment : BaseFragment() {
         }
     }
 
+    private fun getSearchText(sourceCitation: SourceCitation): String {
+        return sourceCitation.run {
+            val builder = StringBuilder()
+            if (value != null) builder.append(value).append(' ')
+            if (page != null) builder.append(page).append(' ')
+            if (date != null) builder.append(date).append(' ')
+            if (text != null) builder.append(text).append(' ')
+            if (quality != null) builder.append(quality).append(' ')
+            for (note in notes) if (note.value != null) builder.append(note.value).append(' ')
+            for (media in media) if (media.file != null) builder.append(media.file).append(' ')
+            builder.toString().lowercase(Locale.getDefault())
+        }
+    }
+
     private fun sortSources() {
         if (order != Order.NONE) {
             selectedWrappers.sortWith { w1, w2 ->
                 return@sortWith when (order) {
                     Order.ID_ASC -> w1.id - w2.id
-                    Order.ID_DESC -> w2.id - w1.id
-                    Order.TITLE_ASC -> w1.mainTitle.compareTo(w2.mainTitle, true)
-                    Order.TITLE_DESC -> w2.mainTitle.compareTo(w1.mainTitle, true)
+                    Order.ID_DESC -> {
+                        if (w1.id == Int.MAX_VALUE) 1
+                        else if (w2.id == Int.MAX_VALUE) -1
+                        else w2.id - w1.id
+                    }
+                    Order.TITLE_ASC -> w1.displayText.compareTo(w2.displayText, true)
+                    Order.TITLE_DESC -> w2.displayText.compareTo(w1.displayText, true)
                     Order.CITATIONS_ASC -> w1.citations - w2.citations
-                    Order.CITATIONS_DESC -> w2.citations - w1.citations
+                    Order.CITATIONS_DESC -> {
+                        if (w1.citations == Int.MAX_VALUE) 1
+                        else if (w2.citations == Int.MAX_VALUE) -1
+                        else w2.citations - w1.citations
+                    }
                     else -> 0
                 }
             }
@@ -260,12 +307,23 @@ class SourcesFragment : BaseFragment() {
     }
 
     override fun updateToolbar(bar: ActionBar, menu: Menu, inflater: MenuInflater) {
-        bar.title = Global.gc.sources.size.toString() + " " +
-                Util.caseString(if (Global.gc.sources.size == 1) R.string.source else R.string.sources)
-        if (Global.gc.sources.size > 1) {
+        bar.title = allWrappers.size.toString() + " " + Util.caseString(if (allWrappers.size == 1) R.string.source else R.string.sources)
+        if (allWrappers.size > 1) {
             // Search in SourcesFragment
             inflater.inflate(R.menu.search, menu)
-            searchView = menu.findItem(R.id.search_item).actionView as SearchView?
+            val searchItem = menu.findItem(R.id.search_item)
+            searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(p0: MenuItem): Boolean {
+                    return true
+                }
+
+                // Click on back arrow of SearchView
+                override fun onMenuItemActionCollapse(p0: MenuItem): Boolean {
+                    activity?.invalidateOptionsMenu() // Updates the title in case a source was deleted
+                    return true
+                }
+            })
+            searchView = searchItem.actionView as? SearchView
             stylizeSearchView(searchView)
             searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextChange(query: String?): Boolean {
@@ -281,9 +339,9 @@ class SourcesFragment : BaseFragment() {
             // Sort-by menu
             inflater.inflate(R.menu.sort_by, menu)
             val subMenu = menu.findItem(R.id.sortBy).subMenu
-            if (Global.settings.expert) subMenu!!.add(0, 1, 0, R.string.id)
-            subMenu!!.add(0, 2, 0, R.string.title)
-            subMenu.add(0, 3, 0, R.string.citations)
+            if (Global.settings.expert && Global.gc.sources.isNotEmpty()) subMenu!!.add(0, 1, 0, R.string.id)
+            subMenu!!.add(0, 2, 0, R.string.text)
+            if (Global.gc.sources.isNotEmpty()) subMenu.add(0, 3, 0, R.string.citations)
         }
     }
 
@@ -303,11 +361,16 @@ class SourcesFragment : BaseFragment() {
     }
 
     private var source: Source? = null
+    private var citation: SourceCitation? = null
 
     override fun onCreateContextMenu(menu: ContextMenu, view: View, info: ContextMenuInfo?) {
-        source = Global.gc.getSource((view.getTag(R.id.source_id) as? String))
-        if (Global.settings.expert) menu.add(5, 0, 0, R.string.edit_id)
-        menu.add(5, 1, 0, R.string.delete)
+        if (prepareJob?.isCompleted == true) {
+            source = Global.gc.getSource((view.getTag(R.id.tag_object) as? String))
+            citation = view.getTag(R.id.tag_object) as? SourceCitation
+            if (Global.settings.expert && source != null) menu.add(5, 0, 0, R.string.edit_id)
+            if (source != null) menu.add(5, 1, 0, R.string.delete)
+            else if (citation != null) menu.add(5, 2, 0, R.string.delete)
+        }
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -316,16 +379,31 @@ class SourcesFragment : BaseFragment() {
                 U.editId(context, source) { this.showContent() }
             } else if (item.itemId == 1) { // Delete source
                 Util.confirmDelete(requireContext()) {
-                    val objects: Array<Any?> = SourceUtil.deleteSource(source!!)
-                    TreeUtil.save(false, *objects)
-                    showContent()
-                    (requireActivity() as MainActivity).refreshInterface()
+                    val objects = SourceUtil.deleteSource(source!!)
+                    conclude(*objects)
+                }
+            } else if (item.itemId == 2) { // Delete note-source
+                Util.confirmDelete(requireContext()) {
+                    val stack = FindStack(Global.gc, citation, false)
+                    val container = stack.containerObject as SourceCitationContainer
+                    container.sourceCitations.remove(citation)
+                    if (container.sourceCitations.isEmpty()) container.sourceCitations = null
+                    conclude(stack.leaderObject)
                 }
             }
             return true
         }
         return false
     }
+
+    private fun conclude(vararg objects: Any?) {
+        TreeUtil.save(false, *objects)
+        showContent()
+        (requireActivity() as MainActivity).refreshInterface()
+    }
 }
 
-data class SourceWrapper(val source: Source, val id: Int, val mainTitle: String, val citations: Int, val searchText: String)
+data class SourceWrapper(
+    val source: Source? = null, val noteSource: SourceCitation? = null, // Source or SourceCitation one of the two is not null
+    val id: Int = Int.MAX_VALUE, val displayText: String, val citations: Int = Int.MAX_VALUE, val searchText: String
+)

@@ -19,12 +19,11 @@ import app.familygem.constant.Image
 import app.familygem.constant.Level
 import app.familygem.detail.SourceCitationActivity
 import app.familygem.profile.ProfileActivity
-import org.folg.gedcom.model.ExtensionContainer
 import org.folg.gedcom.model.Note
 import org.folg.gedcom.model.SourceCitation
 import org.folg.gedcom.model.SourceCitationContainer
 
-fun SourceCitation.getText(level: Level = Level.DETAILED): String {
+fun SourceCitation.getMainText(level: Level = Level.DETAILED): String {
     fun reduce(str: String): String {
         return str.replace("\n+".toRegex(), if (level == Level.DETAILED) "\n" else " ")
     }
@@ -42,10 +41,11 @@ object SourceCitationUtil {
 
     /** Places into layout the source citations of a given container, with different level of detail. */
     @JvmOverloads
-    fun placeSourceCitations(layout: LinearLayout, container: ExtensionContainer, level: Level = Level.DETAILED) {
+    fun placeSourceCitations(layout: LinearLayout, container: Any, level: Level = Level.DETAILED) {
         if (Global.settings.expert) {
             val sourceCitations = if (container is Note) container.sourceCitations // Note doesn't extend SourceCitationContainer
-            else (container as SourceCitationContainer).sourceCitations
+            else if (container is SourceCitationContainer) container.sourceCitations
+            else emptyList() // container could be a GedcomTag
             if (level == Level.DETAILED && sourceCitations.isNotEmpty()) {
                 val titleView = LayoutInflater.from(layout.context).inflate(R.layout.notes_title, layout, false) as TextView
                 titleView.setText(R.string.sources)
@@ -66,7 +66,7 @@ object SourceCitationUtil {
                 }
                 val boxView = citationView.findViewById<RelativeLayout>(R.id.sourceCitation_box)
                 val textView = citationView.findViewById<TextView>(R.id.sourceCitation_text)
-                val text = citation.getText(level)
+                val text = citation.getMainText(level)
                 if (text.isNotBlank()) {
                     boxView.visibility = View.VISIBLE
                     textView.text = text
