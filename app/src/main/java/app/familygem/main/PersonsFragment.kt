@@ -43,6 +43,9 @@ import app.familygem.util.sex
 import app.familygem.util.writeContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import org.folg.gedcom.model.Person
 import org.joda.time.Days
@@ -50,11 +53,11 @@ import org.joda.time.LocalDate
 import org.joda.time.Period
 import org.joda.time.Years
 import java.util.Locale
-import kotlin.concurrent.timer
+import kotlin.time.Duration.Companion.milliseconds
 
 /** List of all people of the tree, searchable and sortable. */
 class PersonsFragment : BaseFragment() {
-    private val allPeople: MutableList<PersonWrapper> = ArrayList() // The immutable complete list of people
+    private lateinit var allPeople: MutableList<PersonWrapper> // The complete list of people
     private var selectedPeople: MutableList<PersonWrapper> = ArrayList() // Some persons selected by the search feature
     private val adapter = PeopleAdapter()
     private lateinit var progress: ProgressView
@@ -93,27 +96,26 @@ class PersonsFragment : BaseFragment() {
     }
 
     override fun showContent() {
-        progress.visibility = View.VISIBLE
         if (prepareJob == null || prepareJob!!.isCompleted) { // To avoid ConcurrentModificationException
-            prepareJob = lifecycleScope.launch(Dispatchers.Default) {
-                // Recreates the list for some person modified, added or removed
-                allPeople.clear()
-                Global.gc.people.forEach {
-                    allPeople.add(PersonWrapper(it))
-                    // On version 0.9.2 all person's extensions was removed, replaced by PersonWrapper fields
-                    it.extensions = null // TODO: remove on a future release
+            progress.visibility = View.VISIBLE
+            prepareJob = lifecycleScope.launch {
+                // Recreates the list of all people
+                val job = launch(Dispatchers.Default) {
+                    allPeople = Global.gc.people.map { PersonWrapper(it) }.toMutableList()
+                    idsAreNumeric = verifyNumericIds() // Maybe some ID has changed
+                    for (person in allPeople) {
+                        ensureActive()
+                        person.completeFields() // This could be time-consuming on a big tree
+                    }
                 }
-                idsAreNumeric = verifyNumericIds() // Maybe some ID has been changed
-                allPeople.forEach { it.completeFields() } // This could be time-consuming on a big tree
-            }
-        }
-        // Updates displayed people, filtered or not, every second
-        timer(period = 1000) {
-            lifecycleScope.launch(Dispatchers.Main) {
-                adapter.filter.filter(searchView?.query ?: "")
-                if (prepareJob!!.isCompleted) {
+                // Updates displayed people, filtered or not, every second
+                launch(Dispatchers.Main) {
+                    while (job.isActive) {
+                        adapter.filter.filter(searchView?.query ?: "")
+                        delay(1000.milliseconds)
+                    }
+                    adapter.filter.filter(searchView?.query ?: "")
                     progress.visibility = View.GONE
-                    cancel()
                 }
             }
         }
@@ -375,6 +377,7 @@ class PersonsFragment : BaseFragment() {
         fun completeFields() {
             // Writes one string concatenating all names and personal events
             val builder = StringBuilder()
+            if (Global.settings.expert) builder.append(person.id).append(' ')
             for (name in person.names) {
                 builder.append(U.firstAndLastName(name, " ")).append(' ')
             }
@@ -489,7 +492,6 @@ class PersonsFragment : BaseFragment() {
         }
     }
 
-    // Context menu
     private lateinit var person: Person
     private var position = 0
 
@@ -525,10 +527,17 @@ class PersonsFragment : BaseFragment() {
             6 -> { // Delete person
                 Util.confirmDelete(requireContext()) {
                     val families = person.delete()
-                    selectedPeople.removeAt(position)
-                    allPeople.removeAt(position)
-                    adapter.notifyItemRemoved(position)
-                    adapter.notifyItemRangeChanged(position, selectedPeople.size - position)
+                    if (prepareJob?.isCompleted == true) {
+                        allPeople.removeAt(position)
+                        selectedPeople.removeAt(position)
+                        adapter.notifyItemRemoved(position)
+                        adapter.notifyItemRangeChanged(position, selectedPeople.size - position)
+                    } else {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            prepareJob?.cancelAndJoin()
+                            showContent()
+                        }
+                    }
                     (requireActivity() as MainActivity).refreshInterface()
                     U.deleteEmptyFamilies(context, null, false, *families)
                 }
