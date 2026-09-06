@@ -32,7 +32,7 @@
     <string name="long_press_menu">برای نمایش منو دکمه را نگه دارید.
 \nبرای باز کردن پروفایل ضربه بزنید.</string>
     <string name="family_as_spouse">خانواده (در نقش همسر)</string>
-    <string name="uncles_cousins">عموها و عموزاده ها</string>
+    <string name="uncles_cousins">عموها و عموزاده‌ها</string>
     <string name="age">سن</string>
     <string name="death">مرگ</string>
     <string name="husband">شوهر</string>
@@ -79,7 +79,7 @@
     <string name="shared_by">استفاده شده توسط</string>
     <string name="male">مذکر</string>
     <string name="no_name">بدون نام</string>
-    <string name="months">ماه ها</string>
+    <string name="months">ماه‌ها</string>
     <string name="days">روزها</string>
     <string name="partnership">شراکت</string>
     <string name="civil_marriage">مدنی</string>
@@ -183,7 +183,7 @@
     <string name="add">اضافه</string>
     <string name="replace">تعویض</string>
     <string name="ignore">پریدن</string>
-    <string name="confirm_news">تایید به روز رسانی ها</string>
+    <string name="confirm_news">تایید به روز رسانی‌ها</string>
     <string name="confirm">تایید</string>
     <string name="all_imported_delete">همه به‌روزرسانی‌ها وارد شده‌اند.
 \nآیا می خواهید درخت وارد شده را حذف کنید؟</string>
@@ -200,7 +200,7 @@
     <string name="export_pdf">استخراج PDF</string>
     <string name="pdf_exported_ok">PDF استخراج شد.</string>
     <string name="diagram_settings">تنظیمات نمودار</string>
-    <string name="generations_display_diagram">تعداد نسل ها را در نمودار تنظیم کنید:</string>
+    <string name="generations_display_diagram">تعداد نسل‌ها را در نمودار تنظیم کنید:</string>
     <string name="ancestors">اجداد</string>
     <string name="uncles_great_uncles">عموها و عموهای بزرگ</string>
     <string name="partners">شرکا</string>

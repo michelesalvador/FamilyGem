@@ -326,7 +326,7 @@
     <string name="registered_partnership">Zarejestrowane partnerstwo</string>
     <string name="partnership">Partnerstwo</string>
     <string name="not_married">Niezamężny/a</string>
-    <string name="unknown_relationship">NIeznany</string>
+    <string name="unknown_relationship">Nieznany</string>
     <string name="relationship">Związek</string>
     <string name="ex_wife">Była żona</string>
     <string name="ex_husband">Były mąż</string>
@@ -414,4 +414,5 @@
     <string name="file_exists_reuse">Ten plik już istnieje.\nCzy chcesz go ponownie wykorzystać czy zrobić jego kopię?</string>
     <string name="existing_name">Istniejąca już nazwa</string>
     <string name="invalid_name">Nieważna nazwa</string>
+    <string name="shrink_path">Skrócić drogę do pliku</string>
 </resources>

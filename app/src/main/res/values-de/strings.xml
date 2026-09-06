@@ -381,7 +381,7 @@
     <string name="device_date">Datum des Geräts</string>
     <string name="years">Jahre</string>
     <string name="max_life_span">Maximale Lebensspanne</string>
-    <string name="tree_settings">Stambaum Einstellungen</string>
+    <string name="tree_settings">Stammbaum Einstellungen</string>
     <string name="fixed_date">Festes Datum</string>
     <string name="current_date">Aktuelles Datum</string>
     <string name="birthday">Geburtstag</string>
@@ -417,4 +417,7 @@
     <string name="file_exists_reuse">Diese Datei existiert bereits.\nMöchten Sie sie wiederverwenden oder eine Kopie erstellen?</string>
     <string name="use_existing">Vorhandene Datei wiederverwenden</string>
     <string name="make_copy">Kopie erstellen</string>
+    <string name="shrink_path">Den Weg zur Datei verkürzen</string>
+    <string name="invalid_date">Ungültiges GEDCOM Datum.</string>
+    <string name="interpreted">Interpretiert</string>
 </resources>

@@ -399,4 +399,27 @@
     <string name="origin_family">Famille d\'origine</string>
     <string name="adoptive_family">Famille adoptive</string>
     <string name="paternal_family">Famille paternelle</string>
+    <string name="foster_family">Famille d\'accueil</string>
+    <string name="recover">Restaurer</string>
+    <string name="backup_trees">Sauvegarder les arbres sélectionnés</string>
+    <string name="own_family">Famille propre</string>
+    <string name="notification_time">Date de notification de naissance</string>
+    <string name="search_duplicates">Chercher des doublons</string>
+    <string name="skip">Eviter</string>
+    <string name="yes_to_all">Oui pour le reste</string>
+    <string name="no_to_all">Non pour le reste</string>
+    <string name="make_media">Créer un média</string>
+    <string name="copy_app_storage">Copier vers un stockage</string>
+    <string name="make_shared_media">Créer un média partagé</string>
+    <string name="existing_name">Nom déjà existant</string>
+    <string name="file_exists_reuse">Le fichier existe déjà.\nVoulez-vous le réutiliser ou en faire un copie ?</string>
+    <string name="use_existing">Réutiliser l\'existant</string>
+    <string name="backup_folder">Répertoire de sauvegarde</string>
+    <string name="invalid_name">Nom invalide</string>
+    <string name="make_copy">Faire un copie</string>
+    <string name="duplicates_lines">lignes en doublon</string>
+    <string name="local_backup">Sauvegarde locale</string>
+    <string name="shrink_path">Réduire le chemin du fichier</string>
+    <string name="choose_disable_backup">Choisir un répertoire de sauvegarde ou déactiver la sauvegarde.\nVous pourrez la réactiver plus tard.</string>
+    <string name="invalid_date">Date GEDCOM invalide.</string>
 </resources>

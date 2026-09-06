@@ -51,7 +51,7 @@
     <string name="add">Lägg till</string>
     <string name="confirm">Bekräfta</string>
     <string name="replace">Byt ut</string>
-    <string name="uncles_great_uncles">Morföräldrar och farbröder</string>
+    <string name="uncles_great_uncles">Mor- och farbröder</string>
     <string name="ancestors">Förfäder</string>
     <string name="partners">Partners</string>
     <string name="descendants">Ättlingar</string>
@@ -186,7 +186,7 @@
     <string name="telephone">Telefon</string>
     <string name="fax">Fax</string>
     <string name="date">Datum</string>
-    <string name="destination">Mål</string>
+    <string name="destination">Destination</string>
     <string name="time">Tid</string>
     <string name="media_folders">Media mappar</string>
     <string name="share_with">Dela med</string>
@@ -201,7 +201,7 @@
     <string name="this_is_root">%s är huvud person i trädet.</string>
     <string name="relatives">Släktingar</string>
     <string name="birth">Födelse</string>
-    <string name="christening">Barndop</string>
+    <string name="christening">Dop</string>
     <string name="name">Namn</string>
     <string name="ex_spouse">Ex-make/maka</string>
     <string name="partner">Partner</string>
@@ -399,4 +399,19 @@
     <string name="auto_save">Automatiskt sparande</string>
     <string name="max_life_span">Maximal livslängd</string>
     <string name="make_shared_media">Skapa delat media</string>
+    <string name="source_note">Källnotering</string>
+    <string name="inexistent_source_citation">Källhänvisning saknas</string>
+    <string name="link_shared_note">Länka delad anteckning</string>
+    <string name="new_shared_note">Ny delad anteckning</string>
+    <string name="invalid_date">Ogiltigt GEDCOM-datum.</string>
+    <string name="shrink_path">Krymp filsökvägen</string>
+    <string name="into">Inuti</string>
+    <string name="copy_app_storage">Kopiera till applagring</string>
+    <string name="existing_name">Namnet finns redan</string>
+    <string name="invalid_name">Ogiltigt namn</string>
+    <string name="shared_notes">Delade notiser</string>
+    <string name="shared_note">Delad notis</string>
+    <string name="file_exists_reuse">Denna fil existerar redan.\nVill du använda den eller göra en kopia?</string>
+    <string name="use_existing">Använd existerande</string>
+    <string name="make_copy">Gör en kopia</string>
 </resources>

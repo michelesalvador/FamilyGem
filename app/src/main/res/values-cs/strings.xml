@@ -417,4 +417,12 @@
     <string name="copy_app_storage">Kopírovat do úložiště aplikace</string>
     <string name="existing_name">Již existující název</string>
     <string name="invalid_name">Neplatný název</string>
+    <string name="shrink_path">Zkrátit cestu k souboru</string>
+    <string name="invalid_date">Neplatná data GEDCOM.</string>
+    <string name="interpreted">Interpretované</string>
+    <string name="husband_age">Manželův věk</string>
+    <string name="wife_age">Manželčin věk</string>
+    <string name="less_than">Méně než</string>
+    <string name="more_than">Více než</string>
+    <string name="invalid_age">Neplatný údaj o věku v souboru GEDCOM.</string>
 </resources>

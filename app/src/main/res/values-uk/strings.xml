@@ -417,4 +417,5 @@
     <string name="existing_name">Вже існуюча назва</string>
     <string name="copy_app_storage">Копіювати в сховище програми</string>
     <string name="invalid_name">Недійсне ім\'я</string>
+    <string name="shrink_path">Зменшити шлях до файлу</string>
 </resources>

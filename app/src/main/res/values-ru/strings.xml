@@ -414,4 +414,8 @@
     <string name="use_existing">Повторно использовать существующий</string>
     <string name="make_copy">Сделать копию</string>
     <string name="file_exists_reuse">Этот файл уже существует.\nВы хотите использовать его повторно или сделать копию?</string>
+    <string name="shrink_path">Сократить путь к файлу</string>
+    <string name="copy_app_storage">Копировать в хранилище приложения</string>
+    <string name="existing_name">Уже существующее название</string>
+    <string name="invalid_name">Недействительное название</string>
 </resources>

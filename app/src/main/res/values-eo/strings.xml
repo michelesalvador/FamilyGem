@@ -411,4 +411,8 @@
     <string name="person_birthday">La naskiĝtago de ĉiu vivanta persono.</string>
     <string name="png_exported_ok">PNG eksportita.</string>
     <string name="numbers">Nombroj</string>
+    <string name="existing_name">Nomo jam ekzistas</string>
+    <string name="invalid_name">Nevalida nomo</string>
+    <string name="file_exists_reuse">Tiu dosiero jam ekzistas.\nĈu vi volas reuzi ĝin aŭ fari kopion?</string>
+    <string name="use_existing">Reuzi ekzistantan</string>
 </resources>
