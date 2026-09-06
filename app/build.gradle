@@ -29,8 +29,8 @@ android {
         targetSdk = 37.1
         versionCode = 28
         versionName = '1.2.0.8'
-        resourceConfigurations += ['ar', 'bg', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn',
-                                   'lt', 'mr', 'nb', 'nl', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'sv', 'ta', 'ti', 'tr', 'uk', 'vi', 'zh']
+        resourceConfigurations += ['ar', 'bg', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'lt',
+                                   'mr', 'nb', 'nl', 'ota', 'pa-rPK', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'sv', 'ta', 'ti', 'tr', 'uk', 'vi', 'zh']
         def passkey = ''
         if (credential) {
             passkey = credential['passkey']
