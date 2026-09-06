@@ -86,7 +86,7 @@
     <string name="trees">Árvores</string>
     <string name="revert">Desfazer mudanças</string>
     <string name="drawer_close">Fechar gaveta de navegação</string>
-    <string name="drawer_open">Abra a gaveta de navegação</string>
+    <string name="drawer_open">Abrir a gaveta de navegação</string>
     <string name="existing_family">Família já existente</string>
     <string name="new_family_of">Nova família de %s</string>
     <string name="extension">Extensão</string>
@@ -409,4 +409,12 @@
     <string name="yes_to_all">Sim para todos restantes</string>
     <string name="no_to_all">Não para todos restantes</string>
     <string name="numbers">Números</string>
+    <string name="shrink_path">Reduzir caminho do arquivo</string>
+    <string name="copy_app_storage">Copiar para armazenamento do aplicativo</string>
+    <string name="existing_name">Nome já existente</string>
+    <string name="invalid_name">Nome inválido</string>
+    <string name="file_exists_reuse">Este arquivo já existe.\nGostaria de reutilizá-lo ou fazer uma cópia?</string>
+    <string name="use_existing">Reutilizar existente</string>
+    <string name="make_copy">Fazer uma cópia</string>
+    <string name="invalid_date">Data GEDCOM inválida.</string>
 </resources>

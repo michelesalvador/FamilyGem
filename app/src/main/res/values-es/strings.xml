@@ -348,7 +348,7 @@
     <string name="uncles_cousins">Tíos y primos</string>
     <string name="partners">Parejas</string>
     <string name="family_as">Familia (como %s)</string>
-    <string name="living_apart_together">Viviente aparte junto</string>
+    <string name="living_apart_together">En pareja viviendo separados</string>
     <string name="system_language">Lenguaje del sistema</string>
     <string name="lineage">Linaje</string>
     <string name="adopted">Adoptado/a</string>
@@ -408,4 +408,12 @@
     <string name="skip">Omitir</string>
     <string name="yes_to_all">Si a todo lo demás</string>
     <string name="duplicates_lines">Líneas de duplicados</string>
+    <string name="shrink_path">Reducir la ruta del archivo</string>
+    <string name="copy_app_storage">Copiar al almacenamiento de la aplicación</string>
+    <string name="existing_name">Nombre ya existente</string>
+    <string name="invalid_name">Nombre invalido</string>
+    <string name="invalid_date">Fecha GEDCOM inválida.</string>
+    <string name="make_copy">Hacer una copia</string>
+    <string name="file_exists_reuse">Este archivo ya existe\n¿Quieres reutilizarlo o hacer una copia?</string>
+    <string name="use_existing">Reutilizar existente</string>
 </resources>

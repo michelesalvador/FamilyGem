@@ -407,8 +407,15 @@
     <string name="disable">禁用</string>
     <string name="backup_folder">备份文件夹</string>
     <string name="search_duplicates">搜索重复项</string>
-    <string name="recover">修复</string>
+    <string name="recover">恢复</string>
     <string name="yes_to_all">全部应用是</string>
     <string name="no_to_all">全部应用否</string>
     <string name="person_birthday">每一个在世之人的生日。</string>
+    <string name="shrink_path">收缩文件路径</string>
+    <string name="copy_app_storage">复制到应用存储</string>
+    <string name="existing_name">已存在的名字</string>
+    <string name="invalid_name">无效的名字</string>
+    <string name="make_copy">创建副本</string>
+    <string name="file_exists_reuse">该文件已存在。\n您要重复使用还是复制？</string>
+    <string name="use_existing">重复使用现有的</string>
 </resources>

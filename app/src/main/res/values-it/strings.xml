@@ -280,7 +280,7 @@
     <string name="value">Valore</string>
     <string name="type">Tipo</string>
     <string name="prefix">Prefisso</string>
-    <string name="given">Prenome</string>
+    <string name="given">Nome</string>
     <string name="nickname">Soprannome</string>
     <string name="surname_prefix">Prefisso cognome</string>
     <string name="suffix">Suffisso</string>

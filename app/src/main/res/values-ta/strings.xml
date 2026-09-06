@@ -406,4 +406,14 @@
     <string name="birth_place">பிறந்த இடம்</string>
     <string name="death_date">இறப்பு தேதி</string>
     <string name="death_place">மரண இடம்</string>
+    <string name="duplicates_lines">கோடுகள் நகல்</string>
+    <string name="shrink_path">கோப்பு பாதையை சுருக்கவும்</string>
+    <string name="copy_app_storage">நகலெடு பெறுநர் பயன்பாடு storage</string>
+    <string name="existing_name">ஏற்கனவே இருக்கும் பெயர்</string>
+    <string name="invalid_name">செல்லுபடியாகாத பெயர்</string>
+    <string name="file_exists_reuse">இந்த கோப்பு ஏற்கனவே உள்ளது. \nநீங்கள் அதை மீண்டும் பயன்படுத்த விரும்புகிறீர்களா அல்லது நகலை உருவாக்க விரும்புகிறீர்களா?</string>
+    <string name="use_existing">மீண்டும் பயன்படுத்தவும்</string>
+    <string name="make_copy">ஒரு நகலை உருவாக்குங்கள்</string>
+    <string name="husband_age">கணவர் வயது</string>
+    <string name="wife_age">மனைவி வயது</string>
 </resources>
