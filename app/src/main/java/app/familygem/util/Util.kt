@@ -82,29 +82,22 @@ object Util {
         }
     }
 
-    /**
-     * Returns encrypted shared preferences for API 23+, otherwise normal shared preferences.
-     * @return Null in case of error
-     */
+    /** @return Encrypted shared preferences or null in case of error */
     fun getSharedPreferences(context: Context): SharedPreferences? {
         val fileName = "credential"
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                val masterKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
-                EncryptedSharedPreferences.create(
-                    context, fileName, masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                )
-            } catch (e: Exception) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    context.deleteSharedPreferences(fileName) // Deletes them since they are probably invalid
-                }
-                e.printStackTrace()
-                null
+        return try {
+            val masterKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
+            EncryptedSharedPreferences.create(
+                context, fileName, masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                context.deleteSharedPreferences(fileName) // Deletes them since they are probably invalid
             }
-        } else {
-            context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
+            e.printStackTrace()
+            null
         }
     }
 }

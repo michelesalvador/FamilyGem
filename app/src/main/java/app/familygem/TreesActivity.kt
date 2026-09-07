@@ -201,9 +201,7 @@ class TreesActivity : AppCompatActivity() {
                 treeView.setOnDragListener { view, event ->
                     when (event.action) {
                         DragEvent.ACTION_DRAG_ENTERED -> {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                treeLayout.foreground = ResourcesCompat.getDrawable(resources, R.drawable.line_above, null)
-                            }
+                            treeLayout.foreground = ResourcesCompat.getDrawable(resources, R.drawable.line_above, null)
                         }
                         DragEvent.ACTION_DRAG_LOCATION -> {
                             val touchY = view.top + event.y // Y coordinate of touch event inside the current viewport
@@ -214,9 +212,7 @@ class TreesActivity : AppCompatActivity() {
                             }
                         }
                         DragEvent.ACTION_DRAG_EXITED, DragEvent.ACTION_DRAG_ENDED -> {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                treeLayout.foreground = null
-                            }
+                            treeLayout.foreground = null
                         }
                         DragEvent.ACTION_DROP -> {
                             val draggedTree = event.localState as Settings.Tree

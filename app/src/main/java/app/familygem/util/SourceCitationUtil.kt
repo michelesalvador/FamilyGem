@@ -1,7 +1,6 @@
 package app.familygem.util
 
 import android.content.Intent
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -50,7 +49,7 @@ object SourceCitationUtil {
                 val titleView = LayoutInflater.from(layout.context).inflate(R.layout.notes_title, layout, false) as TextView
                 titleView.setText(R.string.sources)
                 layout.addView(titleView)
-                if (layout.context is ProfileActivity && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // profile.FactsFragment
+                if (layout.context is ProfileActivity) { // profile.FactsFragment
                     titleView.setTextAppearance(R.style.AppTheme_LittleTitle)
                 }
             }

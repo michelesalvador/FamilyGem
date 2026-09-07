@@ -2,7 +2,6 @@ package app.familygem.util
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
@@ -53,7 +52,7 @@ object NoteUtil {
         if (level == Level.DETAILED && (container.noteRefs.isNotEmpty() || container.notes.isNotEmpty())) {
             val titleView = LayoutInflater.from(layout.context).inflate(R.layout.notes_title, layout, false)
             layout.addView(titleView)
-            if (layout.context is ProfileActivity && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // profile.FactsFragment
+            if (layout.context is ProfileActivity) { // profile.FactsFragment
                 (titleView as TextView).setTextAppearance(R.style.AppTheme_LittleTitle)
             }
         }

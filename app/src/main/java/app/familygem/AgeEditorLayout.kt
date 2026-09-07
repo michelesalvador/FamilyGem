@@ -1,7 +1,6 @@
 package app.familygem
 
 import android.content.Context
-import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -126,15 +125,6 @@ class AgeEditorLayout(context: Context, set: AttributeSet?) : LinearLayout(conte
     }
 
     private fun preparePicker(picker: NumberPicker) {
-        // Removes the divider blue lines on API <= 22
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            try {
-                val field = NumberPicker::class.java.getDeclaredField("mSelectionDivider")
-                field.isAccessible = true
-                field.set(picker, null)
-            } catch (_: Exception) {
-            }
-        }
         // Fixes the bug https://issuetracker.google.com/issues/37055335
         picker.isSaveFromParentEnabled = false
     }

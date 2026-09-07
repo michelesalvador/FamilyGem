@@ -120,7 +120,7 @@
     </style>
 
     <style name="AppTheme.Wheel.TransparentLines">
-        <!-- Hides the divider lines from API 23 -->
+        <!-- Hides the divider lines -->
         <item name="colorControlNormal">@android:color/transparent</item>
     </style>
 
