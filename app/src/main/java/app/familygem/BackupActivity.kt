@@ -67,8 +67,7 @@ class BackupActivity : AppCompatActivity() {
             backupToolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
             backupToolbar.inflateMenu(R.menu.switcher)
             val item = backupToolbar.menu.findItem(R.id.switch_item)
-            item.setActionView(R.layout.switch_layout)
-            val switch = item.actionView!!.findViewById<SwitchCompat>(R.id.switch_widget)
+            val switch = item.actionView as SwitchCompat
             switch.isChecked = Global.settings.backup
             switch.setOnCheckedChangeListener { _, isChecked ->
                 Global.settings.backup = isChecked
