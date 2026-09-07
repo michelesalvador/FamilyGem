@@ -57,8 +57,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /** List of all people of the tree, searchable and sortable. */
 class PersonsFragment : BaseFragment() {
-    private lateinit var allPeople: MutableList<PersonWrapper> // The complete list of people
-    private var selectedPeople: MutableList<PersonWrapper> = ArrayList() // Some persons selected by the search feature
+    private var allPeople = mutableListOf<PersonWrapper>() // The complete list of people
+    private var selectedPeople = mutableListOf<PersonWrapper>() // Some persons selected by the search feature
     private val adapter = PeopleAdapter()
     private lateinit var progress: ProgressView
     private var prepareJob: Job? = null
