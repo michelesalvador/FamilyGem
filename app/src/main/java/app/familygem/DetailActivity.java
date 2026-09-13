@@ -76,7 +76,6 @@ import app.familygem.detail.FamilyActivity;
 import app.familygem.detail.MediaActivity;
 import app.familygem.detail.NameActivity;
 import app.familygem.detail.NoteActivity;
-import app.familygem.detail.SourceCitationActivity;
 import app.familygem.detail.SubmitterActivity;
 import app.familygem.main.MainActivity;
 import app.familygem.main.RepositoriesFragment;
@@ -997,7 +996,7 @@ public abstract class DetailActivity extends BaseActivity {
         } else if (id == 5) { // Choose image
             FileUtil.INSTANCE.displayFileChooser(this, chooseMediaLauncher);
         } else if (id == 6) { // Media folders
-            startActivity(new Intent(this, MediaFoldersActivity.class).putExtra(Extra.TREE_ID, Global.settings.openTree));
+            startActivity(new Intent(this, MediaFoldersActivity.class));
         } else if (id == 7) { // Make simple media
             Object[] modifiedObjects = MediaUtil.INSTANCE.makeSimpleMedia((Media)object);
             TreeUtil.INSTANCE.save(true, modifiedObjects);

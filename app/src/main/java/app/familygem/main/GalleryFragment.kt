@@ -28,7 +28,6 @@ import app.familygem.ProgressView
 import app.familygem.R
 import app.familygem.constant.Choice
 import app.familygem.constant.Destination
-import app.familygem.constant.Extra
 import app.familygem.util.ChangeUtil
 import app.familygem.util.FileUtil
 import app.familygem.util.MediaUtil
@@ -197,7 +196,7 @@ class GalleryFragment : BaseFragment() {
 
     override fun selectItem(id: Int) {
         when (id) {
-            0 -> startActivity(Intent(context, MediaFoldersActivity::class.java).putExtra(Extra.TREE_ID, Global.settings.openTree))
+            0 -> startActivity(Intent(context, MediaFoldersActivity::class.java))
             1 -> {
                 progress.visibility = View.VISIBLE
                 copyJob = lifecycleScope.launch(IO) { copyFilesToTreeStorage() }

@@ -15,7 +15,7 @@ import java.io.File
  */
 class FileUri(val context: Context, val media: Media, val treeId: Int = Global.settings.openTree, fileOnly: Boolean = false) {
 
-    private val mediaPath: String? = media.file?.replace('\\', '/')
+    private val mediaPath: String? = media.file?.replace('\\', '/')?.trim()
     var file: File? = null
     var uri: Uri? = null
     var path: String? = null
@@ -29,7 +29,7 @@ class FileUri(val context: Context, val media: Media, val treeId: Int = Global.s
         else null
 
     init {
-        if (!mediaPath.isNullOrBlank()) {
+        if (!mediaPath.isNullOrBlank() && !mediaPath.startsWith("http://") && !mediaPath.startsWith("https://")) {
             file = getFileFromMedia()
             if (!fileOnly && file == null) uri = getUriFromMedia()
             path = file?.absolutePath ?: uri?.path
@@ -69,24 +69,58 @@ class FileUri(val context: Context, val media: Media, val treeId: Int = Global.s
     private fun getUriFromMedia(): Uri? {
         // In Family Gem OBJE.FILE is never a URI: it's always a file path (Windows or Android) or a single filename
         val segments = mediaPath!!.split('/')
+        val projection = arrayOf(
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            DocumentsContract.Document.COLUMN_MIME_TYPE
+        )
+
+        fun findInDir(folderUri: Uri, folder: String, name: String): Pair<String, Boolean>? {
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(folderUri, folder)
+            try {
+                context.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+                    val idCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                    val nameCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                    val mimeCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+                    while (cursor.moveToNext()) {
+                        if (cursor.getString(nameCol) == name) {
+                            return Pair(
+                                cursor.getString(idCol),
+                                cursor.getString(mimeCol) == DocumentsContract.Document.MIME_TYPE_DIR
+                            )
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+            }
+            return null
+        }
         for (uri in Global.settings.getTree(treeId).uris.filterNot { it == null }) {
-            var documentDir = DocumentFile.fromTreeUri(context, Uri.parse(uri))
+            val folderUri = Uri.parse(uri)
+            var folder = DocumentsContract.getTreeDocumentId(folderUri)
             // Relative path or filename only
             for (segment in segments) {
-                val test = documentDir?.findFile(segment)
-                if (test?.isFile == true) return test.uri
-                else if (test?.isDirectory == true) {
-                    relative = true
-                    documentDir = test
+                val found = findInDir(folderUri, folder, segment)
+                if (found != null) {
+                    val (docId, isDir) = found
+                    if (isDir) {
+                        relative = true
+                        folder = docId
+                    } else {
+                        return DocumentsContract.buildDocumentUriUsingTree(folderUri, docId)
+                    }
                 } else break
             }
             // Filename in last segment
-            documentDir?.findFile(segments.last())?.let { if (it.isFile) return it.uri }
+            val foundLast = findInDir(folderUri, folder, segments.last())
+            if (foundLast != null && !foundLast.second) {
+                return DocumentsContract.buildDocumentUriUsingTree(folderUri, foundLast.first)
+            }
         }
         return null
     }
 
-    /** One of [file] or [uri] is null, the other is valid. */
+    /** One of [file] or [uri] is valid. */
     fun exists(): Boolean = file != null || uri != null
 
     /** @return True on successfully renaming the file */

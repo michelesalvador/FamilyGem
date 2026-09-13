@@ -28,7 +28,7 @@ android {
         minSdk = 23
         targetSdk = 37.2
         versionCode = 29
-        versionName = '1.3'
+        versionName = '1.3.0.1'
         resourceConfigurations += ['ar', 'bg', 'ckb', 'cs', 'da', 'de', 'en', 'eo', 'es', 'fa', 'fr', 'hr', 'hu', 'in', 'it', 'iw', 'kn', 'lt',
                                    'mr', 'nb', 'nl', 'ota', 'pa-rPK', 'pl', 'pt', 'ru', 'sk', 'sl', 'sr', 'sv', 'ta', 'ti', 'tr', 'uk', 'vi', 'zh']
         def passkey = ''

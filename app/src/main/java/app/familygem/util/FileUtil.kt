@@ -411,7 +411,9 @@ object FileUtil {
     fun isOwnedDirectory(context: Context, file: File): Boolean {
         val path = file.absolutePath
         for (fileDir in context.getExternalFilesDirs(null).map { it.absolutePath }) if (path.startsWith(fileDir)) return true
-        for (mediaDir in context.externalMediaDirs.map { it.absolutePath }) if (path.startsWith(mediaDir)) return true
+        // From API 36 the folder /Android/media/app.familygem is no longer owned by the app
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            for (mediaDir in context.externalMediaDirs.map { it.absolutePath }) if (path.startsWith(mediaDir)) return true
         return false
     }
 

@@ -13,12 +13,16 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import app.familygem.constant.Extra
+import androidx.lifecycle.lifecycleScope
 import app.familygem.databinding.MediaFoldersActivityBinding
 import app.familygem.util.FileUtil
 import app.familygem.util.Util
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /** Activity where user can set the list of media folders. */
@@ -31,7 +35,7 @@ class MediaFoldersActivity : BaseActivity(R.string.media_folders) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent(MediaFoldersActivityBinding.inflate(layoutInflater).root)
-        treeId = intent.getIntExtra(Extra.TREE_ID, 0)
+        treeId = Global.settings.openTree
         // Sometimes a null dir or uri is stored in settings
         dirs = ArrayList(Global.settings.getTree(treeId).dirs).filterNot { it == null }.toMutableList()
         uris = ArrayList(Global.settings.getTree(treeId).uris).filterNot { it == null }.toMutableList()
@@ -61,15 +65,23 @@ class MediaFoldersActivity : BaseActivity(R.string.media_folders) {
                     contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     val docDir = DocumentFile.fromTreeUri(this, uri)
                     if (docDir != null && docDir.canRead()) {
-                        if (!uris.contains(uri.toString())) {
-                            uris.add(uri.toString())
-                            save()
-                        } else {
-                            Toast.makeText(this, "Already listed.", Toast.LENGTH_LONG).show()
-                            // Maybe the URI is already listed, but was invalid
-                            updateList()
-                            Global.edited = true
+                        val addUri = {
+                            if (!uris.contains(uri.toString())) {
+                                uris.add(uri.toString())
+                                save()
+                            } else {
+                                // Maybe the URI is already listed, but was invalid
+                                updateList()
+                                Global.edited = true
+                            }
                         }
+                        val files = docDir.listFiles().filter { it.isFile && it.name != null }
+                        if (files.isNotEmpty()) {
+                            AlertDialog.Builder(this).setMessage(R.string.copy_files_storage)
+                                .setOnCancelListener { addUri() }
+                                .setNegativeButton(R.string.no) { _, _ -> addUri() }
+                                .setPositiveButton(R.string.yes) { _, _ -> copyFiles(files) }.show()
+                        } else addUri()
                     } else Toast.makeText(this, "Could not read this position.", Toast.LENGTH_LONG).show()
                 }
             } else Toast.makeText(this, R.string.cant_understand_uri, Toast.LENGTH_LONG).show()
@@ -77,7 +89,7 @@ class MediaFoldersActivity : BaseActivity(R.string.media_folders) {
     }
 
     /**
-     * @param uri An URI tree obtained with ACTION_OPEN_DOCUMENT_TREE
+     * @param uri A URI tree obtained with ACTION_OPEN_DOCUMENT_TREE
      * @return The path of the folder or null
      */
     private fun getFolderPathFromUri(uri: Uri): String? {
@@ -112,6 +124,29 @@ class MediaFoldersActivity : BaseActivity(R.string.media_folders) {
             }
         }
         return null
+    }
+
+    /** Copies all [files] to the tree app storage. **/
+    private fun copyFiles(files: List<DocumentFile>) {
+        progressView.visibility = View.VISIBLE
+        lifecycleScope.launch(Dispatchers.IO) {
+            progressView.displayBar("Copying files", files.size.toLong())
+            val appDir = getExternalFilesDir(treeId.toString())
+            var count = 0L
+            for (file in files) {
+                contentResolver.openInputStream(file.uri)?.use { inputStream ->
+                    File(appDir, file.name!!).outputStream().use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                }
+                progressView.progress = ++count
+            }
+            withContext(Dispatchers.Main) {
+                progressView.visibility = View.GONE
+                Toast.makeText(this@MediaFoldersActivity, "$count files copied.", Toast.LENGTH_LONG).show()
+                if (count > 0) onBackPressedDispatcher.onBackPressed()
+            }
+        }
     }
 
     private fun updateList() {

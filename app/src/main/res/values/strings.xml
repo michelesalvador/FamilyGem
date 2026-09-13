@@ -112,6 +112,7 @@
     <string name="media_folders">Media folders</string>
     <string name="media_searched_list">Media files are searched inside these folders:</string>
     <string name="add_device_folder">Add a folder from this device.</string>
+    <string name="copy_files_storage">Copy the files to the app storage?</string>
     <string name="share_sensitive">Sharing sensitive data</string>
     <string name="aware_upload_server">Please be aware that you are going to upload the whole tree to a server online.</string>
     <string name="remind_later">Remind me later</string>
