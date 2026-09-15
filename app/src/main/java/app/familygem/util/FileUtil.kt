@@ -22,10 +22,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.familygem.BuildConfig
 import app.familygem.CropImageActivity
@@ -44,7 +44,6 @@ import app.familygem.main.MainActivity
 import app.familygem.profile.ProfileActivity
 import app.familygem.visitor.MediaContainerList
 import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
@@ -273,93 +272,84 @@ object FileUtil {
         media: Media, imageView: ImageView, options: Int = 0, progressWheel: ProgressBar? = null,
         oldFileUri: FileUri? = null, treeId: Int = Global.settings.openTree, onMediaType: ((Media, Type) -> Unit)? = null
     ): FileUri {
-        fun applyOptions(builder: RequestBuilder<Drawable>) {
+        fun completeDisplay(fileType: Type) {
+            onMediaType?.invoke(media, fileType)
+            progressWheel?.visibility = View.GONE
+            imageView.tag = R.id.tag_object // Used by DiagramFragment to check the image finish loading
+        }
+        onMediaType?.invoke(media, Type.NONE)
+        progressWheel?.visibility = View.VISIBLE
+        val fileUri = oldFileUri ?: FileUri(imageView.context, media, treeId)
+        val glide = Glide.with(imageView.context)
+        val placeholder = if (options and Image.SOURCE != 0) R.drawable.source_image else R.drawable.person_image
+        if (media.file.isNullOrBlank()) {
+            glide.load(placeholder).into(imageView)
+            completeDisplay(Type.PLACEHOLDER)
+        } else {
+            val model = if (fileUri.exists()) previewPdf(imageView.context, fileUri).getOrElse { fileUri.file ?: fileUri.uri } // Local file
+            else media.file // Maybe is an online file
+            val builder = glide.load(model)
+            val listener = object : RequestListener<Drawable> {
+                override fun onResourceReady(
+                    resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
+                ): Boolean {
+                    val fileType = when (model) {
+                        is Bitmap -> Type.PDF
+                        is String -> Type.WEB_IMAGE
+                        else -> { // File or URI
+                            val videoExtensions = arrayOf("mp4", "3gp", "webm", "mkv", "mpg", "mov")
+                            if (videoExtensions.contains(fileUri.extension)) Type.VIDEO else Type.CROPPABLE
+                        }
+                    }
+                    completeDisplay(fileType)
+                    return false
+                }
+
+                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
+                    val coroutineScope = imageView.findViewTreeLifecycleOwner()?.lifecycleScope ?: GlobalScope
+                    if (model is String) { // A generic file on the web
+                        coroutineScope.launch(Dispatchers.IO) {
+                            try {
+                                val connection = URL(model).openConnection() as HttpURLConnection
+                                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                                    withContext(Dispatchers.Main) {
+                                        glide.load(generateIcon(imageView.context, fileUri)).placeholder(placeholder)
+                                            .override(Target.SIZE_ORIGINAL).into(imageView)
+                                        completeDisplay(Type.WEB_ANYTHING)
+                                    }
+                                } else throw Exception()
+                            } catch (_: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    completeDisplay(Type.PLACEHOLDER)
+                                    if (imageView.context is MediaActivity) {
+                                        glide.clear(imageView) // To avoid listener be called twice
+                                        // See https://github.com/bumptech/glide/issues/4571 and https://github.com/bumptech/glide/issues/5337
+                                    }
+                                }
+                            }
+                        }
+                    } else { // A local file with no preview
+                        coroutineScope.launch(Dispatchers.Main) {
+                            glide.load(generateIcon(imageView.context, fileUri)).placeholder(placeholder)
+                                .override(Target.SIZE_ORIGINAL).into(imageView)
+                        }
+                        completeDisplay(Type.DOCUMENT)
+                    }
+                    return false
+                }
+            }
             if (options and Image.DARK != 0) {
                 imageView.setColorFilter(ContextCompat.getColor(imageView.context, R.color.primary_grayed), PorterDuff.Mode.MULTIPLY)
             }
             if (options and Image.BLUR != 0) {
                 builder.override(100, 100).apply(RequestOptions.bitmapTransform(BlurTransformation(4)))
             }
-        }
-
-        fun completeDisplay(fileType: Type) {
-            onMediaType?.invoke(media, fileType)
-            progressWheel?.visibility = View.GONE
-            imageView.tag = R.id.tag_object // Used by DiagramFragment to check the image finish loading
-        }
-
-        onMediaType?.invoke(media, Type.NONE)
-        progressWheel?.visibility = View.VISIBLE
-        val fileUri = oldFileUri ?: FileUri(imageView.context, media, treeId)
-        val glide = Glide.with(imageView)
-        val placeholder = if (options and Image.SOURCE != 0) R.drawable.source_image else R.drawable.person_image
-        val coroutineScope = if (imageView.context is AppCompatActivity) (imageView.context as AppCompatActivity).lifecycleScope else GlobalScope
-        if (fileUri.exists()) {
-            previewPdf(imageView.context, fileUri).onSuccess { bitmap ->
-                val builder = glide.load(bitmap)
-                applyOptions(builder)
-                builder.placeholder(placeholder).into(imageView)
-                completeDisplay(Type.PDF)
-                return fileUri
+            fileUri.path?.let { // A cropped image needs to be reloaded not from cache
+                if (Global.croppedPaths.contains(it)) {
+                    builder.signature(ObjectKey(Global.croppedPaths[it]!!))
+                }
             }
-            val builder = glide.load(fileUri.file ?: fileUri.uri)
-            applyOptions(builder)
-            if (Global.croppedPaths.contains(fileUri.path)) { // A cropped image needs to be reloaded not from cache
-                builder.signature(ObjectKey(Global.croppedPaths[fileUri.path]!!))
-            }
-            builder.placeholder(placeholder).listener(object : RequestListener<Drawable> {
-                override fun onResourceReady(
-                    resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
-                ): Boolean {
-                    // Maybe is a video
-                    val videoExtensions = arrayOf("mp4", "3gp", "webm", "mkv", "mpg", "mov")
-                    val fileType = if (videoExtensions.contains(fileUri.extension)) Type.VIDEO else Type.CROPPABLE
-                    completeDisplay(fileType)
-                    return false
-                }
-
-                // File or URI one is correct, but image can't be displayed (e.g. unsupported format)
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                    // A local file with no preview
-                    coroutineScope.launch(Dispatchers.Main) {
-                        glide.load(generateIcon(imageView.context, fileUri)).placeholder(placeholder).into(imageView)
-                    }
-                    completeDisplay(Type.DOCUMENT)
-                    return false
-                }
-            }).into(imageView)
-        } else if (!media.file.isNullOrBlank()) { // File and URI are both null
-            // Maybe is an image online
-            val builder = glide.load(media.file)
-            applyOptions(builder)
-            builder.placeholder(placeholder).listener(object : RequestListener<Drawable> {
-                override fun onResourceReady(
-                    resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
-                ): Boolean {
-                    completeDisplay(Type.WEB_IMAGE)
-                    return false
-                }
-
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        try {
-                            val connection = URL(media.file).openConnection() as HttpURLConnection
-                            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                                withContext(Dispatchers.Main) {
-                                    glide.load(generateIcon(imageView.context, fileUri)).placeholder(placeholder).into(imageView)
-                                    completeDisplay(Type.WEB_ANYTHING)
-                                }
-                            } else throw Exception()
-                        } catch (_: Exception) {
-                            withContext(Dispatchers.Main) { completeDisplay(Type.PLACEHOLDER) }
-                        }
-                    }
-                    return false
-                }
-            }).into(imageView)
-        } else { // Media file field is null or blank
-            glide.load(placeholder).into(imageView)
-            completeDisplay(Type.PLACEHOLDER)
+            builder.placeholder(placeholder).listener(listener).into(imageView)
         }
         return fileUri
     }
