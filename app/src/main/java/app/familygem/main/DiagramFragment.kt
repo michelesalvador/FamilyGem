@@ -82,6 +82,7 @@ import org.folg.gedcom.model.Person
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
 
@@ -231,10 +232,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             else graphicNodes.add(GraphicPerson(context(), personNode))
         }
         // First layout of cards
-        graphicNodes.forEach {
+        for (node in graphicNodes) {
             ensureActive()
-            it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.AT_MOST)
-            it.layout(0, 0, it.measuredWidth, it.measuredHeight)
+            node.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.AT_MOST)
+            node.layout(0, 0, node.measuredWidth, node.measuredHeight)
         }
         withContext(Dispatchers.Main) {
             // Loads images
@@ -249,10 +250,10 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
         // Waits for images to be loaded
         do {
             ensureActive()
-            delay(100) // Anyway a little delay is useful to correctly calculate lines and pan to fulcrum
+            delay(100.milliseconds) // Anyway a little delay is useful to correctly calculate lines and pan to fulcrum
             var imageToLoad = false
-            for (it in loadingImages) {
-                if (it.second.tag != R.id.tag_object) {
+            for ((_, imageView) in loadingImages) {
+                if (imageView.tag != R.id.tag_object) {
                     imageToLoad = true
                     break
                 }
@@ -283,12 +284,12 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
             }
         } else { // Two or more persons in the diagram or PDF print
             // Gets the dimensions of each node converting from pixel to dip
-            graphicNodes.forEach {
+            for (node in graphicNodes) {
                 ensureActive()
                 // Second measurement to get final card size
-                it.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
-                it.metric.width = toDp(it.measuredWidth)
-                it.metric.height = toDp(it.measuredHeight)
+                node.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+                node.metric.width = toDp(node.measuredWidth)
+                node.metric.height = toDp(node.measuredHeight)
             }
             graph.initNodes() // Initializes nodes and lines
             // Adds bond nodes
@@ -500,14 +501,14 @@ class DiagramFragment : BaseFragment(R.layout.diagram_fragment) {
                 oval.textSize = 13f
                 oval.text = bond.marriageYear
                 val yearParams = LayoutParams(LayoutParams.MATCH_PARENT, toPx(Util.MARRIAGE_HEIGHT.toFloat()))
-                yearParams.topMargin = toPx(bond.centerRelY() - Util.MARRIAGE_HEIGHT / 2)
+                yearParams.topMargin = toPx(bond.height / 2 - Util.MARRIAGE_HEIGHT / 2)
                 bondLayout.addView(oval, yearParams)
             } else {
                 hearth = View(context)
                 hearth!!.setBackgroundResource(R.drawable.diagram_hearth)
                 val diameter = toPx((if (familyNode.mini) Util.MINI_HEARTH_DIAMETER else Util.HEARTH_DIAMETER).toFloat())
                 val hearthParams = LayoutParams(diameter, diameter)
-                hearthParams.topMargin = toPx(familyNode.centerRelY()) - diameter / 2
+                hearthParams.topMargin = toPx(familyNode.height / 2) - diameter / 2
                 hearthParams.addRule(CENTER_HORIZONTAL)
                 bondLayout.addView(hearth, hearthParams)
             }

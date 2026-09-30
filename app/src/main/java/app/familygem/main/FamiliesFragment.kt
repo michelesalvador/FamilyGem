@@ -256,17 +256,17 @@ class FamiliesFragment : BaseFragment(R.layout.recyclerview) {
         }
 
         private fun writeParents(): String {
-            var parents = StringBuilder()
-            family.getSpouses().forEach { parents.append(U.properName(it)).append(",\n") }
-            if (parents.isNotEmpty()) parents = StringBuilder(parents.substring(0, parents.length - 2)) // Just to remove the final ',\n'
-            return parents.toString()
+            val builder = StringBuilder()
+            family.getSpouses().forEach { builder.append(U.properName(it)).append(",\n") }
+            if (builder.isNotEmpty()) builder.delete(builder.length - 2, builder.length)
+            return builder.toString()
         }
 
         private fun writeChildren(): String {
-            var children = java.lang.StringBuilder()
-            family.getChildren(Global.gc).forEach { children.append(U.properName(it)).append(",\n") }
-            if (children.isNotEmpty()) children = java.lang.StringBuilder(children.substring(0, children.length - 2))
-            return children.toString()
+            val builder = StringBuilder()
+            family.getChildren(Global.gc).forEach { builder.append(U.properName(it)).append(",\n") }
+            if (builder.isNotEmpty()) builder.delete(builder.length - 2, builder.length)
+            return builder.toString()
         }
 
         private fun findSurname(): String? {

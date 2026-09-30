@@ -4,7 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusableInTouchMode="true"
-    android:padding="16dp">
+    android:paddingStart="16dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="40dp">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/editor_nameLabel"

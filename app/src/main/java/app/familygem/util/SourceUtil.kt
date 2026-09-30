@@ -32,7 +32,7 @@ fun Source.getMainText(level: Level = Level.DETAILED): String {
     }
 
     val builder = StringBuilder()
-    val divider = if (level == Level.DETAILED || level == Level.MEDIUM) "\n" else " "
+    val divider = if (level == Level.DETAILED || level == Level.MEDIUM) '\n' else ' '
     if (abbreviation != null) builder.append(abbreviation).append(divider)
     if (title != null) builder.append(reduce(title)).append(divider)
     if (author != null) builder.append(reduce(author)).append(divider)
