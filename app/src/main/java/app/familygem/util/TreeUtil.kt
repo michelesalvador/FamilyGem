@@ -49,6 +49,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.InputStream
 import java.io.PrintWriter
+import java.util.ArrayDeque
 import java.util.Locale
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -294,52 +295,71 @@ object TreeUtil {
         return null
     }
 
-    private var generationMin = 0
-    private var generationMax = 0
-    private const val GENERATION = "gen"
-
     /** @return Total number of generations of the tree starting from a root person */
     fun countGenerations(gedcom: Gedcom, tree: Tree?): Int {
         if (gedcom.people.isEmpty()) return 0
-        generationMin = 0
-        generationMax = 0
+        val genKey = "gen"
+        var generationMin = 0
+        var generationMax = 0
         getRoot(gedcom, tree)?.let { root ->
-            ascendGenerations(root, gedcom, 0)
-            descendGenerations(root, gedcom, 0)
+            val queue = ArrayDeque<Person>()
+            queue.add(root)
+            root.putExtension(genKey, 0)
+            while (queue.isNotEmpty()) {
+                val person = queue.remove()
+                val generation = person.getExtension(genKey) as Int
+                if (generation < generationMin) generationMin = generation
+                if (generation > generationMax) generationMax = generation
+                // Parents (-1) and Siblings (0)
+                person.getParentFamilies(gedcom).forEach { family ->
+                    family.getHusbands(gedcom).forEach { father ->
+                        if (father.getExtension(genKey) == null) {
+                            father.putExtension(genKey, generation - 1)
+                            queue.add(father)
+                        }
+                    }
+                    family.getWives(gedcom).forEach { mother ->
+                        if (mother.getExtension(genKey) == null) {
+                            mother.putExtension(genKey, generation - 1)
+                            queue.add(mother)
+                        }
+                    }
+                    family.getChildren(gedcom).forEach { sibling ->
+                        if (sibling.getExtension(genKey) == null) {
+                            sibling.putExtension(genKey, generation)
+                            queue.add(sibling)
+                        }
+                    }
+                }
+                // Partners (0) and Children (+1)
+                person.getSpouseFamilies(gedcom).forEach { family ->
+                    family.getHusbands(gedcom).forEach { husband ->
+                        if (husband.getExtension(genKey) == null) {
+                            husband.putExtension(genKey, generation)
+                            queue.add(husband)
+                        }
+                    }
+                    family.getWives(gedcom).forEach { wife ->
+                        if (wife.getExtension(genKey) == null) {
+                            wife.putExtension(genKey, generation)
+                            queue.add(wife)
+                        }
+                    }
+                    family.getChildren(gedcom).forEach { child ->
+                        if (child.getExtension(genKey) == null) {
+                            child.putExtension(genKey, generation + 1)
+                            queue.add(child)
+                        }
+                    }
+                }
+            }
         }
-        // Removes from persons the GENERATION extension to allow later counting
+        // Removes extensions to allow later counting
         gedcom.people.forEach {
-            it.extensions.remove(GENERATION)
+            it.extensions.remove(genKey)
             if (it.extensions.isEmpty()) it.extensions = null
         }
         return 1 - generationMin + generationMax
-    }
-
-    /** Receives a person and finds the number of the earliest generation of ancestors. */
-    private fun ascendGenerations(person: Person, gedcom: Gedcom, generation: Int) {
-        if (generation < generationMin) generationMin = generation
-        // Adds the extension to indicate that passed by this person
-        person.putExtension(GENERATION, generation)
-        // If person is a progenitor, goes to count the generations of descendants
-        if (person.getParentFamilies(gedcom).isEmpty()) descendGenerations(person, gedcom, generation)
-        person.getParentFamilies(gedcom).forEach { family ->
-            // Intercepts also any siblings
-            family.getChildren(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { descendGenerations(it, gedcom, generation) }
-            family.getHusbands(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation - 1) }
-            family.getWives(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation - 1) }
-        }
-    }
-
-    /** Receives a person and finds the number of the earliest generation of descendants. */
-    private fun descendGenerations(person: Person, gedcom: Gedcom, generation: Int) {
-        if (generation > generationMax) generationMax = generation
-        person.putExtension(GENERATION, generation)
-        person.getSpouseFamilies(gedcom).forEach { family ->
-            // Identifies also other spouses
-            family.getWives(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation) }
-            family.getHusbands(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { ascendGenerations(it, gedcom, generation) }
-            family.getChildren(gedcom).filter { it.getExtension(GENERATION) == null }.forEach { descendGenerations(it, gedcom, generation + 1) }
-        }
     }
 
     /** Imports a GEDCOM provided by an URI. */
