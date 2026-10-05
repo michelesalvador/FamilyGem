@@ -15,6 +15,7 @@ import org.folg.gedcom.model.Media;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
@@ -135,6 +136,11 @@ public class Global extends Application {
             settings.backup = true;
             settings.backupUri = BackupViewModel.NO_URI;
             for (Settings.Tree tree : settings.trees) tree.backup = true;
+            toBeSaved = true;
+        }
+        // hideBanner was introduced in version 1.3.1
+        if (settings.hideBanner == null) {
+            settings.hideBanner = new HashSet<>(2);
             toBeSaved = true;
         }
         if (toBeSaved) settings.save();

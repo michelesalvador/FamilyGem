@@ -437,7 +437,7 @@ object TreeUtil {
                     }
                     else -> {
                         Util.toast(exception.localizedMessage)
-                        onRefresh()
+                        withContext(Main) { onReset() }
                     }
                 }
             }.onSuccess { launchUnzipTree(scope, context, it, null, progressView, onRefreshEnriched, onReset) }

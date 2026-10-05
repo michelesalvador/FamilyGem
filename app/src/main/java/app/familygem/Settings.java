@@ -11,6 +11,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +57,12 @@ public class Settings {
      * Displays or hides all advanced tools.
      */
     public boolean expert;
+    /**
+     * TreesActivity banners closed with X button that must no more be displayed.
+     * 0: Shared tree banner
+     * 1: Local backup banner
+     */
+    Set<Integer> hideBanner;
     public boolean shareAgreement;
     public boolean premium;
     public DiagramSettings diagram;
@@ -71,6 +78,7 @@ public class Settings {
         notifyTime = "12:00";
         backup = true;
         backupUri = BackupViewModel.NO_URI;
+        hideBanner = new HashSet<>(2);
         diagram = new DiagramSettings().init();
     }
 

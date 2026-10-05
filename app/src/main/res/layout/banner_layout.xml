@@ -24,7 +24,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/premium_name"
+                android:id="@+id/banner_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/local_backup"
@@ -32,6 +32,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/banner_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
@@ -58,5 +59,12 @@
                     android:text="@string/disable" />
             </LinearLayout>
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/banner_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            app:srcCompat="@drawable/ex" />
     </androidx.cardview.widget.CardView>
 </FrameLayout>

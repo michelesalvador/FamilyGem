@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.RelativeLayout
 import android.widget.SimpleAdapter
@@ -78,6 +79,7 @@ class TreesActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.trees_activity)
         val listView = findViewById<ListView>(R.id.trees_list)
+        listView.setHeaderDividersEnabled(false)
         progress = findViewById(R.id.trees_progress)
         welcome = FabPopup(this, findViewById(R.id.fab_box), R.string.tap_add_tree)
         exporter = Exporter(this, progress)
@@ -87,7 +89,7 @@ class TreesActivity : AppCompatActivity() {
         if (referrer != null && referrer == "start") retrieveReferrer()
         // If in the referrer has been stored a dateID (which will be annulled as soon as used)
         else if (referrer != null && referrer.matches("\\d{14}".toRegex())) {
-            showSharedTreeDialog(referrer) {}
+            showSharedTreeBanner(referrer) {}
         } // If there are no trees
         else if (Global.settings.trees.isEmpty()) welcome.show()
 
@@ -259,13 +261,20 @@ class TreesActivity : AppCompatActivity() {
         updateList()
 
         // Banner to choose backup folder or to disable backup
-        if (Global.settings.backupUri == BackupViewModel.NO_URI && Global.settings.backup && Global.settings.trees.isNotEmpty()) {
+        if (Global.settings.backupUri == BackupViewModel.NO_URI && Global.settings.backup
+            && Global.settings.trees.isNotEmpty() && !Global.settings.hideBanner.contains(1)
+        ) {
             val bannerView = layoutInflater.inflate(R.layout.banner_layout, listView, false)
             bannerView.findViewById<Button>(R.id.banner_choose).setOnClickListener {
                 startActivity(Intent(this, BackupActivity::class.java))
             }
             bannerView.findViewById<Button>(R.id.banner_disable).setOnClickListener {
                 Global.settings.backup = false
+                Global.settings.save()
+                listView.removeHeaderView(bannerView)
+            }
+            bannerView.findViewById<ImageView>(R.id.banner_close).setOnClickListener {
+                Global.settings.hideBanner.add(1)
                 Global.settings.save()
                 listView.removeHeaderView(bannerView)
             }
@@ -314,20 +323,36 @@ class TreesActivity : AppCompatActivity() {
         }
     }
 
-    /** Displays an AlertDialog that asks to download the shared tree. */
-    private fun showSharedTreeDialog(dateId: String, onCancel: () -> Unit) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.a_new_tree)
-            .setMessage(R.string.you_can_download)
-            .setNeutralButton(R.string.cancel) { _, _ -> onCancel() }
-            .setOnCancelListener { onCancel() }
-            .setPositiveButton(R.string.download) { _, _ ->
+    /** Displays a banner that asks to download the shared tree. */
+    private fun showSharedTreeBanner(dateId: String, onCancel: () -> Unit) {
+        if (!Global.settings.hideBanner.contains(0)) {
+            val listView = findViewById<ListView>(R.id.trees_list)
+            val bannerView = layoutInflater.inflate(R.layout.banner_layout, listView, false)
+            bannerView.findViewById<TextView>(R.id.banner_title).setText(R.string.a_new_tree)
+            bannerView.findViewById<TextView>(R.id.banner_text).setText(R.string.you_can_download)
+            val downloadButton = bannerView.findViewById<Button>(R.id.banner_choose)
+            downloadButton.setText(R.string.download)
+            downloadButton.setOnClickListener { button ->
+                button.isEnabled = false
                 progress.visibility = View.VISIBLE
                 TreeUtil.launchDownloadSharedTree(lifecycleScope, this, dateId, progress, {
                     progress.visibility = View.GONE
+                    listView.removeHeaderView(bannerView)
                     updateList()
-                }, { progress.visibility = View.GONE })
-            }.show()
+                }, {
+                    button.isEnabled = true
+                    progress.visibility = View.GONE
+                })
+            }
+            bannerView.findViewById<Button>(R.id.banner_disable).visibility = View.GONE
+            bannerView.findViewById<ImageView>(R.id.banner_close).setOnClickListener {
+                Global.settings.hideBanner.add(0)
+                Global.settings.save()
+                onCancel()
+                listView.removeHeaderView(bannerView)
+            }
+            listView.addHeaderView(bannerView)
+        }
     }
 
     val zipBackupLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -506,7 +531,7 @@ class TreesActivity : AppCompatActivity() {
                         val referrer = details.installReferrer
                         if (referrer != null && referrer.matches("\\d{14}".toRegex())) { // It's a dateID
                             Global.settings.referrer = referrer
-                            showSharedTreeDialog(referrer, welcome::show)
+                            showSharedTreeBanner(referrer, welcome::show)
                         } else { // It's anything else
                             Global.settings.referrer = null // We null it so we won't look for it again
                             welcome.show()
