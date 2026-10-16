@@ -307,7 +307,7 @@ object FileUtil {
 
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
                     val coroutineScope = imageView.findViewTreeLifecycleOwner()?.lifecycleScope ?: GlobalScope
-                    if (model is String) { // A generic file on the web
+                    val job = if (model is String) { // A generic file on the web
                         coroutineScope.launch(Dispatchers.IO) {
                             try {
                                 val connection = URL(model).openConnection() as HttpURLConnection
@@ -332,9 +332,10 @@ object FileUtil {
                         coroutineScope.launch(Dispatchers.Main) {
                             glide.load(generateIcon(imageView.context, fileUri)).placeholder(placeholder)
                                 .override(Target.SIZE_ORIGINAL).into(imageView)
+                            completeDisplay(Type.DOCUMENT)
                         }
-                        completeDisplay(Type.DOCUMENT)
                     }
+                    imageView.setTag(R.id.tag_job, job)
                     return false
                 }
             }

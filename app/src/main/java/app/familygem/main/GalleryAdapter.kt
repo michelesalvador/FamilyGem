@@ -21,6 +21,7 @@ import app.familygem.util.FileUtil
 import app.familygem.util.MediaUtil
 import app.familygem.visitor.FindStack
 import app.familygem.visitor.MediaLeaders.MediaWrapper
+import kotlinx.coroutines.Job
 import org.folg.gedcom.model.Media
 import java.util.Locale
 
@@ -56,6 +57,8 @@ class GalleryAdapter(private val mediaList: List<MediaWrapper>) : RecyclerView.A
             view.setTag(R.id.tag_object, media)
             val activity = view.context as AppCompatActivity
             activity.supportFragmentManager.findFragmentById(R.id.main_fragment)!!.registerForContextMenu(view)
+            val existingJob = imageView.getTag(R.id.tag_job) as? Job
+            existingJob?.cancel()
             if (wrapper.fileUri == null)
                 wrapper.fileUri = FileUtil.showImage(media, imageView, wrapper.getOptions(), view.findViewById(R.id.media_progress))
             else FileUtil.showImage(media, imageView, wrapper.getOptions(), view.findViewById(R.id.media_progress), wrapper.fileUri)
