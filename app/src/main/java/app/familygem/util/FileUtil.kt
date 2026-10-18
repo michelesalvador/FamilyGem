@@ -293,9 +293,9 @@ object FileUtil {
                 override fun onResourceReady(
                     resource: Drawable, model: Any, target: Target<Drawable>?, dataSource: DataSource, isFirstResource: Boolean
                 ): Boolean {
-                    val fileType = when (model) {
-                        is Bitmap -> Type.PDF
-                        is String -> Type.WEB_IMAGE
+                    val fileType = when {
+                        fileUri.extension == "pdf" -> Type.PDF
+                        model is String -> Type.WEB_IMAGE
                         else -> { // File or URI
                             val videoExtensions = arrayOf("mp4", "3gp", "webm", "mkv", "mpg", "mov")
                             if (videoExtensions.contains(fileUri.extension)) Type.VIDEO else Type.CROPPABLE
@@ -357,37 +357,50 @@ object FileUtil {
 
     /**
      * Previews the first page of a PDF file from file or URI.
-     * @return Result with the PDF bitmap or exception
+     * @return Result with the PDF cached file, icon file, or exception
      */
-    fun previewPdf(context: Context, fileUri: FileUri): Result<Bitmap> {
+    fun previewPdf(context: Context, fileUri: FileUri): Result<File> {
         return try {
-            if (fileUri.extension == "pdf") {
-                fileUri.fileDescriptor?.use descriptor@{ descriptor ->
-                    PdfRenderer(descriptor).use { renderer ->
-                        renderer.openPage(0).use { page ->
-                            val bitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
-                            // Paints bitmap on white background before rendering
-                            val canvas = Canvas(bitmap)
-                            canvas.drawColor(Color.WHITE)
-                            canvas.drawBitmap(bitmap, 0F, 0F, null)
-                            // Renders PDF page into bitmap
-                            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                            return Result.success(bitmap)
+            if (fileUri.extension != "pdf") throw Exception("Not a PDF")
+            val hash = Integer.toHexString(fileUri.file?.hashCode() ?: fileUri.uri.hashCode())
+            val cacheFile = File(context.cacheDir, "pdf_$hash.webp")
+            if (cacheFile.exists() && cacheFile.length() > 0) {
+                return Result.success(cacheFile)
+            }
+            fileUri.fileDescriptor?.use { descriptor ->
+                PdfRenderer(descriptor).use { renderer ->
+                    renderer.openPage(0).use { page ->
+                        val scale = 1500F / minOf(page.width, page.height)
+                        val bitmap = Bitmap.createBitmap((page.width * scale).toInt(), (page.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+                        val canvas = Canvas(bitmap)
+                        canvas.drawColor(Color.WHITE)
+                        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                        cacheFile.outputStream().use { out ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 90, out)
+                            } else {
+                                @Suppress("DEPRECATION")
+                                bitmap.compress(Bitmap.CompressFormat.WEBP, 90, out)
+                            }
                         }
+                        bitmap.recycle()
+                        return Result.success(cacheFile)
                     }
                 }
-            } else throw Exception("Not a PDF")
-            Result.success(generateIcon(context, fileUri)) // Fallback bitmap
+            }
+            Result.success(generateIcon(context, fileUri)) // Fallback icon
         } catch (exception: Exception) {
             Result.failure(exception)
         }
     }
 
-    /** Creates a bitmap of a generic file icon with the format overwritten. */
-    fun generateIcon(context: Context, fileUri: FileUri): Bitmap {
-        val view = LayoutInflater.from(context).inflate(R.layout.media_file, null)
+    /** @return A File with the image of a generic icon with the format overwritten. */
+    fun generateIcon(context: Context, fileUri: FileUri): File {
         val format = if (!fileUri.media.format.isNullOrBlank()) fileUri.media.format else fileUri.extension?.uppercase()
             ?: MimeTypeMap.getFileExtensionFromUrl(fileUri.media.file).uppercase()
+        val cacheFile = File(context.cacheDir, "icon_$format.png")
+        if (cacheFile.exists()) return cacheFile
+        val view = LayoutInflater.from(context).inflate(R.layout.media_file, null)
         view.findViewById<TextView>(R.id.media_text).text = format
         view.measure(0, 0) // For View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         val size = U.dpToPx(200F)
@@ -395,7 +408,10 @@ object FileUtil {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         view.draw(canvas)
-        return bitmap
+        cacheFile.outputStream().use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, out)
+        }
+        return cacheFile
     }
 
     /** Checks if a file points to an external storage folder owned by the app. */
@@ -403,8 +419,10 @@ object FileUtil {
         val path = file.absolutePath
         for (fileDir in context.getExternalFilesDirs(null).map { it.absolutePath }) if (path.startsWith(fileDir)) return true
         // From API 36 the folder /Android/media/app.familygem is no longer owned by the app
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            @Suppress("DEPRECATION")
             for (mediaDir in context.externalMediaDirs.map { it.absolutePath }) if (path.startsWith(mediaDir)) return true
+        }
         return false
     }
 
